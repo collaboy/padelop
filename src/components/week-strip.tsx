@@ -48,11 +48,12 @@ export default function WeekStrip({ gameDays, onToggle }: Props) {
   }, []);
 
   const todayCenterX = containerWidth > 0 ? ((todayIndex + 0.5) / 7) * containerWidth : 0;
+  const labelCenterX = containerWidth / 2;
   const connectorH = 40;
   const connectorPath =
-    todayCenterX < 8
+    Math.abs(todayCenterX - labelCenterX) < 8
       ? `M ${todayCenterX} 0 L ${todayCenterX} ${connectorH}`
-      : `M ${todayCenterX} 0 L ${todayCenterX} ${connectorH / 2} L 0 ${connectorH / 2} L 0 ${connectorH}`;
+      : `M ${todayCenterX} 0 L ${todayCenterX} ${connectorH / 2} L ${labelCenterX} ${connectorH / 2} L ${labelCenterX} ${connectorH}`;
 
   return (
     <div>
@@ -118,12 +119,14 @@ export default function WeekStrip({ gameDays, onToggle }: Props) {
         )}
       </div>
 
-      <p className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[var(--green)] mb-1">
-        Today
-      </p>
-      <h2 className="text-2xl font-bold tracking-tight text-[var(--text)]">
-        {DAY_NAMES[todayIndex]}
-      </h2>
+      <div className="text-center">
+        <p className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[var(--green)] mb-1">
+          Today
+        </p>
+        <h2 className="text-4xl font-bold tracking-tight text-[var(--text)]">
+          {DAY_NAMES[todayIndex]}
+        </h2>
+      </div>
     </div>
   );
 }
