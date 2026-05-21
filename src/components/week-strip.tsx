@@ -1,14 +1,14 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 
-const DAY_LETTERS = ["M", "T", "W", "T", "F", "S", "S"];
+const DAY_ABBREVS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-function getWeekDays(today: Date): Date[] {
+function getWeekDays(today: Date, offset = 0): Date[] {
   const dow = (today.getDay() + 6) % 7;
   const monday = new Date(today);
-  monday.setDate(today.getDate() - dow);
+  monday.setDate(today.getDate() - dow + offset * 7);
   return Array.from({ length: 7 }, (_, i) => {
     const d = new Date(monday);
     d.setDate(monday.getDate() + i);
@@ -17,27 +17,75 @@ function getWeekDays(today: Date): Date[] {
 }
 
 function toYMD(d: Date): string {
-  return d.toISOString().slice(0, 10);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${dd}`;
 }
 
 function formatWeekRange(days: Date[]): string {
-  const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
-  return `${days[0].toLocaleDateString("en-US", opts)} – ${days[6].toLocaleDateString("en-US", opts)}`;
+  const month = days[0].toLocaleDateString("en-US", { month: "short" });
+  return `${month} ${days[0].getDate()}-${days[6].getDate()}`;
+}
+
+function buildWeekSummary(weekDays: Date[], gameDays: string[]): React.ReactNode {
+  const gameNames = weekDays
+    .filter((d) => gameDays.includes(toYMD(d)))
+    .map((d) => DAY_NAMES[(d.getDay() + 6) % 7]);
+
+  const nonGameWeekdays = weekDays
+    .slice(0, 5)
+    .filter((d) => !gameDays.includes(toYMD(d)));
+  const restDay = nonGameWeekdays.length > 0
+    ? DAY_NAMES[(nonGameWeekdays[Math.floor(nonGameWeekdays.length / 2)].getDay() + 6) % 7]
+    : null;
+
+  const bold = (name: string) => <span key={name} className="font-bold text-[var(--text)]">{name}</span>;
+
+  const objective = <> This weeks off court focus is: <span className="font-bold text-[var(--text)]">knee strength</span>.</>;
+
+  if (gameNames.length === 0) return <>No games scheduled this week. Focus on training and recovery.{objective}</>;
+
+  const gameParts: React.ReactNode[] = gameNames.length === 1
+    ? ["You have a game on ", bold(gameNames[0]), "."]
+    : ["You have games on ", ...gameNames.slice(0, -1).flatMap((n, i) => [bold(n), i < gameNames.length - 2 ? ", " : ""]), " and ", bold(gameNames[gameNames.length - 1]), "."];
+
+  return <>{objective}</>;
 }
 
 type Props = {
   gameDays: string[];
+  selectedYMD: string;
   onToggle: (ymd: string) => void;
+  onSelect: (ymd: string) => void;
 };
 
-export default function WeekStrip({ gameDays, onToggle }: Props) {
+export default function WeekStrip({ gameDays, selectedYMD, onToggle, onSelect }: Props) {
   const today = new Date();
   const todayYMD = toYMD(today);
   const todayIndex = (today.getDay() + 6) % 7;
-  const weekDays = getWeekDays(today);
+
+  const [weekOffset, setWeekOffset] = useState(0);
+  const weekDays = getWeekDays(today, weekOffset);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+  const touchStartX = useRef(0);
+
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    if (delta < -50) {
+      setWeekOffset((o) => o + 1);
+      onSelect(toYMD(getWeekDays(today, weekOffset + 1)[0]));
+    } else if (delta > 50) {
+      setWeekOffset((o) => o - 1);
+      onSelect(toYMD(getWeekDays(today, weekOffset - 1)[0]));
+    }
+  }
 
   useEffect(() => {
     const el = containerRef.current;
@@ -47,85 +95,116 @@ export default function WeekStrip({ gameDays, onToggle }: Props) {
     return () => ro.disconnect();
   }, []);
 
-  const todayCenterX = containerWidth > 0 ? ((todayIndex + 0.5) / 7) * containerWidth : 0;
-  const labelCenterX = containerWidth / 2;
-  const connectorH = 40;
-  const connectorPath =
-    Math.abs(todayCenterX - labelCenterX) < 8
-      ? `M ${todayCenterX} 0 L ${todayCenterX} ${connectorH}`
-      : `M ${todayCenterX} 0 L ${todayCenterX} ${connectorH / 2} L ${labelCenterX} ${connectorH / 2} L ${labelCenterX} ${connectorH}`;
+  const selectedIndex = weekDays.findIndex((d) => toYMD(d) === selectedYMD);
+  const effectiveIndex = selectedIndex === -1 ? 0 : selectedIndex;
+
+  const boxWidth = containerWidth > 0 ? containerWidth / 7 : 0;
+  const selectedCenterX = containerWidth > 0 ? effectiveIndex * boxWidth + boxWidth / 2 : 0;
+  const connectorEndX = containerWidth / 2;
+
+  const connectorPath = containerWidth > 0
+    ? `M ${selectedCenterX} 4 V 12 H ${connectorEndX} V 24`
+    : "";
+
+  const isSelectedGameDay = gameDays.includes(selectedYMD);
+  const isCurrentWeek = weekOffset === 0;
+  const selectedDayName = isCurrentWeek && selectedYMD === todayYMD
+    ? "Today"
+    : DAY_NAMES[effectiveIndex];
 
   return (
     <div>
-      <p className="text-xs font-medium tracking-wide text-[var(--muted)] mb-3">
-        This Week: {formatWeekRange(weekDays)}
-      </p>
 
-      <div ref={containerRef} className="flex gap-1.5">
+      {/* Week summary */}
+      <div className="pt-3 pb-1 text-center">
+        <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)]" style={{ fontFamily: "monospace" }}>My Padel Week: {formatWeekRange(weekDays)}</p>
+      </div>
+
+      {/* Day cubes — full width, shared 2px borders, swipeable */}
+      <div ref={containerRef} className="grid grid-cols-7" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
         {weekDays.map((day, i) => {
           const ymd = toYMD(day);
           const isToday = ymd === todayYMD;
+          const isSelected = ymd === selectedYMD && !isToday;
           const isGame = gameDays.includes(ymd);
 
           return (
             <button
               key={ymd}
-              onClick={() => onToggle(ymd)}
-              aria-pressed={isGame}
-              aria-label={`${DAY_NAMES[i]} ${day.getDate()}${isGame ? ", game day — tap to remove" : " — tap to mark as game day"}`}
-              className="flex-1 flex flex-col items-center pt-2.5 pb-3 rounded-xl transition-all active:scale-95"
+              onClick={() => onSelect(ymd)}
+              className="aspect-square flex flex-col items-center justify-center transition-all active:scale-95"
               style={{
-                background: isToday ? "var(--green-light)" : "var(--surface)",
-                borderTop: isGame ? "3px solid var(--green)" : "3px solid transparent",
+                background: "#2653d4",
+                borderTop: "1px solid var(--border)",
+                borderBottom: "1px solid var(--border)",
+                borderLeft: "1px solid var(--border)",
+                borderRight: i === 6 ? "1px solid var(--border)" : "none",
                 cursor: "pointer",
               }}
             >
               <span
-                className="text-[10px] font-medium tracking-widest mb-2"
-                style={{ color: isToday ? "var(--green)" : "var(--muted)" }}
+                className="text-[11px] md:text-sm font-extrabold tracking-wider uppercase"
+                style={{ color: "#ffffff" }}
               >
-                {DAY_LETTERS[i]}
+                {DAY_ABBREVS[i]}
               </span>
               <span
-                className="text-sm font-bold"
-                style={{ color: isToday ? "var(--green)" : "var(--text)" }}
+                className="text-base md:text-xl font-bold mt-0.5 leading-none"
+                style={{ color: "#ffffff", fontFamily: "var(--font-hanken)" }}
               >
-                {day.getDate()}
+                {isGame ? "🎾" : day.getDate()}
               </span>
-              <span
-                className="mt-1.5 w-1 h-1 rounded-full transition-opacity"
-                style={{
-                  background: "var(--green)",
-                  opacity: isGame ? 1 : 0,
-                }}
-              />
             </button>
           );
         })}
       </div>
 
-      <div className="relative" style={{ height: connectorH }}>
-        {containerWidth > 0 && (
-          <svg width="100%" height={connectorH} className="absolute inset-0" style={{ overflow: "visible" }}>
+      {/* Game labels */}
+      <div className="grid grid-cols-7">
+        {weekDays.map((day) => {
+          const ymd = toYMD(day);
+          const isGame = gameDays.includes(ymd);
+          return (
+            <div key={ymd} className="flex items-center justify-center h-4">
+              {isGame && <span className="text-[8px] font-bold tracking-widest uppercase text-[var(--muted)]">GAME</span>}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Connector SVG */}
+      <div className="relative w-full h-6 overflow-visible">
+        {connectorPath && (
+          <svg className="w-full h-full overflow-visible" viewBox={`0 0 ${containerWidth} 24`} preserveAspectRatio="none" fill="none">
             <path
               d={connectorPath}
-              fill="none"
-              stroke="var(--green)"
-              strokeWidth="1.5"
+              stroke="#2653d4"
+              strokeWidth="3"
               strokeLinecap="round"
               strokeLinejoin="round"
+              vectorEffect="non-scaling-stroke"
             />
           </svg>
         )}
       </div>
 
+      {/* Today heading */}
       <div className="text-center">
-        <p className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[var(--green)] mb-1">
-          Today
-        </p>
-        <h2 className="text-4xl font-bold tracking-tight text-[var(--text)]">
-          {DAY_NAMES[todayIndex]}
+        <h2
+          className="text-4xl md:text-5xl font-bold tracking-tight text-[var(--text)] leading-tight"
+          style={{ fontFamily: "var(--font-hanken)" }}
+        >
+          {selectedDayName}
         </h2>
+        {isSelectedGameDay && (
+          <p className="flex items-center justify-center gap-2 text-2xl md:text-[2.5rem] font-bold tracking-tight leading-tight" style={{ color: "var(--text)", fontFamily: "var(--font-hanken)" }}>
+            GAME DAY
+          </p>
+        )}
+      </div>
+      <div className="px-5 md:px-12 mt-2">
+        <p className="text-sm font-bold tracking-widest uppercase text-[var(--muted)]">Today's Objectives</p>
+        <p className="text-xs tracking-widest uppercase text-[var(--muted)] mt-0.5">Pre-Game:</p>
       </div>
     </div>
   );

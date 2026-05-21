@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import { Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/nav";
 import BottomNav from "@/components/bottom-nav";
 
 const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const hanken = Hanken_Grotesk({ variable: "--font-hanken", subsets: ["latin"], weight: ["400", "500", "600", "700"] });
 
 export const metadata: Metadata = {
   title: "Padelop",
@@ -13,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${geist.variable} h-full`}>
+    <html lang="en" className={`${geist.variable} ${hanken.variable} h-full`}>
       <body className="flex flex-col min-h-full bg-[var(--bg)]">
         <Nav />
         <main className="flex-1 pb-24">{children}</main>

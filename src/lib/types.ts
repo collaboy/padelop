@@ -72,6 +72,9 @@ export type Profile = {
 };
 
 export type Recommendation = {
-  category: "exercise" | "nutrition" | "recovery" | "tip";
-  text: string;
+  category: "training" | "game" | "nutrition" | "recovery" | "tip";
+  title: string;
+  subtitle: string;
+  detail?: string;
+  badge?: string;
 };
