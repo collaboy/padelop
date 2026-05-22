@@ -173,17 +173,13 @@ export default function HomeClient() {
   return (
     <div className="pb-8">
       {/* Optimization score card */}
-      <div className="h-[calc(100vh-64px)] flex items-center justify-center px-5 md:px-12 bg-[var(--bg)]">
-      <div className="w-full bg-[var(--surface)] flex flex-col items-center border border-[var(--border)] rounded-2xl shadow-sm px-5 pt-3 pb-4">
-        <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-2">Padel Optimization Score</p>
-        <span
-          className="text-6xl font-extrabold leading-none"
-          style={{ color: "var(--green)", fontFamily: "var(--font-hanken)" }}
-        >
-          {pct}
-        </span>
-        <span className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mt-0.5">out of 100</span>
-        <div className="w-full mt-3">
+      <div className="pt-[80px] px-5 md:px-12 pb-4 bg-[var(--bg)]">
+      <div className="w-full bg-[var(--surface)] flex flex-col border border-[var(--border)] rounded-2xl shadow-sm px-5 pt-3 pb-4">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] text-left leading-relaxed">Padel<br />Optimization<br />Score</p>
+          <span className="text-3xl font-extrabold leading-none" style={{ color: "var(--green)", fontFamily: "var(--font-hanken)" }}>{pct}<span className="text-base font-bold text-[var(--muted)]">/100</span></span>
+        </div>
+        <div className="w-full mt-1">
           <div className="relative">
             <div
               className="w-full h-6 rounded-full overflow-hidden"
@@ -196,26 +192,28 @@ export default function HomeClient() {
             </div>
           </div>
         </div>
-        <div className="w-full mt-5 rounded-xl px-3 py-3 flex flex-col items-center gap-3" style={{ background: "var(--bg)" }}>
-          <p className="text-sm font-bold text-[var(--text)] leading-none flex items-center justify-center gap-1.5">
-            Sleep 8h Tonight
-            <svg width="16" height="10" viewBox="0 0 16 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="0" y1="5" x2="13" y2="5" />
-              <polyline points="9,1 13,5 9,9" />
-            </svg>
-            <span style={{ color: "var(--green)" }}>+7%</span>
-          </p>
-          <Link
-            href="/optimizer"
-            className="px-4 py-1.5 rounded-full border border-[var(--border)] text-[10px] font-bold tracking-widest uppercase text-[var(--text)] bg-white shadow-sm active:scale-95 transition-transform flex items-center gap-1.5"
-          >
-            Optimize Me
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="3,1 8,5 3,9" />
-            </svg>
-          </Link>
-        </div>
       </div>
+      </div>
+
+      {/* Tip + button */}
+      <div className="px-5 md:px-12 pb-4 flex flex-col items-center gap-3">
+        <p className="text-sm font-bold text-[var(--text)] leading-none flex items-center gap-1.5">
+          Sleep 8h Tonight
+          <svg width="16" height="10" viewBox="0 0 16 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="0" y1="5" x2="13" y2="5" />
+            <polyline points="9,1 13,5 9,9" />
+          </svg>
+          <span style={{ color: "var(--green)" }}>+7%</span>
+        </p>
+        <Link
+          href="/optimizer"
+          className="px-4 py-1.5 rounded-full border border-[var(--border)] text-[10px] font-bold tracking-widest uppercase text-[var(--text)] bg-white shadow-sm active:scale-95 transition-transform flex items-center gap-1.5"
+        >
+          Let's Optimize
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="3,1 8,5 3,9" />
+          </svg>
+        </Link>
       </div>
 
 
