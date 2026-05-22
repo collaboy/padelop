@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import type { Recommendation } from "@/lib/types";
 
 function offsetYMD(ymd: string, days: number): string {
@@ -9,7 +8,7 @@ function offsetYMD(ymd: string, days: number): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
-function getRecommendations(selectedYMD: string, gameDays: string[]): Recommendation[] {
+export function getRecommendations(selectedYMD: string, gameDays: string[]): Recommendation[] {
   const isGameToday = gameDays.includes(selectedYMD);
   const isGameTomorrow = gameDays.includes(offsetYMD(selectedYMD, 1));
   const isGameYesterday = gameDays.includes(offsetYMD(selectedYMD, -1));
@@ -49,7 +48,7 @@ function getRecommendations(selectedYMD: string, gameDays: string[]): Recommenda
   ];
 }
 
-const categoryConfig: Record<Recommendation["category"], { label: string; icon: React.ReactNode }> = {
+export const categoryConfig: Record<Recommendation["category"], { label: string; icon: React.ReactNode }> = {
   training: {
     label: "Training",
     icon: (
@@ -103,75 +102,51 @@ const categoryConfig: Record<Recommendation["category"], { label: string; icon: 
   },
 };
 
-type Props = { selectedYMD: string; gameDays: string[] };
+type RecCardProps = { rec: Recommendation; isDone: boolean; onToggle: () => void; onTap?: () => void };
 
-export default function Recommendations({ selectedYMD, gameDays }: Props) {
-  const recs = getRecommendations(selectedYMD, gameDays);
-  const [done, setDone] = useState<Set<number>>(new Set());
-
-  function toggle(i: number) {
-    setDone((prev) => {
-      const next = new Set(prev);
-      next.has(i) ? next.delete(i) : next.add(i);
-      return next;
-    });
-  }
-
-  const indexed = recs.map((rec, i) => ({ rec, i }));
-  const pending = indexed.filter(({ i }) => !done.has(i));
-  const completed = indexed.filter(({ i }) => done.has(i));
-
-  function renderCard({ rec, i }: { rec: Recommendation; i: number }) {
-    const cfg = categoryConfig[rec.category];
-    const isDone = done.has(i);
-    return (
-      <div key={i} className="relative bg-[var(--surface)] rounded-2xl px-4 py-4 flex items-center gap-4 overflow-hidden">
-        {isDone && <div className="absolute inset-0 bg-black/30 rounded-2xl pointer-events-none" />}
-        <div
-          className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center"
-          style={{ background: "#2653d4" }}
-        >
-          {cfg.icon}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-[var(--text)] leading-snug">{rec.title}</p>
-          <p className="text-sm text-[var(--muted)] leading-snug mt-0.5">{rec.subtitle}</p>
-          {rec.detail && (
-            <p className="text-xs text-[var(--muted)] mt-0.5">{rec.detail}</p>
-          )}
-          {rec.badge && (
-            <span
-              className="inline-block mt-2 text-[10px] font-bold tracking-widest px-2.5 py-1 rounded-full text-white"
-              style={{ background: "var(--green)" }}
-            >
-              {rec.badge}
-            </span>
-          )}
-        </div>
-        <button
-          onClick={() => toggle(i)}
-          className="flex-shrink-0 w-7 h-7 rounded-full border border-[var(--border)] flex items-center justify-center active:scale-90 transition-transform relative z-10"
-          style={{ background: isDone ? "var(--green)" : "transparent" }}
-        >
-          {isDone && (
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="2,6 5,9 10,3" />
-            </svg>
-          )}
-        </button>
+export function RecCard({ rec, isDone, onToggle, onTap }: RecCardProps) {
+  const cfg = categoryConfig[rec.category];
+  return (
+    <button
+      onClick={onTap ?? onToggle}
+      className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl px-4 py-4 flex items-center gap-4 active:opacity-70 transition-opacity text-left"
+      style={{ opacity: isDone ? 0.55 : 1 }}
+    >
+      <div className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: isDone ? "#16a34a" : "#2653d4" }}>
+        {isDone
+          ? <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20,6 9,17 4,12" /></svg>
+          : cfg.icon
+        }
       </div>
-    );
-  }
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-bold leading-snug" style={{ color: isDone ? "var(--muted)" : "var(--text)", textDecoration: isDone ? "line-through" : "none" }}>{rec.title}</p>
+        <p className="text-xs text-[var(--muted)] leading-snug mt-0.5">{rec.subtitle}</p>
+        {rec.detail && !isDone && <p className="text-xs text-[var(--muted)] mt-0.5">{rec.detail}</p>}
+        {rec.badge && !isDone && (
+          <span className="inline-block mt-2 text-[10px] font-bold tracking-widest px-2.5 py-1 rounded-full text-white" style={{ background: "var(--green)" }}>
+            {rec.badge}
+          </span>
+        )}
+      </div>
+      {onTap && !isDone && (
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+          <polyline points="3,1 8,5 3,9" />
+        </svg>
+      )}
+    </button>
+  );
+}
 
+type Props = { selectedYMD: string; gameDays: string[]; doneItems: Set<number>; onToggle: (i: number) => void; cardTaps?: Record<string, () => void> };
+
+export default function Recommendations({ selectedYMD, gameDays, doneItems, onToggle, cardTaps }: Props) {
+  const recs = getRecommendations(selectedYMD, gameDays);
+  const pending = recs.map((rec, i) => ({ rec, i })).filter(({ i }) => !doneItems.has(i));
   return (
     <div className="flex flex-col gap-3">
-      {pending.map(renderCard)}
-      {completed.length > 0 && (
-        <>
-          <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mt-2 text-center">Done</p>
-          {completed.map(renderCard)}
-        </>
-      )}
+      {pending.map(({ rec, i }) => (
+        <RecCard key={i} rec={rec} isDone={false} onToggle={() => onToggle(i)} onTap={cardTaps?.[rec.title]} />
+      ))}
     </div>
   );
 }

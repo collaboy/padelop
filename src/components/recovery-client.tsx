@@ -80,7 +80,7 @@ export default function RecoveryClient() {
       {activeTab === "today" ? (
         <>
           <div className="mt-2 relative space-y-4 px-5 md:px-12 max-w-7xl mx-auto pb-2">
-            <Recommendations selectedYMD={selectedYMD} gameDays={gameDays} />
+            <Recommendations selectedYMD={selectedYMD} gameDays={gameDays} doneItems={new Set()} onToggle={() => {}} />
           </div>
           <div className="flex justify-center pb-4">
             <button
