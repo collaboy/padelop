@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Nav() {
   const pct = 71;
 
@@ -16,11 +18,11 @@ export default function Nav() {
 
         {/* Center: title */}
         <div className="flex justify-center">
-          <h1 className="text-lg font-semibold tracking-tight text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>
+          <Link href="/" className="text-lg font-semibold tracking-tight text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>
             {"Padelop!".split("").map((char, i) => (
               <span key={i} style={{ position: "relative", top: `${-i * 1.5}px` }}>{char}</span>
             ))}
-          </h1>
+          </Link>
         </div>
 
         {/* Right: full-scale color circle with triangle indicator at pct */}

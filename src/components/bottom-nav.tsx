@@ -5,23 +5,15 @@ import { usePathname } from "next/navigation";
 
 const items = [
   {
-    href: "/",
-    label: "Home",
+    href: "/wellbeing",
+    label: "Today",
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z" />
-        <path d="M9 21V12h6v9" />
-      </svg>
-    ),
-  },
-  {
-    href: "/optimizer",
-    label: "Optimizer",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 7v5l3 3" />
-        <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+        <circle cx="12" cy="16" r="1.5" fill="currentColor" stroke="none" />
       </svg>
     ),
   },
@@ -30,9 +22,11 @@ const items = [
     label: "Training",
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="10" width="4" height="4" rx="1" /><rect x="18" y="10" width="4" height="4" rx="1" />
-        <line x1="6" y1="12" x2="18" y2="12" />
-        <line x1="8" y1="8" x2="8" y2="16" /><line x1="16" y1="8" x2="16" y2="16" />
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+        <polyline points="8,16 11,19 16,13" />
       </svg>
     ),
   },
@@ -42,6 +36,16 @@ const items = [
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 21C12 21 3 14 3 8a4 4 0 0 1 9-1.8A4 4 0 0 1 21 8c0 6-9 13-9 13z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/optimizer",
+    label: "Optimizer",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+        <polyline points="17 6 23 6 23 12" />
       </svg>
     ),
   },
@@ -61,7 +65,7 @@ export default function BottomNav() {
   const pathname = usePathname();
   return (
     <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-[var(--surface)]/95 backdrop-blur-md border-t border-[var(--border)] shadow-2xl rounded-t-xl">
-      <div className="flex justify-around items-center py-3 px-4">
+      <div className="flex justify-around items-center py-3 px-2">
         {items.map((item) => {
           const active = pathname === item.href;
           return (
@@ -72,7 +76,7 @@ export default function BottomNav() {
               style={{ color: active ? "var(--green)" : "var(--muted)", transform: active ? "scale(1.1)" : "scale(1)" }}
             >
               {item.icon}
-              <span className="text-[10px] font-bold tracking-widest uppercase">{item.label}</span>
+              <span className="text-[9px] font-bold tracking-wide uppercase">{item.label}</span>
             </Link>
           );
         })}

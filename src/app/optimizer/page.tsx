@@ -202,16 +202,6 @@ const sections = [
 export default function OptimizerPage() {
   return (
     <div className="pt-[80px] pb-24 px-5 md:px-12">
-      {/* Score gauge */}
-      <div className="pt-0 pb-6 relative">
-        <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-3">Padel Optimization Score</p>
-        <div className="w-full h-5 rounded-full overflow-hidden" style={{ background: "linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e)" }} />
-        <div className="absolute" style={{ left: `calc(${pct}% - 5px)`, bottom: "15px" }}>
-          <svg width="10" height="7" viewBox="0 0 10 7" fill="none">
-            <polygon points="5,0 0,7 10,7" fill="#171c1f" />
-          </svg>
-        </div>
-      </div>
 
       {/* Currently tracking card */}
       <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl px-4 py-4 shadow-sm mb-6">
@@ -221,6 +211,12 @@ export default function OptimizerPage() {
             <span key={s.title}>{s.title}{i < sections.length - 1 ? ", " : ""}</span>
           ))}
         </p>
+        <button className="mt-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[var(--border)] bg-white text-xs font-bold text-[var(--text)] shadow-sm active:scale-95 transition-transform">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <line x1="5" y1="1" x2="5" y2="9" /><line x1="1" y1="5" x2="9" y2="5" />
+          </svg>
+          Add new
+        </button>
       </div>
 
       {/* Sections */}

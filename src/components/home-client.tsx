@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import WeekStrip, { formatWeekRange } from "./week-strip";
-import Recommendations from "./recommendations";
+import { useState } from "react";
+import Link from "next/link";
 
 const STORAGE_KEY = "padelop:game-days";
 
@@ -159,31 +158,9 @@ function TipSlider({ onOptimize }: { onOptimize: () => void }) {
 
 export default function HomeClient() {
   const todayYMD = new Date().toISOString().slice(0, 10);
-  const [gameDays, setGameDays] = useState<string[]>(getWeekGameDays());
-  const [selectedYMD, setSelectedYMD] = useState(todayYMD);
-  const [optimizeOpen, setOptimizeOpen] = useState(false);
-  const [planOpen, setPlanOpen] = useState(false);
-  const [topSlide, setTopSlide] = useState(0);
-  const [activeTab, setActiveTab] = useState<"today" | "week" | null>("today");
-  const topTouchStart = useRef(0);
+  const [gameDays] = useState<string[]>(getWeekGameDays());
+  const [fabOpen, setFabOpen] = useState(false);
 
-  const currentWeekRange = formatWeekRange((() => {
-    const today = new Date();
-    const dow = (today.getDay() + 6) % 7;
-    const monday = new Date(today);
-    monday.setDate(today.getDate() - dow);
-    return Array.from({ length: 7 }, (_, i) => { const d = new Date(monday); d.setDate(monday.getDate() + i); return d; });
-  })());
-
-  function toggleGameDay(ymd: string) {
-    setGameDays((prev) => {
-      const next = prev.includes(ymd) ? prev.filter((d) => d !== ymd) : [...prev, ymd];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      return next;
-    });
-  }
-
-  const isSelectedGameDay = gameDays.includes(selectedYMD);
   const todayDayType = gameDays.includes(todayYMD)
     ? "Game Day"
     : gameDays.includes(offsetYMD(todayYMD, -1))
@@ -196,7 +173,7 @@ export default function HomeClient() {
   return (
     <div className="pb-8">
       {/* Optimization score card */}
-      <div className="pt-[80px] px-5 md:px-12 pb-4 bg-[var(--bg)]">
+      <div className="h-[calc(100vh-64px)] flex items-center justify-center px-5 md:px-12 bg-[var(--bg)]">
       <div className="w-full bg-[var(--surface)] flex flex-col items-center border border-[var(--border)] rounded-2xl shadow-sm px-5 pt-3 pb-4">
         <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-2">Padel Optimization Score</p>
         <span
@@ -228,93 +205,52 @@ export default function HomeClient() {
             </svg>
             <span style={{ color: "var(--green)" }}>+7%</span>
           </p>
-          <button
+          <Link
+            href="/optimizer"
             className="px-4 py-1.5 rounded-full border border-[var(--border)] text-[10px] font-bold tracking-widest uppercase text-[var(--text)] bg-white shadow-sm active:scale-95 transition-transform flex items-center gap-1.5"
           >
             Optimize Me
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="3,1 8,5 3,9" />
             </svg>
-          </button>
+          </Link>
         </div>
       </div>
       </div>
 
-      {/* Tab switcher card */}
-      <div className="px-5 md:px-12 pt-2 bg-[var(--bg)]">
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden">
-          <div className="px-5 py-3 border-b border-[var(--border)] flex justify-center">
-            <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)]">Things to do...</p>
-          </div>
-          <div className="flex">
-            <button
-              onClick={() => setActiveTab(activeTab === "today" ? null : "today")}
-              className="flex-1 py-4 flex items-center justify-center gap-1.5 border-r border-[var(--border)] active:opacity-80 transition-opacity"
-              style={{ background: activeTab === "today" ? "#2653d4" : "transparent" }}
-            >
-              <p className="text-sm font-bold leading-none" style={{ color: activeTab === "today" ? "#ffffff" : "var(--text)" }}>Today</p>
-            </button>
-            <button
-              onClick={() => setActiveTab(activeTab === "week" ? null : "week")}
-              className="flex-1 py-4 flex items-center justify-center gap-1.5 active:opacity-80 transition-opacity"
-              style={{ background: activeTab === "week" ? "#2653d4" : "transparent" }}
-            >
-              <p className="text-sm font-bold leading-none" style={{ color: activeTab === "week" ? "#ffffff" : "var(--text)" }}>This Week</p>
-            </button>
+
+      {/* FAB modal */}
+      {fabOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-end justify-center pb-32" onClick={() => setFabOpen(false)}>
+          <div className="w-full max-w-[640px] bg-white rounded-2xl shadow-2xl mx-5 overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            {[
+              { label: "Things to Do Today", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg> },
+              { label: "Things to Do This Week", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /><polyline points="9,16 11,18 15,14" /></svg> },
+              { label: "Add Data", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg> },
+              { label: "Take Quiz", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 8v4" /><circle cx="12" cy="16" r="0.5" fill="currentColor" /></svg> },
+            ].map((item, i, arr) => (
+              <button
+                key={item.label}
+                className="w-full flex items-center gap-4 px-6 py-5 text-base font-bold text-[var(--text)] active:bg-[var(--bg)] transition-colors"
+                style={{ borderBottom: i < arr.length - 1 ? "1px solid var(--border)" : "none" }}
+              >
+                <span style={{ color: "#2653d4" }}>{item.icon}</span>
+                {item.label}
+              </button>
+            ))}
           </div>
         </div>
-      </div>
-
-      {/* Tab content */}
-      {activeTab === "today" ? (
-        <>
-          <div className="mt-2 relative space-y-4 px-5 md:px-12 max-w-7xl mx-auto pb-2">
-            {isSelectedGameDay ? (
-              <GameDaySection />
-            ) : (
-              <Recommendations selectedYMD={selectedYMD} gameDays={gameDays} />
-            )}
-          </div>
-          <div className="flex justify-center pb-4">
-            <button
-              onClick={() => setActiveTab(null)}
-              className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] active:opacity-60 transition-opacity"
-            >
-              Close
-            </button>
-          </div>
-        </>
-      ) : activeTab === "week" ? (
-        <>
-          <div className="w-full">
-            <WeekStrip
-              gameDays={gameDays}
-              selectedYMD={selectedYMD}
-              onToggle={toggleGameDay}
-              onSelect={setSelectedYMD}
-              planOpen={planOpen}
-              onPlanOpenChange={setPlanOpen}
-              hideHeading
-            />
-          </div>
-          <div className="flex justify-center pb-4">
-            <button
-              onClick={() => setActiveTab(null)}
-              className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] active:opacity-60 transition-opacity"
-            >
-              Close
-            </button>
-          </div>
-        </>
-      ) : null}
+      )}
 
       {/* FAB */}
       <button
-        className="fixed bottom-24 right-5 md:bottom-10 md:right-10 w-14 h-14 rounded-full shadow-xl flex items-center justify-center active:scale-90 transition-transform z-40"
+        onClick={() => setFabOpen((o) => !o)}
+        className="fixed bottom-24 right-5 md:bottom-10 md:right-10 w-14 h-14 rounded-full shadow-xl flex items-center justify-center active:scale-90 transition-transform z-50"
         style={{ background: "var(--lime)" }}
         aria-label="Add"
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2.5" strokeLinecap="round">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2.5" strokeLinecap="round"
+          style={{ transform: fabOpen ? "rotate(45deg)" : "none", transition: "transform 0.2s" }}>
           <line x1="12" y1="5" x2="12" y2="19" />
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
