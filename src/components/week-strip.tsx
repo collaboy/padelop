@@ -23,34 +23,9 @@ function toYMD(d: Date): string {
   return `${y}-${m}-${dd}`;
 }
 
-function formatWeekRange(days: Date[]): string {
+export function formatWeekRange(days: Date[]): string {
   const month = days[0].toLocaleDateString("en-US", { month: "short" });
   return `${month} ${days[0].getDate()}-${days[6].getDate()}`;
-}
-
-function buildWeekSummary(weekDays: Date[], gameDays: string[]): React.ReactNode {
-  const gameNames = weekDays
-    .filter((d) => gameDays.includes(toYMD(d)))
-    .map((d) => DAY_NAMES[(d.getDay() + 6) % 7]);
-
-  const nonGameWeekdays = weekDays
-    .slice(0, 5)
-    .filter((d) => !gameDays.includes(toYMD(d)));
-  const restDay = nonGameWeekdays.length > 0
-    ? DAY_NAMES[(nonGameWeekdays[Math.floor(nonGameWeekdays.length / 2)].getDay() + 6) % 7]
-    : null;
-
-  const bold = (name: string) => <span key={name} className="font-bold text-[var(--text)]">{name}</span>;
-
-  const objective = <> This weeks off court focus is: <span className="font-bold text-[var(--text)]">knee strength</span>.</>;
-
-  if (gameNames.length === 0) return <>No games scheduled this week. Focus on training and recovery.{objective}</>;
-
-  const gameParts: React.ReactNode[] = gameNames.length === 1
-    ? ["You have a game on ", bold(gameNames[0]), "."]
-    : ["You have games on ", ...gameNames.slice(0, -1).flatMap((n, i) => [bold(n), i < gameNames.length - 2 ? ", " : ""]), " and ", bold(gameNames[gameNames.length - 1]), "."];
-
-  return <>{objective}</>;
 }
 
 type Props = {
@@ -58,12 +33,15 @@ type Props = {
   selectedYMD: string;
   onToggle: (ymd: string) => void;
   onSelect: (ymd: string) => void;
+  optimizationPct?: number;
+  planOpen: boolean;
+  onPlanOpenChange: (v: boolean) => void;
+  hideHeading?: boolean;
 };
 
-export default function WeekStrip({ gameDays, selectedYMD, onToggle, onSelect }: Props) {
+export default function WeekStrip({ gameDays, selectedYMD, onSelect, planOpen, onPlanOpenChange, hideHeading = false }: Props) {
   const today = new Date();
   const todayYMD = toYMD(today);
-  const todayIndex = (today.getDay() + 6) % 7;
 
   const [weekOffset, setWeekOffset] = useState(0);
   const weekDays = getWeekDays(today, weekOffset);
@@ -93,118 +71,133 @@ export default function WeekStrip({ gameDays, selectedYMD, onToggle, onSelect }:
     const ro = new ResizeObserver(() => setContainerWidth(el.offsetWidth));
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [planOpen]);
 
   const selectedIndex = weekDays.findIndex((d) => toYMD(d) === selectedYMD);
   const effectiveIndex = selectedIndex === -1 ? 0 : selectedIndex;
 
   const boxWidth = containerWidth > 0 ? containerWidth / 7 : 0;
   const selectedCenterX = containerWidth > 0 ? effectiveIndex * boxWidth + boxWidth / 2 : 0;
-  const connectorEndX = containerWidth / 2;
-
-  const connectorPath = containerWidth > 0
-    ? `M ${selectedCenterX} 4 V 12 H ${connectorEndX} V 24`
-    : "";
 
   const isSelectedGameDay = gameDays.includes(selectedYMD);
-  const isCurrentWeek = weekOffset === 0;
-  const selectedDayName = isCurrentWeek && selectedYMD === todayYMD
-    ? "Today"
-    : DAY_NAMES[effectiveIndex];
+  const prevYMD = toYMD(new Date(new Date(selectedYMD).getTime() - 86400000));
+  const dayType = isSelectedGameDay
+    ? "game day"
+    : gameDays.includes(prevYMD)
+    ? "recovery"
+    : "training";
 
   return (
     <div>
-
-      {/* Week summary */}
-      <div className="pt-3 pb-1 text-center">
-        <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)]" style={{ fontFamily: "monospace" }}>My Padel Week: {formatWeekRange(weekDays)}</p>
-      </div>
-
-      {/* Day cubes — full width, shared 2px borders, swipeable */}
-      <div ref={containerRef} className="grid grid-cols-7" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-        {weekDays.map((day, i) => {
-          const ymd = toYMD(day);
-          const isToday = ymd === todayYMD;
-          const isSelected = ymd === selectedYMD && !isToday;
-          const isGame = gameDays.includes(ymd);
-
-          return (
-            <button
-              key={ymd}
-              onClick={() => onSelect(ymd)}
-              className="aspect-square flex flex-col items-center justify-center transition-all active:scale-95"
-              style={{
-                background: "#2653d4",
-                borderTop: "1px solid var(--border)",
-                borderBottom: "1px solid var(--border)",
-                borderLeft: "1px solid var(--border)",
-                borderRight: i === 6 ? "1px solid var(--border)" : "none",
-                cursor: "pointer",
-              }}
-            >
-              <span
-                className="text-[11px] md:text-sm font-extrabold tracking-wider uppercase"
-                style={{ color: "#ffffff" }}
-              >
-                {DAY_ABBREVS[i]}
-              </span>
-              <span
-                className="text-base md:text-xl font-bold mt-0.5 leading-none"
-                style={{ color: "#ffffff", fontFamily: "var(--font-hanken)" }}
-              >
-                {isGame ? "🎾" : day.getDate()}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Game labels */}
-      <div className="grid grid-cols-7">
-        {weekDays.map((day) => {
-          const ymd = toYMD(day);
-          const isGame = gameDays.includes(ymd);
-          return (
-            <div key={ymd} className="flex items-center justify-center h-4">
-              {isGame && <span className="text-[8px] font-bold tracking-widest uppercase text-[var(--muted)]">GAME</span>}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Connector SVG */}
-      <div className="relative w-full h-6 overflow-visible">
-        {connectorPath && (
-          <svg className="w-full h-full overflow-visible" viewBox={`0 0 ${containerWidth} 24`} preserveAspectRatio="none" fill="none">
-            <path
-              d={connectorPath}
-              stroke="#2653d4"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              vectorEffect="non-scaling-stroke"
-            />
-          </svg>
-        )}
-      </div>
-
       {/* Today heading */}
-      <div className="text-center">
-        <h2
-          className="text-4xl md:text-5xl font-bold tracking-tight text-[var(--text)] leading-tight"
-          style={{ fontFamily: "var(--font-hanken)" }}
+      {!hideHeading && (
+        <div className="mt-4 px-5 md:px-12">
+          <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)]">Today's Plan:</p>
+          <h2
+            className="text-xl font-bold tracking-tight text-[var(--text)] leading-snug mt-0.5"
+            style={{ fontFamily: "var(--font-hanken)", textTransform: "capitalize" }}
+          >
+            {dayType} Day
+          </h2>
+        </div>
+      )}
+
+      <div className="mt-3 mx-5 md:mx-12 bg-[var(--surface)] border border-[var(--border)] rounded-2xl px-4 py-3 flex items-center gap-4">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+          <polyline points="17 6 23 6 23 12" />
+        </svg>
+        <div>
+          <p className="text-sm font-normal text-[var(--text)]">Complete all objectives</p>
+          <p className="text-base font-extrabold text-[var(--text)] mt-0.5">Optimization rises to 78%</p>
+          <p className="text-xs font-bold mt-1" style={{ color: "var(--green)" }}>+7% improvement potential</p>
+        </div>
+      </div>
+
+      {/* Modal */}
+      {planOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/40"
+          onClick={() => onPlanOpenChange(false)}
         >
-          {selectedDayName}
-        </h2>
-        {isSelectedGameDay && (
-          <p className="flex items-center justify-center gap-2 text-2xl md:text-[2.5rem] font-bold tracking-tight leading-tight" style={{ color: "var(--text)", fontFamily: "var(--font-hanken)" }}>
-            GAME DAY
-          </p>
-        )}
-      </div>
-      <div className="px-5 md:px-12 mt-2">
-        <p className="text-sm font-bold tracking-widest uppercase text-[var(--muted)]">Today's Objectives</p>
-      </div>
+          <div
+            className="bg-[var(--surface)] border-b border-[var(--border)] shadow-2xl"
+            style={{ marginTop: 64 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-5 md:px-12 h-10">
+              <p className="text-xs font-bold tracking-widest uppercase" style={{ fontFamily: "monospace", color: "#171c1f" }}>
+                Plan for {formatWeekRange(weekDays)}
+              </p>
+              <button
+                onClick={() => onPlanOpenChange(false)}
+                className="flex items-center justify-center active:scale-90 transition-transform"
+                aria-label="Close"
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#171c1f" strokeWidth="2" strokeLinecap="round">
+                  <line x1="2" y1="2" x2="12" y2="12" />
+                  <line x1="12" y1="2" x2="2" y2="12" />
+                </svg>
+              </button>
+            </div>
+
+            <div
+              ref={containerRef}
+              className="grid grid-cols-7"
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
+              {weekDays.map((day, i) => {
+                const ymd = toYMD(day);
+                const isGame = gameDays.includes(ymd);
+                const isPast = ymd < todayYMD;
+
+                return (
+                  <button
+                    key={ymd}
+                    onClick={() => { onSelect(ymd); onPlanOpenChange(false); }}
+                    className="aspect-square flex flex-col items-center justify-center transition-all active:scale-95 relative overflow-hidden"
+                    style={{
+                      background: "#2653d4",
+                      borderTop: "1px solid var(--border)",
+                      borderBottom: "1px solid var(--border)",
+                      borderLeft: "1px solid var(--border)",
+                      borderRight: i === 6 ? "1px solid var(--border)" : "none",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {isPast && <div className="absolute inset-0 bg-black/55 pointer-events-none" />}
+                    <span className="text-[11px] md:text-sm font-extrabold tracking-wider uppercase" style={{ color: "#ffffff" }}>
+                      {DAY_ABBREVS[i]}
+                    </span>
+                    <span className="text-base md:text-xl font-bold mt-0.5 leading-none" style={{ color: "#ffffff", fontFamily: "var(--font-hanken)" }}>
+                      {isGame ? "🎾" : day.getDate()}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="relative w-full h-3">
+              {containerWidth > 0 && (
+                <div
+                  className="absolute"
+                  style={{
+                    left: selectedCenterX,
+                    top: 2,
+                    transform: "translateX(-50%)",
+                    width: 0,
+                    height: 0,
+                    borderLeft: "5px solid transparent",
+                    borderRight: "5px solid transparent",
+                    borderBottom: "6px solid var(--text)",
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

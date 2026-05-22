@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import type { Recommendation } from "@/lib/types";
 
 function offsetYMD(ymd: string, days: number): string {
@@ -109,40 +112,71 @@ type Props = { selectedYMD: string; gameDays: string[] };
 
 export default function Recommendations({ selectedYMD, gameDays }: Props) {
   const recs = getRecommendations(selectedYMD, gameDays);
+  const [done, setDone] = useState<Set<number>>(new Set());
+
+  function toggle(i: number) {
+    setDone((prev) => {
+      const next = new Set(prev);
+      next.has(i) ? next.delete(i) : next.add(i);
+      return next;
+    });
+  }
+
+  const indexed = recs.map((rec, i) => ({ rec, i }));
+  const pending = indexed.filter(({ i }) => !done.has(i));
+  const completed = indexed.filter(({ i }) => done.has(i));
+
+  function renderCard({ rec, i }: { rec: Recommendation; i: number }) {
+    const cfg = categoryConfig[rec.category];
+    const isDone = done.has(i);
+    return (
+      <div key={i} className="relative bg-[var(--surface)] rounded-2xl px-4 py-4 flex items-center gap-4 overflow-hidden">
+        {isDone && <div className="absolute inset-0 bg-black/30 rounded-2xl pointer-events-none" />}
+        <div
+          className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center"
+          style={{ background: cfg.bg }}
+        >
+          {cfg.icon}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-bold text-[var(--text)] leading-snug">{rec.title}</p>
+          <p className="text-sm text-[var(--muted)] leading-snug mt-0.5">{rec.subtitle}</p>
+          {rec.detail && (
+            <p className="text-xs text-[var(--muted)] mt-0.5">{rec.detail}</p>
+          )}
+          {rec.badge && (
+            <span
+              className="inline-block mt-2 text-[10px] font-bold tracking-widest px-2.5 py-1 rounded-full text-white"
+              style={{ background: "var(--green)" }}
+            >
+              {rec.badge}
+            </span>
+          )}
+        </div>
+        <button
+          onClick={() => toggle(i)}
+          className="flex-shrink-0 w-7 h-7 rounded-full border border-[var(--border)] flex items-center justify-center active:scale-90 transition-transform relative z-10"
+          style={{ background: isDone ? "var(--green)" : "transparent" }}
+        >
+          {isDone && (
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="2,6 5,9 10,3" />
+            </svg>
+          )}
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="mt-5 flex flex-col gap-3">
-      {recs.map((rec, i) => {
-        const cfg = categoryConfig[rec.category];
-        return (
-          <div key={i} className="bg-[var(--surface)] rounded-2xl px-4 py-4 flex items-center gap-4">
-            <div
-              className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center"
-              style={{ background: cfg.bg }}
-            >
-              {cfg.icon}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-[var(--text)] leading-snug">{rec.title}</p>
-              <p className="text-sm text-[var(--muted)] leading-snug mt-0.5">{rec.subtitle}</p>
-              {rec.detail && (
-                <p className="text-xs text-[var(--muted)] mt-0.5">{rec.detail}</p>
-              )}
-              {rec.badge && (
-                <span
-                  className="inline-block mt-2 text-[10px] font-bold tracking-widest px-2.5 py-1 rounded-full text-white"
-                  style={{ background: "var(--green)" }}
-                >
-                  {rec.badge}
-                </span>
-              )}
-            </div>
-            <svg width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="var(--border)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-              <path d="M1 1l6 6-6 6" />
-            </svg>
-          </div>
-        );
-      })}
+    <div className="flex flex-col gap-3">
+      {pending.map(renderCard)}
+      {completed.length > 0 && (
+        <>
+          <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mt-2 text-center">Done</p>
+          {completed.map(renderCard)}
+        </>
+      )}
     </div>
   );
 }

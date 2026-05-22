@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import WeekStrip from "./week-strip";
+import WeekStrip, { formatWeekRange } from "./week-strip";
 import Recommendations from "./recommendations";
 
 const STORAGE_KEY = "padelop:game-days";
@@ -162,6 +162,18 @@ export default function HomeClient() {
   const [gameDays, setGameDays] = useState<string[]>(getWeekGameDays());
   const [selectedYMD, setSelectedYMD] = useState(todayYMD);
   const [optimizeOpen, setOptimizeOpen] = useState(false);
+  const [planOpen, setPlanOpen] = useState(false);
+  const [topSlide, setTopSlide] = useState(0);
+  const [seePlanOpen, setSeePlanOpen] = useState(false);
+  const topTouchStart = useRef(0);
+
+  const currentWeekRange = formatWeekRange((() => {
+    const today = new Date();
+    const dow = (today.getDay() + 6) % 7;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - dow);
+    return Array.from({ length: 7 }, (_, i) => { const d = new Date(monday); d.setDate(monday.getDate() + i); return d; });
+  })());
 
   function toggleGameDay(ymd: string) {
     setGameDays((prev) => {
@@ -172,74 +184,169 @@ export default function HomeClient() {
   }
 
   const isSelectedGameDay = gameDays.includes(selectedYMD);
+  const todayDayType = gameDays.includes(todayYMD)
+    ? "Game Day"
+    : gameDays.includes(offsetYMD(todayYMD, -1))
+    ? "Recovery Day"
+    : "Training Day";
+
+
+  const pct = 71;
 
   return (
     <div className="pb-8">
-      {/* Full-width week strip flush under header */}
-      <div className="pt-[64px] bg-white border-b border-[var(--border)] flex relative">
-        {/* Padel Optimization gauge */}
-        <div className="w-1/2 px-5 pt-4 pb-4 border-r border-[var(--border)] relative">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-bold tracking-wide text-[var(--text)] leading-none block">Current<br />Optimization<br />Level</span>
-            <span className="text-2xl font-bold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>71%</span>
-          </div>
+      {/* Optimization score card */}
+      <div className="pt-[80px] px-5 md:px-12 pb-4 bg-[var(--bg)]">
+      <div className="w-full bg-[var(--surface)] flex flex-col items-center border border-[var(--border)] rounded-2xl shadow-sm px-5 pt-3 pb-4">
+        <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-2">Padel Optimization Score</p>
+        <span
+          className="text-6xl font-extrabold leading-none"
+          style={{ color: "var(--green)", fontFamily: "var(--font-hanken)" }}
+        >
+          {pct}
+        </span>
+        <span className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mt-0.5">out of 100</span>
+        <div className="w-full mt-3">
           <div className="relative">
-            <div className="w-full h-3 overflow-hidden" style={{ background: "linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e)" }} />
-            <div className="absolute" style={{ left: "calc(71% - 6px)", top: "12px" }}>
-              <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
-                <polygon points="6,0 0,8 12,8" fill="var(--text)" />
+            <div
+              className="w-full h-6 rounded-full overflow-hidden"
+              style={{ background: "linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e)" }}
+            />
+            <div className="absolute" style={{ left: `calc(${pct}% - 5px)`, top: "24px" }}>
+              <svg width="10" height="7" viewBox="0 0 10 7" fill="none">
+                <polygon points="5,0 0,7 10,7" fill="#171c1f" />
               </svg>
             </div>
           </div>
-
-          {/* Horizontal arrow from border midpoint */}
-          <div className="absolute top-1/2 -translate-y-1/2 z-10 pointer-events-none" style={{ left: "100%" }}>
-            <svg width="14" height="8" viewBox="0 0 14 8" fill="none">
-              <line x1="0" y1="4" x2="11" y2="4" stroke="var(--border)" strokeWidth="1"/>
-              <path d="M 8 1 L 14 4 L 8 7" stroke="var(--border)" strokeWidth="1" strokeLinejoin="miter" strokeLinecap="square" fill="none"/>
-            </svg>
-          </div>
         </div>
-
-        {/* Tip box — swipeable slides */}
-        <TipSlider onOptimize={() => setOptimizeOpen((o) => !o)} />
+        <div className="w-full mt-5 rounded-xl px-3 py-3 flex flex-col items-center gap-3" style={{ background: "var(--bg)" }}>
+          <p className="text-sm font-bold text-[var(--text)] leading-none flex items-center justify-center gap-1.5">
+            Sleep 8h Tonight
+            <svg width="16" height="10" viewBox="0 0 16 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="0" y1="5" x2="13" y2="5" />
+              <polyline points="9,1 13,5 9,9" />
+            </svg>
+            <span style={{ color: "var(--green)" }}>+7%</span>
+          </p>
+          <button
+            className="px-4 py-1.5 rounded-full border border-[var(--border)] text-[10px] font-bold tracking-widest uppercase text-[var(--text)] bg-white shadow-sm active:scale-95 transition-transform flex items-center gap-1.5"
+          >
+            Optimize Me
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="3,1 8,5 3,9" />
+            </svg>
+          </button>
+        </div>
+      </div>
       </div>
 
-      {optimizeOpen && (
-        <div className="bg-white border-b border-[var(--border)] px-5 py-4 space-y-3">
-          {OPTIMIZATION_TIPS.map((tip, i) => (
-            <div key={i} className="flex items-start gap-3 border border-[var(--border)] rounded-xl p-3">
-              <span className="text-xs font-bold text-white bg-[var(--green-mid)] rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
-              <div>
-                <p className="text-sm font-semibold text-[var(--text)]">{tip.title}</p>
-                <p className="text-xs text-[var(--muted)]">{tip.detail}</p>
+      {/* Today / This Week cell */}
+      <div className="bg-white border-t border-b border-[var(--border)]">
+        <div className="w-full px-5 py-4 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-bold tracking-normal text-[var(--muted)] leading-none">Today is...</p>
+            <p className="text-base font-bold text-[var(--text)] leading-none mt-0.5">{todayDayType}</p>
+          </div>
+          <button
+            onClick={() => setSeePlanOpen((o) => !o)}
+            className="px-3 py-1 rounded-full border border-[var(--border)] text-[10px] font-bold tracking-widest uppercase text-[var(--text)] bg-white shadow-sm active:scale-95 transition-transform flex items-center gap-1"
+          >
+            See Plan
+            <svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+              style={{ transform: seePlanOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+              <polyline points="1,3 4.5,7 8,3" />
+            </svg>
+          </button>
+        </div>
+
+      </div>
+
+      {seePlanOpen && (
+        <>
+          {/* 7 day boxes */}
+          <div className="w-full">
+            <WeekStrip
+              gameDays={gameDays}
+              selectedYMD={selectedYMD}
+              onToggle={toggleGameDay}
+              onSelect={setSelectedYMD}
+              planOpen={planOpen}
+              onPlanOpenChange={setPlanOpen}
+              hideHeading
+            />
+          </div>
+
+          <div className="max-w-7xl mx-auto pt-4 pb-0.5 px-5 md:px-12">
+            <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)]">Objectives</p>
+          </div>
+          <div className="mt-0 relative space-y-4 px-5 md:px-12 max-w-7xl mx-auto">
+            {isSelectedGameDay ? (
+              <GameDaySection />
+            ) : (
+              <Recommendations selectedYMD={selectedYMD} gameDays={gameDays} />
+            )}
+          </div>
+
+          {/* Optimization gauge + tip slider */}
+          <div className="bg-white border-t border-b border-[var(--border)] flex relative">
+            <div className="w-1/2 px-5 pt-4 pb-4 border-r border-[var(--border)] relative">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-bold tracking-wide text-[var(--text)] leading-none block">Current<br />Optimization<br />Level</span>
+                <span className="text-2xl font-bold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>71%</span>
+              </div>
+              <div className="relative">
+                <div className="w-full h-3 overflow-hidden" style={{ background: "linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e)" }} />
+                <div className="absolute" style={{ left: "calc(71% - 6px)", top: "12px" }}>
+                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                    <polygon points="6,0 0,8 12,8" fill="var(--text)" />
+                  </svg>
+                </div>
+              </div>
+              <div className="absolute top-1/2 -translate-y-1/2 z-10 pointer-events-none" style={{ left: "100%" }}>
+                <svg width="14" height="8" viewBox="0 0 14 8" fill="none">
+                  <line x1="0" y1="4" x2="11" y2="4" stroke="var(--border)" strokeWidth="1"/>
+                  <path d="M 8 1 L 14 4 L 8 7" stroke="var(--border)" strokeWidth="1" strokeLinejoin="miter" strokeLinecap="square" fill="none"/>
+                </svg>
               </div>
             </div>
-          ))}
-        </div>
+            <TipSlider onOptimize={() => setOptimizeOpen((o) => !o)} />
+          </div>
+
+          {/* Plan for week bar */}
+          <div className="bg-white border-t border-b border-[var(--border)] flex items-center justify-between px-5 md:px-12 h-10">
+            <p className="text-xs font-bold tracking-widest uppercase" style={{ fontFamily: "monospace", color: "#171c1f" }}>
+              Plan for {currentWeekRange}
+            </p>
+            <button
+              onClick={() => setPlanOpen(true)}
+              className="flex items-center justify-center active:scale-90 transition-transform"
+              aria-label="Open week plan"
+            >
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="#171c1f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3,1 8,5.5 3,10" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Compact optimization card */}
+          <div className="px-5 md:px-12 py-4 bg-[var(--bg)]">
+            <div className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm px-5 py-4">
+              <p className="text-sm font-bold tracking-wide text-[var(--text)] mb-1">Padel Optimization</p>
+              <p className="text-3xl font-extrabold text-[var(--text)] mb-3" style={{ fontFamily: "var(--font-hanken)" }}>
+                {pct}<span className="text-lg font-bold text-[var(--muted)]">/100</span>
+              </p>
+              <div className="relative">
+                <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: "linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e)" }} />
+                <div className="absolute" style={{ left: `calc(${pct}% - 5px)`, top: "10px" }}>
+                  <svg width="10" height="7" viewBox="0 0 10 7" fill="none">
+                    <polygon points="5,0 0,7 10,7" fill="#171c1f" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
       )}
-
-      <div className="px-5 md:px-12 pt-4">
-        <h1 className="text-lg font-bold text-[var(--text)] whitespace-nowrap leading-none" style={{ fontFamily: "var(--font-hanken)" }}>
-          My Padel Week:
-        </h1>
-      </div>
-      <div className="pt-[600px] w-full">
-        <WeekStrip
-          gameDays={gameDays}
-          selectedYMD={selectedYMD}
-          onToggle={toggleGameDay}
-          onSelect={setSelectedYMD}
-        />
-      </div>
-
-      <div className="mt-0 relative space-y-4 px-5 md:px-12 max-w-7xl mx-auto">
-        {isSelectedGameDay ? (
-          <GameDaySection />
-        ) : (
-          <Recommendations selectedYMD={selectedYMD} gameDays={gameDays} />
-        )}
-      </div>
 
       {/* FAB */}
       <button
