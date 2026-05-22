@@ -182,6 +182,39 @@ export default function HomeClient() {
     ? "Recovery Day"
     : "Training Day";
 
+  function getNextGameDay(): string | null {
+    for (let i = 1; i <= 7; i++) {
+      const ymd = offsetYMD(todayYMD, i);
+      if (gameDays.includes(ymd)) {
+        const d = new Date(ymd);
+        return d.toLocaleDateString("en-US", { weekday: "long" });
+      }
+    }
+    return null;
+  }
+
+  function getLastGameDay(): string | null {
+    for (let i = 1; i <= 7; i++) {
+      const ymd = offsetYMD(todayYMD, -i);
+      if (gameDays.includes(ymd)) {
+        const d = new Date(ymd);
+        return d.toLocaleDateString("en-US", { weekday: "long" });
+      }
+    }
+    return null;
+  }
+
+  function getSummary(): string {
+    const nextGame = getNextGameDay();
+    const lastGame = getLastGameDay();
+    if (todayDayType === "Game Day") {
+      return `You have a match today. Stay focused, warm up well, and follow your pre-game routine.`;
+    }
+    if (todayDayType === "Recovery Day") {
+      return `You played ${lastGame ? `on ${lastGame}` : "recently"}. Today is a recovery day — rest, hydrate, and follow your recovery checklist.${nextGame ? ` Your next game is ${nextGame}.` : ""}`;
+    }
+    return `Today is a training day.${nextGame ? ` You have a game ${nextGame} — use today to build strength and sharpen your game.` : " No upcoming game this week, so focus on building your base."}`;
+  }
 
   const pct = 71;
 
@@ -194,7 +227,7 @@ export default function HomeClient() {
           <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] text-left leading-tight">Padel<br />Optimization<br />Score</p>
           <span className="text-3xl font-extrabold leading-none" style={{ color: "var(--green)", fontFamily: "var(--font-hanken)" }}>{pct}<span className="text-base font-bold text-[var(--muted)]">/100</span></span>
         </div>
-        <div className="w-full mt-1 mb-4 relative">
+        <div className="w-full mt-1 mb-6 relative">
           <div className="w-full h-6 rounded-full overflow-hidden" style={{ background: "linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e)" }} />
           <div className="absolute" style={{ left: `calc(${pct}% - 5px)`, top: "24px" }}>
             <svg width="10" height="7" viewBox="0 0 10 7" fill="none">
@@ -221,11 +254,97 @@ export default function HomeClient() {
       </div>
 
 
+      {/* Week at a glance */}
+      <div className="px-5 md:px-12 pb-3 bg-[var(--bg)]">
+        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl px-4 pt-3 pb-4 shadow-sm">
+          <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-1">Your Week</p>
+          <p className="text-xs text-[var(--muted)] mb-3">
+            {(() => {
+              const gameCount = gameDays.filter(ymd => {
+                const today = new Date();
+                const dow = (today.getDay() + 6) % 7;
+                const monday = new Date(today);
+                monday.setDate(today.getDate() - dow);
+                const sunday = new Date(monday);
+                sunday.setDate(monday.getDate() + 6);
+                const mondayYMD = `${monday.getFullYear()}-${String(monday.getMonth()+1).padStart(2,"0")}-${String(monday.getDate()).padStart(2,"0")}`;
+                const sundayYMD = `${sunday.getFullYear()}-${String(sunday.getMonth()+1).padStart(2,"0")}-${String(sunday.getDate()).padStart(2,"0")}`;
+                return ymd >= mondayYMD && ymd <= sundayYMD;
+              }).length;
+              const nextGame = getNextGameDay();
+              const parts = [];
+              if (gameCount > 0) parts.push(`${gameCount} game${gameCount > 1 ? "s" : ""} this week`);
+              if (nextGame) parts.push(`next game ${nextGame}`);
+              else parts.push("no upcoming games");
+              return parts.join(" · ");
+            })()}
+          </p>
+          <div className="grid grid-cols-7 gap-1 mb-3">
+            {(() => {
+              const today = new Date();
+              const dow = (today.getDay() + 6) % 7;
+              const monday = new Date(today);
+              monday.setDate(today.getDate() - dow);
+              const days = Array.from({ length: 7 }, (_, i) => {
+                const d = new Date(monday);
+                d.setDate(monday.getDate() + i);
+                const ymd = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+                const isToday = ymd === todayYMD;
+                const isGame = gameDays.includes(ymd);
+                const isRecovery = !isGame && gameDays.includes(offsetYMD(ymd, -1));
+                const isPast = ymd < todayYMD;
+                return { d, ymd, isToday, isGame, isRecovery, isPast };
+              });
+              return days.map(({ d, ymd, isToday, isGame, isRecovery, isPast }) => {
+                const bg = isToday ? "#2653d4" : isGame ? "#16a34a" : isRecovery ? "#7c3aed" : "#94a3b8";
+                const iconColor = "#ffffff";
+                return (
+                <div key={ymd} className="flex flex-col items-center gap-1" style={{ opacity: isPast ? 0.35 : 1 }}>
+                  <span className="text-[9px] font-bold uppercase" style={{ color: isToday ? "#2653d4" : "var(--muted)" }}>
+                    {["M","T","W","T","F","S","S"][d.getDay() === 0 ? 6 : d.getDay() - 1]}
+                  </span>
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center"
+                    style={{ background: bg }}
+                  >
+                    {isGame ? (
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <ellipse cx="8" cy="16" rx="2.5" ry="2.5" /><line x1="10" y1="14" x2="19" y2="5" /><path d="M17 3l4 4-2 2-4-4z" />
+                      </svg>
+                    ) : isRecovery ? (
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                      </svg>
+                    ) : (
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="2" y="10" width="4" height="4" rx="1" /><rect x="18" y="10" width="4" height="4" rx="1" />
+                        <line x1="6" y1="12" x2="18" y2="12" /><line x1="8" y1="8" x2="8" y2="16" /><line x1="16" y1="8" x2="16" y2="16" />
+                      </svg>
+                    )}
+                  </div>
+                  <span className="text-[9px] font-bold" style={{ color: isToday ? "#2653d4" : "var(--muted)" }}>{d.getDate()}</span>
+                </div>
+                );
+              });
+            })()}
+          </div>
+        </div>
+      </div>
+
+      {/* Summary card */}
+      <div className="px-5 md:px-12 pb-3 bg-[var(--bg)]">
+        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl px-4 py-4 shadow-sm">
+          <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-0.5">Today</p>
+          <p className="text-base font-bold text-[var(--text)] mb-2">{todayDayType}</p>
+          <p className="text-sm text-[var(--muted)] leading-snug">{getSummary()}</p>
+        </div>
+      </div>
+
       {/* Things to do tab card */}
       <div className="px-5 md:px-12 pt-2 bg-[var(--bg)]">
         <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden">
           <div className="px-5 py-3 border-b border-[var(--border)] flex justify-center">
-            <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)]">Things to do...</p>
+            <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)]">Today's Plan</p>
           </div>
           <div className="flex">
             <button
