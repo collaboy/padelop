@@ -2,6 +2,8 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
+import WeekStrip from "./week-strip";
+import Recommendations from "./recommendations";
 
 const STORAGE_KEY = "padelop:game-days";
 
@@ -158,8 +160,21 @@ function TipSlider({ onOptimize }: { onOptimize: () => void }) {
 
 export default function HomeClient() {
   const todayYMD = new Date().toISOString().slice(0, 10);
-  const [gameDays] = useState<string[]>(getWeekGameDays());
+  const [gameDays, setGameDays] = useState<string[]>(getWeekGameDays());
+  const [selectedYMD, setSelectedYMD] = useState(todayYMD);
+  const [planOpen, setPlanOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"today" | "week" | null>(null);
   const [fabOpen, setFabOpen] = useState(false);
+
+  function toggleGameDay(ymd: string) {
+    setGameDays((prev) => {
+      const next = prev.includes(ymd) ? prev.filter((d) => d !== ymd) : [...prev, ymd];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  }
+
+  const isSelectedGameDay = gameDays.includes(selectedYMD);
 
   const todayDayType = gameDays.includes(todayYMD)
     ? "Game Day"
@@ -176,46 +191,80 @@ export default function HomeClient() {
       <div className="pt-[80px] px-5 md:px-12 pb-4 bg-[var(--bg)]">
       <div className="w-full bg-[var(--surface)] flex flex-col border border-[var(--border)] rounded-2xl shadow-sm px-5 pt-3 pb-4">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] text-left leading-relaxed">Padel<br />Optimization<br />Score</p>
+          <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] text-left leading-tight">Padel<br />Optimization<br />Score</p>
           <span className="text-3xl font-extrabold leading-none" style={{ color: "var(--green)", fontFamily: "var(--font-hanken)" }}>{pct}<span className="text-base font-bold text-[var(--muted)]">/100</span></span>
         </div>
-        <div className="w-full mt-1">
-          <div className="relative">
-            <div
-              className="w-full h-6 rounded-full overflow-hidden"
-              style={{ background: "linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e)" }}
-            />
-            <div className="absolute" style={{ left: `calc(${pct}% - 5px)`, top: "24px" }}>
-              <svg width="10" height="7" viewBox="0 0 10 7" fill="none">
-                <polygon points="5,0 0,7 10,7" fill="#171c1f" />
-              </svg>
-            </div>
+        <div className="w-full mt-1 mb-4 relative">
+          <div className="w-full h-6 rounded-full overflow-hidden" style={{ background: "linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e)" }} />
+          <div className="absolute" style={{ left: `calc(${pct}% - 5px)`, top: "24px" }}>
+            <svg width="10" height="7" viewBox="0 0 10 7" fill="none">
+              <polygon points="5,0 0,7 10,7" fill="#171c1f" />
+            </svg>
+          </div>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-bold text-[var(--text)] leading-none">Sleep 8h Tonight</p>
+            <svg width="14" height="9" viewBox="0 0 16 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="0" y1="5" x2="13" y2="5" /><polyline points="9,1 13,5 9,9" />
+            </svg>
+            <span className="text-sm font-bold leading-none" style={{ color: "var(--green)" }}>+7%</span>
+          </div>
+          <Link href="/optimizer" className="px-4 py-1.5 rounded-full border border-[var(--border)] text-[10px] font-bold tracking-widest uppercase text-[var(--text)] bg-white shadow-sm active:scale-95 transition-transform flex items-center gap-1.5">
+            Improve
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="3,1 8,5 3,9" />
+            </svg>
+          </Link>
+        </div>
+      </div>
+      </div>
+
+
+      {/* Things to do tab card */}
+      <div className="px-5 md:px-12 pt-2 bg-[var(--bg)]">
+        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden">
+          <div className="px-5 py-3 border-b border-[var(--border)] flex justify-center">
+            <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)]">Things to do...</p>
+          </div>
+          <div className="flex">
+            <button
+              onClick={() => setActiveTab(activeTab === "today" ? null : "today")}
+              className="flex-1 py-4 flex items-center justify-center border-r border-[var(--border)] active:opacity-80 transition-opacity"
+              style={{ background: activeTab === "today" ? "#2653d4" : "transparent" }}
+            >
+              <p className="text-sm font-bold leading-none" style={{ color: activeTab === "today" ? "#ffffff" : "var(--text)" }}>Today</p>
+            </button>
+            <button
+              onClick={() => setActiveTab(activeTab === "week" ? null : "week")}
+              className="flex-1 py-4 flex items-center justify-center active:opacity-80 transition-opacity"
+              style={{ background: activeTab === "week" ? "#2653d4" : "transparent" }}
+            >
+              <p className="text-sm font-bold leading-none" style={{ color: activeTab === "week" ? "#ffffff" : "var(--text)" }}>This Week</p>
+            </button>
           </div>
         </div>
       </div>
-      </div>
 
-      {/* Tip + button */}
-      <div className="px-5 md:px-12 pb-4 flex flex-col items-center gap-3">
-        <p className="text-sm font-bold text-[var(--text)] leading-none flex items-center gap-1.5">
-          Sleep 8h Tonight
-          <svg width="16" height="10" viewBox="0 0 16 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="0" y1="5" x2="13" y2="5" />
-            <polyline points="9,1 13,5 9,9" />
-          </svg>
-          <span style={{ color: "var(--green)" }}>+7%</span>
-        </p>
-        <Link
-          href="/optimizer"
-          className="px-4 py-1.5 rounded-full border border-[var(--border)] text-[10px] font-bold tracking-widest uppercase text-[var(--text)] bg-white shadow-sm active:scale-95 transition-transform flex items-center gap-1.5"
-        >
-          Let's Optimize
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="3,1 8,5 3,9" />
-          </svg>
-        </Link>
-      </div>
-
+      {activeTab === "today" ? (
+        <>
+          <div className="mt-2 space-y-4 px-5 md:px-12 pb-2">
+            <Recommendations selectedYMD={selectedYMD} gameDays={gameDays} />
+          </div>
+          <div className="flex justify-center pb-4">
+            <button onClick={() => setActiveTab(null)} className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] active:opacity-60 transition-opacity">Close</button>
+          </div>
+        </>
+      ) : activeTab === "week" ? (
+        <>
+          <div className="w-full">
+            <WeekStrip gameDays={gameDays} selectedYMD={selectedYMD} onToggle={toggleGameDay} onSelect={setSelectedYMD} planOpen={planOpen} onPlanOpenChange={setPlanOpen} hideHeading />
+          </div>
+          <div className="flex justify-center pb-4">
+            <button onClick={() => setActiveTab(null)} className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] active:opacity-60 transition-opacity">Close</button>
+          </div>
+        </>
+      ) : null}
 
       {/* FAB modal */}
       {fabOpen && (
