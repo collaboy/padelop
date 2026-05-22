@@ -164,7 +164,7 @@ export default function HomeClient() {
   const [optimizeOpen, setOptimizeOpen] = useState(false);
   const [planOpen, setPlanOpen] = useState(false);
   const [topSlide, setTopSlide] = useState(0);
-  const [seePlanOpen, setSeePlanOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"today" | "week" | null>("today");
   const topTouchStart = useRef(0);
 
   const currentWeekRange = formatWeekRange((() => {
@@ -240,30 +240,52 @@ export default function HomeClient() {
       </div>
       </div>
 
-      {/* Today / This Week cell */}
-      <div className="bg-white border-t border-b border-[var(--border)]">
-        <div className="w-full px-5 py-4 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-bold tracking-normal text-[var(--muted)] leading-none">Today is...</p>
-            <p className="text-base font-bold text-[var(--text)] leading-none mt-0.5">{todayDayType}</p>
+      {/* Tab switcher card */}
+      <div className="px-5 md:px-12 pt-2 bg-[var(--bg)]">
+        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden">
+          <div className="px-5 py-3 border-b border-[var(--border)] flex justify-center">
+            <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)]">Things to do...</p>
           </div>
-          <button
-            onClick={() => setSeePlanOpen((o) => !o)}
-            className="px-3 py-1 rounded-full border border-[var(--border)] text-[10px] font-bold tracking-widest uppercase text-[var(--text)] bg-white shadow-sm active:scale-95 transition-transform flex items-center gap-1"
-          >
-            See Plan
-            <svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-              style={{ transform: seePlanOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
-              <polyline points="1,3 4.5,7 8,3" />
-            </svg>
-          </button>
+          <div className="flex">
+            <button
+              onClick={() => setActiveTab(activeTab === "today" ? null : "today")}
+              className="flex-1 py-4 flex items-center justify-center gap-1.5 border-r border-[var(--border)] active:opacity-80 transition-opacity"
+              style={{ background: activeTab === "today" ? "#2653d4" : "transparent" }}
+            >
+              <p className="text-sm font-bold leading-none" style={{ color: activeTab === "today" ? "#ffffff" : "var(--text)" }}>Today</p>
+            </button>
+            <button
+              onClick={() => setActiveTab(activeTab === "week" ? null : "week")}
+              className="flex-1 py-4 flex items-center justify-center gap-1.5 active:opacity-80 transition-opacity"
+              style={{ background: activeTab === "week" ? "#2653d4" : "transparent" }}
+            >
+              <p className="text-sm font-bold leading-none" style={{ color: activeTab === "week" ? "#ffffff" : "var(--text)" }}>This Week</p>
+            </button>
+          </div>
         </div>
-
       </div>
 
-      {seePlanOpen && (
+      {/* Tab content */}
+      {activeTab === "today" ? (
         <>
-          {/* 7 day boxes */}
+          <div className="mt-2 relative space-y-4 px-5 md:px-12 max-w-7xl mx-auto pb-2">
+            {isSelectedGameDay ? (
+              <GameDaySection />
+            ) : (
+              <Recommendations selectedYMD={selectedYMD} gameDays={gameDays} />
+            )}
+          </div>
+          <div className="flex justify-center pb-4">
+            <button
+              onClick={() => setActiveTab(null)}
+              className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] active:opacity-60 transition-opacity"
+            >
+              Close
+            </button>
+          </div>
+        </>
+      ) : activeTab === "week" ? (
+        <>
           <div className="w-full">
             <WeekStrip
               gameDays={gameDays}
@@ -275,78 +297,16 @@ export default function HomeClient() {
               hideHeading
             />
           </div>
-
-          <div className="max-w-7xl mx-auto pt-4 pb-0.5 px-5 md:px-12">
-            <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)]">Objectives</p>
-          </div>
-          <div className="mt-0 relative space-y-4 px-5 md:px-12 max-w-7xl mx-auto">
-            {isSelectedGameDay ? (
-              <GameDaySection />
-            ) : (
-              <Recommendations selectedYMD={selectedYMD} gameDays={gameDays} />
-            )}
-          </div>
-
-          {/* Optimization gauge + tip slider */}
-          <div className="bg-white border-t border-b border-[var(--border)] flex relative">
-            <div className="w-1/2 px-5 pt-4 pb-4 border-r border-[var(--border)] relative">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-bold tracking-wide text-[var(--text)] leading-none block">Current<br />Optimization<br />Level</span>
-                <span className="text-2xl font-bold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>71%</span>
-              </div>
-              <div className="relative">
-                <div className="w-full h-3 overflow-hidden" style={{ background: "linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e)" }} />
-                <div className="absolute" style={{ left: "calc(71% - 6px)", top: "12px" }}>
-                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
-                    <polygon points="6,0 0,8 12,8" fill="var(--text)" />
-                  </svg>
-                </div>
-              </div>
-              <div className="absolute top-1/2 -translate-y-1/2 z-10 pointer-events-none" style={{ left: "100%" }}>
-                <svg width="14" height="8" viewBox="0 0 14 8" fill="none">
-                  <line x1="0" y1="4" x2="11" y2="4" stroke="var(--border)" strokeWidth="1"/>
-                  <path d="M 8 1 L 14 4 L 8 7" stroke="var(--border)" strokeWidth="1" strokeLinejoin="miter" strokeLinecap="square" fill="none"/>
-                </svg>
-              </div>
-            </div>
-            <TipSlider onOptimize={() => setOptimizeOpen((o) => !o)} />
-          </div>
-
-          {/* Plan for week bar */}
-          <div className="bg-white border-t border-b border-[var(--border)] flex items-center justify-between px-5 md:px-12 h-10">
-            <p className="text-xs font-bold tracking-widest uppercase" style={{ fontFamily: "monospace", color: "#171c1f" }}>
-              Plan for {currentWeekRange}
-            </p>
+          <div className="flex justify-center pb-4">
             <button
-              onClick={() => setPlanOpen(true)}
-              className="flex items-center justify-center active:scale-90 transition-transform"
-              aria-label="Open week plan"
+              onClick={() => setActiveTab(null)}
+              className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] active:opacity-60 transition-opacity"
             >
-              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="#171c1f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="3,1 8,5.5 3,10" />
-              </svg>
+              Close
             </button>
           </div>
-
-          {/* Compact optimization card */}
-          <div className="px-5 md:px-12 py-4 bg-[var(--bg)]">
-            <div className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm px-5 py-4">
-              <p className="text-sm font-bold tracking-wide text-[var(--text)] mb-1">Padel Optimization</p>
-              <p className="text-3xl font-extrabold text-[var(--text)] mb-3" style={{ fontFamily: "var(--font-hanken)" }}>
-                {pct}<span className="text-lg font-bold text-[var(--muted)]">/100</span>
-              </p>
-              <div className="relative">
-                <div className="w-full h-2.5 rounded-full overflow-hidden" style={{ background: "linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e)" }} />
-                <div className="absolute" style={{ left: `calc(${pct}% - 5px)`, top: "10px" }}>
-                  <svg width="10" height="7" viewBox="0 0 10 7" fill="none">
-                    <polygon points="5,0 0,7 10,7" fill="#171c1f" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
         </>
-      )}
+      ) : null}
 
       {/* FAB */}
       <button

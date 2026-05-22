@@ -49,12 +49,11 @@ function getRecommendations(selectedYMD: string, gameDays: string[]): Recommenda
   ];
 }
 
-const categoryConfig: Record<Recommendation["category"], { label: string; bg: string; icon: React.ReactNode }> = {
+const categoryConfig: Record<Recommendation["category"], { label: string; icon: React.ReactNode }> = {
   training: {
     label: "Training",
-    bg: "#e8f2e8",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3a7a3a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="10" width="4" height="4" rx="1" />
         <rect x="18" y="10" width="4" height="4" rx="1" />
         <line x1="6" y1="12" x2="18" y2="12" />
@@ -65,9 +64,8 @@ const categoryConfig: Record<Recommendation["category"], { label: string; bg: st
   },
   game: {
     label: "Game",
-    bg: "#e8f2e8",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3a7a3a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <ellipse cx="8" cy="16" rx="2.5" ry="2.5" />
         <line x1="10" y1="14" x2="19" y2="5" />
         <path d="M17 3l4 4-2 2-4-4z" />
@@ -76,9 +74,8 @@ const categoryConfig: Record<Recommendation["category"], { label: string; bg: st
   },
   nutrition: {
     label: "Nutrition",
-    bg: "#f5edd8",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a07030" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M4 17c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V9H4v8z" />
         <path d="M4 9c0-2 1.5-3.5 4-4 1-.2 2-.3 4-.3s3 .1 4 .3c2.5.5 4 2 4 4" />
         <path d="M8 9V7" /><path d="M12 9V6" /><path d="M16 9V7" />
@@ -87,9 +84,8 @@ const categoryConfig: Record<Recommendation["category"], { label: string; bg: st
   },
   recovery: {
     label: "Recovery",
-    bg: "#ece8f5",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="7" r="2" />
         <path d="M9 22V12l3-3 3 3v10" />
         <path d="M6 17l3-3" /><path d="M18 17l-3-3" />
@@ -98,11 +94,10 @@ const categoryConfig: Record<Recommendation["category"], { label: string; bg: st
   },
   tip: {
     label: "Tip",
-    bg: "#fdf3dc",
     icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#b45309" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="9" />
-        <path d="M12 8v4" /><circle cx="12" cy="16" r="0.5" fill="#b45309" />
+        <path d="M12 8v4" /><circle cx="12" cy="16" r="0.5" fill="#ffffff" />
       </svg>
     ),
   },
@@ -134,7 +129,7 @@ export default function Recommendations({ selectedYMD, gameDays }: Props) {
         {isDone && <div className="absolute inset-0 bg-black/30 rounded-2xl pointer-events-none" />}
         <div
           className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center"
-          style={{ background: cfg.bg }}
+          style={{ background: "#2653d4" }}
         >
           {cfg.icon}
         </div>

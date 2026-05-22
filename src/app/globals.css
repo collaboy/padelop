@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f9f9f9;
+  --bg: #e2e5e9;
   --surface: #ffffff;
   --green: #1e3a1e;
   --green-mid: #3a7a3a;
@@ -31,7 +31,7 @@
 * { box-sizing: border-box; }
 
 body {
-  background: #f9f9f9 !important;
+  background: #e2e5e9 !important;
   color: var(--text);
   -webkit-font-smoothing: antialiased;
 }
