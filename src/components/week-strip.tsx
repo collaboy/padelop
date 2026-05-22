@@ -204,7 +204,6 @@ export default function WeekStrip({ gameDays, selectedYMD, onToggle, onSelect }:
       </div>
       <div className="px-5 md:px-12 mt-2">
         <p className="text-sm font-bold tracking-widest uppercase text-[var(--muted)]">Today's Objectives</p>
-        <p className="text-xs tracking-widest uppercase text-[var(--muted)] mt-0.5">Pre-Game:</p>
       </div>
     </div>
   );

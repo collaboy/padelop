@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import WeekStrip from "./week-strip";
 import Recommendations from "./recommendations";
 
@@ -112,10 +112,56 @@ function getWeekGameDays(): string[] {
   });
 }
 
+const OPTIMIZATION_TIPS = [
+  { title: "Sleep 8h tonight", detail: "Optimization rises to 76%" },
+  { title: "Hydrate 3.5L today", detail: "Boosts recovery and court speed" },
+  { title: "10-min mobility warmup", detail: "Reduces injury risk by 40%" },
+  { title: "Eat complex carbs pre-game", detail: "Sustains energy through 3 sets" },
+];
+
+
+function TipSlider({ onOptimize }: { onOptimize: () => void }) {
+  const [slide, setSlide] = useState(0);
+  const touchStart = useRef(0);
+
+  function onTouchStart(e: React.TouchEvent) { touchStart.current = e.touches[0].clientX; }
+  function onTouchEnd(e: React.TouchEvent) {
+    const delta = e.changedTouches[0].clientX - touchStart.current;
+    if (delta < -40) setSlide((s) => Math.min(s + 1, 1));
+    else if (delta > 40) setSlide((s) => Math.max(s - 1, 0));
+  }
+
+  return (
+    <div className="w-1/2 pt-1 pb-1 flex flex-col items-center" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+      <div className="flex-1 flex items-center justify-center px-5">
+        {slide === 0
+          ? <p className="text-xs text-[var(--text)] leading-tight text-center">If you sleep 8h tonight:<br /><span className="font-bold">Optimization rises to 76%</span></p>
+          : <div className="flex flex-col items-center gap-0.5">
+              <p className="text-[10px] text-[var(--muted)] text-center">More ways to</p>
+              <button
+                onClick={onOptimize}
+                className="text-[10px] font-bold tracking-wide text-center px-3 py-1.5 rounded-full border border-[var(--border)] shadow-sm active:scale-95 transition-transform"
+                style={{ background: "#fff", color: "var(--text)" }}
+              >
+                Optimize
+              </button>
+            </div>
+        }
+      </div>
+      <div className="flex gap-1 pb-1">
+        {[0, 1].map((i) => (
+          <div key={i} className="w-1 h-1 rounded-full" style={{ background: i === slide ? "var(--text)" : "var(--border)" }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function HomeClient() {
   const todayYMD = new Date().toISOString().slice(0, 10);
   const [gameDays, setGameDays] = useState<string[]>(getWeekGameDays());
   const [selectedYMD, setSelectedYMD] = useState(todayYMD);
+  const [optimizeOpen, setOptimizeOpen] = useState(false);
 
   function toggleGameDay(ymd: string) {
     setGameDays((prev) => {
@@ -130,7 +176,55 @@ export default function HomeClient() {
   return (
     <div className="pb-8">
       {/* Full-width week strip flush under header */}
-      <div className="pt-[64px] w-full">
+      <div className="pt-[64px] bg-white border-b border-[var(--border)] flex relative">
+        {/* Padel Optimization gauge */}
+        <div className="w-1/2 px-5 pt-4 pb-4 border-r border-[var(--border)] relative">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-bold tracking-wide text-[var(--text)] leading-none block">Current<br />Optimization<br />Level</span>
+            <span className="text-2xl font-bold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>71%</span>
+          </div>
+          <div className="relative">
+            <div className="w-full h-3 overflow-hidden" style={{ background: "linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e)" }} />
+            <div className="absolute" style={{ left: "calc(71% - 6px)", top: "12px" }}>
+              <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                <polygon points="6,0 0,8 12,8" fill="var(--text)" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Horizontal arrow from border midpoint */}
+          <div className="absolute top-1/2 -translate-y-1/2 z-10 pointer-events-none" style={{ left: "100%" }}>
+            <svg width="14" height="8" viewBox="0 0 14 8" fill="none">
+              <line x1="0" y1="4" x2="11" y2="4" stroke="var(--border)" strokeWidth="1"/>
+              <path d="M 8 1 L 14 4 L 8 7" stroke="var(--border)" strokeWidth="1" strokeLinejoin="miter" strokeLinecap="square" fill="none"/>
+            </svg>
+          </div>
+        </div>
+
+        {/* Tip box — swipeable slides */}
+        <TipSlider onOptimize={() => setOptimizeOpen((o) => !o)} />
+      </div>
+
+      {optimizeOpen && (
+        <div className="bg-white border-b border-[var(--border)] px-5 py-4 space-y-3">
+          {OPTIMIZATION_TIPS.map((tip, i) => (
+            <div key={i} className="flex items-start gap-3 border border-[var(--border)] rounded-xl p-3">
+              <span className="text-xs font-bold text-white bg-[var(--green-mid)] rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">{i + 1}</span>
+              <div>
+                <p className="text-sm font-semibold text-[var(--text)]">{tip.title}</p>
+                <p className="text-xs text-[var(--muted)]">{tip.detail}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="px-5 md:px-12 pt-4">
+        <h1 className="text-lg font-bold text-[var(--text)] whitespace-nowrap leading-none" style={{ fontFamily: "var(--font-hanken)" }}>
+          My Padel Week:
+        </h1>
+      </div>
+      <div className="pt-[600px] w-full">
         <WeekStrip
           gameDays={gameDays}
           selectedYMD={selectedYMD}
