@@ -420,6 +420,11 @@ export default function HomeClient() {
   const [showTasks, setShowTasks] = useState(false);
   const [showWeekDetails, setShowWeekDetails] = useState(false);
   const [scheduleModal, setScheduleModal] = useState<{ title: string; subtitle?: string; category: ScheduleBlock["category"]; detail: string } | null>(null);
+  const [gameDetails, setGameDetails] = useState<{ time: string; location: string; court: string; partner: string }>(() => {
+    try { const s = localStorage.getItem("padelop:game-details"); if (s) return JSON.parse(s); } catch {}
+    return { time: "21:00", location: "Di Cagno Sports Club", court: "6", partner: "Bobby M" };
+  });
+  const [gameDetailsOpen, setGameDetailsOpen] = useState(false);
   const cardTouchX = useRef(0);
   const [hydrationLog, setHydrationLog] = useState({ litres: "", timing: [] as string[], quality: "", urine: "" });
   const notifTimeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -671,16 +676,7 @@ export default function HomeClient() {
 
   function renderSummaryGraphic() {
     if (todayDayType === "Game Day") {
-      const todayTime = gameTimes[todayYMD] as TimeSlot | undefined;
-      const timeLabel = todayTime ? TIME_SLOTS.find(t => t.v === todayTime)?.label : null;
-      return (
-        <div className="flex flex-col gap-0.5 mb-2">
-          <p className="text-sm font-semibold text-[var(--text)]">
-            You have a <span className="font-extrabold">match</span> today at <span className="font-extrabold">21:00</span>
-          </p>
-          <p className="text-xs text-[var(--muted)] leading-snug">Stay focused · warm up well · <span className="font-semibold text-[var(--text)]">follow your routine</span></p>
-        </div>
-      );
+      return null;
     }
 
     if (todayDayType === "Recovery Day") {
@@ -781,45 +777,50 @@ export default function HomeClient() {
                 <span className="text-2xl font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>
                   {activeTab === "today" ? "Today" : "This Week"}
                 </span>
-                <span
+                <button
                   className="absolute top-0 left-full pl-3 text-2xl font-extrabold whitespace-nowrap"
-                  style={{
-                    fontFamily: "var(--font-hanken)",
-                    color: "var(--text)",
-                    opacity: 0.18,
-                    WebkitMaskImage: "linear-gradient(to right, black 0%, transparent 65%)",
-                    maskImage: "linear-gradient(to right, black 0%, transparent 65%)",
-                  }}
+                  style={{ fontFamily: "var(--font-hanken)", color: "var(--text)", opacity: 0.18, WebkitMaskImage: "linear-gradient(to right, black 0%, transparent 65%)", maskImage: "linear-gradient(to right, black 0%, transparent 65%)" }}
+                  onClick={() => { if (activeTab === "today") { setActiveTab("week"); setShowWeekDetails(true); } else { setActiveTab("today"); } }}
                 >
                   {activeTab === "today" ? "This Week" : "Today"}
-                </span>
+                </button>
               </span>
             </div>
             <div className="flex gap-1.5 mt-1.5">
               <button onClick={() => setActiveTab("today")} className="w-1.5 h-1.5 rounded-full transition-colors duration-200" style={{ background: activeTab === "today" ? "var(--text)" : "var(--border)" }} />
-              <button onClick={() => setActiveTab("week")} className="w-1.5 h-1.5 rounded-full transition-colors duration-200" style={{ background: activeTab === "week" ? "var(--text)" : "var(--border)" }} />
+              <button onClick={() => { setActiveTab("week"); setShowWeekDetails(true); }} className="w-1.5 h-1.5 rounded-full transition-colors duration-200" style={{ background: activeTab === "week" ? "var(--text)" : "var(--border)" }} />
             </div>
           </div>
           <div className="border-t border-[var(--border)]" />
           <div
             className="px-4 pb-4"
             onTouchStart={(e) => { cardTouchX.current = e.touches[0].clientX; }}
-            onTouchEnd={(e) => {
-              const delta = e.changedTouches[0].clientX - cardTouchX.current;
-              if (delta < -40) setActiveTab("week");
-              else if (delta > 40) setActiveTab("today");
-            }}
+            onTouchEnd={(e) => { const delta = e.changedTouches[0].clientX - cardTouchX.current; if (delta < -40) { setActiveTab("week"); setShowWeekDetails(true); } else if (delta > 40) setActiveTab("today"); }}
           >
             {activeTab === "today" && (
               <>
                 {/* Day type row */}
-                <div className="grid grid-cols-2 -mx-4 mb-4" style={{ borderBottom: "1px solid var(--border)" }}>
+                <div className="grid grid-cols-2 -mx-4" style={{ borderBottom: "1px solid var(--border)" }}>
                   <div className="px-4 py-2 flex items-center justify-center" style={{ borderRight: "1px solid var(--border)" }}>
                     <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)]">Today is a...</p>
                   </div>
                   <div className="px-4 py-2 flex flex-col items-center justify-center">
                     <p className="text-sm font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>{todayDayType}</p>
                   </div>
+                </div>
+                {/* Game details row */}
+                <div className="grid grid-cols-4 -mx-4 mb-4" style={{ borderBottom: "1px solid var(--border)" }}>
+                  {[
+                    { label: "Time",     value: gameDetails.time     || "—" },
+                    { label: "Location", value: gameDetails.location ? (gameDetails.location.slice(0, 4) + (gameDetails.location.length > 4 ? "…" : "")) : "—" },
+                    { label: "Court",    value: gameDetails.court    || "—" },
+                    { label: "Partner",  value: gameDetails.partner ? (gameDetails.partner.slice(0, 4) + (gameDetails.partner.length > 4 ? "…" : "")) : "—" },
+                  ].map(({ label, value }, i) => (
+                    <button key={label} onClick={() => setGameDetailsOpen(true)} className="px-2 py-2 flex flex-col items-center justify-center gap-0.5 active:opacity-60 transition-opacity" style={{ borderRight: i < 3 ? "1px solid var(--border)" : "none" }}>
+                      <p className="text-[8px] font-bold tracking-widest uppercase text-[var(--muted)]">{label}</p>
+                      <p className="text-xs font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>{value}</p>
+                    </button>
+                  ))}
                 </div>
                 {renderSummaryGraphic()}
                 <button onClick={() => setShowTasks(o => !o)} className="flex items-center gap-1 mt-2 active:opacity-70 transition-opacity">
@@ -941,7 +942,6 @@ export default function HomeClient() {
                 );})()}
               </>
             )}
-
             {activeTab === "week" && (
               <>
                 <div className="flex items-baseline justify-between mb-3">
@@ -950,7 +950,7 @@ export default function HomeClient() {
                 </div>
                 <p className="text-sm text-[var(--muted)] leading-snug mb-2">
                   {(() => {
-                    const gameCount = gameDays.filter(ymd => {
+                    const gameCount = gameDays.filter((ymd: string) => {
                       const today = new Date();
                       const dow = (today.getDay() + 6) % 7;
                       const monday = new Date(today);
@@ -1119,6 +1119,52 @@ export default function HomeClient() {
           </div>
         </button>
       </div>
+
+      {/* Game details modal */}
+      {gameDetailsOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: "rgba(0,0,0,0.5)" }} onClick={() => setGameDetailsOpen(false)}>
+          <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="px-6 pt-6 pb-4" style={{ background: "#2653d410" }}>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "#2653d4" }}>Game Details</p>
+                <button onClick={() => setGameDetailsOpen(false)} className="w-7 h-7 rounded-full flex items-center justify-center active:scale-90 transition-transform" style={{ background: "rgba(0,0,0,0.08)" }}>
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" /></svg>
+                </button>
+              </div>
+              <p className="text-xl font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>Tonight's Match</p>
+            </div>
+            <div className="px-6 py-5 flex flex-col gap-4">
+              {([
+                { key: "time",     label: "Time",     placeholder: "e.g. 21:00" },
+                { key: "location", label: "Location", placeholder: "e.g. Di Cagno Sports Club" },
+                { key: "court",    label: "Court #",  placeholder: "e.g. 3" },
+                { key: "partner",  label: "Partner",  placeholder: "e.g. Marco" },
+              ] as const).map(({ key, label, placeholder }) => (
+                <div key={key}>
+                  <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)] mb-1">{label}</p>
+                  <input
+                    type="text"
+                    value={gameDetails[key]}
+                    placeholder={placeholder}
+                    onChange={e => setGameDetails(prev => ({ ...prev, [key]: e.target.value }))}
+                    className="w-full text-sm font-bold text-[var(--text)] bg-[var(--bg)] border border-[var(--border)] rounded-xl px-3 py-2.5 outline-none focus:border-[#2653d4]"
+                  />
+                </div>
+              ))}
+              <button
+                onClick={() => {
+                  try { localStorage.setItem("padelop:game-details", JSON.stringify(gameDetails)); } catch {}
+                  setGameDetailsOpen(false);
+                }}
+                className="w-full py-3.5 rounded-2xl text-sm font-bold text-white mt-1 active:scale-95 transition-transform"
+                style={{ background: "#2653d4" }}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Week Plan Modal */}
       {weekPlanOpen && (
