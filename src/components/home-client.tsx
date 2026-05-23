@@ -146,8 +146,9 @@ function buildWeeklyDigest(todayYMD: string): WeekDigest | null {
     const avgE = reviews.length > 0 ? energyScore / reviews.length : null;
     const avgEnergy = avgE === null ? null : avgE >= 2.5 ? "high" : avgE >= 1.5 ? "mid" : "low";
 
-    const fmt = (ymd: string) => { const d = new Date(ymd); return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }); };
-    const weekLabel = `${fmt(weekStart)} – ${fmt(todayYMD)}`;
+    const fmtDay = (ymd: string) => new Date(ymd).getDate();
+    const fmtMonth = (ymd: string) => new Date(ymd).toLocaleDateString("en-US", { month: "short" });
+    const weekLabel = `${fmtMonth(weekStart)} ${fmtDay(weekStart)}–${fmtDay(todayYMD)}`;
 
     return { matches: reviews.length, wins, losses, topStrengths, topWorkOn, avgHydrationL, avgEnergy, weekLabel };
   } catch { return null; }
@@ -311,8 +312,7 @@ export default function HomeClient() {
   });
   const [selectedYMD, setSelectedYMD] = useState(todayYMD);
   const [planOpen, setPlanOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<"today" | "week" | null>(null);
-  const [fabOpen, setFabOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"today" | "week">("today");
   const [weekPlanOpen, setWeekPlanOpen] = useState(false);
   const [weekPlanDays, setWeekPlanDays] = useState<string[]>([]);
   const [weekPlanTimes, setWeekPlanTimes] = useState<Record<string, TimeSlot>>({});
@@ -328,6 +328,8 @@ export default function HomeClient() {
   const [nutritionOpen, setNutritionOpen] = useState(false);
   const [nutritionLog, setNutritionLog] = useState({ proteinRating: "", foods: [] as string[], postMatch: "", quality: "" });
   const [hydrationOpen, setHydrationOpen] = useState(false);
+  const [showTasks, setShowTasks] = useState(false);
+  const [showWeekDetails, setShowWeekDetails] = useState(false);
   const [hydrationLog, setHydrationLog] = useState({ litres: "", timing: [] as string[], quality: "", urine: "" });
 
   useEffect(() => {
@@ -347,6 +349,14 @@ export default function HomeClient() {
         setWeekPlanOpen(true);
       }
     } catch {}
+
+    const handleOpenWeekPlan = () => {
+      setWeekPlanDays(gameDays);
+      setWeekPlanTimes(gameTimes);
+      setWeekPlanOpen(true);
+    };
+    window.addEventListener("open-week-plan", handleOpenWeekPlan);
+    return () => window.removeEventListener("open-week-plan", handleOpenWeekPlan);
   }, []);
 
   function toggleGameDay(ymd: string) {
@@ -450,299 +460,263 @@ export default function HomeClient() {
       </div>
       </div>
 
-
-      {/* Week at a glance */}
+      {/* Today / This Week toggle card */}
       <div className="px-5 md:px-12 pb-3 bg-[var(--bg)]">
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl px-4 pt-3 pb-4 shadow-sm">
-          <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-0.5">Your Week</p>
-          <p className="text-sm text-[var(--muted)] leading-snug mb-3">
-            {(() => {
-              const gameCount = gameDays.filter(ymd => {
-                const today = new Date();
-                const dow = (today.getDay() + 6) % 7;
-                const monday = new Date(today);
-                monday.setDate(today.getDate() - dow);
-                const sunday = new Date(monday);
-                sunday.setDate(monday.getDate() + 6);
-                const mondayYMD = `${monday.getFullYear()}-${String(monday.getMonth()+1).padStart(2,"0")}-${String(monday.getDate()).padStart(2,"0")}`;
-                const sundayYMD = `${sunday.getFullYear()}-${String(sunday.getMonth()+1).padStart(2,"0")}-${String(sunday.getDate()).padStart(2,"0")}`;
-                return ymd >= mondayYMD && ymd <= sundayYMD;
-              }).length;
-              const nextGame = getNextGameDay();
-              const parts = [];
-              if (gameCount > 0) parts.push(`${gameCount} game${gameCount > 1 ? "s" : ""} this week`);
-              if (nextGame) parts.push(`next game ${nextGame}`);
-              else parts.push("no upcoming games");
-              return parts.join(" · ");
-            })()}
-          </p>
-          <div className="grid grid-cols-7 gap-1.5 mb-3">
-            {(() => {
-              const today = new Date();
-              const dow = (today.getDay() + 6) % 7;
-              const monday = new Date(today);
-              monday.setDate(today.getDate() - dow);
-              const days = Array.from({ length: 7 }, (_, i) => {
-                const d = new Date(monday);
-                d.setDate(monday.getDate() + i);
-                const ymd = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-                const isToday = ymd === todayYMD;
-                const isGame = gameDays.includes(ymd);
-                const isRecovery = !isGame && gameDays.includes(offsetYMD(ymd, -1));
-                const isPast = ymd < todayYMD;
-                return { d, ymd, isToday, isGame, isRecovery, isPast };
-              });
-              return days.map(({ d, ymd, isToday, isGame, isRecovery, isPast }) => {
-                const dotColor = isGame ? "#16a34a" : isRecovery ? "#7c3aed" : "#cbd5e1";
-                const label = isGame ? "Game" : isRecovery ? "Rest" : "Train";
-                return (
-                  <div
-                    key={ymd}
-                    className="flex flex-col items-center rounded-xl py-2 gap-1"
-                    style={{
-                      background: isToday ? "#2653d4" : "var(--bg)",
-                      opacity: isPast ? 0.4 : 1,
-                    }}
-                  >
-                    <span className="text-[9px] font-bold uppercase leading-none" style={{ color: isToday ? "rgba(255,255,255,0.7)" : "var(--muted)" }}>
-                      {["M","T","W","T","F","S","S"][d.getDay() === 0 ? 6 : d.getDay() - 1]}
+        <div className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden">
+          <div className="grid grid-cols-2">
+            <button onClick={() => setActiveTab("today")} className="py-3 text-sm font-bold text-center border-r border-[var(--border)] active:opacity-70 transition-opacity" style={{ color: activeTab === "today" ? "var(--text)" : "var(--muted)" }}>Today</button>
+            <button onClick={() => setActiveTab("week")} className="py-3 text-sm font-bold text-center active:opacity-70 transition-opacity" style={{ color: activeTab === "week" ? "var(--text)" : "var(--muted)" }}>This Week</button>
+          </div>
+          <div className="border-t border-[var(--border)] px-4 py-4">
+            {activeTab === "today" && (
+              <>
+                {/* Today summary */}
+                <p className="text-4xl font-extrabold text-[var(--text)] leading-none mb-2" style={{ fontFamily: "var(--font-hanken)" }}>{todayDayType}</p>
+                {gameTimes[todayYMD] && (
+                  <div className="flex mb-3">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border border-[var(--border)] text-[var(--muted)]">
+                      {TIME_SLOTS.find(t => t.v === gameTimes[todayYMD])?.label}
                     </span>
-                    <span className="text-sm font-bold leading-none" style={{ color: isToday ? "#ffffff" : "var(--text)" }}>
-                      {d.getDate()}
-                    </span>
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ background: isToday ? "rgba(255,255,255,0.6)" : dotColor }} />
                   </div>
-                );
-              });
-            })()}
-          </div>
-        </div>
-      </div>
-
-      {/* Weekly digest */}
-      {digest && (
-        <div className="px-5 md:px-12 pb-3 bg-[var(--bg)]">
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl px-4 py-4 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)]">Weekly Summary</p>
-              <p className="text-xs text-[var(--muted)]">{digest.weekLabel}</p>
-            </div>
-
-            {/* Match record row */}
-            {digest.matches > 0 && (
-              <div className="grid grid-cols-4 gap-2 mb-3">
-                <div className="bg-[var(--bg)] rounded-xl py-2.5 flex flex-col items-center gap-0.5">
-                  <p className="text-xl font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>{digest.matches}</p>
-                  <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)]">Played</p>
-                </div>
-                <div className="bg-[var(--bg)] rounded-xl py-2.5 flex flex-col items-center gap-0.5">
-                  <p className="text-xl font-extrabold" style={{ fontFamily: "var(--font-hanken)", color: "#16a34a" }}>{digest.wins}</p>
-                  <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)]">Wins</p>
-                </div>
-                <div className="bg-[var(--bg)] rounded-xl py-2.5 flex flex-col items-center gap-0.5">
-                  <p className="text-xl font-extrabold" style={{ fontFamily: "var(--font-hanken)", color: "#dc2626" }}>{digest.losses}</p>
-                  <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)]">Losses</p>
-                </div>
-                <div className="bg-[var(--bg)] rounded-xl py-2.5 flex flex-col items-center gap-1">
-                  {digest.avgEnergy
-                    ? <EnergyIcon level={digest.avgEnergy} size={20} color="var(--text)" />
-                    : <span className="text-xl font-extrabold text-[var(--muted)]" style={{ fontFamily: "var(--font-hanken)" }}>—</span>
-                  }
-                  <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)]">Energy</p>
-                </div>
-              </div>
-            )}
-
-            {/* Strengths & work-on */}
-            {digest.topStrengths.length > 0 && (
-              <div className="flex items-start gap-2 mb-2">
-                <span className="text-xs font-bold mt-0.5" style={{ color: "#16a34a" }}>✓</span>
-                <p className="text-xs text-[var(--text)] leading-snug"><span className="font-bold">Strengths:</span> {digest.topStrengths.join(", ")}</p>
-              </div>
-            )}
-            {digest.topWorkOn.length > 0 && (
-              <div className="flex items-start gap-2 mb-2">
-                <span className="text-xs font-bold mt-0.5" style={{ color: "#2653d4" }}>↑</span>
-                <p className="text-xs text-[var(--text)] leading-snug"><span className="font-bold">Focus on:</span> {digest.topWorkOn.join(", ")}</p>
-              </div>
-            )}
-
-            {/* Hydration */}
-            {digest.avgHydrationL !== null && (
-              <div className="flex items-center gap-2 mt-1">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2C12 2 5 10 5 15a7 7 0 0 0 14 0c0-5-7-13-7-13z" />
-                </svg>
-                <p className="text-xs text-[var(--muted)]">Avg hydration: <span className="font-bold text-[var(--text)]">{digest.avgHydrationL}L/day</span></p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Summary card */}
-      <div className="px-5 md:px-12 pb-3 bg-[var(--bg)]">
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl px-4 py-4 shadow-sm">
-          <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-0.5">Today</p>
-          <div className="flex items-center gap-2 mb-2">
-            <p className="text-base font-bold text-[var(--text)]">{todayDayType}</p>
-            {gameTimes[todayYMD] && (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border border-[var(--border)] text-[var(--muted)]">
-                {TIME_SLOTS.find(t => t.v === gameTimes[todayYMD])?.label}
-              </span>
-            )}
-          </div>
-          <p className="text-sm text-[var(--muted)] leading-snug">{getSummary()}</p>
-          {lastReview && (
-            <div className="mt-3 pt-3 border-t border-[var(--border)]">
-              <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)] mb-3">Last Match</p>
-
-              {/* Stat tiles */}
-              <div className="grid grid-cols-4 gap-2 mb-3">
-                <div className="bg-[var(--bg)] rounded-xl py-2.5 flex flex-col items-center gap-1">
-                  <p className="text-sm font-extrabold" style={{ fontFamily: "var(--font-hanken)", color: lastReview.result === "win" ? "#16a34a" : lastReview.result === "loss" ? "#dc2626" : "var(--text)" }}>
-                    {lastReview.result === "win" ? "W" : lastReview.result === "loss" ? "L" : "—"}
-                  </p>
-                  <p className="text-[9px] font-bold tracking-widest uppercase text-[var(--muted)]">Result</p>
-                </div>
-                <div className="bg-[var(--bg)] rounded-xl py-2.5 flex flex-col items-center gap-1">
-                  {lastReview.feeling
-                    ? <FaceIcon mood={lastReview.feeling as "bad"|"ok"|"great"} size={18} color="var(--text)" />
-                    : <span className="text-sm font-bold text-[var(--muted)]">—</span>}
-                  <p className="text-[9px] font-bold tracking-widest uppercase text-[var(--muted)]">Feel</p>
-                </div>
-                <div className="bg-[var(--bg)] rounded-xl py-2.5 flex flex-col items-center gap-1">
-                  {lastReview.energy
-                    ? <EnergyIcon level={lastReview.energy as "low"|"mid"|"high"} size={18} color="var(--text)" />
-                    : <span className="text-sm font-bold text-[var(--muted)]">—</span>}
-                  <p className="text-[9px] font-bold tracking-widest uppercase text-[var(--muted)]">Energy</p>
-                </div>
-                <div className="bg-[var(--bg)] rounded-xl py-2.5 flex flex-col items-center gap-1">
-                  <p className="text-sm font-extrabold" style={{ fontFamily: "var(--font-hanken)", color: lastReview.injury === "yes" ? "#dc2626" : "#16a34a" }}>
-                    {lastReview.injury === "yes" ? "!" : lastReview.injury === "no" ? "✓" : "—"}
-                  </p>
-                  <p className="text-[9px] font-bold tracking-widest uppercase text-[var(--muted)]">Injury</p>
-                </div>
-              </div>
-
-              {lastReview.wellDone.length > 0 && (
-                <div className="flex items-start gap-2 mb-1.5">
-                  <span className="text-xs font-bold mt-0.5 shrink-0" style={{ color: "#16a34a" }}>✓</span>
-                  <p className="text-xs text-[var(--text)]"><span className="font-bold">Strengths:</span> {lastReview.wellDone.join(", ")}</p>
-                </div>
-              )}
-              {lastReview.improved.length > 0 && (
-                <div className="flex items-start gap-2">
-                  <span className="text-xs font-bold mt-0.5 shrink-0" style={{ color: "#2653d4" }}>↑</span>
-                  <p className="text-xs text-[var(--text)]"><span className="font-bold">Focus on:</span> {lastReview.improved.join(", ")}</p>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Hydration meter */}
-      <div className="px-5 md:px-12 pb-3 bg-[var(--bg)]">
-        <button onClick={() => setHydrationOpen(true)} className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl px-4 py-4 shadow-sm text-left active:opacity-80 transition-opacity">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-0.5">Hydration</p>
-              <p className="text-base font-bold text-[var(--text)]">1.8L <span className="text-sm font-normal text-[var(--muted)]">/ 3.5L</span></p>
-            </div>
-            <span className="text-2xl font-extrabold" style={{ color: "#2653d4", fontFamily: "var(--font-hanken)" }}>51%</span>
-          </div>
-          <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
-            <div className="h-full rounded-full transition-all" style={{ width: "51%", background: "#2653d4" }} />
-          </div>
-          <div className="flex justify-between mt-2">
-            <p className="text-xs text-[var(--muted)]">Target: 3.5L today</p>
-            <p className="text-xs font-bold" style={{ color: "#2653d4" }}>+1.7L to go</p>
-          </div>
-        </button>
-      </div>
-
-      {/* Today's checklist */}
-      {(() => {
-        const reviewedToday = lastReview?.ts.slice(0, 10) === todayYMD;
-        const recs = getRecommendations(selectedYMD, gameDays);
-        const proteinIdx = recs.findIndex((r) => r.title === "Protein Recovery");
-        const doneRecsList = recs.map((rec, i) => ({ rec, i })).filter(({ i }) => doneRecs.has(i));
-        const hasDone = reviewedToday || doneRecsList.length > 0;
-
-        const reviewCard = (done: boolean) => (
-          <button
-            onClick={() => setMatchReviewOpen(true)}
-            className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl px-4 py-4 flex items-center gap-4 active:opacity-70 transition-opacity text-left"
-            style={{ opacity: done ? 0.55 : 1 }}
-          >
-            <div className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: done ? "#16a34a" : "#2653d4" }}>
-              {done
-                ? <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20,6 9,17 4,12" /></svg>
-                : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="16" y1="13" x2="8" y2="13" />
-                    <line x1="16" y1="17" x2="8" y2="17" />
-                    <line x1="10" y1="9" x2="8" y2="9" />
+                )}
+                <p className="text-sm text-[var(--muted)] leading-snug">{getSummary()}</p>
+                <button onClick={() => setShowTasks(o => !o)} className="flex items-center gap-1 mt-2 active:opacity-70 transition-opacity">
+                  <p className="text-sm font-bold" style={{ color: "#2653d4" }}>{showTasks ? "Hide Today's Schedule" : "Show Today's Schedule"}</p>
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: showTasks ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                    <polyline points="2,4 6,8 10,4" />
                   </svg>
-              }
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold leading-snug" style={{ color: done ? "var(--muted)" : "var(--text)", textDecoration: done ? "line-through" : "none" }}>Review Your Last Match</p>
-              <p className="text-xs text-[var(--muted)] leading-snug mt-0.5">{done ? "Tap to update" : "Rate performance while it's still fresh"}</p>
-            </div>
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-              <polyline points="3,1 8,5 3,9" />
-            </svg>
-          </button>
-        );
-
-        const allDone = reviewedToday && doneRecs.size >= recs.length;
-
-        return (
-          <div className="px-5 md:px-12 pb-3 bg-[var(--bg)]">
-            <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-2">Today's Checklist</p>
-
-            {allDone ? (
-              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl px-4 py-8 flex flex-col items-center justify-center gap-2 shadow-sm relative">
-                <ThumbsUpIcon size={40} color="var(--text)" />
-                <p className="text-base font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>All done for today</p>
-                <p className="text-xs text-[var(--muted)]">Great work — rest up and come back tomorrow</p>
-                <button
-                  onClick={() => setDoneRecs(new Set())}
-                  className="mt-2 px-4 py-1.5 rounded-full border border-[var(--border)] text-[10px] font-bold tracking-widest uppercase text-[var(--muted)] bg-[var(--bg)] active:scale-95 transition-transform"
-                >
-                  Edit
                 </button>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-3">
-                {!reviewedToday && reviewCard(false)}
-                <Recommendations
-                  selectedYMD={selectedYMD}
-                  gameDays={gameDays}
-                  doneItems={doneRecs}
-                  onToggle={toggleRec}
-                  cardTaps={{ "Protein Recovery": () => setNutritionOpen(true) }}
-                />
-              </div>
+
+                {showTasks && (
+                  <div className="mt-4 flex flex-col gap-3">
+                    {/* Hydration */}
+                    <button onClick={() => setHydrationOpen(true)} className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-2xl px-4 py-4 text-left active:opacity-80 transition-opacity">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-0.5">Hydration</p>
+                          <p className="text-base font-bold text-[var(--text)]">1.8L <span className="text-sm font-normal text-[var(--muted)]">/ 3.5L</span></p>
+                        </div>
+                        <span className="text-2xl font-extrabold" style={{ color: "#2653d4", fontFamily: "var(--font-hanken)" }}>51%</span>
+                      </div>
+                      <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
+                        <div className="h-full rounded-full transition-all" style={{ width: "51%", background: "#2653d4" }} />
+                      </div>
+                      <div className="flex justify-between mt-2">
+                        <p className="text-xs text-[var(--muted)]">Target: 3.5L today</p>
+                        <p className="text-xs font-bold" style={{ color: "#2653d4" }}>+1.7L to go</p>
+                      </div>
+                    </button>
+
+                    {/* Checklist */}
+                    {(() => {
+                      const reviewedToday = lastReview?.ts.slice(0, 10) === todayYMD;
+                      const recs = getRecommendations(selectedYMD, gameDays);
+                      const doneRecsList = recs.map((rec, i) => ({ rec, i })).filter(({ i }) => doneRecs.has(i));
+                      const hasDone = reviewedToday || doneRecsList.length > 0;
+                      const reviewCard = (done: boolean) => (
+                        <button onClick={() => setMatchReviewOpen(true)} className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-2xl px-4 py-4 flex items-center gap-4 active:opacity-70 transition-opacity text-left" style={{ opacity: done ? 0.55 : 1 }}>
+                          <div className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: done ? "#16a34a" : "#2653d4" }}>
+                            {done ? <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20,6 9,17 4,12" /></svg>
+                              : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><line x1="10" y1="9" x2="8" y2="9" /></svg>}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold leading-snug" style={{ color: done ? "var(--muted)" : "var(--text)", textDecoration: done ? "line-through" : "none" }}>Review Your Last Match</p>
+                            <p className="text-xs text-[var(--muted)] leading-snug mt-0.5">{done ? "Tap to update" : "Rate performance while it's still fresh"}</p>
+                          </div>
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0"><polyline points="3,1 8,5 3,9" /></svg>
+                        </button>
+                      );
+                      const allDone = reviewedToday && doneRecs.size >= recs.length;
+                      return (
+                        <>
+                          {allDone ? (
+                            <div className="bg-[var(--bg)] border border-[var(--border)] rounded-2xl px-4 py-8 flex flex-col items-center justify-center gap-2">
+                              <ThumbsUpIcon size={40} color="var(--text)" />
+                              <p className="text-base font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>All done for today</p>
+                              <p className="text-xs text-[var(--muted)]">Great work — rest up and come back tomorrow</p>
+                              <button onClick={() => setDoneRecs(new Set())} className="mt-2 px-4 py-1.5 rounded-full border border-[var(--border)] text-[10px] font-bold tracking-widest uppercase text-[var(--muted)] bg-[var(--surface)] active:scale-95 transition-transform">Edit</button>
+                            </div>
+                          ) : (
+                            <>
+                              {!reviewedToday && reviewCard(false)}
+                              <Recommendations selectedYMD={selectedYMD} gameDays={gameDays} doneItems={doneRecs} onToggle={toggleRec} cardTaps={{ "Protein Recovery": () => setNutritionOpen(true) }} />
+                            </>
+                          )}
+                          {hasDone && !allDone && (
+                            <div className="mt-1">
+                              <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-2">Done</p>
+                              <div className="flex flex-col gap-3">
+                                {doneRecsList.map(({ rec, i }) => <RecCard key={i} rec={rec} isDone onToggle={() => toggleRec(i)} />)}
+                                {reviewedToday && reviewCard(true)}
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                )}
+              </>
             )}
 
-            {hasDone && !allDone && (
-              <div className="mt-4">
-                <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-2">Done</p>
-                <div className="flex flex-col gap-3">
-                  {doneRecsList.map(({ rec, i }) => (
-                    <RecCard key={i} rec={rec} isDone onToggle={() => toggleRec(i)} />
-                  ))}
-                  {reviewedToday && reviewCard(true)}
+            {activeTab === "week" && (
+              <>
+                <div className="flex items-baseline justify-between mb-3">
+                  <p className="text-4xl font-extrabold text-[var(--text)] leading-none" style={{ fontFamily: "var(--font-hanken)" }}>Your Week</p>
+                  {digest && <p className="text-xs text-[var(--muted)]">({digest.weekLabel})</p>}
                 </div>
-              </div>
+                <p className="text-sm text-[var(--muted)] leading-snug mb-2">
+                  {(() => {
+                    const gameCount = gameDays.filter(ymd => {
+                      const today = new Date();
+                      const dow = (today.getDay() + 6) % 7;
+                      const monday = new Date(today);
+                      monday.setDate(today.getDate() - dow);
+                      const sunday = new Date(monday);
+                      sunday.setDate(monday.getDate() + 6);
+                      const mondayYMD = `${monday.getFullYear()}-${String(monday.getMonth()+1).padStart(2,"0")}-${String(monday.getDate()).padStart(2,"0")}`;
+                      const sundayYMD = `${sunday.getFullYear()}-${String(sunday.getMonth()+1).padStart(2,"0")}-${String(sunday.getDate()).padStart(2,"0")}`;
+                      return ymd >= mondayYMD && ymd <= sundayYMD;
+                    }).length;
+                    const nextGame = getNextGameDay();
+                    const parts = [];
+                    if (gameCount > 0) parts.push(`${gameCount} game${gameCount > 1 ? "s" : ""} this week`);
+                    if (nextGame) parts.push(`next game ${nextGame}`);
+                    else parts.push("no upcoming games");
+                    return parts.join(" · ");
+                  })()}
+                </p>
+                <button onClick={() => setShowWeekDetails(o => !o)} className="flex items-center gap-1 mb-3 active:opacity-70 transition-opacity">
+                  <p className="text-sm font-bold" style={{ color: "#2653d4" }}>{showWeekDetails ? "Hide Details" : "Show Details"}</p>
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: showWeekDetails ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                    <polyline points="2,4 6,8 10,4" />
+                  </svg>
+                </button>
+                {showWeekDetails && <>
+                {/* Horizontal grid */}
+                {(() => {
+                  const today = new Date();
+                  const dow = (today.getDay() + 6) % 7;
+                  const monday = new Date(today);
+                  monday.setDate(today.getDate() - dow);
+                  const days = Array.from({ length: 7 }, (_, i) => {
+                    const d = new Date(monday);
+                    d.setDate(monday.getDate() + i);
+                    const ymd = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+                    const isToday = ymd === todayYMD;
+                    const isGame = gameDays.includes(ymd);
+                    const isRecovery = !isGame && gameDays.includes(offsetYMD(ymd, -1));
+                    const isPast = ymd < todayYMD;
+                    const label = isGame ? "Game" : isRecovery ? "Rest" : "Train";
+                    const labelColor = isGame ? "#16a34a" : isRecovery ? "#7c3aed" : "#2653d4";
+                    const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+                    const dayName = dayNames[d.getDay() === 0 ? 6 : d.getDay() - 1];
+                    return { d, ymd, isToday, isGame, isRecovery, isPast, label, labelColor, dayName };
+                  });
+                  return (
+                    <div className="rounded-xl overflow-hidden border border-[var(--border)]">
+                      {/* Row 1: day name + date */}
+                      <div className="grid grid-cols-7">
+                        {days.map(({ ymd, isToday, isPast, d, dayName }, idx) => (
+                          <div
+                            key={ymd}
+                            className="flex flex-col items-center justify-center py-2.5 gap-1"
+                            style={{
+                              borderLeft: idx > 0 ? "1px solid var(--border)" : "none",
+                              boxShadow: isToday ? "inset 0 0 0 2px #2653d4" : "none",
+                              opacity: isPast ? 0.25 : 1,
+                            }}
+                          >
+                            <span className="text-[10px] font-bold" style={{ color: isToday ? "#2653d4" : "var(--muted)" }}>{dayName}</span>
+                            <span className="text-sm font-bold leading-none" style={{ color: isToday ? "#2653d4" : "var(--text)" }}>{d.getDate()}</span>
+                          </div>
+                        ))}
+                      </div>
+                      {/* Row 2: type of day */}
+                      <div className="grid grid-cols-7 border-t border-[var(--border)]">
+                        {days.map(({ ymd, isToday, isPast, label, labelColor }, idx) => (
+                          <div
+                            key={ymd}
+                            className="flex items-center justify-center py-2"
+                            style={{
+                              borderLeft: idx > 0 ? "1px solid var(--border)" : "none",
+                              background: isToday ? "#f9f9f9" : "transparent",
+                              opacity: isPast ? 0.25 : 1,
+                            }}
+                          >
+                            <span className="text-base font-extrabold" style={{ color: labelColor, fontFamily: "var(--font-hanken)" }}>{label[0]}</span>
+                          </div>
+                        ))}
+                      </div>
+                      {/* Key */}
+                      <div className="flex items-center gap-3 px-3 py-2 border-t border-[var(--border)]">
+                        <span className="text-[10px] font-bold" style={{ color: "#16a34a" }}>G</span>
+                        <span className="text-[10px] text-[var(--muted)]">Game day</span>
+                        <span className="text-[10px] font-bold ml-2" style={{ color: "#7c3aed" }}>R</span>
+                        <span className="text-[10px] text-[var(--muted)]">Rest</span>
+                        <span className="text-[10px] font-bold ml-2" style={{ color: "#2653d4" }}>T</span>
+                        <span className="text-[10px] text-[var(--muted)]">Train</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Weekly digest inline */}
+                {digest && (
+                  <div className="mt-3 pt-3 border-t border-[var(--border)]">
+                    <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-3">Recap</p>
+                    {digest.matches > 0 && (
+                      <div className="grid grid-cols-4 gap-2 mb-3">
+                        <div className="bg-[var(--bg)] rounded-xl py-2.5 flex flex-col items-center gap-0.5">
+                          <p className="text-xl font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>{digest.matches}</p>
+                          <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)]">Played</p>
+                        </div>
+                        <div className="bg-[var(--bg)] rounded-xl py-2.5 flex flex-col items-center gap-0.5">
+                          <p className="text-xl font-extrabold" style={{ fontFamily: "var(--font-hanken)", color: "#16a34a" }}>{digest.wins}</p>
+                          <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)]">Wins</p>
+                        </div>
+                        <div className="bg-[var(--bg)] rounded-xl py-2.5 flex flex-col items-center gap-0.5">
+                          <p className="text-xl font-extrabold" style={{ fontFamily: "var(--font-hanken)", color: "#dc2626" }}>{digest.losses}</p>
+                          <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)]">Losses</p>
+                        </div>
+                        <div className="bg-[var(--bg)] rounded-xl py-2.5 flex flex-col items-center gap-1">
+                          {digest.avgEnergy
+                            ? <EnergyIcon level={digest.avgEnergy} size={20} color="var(--text)" />
+                            : <span className="text-xl font-extrabold text-[var(--muted)]" style={{ fontFamily: "var(--font-hanken)" }}>—</span>
+                          }
+                          <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)]">Energy</p>
+                        </div>
+                      </div>
+                    )}
+                    {digest.topStrengths.length > 0 && (
+                      <div className="flex items-start gap-2 mb-2">
+                        <span className="text-xs font-bold mt-0.5" style={{ color: "#16a34a" }}>✓</span>
+                        <p className="text-xs text-[var(--text)] leading-snug"><span className="font-bold">Strengths:</span> {digest.topStrengths.join(", ")}</p>
+                      </div>
+                    )}
+                    {digest.topWorkOn.length > 0 && (
+                      <div className="flex items-start gap-2 mb-2">
+                        <span className="text-xs font-bold mt-0.5" style={{ color: "#2653d4" }}>↑</span>
+                        <p className="text-xs text-[var(--text)] leading-snug"><span className="font-bold">Focus on:</span> {digest.topWorkOn.join(", ")}</p>
+                      </div>
+                    )}
+                    {digest.avgHydrationL !== null && (
+                      <div className="flex items-center gap-2 mt-1">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 2C12 2 5 10 5 15a7 7 0 0 0 14 0c0-5-7-13-7-13z" />
+                        </svg>
+                        <p className="text-xs text-[var(--muted)]">Avg hydration: <span className="font-bold text-[var(--text)]">{digest.avgHydrationL}L/day</span></p>
+                      </div>
+                    )}
+                  </div>
+                )}
+                </>}
+              </>
             )}
           </div>
-        );
-      })()}
+        </div>
+      </div>
+
 
 
       {/* Week Plan Modal */}
@@ -1240,48 +1214,6 @@ export default function HomeClient() {
         </div>
       )}
 
-      {/* FAB modal */}
-      {fabOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-end justify-center pb-32" onClick={() => setFabOpen(false)}>
-          <div className="w-full max-w-[640px] bg-white rounded-2xl shadow-2xl mx-5 overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            {[
-              { label: "Things to Do Today", action: null, icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg> },
-              { label: "Things to Do This Week", action: null, icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /><polyline points="9,16 11,18 15,14" /></svg> },
-              { label: "Add Data", action: null, icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg> },
-              { label: "Take Quiz", action: null, icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 8v4" /><circle cx="12" cy="16" r="0.5" fill="currentColor" /></svg> },
-              {
-                label: "Plan this week",
-                action: () => { setWeekPlanDays(gameDays); setWeekPlanTimes(gameTimes); setFabOpen(false); setWeekPlanOpen(true); },
-                icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /><line x1="12" y1="14" x2="12" y2="18" /><line x1="10" y1="16" x2="14" y2="16" /></svg>,
-              },
-            ].map((item, i, arr) => (
-              <button
-                key={item.label}
-                onClick={item.action ?? undefined}
-                className="w-full flex items-center gap-4 px-6 py-5 text-base font-bold text-[var(--text)] active:bg-[var(--bg)] transition-colors"
-                style={{ borderBottom: i < arr.length - 1 ? "1px solid var(--border)" : "none" }}
-              >
-                <span style={{ color: "#2653d4" }}>{item.icon}</span>
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* FAB */}
-      <button
-        onClick={() => setFabOpen((o) => !o)}
-        className="fixed bottom-24 right-5 md:bottom-10 md:right-10 w-14 h-14 rounded-full shadow-xl flex items-center justify-center active:scale-90 transition-transform z-50"
-        style={{ background: "var(--lime)" }}
-        aria-label="Add"
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2.5" strokeLinecap="round"
-          style={{ transform: fabOpen ? "rotate(45deg)" : "none", transition: "transform 0.2s" }}>
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-      </button>
     </div>
   );
 }
