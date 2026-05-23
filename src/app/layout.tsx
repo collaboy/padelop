@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${geist.variable} ${hanken.variable} h-full`}>
-      <body className="flex flex-col min-h-full bg-[var(--bg)]">
+      <body className="flex flex-col min-h-full bg-[var(--bg)]" suppressHydrationWarning>
         <Nav />
         <SwipeNav>
           <main className="flex-1 pb-24">

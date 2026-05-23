@@ -417,8 +417,8 @@ export default function HomeClient() {
   const [nutritionOpen, setNutritionOpen] = useState(false);
   const [nutritionLog, setNutritionLog] = useState({ proteinRating: "", foods: [] as string[], postMatch: "", quality: "" });
   const [showTasks, setShowTasks] = useState(false);
-  const [showWeekDetails, setShowWeekDetails] = useState(false);
   const [scheduleModal, setScheduleModal] = useState<{ title: string; subtitle?: string; category: ScheduleBlock["category"]; detail: string } | null>(null);
+  const [categoryModal, setCategoryModal] = useState<{ label: string; pct: number; color: string; subtitle: string; detail: string } | null>(null);
   const [gameDetails, setGameDetails] = useState<{ time: string; location: string; court: string; partner: string }>(() => {
     try { const s = localStorage.getItem("padelop:game-details"); if (s) return JSON.parse(s); } catch {}
     return { time: "21:00", location: "Di Cagno Sports Club", court: "6", partner: "Bobby M" };
@@ -730,41 +730,198 @@ export default function HomeClient() {
     );
   }
 
+  const matchReadyHeading = pct >= 80 ? "Great Work!" : pct >= 65 ? "Looking Good!" : pct >= 50 ? "Keep Going!" : "Room to Grow";
+  const matchReadySubtitle = pct >= 80 ? "You're on track for a strong performance." : pct >= 65 ? "A few tweaks and you'll be match-ready." : pct >= 50 ? "Focus on recovery and nutrition today." : "Build your base — small habits compound fast.";
+  const ringR = 52;
+  const ringC = 2 * Math.PI * ringR;
+
   return (
     <div className="pb-8">
       <style>{`@keyframes colonBlink{0%,49%{opacity:1}50%,100%{opacity:0}}`}</style>
-      {/* Optimization score card */}
+
+      {/* Match Ready hero card */}
       <div className="pt-[80px] px-5 md:px-12 pb-4 bg-[var(--bg)]">
-      <div className="w-full bg-[var(--surface)] flex flex-col border border-[var(--border)] rounded-2xl shadow-sm px-5 pt-3 pb-4">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] text-left leading-tight">Padel<br />Optimization<br />Score</p>
-          <span className="text-3xl font-extrabold leading-none" style={{ color: "var(--green)", fontFamily: "var(--font-hanken)" }}>{pct}<span className="text-base font-bold text-[var(--muted)]">/100</span></span>
-        </div>
-        <div className="w-full mt-1 mb-6 relative">
-          <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: "linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e)" }} />
-          <div className="absolute" style={{ left: `calc(${pct}% - 5px)`, top: "24px" }}>
-            <svg width="10" height="7" viewBox="0 0 10 7" fill="none">
-              <polygon points="5,0 0,7 10,7" fill="#171c1f" />
+        <div className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm px-4 py-3 flex items-center gap-4">
+          {/* Ring */}
+          <div className="flex-shrink-0 relative" style={{ width: 128, height: 128 }}>
+            <svg width="128" height="128" viewBox="0 0 128 128">
+              <circle cx="64" cy="64" r={ringR} fill="none" stroke="var(--border)" strokeWidth="8" />
+              <circle
+                cx="64" cy="64" r={ringR} fill="none"
+                stroke="#2653d4" strokeWidth="8" strokeLinecap="round"
+                strokeDasharray={ringC}
+                strokeDashoffset={ringC * (1 - pct / 100)}
+                style={{ transform: "rotate(-90deg)", transformOrigin: "64px 64px", transition: "stroke-dashoffset 0.6s ease" }}
+              />
             </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
+              <p className="text-[7px] font-bold tracking-wide uppercase text-[var(--muted)] leading-none">MATCH READY</p>
+              <p className="text-3xl font-extrabold leading-none text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>{pct}<span className="text-base">%</span></p>
+              <p className="text-[7px] font-bold tracking-wide uppercase text-[var(--muted)] leading-none">Optimizer Score</p>
+            </div>
+          </div>
+
+          {/* Message */}
+          <div className="flex-1 flex flex-col">
+            <p className="text-2xl font-extrabold text-[var(--text)] leading-tight mb-1" style={{ fontFamily: "var(--font-hanken)" }}>{matchReadyHeading}</p>
+            <p className="text-xs text-[var(--muted)] leading-snug mb-4">{matchReadySubtitle}</p>
+            <Link href="/optimizer" className="self-start flex items-center gap-1 px-3 py-1 rounded-full border border-[var(--border)] text-[9px] font-bold tracking-widest uppercase active:scale-95 transition-transform" style={{ background: "var(--bg)", color: "var(--muted)" }}>
+              Improve Score
+              <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3,1 8,5 3,9" />
+              </svg>
+            </Link>
           </div>
         </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-bold text-[var(--text)] leading-none">{tip.title}</p>
-            <svg width="14" height="9" viewBox="0 0 16 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="0" y1="5" x2="13" y2="5" /><polyline points="9,1 13,5 9,9" />
-            </svg>
-            <span className="text-sm font-bold leading-none" style={{ color: "var(--green)" }}>+{tip.gain}%</span>
+      </div>
+
+      {/* Category bars card */}
+      {(() => {
+        const hydrationPct = lastHydration
+          ? ({ "<1L": 20, "1–1.5L": 35, "1.5–2L": 50, "2–2.5L": 65, "2.5–3L": 80, "3L+": 100 } as Record<string, number>)[lastHydration.litres] ?? 50
+          : 50;
+        const energyPct = lastReview
+          ? (lastReview.energy === "high" ? 85 : lastReview.energy === "low" ? 35 : 60)
+          : 60;
+        const bars = [
+          {
+            label: "Recovery", pct: scores.recovery, color: "#7c3aed",
+            subtitle: "Post-session repair & rest",
+            detail: "Recovery reflects how well your body is bouncing back between sessions. It's shaped by your rest days, recent match load, and how you rated your physical feeling after games.\n\nAim for at least one full rest day between intense sessions and prioritise 7–9 hours of sleep. Logging your match reviews regularly helps keep this score accurate.",
+            icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>,
+          },
+          {
+            label: "Hydration", pct: hydrationPct, color: "#2653d4",
+            subtitle: "Daily water intake",
+            detail: "Hydration is based on your most recent intake log. The target is 3.5L on training and match days — more if conditions are hot or sessions are long.\n\nEven mild dehydration (1–2%) measurably reduces reaction time and coordination. Log your intake daily so this score stays current.",
+            icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C12 2 5 10 5 15a7 7 0 0 0 14 0c0-5-7-13-7-13z" /></svg>,
+          },
+          {
+            label: "Energy", pct: energyPct, color: "#ea580c",
+            subtitle: "Training & match readiness",
+            detail: "Energy is derived from how you've rated your energy levels in recent match reviews and your nutrition quality. High energy scores reflect consistent fuelling, good sleep, and manageable training loads.\n\nIf your score is low, check your pre-match meal timing, carbohydrate intake, and whether you're accumulating fatigue across the week.",
+            icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="13,2 13,10 19,10 11,22 11,14 5,14 13,2" /></svg>,
+          },
+          {
+            label: "Mobility", pct: 70, color: "#16a34a",
+            subtitle: "Flexibility & movement quality",
+            detail: "Mobility covers how freely and efficiently you move on court — hip rotation, shoulder range, and ankle stability all feed into padel performance.\n\nSpend 10 minutes after each session on dynamic stretching: hip flexors, thoracic rotation, and calf raises. Regular mobility work reduces injury risk and improves your ability to reach wide balls and change direction quickly.",
+            icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="5" r="2" /><path d="M12 7v6" /><path d="M9 10l-3 5h12l-3-5" /><path d="M9 22v-4" /><path d="M15 22v-4" /></svg>,
+          },
+        ];
+        return (
+          <div className="px-5 md:px-12 pb-4 bg-[var(--bg)]">
+            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden">
+              <div className="flex">
+                {bars.map(({ label, pct: p, color, icon, subtitle, detail }, i) => {
+                  const rating = p >= 85 ? "Optimal" : p >= 65 ? "Good" : p >= 45 ? "Improve" : "Low";
+                  const ratingColor = p >= 85 ? "#16a34a" : p >= 65 ? "#16a34a" : p >= 45 ? "#ea580c" : "#dc2626";
+                  const r = 24, sz = 56, cx = 28;
+                  const fillH = 2 * r * p / 100;
+                  const fillY = cx + r - fillH;
+                  return (
+                    <button key={label} onClick={() => setCategoryModal({ label, pct: p, color, subtitle, detail })} className="flex-1 min-w-0 px-2 py-3 sm:px-4 sm:py-4 flex flex-col items-center gap-1 bg-white active:opacity-70 transition-opacity" style={{ borderLeft: i > 0 ? "1px solid #eef0f2" : "none" }}>
+                      <div style={{ color }} className="[&>svg]:w-3.5 [&>svg]:h-3.5 sm:[&>svg]:w-5 sm:[&>svg]:h-5">{icon}</div>
+                      <svg width={sz} height={sz} viewBox={`0 0 ${sz} ${sz}`}>
+                        <defs>
+                          <clipPath id={`fc-${label}`}>
+                            <circle cx={cx} cy={cx} r={r} />
+                          </clipPath>
+                        </defs>
+                        <circle cx={cx} cy={cx} r={r} fill="var(--border)" />
+                        <rect x="0" y={fillY} width={sz} height={fillH} fill={color} clipPath={`url(#fc-${label})`} />
+                      </svg>
+                      <p className="text-[9px] sm:text-[11px] font-bold text-[var(--text)] leading-tight text-center truncate w-full">{label}</p>
+                      <p className="text-xs font-extrabold leading-none text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>{p}%</p>
+                      <p className="text-[8px] sm:text-[10px] font-bold tracking-wide uppercase leading-none" style={{ color: ratingColor }}>{rating}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
-          <Link href="/optimizer" className="px-4 py-1.5 rounded-full border border-[var(--border)] text-[10px] font-bold tracking-widest uppercase text-[var(--text)] bg-white shadow-sm active:scale-95 transition-transform flex items-center gap-1.5">
-            Improve
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="3,1 8,5 3,9" />
-            </svg>
-          </Link>
-        </div>
-      </div>
-      </div>
+        );
+      })()}
+
+      {/* Next Match card */}
+      {(() => {
+        let nextYMD: string | null = null;
+        for (let i = 0; i <= 30; i++) {
+          const ymd = offsetYMD(todayYMD, i);
+          if (gameDays.includes(ymd)) { nextYMD = ymd; break; }
+        }
+        if (!nextYMD) nextYMD = todayYMD;
+        const isToday = nextYMD === todayYMD;
+        const d = new Date(nextYMD);
+        const dateLabel = isToday ? "Today" : d.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
+        return (
+          <div className="px-5 md:px-12 pb-3 bg-[var(--bg)]">
+            <div className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm px-4 py-4 flex items-center gap-4 relative overflow-hidden">
+              {/* Greyscale racket + ball background, fading left */}
+              <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+                <svg className="absolute right-0 top-0 h-full" style={{ width: "72%" }} viewBox="0 0 200 90" fill="none" preserveAspectRatio="xMaxYMid meet" opacity="0.13">
+                  {/* Racket — rotated -22deg around grip base */}
+                  <g transform="rotate(-22, 148, 72)">
+                    {/* Outer frame */}
+                    <rect x="110" y="4" width="76" height="82" rx="20" fill="#111" />
+                    {/* Inner hitting surface */}
+                    <rect x="118" y="12" width="60" height="66" rx="14" fill="white" />
+                    {/* Hole grid 3×4 */}
+                    <circle cx="131" cy="25" r="4.5" fill="#111" />
+                    <circle cx="148" cy="25" r="4.5" fill="#111" />
+                    <circle cx="165" cy="25" r="4.5" fill="#111" />
+                    <circle cx="131" cy="40" r="4.5" fill="#111" />
+                    <circle cx="148" cy="40" r="4.5" fill="#111" />
+                    <circle cx="165" cy="40" r="4.5" fill="#111" />
+                    <circle cx="131" cy="55" r="4.5" fill="#111" />
+                    <circle cx="148" cy="55" r="4.5" fill="#111" />
+                    <circle cx="165" cy="55" r="4.5" fill="#111" />
+                    <circle cx="131" cy="70" r="4.5" fill="#111" />
+                    <circle cx="148" cy="70" r="4.5" fill="#111" />
+                    <circle cx="165" cy="70" r="4.5" fill="#111" />
+                    {/* Throat taper */}
+                    <path d="M132 86 Q148 80 164 86 L164 88 Q148 96 132 88 Z" fill="#111" />
+                    {/* Handle/grip */}
+                    <rect x="138" y="86" width="20" height="26" rx="5" fill="#111" />
+                    {/* Grip wrap lines */}
+                    <line x1="138" y1="94" x2="158" y2="94" stroke="white" strokeWidth="1.5" />
+                    <line x1="138" y1="102" x2="158" y2="102" stroke="white" strokeWidth="1.5" />
+                  </g>
+                  {/* Ball */}
+                  <circle cx="44" cy="46" r="26" fill="#111" />
+                  {/* Ball seam curves */}
+                  <path d="M24 32 C32 22, 56 22, 64 32" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                  <path d="M24 60 C32 70, 56 70, 64 60" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                </svg>
+                <div className="absolute inset-0 rounded-2xl" style={{ background: "linear-gradient(to right, var(--surface) 28%, transparent 72%)" }} />
+              </div>
+              <div className="flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center relative" style={{ background: "#2653d4" }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="2" width="18" height="20" rx="1" />
+                  <line x1="3" y1="12" x2="21" y2="12" />
+                  <line x1="12" y1="5" x2="12" y2="12" />
+                  <line x1="12" y1="12" x2="12" y2="19" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0 relative">
+                <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)] mb-0.5">Next Match</p>
+                <p className="text-sm font-extrabold text-[var(--text)] leading-tight" style={{ fontFamily: "var(--font-hanken)" }}>
+                  {dateLabel}{gameDetails.time ? ` · ${gameDetails.time}` : ""}
+                </p>
+                <div className="flex items-center gap-1 mt-1">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--muted)] flex-shrink-0">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
+                  </svg>
+                  <p className="text-xs text-[var(--muted)] truncate">{gameDetails.location || "—"}</p>
+                </div>
+              </div>
+              <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 relative text-[var(--muted)]">
+                <polyline points="1,1 6,6 1,11" />
+              </svg>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Today / This Week toggle card */}
       <div className="px-5 md:px-12 pb-3 bg-[var(--bg)]">
@@ -778,7 +935,7 @@ export default function HomeClient() {
                 <button
                   className="absolute top-0 left-full pl-3 text-2xl font-extrabold whitespace-nowrap"
                   style={{ fontFamily: "var(--font-hanken)", color: "var(--text)", opacity: 0.18, WebkitMaskImage: "linear-gradient(to right, black 0%, transparent 65%)", maskImage: "linear-gradient(to right, black 0%, transparent 65%)" }}
-                  onClick={() => { if (activeTab === "today") { setActiveTab("week"); setShowWeekDetails(true); } else { setActiveTab("today"); } }}
+                  onClick={() => { if (activeTab === "today") { setActiveTab("week"); } else { setActiveTab("today"); } }}
                 >
                   {activeTab === "today" ? "This Week" : "Today"}
                 </button>
@@ -786,49 +943,18 @@ export default function HomeClient() {
             </div>
             <div className="flex gap-1.5 mt-1.5">
               <button onClick={() => setActiveTab("today")} className="w-1.5 h-1.5 rounded-full transition-colors duration-200" style={{ background: activeTab === "today" ? "var(--text)" : "var(--border)" }} />
-              <button onClick={() => { setActiveTab("week"); setShowWeekDetails(true); }} className="w-1.5 h-1.5 rounded-full transition-colors duration-200" style={{ background: activeTab === "week" ? "var(--text)" : "var(--border)" }} />
+              <button onClick={() => setActiveTab("week")} className="w-1.5 h-1.5 rounded-full transition-colors duration-200" style={{ background: activeTab === "week" ? "var(--text)" : "var(--border)" }} />
             </div>
           </div>
           <div className="border-t border-[var(--border)]" />
           <div
             className="px-4 pb-4"
             onTouchStart={(e) => { cardTouchX.current = e.touches[0].clientX; }}
-            onTouchEnd={(e) => { const delta = e.changedTouches[0].clientX - cardTouchX.current; if (delta < -40) { setActiveTab("week"); setShowWeekDetails(true); } else if (delta > 40) setActiveTab("today"); }}
+            onTouchEnd={(e) => { const delta = e.changedTouches[0].clientX - cardTouchX.current; if (delta < -40) { setActiveTab("week"); } else if (delta > 40) setActiveTab("today"); }}
           >
             {activeTab === "today" && (
               <>
-                {/* Day type row */}
-                <div className="grid grid-cols-2 -mx-4" style={{ borderBottom: "1px solid var(--border)" }}>
-                  <div className="px-4 py-2 flex items-center justify-center" style={{ borderRight: "1px solid var(--border)" }}>
-                    <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)]">Today is a...</p>
-                  </div>
-                  <div className="px-4 py-2 flex flex-col items-center justify-center">
-                    <p className="text-sm font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>{todayDayType}</p>
-                  </div>
-                </div>
-                {/* Game details row */}
-                <div className="grid grid-cols-4 -mx-4 mb-4" style={{ borderBottom: "1px solid var(--border)" }}>
-                  {[
-                    { label: "Time",     value: gameDetails.time     || "—" },
-                    { label: "Location", value: gameDetails.location ? (gameDetails.location.slice(0, 4) + (gameDetails.location.length > 4 ? "…" : "")) : "—" },
-                    { label: "Court",    value: gameDetails.court    || "—" },
-                    { label: "Partner",  value: gameDetails.partner ? (gameDetails.partner.slice(0, 4) + (gameDetails.partner.length > 4 ? "…" : "")) : "—" },
-                  ].map(({ label, value }, i) => (
-                    <button key={label} onClick={() => setGameDetailsOpen(true)} className="px-2 py-2 flex flex-col items-center justify-center gap-0.5 active:opacity-60 transition-opacity" style={{ borderRight: i < 3 ? "1px solid var(--border)" : "none" }}>
-                      <p className="text-[8px] font-bold tracking-widest uppercase text-[var(--muted)]">{label}</p>
-                      <p className="text-xs font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>{value}</p>
-                    </button>
-                  ))}
-                </div>
-                {renderSummaryGraphic()}
-                <button onClick={() => setShowTasks(o => !o)} className="flex items-center gap-1 mt-2 active:opacity-70 transition-opacity">
-                  <p className="text-sm font-bold" style={{ color: "#2653d4" }}>{showTasks ? "Hide Today's Schedule" : "Show Today's Schedule"}</p>
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: showTasks ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
-                    <polyline points="2,4 6,8 10,4" />
-                  </svg>
-                </button>
-
-                {showTasks && (() => {
+                {(() => {
                   const schedule = getDaySchedule();
                   const now = new Date();
                   const currentMins = now.getHours() * 60 + now.getMinutes();
@@ -942,38 +1068,7 @@ export default function HomeClient() {
             )}
             {activeTab === "week" && (
               <>
-                <div className="flex items-baseline justify-between mb-3">
-                  <p className="text-4xl font-extrabold text-[var(--text)] leading-none" style={{ fontFamily: "var(--font-hanken)" }}>Your Week</p>
-                  {digest && <p className="text-xs text-[var(--muted)]">({digest.weekLabel})</p>}
-                </div>
-                <p className="text-sm text-[var(--muted)] leading-snug mb-2">
-                  {(() => {
-                    const gameCount = gameDays.filter((ymd: string) => {
-                      const today = new Date();
-                      const dow = (today.getDay() + 6) % 7;
-                      const monday = new Date(today);
-                      monday.setDate(today.getDate() - dow);
-                      const sunday = new Date(monday);
-                      sunday.setDate(monday.getDate() + 6);
-                      const mondayYMD = `${monday.getFullYear()}-${String(monday.getMonth()+1).padStart(2,"0")}-${String(monday.getDate()).padStart(2,"0")}`;
-                      const sundayYMD = `${sunday.getFullYear()}-${String(sunday.getMonth()+1).padStart(2,"0")}-${String(sunday.getDate()).padStart(2,"0")}`;
-                      return ymd >= mondayYMD && ymd <= sundayYMD;
-                    }).length;
-                    const nextGame = getNextGameDay();
-                    const parts = [];
-                    if (gameCount > 0) parts.push(`${gameCount} game${gameCount > 1 ? "s" : ""} this week`);
-                    if (nextGame) parts.push(`next game ${nextGame}`);
-                    else parts.push("no upcoming games");
-                    return parts.join(" · ");
-                  })()}
-                </p>
-                <button onClick={() => setShowWeekDetails(o => !o)} className="flex items-center gap-1 mb-3 active:opacity-70 transition-opacity">
-                  <p className="text-sm font-bold" style={{ color: "#2653d4" }}>{showWeekDetails ? "Hide Details" : "Show Details"}</p>
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: showWeekDetails ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
-                    <polyline points="2,4 6,8 10,4" />
-                  </svg>
-                </button>
-                {showWeekDetails && <>
+                <>
                 {/* Horizontal grid */}
                 {(() => {
                   const today = new Date();
@@ -1091,7 +1186,7 @@ export default function HomeClient() {
                     )}
                   </div>
                 )}
-                </>}
+                </>
               </>
             )}
           </div>
@@ -1531,6 +1626,55 @@ export default function HomeClient() {
             >
               Save Review
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Category metric modal */}
+      {categoryModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-6"
+          style={{ background: "rgba(0,0,0,0.5)" }}
+          onClick={() => setCategoryModal(null)}
+        >
+          <div
+            className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 pt-6 pb-4" style={{ background: categoryModal.color + "18" }}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: categoryModal.color }} />
+                  <p className="text-[10px] font-bold tracking-widest uppercase" style={{ color: categoryModal.color }}>
+                    {categoryModal.label}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setCategoryModal(null)}
+                  className="w-7 h-7 rounded-full flex items-center justify-center active:scale-90 transition-transform"
+                  style={{ background: "rgba(0,0,0,0.08)" }}
+                >
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
+                  </svg>
+                </button>
+              </div>
+              <p className="text-xl font-extrabold text-[var(--text)] leading-tight" style={{ fontFamily: "var(--font-hanken)" }}>
+                {categoryModal.label}
+              </p>
+              <p className="text-sm text-[var(--muted)] mt-1 leading-snug">{categoryModal.subtitle}</p>
+              <div className="mt-4 flex items-center gap-3">
+                <span className="text-3xl font-extrabold leading-none" style={{ color: categoryModal.color, fontFamily: "var(--font-hanken)" }}>{categoryModal.pct}%</span>
+                <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
+                  <div className="h-full rounded-full" style={{ width: `${categoryModal.pct}%`, background: categoryModal.color, transition: "width 0.4s ease" }} />
+                </div>
+              </div>
+            </div>
+            <div className="px-6 py-5">
+              {categoryModal.detail.split("\n\n").map((para, i) => (
+                <p key={i} className={`text-sm text-[var(--text)] leading-relaxed${i > 0 ? " mt-3" : ""}`}>{para}</p>
+              ))}
+            </div>
           </div>
         </div>
       )}

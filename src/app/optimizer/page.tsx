@@ -201,9 +201,34 @@ const sections = [
   },
 ];
 
+const tip = { title: "Sleep 8h tonight", gain: 7 };
+
 export default function OptimizerPage() {
   return (
     <div className="pt-[80px] pb-24 px-5 md:px-12">
+
+      {/* Optimization score card */}
+      <div className="w-full bg-[var(--surface)] flex flex-col border border-[var(--border)] rounded-2xl shadow-sm px-5 pt-3 pb-4 mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] text-left leading-tight">Padel<br />Optimization<br />Score</p>
+          <span className="text-3xl font-extrabold leading-none" style={{ color: "var(--green)", fontFamily: "var(--font-hanken)" }}>{pct}<span className="text-base font-bold text-[var(--muted)]">/100</span></span>
+        </div>
+        <div className="w-full mt-1 mb-6 relative">
+          <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: "linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e)" }} />
+          <div className="absolute" style={{ left: `calc(${pct}% - 5px)`, top: "24px" }}>
+            <svg width="10" height="7" viewBox="0 0 10 7" fill="none">
+              <polygon points="5,0 0,7 10,7" fill="#171c1f" />
+            </svg>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-bold text-[var(--text)] leading-none">{tip.title}</p>
+          <svg width="14" height="9" viewBox="0 0 16 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="0" y1="5" x2="13" y2="5" /><polyline points="9,1 13,5 9,9" />
+          </svg>
+          <span className="text-sm font-bold leading-none" style={{ color: "var(--green)" }}>+{tip.gain}%</span>
+        </div>
+      </div>
 
       <CategoryScoresCard />
 
