@@ -428,6 +428,22 @@ export default function HomeClient() {
   const cardTouchX = useRef(0);
   const [hydrationLog, setHydrationLog] = useState({ litres: "", timing: [] as string[], quality: "", urine: "" });
   const notifTimeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [activeCard, setActiveCard] = useState(1);
+
+  useEffect(() => {
+    const el = carouselRef.current;
+    if (!el) return;
+    const cardW = el.offsetWidth - 48;
+    el.scrollLeft = cardW + 12;
+  }, []);
+
+  function onCarouselScroll() {
+    const el = carouselRef.current;
+    if (!el) return;
+    const cardW = el.offsetWidth - 48;
+    setActiveCard(Math.round(el.scrollLeft / (cardW + 12)));
+  }
 
   useEffect(() => {
     if (!("Notification" in window)) return;
@@ -733,9 +749,45 @@ export default function HomeClient() {
   }
 
   return (
-    <div className="pb-8">
-      <style>{`@keyframes colonBlink{0%,49%{opacity:1}50%,100%{opacity:0}}`}</style>
-      {/* Optimization score card */}
+    <div style={{ height: "100dvh", overflow: "hidden", position: "relative" }}>
+      <style>{`@keyframes colonBlink{0%,49%{opacity:1}50%,100%{opacity:0}} .carousel::-webkit-scrollbar{display:none}`}</style>
+
+      {/* Lateral card carousel */}
+      <div
+        ref={carouselRef}
+        className="carousel"
+        onScroll={onCarouselScroll}
+        style={{
+          display: "flex",
+          overflowX: "auto",
+          overflowY: "hidden",
+          scrollSnapType: "x mandatory",
+          scrollBehavior: "smooth",
+          WebkitOverflowScrolling: "touch" as never,
+          scrollbarWidth: "none",
+          gap: 12,
+          padding: "0 16px",
+          height: "100%",
+        }}
+      >
+        {/* ── Left card ── */}
+        <div style={{ flex: "0 0 calc(100vw - 48px)", scrollSnapAlign: "start", overflowY: "auto", borderRadius: 20, background: "#0f172a", display: "flex", flexDirection: "column", paddingTop: 90, paddingBottom: 32 }}>
+          <div style={{ padding: "0 20px" }}>
+            <p className="text-[10px] font-bold tracking-widest uppercase mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>Player</p>
+            <p className="text-3xl font-extrabold text-white mb-6" style={{ fontFamily: "var(--font-hanken)" }}>Stats</p>
+            {[["ELO Rating", "1 420"], ["Win Rate", "67%"], ["Matches", "42"], ["Avg Match", "78 min"]].map(([label, val]) => (
+              <div key={label} style={{ borderTop: "1px solid rgba(255,255,255,0.1)", padding: "14px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <p className="text-xs font-bold" style={{ color: "rgba(255,255,255,0.45)" }}>{label}</p>
+                <p className="text-xl font-extrabold text-white" style={{ fontFamily: "var(--font-hanken)" }}>{val}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Center card — home ── */}
+        <div style={{ flex: "0 0 calc(100vw - 48px)", scrollSnapAlign: "start", overflowY: "auto", borderRadius: 20, background: "var(--bg)", overflow: "hidden" }}>
+          <div className="pb-8">
+          {/* Optimization score card */}
       <div className="pt-[80px] px-5 md:px-12 pb-4 bg-[var(--bg)]">
       <div className="w-full bg-[var(--surface)] flex flex-col border border-[var(--border)] rounded-2xl shadow-sm px-5 pt-3 pb-4">
         <div className="flex items-center justify-between mb-2">
@@ -1705,6 +1757,32 @@ export default function HomeClient() {
           </div>
         </div>
       )}
+
+          </div>{/* end center card inner */}
+        </div>{/* end center card */}
+
+        {/* ── Right card ── */}
+        <div style={{ flex: "0 0 calc(100vw - 48px)", scrollSnapAlign: "start", overflowY: "auto", borderRadius: 20, background: "#1e3a1e", display: "flex", flexDirection: "column", paddingTop: 90, paddingBottom: 32 }}>
+          <div style={{ padding: "0 20px" }}>
+            <p className="text-[10px] font-bold tracking-widest uppercase mb-1" style={{ color: "rgba(255,255,255,0.4)" }}>This Week</p>
+            <p className="text-3xl font-extrabold text-white mb-6" style={{ fontFamily: "var(--font-hanken)" }}>Schedule</p>
+            {[["Monday", "Training"], ["Tuesday", "Rest"], ["Wednesday", "Training"], ["Thursday", "—"], ["Friday", "—"], ["Saturday", "Game Day"], ["Sunday", "Recovery"]].map(([day, type]) => (
+              <div key={day} style={{ borderTop: "1px solid rgba(255,255,255,0.1)", padding: "12px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <p className="text-xs font-bold" style={{ color: "rgba(255,255,255,0.45)" }}>{day}</p>
+                <p className="text-sm font-extrabold" style={{ color: type === "Game Day" ? "#86efac" : type === "Rest" || type === "Recovery" ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.8)" }}>{type}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>{/* end carousel */}
+
+      {/* Dot indicators */}
+      <div style={{ position: "fixed", bottom: 24, left: 0, right: 0, display: "flex", justifyContent: "center", gap: 6, zIndex: 10, pointerEvents: "none" }}>
+        {[0, 1, 2].map(i => (
+          <div key={i} style={{ width: 6, height: 6, borderRadius: 9999, background: i === activeCard ? "var(--text)" : "var(--border)", transition: "background 0.2s" }} />
+        ))}
+      </div>
 
     </div>
   );
