@@ -1,5 +1,7 @@
 "use client";
 
+import CategoryScoresCard from "@/components/category-scores-card";
+
 const pct = 71;
 
 const sections = [
@@ -202,6 +204,8 @@ const sections = [
 export default function OptimizerPage() {
   return (
     <div className="pt-[80px] pb-24 px-5 md:px-12">
+
+      <CategoryScoresCard />
 
       {/* Currently tracking card */}
       <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl px-4 py-4 shadow-sm mb-6">

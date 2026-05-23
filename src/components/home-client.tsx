@@ -89,6 +89,62 @@ function calcScore(review: ReviewEntry | null, nutrition: NutritionEntry | null,
   return Math.max(10, Math.min(99, s));
 }
 
+function calcCategoryScores(
+  review: ReviewEntry | null,
+  nutrition: NutritionEntry | null,
+  hydration: HydrationEntry | null,
+  gameDays: string[],
+  todayYMD: string
+) {
+  const lm: Record<string, number> = { "<1L": -12, "1–1.5L": -7, "1.5–2L": -3, "2–2.5L": 2, "2.5–3L": 8, "3L+": 12 };
+
+  let performance = 60;
+  if (review) {
+    performance += review.result === "win" ? 12 : review.result === "loss" ? -5 : 0;
+    performance += review.feeling === "great" ? 8 : review.feeling === "bad" ? -8 : 0;
+    performance += review.energy === "high" ? 5 : review.energy === "low" ? -5 : 0;
+  }
+
+  let recovery = 60;
+  if (hydration) {
+    recovery += lm[hydration.litres] ?? 0;
+    recovery += hydration.quality === "great" ? 8 : hydration.quality === "bad" ? -8 : 0;
+  }
+  if (review) {
+    recovery += review.injury === "no" ? 5 : review.injury === "yes" ? -15 : 0;
+  }
+
+  let physicalHealth = 63;
+  if (review) {
+    physicalHealth += review.energy === "high" ? 10 : review.energy === "low" ? -10 : 0;
+    physicalHealth += review.injury === "yes" ? -15 : review.injury === "no" ? 5 : 0;
+  }
+  if (hydration) physicalHealth += Math.round((lm[hydration.litres] ?? 0) / 2);
+
+  let training = 50;
+  const dow = (new Date().getDay() + 6) % 7;
+  const weekStart = offsetYMD(todayYMD, -dow);
+  training += gameDays.filter(d => d >= weekStart && d <= todayYMD).length * 14;
+  if (nutrition) training += nutrition.quality === "great" ? 6 : nutrition.quality === "bad" ? -4 : 0;
+
+  let wellbeing = 63;
+  if (review) {
+    const ms = (v: string) => v === "great" ? 5 : v === "bad" ? -5 : 0;
+    wellbeing += ms(review.mentalBefore) + ms(review.mentalDuring) + ms(review.mentalAfter);
+    wellbeing += review.feeling === "great" ? 4 : review.feeling === "bad" ? -4 : 0;
+  }
+  if (nutrition) wellbeing += nutrition.quality === "great" ? 5 : nutrition.quality === "bad" ? -5 : 0;
+
+  const clamp = (n: number) => Math.max(10, Math.min(99, Math.round(n)));
+  return {
+    performance: clamp(performance),
+    recovery: clamp(recovery),
+    physicalHealth: clamp(physicalHealth),
+    training: clamp(training),
+    wellbeing: clamp(wellbeing),
+  };
+}
+
 function getBestTip(review: ReviewEntry | null, nutrition: NutritionEntry | null, hydration: HydrationEntry | null): { title: string; gain: number } {
   const options: { title: string; gain: number; skip: boolean }[] = [
     { title: "Sleep 8h tonight", gain: 7, skip: false },
@@ -299,6 +355,39 @@ function TipSlider({ onOptimize }: { onOptimize: () => void }) {
   );
 }
 
+function CategoryBar({ score, color, icon, label }: {
+  score: number;
+  color: string;
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <div className="flex-1 flex flex-col items-center gap-1.5">
+      <div className="relative flex flex-col items-center" style={{ width: 22, height: 156 }}>
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full flex items-center justify-center z-10"
+          style={{ background: color, boxShadow: "0 0 0 2px #fff" }}
+        >
+          {icon}
+        </div>
+        <div
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 rounded-full overflow-hidden"
+          style={{ width: 16, top: 10, background: "var(--border)" }}
+        >
+          <div
+            className="absolute bottom-0 w-full rounded-full"
+            style={{ height: `${score}%`, background: `linear-gradient(to top, ${color}99, ${color})` }}
+          />
+        </div>
+      </div>
+      <p className="text-[13px] font-extrabold leading-none text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>
+        {score}<span className="text-[9px] font-bold text-[var(--muted)]">/100</span>
+      </p>
+      <p className="text-[8px] font-bold tracking-widest uppercase text-[var(--muted)] text-center leading-tight">{label}</p>
+    </div>
+  );
+}
+
 export default function HomeClient() {
   const todayYMD = new Date().toISOString().slice(0, 10);
   const mondayYMD = offsetYMD(todayYMD, -((new Date().getDay() + 6) % 7));
@@ -330,7 +419,31 @@ export default function HomeClient() {
   const [hydrationOpen, setHydrationOpen] = useState(false);
   const [showTasks, setShowTasks] = useState(false);
   const [showWeekDetails, setShowWeekDetails] = useState(false);
+  const [scheduleModal, setScheduleModal] = useState<{ title: string; subtitle?: string; category: ScheduleBlock["category"]; detail: string } | null>(null);
+  const cardTouchX = useRef(0);
   const [hydrationLog, setHydrationLog] = useState({ litres: "", timing: [] as string[], quality: "", urine: "" });
+  const notifTimeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  useEffect(() => {
+    if (!("Notification" in window)) return;
+    Notification.requestPermission().then(permission => {
+      if (permission !== "granted") return;
+      const schedule = getDaySchedule();
+      const now = Date.now();
+      notifTimeouts.current.forEach(clearTimeout);
+      notifTimeouts.current = schedule.flatMap(block => {
+        const [h, m] = block.time.split(":").map(Number);
+        const fire = new Date();
+        fire.setHours(h, m, 0, 0);
+        const delay = fire.getTime() - now;
+        if (delay <= 0) return [];
+        return [setTimeout(() => {
+          new Notification(block.title, { body: block.subtitle ?? "", silent: false });
+        }, delay)];
+      });
+    });
+    return () => { notifTimeouts.current.forEach(clearTimeout); };
+  }, []);
 
   useEffect(() => {
     try {
@@ -369,11 +482,8 @@ export default function HomeClient() {
 
   const isSelectedGameDay = gameDays.includes(selectedYMD);
 
-  const todayDayType = gameDays.includes(todayYMD)
-    ? "Game Day"
-    : gameDays.includes(offsetYMD(todayYMD, -1))
-    ? "Recovery Day"
-    : "Training Day";
+  // TODO: remove hardcode
+  const todayDayType = "Game Day";
 
   function getNextGameDay(): string | null {
     for (let i = 1; i <= 7; i++) {
@@ -424,9 +534,211 @@ export default function HomeClient() {
   const pct = calcScore(lastReview, lastNutrition, lastHydration);
   const tip = getBestTip(lastReview, lastNutrition, lastHydration);
   const digest = buildWeeklyDigest(todayYMD);
+  const scores = calcCategoryScores(lastReview, lastNutrition, lastHydration, gameDays, todayYMD);
+
+  type ScheduleBlock = {
+    time: string;
+    title: string;
+    subtitle?: string;
+    category: "wake" | "nutrition" | "training" | "game" | "recovery" | "rest" | "tip";
+  };
+
+  const SCHEDULE_COLORS: Record<ScheduleBlock["category"], string> = {
+    wake:      "#f59e0b",
+    nutrition: "#16a34a",
+    training:  "#2653d4",
+    game:      "#1e3a1e",
+    recovery:  "#7c3aed",
+    rest:      "#94a3b8",
+    tip:       "#0891b2",
+  };
+
+  const SCHEDULE_DETAILS: Record<string, string> = {
+    "Wake up & hydrate": "Starting your day with 500 ml of water re-hydrates you after 7–8 hours without fluids. Do this before coffee — caffeine is a mild diuretic and amplifies morning dehydration. Cold water wakes up your digestive system; warm water is gentler on an empty stomach.",
+    "Light breakfast": "A light pre-match breakfast fuels short anaerobic bursts without weighing you down. Banana provides fast-releasing carbs and potassium. Toast offers sustained energy. Coffee raises alertness and delays fatigue — have it 45–60 min before match time.",
+    "Breakfast": "Oats are a slow-releasing carbohydrate that keeps blood sugar stable for hours. Eggs deliver complete protein to protect muscle. Fruit provides natural sugars and hydrating water content. This combo sustains energy through to an afternoon or evening match.",
+    "Pre-workout breakfast": "Fuelling before a gym or court session prevents muscle breakdown and boosts output by 10–20%. Oats give sustained energy; banana adds fast carbs and potassium to delay cramping; coffee amplifies fat oxidation and delays perceived fatigue.",
+    "Morning mobility": "Light mobility work increases range of motion and blood flow without fatiguing your muscles before a match. Foam rolling uses your body weight to apply pressure and release adhesions — roll at 1–2 cm/sec, pausing 20–30 sec on tight spots. Key areas for padel: hip flexors, IT band, calves, thoracic spine.",
+    "Foam roll & stretch": "Foam rolling (self-myofascial release) applies sustained pressure to muscle tissue to break up adhesions and knots. Roll slowly — pause on tight spots for 20–30 seconds. Key areas for padel: hip flexors, IT band, calves, thoracic spine. Best done when muscles are warm.",
+    "Warmup & activation": "Dynamic warmup primes the neuromuscular system — it signals your fast-twitch fibres that explosive movement is coming. Lateral drills mimic court-side movement patterns. Build from 60% to 80–90% intensity. Cold muscles are slow muscles — never skip this.",
+    "Pre-game meal": "A small solid meal 60–90 min before the match tops off energy stores without sitting heavy in your stomach. Eggs provide fast-absorbing protein and fats for sustained energy; toast adds digestible carbs. Keep portions modest — you want fuel, not a full stomach on court.",
+    "Pre-match snack": "A light snack 60–90 min before the match avoids blood sugar dips without causing digestive discomfort during play. Banana provides potassium, which reduces cramp risk. Rice cakes are easily digestible fast carbs. Avoid high-fat or high-fibre foods — they slow gastric emptying.",
+    "Match": "Match time. Focus on early rhythm — the first few games set the tempo. Communicate constantly with your partner. If losing points from the back, use the lob as a reset rather than going for winners. Stay hydrated between sets.",
+    "Post-match cool down": "Cooling down gradually lowers your heart rate, preventing blood from pooling in your legs. Static stretching (30-sec holds) is most effective now — muscles are warm and pliable. Focus on quads, hip flexors, calves, and shoulder external rotators. This is the best time to improve flexibility.",
+    "Recovery meal": "The 30-minute post-exercise window has the highest rate of muscle protein synthesis. Aim for 20–40 g protein + 60–80 g carbs. The carbs replenish glycogen; the protein provides amino acids for repair. A protein shake + banana works; so does chicken + rice.",
+    "Post-workout fuel": "The anabolic window (first 30 minutes post-workout) is when muscles are most receptive to protein synthesis. 20–30 g of fast-absorbing protein (whey or eggs) maximises muscle repair. Adding carbs (banana, rice) replenishes glycogen faster.",
+    "Lunch": "On game days, carbohydrates are your primary fuel. Complex carbs (rice, pasta, sweet potato) convert to glycogen — your muscles' preferred energy source. This meal 3–4 hours before the match gives your body time to digest and store the energy.",
+    "Protein-rich lunch": "Post-match recovery demands high protein intake. Chicken, legumes, and fish provide all essential amino acids needed for muscle repair. Pairing protein with vegetables and some carbs optimises absorption and reduces inflammation from the previous day's effort.",
+    "Dinner": "Post-training dinner should lean toward protein and vegetables with moderate carbs. Protein at dinner supports overnight muscle protein synthesis — your body repairs muscle during deep sleep. Avoid heavy carbs late unless you have a game the following morning.",
+    "Active recovery": "20 minutes of walking or light swimming at low intensity (~50% max heart rate) accelerates lactate clearance — the metabolic byproduct responsible for muscle soreness. Research consistently shows this is more effective than complete rest at reducing next-day stiffness.",
+    "Rest": "Active rest lowers cortisol (the stress hormone) while maintaining light blood flow. A 20-minute nap can increase alertness and motor skill retention — keep it under 25 min to avoid deep sleep and waking with grogginess (sleep inertia).",
+    "Recovery": "Foam rolling and stretching after a training session reduces delayed-onset muscle soreness (DOMS) by increasing blood flow to worked tissue. Prioritise the hip flexors, quads, and calves — the most loaded muscles in padel court movement.",
+    "Strength session": "Padel demands explosive lateral movement, shoulder stability, and rotational power. Lower body work (squats, lunges, lateral hops) builds the foundation for court speed. Rotator cuff exercises protect the shoulder from repetitive overhead and lateral forces of the bandeja and smash.",
+    "Light movement": "Easy movement on recovery days maintains circulation without adding training load. A walk at conversation pace keeps your joints mobile, clears metabolic waste from sore muscles, and signals to your nervous system that it's safe to relax — essential for full recovery.",
+    "Optional drills": "Light technical drill work on non-game days sharpens patterns without accumulating fatigue. Focus on mechanics: bandeja angle, serve placement, volley touch. Keep intensity at 60–70%. More important than the session: leave the court feeling better than you arrived.",
+    "Match review": "Athletes who review and self-reflect improve measurably faster than those who don't. Log while it's fresh — note patterns, not one-off mistakes. What happened more than twice is a system, not an accident. Use it to define your next training focus.",
+    "Review & plan": "End-of-day reflection closes the loop on your training. Ask: what worked? What do I want to sharpen? Writing it down converts fleeting thoughts into actionable training cues — and creates a data trail you can look back on.",
+    "Prepare for game day": "Visualisation is a proven cognitive rehearsal technique — your nervous system barely distinguishes between vividly imagined and real movement. Spend 5–10 minutes seeing yourself play well: your best shots, your positioning, your communication with your partner. Then set out your gear so morning is frictionless.",
+    "Wind down": "Blue light from screens suppresses melatonin production by up to 50%. Melatonin is the hormone that signals sleep onset. In the 60 minutes before bed: dim lights, avoid screens, try light reading or slow breathing. A consistent bedtime (±30 min) stabilises your circadian rhythm.",
+    "Sleep": "Deep sleep (slow-wave) is when growth hormone is released and muscle tissue is repaired. Most padel players are under-recovered, not under-trained. 8 hours at a consistent time improves reaction time, shot accuracy, and pain tolerance. Think of sleep as the session after the session.",
+  };
+
+  function getDaySchedule(): ScheduleBlock[] {
+    const gameTime = gameTimes[todayYMD] as TimeSlot | undefined;
+
+    if (todayDayType === "Game Day") {
+      if (gameTime === "morning") return [
+        { time: "07:00", title: "Wake up & hydrate", subtitle: "500ml water before anything else", category: "wake" },
+        { time: "07:30", title: "Light breakfast", subtitle: "Toast, banana, black coffee", category: "nutrition" },
+        { time: "08:15", title: "Warmup & activation", subtitle: "Dynamic stretches, lateral drills", category: "training" },
+        { time: "09:00", title: "Match", subtitle: "Focus on strategy and intensity", category: "game" },
+        { time: "10:30", title: "Post-match cool down", subtitle: "Mobility & stretch, 15 min", category: "recovery" },
+        { time: "11:00", title: "Recovery meal", subtitle: "Protein + carbs within 30 min of finishing", category: "nutrition" },
+        { time: "13:00", title: "Lunch", subtitle: "Balanced — stay off heavy carbs", category: "nutrition" },
+        { time: "15:00", title: "Rest", subtitle: "20-min nap or feet up", category: "rest" },
+        { time: "19:00", title: "Dinner", subtitle: "High protein, vegetables, good fats", category: "nutrition" },
+        { time: "22:30", title: "Wind down", subtitle: "No screens — sleep by 23:00", category: "rest" },
+      ];
+      if (gameTime === "afternoon") return [
+        { time: "07:00", title: "Wake up & hydrate", subtitle: "500ml water before anything else", category: "wake" },
+        { time: "08:00", title: "Breakfast", subtitle: "Oats, eggs, fruit", category: "nutrition" },
+        { time: "09:30", title: "Morning mobility", subtitle: "Light stretching & foam roll", category: "recovery" },
+        { time: "11:00", title: "Pre-match snack", subtitle: "Banana, rice cakes — keep it light", category: "nutrition" },
+        { time: "12:00", title: "Warmup & activation", subtitle: "Dynamic stretches, lateral drills", category: "training" },
+        { time: "13:00", title: "Match", subtitle: "Focus on strategy and intensity", category: "game" },
+        { time: "14:30", title: "Post-match cool down", subtitle: "Mobility & stretch, 15 min", category: "recovery" },
+        { time: "15:00", title: "Recovery meal", subtitle: "Protein + carbs within 30 min of finishing", category: "nutrition" },
+        { time: "19:00", title: "Dinner", subtitle: "High protein, vegetables, good fats", category: "nutrition" },
+        { time: "22:30", title: "Wind down", subtitle: "No screens — sleep by 23:00", category: "rest" },
+      ];
+      if (gameTime === "night") return [
+        { time: "07:00", title: "Wake up & hydrate", subtitle: "500ml water before anything else", category: "wake" },
+        { time: "08:00", title: "Breakfast", subtitle: "Oats, eggs, fruit", category: "nutrition" },
+        { time: "10:00", title: "Morning mobility", subtitle: "Light stretching & foam roll", category: "recovery" },
+        { time: "13:00", title: "Lunch", subtitle: "Carb-heavy: rice, chicken, veg", category: "nutrition" },
+        { time: "17:00", title: "Pre-match snack", subtitle: "Banana, rice cakes — keep it light", category: "nutrition" },
+        { time: "19:00", title: "Warmup & activation", subtitle: "Dynamic stretches, lateral drills", category: "training" },
+        { time: "20:00", title: "Match", subtitle: "Focus on strategy and intensity", category: "game" },
+        { time: "21:30", title: "Post-match cool down", subtitle: "Mobility & stretch, 15 min", category: "recovery" },
+        { time: "22:00", title: "Recovery meal", subtitle: "Protein + carbs within 30 min of finishing", category: "nutrition" },
+        { time: "23:30", title: "Wind down", subtitle: "Adrenaline will linger — plan a sleep routine", category: "rest" },
+      ];
+      // default: evening
+      return [
+        { time: "06:55", title: "Wake up & hydrate", subtitle: "500ml water before anything else", category: "wake" },
+        { time: "07:15", title: "Breakfast", subtitle: "Oats, eggs, fruit", category: "nutrition" },
+        { time: "09:30", title: "Morning mobility", subtitle: "Light stretching & foam roll", category: "recovery" },
+        { time: "14:00", title: "Lunch", subtitle: "Carb-heavy: rice, chicken, veg", category: "nutrition" },
+        { time: "17:30", title: "Pre-match snack", subtitle: "Banana, rice cakes — keep it light", category: "nutrition" },
+        { time: "19:30", title: "Warmup & activation", subtitle: "Dynamic stretches, lateral drills", category: "training" },
+        { time: "20:00", title: "Pre-game meal", subtitle: "2 eggs and toast", category: "nutrition" },
+        { time: "21:00", title: "Match", subtitle: "Focus on strategy and intensity", category: "game" },
+        { time: "22:30", title: "Post-match cool down", subtitle: "Mobility & stretch, 15 min", category: "recovery" },
+        { time: "23:00", title: "Recovery meal", subtitle: "Protein + carbs within 30 min of finishing", category: "nutrition" },
+        { time: "23:45", title: "Wind down", subtitle: "Adrenaline will linger — plan a sleep routine", category: "rest" },
+      ];
+    }
+
+    if (todayDayType === "Recovery Day") return [
+      { time: "07:00", title: "Wake up & hydrate", subtitle: "500ml water, no alarm stress", category: "wake" },
+      { time: "08:00", title: "Light breakfast", subtitle: "Eggs, fruit, coffee", category: "nutrition" },
+      { time: "09:00", title: "Active recovery", subtitle: "20-min walk or light swim", category: "recovery" },
+      { time: "10:30", title: "Foam roll & stretch", subtitle: "Focus on hips, calves, shoulders", category: "recovery" },
+      { time: "13:00", title: "Protein-rich lunch", subtitle: "Chicken, legumes, vegetables", category: "nutrition" },
+      { time: "15:00", title: "Rest", subtitle: "20-min nap if needed", category: "rest" },
+      { time: "17:00", title: "Light movement", subtitle: "Easy walk, no court intensity", category: "recovery" },
+      { time: "19:00", title: "Dinner", subtitle: "Balanced: protein, veg, good fats", category: "nutrition" },
+      { time: "21:00", title: "Match review", subtitle: "Log your last match while it's fresh", category: "tip" },
+      { time: "22:30", title: "Wind down", subtitle: "Aim for 8h sleep tonight", category: "rest" },
+    ];
+
+    // Training Day
+    const nextGameYMD = (() => { for (let i = 1; i <= 7; i++) { const y = offsetYMD(todayYMD, i); if (gameDays.includes(y)) return y; } return null; })();
+    const gameIstomorrow = nextGameYMD === offsetYMD(todayYMD, 1);
+    return [
+      { time: "07:00", title: "Wake up & hydrate", subtitle: "500ml water before anything else", category: "wake" },
+      { time: "08:00", title: "Pre-workout breakfast", subtitle: "Oats, banana, coffee", category: "nutrition" },
+      { time: "09:00", title: "Strength session", subtitle: "Lower body, lateral hops, rotator cuff — 45 min", category: "training" },
+      { time: "10:30", title: "Post-workout fuel", subtitle: "Protein shake or eggs within 30 min", category: "nutrition" },
+      { time: "13:00", title: "Lunch", subtitle: "Balanced: carbs, protein, veg", category: "nutrition" },
+      { time: "15:00", title: "Recovery", subtitle: "Foam roll, stretch, hydrate", category: "recovery" },
+      { time: "17:00", title: "Optional drills", subtitle: "Bandeja, serve practice — keep it light", category: "training" },
+      { time: "19:00", title: "Dinner", subtitle: gameIstomorrow ? "Carb-up tonight — game tomorrow" : "High protein, vegetables", category: "nutrition" },
+      { time: "21:00", title: gameIstomorrow ? "Prepare for game day" : "Review & plan", subtitle: gameIstomorrow ? "Visualise your shots. Sleep by 22:30." : "Log training, plan tomorrow", category: "tip" },
+      { time: "23:00", title: "Sleep", subtitle: "Aim for 8 hours", category: "rest" },
+    ];
+  }
+
+  function renderSummaryGraphic() {
+    if (todayDayType === "Game Day") {
+      const todayTime = gameTimes[todayYMD] as TimeSlot | undefined;
+      const timeLabel = todayTime ? TIME_SLOTS.find(t => t.v === todayTime)?.label : null;
+      return (
+        <div className="flex flex-col gap-0.5 mb-2">
+          <p className="text-sm font-semibold text-[var(--text)]">
+            You have a <span className="font-extrabold">match</span> today at <span className="font-extrabold">21:00</span>
+          </p>
+          <p className="text-xs text-[var(--muted)] leading-snug">Stay focused · warm up well · <span className="font-semibold text-[var(--text)]">follow your routine</span></p>
+        </div>
+      );
+    }
+
+    if (todayDayType === "Recovery Day") {
+      const lastGame = getLastGameDay();
+      const nextGame = getNextGameDay();
+      return (
+        <div className="flex flex-col gap-0.5 mb-2">
+          <p>
+            <span className="text-xs text-[var(--muted)]">You played </span>
+            {lastGame && <span className="text-lg font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>{lastGame}</span>}
+          </p>
+          <p>
+            <span className="text-sm font-bold text-[var(--text)]">Rest</span>
+            <span className="text-xs text-[var(--muted)]"> · </span>
+            <span className="text-sm font-bold text-[var(--text)]">Hydrate</span>
+            <span className="text-xs text-[var(--muted)]"> · </span>
+            <span className="text-sm font-bold text-[var(--text)]">Recover</span>
+          </p>
+          {nextGame && (
+            <p className="text-xs text-[var(--muted)]">Next game: <span className="font-bold text-[var(--text)]">{nextGame}</span></p>
+          )}
+        </div>
+      );
+    }
+
+    // Training Day
+    const nextGameYMD = (() => { for (let i = 1; i <= 7; i++) { const y = offsetYMD(todayYMD, i); if (gameDays.includes(y)) return y; } return null; })();
+    const nextGame = getNextGameDay();
+    const nextTime = nextGameYMD ? gameTimes[nextGameYMD] as TimeSlot | undefined : undefined;
+    const nextTimeLabel = nextTime ? TIME_SLOTS.find(t => t.v === nextTime)?.label : null;
+    return (
+      <div className="flex flex-col gap-0.5 mb-2">
+        {nextGame ? (
+          <>
+            <p>
+              <span className="text-xs text-[var(--muted)]">Next game </span>
+              <span className="text-lg font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>{nextGame}</span>
+              {nextTimeLabel && <span className="text-xs text-[var(--muted)]"> · {nextTimeLabel}</span>}
+            </p>
+            <p>
+              <span className="text-sm font-bold text-[var(--text)]">Build strength</span>
+              <span className="text-xs text-[var(--muted)]"> &amp; </span>
+              <span className="text-sm font-bold text-[var(--text)]">sharpen your game</span>
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="text-xs text-[var(--muted)]">No upcoming game this week</p>
+            <p className="text-sm font-bold text-[var(--text)]">Build your base</p>
+          </>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="pb-8">
+      <style>{`@keyframes colonBlink{0%,49%{opacity:1}50%,100%{opacity:0}}`}</style>
       {/* Optimization score card */}
       <div className="pt-[80px] px-5 md:px-12 pb-4 bg-[var(--bg)]">
       <div className="w-full bg-[var(--surface)] flex flex-col border border-[var(--border)] rounded-2xl shadow-sm px-5 pt-3 pb-4">
@@ -435,7 +747,7 @@ export default function HomeClient() {
           <span className="text-3xl font-extrabold leading-none" style={{ color: "var(--green)", fontFamily: "var(--font-hanken)" }}>{pct}<span className="text-base font-bold text-[var(--muted)]">/100</span></span>
         </div>
         <div className="w-full mt-1 mb-6 relative">
-          <div className="w-full h-6 rounded-full overflow-hidden" style={{ background: "linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e)" }} />
+          <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: "linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e)" }} />
           <div className="absolute" style={{ left: `calc(${pct}% - 5px)`, top: "24px" }}>
             <svg width="10" height="7" viewBox="0 0 10 7" fill="none">
               <polygon points="5,0 0,7 10,7" fill="#171c1f" />
@@ -463,23 +775,53 @@ export default function HomeClient() {
       {/* Today / This Week toggle card */}
       <div className="px-5 md:px-12 pb-3 bg-[var(--bg)]">
         <div className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden">
-          <div className="grid grid-cols-2">
-            <button onClick={() => setActiveTab("today")} className="py-3 text-sm font-bold text-center border-r border-[var(--border)] active:opacity-70 transition-opacity" style={{ color: activeTab === "today" ? "var(--text)" : "var(--muted)" }}>Today</button>
-            <button onClick={() => setActiveTab("week")} className="py-3 text-sm font-bold text-center active:opacity-70 transition-opacity" style={{ color: activeTab === "week" ? "var(--text)" : "var(--muted)" }}>This Week</button>
+          <div className="px-4 pt-3 pb-2 flex flex-col items-center">
+            <div className="w-full overflow-hidden flex justify-center">
+              <span className="relative flex-shrink-0">
+                <span className="text-2xl font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>
+                  {activeTab === "today" ? "Today" : "This Week"}
+                </span>
+                <span
+                  className="absolute top-0 left-full pl-3 text-2xl font-extrabold whitespace-nowrap"
+                  style={{
+                    fontFamily: "var(--font-hanken)",
+                    color: "var(--text)",
+                    opacity: 0.18,
+                    WebkitMaskImage: "linear-gradient(to right, black 0%, transparent 65%)",
+                    maskImage: "linear-gradient(to right, black 0%, transparent 65%)",
+                  }}
+                >
+                  {activeTab === "today" ? "This Week" : "Today"}
+                </span>
+              </span>
+            </div>
+            <div className="flex gap-1.5 mt-1.5">
+              <button onClick={() => setActiveTab("today")} className="w-1.5 h-1.5 rounded-full transition-colors duration-200" style={{ background: activeTab === "today" ? "var(--text)" : "var(--border)" }} />
+              <button onClick={() => setActiveTab("week")} className="w-1.5 h-1.5 rounded-full transition-colors duration-200" style={{ background: activeTab === "week" ? "var(--text)" : "var(--border)" }} />
+            </div>
           </div>
-          <div className="border-t border-[var(--border)] px-4 py-4">
+          <div className="border-t border-[var(--border)]" />
+          <div
+            className="px-4 pb-4"
+            onTouchStart={(e) => { cardTouchX.current = e.touches[0].clientX; }}
+            onTouchEnd={(e) => {
+              const delta = e.changedTouches[0].clientX - cardTouchX.current;
+              if (delta < -40) setActiveTab("week");
+              else if (delta > 40) setActiveTab("today");
+            }}
+          >
             {activeTab === "today" && (
               <>
-                {/* Today summary */}
-                <p className="text-4xl font-extrabold text-[var(--text)] leading-none mb-2" style={{ fontFamily: "var(--font-hanken)" }}>{todayDayType}</p>
-                {gameTimes[todayYMD] && (
-                  <div className="flex mb-3">
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold border border-[var(--border)] text-[var(--muted)]">
-                      {TIME_SLOTS.find(t => t.v === gameTimes[todayYMD])?.label}
-                    </span>
+                {/* Day type row */}
+                <div className="grid grid-cols-2 -mx-4 mb-4" style={{ borderBottom: "1px solid var(--border)" }}>
+                  <div className="px-4 py-2 flex items-center justify-center" style={{ borderRight: "1px solid var(--border)" }}>
+                    <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)]">Today is a...</p>
                   </div>
-                )}
-                <p className="text-sm text-[var(--muted)] leading-snug">{getSummary()}</p>
+                  <div className="px-4 py-2 flex flex-col items-center justify-center">
+                    <p className="text-sm font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>{todayDayType}</p>
+                  </div>
+                </div>
+                {renderSummaryGraphic()}
                 <button onClick={() => setShowTasks(o => !o)} className="flex items-center gap-1 mt-2 active:opacity-70 transition-opacity">
                   <p className="text-sm font-bold" style={{ color: "#2653d4" }}>{showTasks ? "Hide Today's Schedule" : "Show Today's Schedule"}</p>
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: showTasks ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
@@ -487,75 +829,116 @@ export default function HomeClient() {
                   </svg>
                 </button>
 
-                {showTasks && (
-                  <div className="mt-4 flex flex-col gap-3">
-                    {/* Hydration */}
-                    <button onClick={() => setHydrationOpen(true)} className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-2xl px-4 py-4 text-left active:opacity-80 transition-opacity">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-0.5">Hydration</p>
-                          <p className="text-base font-bold text-[var(--text)]">1.8L <span className="text-sm font-normal text-[var(--muted)]">/ 3.5L</span></p>
-                        </div>
-                        <span className="text-2xl font-extrabold" style={{ color: "#2653d4", fontFamily: "var(--font-hanken)" }}>51%</span>
-                      </div>
-                      <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
-                        <div className="h-full rounded-full transition-all" style={{ width: "51%", background: "#2653d4" }} />
-                      </div>
-                      <div className="flex justify-between mt-2">
-                        <p className="text-xs text-[var(--muted)]">Target: 3.5L today</p>
-                        <p className="text-xs font-bold" style={{ color: "#2653d4" }}>+1.7L to go</p>
-                      </div>
-                    </button>
+                {showTasks && (() => {
+                  const schedule = getDaySchedule();
+                  const now = new Date();
+                  const currentMins = now.getHours() * 60 + now.getMinutes();
+                  const parseMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
 
-                    {/* Checklist */}
-                    {(() => {
-                      const reviewedToday = lastReview?.ts.slice(0, 10) === todayYMD;
-                      const recs = getRecommendations(selectedYMD, gameDays);
-                      const doneRecsList = recs.map((rec, i) => ({ rec, i })).filter(({ i }) => doneRecs.has(i));
-                      const hasDone = reviewedToday || doneRecsList.length > 0;
-                      const reviewCard = (done: boolean) => (
-                        <button onClick={() => setMatchReviewOpen(true)} className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-2xl px-4 py-4 flex items-center gap-4 active:opacity-70 transition-opacity text-left" style={{ opacity: done ? 0.55 : 1 }}>
-                          <div className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: done ? "#16a34a" : "#2653d4" }}>
-                            {done ? <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20,6 9,17 4,12" /></svg>
-                              : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><line x1="10" y1="9" x2="8" y2="9" /></svg>}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold leading-snug" style={{ color: done ? "var(--muted)" : "var(--text)", textDecoration: done ? "line-through" : "none" }}>Review Your Last Match</p>
-                            <p className="text-xs text-[var(--muted)] leading-snug mt-0.5">{done ? "Tap to update" : "Rate performance while it's still fresh"}</p>
-                          </div>
-                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0"><polyline points="3,1 8,5 3,9" /></svg>
-                        </button>
-                      );
-                      const allDone = reviewedToday && doneRecs.size >= recs.length;
-                      return (
-                        <>
-                          {allDone ? (
-                            <div className="bg-[var(--bg)] border border-[var(--border)] rounded-2xl px-4 py-8 flex flex-col items-center justify-center gap-2">
-                              <ThumbsUpIcon size={40} color="var(--text)" />
-                              <p className="text-base font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>All done for today</p>
-                              <p className="text-xs text-[var(--muted)]">Great work — rest up and come back tomorrow</p>
-                              <button onClick={() => setDoneRecs(new Set())} className="mt-2 px-4 py-1.5 rounded-full border border-[var(--border)] text-[10px] font-bold tracking-widest uppercase text-[var(--muted)] bg-[var(--surface)] active:scale-95 transition-transform">Edit</button>
-                            </div>
-                          ) : (
-                            <>
-                              {!reviewedToday && reviewCard(false)}
-                              <Recommendations selectedYMD={selectedYMD} gameDays={gameDays} doneItems={doneRecs} onToggle={toggleRec} cardTaps={{ "Protein Recovery": () => setNutritionOpen(true) }} />
-                            </>
-                          )}
-                          {hasDone && !allDone && (
-                            <div className="mt-1">
-                              <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-2">Done</p>
-                              <div className="flex flex-col gap-3">
-                                {doneRecsList.map(({ rec, i }) => <RecCard key={i} rec={rec} isDone onToggle={() => toggleRec(i)} />)}
-                                {reviewedToday && reviewCard(true)}
+                  return (
+                  <div className="mt-4">
+                    <div className="flex gap-3 items-stretch">
+                      {/* Timeline */}
+                      <div className="flex-1">
+                        {schedule.map((block, idx, arr) => {
+                          const color = SCHEDULE_COLORS[block.category];
+                          const isLast = idx === arr.length - 1;
+                          const blockMins = parseMins(block.time);
+                          const nextMins = !isLast ? parseMins(arr[idx + 1].time) : 24 * 60;
+                          const isCurrentSegment = !isLast && currentMins >= blockMins && currentMins < nextMins;
+                          const segmentPct = isCurrentSegment ? ((currentMins - blockMins) / (nextMins - blockMins)) * 100 : 0;
+                          const detail = SCHEDULE_DETAILS[block.title];
+                          return (
+                            <div key={idx} className="flex gap-3">
+                              <div className="w-10 flex-shrink-0 pt-0.5">
+                                <p className="text-[10px] font-bold text-[var(--muted)] text-right leading-none">{block.time}</p>
                               </div>
+                              <div className="flex flex-col items-center flex-shrink-0">
+                                <div className="w-2 h-2 rounded-full mt-0.5 flex-shrink-0" style={{ background: color }} />
+                                {!isLast && (
+                                  <div className="relative mt-1" style={{ width: 1, flex: 1, background: "var(--border)", minHeight: 28, overflow: "visible" }}>
+                                    {isCurrentSegment && (
+                                      <div className="absolute flex items-center" style={{ top: `${segmentPct}%`, right: 0, transform: "translateY(-50%)" }}>
+                                        <span className="text-[11px] font-bold text-white px-2 py-0.5 rounded mr-0.5 whitespace-nowrap" style={{ background: "#2653d4" }}>
+                                          {String(now.getHours()).padStart(2, "0")}<span style={{ animation: "colonBlink 1s step-start infinite" }}>:</span>{String(now.getMinutes()).padStart(2, "0")}
+                                        </span>
+                                        <svg width="8" height="10" viewBox="0 0 8 10"><polygon points="0,0 8,5 0,10" fill="#171c1f" /></svg>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                              <button
+                                className="pb-4 flex-1 min-w-0 flex items-start justify-between gap-2 text-left active:opacity-70 transition-opacity"
+                                onClick={() => detail && setScheduleModal({ title: block.title, subtitle: block.subtitle, category: block.category, detail })}
+                              >
+                                <div className="min-w-0">
+                                  <p className="text-sm font-bold text-[var(--text)] leading-tight">{block.title}</p>
+                                  {block.subtitle && <p className="text-xs text-[var(--muted)] leading-snug mt-0.5">{block.subtitle}</p>}
+                                </div>
+                                {detail && (
+                                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--border)" strokeWidth="2" strokeLinecap="round" className="flex-shrink-0 mt-1">
+                                    <line x1="5" y1="1" x2="5" y2="9" /><line x1="1" y1="5" x2="9" y2="5" />
+                                  </svg>
+                                )}
+                              </button>
                             </div>
-                          )}
-                        </>
-                      );
-                    })()}
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Action cards */}
+                    <div className="flex flex-col gap-3 mt-2 pt-4 border-t border-[var(--border)]">
+                      {(() => {
+                        const reviewedToday = lastReview?.ts.slice(0, 10) === todayYMD;
+                        const recs = getRecommendations(selectedYMD, gameDays);
+                        const doneRecsList = recs.map((rec, i) => ({ rec, i })).filter(({ i }) => doneRecs.has(i));
+                        const hasDone = reviewedToday || doneRecsList.length > 0;
+                        const reviewCard = (done: boolean) => (
+                          <button key="review" onClick={() => setMatchReviewOpen(true)} className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-2xl px-4 py-4 flex items-center gap-4 active:opacity-70 transition-opacity text-left" style={{ opacity: done ? 0.55 : 1 }}>
+                            <div className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: done ? "#16a34a" : "#2653d4" }}>
+                              {done ? <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20,6 9,17 4,12" /></svg>
+                                : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><line x1="10" y1="9" x2="8" y2="9" /></svg>}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold leading-snug" style={{ color: done ? "var(--muted)" : "var(--text)", textDecoration: done ? "line-through" : "none" }}>Review Your Last Match</p>
+                              <p className="text-xs text-[var(--muted)] leading-snug mt-0.5">{done ? "Tap to update" : "Rate performance while it's still fresh"}</p>
+                            </div>
+                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0"><polyline points="3,1 8,5 3,9" /></svg>
+                          </button>
+                        );
+                        const allDone = reviewedToday && doneRecs.size >= recs.length;
+                        return (
+                          <>
+                            {allDone ? (
+                              <div className="bg-[var(--bg)] border border-[var(--border)] rounded-2xl px-4 py-8 flex flex-col items-center justify-center gap-2">
+                                <ThumbsUpIcon size={40} color="var(--text)" />
+                                <p className="text-base font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>All done for today</p>
+                                <p className="text-xs text-[var(--muted)]">Great work — rest up and come back tomorrow</p>
+                                <button onClick={() => setDoneRecs(new Set())} className="mt-2 px-4 py-1.5 rounded-full border border-[var(--border)] text-[10px] font-bold tracking-widest uppercase text-[var(--muted)] bg-[var(--surface)] active:scale-95 transition-transform">Edit</button>
+                              </div>
+                            ) : (
+                              <>
+                                {!reviewedToday && reviewCard(false)}
+                                <Recommendations selectedYMD={selectedYMD} gameDays={gameDays} doneItems={doneRecs} onToggle={toggleRec} cardTaps={{ "Protein Recovery": () => setNutritionOpen(true) }} />
+                              </>
+                            )}
+                            {hasDone && !allDone && (
+                              <div className="mt-1">
+                                <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-2">Done</p>
+                                <div className="flex flex-col gap-3">
+                                  {doneRecsList.map(({ rec, i }) => <RecCard key={i} rec={rec} isDone onToggle={() => toggleRec(i)} />)}
+                                  {reviewedToday && reviewCard(true)}
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
                   </div>
-                )}
+                );})()}
               </>
             )}
 
@@ -717,7 +1100,25 @@ export default function HomeClient() {
         </div>
       </div>
 
-
+      {/* Hydration card */}
+      <div className="px-5 md:px-12 pb-3 bg-[var(--bg)]">
+        <button onClick={() => setHydrationOpen(true)} className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl px-5 py-4 text-left active:opacity-80 transition-opacity shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-0.5">Hydration</p>
+              <p className="text-base font-bold text-[var(--text)]">1.8L <span className="text-sm font-normal text-[var(--muted)]">/ 3.5L</span></p>
+            </div>
+            <span className="text-2xl font-extrabold" style={{ color: "#2653d4", fontFamily: "var(--font-hanken)" }}>51%</span>
+          </div>
+          <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
+            <div className="h-full rounded-full transition-all" style={{ width: "51%", background: "#2653d4" }} />
+          </div>
+          <div className="flex justify-between mt-2">
+            <p className="text-xs text-[var(--muted)]">Target: 3.5L today</p>
+            <p className="text-xs font-bold" style={{ color: "#2653d4" }}>+1.7L to go</p>
+          </div>
+        </button>
+      </div>
 
       {/* Week Plan Modal */}
       {weekPlanOpen && (
@@ -1210,6 +1611,51 @@ export default function HomeClient() {
             >
               Save Review
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Schedule item modal */}
+      {scheduleModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-6"
+          style={{ background: "rgba(0,0,0,0.5)" }}
+          onClick={() => setScheduleModal(null)}
+        >
+          <div
+            className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Coloured header strip */}
+            <div className="px-6 pt-6 pb-4" style={{ background: SCHEDULE_COLORS[scheduleModal.category] + "18" }}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: SCHEDULE_COLORS[scheduleModal.category] }} />
+                  <p className="text-[10px] font-bold tracking-widest uppercase" style={{ color: SCHEDULE_COLORS[scheduleModal.category] }}>
+                    {scheduleModal.category}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setScheduleModal(null)}
+                  className="w-7 h-7 rounded-full flex items-center justify-center active:scale-90 transition-transform"
+                  style={{ background: "rgba(0,0,0,0.08)" }}
+                >
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
+                  </svg>
+                </button>
+              </div>
+              <p className="text-xl font-extrabold text-[var(--text)] leading-tight" style={{ fontFamily: "var(--font-hanken)" }}>
+                {scheduleModal.title}
+              </p>
+              {scheduleModal.subtitle && (
+                <p className="text-sm text-[var(--muted)] mt-1 leading-snug">{scheduleModal.subtitle}</p>
+              )}
+            </div>
+            {/* Detail body */}
+            <div className="px-6 py-5">
+              <p className="text-sm text-[var(--text)] leading-relaxed">{scheduleModal.detail}</p>
+            </div>
           </div>
         </div>
       )}
