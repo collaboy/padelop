@@ -416,7 +416,6 @@ export default function HomeClient() {
   }
   const [nutritionOpen, setNutritionOpen] = useState(false);
   const [nutritionLog, setNutritionLog] = useState({ proteinRating: "", foods: [] as string[], postMatch: "", quality: "" });
-  const [hydrationOpen, setHydrationOpen] = useState(false);
   const [showTasks, setShowTasks] = useState(false);
   const [showWeekDetails, setShowWeekDetails] = useState(false);
   const [scheduleModal, setScheduleModal] = useState<{ title: string; subtitle?: string; category: ScheduleBlock["category"]; detail: string } | null>(null);
@@ -426,7 +425,6 @@ export default function HomeClient() {
   });
   const [gameDetailsOpen, setGameDetailsOpen] = useState(false);
   const cardTouchX = useRef(0);
-  const [hydrationLog, setHydrationLog] = useState({ litres: "", timing: [] as string[], quality: "", urine: "" });
   const notifTimeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
@@ -852,7 +850,7 @@ export default function HomeClient() {
                           return (
                             <div key={idx} className="flex gap-3">
                               <div className="w-10 flex-shrink-0 pt-0.5">
-                                <p className="text-[10px] font-bold text-[var(--muted)] text-right leading-none">{block.time}</p>
+                                <p className="text-xs font-bold text-[var(--muted)] text-right leading-none">{block.time}</p>
                               </div>
                               <div className="flex flex-col items-center flex-shrink-0">
                                 <div className="w-2 h-2 rounded-full mt-0.5 flex-shrink-0" style={{ background: color }} />
@@ -860,7 +858,7 @@ export default function HomeClient() {
                                   <div className="relative mt-1" style={{ width: 1, flex: 1, background: "var(--border)", minHeight: 28, overflow: "visible" }}>
                                     {isCurrentSegment && (
                                       <div className="absolute flex items-center" style={{ top: `${segmentPct}%`, right: 0, transform: "translateY(-50%)" }}>
-                                        <span className="text-[11px] font-bold text-white px-2 py-0.5 rounded mr-0.5 whitespace-nowrap" style={{ background: "#2653d4" }}>
+                                        <span className="text-sm font-bold text-white px-2.5 py-1 rounded mr-0.5 whitespace-nowrap" style={{ background: "#2653d4" }}>
                                           {String(now.getHours()).padStart(2, "0")}<span style={{ animation: "colonBlink 1s step-start infinite" }}>:</span>{String(now.getMinutes()).padStart(2, "0")}
                                         </span>
                                         <svg width="8" height="10" viewBox="0 0 8 10"><polygon points="0,0 8,5 0,10" fill="#171c1f" /></svg>
@@ -874,8 +872,8 @@ export default function HomeClient() {
                                 onClick={() => detail && setScheduleModal({ title: block.title, subtitle: block.subtitle, category: block.category, detail })}
                               >
                                 <div className="min-w-0">
-                                  <p className="text-sm font-bold text-[var(--text)] leading-tight">{block.title}</p>
-                                  {block.subtitle && <p className="text-xs text-[var(--muted)] leading-snug mt-0.5">{block.subtitle}</p>}
+                                  <p className="text-base font-bold text-[var(--text)] leading-tight">{block.title}</p>
+                                  {block.subtitle && <p className="text-sm text-[var(--muted)] leading-snug mt-0.5">{block.subtitle}</p>}
                                 </div>
                                 {detail && (
                                   <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--border)" strokeWidth="2" strokeLinecap="round" className="flex-shrink-0 mt-1">
@@ -1100,26 +1098,6 @@ export default function HomeClient() {
         </div>
       </div>
 
-      {/* Hydration card */}
-      <div className="px-5 md:px-12 pb-3 bg-[var(--bg)]">
-        <button onClick={() => setHydrationOpen(true)} className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl px-5 py-4 text-left active:opacity-80 transition-opacity shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-0.5">Hydration</p>
-              <p className="text-base font-bold text-[var(--text)]">1.8L <span className="text-sm font-normal text-[var(--muted)]">/ 3.5L</span></p>
-            </div>
-            <span className="text-2xl font-extrabold" style={{ color: "#2653d4", fontFamily: "var(--font-hanken)" }}>51%</span>
-          </div>
-          <div className="w-full h-3 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
-            <div className="h-full rounded-full transition-all" style={{ width: "51%", background: "#2653d4" }} />
-          </div>
-          <div className="flex justify-between mt-2">
-            <p className="text-xs text-[var(--muted)]">Target: 3.5L today</p>
-            <p className="text-xs font-bold" style={{ color: "#2653d4" }}>+1.7L to go</p>
-          </div>
-        </button>
-      </div>
-
       {/* Game details modal */}
       {gameDetailsOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: "rgba(0,0,0,0.5)" }} onClick={() => setGameDetailsOpen(false)}>
@@ -1254,110 +1232,6 @@ export default function HomeClient() {
                 </>
               );
             })()}
-          </div>
-        </div>
-      )}
-
-      {/* Hydration Modal */}
-      {hydrationOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-end justify-center" onClick={() => setHydrationOpen(false)}>
-          <div className="w-full max-w-[640px] bg-white rounded-t-3xl shadow-2xl px-6 pt-5 pb-10 overflow-y-auto max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
-            <div className="w-10 h-1 rounded-full bg-[var(--border)] mx-auto mb-5" />
-            <p className="text-lg font-extrabold text-[var(--text)] mb-1" style={{ fontFamily: "var(--font-hanken)" }}>Hydration Check</p>
-            <p className="text-xs text-[var(--muted)] mb-6">Log your water intake today</p>
-
-            {/* Litres consumed */}
-            <div className="mb-6">
-              <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-3">How much have you drunk today?</p>
-              <div className="flex gap-3">
-                {["<1L", "1–1.5L", "1.5–2L", "2–2.5L", "2.5–3L", "3L+"].map((n) => {
-                  const selected = hydrationLog.litres === n;
-                  return (
-                    <button key={n} onClick={() => setHydrationLog((l) => ({ ...l, litres: n }))}
-                      className="flex-1 py-2.5 rounded-2xl border-2 text-xs font-bold transition-all active:scale-95"
-                      style={{ borderColor: selected ? "#2653d4" : "var(--border)", background: selected ? "#eef2ff" : "var(--bg)", color: selected ? "#2653d4" : "var(--muted)" }}>
-                      {n}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* What did you drink? */}
-            <div className="mb-6">
-              <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-3">What did you drink?</p>
-              <div className="flex flex-wrap gap-2">
-                {["Water", "Sparkling water", "Sports drink", "Coconut water", "Tea / Coffee", "Juice", "Milk", "Protein shake"].map((drink) => {
-                  const selected = hydrationLog.timing.includes(drink);
-                  return (
-                    <button key={drink}
-                      onClick={() => setHydrationLog((l) => ({ ...l, timing: selected ? l.timing.filter((d) => d !== drink) : [...l.timing, drink] }))}
-                      className="px-3 py-1.5 rounded-full border text-xs font-bold transition-all active:scale-95"
-                      style={{ borderColor: selected ? "#2653d4" : "var(--border)", background: selected ? "#eef2ff" : "var(--bg)", color: selected ? "#2653d4" : "var(--muted)" }}>
-                      {drink}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Urine colour proxy */}
-            <div className="mb-6">
-              <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-1">Urine colour check</p>
-              <p className="text-[10px] text-[var(--muted)] mb-3">Best proxy for hydration status</p>
-              <div className="flex gap-2">
-                {[
-                  { v: "clear", label: "Clear", bg: "#f0f9ff", border: "#bae6fd" },
-                  { v: "pale", label: "Pale yellow", bg: "#fefce8", border: "#fde047" },
-                  { v: "yellow", label: "Yellow", bg: "#fef9c3", border: "#facc15" },
-                  { v: "dark", label: "Dark", bg: "#fef3c7", border: "#f59e0b" },
-                  { v: "brown", label: "Brown", bg: "#fdf4dc", border: "#b45309" },
-                ].map(({ v, label, bg, border }) => {
-                  const selected = hydrationLog.urine === v;
-                  return (
-                    <button key={v} onClick={() => setHydrationLog((l) => ({ ...l, urine: v }))}
-                      className="flex-1 py-2.5 rounded-2xl border-2 text-[10px] font-bold transition-all active:scale-95 text-center"
-                      style={{ borderColor: selected ? border : "var(--border)", background: selected ? bg : "var(--bg)", color: "var(--muted)" }}>
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Overall hydration feel */}
-            <div className="mb-8">
-              <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-3">How do you feel?</p>
-              <div className="flex gap-3">
-                {([["bad", "Thirsty"], ["ok", "OK"], ["great", "Hydrated"]] as const).map(([v, label]) => {
-                  const selected = hydrationLog.quality === v;
-                  return (
-                    <button key={v} onClick={() => setHydrationLog((l) => ({ ...l, quality: v }))}
-                      className="flex-1 flex flex-col items-center gap-1.5 py-3 rounded-2xl border-2 transition-all active:scale-95"
-                      style={{ borderColor: selected ? "#2653d4" : "var(--border)", background: selected ? "#eef2ff" : "var(--bg)" }}>
-                      <FaceIcon mood={v} color={selected ? "#2653d4" : "var(--muted)"} />
-                      <span className="text-[10px] font-bold tracking-wide" style={{ color: selected ? "#2653d4" : "var(--muted)" }}>{label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <button
-              onClick={() => {
-                const entry: HydrationEntry = { ...hydrationLog, ts: new Date().toISOString() };
-                try {
-                  const prev = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]");
-                  localStorage.setItem("padelop:hydration-logs", JSON.stringify([entry, ...prev].slice(0, 50)));
-                } catch {}
-                setLastHydration(entry);
-                setHydrationOpen(false);
-              }}
-              className="w-full py-4 rounded-2xl text-sm font-bold tracking-wide text-white active:scale-95 transition-transform"
-              style={{ background: "#2653d4" }}
-            >
-              Save
-            </button>
           </div>
         </div>
       )}
