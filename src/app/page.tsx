@@ -1232,17 +1232,18 @@ export default function HomePage() {
               {/* Upload state */}
               {!uploading && !extractedData && (
                 <div className="space-y-4">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full border-2 border-dashed border-[#e2e2e2] rounded-2xl py-10 flex flex-col items-center gap-3 active:bg-[#f0f0f0] transition-colors"
+                  <label
+                    htmlFor="match-screenshot-input"
+                    className="w-full border-2 border-dashed border-[#e2e2e2] rounded-2xl py-10 flex flex-col items-center gap-3 active:bg-[#f0f0f0] transition-colors cursor-pointer"
                   >
+                    <input
+                      id="match-screenshot-input"
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
                     <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#496640" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="3" y="3" width="18" height="18" rx="3" />
                       <circle cx="8.5" cy="8.5" r="1.5" />
@@ -1252,7 +1253,7 @@ export default function HomePage() {
                       <p className="text-[14px] font-semibold text-[#1a1c1c]">Choose screenshot</p>
                       <p className="text-[12px] text-[#747878] mt-0.5">Booking confirmation or WhatsApp message</p>
                     </div>
-                  </button>
+                  </label>
                   {uploadError && (
                     <p className="text-[13px] text-[#dc2626] text-center font-medium">{uploadError}</p>
                   )}
