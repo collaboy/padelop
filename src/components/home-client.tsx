@@ -402,9 +402,7 @@ export default function HomeClient() {
   const [selectedYMD, setSelectedYMD] = useState(todayYMD);
   const [planOpen, setPlanOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"today" | "week">("today");
-  const [weekPlanOpen, setWeekPlanOpen] = useState(false);
-  const [weekPlanDays, setWeekPlanDays] = useState<string[]>([]);
-  const [weekPlanTimes, setWeekPlanTimes] = useState<Record<string, TimeSlot>>({});
+
   const [matchReviewOpen, setMatchReviewOpen] = useState(false);
   const [matchReview, setMatchReview] = useState({ feeling: "", result: "", opponent: "", energy: "", injury: "", wellDone: [] as string[], improved: [] as string[], mentalBefore: "", mentalDuring: "", mentalAfter: "" });
   const [lastReview, setLastReview] = useState<ReviewEntry | null>(null);
@@ -517,19 +515,20 @@ export default function HomeClient() {
       const isMonday = new Date().getDay() === 1;
       const alreadyPlanned = !!localStorage.getItem(WEEK_PLAN_PREFIX + mondayYMD);
       if (isMonday && !alreadyPlanned) {
-        setWeekPlanDays(gameDays);
-        setWeekPlanTimes(gameTimes);
-        setWeekPlanOpen(true);
+        window.dispatchEvent(new CustomEvent("open-week-plan"));
       }
     } catch {}
 
-    const handleOpenWeekPlan = () => {
-      setWeekPlanDays(gameDays);
-      setWeekPlanTimes(gameTimes);
-      setWeekPlanOpen(true);
+    const handleWeekPlanSaved = () => {
+      try {
+        const days = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]") as string[];
+        const times = JSON.parse(localStorage.getItem(GAME_TIMES_KEY) || "{}") as Record<string, TimeSlot>;
+        setGameDays(days);
+        setGameTimes(times);
+      } catch {}
     };
-    window.addEventListener("open-week-plan", handleOpenWeekPlan);
-    return () => window.removeEventListener("open-week-plan", handleOpenWeekPlan);
+    window.addEventListener("week-plan-saved", handleWeekPlanSaved);
+    return () => window.removeEventListener("week-plan-saved", handleWeekPlanSaved);
   }, []);
 
   function toggleGameDay(ymd: string) {
@@ -1330,98 +1329,6 @@ export default function HomeClient() {
                 Save
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Week Plan Modal */}
-      {weekPlanOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-end justify-center">
-          <div className="w-full max-w-[640px] bg-white rounded-t-3xl shadow-2xl px-6 pt-5 pb-10">
-            <div className="w-10 h-1 rounded-full bg-[var(--border)] mx-auto mb-5" />
-            <p className="text-lg font-extrabold text-[var(--text)] mb-1" style={{ fontFamily: "var(--font-hanken)" }}>Good morning 👋</p>
-            <p className="text-sm text-[var(--muted)] mb-6">When are you playing this week? Tap the days.</p>
-
-            {/* Day tiles */}
-            <div className="grid grid-cols-7 gap-2 mb-5">
-              {Array.from({ length: 7 }, (_, i) => {
-                const ymd = offsetYMD(mondayYMD, i);
-                const d = new Date(ymd);
-                const selected = weekPlanDays.includes(ymd);
-                const dayLetter = ["M","T","W","T","F","S","S"][i];
-                return (
-                  <button
-                    key={ymd}
-                    onClick={() => setWeekPlanDays((prev) => prev.includes(ymd) ? prev.filter((x) => x !== ymd) : [...prev, ymd])}
-                    className="flex flex-col items-center rounded-xl py-3 gap-1 border-2 transition-all active:scale-95"
-                    style={{ borderColor: selected ? "#2653d4" : "var(--border)", background: selected ? "#2653d4" : "var(--bg)" }}
-                  >
-                    <span className="text-[9px] font-bold uppercase" style={{ color: selected ? "rgba(255,255,255,0.7)" : "var(--muted)" }}>{dayLetter}</span>
-                    <span className="text-sm font-bold" style={{ color: selected ? "#ffffff" : "var(--text)" }}>{d.getDate()}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Time pickers for selected days */}
-            {weekPlanDays.length > 0 && (
-              <div className="flex flex-col gap-4 mb-8">
-                {weekPlanDays.slice().sort().map((ymd) => {
-                  const d = new Date(ymd);
-                  const dayName = d.toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "short" });
-                  const selected = weekPlanTimes[ymd];
-                  return (
-                    <div key={ymd}>
-                      <p className="text-xs font-bold text-[var(--text)] mb-2">{dayName}</p>
-                      <div className="grid grid-cols-4 gap-2">
-                        {TIME_SLOTS.map(({ v, label, hint }) => (
-                          <button
-                            key={v}
-                            onClick={() => setWeekPlanTimes((prev) => ({ ...prev, [ymd]: v }))}
-                            className="flex flex-col items-center py-2.5 rounded-xl border-2 transition-all active:scale-95"
-                            style={{ borderColor: selected === v ? "#2653d4" : "var(--border)", background: selected === v ? "#eef2ff" : "var(--bg)" }}
-                          >
-                            <span className="text-[11px] font-bold" style={{ color: selected === v ? "#2653d4" : "var(--text)" }}>{label}</span>
-                            <span className="text-[9px] text-[var(--muted)]">{hint}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {weekPlanDays.length === 0 && <div className="mb-8" />}
-
-            {(() => {
-              const missingTimes = weekPlanDays.filter(ymd => !weekPlanTimes[ymd]);
-              const canSave = missingTimes.length === 0;
-              return (
-                <>
-                  {!canSave && (
-                    <p className="text-xs text-center text-[var(--muted)] mb-3">
-                      Pick a time for {missingTimes.map(ymd => new Date(ymd).toLocaleDateString("en-US", { weekday: "long" })).join(", ")}
-                    </p>
-                  )}
-                  <button
-                    disabled={!canSave}
-                    onClick={() => {
-                      setGameDays(weekPlanDays);
-                      setGameTimes(weekPlanTimes);
-                      localStorage.setItem(STORAGE_KEY, JSON.stringify(weekPlanDays));
-                      localStorage.setItem(GAME_TIMES_KEY, JSON.stringify(weekPlanTimes));
-                      localStorage.setItem(WEEK_PLAN_PREFIX + mondayYMD, "1");
-                      setWeekPlanOpen(false);
-                    }}
-                    className="w-full py-4 rounded-2xl text-sm font-bold tracking-wide text-white transition-all"
-                    style={{ background: canSave ? "#2653d4" : "var(--border)", color: canSave ? "#ffffff" : "var(--muted)", cursor: canSave ? "pointer" : "default" }}
-                  >
-                    Set my week
-                  </button>
-                </>
-              );
-            })()}
           </div>
         </div>
       )}
