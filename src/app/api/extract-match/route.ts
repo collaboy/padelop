@@ -1,6 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
 
+export const maxDuration = 30;
+
 const client = new Anthropic();
 
 const MAX_BYTES = 4.5 * 1024 * 1024; // 4.5 MB decoded limit
@@ -33,7 +35,7 @@ export async function POST(req: NextRequest) {
   let raw: string;
   try {
     const response = await client.messages.create({
-      model: "claude-haiku-4-5-20251001",
+      model: "claude-sonnet-4-6",
       max_tokens: 512,
       messages: [{
         role: "user",
@@ -71,8 +73,9 @@ Respond with ONLY valid JSON, no markdown, no explanation.`,
 
     raw = response.content[0].type === "text" ? response.content[0].text.trim() : "";
   } catch (err) {
-    console.error("Claude API error:", err);
-    return NextResponse.json({ error: "api_error", message: "Something went wrong. Please try again." }, { status: 502 });
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("Claude API error:", msg);
+    return NextResponse.json({ error: "api_error", message: `Analysis failed: ${msg}` }, { status: 502 });
   }
 
   // Strip markdown code fences if present
