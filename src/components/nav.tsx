@@ -8,6 +8,16 @@ export default function Nav() {
   const pct = 71;
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+
+  const notifications = [
+    { time: "07:02", message: "Morning reminder: drink 500ml water now before coffee.", link: null },
+    { time: "08:45", message: "Sleep score 92 — excellent recovery. You're ready to train hard today.", link: null },
+    { time: "10:30", message: "Tip: dynamic mobility before your pre-match meal boosts nutrient uptake.", link: "Today's Schedule" },
+    { time: "12:00", message: "Pre-match meal window opens in 30 min. Aim for carbs + protein.", link: null },
+    { time: "15:15", message: "HRV trending up this week — a sign your training load is well-managed.", link: null },
+    { time: "16:45", message: "Match in 90 min. Start your box breathing (4x4) routine now.", link: "Box Breathing (4x4)" },
+  ];
 
   const items = [
     {
@@ -74,36 +84,88 @@ export default function Nav() {
             </Link>
           </div>
 
-          {/* Right: score arc */}
+          {/* Right: score arc + notification dot */}
           <div className="flex justify-end">
-            <svg width="48" height="48" viewBox="0 0 48 48">
-              <defs>
-                <linearGradient id="g1" gradientUnits="userSpaceOnUse" x1="24" y1="4" x2="44" y2="24">
-                  <stop offset="0%" stopColor="#ef4444" />
-                  <stop offset="100%" stopColor="#f97316" />
-                </linearGradient>
-                <linearGradient id="g2" gradientUnits="userSpaceOnUse" x1="44" y1="24" x2="24" y2="44">
-                  <stop offset="0%" stopColor="#f97316" />
-                  <stop offset="100%" stopColor="#eab308" />
-                </linearGradient>
-                <linearGradient id="g3" gradientUnits="userSpaceOnUse" x1="24" y1="44" x2="4" y2="24">
-                  <stop offset="0%" stopColor="#eab308" />
-                  <stop offset="100%" stopColor="#84cc16" />
-                </linearGradient>
-                <linearGradient id="g4" gradientUnits="userSpaceOnUse" x1="4" y1="24" x2="24" y2="4">
-                  <stop offset="0%" stopColor="#84cc16" />
-                  <stop offset="100%" stopColor="#22c55e" />
-                </linearGradient>
-              </defs>
-              <path d="M 24 4 A 20 20 0 0 1 44 24" fill="none" stroke="url(#g1)" strokeWidth="2.5" strokeLinecap="butt" />
-              <path d="M 44 24 A 20 20 0 0 1 24 44" fill="none" stroke="url(#g2)" strokeWidth="2.5" strokeLinecap="butt" />
-              <path d="M 24 44 A 20 20 0 0 1 4 24"  fill="none" stroke="url(#g3)" strokeWidth="2.5" strokeLinecap="butt" />
-              <path d="M 4 24 A 20 20 0 0 1 24 4"   fill="none" stroke="url(#g4)" strokeWidth="2.5" strokeLinecap="butt" />
-              <text x="24" y="28" textAnchor="middle" fontSize="11" fontWeight="bold" fill="var(--text)" fontFamily="var(--font-hanken)">{pct}%</text>
-            </svg>
+            <button onClick={() => setNotifOpen(true)} className="relative active:scale-90 transition-transform">
+              <svg width="48" height="48" viewBox="0 0 48 48">
+                <defs>
+                  <linearGradient id="g1" gradientUnits="userSpaceOnUse" x1="24" y1="4" x2="44" y2="24">
+                    <stop offset="0%" stopColor="#ef4444" />
+                    <stop offset="100%" stopColor="#f97316" />
+                  </linearGradient>
+                  <linearGradient id="g2" gradientUnits="userSpaceOnUse" x1="44" y1="24" x2="24" y2="44">
+                    <stop offset="0%" stopColor="#f97316" />
+                    <stop offset="100%" stopColor="#eab308" />
+                  </linearGradient>
+                  <linearGradient id="g3" gradientUnits="userSpaceOnUse" x1="24" y1="44" x2="4" y2="24">
+                    <stop offset="0%" stopColor="#eab308" />
+                    <stop offset="100%" stopColor="#84cc16" />
+                  </linearGradient>
+                  <linearGradient id="g4" gradientUnits="userSpaceOnUse" x1="4" y1="24" x2="24" y2="4">
+                    <stop offset="0%" stopColor="#84cc16" />
+                    <stop offset="100%" stopColor="#22c55e" />
+                  </linearGradient>
+                </defs>
+                <path d="M 24 4 A 20 20 0 0 1 44 24" fill="none" stroke="url(#g1)" strokeWidth="2.5" strokeLinecap="butt" />
+                <path d="M 44 24 A 20 20 0 0 1 24 44" fill="none" stroke="url(#g2)" strokeWidth="2.5" strokeLinecap="butt" />
+                <path d="M 24 44 A 20 20 0 0 1 4 24"  fill="none" stroke="url(#g3)" strokeWidth="2.5" strokeLinecap="butt" />
+                <path d="M 4 24 A 20 20 0 0 1 24 4"   fill="none" stroke="url(#g4)" strokeWidth="2.5" strokeLinecap="butt" />
+                <text x="24" y="28" textAnchor="middle" fontSize="11" fontWeight="bold" fill="var(--text)" fontFamily="var(--font-hanken)">{pct}%</text>
+              </svg>
+              <span className="absolute w-3.5 h-3.5 rounded-full bg-[#ef4444] border-2 border-[var(--surface)]" style={{ top: 1, right: 1 }} />
+            </button>
           </div>
         </div>
       </header>
+
+      {/* Notifications modal */}
+      {notifOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center px-3 pb-3" onClick={() => setNotifOpen(false)}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-lg bg-white rounded-[28px] overflow-hidden flex flex-col max-h-[80vh]"
+            style={{ fontFamily: "var(--font-hanken)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+              <div className="w-10 h-1 rounded-full bg-[#e2e2e2]" />
+            </div>
+            <div className="px-6 pt-3 pb-4 flex items-center justify-between flex-shrink-0">
+              <p className="text-[18px] font-semibold text-[var(--text)]">Notifications</p>
+              <button onClick={() => setNotifOpen(false)} className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4] transition-colors">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            <div className="overflow-y-auto divide-y divide-[#f4f4f4]">
+              {/* Featured */}
+              <div className="mx-4 mb-3 px-4 py-3.5 rounded-2xl" style={{ background: "#4169e110" }}>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#4169e1] flex-shrink-0" />
+                  <span className="text-[11px] font-bold tracking-wide text-[#4169e1]">Just now</span>
+                </div>
+                <p className="text-[14px] font-semibold text-[var(--text)] leading-snug">Match in 90 min — start your box breathing and dynamic warm-up now.</p>
+                <p className="text-[12px] font-semibold mt-1.5 text-[#4169e1]">Box Breathing (4x4) →</p>
+              </div>
+              {notifications.map((n, i) => (
+                <div key={i} className="flex items-start gap-4 px-6 py-4">
+                  <span className="text-[11px] font-semibold text-[#747878] flex-shrink-0 w-12 pt-0.5">{n.time}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[14px] text-[var(--text)] leading-snug">{n.message}</p>
+                    {n.link && <p className="text-[12px] font-semibold mt-1 text-[#4169e1]">{n.link} →</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="px-6 py-4 flex-shrink-0 border-t border-[#f4f4f4]">
+              <button className="w-full py-2.5 rounded-2xl text-[13px] font-semibold text-[#747878] bg-[#f4f4f4] active:scale-[0.98] transition-transform">
+                Clear all
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Hamburger menu modal */}
       {menuOpen && (
