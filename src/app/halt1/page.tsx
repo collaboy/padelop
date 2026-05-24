@@ -32,6 +32,7 @@ export default function Halt1Page() {
   const [mustDoExpanded, setMustDoExpanded] = useState(false);
   const [addMatchOpen, setAddMatchOpen] = useState(false);
   const [hydroOpen, setHydroOpen] = useState(false);
+  const [notifExpanded, setNotifExpanded] = useState(false);
   const [hydrationLog, setHydrationLog] = useState({ litres: "", timing: [] as string[], quality: "", urine: "" });
 
   // Match info state
@@ -379,21 +380,33 @@ export default function Halt1Page() {
                 <p className="text-[14px] font-semibold text-[#1a1c1c] leading-snug">Match in 90 min — start your box breathing and dynamic warm-up now.</p>
                 <p className="text-[12px] font-semibold mt-1.5 text-[#4169e1]">Box Breathing (4x4) →</p>
               </div>
-              {[
-                { time: "16:45", message: "Match in 90 min. Start your box breathing (4x4) routine now.", link: "Box Breathing (4x4)" },
-                { time: "15:15", message: "HRV trending up this week — a sign your training load is well-managed.", link: null },
-                { time: "12:00", message: "Pre-match meal window opens in 30 min. Aim for carbs + protein.", link: null },
-              ].map((n, i) => (
-                <div key={i} className="flex items-start gap-4 px-6 py-3.5 border-t border-[#f4f4f4]">
-                  <span className="text-[11px] font-semibold text-[#747878] flex-shrink-0 w-12 pt-0.5">{n.time}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[14px] text-[#1a1c1c] leading-snug">{n.message}</p>
-                    {n.link && <p className="text-[12px] font-semibold mt-1 text-[#4169e1]">{n.link} →</p>}
-                  </div>
+              <div className="relative">
+                <div
+                  className="overflow-hidden transition-all duration-300"
+                  style={{ maxHeight: notifExpanded ? 600 : 82 }}
+                >
+                  {[
+                    { time: "16:45", message: "Match in 90 min. Start your box breathing (4x4) routine now.", link: "Box Breathing (4x4)" },
+                    { time: "15:15", message: "HRV trending up this week — a sign your training load is well-managed.", link: null },
+                    { time: "12:00", message: "Pre-match meal window opens in 30 min. Aim for carbs + protein.", link: null },
+                  ].map((n, i) => (
+                    <div key={i} className="flex items-start gap-4 px-6 py-3.5 border-t border-[#f4f4f4]">
+                      <span className="text-[11px] font-semibold text-[#747878] flex-shrink-0 w-12 pt-0.5">{n.time}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[14px] text-[#1a1c1c] leading-snug">{n.message}</p>
+                        {n.link && <p className="text-[12px] font-semibold mt-1 text-[#4169e1]">{n.link} →</p>}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+                {!notifExpanded && (
+                  <div className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none" style={{ background: "linear-gradient(to bottom, transparent, white)" }} />
+                )}
+              </div>
               <div className="border-t border-[#f4f4f4] px-6 py-3">
-                <button className="text-[13px] font-semibold text-[#4169e1]">See all →</button>
+                <button onClick={() => setNotifExpanded(o => !o)} className="text-[13px] font-semibold text-[#4169e1]">
+                  {notifExpanded ? "See less" : "See all →"}
+                </button>
               </div>
             </div>
 
