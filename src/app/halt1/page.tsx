@@ -24,6 +24,7 @@ export default function Halt1Page() {
   const [checkIn, setCheckIn] = useState({ sleep: 3, energy: 3, soreness: 3, hydration: 3 });
   const [countdown, setCountdown] = useState({ h: 0, m: 0, past: false });
   const [fabOpen, setFabOpen] = useState(false);
+  const [routineModal, setRoutineModal] = useState<{ label: string; detail: string } | null>(null);
 
   // Match info state
   const [matchInfoOpen, setMatchInfoOpen] = useState(false);
@@ -344,6 +345,55 @@ export default function Halt1Page() {
               </button>
             </div>
 
+            {/* Do This Right Now */}
+            <div className="bg-white rounded-[24px] p-6 h1-ambient border border-[#c4c7c7]/10">
+              <div className="flex items-center gap-2 mb-4">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#1a1c1c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="9" y1="1" x2="9" y2="13" />
+                  <polyline points="5,9 9,13 13,9" />
+                  <line x1="3" y1="17" x2="15" y2="17" />
+                </svg>
+                <h3 className="h1-headline-md text-black">Do This Right Now</h3>
+              </div>
+              <div className="space-y-4">
+                {[
+                  { label: "Hydration (500ml Electrolytes)", checked: hydration, set: setHydration, detail: "Drink 500ml of water with electrolytes before you do anything else. After hours of sleep your body is dehydrated — even mild dehydration (1–2%) measurably reduces reaction time, concentration, and physical output. Electrolytes (sodium, potassium, magnesium) help your cells absorb the water faster than plain water alone." },
+                  { label: "10min Dynamic Mobility",         checked: mobility,  set: setMobility,  detail: "Spend 10 minutes on dynamic mobility — leg swings, hip circles, thoracic rotations, and lateral lunges. This increases blood flow to the joints and primes the neuromuscular system for explosive movement. Static stretching before a match reduces power output; dynamic movement builds it." },
+                  { label: "Visualise Key Tactics",          checked: visualise, set: setVisualise, detail: "Close your eyes for 3–5 minutes and mentally rehearse your key patterns: your serve placement, your net approach after a quality drive, and your reset lob when under pressure. Visualisation activates the same neural pathways as physical practice. Athletes who visualise consistently perform better under match pressure." },
+                ].map(({ label, checked, set, detail }) => (
+                  <div key={label} className="flex items-center gap-4">
+                    <label className="flex items-center gap-4 flex-1 cursor-pointer group">
+                      <div className="relative flex items-center justify-center w-6 h-6 rounded-lg border-2 border-[#747878] group-active:scale-90 transition-transform flex-shrink-0">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={(e) => set(e.target.checked)}
+                          className="peer absolute opacity-0 w-full h-full cursor-pointer"
+                        />
+                        <span
+                          className="material-symbols-outlined text-[#496640] opacity-0 peer-checked:opacity-100 transition-opacity"
+                          style={{ fontSize: 18, fontVariationSettings: "'FILL' 1, 'wght' 600" }}
+                        >
+                          check
+                        </span>
+                      </div>
+                      <span className={`h1-body-md text-[#444748] ${checked ? "line-through opacity-50" : ""}`}>
+                        {label}
+                      </span>
+                    </label>
+                    <button
+                      onClick={() => setRoutineModal({ label, detail })}
+                      className="flex-shrink-0 w-6 h-6 flex items-center justify-center active:scale-90 transition-transform"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#c4c7c7" strokeWidth="1.8" strokeLinecap="round">
+                        <line x1="7" y1="2" x2="7" y2="12" /><line x1="2" y1="7" x2="12" y2="7" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Today's Schedule */}
             {(() => {
               const schedule = [
@@ -458,37 +508,6 @@ export default function Halt1Page() {
                   </div>
                 </div>
 
-                {/* Pre-match Routine */}
-                <div className="bg-white rounded-[24px] p-6 h1-ambient border border-[#c4c7c7]/10">
-                  <h3 className="h1-headline-md text-black mb-4">Pre-match Routine</h3>
-                  <div className="space-y-4">
-                    {[
-                      { label: "Hydration (500ml Electrolytes)", checked: hydration, set: setHydration },
-                      { label: "10min Dynamic Mobility",         checked: mobility,  set: setMobility },
-                      { label: "Visualise Key Tactics",          checked: visualise, set: setVisualise },
-                    ].map(({ label, checked, set }) => (
-                      <label key={label} className="flex items-center gap-4 cursor-pointer group">
-                        <div className="relative flex items-center justify-center w-6 h-6 rounded-lg border-2 border-[#747878] group-active:scale-90 transition-transform flex-shrink-0">
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={(e) => set(e.target.checked)}
-                            className="peer absolute opacity-0 w-full h-full cursor-pointer"
-                          />
-                          <span
-                            className="material-symbols-outlined text-[#496640] opacity-0 peer-checked:opacity-100 transition-opacity"
-                            style={{ fontSize: 18, fontVariationSettings: "'FILL' 1, 'wght' 600" }}
-                          >
-                            check
-                          </span>
-                        </div>
-                        <span className={`h1-body-md text-[#444748] ${checked ? "line-through opacity-50" : ""}`}>
-                          {label}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
               </>
             )}
 
@@ -727,6 +746,31 @@ export default function Halt1Page() {
             {/* Body */}
             <div className="px-6 py-5 pb-10">
               <p className="h1-body-lg text-[#444748] leading-relaxed">{scheduleModal.detail}</p>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Routine info modal */}
+      {routineModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6" onClick={() => setRoutineModal(null)}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 pt-5 pb-4" style={{ background: "#49664018" }}>
+              <div className="flex items-center gap-2 mb-1">
+                <svg width="14" height="14" viewBox="0 0 18 18" fill="none" stroke="#496640" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="9" y1="1" x2="9" y2="13" />
+                  <polyline points="5,9 9,13 13,9" />
+                  <line x1="3" y1="17" x2="15" y2="17" />
+                </svg>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#496640]">Do This Right Now</p>
+              </div>
+              <h3 className="h1-headline-md text-[#1a1c1c]">{routineModal.label}</h3>
+            </div>
+            <div className="px-6 py-5 pb-10">
+              <p className="h1-body-lg text-[#444748] leading-relaxed">{routineModal.detail}</p>
             </div>
           </div>
         </div>
