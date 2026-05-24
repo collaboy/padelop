@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { downloadSnapshot, importData } from "@/lib/storage";
 import ProfileModal from "@/components/profile-modal";
+import { computeNotifications, type Notif } from "@/lib/notifications";
 
 export default function Nav() {
   const pct = 71;
@@ -13,16 +14,14 @@ export default function Nav() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [importDone, setImportDone] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notif[]>([]);
   const importRef = useRef<HTMLInputElement>(null);
 
-  const notifications = [
-    { time: "07:02", message: "Morning reminder: drink 500ml water now before coffee.", link: null },
-    { time: "08:45", message: "Sleep score 92 — excellent recovery. You're ready to train hard today.", link: null },
-    { time: "10:30", message: "Tip: dynamic mobility before your pre-match meal boosts nutrient uptake.", link: "Today's Schedule" },
-    { time: "12:00", message: "Pre-match meal window opens in 30 min. Aim for carbs + protein.", link: null },
-    { time: "15:15", message: "HRV trending up this week — a sign your training load is well-managed.", link: null },
-    { time: "16:45", message: "Match in 90 min. Start your box breathing (4x4) routine now.", link: "Box Breathing (4x4)" },
-  ];
+  useEffect(() => {
+    setNotifications(computeNotifications());
+    const id = setInterval(() => setNotifications(computeNotifications()), 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   const items = [
     {
@@ -109,7 +108,7 @@ export default function Nav() {
 
           {/* Right: score arc + notification dot */}
           <div className="flex justify-end">
-            <button onClick={() => setNotifOpen(true)} className="relative active:scale-90 transition-transform">
+            <button onClick={() => { setNotifications(computeNotifications()); setNotifOpen(true); }} className="relative active:scale-90 transition-transform">
               <svg width="48" height="48" viewBox="0 0 48 48">
                 <defs>
                   <linearGradient id="g1" gradientUnits="userSpaceOnUse" x1="24" y1="4" x2="44" y2="24">
@@ -135,7 +134,9 @@ export default function Nav() {
                 <path d="M 4 24 A 20 20 0 0 1 24 4"   fill="none" stroke="url(#g4)" strokeWidth="2.5" strokeLinecap="butt" />
                 <text x="24" y="28" textAnchor="middle" fontSize="11" fontWeight="bold" fill="var(--text)" fontFamily="var(--font-hanken)">{pct}%</text>
               </svg>
-              <span className="absolute w-3.5 h-3.5 rounded-full bg-[#ef4444] border-2 border-[var(--surface)]" style={{ top: 1, right: 1 }} />
+              {notifications.length > 0 && (
+                <span className="absolute w-3.5 h-3.5 rounded-full bg-[#ef4444] border-2 border-[var(--surface)]" style={{ top: 1, right: 1 }} />
+              )}
             </button>
           </div>
         </div>
@@ -159,29 +160,41 @@ export default function Nav() {
               </button>
             </div>
             <div className="overflow-y-auto divide-y divide-[#f4f4f4]">
-              {/* Featured */}
-              <div className="mx-4 mb-3 px-4 py-3.5 rounded-2xl" style={{ background: "#4169e110" }}>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#4169e1] flex-shrink-0" />
-                  <span className="text-[11px] font-bold tracking-wide text-[#4169e1]">Just now</span>
+              {notifications.length === 0 ? (
+                <div className="px-6 py-8 text-center">
+                  <p className="text-[14px] text-[#747878]">You&apos;re all caught up.</p>
                 </div>
-                <p className="text-[14px] font-semibold text-[var(--text)] leading-snug">Match in 90 min — start your box breathing and dynamic warm-up now.</p>
-                <p className="text-[12px] font-semibold mt-1.5 text-[#4169e1]">Box Breathing (4x4) →</p>
-              </div>
-              {notifications.map((n, i) => (
-                <div key={i} className="flex items-start gap-4 px-6 py-4">
-                  <span className="text-[11px] font-semibold text-[#747878] flex-shrink-0 w-12 pt-0.5">{n.time}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[14px] text-[var(--text)] leading-snug">{n.message}</p>
-                    {n.link && <p className="text-[12px] font-semibold mt-1 text-[#4169e1]">{n.link} →</p>}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="px-6 py-4 flex-shrink-0 border-t border-[#f4f4f4]">
-              <button className="w-full py-2.5 rounded-2xl text-[13px] font-semibold text-[#747878] bg-[#f4f4f4] active:scale-[0.98] transition-transform">
-                Clear all
-              </button>
+              ) : (
+                <>
+                  {(() => {
+                    const featured = notifications.find(n => n.featured);
+                    const rest = notifications.filter(n => !n.featured);
+                    return (
+                      <>
+                        {featured && (
+                          <div className="mx-4 mb-3 mt-1 px-4 py-3.5 rounded-2xl" style={{ background: "#4169e110" }}>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#4169e1] flex-shrink-0" />
+                              <span className="text-[11px] font-bold tracking-wide text-[#4169e1]">{featured.time}</span>
+                            </div>
+                            <p className="text-[14px] font-semibold text-[var(--text)] leading-snug">{featured.message}</p>
+                            {featured.link && <p className="text-[12px] font-semibold mt-1.5 text-[#4169e1]">{featured.link} →</p>}
+                          </div>
+                        )}
+                        {rest.map((n, i) => (
+                          <div key={i} className="flex items-start gap-4 px-6 py-4">
+                            <span className="text-[11px] font-semibold text-[#747878] flex-shrink-0 w-12 pt-0.5">{n.time}</span>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[14px] text-[var(--text)] leading-snug">{n.message}</p>
+                              {n.link && <p className="text-[12px] font-semibold mt-1 text-[#4169e1]">{n.link} →</p>}
+                            </div>
+                          </div>
+                        ))}
+                      </>
+                    );
+                  })()}
+                </>
+              )}
             </div>
           </div>
         </div>
