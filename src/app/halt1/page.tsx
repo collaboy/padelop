@@ -594,7 +594,7 @@ export default function Halt1Page() {
                   <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/>
                 </svg>
               ),
-              action: () => { setFabOpen(false); setAddMatchOpen(true); },
+              action: () => { setFabOpen(false); setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); },
             },
             {
               label: "Update Stats",
@@ -620,12 +620,13 @@ export default function Halt1Page() {
               className="flex items-center gap-3"
               style={{ animation: `speedDialUp 0.18s ease ${i * 0.06}s both` }}
             >
-              <span
-                className="bg-white text-[13px] font-semibold text-[#1a1c1c] px-4 py-2 rounded-full whitespace-nowrap"
+              <button
+                onClick={item.action}
+                className="bg-white text-[13px] font-semibold text-[#1a1c1c] px-4 py-2 rounded-full whitespace-nowrap active:scale-95 transition-transform"
                 style={{ boxShadow: "0 2px 14px rgba(0,0,0,0.13)" }}
               >
                 {item.label}
-              </span>
+              </button>
               <button
                 onClick={item.action}
                 className="w-12 h-12 bg-white rounded-full flex items-center justify-center active:scale-90 transition-transform flex-shrink-0"
@@ -814,6 +815,12 @@ export default function Halt1Page() {
                   {uploadError && (
                     <p className="text-[13px] text-[#dc2626] text-center font-medium">{uploadError}</p>
                   )}
+                  <button
+                    onClick={() => { const blank = Object.fromEntries(Object.keys(FIELD_LABELS).map(k => [k, ""])); setExtractedData(blank); setEditedData(blank); }}
+                    className="w-full text-center text-[13px] font-semibold text-[#747878] active:opacity-50 transition-opacity"
+                  >
+                    or insert manually
+                  </button>
                 </div>
               )}
 
@@ -918,7 +925,7 @@ export default function Halt1Page() {
 
       {/* Hydro Tracker modal */}
       {hydroOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center px-3 pb-3" onClick={() => setHydroOpen(false)}>
+        <div className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-4" onClick={() => setHydroOpen(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div className="h1-font relative w-full max-w-lg bg-white rounded-[28px] overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-[#e2e2e2]" /></div>
@@ -931,28 +938,49 @@ export default function Halt1Page() {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
-            <div className="px-6 pb-6 flex flex-col gap-4">
-              <div className="flex gap-2 flex-wrap">
-                {["250ml", "500ml", "750ml", "1L"].map(amt => (
-                  <button
-                    key={amt}
-                    onClick={() => setHydroLitres(amt)}
-                    className="flex-1 py-3 rounded-2xl text-[13px] font-semibold border transition-all active:scale-95"
-                    style={{ background: hydroLitres === amt ? "#0891b2" : "#f4f4f4", color: hydroLitres === amt ? "#fff" : "#747878", borderColor: hydroLitres === amt ? "#0891b2" : "#e2e2e2" }}
-                  >
-                    {amt}
-                  </button>
-                ))}
-              </div>
+            <div className="px-6 pb-6 flex flex-col gap-5">
+              {/* Quick amounts */}
               <div>
-                <p className="text-[12px] font-semibold text-[#747878] mb-1.5">Or enter amount</p>
-                <input
-                  type="text"
-                  value={hydroLitres}
-                  onChange={e => setHydroLitres(e.target.value)}
-                  placeholder="e.g. 600ml"
-                  className="h1-field-input"
-                />
+                <p className="text-[12px] font-semibold text-[#747878] mb-2">How much did you just drink?</p>
+                <div className="grid grid-cols-4 gap-2">
+                  {["250ml", "500ml", "750ml", "1L"].map(amt => (
+                    <button
+                      key={amt}
+                      onClick={() => setHydroLitres(amt)}
+                      className="py-3 rounded-2xl text-[13px] font-semibold border transition-all active:scale-95"
+                      style={{ background: hydroLitres === amt ? "#0891b2" : "#f4f4f4", color: hydroLitres === amt ? "#fff" : "#747878", borderColor: hydroLitres === amt ? "#0891b2" : "#e2e2e2" }}
+                    >
+                      {amt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {/* Questions */}
+              <div className="flex flex-col gap-3">
+                <div>
+                  <p className="text-[12px] font-semibold text-[#747878] mb-1.5">Total so far today</p>
+                  <input type="text" placeholder="e.g. 1.5L" className="h1-field-input" />
+                </div>
+                <div>
+                  <p className="text-[12px] font-semibold text-[#747878] mb-1.5">Electrolytes today?</p>
+                  <div className="flex gap-2">
+                    {["Yes", "No"].map(opt => (
+                      <button key={opt} className="flex-1 py-2.5 rounded-2xl text-[13px] font-semibold border border-[#e2e2e2] bg-[#f4f4f4] text-[#747878] active:scale-95 transition-all">
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[12px] font-semibold text-[#747878] mb-1.5">Thirst level (1–5)</p>
+                  <div className="flex gap-2">
+                    {[1,2,3,4,5].map(n => (
+                      <button key={n} className="flex-1 h-9 rounded-full text-[13px] font-semibold border border-[#e2e2e2] bg-[#f4f4f4] text-[#747878] active:scale-95 transition-all">
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
               <button
                 onClick={() => setHydroOpen(false)}
