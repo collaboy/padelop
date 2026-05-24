@@ -20,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="flex flex-col min-h-full bg-[var(--bg)]" suppressHydrationWarning>
         <Nav />
         <SwipeNav>
-          <main className="flex-1 pb-24">
+          <main className="flex-1 pt-16 pb-24">
             <div className="mx-auto w-full max-w-[640px]">{children}</div>
           </main>
         </SwipeNav>

@@ -205,7 +205,7 @@ const tip = { title: "Sleep 8h tonight", gain: 7 };
 
 export default function OptimizerPage() {
   return (
-    <div className="pt-[80px] pb-24 px-5 md:px-12">
+    <div className="pt-3 pb-24 px-5 md:px-12">
 
       {/* Optimization score card */}
       <div className="w-full bg-[var(--surface)] flex flex-col border border-[var(--border)] rounded-2xl shadow-sm px-5 pt-3 pb-4 mb-4">

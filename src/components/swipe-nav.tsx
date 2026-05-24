@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useRef } from "react";
 
-const NAV_ORDER = ["/", "/wellbeing", "/training", "/recovery", "/optimizer", "/profile"];
+const NAV_ORDER = ["/", "/wellbeing", "/training", "/matches", "/recovery", "/optimizer", "/profile"];
 
 type VTDocument = Document & {
   startViewTransition: (cb: () => void) => { finished: Promise<void> };

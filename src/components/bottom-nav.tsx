@@ -18,15 +18,13 @@ const items = [
     ),
   },
   {
-    href: "/training",
-    label: "Training",
+    href: "/matches",
+    label: "Matches",
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2" />
-        <line x1="16" y1="2" x2="16" y2="6" />
-        <line x1="8" y1="2" x2="8" y2="6" />
-        <line x1="3" y1="10" x2="21" y2="10" />
-        <polyline points="8,16 11,19 16,13" />
+        <circle cx="7.5" cy="12" r="3" />
+        <circle cx="16.5" cy="12" r="3" />
+        <line x1="10.5" y1="12" x2="13.5" y2="12" />
       </svg>
     ),
   },
@@ -36,6 +34,17 @@ const items = [
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 21C12 21 3 14 3 8a4 4 0 0 1 9-1.8A4 4 0 0 1 21 8c0 6-9 13-9 13z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/stats",
+    label: "Stats",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="20" x2="18" y2="10" />
+        <line x1="12" y1="20" x2="12" y2="4" />
+        <line x1="6" y1="20" x2="6" y2="14" />
       </svg>
     ),
   },
@@ -72,11 +81,10 @@ export default function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-col items-center gap-1 transition-all"
-              style={{ color: active ? "var(--green)" : "var(--muted)", transform: active ? "scale(1.1)" : "scale(1)" }}
+              className="flex flex-col items-center transition-all px-2 py-1"
+              style={{ color: active ? "var(--green)" : "var(--muted)" }}
             >
-              {item.icon}
-              <span className="text-[9px] font-bold tracking-wide uppercase">{item.label}</span>
+              <span className="text-[12px] font-semibold">{item.label}</span>
             </Link>
           );
         })}
