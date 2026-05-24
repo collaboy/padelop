@@ -30,6 +30,9 @@ export default function Halt1Page() {
   const [routineModal, setRoutineModal] = useState<{ label: string; detail: string } | null>(null);
   const [advOpen, setAdvOpen] = useState(false);
   const [mustDoExpanded, setMustDoExpanded] = useState(false);
+  const [addMatchOpen, setAddMatchOpen] = useState(false);
+  const [hydroOpen, setHydroOpen] = useState(false);
+  const [hydroLitres, setHydroLitres] = useState("");
 
   // Match info state
   const [matchInfoOpen, setMatchInfoOpen] = useState(false);
@@ -580,18 +583,36 @@ export default function Halt1Page() {
 
         {/* FAB speed dial */}
         {fabOpen && (
-          <div className="fixed inset-0 z-30" onClick={() => setFabOpen(false)} />
+          <div className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm" onClick={() => setFabOpen(false)} />
         )}
         <div className="fixed right-6 bottom-24 z-40 flex flex-col items-end gap-3">
           {fabOpen && [
             {
-              label: "Upload match screenshot",
+              label: "Add Match",
               icon: (
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/>
                 </svg>
               ),
-              action: () => { setFabOpen(false); setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); },
+              action: () => { setFabOpen(false); setAddMatchOpen(true); },
+            },
+            {
+              label: "Update Stats",
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#496640" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+                </svg>
+              ),
+              action: () => { setFabOpen(false); setCheckInOpen(true); },
+            },
+            {
+              label: "Update Hydro Tracker",
+              icon: (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0891b2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2C12 2 5 10 5 15a7 7 0 0 0 14 0c0-5-7-13-7-13z"/>
+                </svg>
+              ),
+              action: () => { setFabOpen(false); setHydroOpen(true); },
             },
           ].map((item, i) => (
             <div
@@ -855,6 +876,96 @@ export default function Halt1Page() {
           </div>
         </div>
       )}
+      {/* Add Match modal */}
+      {addMatchOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center px-3 pb-3" onClick={() => setAddMatchOpen(false)}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="h1-font relative w-full max-w-lg bg-white rounded-[28px] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-[#e2e2e2]" /></div>
+            <div className="px-6 pt-3 pb-2">
+              <p className="h1-headline-md text-[#1a1c1c]">Add Match</p>
+              <p className="text-[13px] text-[#747878] mt-0.5">How would you like to add it?</p>
+            </div>
+            <div className="px-6 pb-6 mt-3 flex flex-col gap-3">
+              <button
+                onClick={() => { setAddMatchOpen(false); setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }}
+                className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl bg-[#f4f4f4] active:scale-[0.98] transition-transform text-left"
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/>
+                </svg>
+                <div>
+                  <p className="text-[14px] font-semibold text-[#1a1c1c]">Upload Screenshot</p>
+                  <p className="text-[12px] text-[#747878]">Booking confirmation or WhatsApp</p>
+                </div>
+              </button>
+              <button
+                onClick={() => { setAddMatchOpen(false); setExtractedData({}); setMatchInfoOpen(true); }}
+                className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl bg-[#f4f4f4] active:scale-[0.98] transition-transform text-left"
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#496640" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                <div>
+                  <p className="text-[14px] font-semibold text-[#1a1c1c]">Insert Manually</p>
+                  <p className="text-[12px] text-[#747878]">Enter date, time, location, players</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hydro Tracker modal */}
+      {hydroOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center px-3 pb-3" onClick={() => setHydroOpen(false)}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="h1-font relative w-full max-w-lg bg-white rounded-[28px] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-[#e2e2e2]" /></div>
+            <div className="px-6 pt-3 pb-4 flex items-center justify-between">
+              <div>
+                <p className="h1-headline-md text-[#1a1c1c]">Hydro Tracker</p>
+                <p className="text-[13px] text-[#747878] mt-0.5">Target: 3.5L today</p>
+              </div>
+              <button onClick={() => setHydroOpen(false)} className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4]">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div className="px-6 pb-6 flex flex-col gap-4">
+              <div className="flex gap-2 flex-wrap">
+                {["250ml", "500ml", "750ml", "1L"].map(amt => (
+                  <button
+                    key={amt}
+                    onClick={() => setHydroLitres(amt)}
+                    className="flex-1 py-3 rounded-2xl text-[13px] font-semibold border transition-all active:scale-95"
+                    style={{ background: hydroLitres === amt ? "#0891b2" : "#f4f4f4", color: hydroLitres === amt ? "#fff" : "#747878", borderColor: hydroLitres === amt ? "#0891b2" : "#e2e2e2" }}
+                  >
+                    {amt}
+                  </button>
+                ))}
+              </div>
+              <div>
+                <p className="text-[12px] font-semibold text-[#747878] mb-1.5">Or enter amount</p>
+                <input
+                  type="text"
+                  value={hydroLitres}
+                  onChange={e => setHydroLitres(e.target.value)}
+                  placeholder="e.g. 600ml"
+                  className="h1-field-input"
+                />
+              </div>
+              <button
+                onClick={() => setHydroOpen(false)}
+                className="w-full py-3.5 rounded-2xl text-white text-[14px] font-semibold active:scale-[0.98] transition-transform"
+                style={{ background: "#0891b2" }}
+              >
+                Log
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Routine info modal */}
       {routineModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6" onClick={() => setRoutineModal(null)}>
