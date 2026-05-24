@@ -17,6 +17,9 @@ export default function Halt1Page() {
   const [hydration, setHydration] = useState(false);
   const [mobility, setMobility] = useState(false);
   const [visualise, setVisualise] = useState(true);
+  const [preMatchMeal, setPreMatchMeal] = useState(false);
+  const [sleep, setSleep] = useState(false);
+  const [boxBreathing, setBoxBreathing] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [scheduleModal, setScheduleModal] = useState<{ title: string; subtitle?: string; detail: string; color: string } | null>(null);
   const [checkInOpen, setCheckInOpen] = useState(false);
@@ -25,6 +28,8 @@ export default function Halt1Page() {
   const [countdown, setCountdown] = useState({ h: 0, m: 0, past: false });
   const [fabOpen, setFabOpen] = useState(false);
   const [routineModal, setRoutineModal] = useState<{ label: string; detail: string } | null>(null);
+  const [advOpen, setAdvOpen] = useState(false);
+  const [mustDoExpanded, setMustDoExpanded] = useState(false);
 
   // Match info state
   const [matchInfoOpen, setMatchInfoOpen] = useState(false);
@@ -219,7 +224,7 @@ export default function Halt1Page() {
                 <div className="w-1/2 px-6 py-4">
                   <p className="h1-label-sm text-[#747878] uppercase tracking-widest">Next Match Starts in</p>
                 </div>
-                <div className="w-1/2 px-6 py-4 border-l border-[#e2e2e2]">
+                <div className="w-1/2 px-6 py-4 border-l border-[#e2e2e2] flex items-center justify-center">
                   <div className="h1-font text-[32px] font-bold text-[#1a1c1c] leading-none tracking-tight">
                     {countdown.past
                       ? <span className="text-[#496640]">Now</span>
@@ -264,7 +269,7 @@ export default function Halt1Page() {
                       <circle cx="12" cy="12" r="10" />
                       <polyline points="8,12 11,15 16,9" />
                     </svg>
-                    <p className="text-[14px] font-semibold text-[#1a1c1c]">How do you feel?</p>
+                    <p className="text-[14px] font-semibold text-[#1a1c1c]">Update your stats...</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="h1-label-sm text-[#496640] bg-[#caecbc] px-2.5 py-1 rounded-full">Done</span>
@@ -279,11 +284,11 @@ export default function Halt1Page() {
                   className="w-full px-6 py-4 flex items-center justify-between active:scale-[0.98] transition-transform"
                 >
                   <div className="text-left">
-                    <p className="h1-headline-md text-[#1a1c1c]">How do you feel?</p>
-                    <p className="h1-body-md text-[#444748] mt-0.5">Click to update stats</p>
+                    <p className="h1-headline-md text-[#1a1c1c]">Update your stats...</p>
+                    <p className="h1-body-md text-[#444748] mt-0.5">Click to use quick wizard</p>
                   </div>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#444748" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-                    <path d="M9 18l6-6-6-6" />
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#444748" strokeWidth="2" strokeLinecap="round" className="flex-shrink-0">
+                    <line x1="8" y1="2" x2="8" y2="14" /><line x1="2" y1="8" x2="14" y2="8" />
                   </svg>
                 </button>
               )}
@@ -347,51 +352,76 @@ export default function Halt1Page() {
 
             {/* Do This Right Now */}
             <div className="bg-white rounded-[24px] p-6 h1-ambient border border-[#c4c7c7]/10">
-              <div className="flex items-center gap-2 mb-4">
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#1a1c1c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="9" y1="1" x2="9" y2="13" />
-                  <polyline points="5,9 9,13 13,9" />
-                  <line x1="3" y1="17" x2="15" y2="17" />
-                </svg>
-                <h3 className="h1-headline-md text-black">Do This Right Now</h3>
-              </div>
-              <div className="space-y-4">
-                {[
-                  { label: "Hydration (500ml Electrolytes)", checked: hydration, set: setHydration, detail: "Drink 500ml of water with electrolytes before you do anything else. After hours of sleep your body is dehydrated — even mild dehydration (1–2%) measurably reduces reaction time, concentration, and physical output. Electrolytes (sodium, potassium, magnesium) help your cells absorb the water faster than plain water alone." },
-                  { label: "10min Dynamic Mobility",         checked: mobility,  set: setMobility,  detail: "Spend 10 minutes on dynamic mobility — leg swings, hip circles, thoracic rotations, and lateral lunges. This increases blood flow to the joints and primes the neuromuscular system for explosive movement. Static stretching before a match reduces power output; dynamic movement builds it." },
-                  { label: "Visualise Key Tactics",          checked: visualise, set: setVisualise, detail: "Close your eyes for 3–5 minutes and mentally rehearse your key patterns: your serve placement, your net approach after a quality drive, and your reset lob when under pressure. Visualisation activates the same neural pathways as physical practice. Athletes who visualise consistently perform better under match pressure." },
-                ].map(({ label, checked, set, detail }) => (
-                  <div key={label} className="flex items-center gap-4">
-                    <label className="flex items-center gap-4 flex-1 cursor-pointer group">
-                      <div className="relative flex items-center justify-center w-6 h-6 rounded-lg border-2 border-[#747878] group-active:scale-90 transition-transform flex-shrink-0">
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={(e) => set(e.target.checked)}
-                          className="peer absolute opacity-0 w-full h-full cursor-pointer"
-                        />
-                        <span
-                          className="material-symbols-outlined text-[#496640] opacity-0 peer-checked:opacity-100 transition-opacity"
-                          style={{ fontSize: 18, fontVariationSettings: "'FILL' 1, 'wght' 600" }}
-                        >
-                          check
+              {(() => {
+                const items = [
+                  { label: "Hydration 3.5L",      checked: hydration,    set: setHydration,    detail: "Drink 500ml of water with electrolytes before you do anything else. After hours of sleep your body is dehydrated — even mild dehydration (1–2%) measurably reduces reaction time, concentration, and physical output. Electrolytes (sodium, potassium, magnesium) help your cells absorb the water faster than plain water alone." },
+                  { label: "Pre-match meal (2–3h out)",  checked: preMatchMeal, set: setPreMatchMeal, detail: "Eat a moderate meal 2–3 hours before the match: carbohydrates for fuel (rice, pasta, oats), lean protein to protect muscle, and nothing heavy or unfamiliar. This window gives your body time to digest without leaving you under-fuelled. Avoid high-fat and high-fibre foods close to match time — they slow digestion and can cause discomfort mid-game." },
+                  { label: "10min Dynamic Mobility",     checked: mobility,     set: setMobility,     detail: "Spend 10 minutes on dynamic mobility — leg swings, hip circles, thoracic rotations, and lateral lunges. This increases blood flow to the joints and primes the neuromuscular system for explosive movement. Static stretching before a match reduces power output; dynamic movement builds it." },
+                  { label: "Visualise Key Tactics",      checked: visualise,    set: setVisualise,    detail: "Close your eyes for 3–5 minutes and mentally rehearse your key patterns: your serve placement, your net approach after a quality drive, and your reset lob when under pressure. Visualisation activates the same neural pathways as physical practice. Athletes who visualise consistently perform better under match pressure." },
+                  { label: "Box Breathing (4x4)",        checked: boxBreathing, set: setBoxBreathing, detail: "Box breathing regulates your autonomic nervous system before competition. Inhale for 4 counts, hold for 4, exhale for 4, hold for 4 — repeat 4–6 cycles. This technique is used by elite athletes and military operators to lower heart rate and cortisol, sharpen focus, and shift from anxious anticipation to controlled readiness. Do it 15–30 minutes before warm-up." },
+                  { label: "Sleep 7–9h tonight",         checked: sleep,        set: setSleep,        detail: "Sleep is the single highest-leverage recovery tool available. During deep sleep your body releases growth hormone, repairs muscle tissue, and consolidates motor patterns learned during training. Even one night under 6 hours measurably reduces reaction time, decision-making speed, and injury resilience. Prioritise a consistent bedtime — it matters more than any supplement." },
+                ];
+                const sorted = [...items.filter(i => !i.checked), ...items.filter(i => i.checked)];
+                const doneCount = items.filter(i => i.checked).length;
+                const total = items.length;
+                const visible = mustDoExpanded ? sorted : sorted.slice(0, 3);
+                return (
+                  <>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="h1-headline-md text-black">Must Do&apos;s Today</h3>
+                      {doneCount > 0 && (
+                        <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: doneCount === total ? "#caecbc" : "#f4f4f4", color: doneCount === total ? "#496640" : "#747878" }}>
+                          {doneCount === total ? "⚡ All done" : `${doneCount}/${total}`}
                         </span>
-                      </div>
-                      <span className={`h1-body-md text-[#444748] ${checked ? "line-through opacity-50" : ""}`}>
-                        {label}
-                      </span>
-                    </label>
-                    <button
-                      onClick={() => setRoutineModal({ label, detail })}
-                      className="flex-shrink-0 w-6 h-6 flex items-center justify-center active:scale-90 transition-transform"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#c4c7c7" strokeWidth="1.8" strokeLinecap="round">
-                        <line x1="7" y1="2" x2="7" y2="12" /><line x1="2" y1="7" x2="12" y2="7" />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-              </div>
+                      )}
+                    </div>
+                    <div className="space-y-4">
+                      {visible.map(({ label, checked, set, detail }) => (
+                        <div key={label} className="flex items-center gap-4">
+                          <label className="flex items-center gap-4 flex-1 cursor-pointer group">
+                            <div className="relative flex items-center justify-center w-6 h-6 rounded-lg border-2 border-[#747878] group-active:scale-90 transition-transform flex-shrink-0">
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={(e) => set(e.target.checked)}
+                                className="peer absolute opacity-0 w-full h-full cursor-pointer"
+                              />
+                              <span
+                                className="material-symbols-outlined text-[#496640] opacity-0 peer-checked:opacity-100 transition-opacity"
+                                style={{ fontSize: 18, fontVariationSettings: "'FILL' 1, 'wght' 600" }}
+                              >
+                                check
+                              </span>
+                            </div>
+                            <span className={`h1-body-md text-[#444748] ${checked ? "line-through opacity-50" : ""}`}>
+                              {label}
+                            </span>
+                          </label>
+                          <button
+                            onClick={() => setRoutineModal({ label, detail })}
+                            className="flex-shrink-0 w-6 h-6 flex items-center justify-center active:scale-90 transition-transform"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#c4c7c7" strokeWidth="1.8" strokeLinecap="round">
+                              <line x1="7" y1="2" x2="7" y2="12" /><line x1="2" y1="7" x2="12" y2="7" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    {!mustDoExpanded && (
+                      <button
+                        onClick={() => setMustDoExpanded(true)}
+                        className="flex items-center gap-1 pt-3 active:opacity-60 transition-opacity"
+                      >
+                        <span className="text-[13px] font-semibold text-[#747878]">More</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M6 9l6 6 6-6" />
+                        </svg>
+                      </button>
+                    )}
+                  </>
+                );
+              })()}
             </div>
 
             {/* Today's Schedule */}
@@ -562,44 +592,55 @@ export default function Halt1Page() {
 
       {/* Daily Check-In modal */}
       {checkInOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-6" onClick={() => setCheckInOpen(false)}>
+        <div className="fixed inset-0 z-50 flex items-end justify-center px-3 pb-3" onClick={() => setCheckInOpen(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div
-            className="h1-font relative w-full max-w-sm bg-white rounded-[24px] h1-ambient overflow-hidden flex flex-col"
-            style={{ maxHeight: "calc(100vh - 48px)" }}
+            className="h1-font relative w-full max-w-lg bg-white rounded-[28px] overflow-hidden flex flex-col max-h-[88vh]"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Handle */}
+            <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+              <div className="w-10 h-1 rounded-full bg-[#e2e2e2]" />
+            </div>
             {/* Header */}
-            <div className="px-6 pt-5 pb-4 flex-shrink-0 flex items-center justify-between" style={{ background: "#ffe600" }}>
-              <p className="h1-headline-md text-[#1a1c1c]">How do you feel?</p>
-              <button onClick={() => setCheckInOpen(false)} className="opacity-40 active:opacity-70">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round">
+            <div className="px-6 pt-3 pb-4 flex items-center justify-between flex-shrink-0">
+              <div>
+                <p className="h1-headline-md text-[#1a1c1c]">Update your stats</p>
+                <p className="h1-label-sm text-[#747878] mt-0.5">Rate each on a scale of 1–5</p>
+              </div>
+              <button onClick={() => setCheckInOpen(false)} className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4] transition-colors">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round">
                   <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
               </button>
             </div>
 
-            {/* Body */}
-            <div className="px-6 pt-4 pb-5 overflow-y-auto space-y-3">
+            {/* Metrics */}
+            <div className="px-6 pb-6 space-y-4 overflow-y-auto">
               {([
-                { key: "sleep",     label: "Sleep"     },
-                { key: "energy",    label: "Energy"    },
-                { key: "soreness",  label: "Soreness"  },
-                { key: "hydration", label: "Hydration" },
-              ] as { key: keyof typeof checkIn; label: string }[]).map(({ key, label }) => (
-                <div key={key} className="flex items-center gap-3">
-                  <p className="h1-body-md font-semibold text-[#1a1c1c] w-20 flex-shrink-0">{label}</p>
-                  <div className="flex gap-1.5 flex-1">
+                { key: "sleep",     label: "Sleep",     sub: "Hours & quality"   },
+                { key: "energy",    label: "Energy",    sub: "How alert you feel" },
+                { key: "soreness",  label: "Soreness",  sub: "Muscle fatigue"    },
+                { key: "hydration", label: "Hydration", sub: "Fluid intake"      },
+              ] as { key: keyof typeof checkIn; label: string; sub: string }[]).map(({ key, label, sub }) => (
+                <div key={key}>
+                  <div className="flex items-baseline justify-between mb-2">
+                    <p className="text-[14px] font-semibold text-[#1a1c1c]">{label}</p>
+                    <p className="h1-label-sm text-[#747878]">{sub}</p>
+                  </div>
+                  <div className="flex gap-2">
                     {[1,2,3,4,5].map(n => {
                       const selected = checkIn[key] === n;
                       return (
                         <button
                           key={n}
                           onClick={() => setCheckIn(c => ({ ...c, [key]: n }))}
-                          className="flex-1 py-2 rounded-xl h1-label-sm transition-all active:scale-90"
+                          className="w-11 h-11 rounded-full text-[13px] font-semibold transition-all active:scale-90 border flex-1"
                           style={{
-                            background: selected ? "#4169e1" : "#f4f4f4",
-                            color: selected ? "#fff" : "#9aabb6",
+                            background: selected ? "#4169e1" : "#f9f9f9",
+                            color: selected ? "#fff" : "#747878",
+                            borderColor: selected ? "#4169e1" : "#e2e2e2",
+                            maxWidth: 52,
                           }}
                         >
                           {n}
@@ -610,10 +651,40 @@ export default function Halt1Page() {
                 </div>
               ))}
 
+              {/* Advanced toggle */}
+              <div className="border-t border-[#e2e2e2] pt-3">
+                <button
+                  onClick={() => setAdvOpen(o => !o)}
+                  className="flex items-center justify-between w-full active:opacity-70 transition-opacity"
+                >
+                  <div className="flex items-center gap-2">
+                    <p className="text-[13px] font-semibold text-[#747878]">Adv. Reporting</p>
+                    <span className="h1-label-sm text-[#9aabb6] bg-[#f4f4f4] px-2 py-0.5 rounded-full">Optional</span>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: advOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+                {advOpen && (
+                  <div className="mt-3 space-y-3">
+                    {(["HRV", "Resting HR", "Body Weight", "Mood"] as const).map(label => (
+                      <div key={label} className="flex items-center gap-3">
+                        <p className="text-[13px] font-semibold text-[#1a1c1c] w-24 flex-shrink-0">{label}</p>
+                        <input
+                          type="text"
+                          placeholder="—"
+                          className="flex-1 h1-field-input text-[13px]"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <button
                 onClick={() => { setCheckInDone(true); setCheckInOpen(false); }}
-                className="w-full py-3 rounded-2xl text-white h1-label-sm active:scale-[0.98] transition-transform mt-1"
-                style={{ background: "#22c55e" }}
+                className="w-full py-3.5 rounded-2xl text-white text-[14px] font-semibold active:scale-[0.98] transition-transform"
+                style={{ background: "#4169e1" }}
               >
                 Save
               </button>
