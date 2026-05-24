@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#2653d4"/>
+  <!-- Padel racket body -->
+  <ellipse cx="256" cy="210" rx="110" ry="130" fill="none" stroke="#ffffff" stroke-width="28" stroke-linecap="round"/>
+  <!-- Racket handle -->
+  <line x1="256" y1="340" x2="256" y2="430" stroke="#ffffff" stroke-width="28" stroke-linecap="round"/>
+  <!-- Cross strings horizontal -->
+  <line x1="165" y1="190" x2="347" y2="190" stroke="#ffffff" stroke-width="10" stroke-linecap="round" opacity="0.5"/>
+  <line x1="155" y1="230" x2="357" y2="230" stroke="#ffffff" stroke-width="10" stroke-linecap="round" opacity="0.5"/>
+  <line x1="165" y1="270" x2="347" y2="270" stroke="#ffffff" stroke-width="10" stroke-linecap="round" opacity="0.5"/>
+  <!-- Cross strings vertical -->
+  <line x1="216" y1="100" x2="216" y2="336" stroke="#ffffff" stroke-width="10" stroke-linecap="round" opacity="0.5"/>
+  <line x1="256" y1="82" x2="256" y2="340" stroke="#ffffff" stroke-width="10" stroke-linecap="round" opacity="0.5"/>
+  <line x1="296" y1="100" x2="296" y2="336" stroke="#ffffff" stroke-width="10" stroke-linecap="round" opacity="0.5"/>
+  <!-- Ball -->
+  <circle cx="355" cy="370" r="38" fill="#ffe600"/>
+</svg>

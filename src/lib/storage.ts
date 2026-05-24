@@ -11,6 +11,7 @@ export const KEYS = {
   hydrationLogs:  "padelop:hydration-logs",
   nutritionLogs:  "padelop:nutrition-logs",
   statsGlasses:   "padelop:stats:glasses",
+  profile:        "padelop:profile",
 } as const;
 
 // Week-plan flags are keyed by Monday YMD — collected dynamically on export.

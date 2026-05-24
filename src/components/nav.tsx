@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { downloadSnapshot, importData } from "@/lib/storage";
+import ProfileModal from "@/components/profile-modal";
 
 export default function Nav() {
   const pct = 71;
@@ -11,6 +12,7 @@ export default function Nav() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [importDone, setImportDone] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const importRef = useRef<HTMLInputElement>(null);
 
   const notifications = [
@@ -62,6 +64,11 @@ export default function Nav() {
   ];
 
   const dataItems = [
+    {
+      label: "My Profile",
+      action: () => { setProfileOpen(true); setMenuOpen(false); },
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>,
+    },
     {
       label: "Export my data",
       action: () => { downloadSnapshot(); setMenuOpen(false); },
@@ -179,6 +186,8 @@ export default function Nav() {
           </div>
         </div>
       )}
+
+      <ProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} />
 
       {/* Hidden import file input */}
       <input
