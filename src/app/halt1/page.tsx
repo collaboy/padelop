@@ -249,15 +249,26 @@ export default function Halt1Page() {
                 </svg>
               </div>
               <div className="border-t border-[#e2e2e2]" />
-              <button
-                onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }}
-                className="w-full px-6 py-3 flex items-center gap-2 active:opacity-60 transition-opacity"
-              >
-                <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="#9aab96" strokeWidth="1.8" strokeLinecap="round">
-                  <line x1="5.5" y1="1" x2="5.5" y2="10" /><line x1="1" y1="5.5" x2="10" y2="5.5" />
-                </svg>
-                <span className="text-[12px] font-medium text-[#9aab96]">Add a match</span>
-              </button>
+              <div className="flex divide-x divide-[#e2e2e2]">
+                <button
+                  onClick={() => window.dispatchEvent(new CustomEvent("open-week-plan"))}
+                  className="flex-1 px-4 py-3 flex items-center justify-center gap-2 active:opacity-60 transition-opacity"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aab96" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  <span className="text-[12px] font-medium text-[#9aab96]">See week</span>
+                </button>
+                <button
+                  onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }}
+                  className="flex-1 px-4 py-3 flex items-center justify-center gap-2 active:opacity-60 transition-opacity"
+                >
+                  <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="#9aab96" strokeWidth="1.8" strokeLinecap="round">
+                    <line x1="5.5" y1="1" x2="5.5" y2="10" /><line x1="1" y1="5.5" x2="10" y2="5.5" />
+                  </svg>
+                  <span className="text-[12px] font-medium text-[#9aab96]">Add a match</span>
+                </button>
+              </div>
             </div>
 
             {/* Daily Check-In + Metrics (connected) */}
