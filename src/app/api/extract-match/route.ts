@@ -3,11 +3,16 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 30;
 
-const client = new Anthropic();
-
 const MAX_BYTES = 4.5 * 1024 * 1024; // 4.5 MB decoded limit
 
 export async function POST(req: NextRequest) {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json(
+      { error: "no_api_key", message: "ANTHROPIC_API_KEY is not configured. Add it to .env.local and restart the server." },
+      { status: 503 }
+    );
+  }
+
   let body: { image: string; mediaType: string };
   try {
     body = await req.json();
@@ -31,6 +36,8 @@ export async function POST(req: NextRequest) {
   if (decodedBytes > MAX_BYTES) {
     return NextResponse.json({ error: "too_large", message: "Image is too large. Please use a screenshot under 4.5 MB." }, { status: 413 });
   }
+
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
   let raw: string;
   try {
