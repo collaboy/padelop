@@ -427,6 +427,63 @@ export default function HomeClient() {
   const cardTouchX = useRef(0);
   const notifTimeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
 
+  // Daily Optimizer
+  const [checkInOpen, setCheckInOpen] = useState(false);
+  const [checkInDone, setCheckInDone] = useState(false);
+  const [checkIn, setCheckIn] = useState({ sleep: 3, energy: 3, soreness: 3, hydration: 3 });
+
+  // Match Info
+  const HOME_FIELD_LABELS: Record<string, string> = { date: "Date", time: "Time", player_1: "Player 1", player_2: "Player 2", player_3: "Player 3", player_4: "Player 4", club: "Club / Venue", court: "Court" };
+  const [homeMatchOpen, setHomeMatchOpen] = useState(false);
+  const [homeMatchDone, setHomeMatchDone] = useState(false);
+  const [homeUploading, setHomeUploading] = useState(false);
+  const [homeUploadError, setHomeUploadError] = useState<string | null>(null);
+  const [homeExtracted, setHomeExtracted] = useState<Record<string, string | null> | null>(null);
+  const [homeEdited, setHomeEdited] = useState<Record<string, string>>({});
+  const homeFileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("padelop:next-match");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setHomeExtracted(parsed);
+        setHomeEdited(Object.fromEntries(Object.keys(HOME_FIELD_LABELS).map(k => [k, parsed[k] ?? ""])));
+        setHomeMatchDone(true);
+      } catch {}
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleHomeFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+    if (file.size > 4 * 1024 * 1024) { setHomeUploadError("Image too large. Please use a screenshot under 4 MB."); return; }
+    setHomeUploadError(null);
+    setHomeUploading(true);
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64 = (reader.result as string).split(",")[1];
+      try {
+        const res = await fetch("/api/extract-match", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ image: base64, mediaType: file.type }) });
+        const data = await res.json();
+        if (data.error) { setHomeUploadError(data.message || "Couldn't read that screenshot."); setHomeUploading(false); return; }
+        setHomeExtracted(data);
+        setHomeEdited(Object.fromEntries(Object.keys(HOME_FIELD_LABELS).map(k => [k, data[k] ?? ""])));
+        setHomeUploading(false);
+      } catch { setHomeUploadError("Network error. Please try again."); setHomeUploading(false); }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const confirmHomeMatch = () => {
+    localStorage.setItem("padelop:next-match", JSON.stringify(homeEdited));
+    setHomeExtracted(homeEdited);
+    setHomeMatchDone(true);
+    setHomeMatchOpen(false);
+  };
+
   useEffect(() => {
     if (!("Notification" in window)) return;
     Notification.requestPermission().then(permission => {
@@ -741,31 +798,31 @@ export default function HomeClient() {
 
       {/* Match Ready hero card */}
       <div className="pt-[80px] px-5 md:px-12 pb-4 bg-[var(--bg)]">
-        <div className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm px-4 py-3 flex items-center gap-4">
+        <div className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm px-4 py-1 flex flex-col items-center text-center gap-2">
           {/* Ring */}
-          <div className="flex-shrink-0 relative" style={{ width: 128, height: 128 }}>
-            <svg width="128" height="128" viewBox="0 0 128 128">
-              <circle cx="64" cy="64" r={ringR} fill="none" stroke="var(--border)" strokeWidth="8" />
+          <div className="relative w-full" style={{ maxWidth: 260, aspectRatio: "1/1", marginTop: "-20px", marginBottom: "-28px" }}>
+            <svg width="100%" height="100%" viewBox="0 0 160 160">
+              <circle cx="80" cy="80" r={ringR} fill="none" stroke="var(--border)" strokeWidth="8" />
               <circle
-                cx="64" cy="64" r={ringR} fill="none"
+                cx="80" cy="80" r={ringR} fill="none"
                 stroke="#2653d4" strokeWidth="8" strokeLinecap="round"
                 strokeDasharray={ringC}
                 strokeDashoffset={ringC * (1 - pct / 100)}
-                style={{ transform: "rotate(-90deg)", transformOrigin: "64px 64px", transition: "stroke-dashoffset 0.6s ease" }}
+                style={{ transform: "rotate(-90deg)", transformOrigin: "80px 80px", transition: "stroke-dashoffset 0.6s ease" }}
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
-              <p className="text-[7px] font-bold tracking-wide uppercase text-[var(--muted)] leading-none">MATCH READY</p>
-              <p className="text-3xl font-extrabold leading-none text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>{pct}<span className="text-base">%</span></p>
-              <p className="text-[7px] font-bold tracking-wide uppercase text-[var(--muted)] leading-none">Optimizer Score</p>
+              <p className="text-[8px] font-bold tracking-wide uppercase text-[var(--muted)] leading-none">MATCH READY</p>
+              <p className="text-4xl font-extrabold leading-none text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>{pct}<span className="text-lg">%</span></p>
+              <p className="text-[8px] font-bold tracking-wide uppercase text-[var(--muted)] leading-none">Optimizer Score</p>
             </div>
           </div>
 
           {/* Message */}
-          <div className="flex-1 flex flex-col">
+          <div className="flex flex-col items-center">
             <p className="text-2xl font-extrabold text-[var(--text)] leading-tight mb-1" style={{ fontFamily: "var(--font-hanken)" }}>{matchReadyHeading}</p>
             <p className="text-xs text-[var(--muted)] leading-snug mb-4">{matchReadySubtitle}</p>
-            <Link href="/optimizer" className="self-start flex items-center gap-1 px-3 py-1 rounded-full border border-[var(--border)] text-[9px] font-bold tracking-widest uppercase active:scale-95 transition-transform" style={{ background: "var(--bg)", color: "var(--muted)" }}>
+            <Link href="/optimizer" className="flex items-center gap-1 px-3 py-1 mb-6 rounded-full border border-[var(--border)] text-[9px] font-bold tracking-widest uppercase active:scale-95 transition-transform" style={{ background: "var(--bg)", color: "var(--muted)" }}>
               Improve Score
               <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="3,1 8,5 3,9" />
@@ -773,6 +830,110 @@ export default function HomeClient() {
             </Link>
           </div>
         </div>
+      </div>
+
+      {/* Next Match card */}
+      {(() => {
+        let nextYMD: string | null = null;
+        for (let i = 0; i <= 30; i++) {
+          const ymd = offsetYMD(todayYMD, i);
+          if (gameDays.includes(ymd)) { nextYMD = ymd; break; }
+        }
+        if (!nextYMD) nextYMD = todayYMD;
+        const isToday = nextYMD === todayYMD;
+        const d = new Date(nextYMD);
+        const dateLabel = isToday ? "Today" : d.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
+        return (
+          <div className="px-5 md:px-12 pb-4 bg-[var(--bg)]">
+            <div className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden">
+            <Link href="/matches" className="w-full px-4 py-5 flex items-center gap-4 relative overflow-hidden active:opacity-70 transition-opacity">
+              {/* Greyscale racket + ball background, fading left */}
+              <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+                <svg className="absolute right-0 top-0 h-full" style={{ width: "72%" }} viewBox="0 0 200 90" fill="none" preserveAspectRatio="xMaxYMid meet" opacity="0.13">
+                  <g transform="rotate(-22, 148, 72)">
+                    <rect x="110" y="4" width="76" height="82" rx="20" fill="#111" />
+                    <rect x="118" y="12" width="60" height="66" rx="14" fill="white" />
+                    <circle cx="131" cy="25" r="4.5" fill="#111" />
+                    <circle cx="148" cy="25" r="4.5" fill="#111" />
+                    <circle cx="165" cy="25" r="4.5" fill="#111" />
+                    <circle cx="131" cy="40" r="4.5" fill="#111" />
+                    <circle cx="148" cy="40" r="4.5" fill="#111" />
+                    <circle cx="165" cy="40" r="4.5" fill="#111" />
+                    <circle cx="131" cy="55" r="4.5" fill="#111" />
+                    <circle cx="148" cy="55" r="4.5" fill="#111" />
+                    <circle cx="165" cy="55" r="4.5" fill="#111" />
+                    <circle cx="131" cy="70" r="4.5" fill="#111" />
+                    <circle cx="148" cy="70" r="4.5" fill="#111" />
+                    <circle cx="165" cy="70" r="4.5" fill="#111" />
+                    <path d="M132 86 Q148 80 164 86 L164 88 Q148 96 132 88 Z" fill="#111" />
+                    <rect x="138" y="86" width="20" height="26" rx="5" fill="#111" />
+                    <line x1="138" y1="94" x2="158" y2="94" stroke="white" strokeWidth="1.5" />
+                    <line x1="138" y1="102" x2="158" y2="102" stroke="white" strokeWidth="1.5" />
+                  </g>
+                  <circle cx="44" cy="46" r="26" fill="#111" />
+                  <path d="M24 32 C32 22, 56 22, 64 32" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                  <path d="M24 60 C32 70, 56 70, 64 60" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                </svg>
+                <div className="absolute inset-0 rounded-2xl" style={{ background: "linear-gradient(to right, var(--surface) 28%, transparent 72%)" }} />
+              </div>
+              <div className="flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center relative" style={{ background: "#2653d4" }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="2" width="18" height="20" rx="1" />
+                  <line x1="3" y1="12" x2="21" y2="12" />
+                  <line x1="12" y1="5" x2="12" y2="12" />
+                  <line x1="12" y1="12" x2="12" y2="19" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0 relative">
+                <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)] mb-0.5">Next Match</p>
+                <p className="text-sm font-extrabold text-[var(--text)] leading-tight" style={{ fontFamily: "var(--font-hanken)" }}>
+                  {dateLabel}{gameDetails.time ? ` · ${gameDetails.time}` : ""}
+                </p>
+                <div className="flex items-center gap-1 mt-1">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--muted)] flex-shrink-0">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
+                  </svg>
+                  <p className="text-xs text-[var(--muted)] truncate">{gameDetails.location || "—"}</p>
+                </div>
+              </div>
+              <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 relative text-[var(--muted)]">
+                <polyline points="1,1 6,6 1,11" />
+              </svg>
+            </Link>
+            <div className="border-t border-[var(--border)]" />
+            <button
+              onClick={() => { setHomeExtracted(null); setHomeUploadError(null); setHomeMatchOpen(true); }}
+              className="w-full px-4 py-2.5 flex items-center gap-2 active:opacity-60 transition-opacity"
+            >
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="#9aab96" strokeWidth="1.8" strokeLinecap="round">
+                <line x1="5.5" y1="1" x2="5.5" y2="10"/><line x1="1" y1="5.5" x2="10" y2="5.5"/>
+              </svg>
+              <span className="text-[12px] font-medium text-[#9aab96]">Add a match</span>
+            </button>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Daily Optimizer card */}
+      <div className="px-5 md:px-12 pb-4 bg-[var(--bg)]">
+        {checkInDone ? (
+          <button onClick={() => setCheckInOpen(true)} className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm px-4 py-3 flex items-center justify-between active:scale-[0.98] transition-all">
+            <div className="flex items-center gap-3">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="8,12 11,15 16,9"/></svg>
+              <span className="text-sm font-bold text-[var(--text)]">Daily Optimizer</span>
+            </div>
+            <span className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">Done</span>
+          </button>
+        ) : (
+          <button onClick={() => setCheckInOpen(true)} className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm px-4 py-5 flex items-center justify-between active:scale-[0.98] transition-transform">
+            <div className="text-left">
+              <p className="text-lg font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>Daily Optimizer</p>
+              <p className="text-sm text-[var(--muted)] mt-0.5">Rate how you&apos;re feeling today</p>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        )}
       </div>
 
       {/* Category bars card */}
@@ -828,7 +989,7 @@ export default function HomeClient() {
                             <circle cx={cx} cy={cx} r={r} />
                           </clipPath>
                         </defs>
-                        <circle cx={cx} cy={cx} r={r} fill="var(--border)" />
+                        <circle cx={cx} cy={cx} r={r} fill="#e8ebee" />
                         <rect x="0" y={fillY} width={sz} height={fillH} fill={color} clipPath={`url(#fc-${label})`} />
                       </svg>
                       <p className="text-[9px] sm:text-[11px] font-bold text-[var(--text)] leading-tight text-center truncate w-full">{label}</p>
@@ -843,85 +1004,19 @@ export default function HomeClient() {
         );
       })()}
 
-      {/* Next Match card */}
-      {(() => {
-        let nextYMD: string | null = null;
-        for (let i = 0; i <= 30; i++) {
-          const ymd = offsetYMD(todayYMD, i);
-          if (gameDays.includes(ymd)) { nextYMD = ymd; break; }
-        }
-        if (!nextYMD) nextYMD = todayYMD;
-        const isToday = nextYMD === todayYMD;
-        const d = new Date(nextYMD);
-        const dateLabel = isToday ? "Today" : d.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
-        return (
-          <div className="px-5 md:px-12 pb-3 bg-[var(--bg)]">
-            <div className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm px-4 py-4 flex items-center gap-4 relative overflow-hidden">
-              {/* Greyscale racket + ball background, fading left */}
-              <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-                <svg className="absolute right-0 top-0 h-full" style={{ width: "72%" }} viewBox="0 0 200 90" fill="none" preserveAspectRatio="xMaxYMid meet" opacity="0.13">
-                  {/* Racket — rotated -22deg around grip base */}
-                  <g transform="rotate(-22, 148, 72)">
-                    {/* Outer frame */}
-                    <rect x="110" y="4" width="76" height="82" rx="20" fill="#111" />
-                    {/* Inner hitting surface */}
-                    <rect x="118" y="12" width="60" height="66" rx="14" fill="white" />
-                    {/* Hole grid 3×4 */}
-                    <circle cx="131" cy="25" r="4.5" fill="#111" />
-                    <circle cx="148" cy="25" r="4.5" fill="#111" />
-                    <circle cx="165" cy="25" r="4.5" fill="#111" />
-                    <circle cx="131" cy="40" r="4.5" fill="#111" />
-                    <circle cx="148" cy="40" r="4.5" fill="#111" />
-                    <circle cx="165" cy="40" r="4.5" fill="#111" />
-                    <circle cx="131" cy="55" r="4.5" fill="#111" />
-                    <circle cx="148" cy="55" r="4.5" fill="#111" />
-                    <circle cx="165" cy="55" r="4.5" fill="#111" />
-                    <circle cx="131" cy="70" r="4.5" fill="#111" />
-                    <circle cx="148" cy="70" r="4.5" fill="#111" />
-                    <circle cx="165" cy="70" r="4.5" fill="#111" />
-                    {/* Throat taper */}
-                    <path d="M132 86 Q148 80 164 86 L164 88 Q148 96 132 88 Z" fill="#111" />
-                    {/* Handle/grip */}
-                    <rect x="138" y="86" width="20" height="26" rx="5" fill="#111" />
-                    {/* Grip wrap lines */}
-                    <line x1="138" y1="94" x2="158" y2="94" stroke="white" strokeWidth="1.5" />
-                    <line x1="138" y1="102" x2="158" y2="102" stroke="white" strokeWidth="1.5" />
-                  </g>
-                  {/* Ball */}
-                  <circle cx="44" cy="46" r="26" fill="#111" />
-                  {/* Ball seam curves */}
-                  <path d="M24 32 C32 22, 56 22, 64 32" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                  <path d="M24 60 C32 70, 56 70, 64 60" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                </svg>
-                <div className="absolute inset-0 rounded-2xl" style={{ background: "linear-gradient(to right, var(--surface) 28%, transparent 72%)" }} />
-              </div>
-              <div className="flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center relative" style={{ background: "#2653d4" }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="2" width="18" height="20" rx="1" />
-                  <line x1="3" y1="12" x2="21" y2="12" />
-                  <line x1="12" y1="5" x2="12" y2="12" />
-                  <line x1="12" y1="12" x2="12" y2="19" />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0 relative">
-                <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)] mb-0.5">Next Match</p>
-                <p className="text-sm font-extrabold text-[var(--text)] leading-tight" style={{ fontFamily: "var(--font-hanken)" }}>
-                  {dateLabel}{gameDetails.time ? ` · ${gameDetails.time}` : ""}
-                </p>
-                <div className="flex items-center gap-1 mt-1">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--muted)] flex-shrink-0">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
-                  </svg>
-                  <p className="text-xs text-[var(--muted)] truncate">{gameDetails.location || "—"}</p>
-                </div>
-              </div>
-              <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 relative text-[var(--muted)]">
-                <polyline points="1,1 6,6 1,11" />
-              </svg>
-            </div>
-          </div>
-        );
-      })()}
+      {/* Improve card */}
+      <div className="px-5 md:px-12 pb-4 bg-[var(--bg)]">
+        <Link href="/recovery" className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm px-4 py-4 flex items-center justify-center gap-3 relative active:scale-[0.98] transition-transform">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+            <polyline points="17 6 23 6 23 12" />
+          </svg>
+          <span className="text-sm font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>Improve</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="absolute right-4">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </Link>
+      </div>
 
       {/* Today / This Week toggle card */}
       <div className="px-5 md:px-12 pb-3 bg-[var(--bg)]">
@@ -1719,6 +1814,89 @@ export default function HomeClient() {
             {/* Detail body */}
             <div className="px-6 py-5">
               <p className="text-sm text-[var(--text)] leading-relaxed">{scheduleModal.detail}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Daily Optimizer modal */}
+      {checkInOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6" onClick={() => setCheckInOpen(false)}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="relative w-full max-w-sm bg-[var(--surface)] rounded-3xl overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="px-6 pt-6 pb-2 bg-green-50">
+              <p className="text-base font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>Daily Optimizer</p>
+              <p className="text-xs text-[var(--muted)] mt-0.5 mb-4">How are you feeling today?</p>
+            </div>
+            <div className="px-6 py-5 space-y-6">
+              {([{ key: "sleep", label: "Sleep" }, { key: "energy", label: "Energy" }, { key: "soreness", label: "Soreness" }, { key: "hydration", label: "Hydration" }] as { key: keyof typeof checkIn; label: string }[]).map(({ key, label }) => (
+                <div key={key}>
+                  <p className="text-xs font-bold text-[var(--text)] mb-2">{label}</p>
+                  <div className="flex gap-2">
+                    {[1,2,3,4,5].map(n => {
+                      const sel = checkIn[key] === n;
+                      return (
+                        <button key={n} onClick={() => setCheckIn(c => ({ ...c, [key]: n }))} className="flex-1 aspect-square rounded-full flex items-center justify-center text-sm font-bold transition-all active:scale-90"
+                          style={{ background: sel ? "var(--green)" : "transparent", color: sel ? "#fff" : "var(--muted)", border: sel ? "2px solid var(--green)" : "2px solid var(--border)" }}>
+                          {n}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+              <button onClick={() => { setCheckInDone(true); setCheckInOpen(false); }} className="w-full py-3 rounded-2xl text-sm font-bold text-white active:scale-[0.98] transition-transform" style={{ background: "var(--green)" }}>
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Match Info modal */}
+      {homeMatchOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6" onClick={() => { if (!homeUploading) setHomeMatchOpen(false); }}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="relative w-full max-w-sm bg-[var(--surface)] rounded-3xl overflow-hidden" style={{ maxHeight: "90vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+            <div className="px-6 pt-5 pb-4 bg-green-50 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-base font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>{homeExtracted ? "Confirm Match Info" : "Add Match Info"}</p>
+                <p className="text-xs text-[var(--muted)] mt-0.5">{homeExtracted ? "Check details and edit if needed." : "Upload a screenshot of your booking."}</p>
+              </div>
+              {!homeUploading && <button onClick={() => setHomeMatchOpen(false)} className="text-[var(--muted)] active:opacity-50"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>}
+            </div>
+            <div className="px-6 py-5">
+              {homeUploading && (
+                <div className="flex flex-col items-center gap-4 py-8">
+                  <svg className="animate-spin" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2.5" strokeLinecap="round"><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+                  <p className="text-sm font-bold text-[var(--muted)]">Analysing screenshot…</p>
+                </div>
+              )}
+              {!homeUploading && !homeExtracted && (
+                <div className="space-y-4">
+                  <input ref={homeFileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleHomeFileChange} />
+                  <button onClick={() => homeFileRef.current?.click()} className="w-full border-2 border-dashed border-[var(--border)] rounded-2xl py-10 flex flex-col items-center gap-3 active:bg-[var(--bg)] transition-colors">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+                    <div className="text-center">
+                      <p className="text-sm font-bold text-[var(--text)]">Choose screenshot</p>
+                      <p className="text-xs text-[var(--muted)] mt-0.5">Booking confirmation or WhatsApp message</p>
+                    </div>
+                  </button>
+                  {homeUploadError && <p className="text-xs text-red-600 text-center font-medium">{homeUploadError}</p>}
+                </div>
+              )}
+              {!homeUploading && homeExtracted && (
+                <div className="space-y-4">
+                  {Object.keys(HOME_FIELD_LABELS).map(key => (
+                    <div key={key}>
+                      <p className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-wide mb-1">{HOME_FIELD_LABELS[key]}</p>
+                      <input className="w-full px-3 py-2 border border-[var(--border)] rounded-xl text-sm text-[var(--text)] bg-[var(--bg)] outline-none focus:border-[var(--green)]" value={homeEdited[key] ?? ""} placeholder="—" onChange={e => setHomeEdited(d => ({ ...d, [key]: e.target.value }))} />
+                    </div>
+                  ))}
+                  <button onClick={confirmHomeMatch} className="w-full py-3 rounded-2xl text-sm font-bold text-white mt-2 active:scale-[0.98] transition-transform" style={{ background: "var(--green)" }}>Confirm</button>
+                  <button onClick={() => { setHomeExtracted(null); setHomeUploadError(null); }} className="w-full py-2 text-xs text-[var(--muted)] active:opacity-50">Upload a different screenshot</button>
+                </div>
+              )}
             </div>
           </div>
         </div>
