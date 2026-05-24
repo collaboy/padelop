@@ -350,6 +350,39 @@ export default function Halt1Page() {
               </button>
             </div>
 
+            {/* Notifications card */}
+            <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden">
+              <div className="px-6 pt-5 pb-4 flex items-center justify-between">
+                <p className="h1-headline-md text-[#1a1c1c]">Notifications</p>
+                <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#4169e110] text-[#4169e1]">6 new</span>
+              </div>
+              {/* Featured */}
+              <div className="mx-4 mb-3 px-4 py-3.5 rounded-2xl" style={{ background: "#4169e110" }}>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#4169e1] flex-shrink-0" />
+                  <span className="text-[11px] font-bold tracking-wide text-[#4169e1]">Just now</span>
+                </div>
+                <p className="text-[14px] font-semibold text-[#1a1c1c] leading-snug">Match in 90 min — start your box breathing and dynamic warm-up now.</p>
+                <p className="text-[12px] font-semibold mt-1.5 text-[#4169e1]">Box Breathing (4x4) →</p>
+              </div>
+              {[
+                { time: "16:45", message: "Match in 90 min. Start your box breathing (4x4) routine now.", link: "Box Breathing (4x4)" },
+                { time: "15:15", message: "HRV trending up this week — a sign your training load is well-managed.", link: null },
+                { time: "12:00", message: "Pre-match meal window opens in 30 min. Aim for carbs + protein.", link: null },
+              ].map((n, i) => (
+                <div key={i} className="flex items-start gap-4 px-6 py-3.5 border-t border-[#f4f4f4]">
+                  <span className="text-[11px] font-semibold text-[#747878] flex-shrink-0 w-12 pt-0.5">{n.time}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[14px] text-[#1a1c1c] leading-snug">{n.message}</p>
+                    {n.link && <p className="text-[12px] font-semibold mt-1 text-[#4169e1]">{n.link} →</p>}
+                  </div>
+                </div>
+              ))}
+              <div className="border-t border-[#f4f4f4] px-6 py-3">
+                <button className="text-[13px] font-semibold text-[#4169e1]">See all →</button>
+              </div>
+            </div>
+
             {/* Do This Right Now */}
             <div className="bg-white rounded-[24px] p-6 h1-ambient border border-[#c4c7c7]/10">
               {(() => {
