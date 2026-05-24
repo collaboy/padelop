@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const STORAGE_KEY = "padelop:game-days";
 const GAME_TIMES_KEY = "padelop:game-times";
 const WEEK_PLAN_PREFIX = "padelop:week-plan:";
+const MATCH_DATA_KEY = "padelop:match-data";
 
 const TIME_SLOTS = [
   { v: "morning",   label: "Morning",   hint: "Before 12" },
@@ -41,6 +42,10 @@ export default function WeekPlanModal() {
   const [weekPlanDays, setWeekPlanDays] = useState<string[]>([]);
   const [weekPlanTimes, setWeekPlanTimes] = useState<Record<string, TimeSlot>>({});
   const [monthOffset, setMonthOffset] = useState(0);
+  const [uploading, setUploading] = useState<Record<string, boolean>>({});
+  const [matchData, setMatchData] = useState<Record<string, Record<string, string>>>({});
+  const [uploadError, setUploadError] = useState<Record<string, string>>({});
+  const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const mondayYMD = getMondayYMD();
 
   useEffect(() => {
@@ -48,11 +53,14 @@ export default function WeekPlanModal() {
       try {
         const days = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]") as string[];
         const times = JSON.parse(localStorage.getItem(GAME_TIMES_KEY) || "{}") as Record<string, TimeSlot>;
+        const saved = JSON.parse(localStorage.getItem(MATCH_DATA_KEY) || "{}") as Record<string, Record<string, string>>;
         setWeekPlanDays(days);
         setWeekPlanTimes(times);
+        setMatchData(saved);
       } catch {
         setWeekPlanDays([]);
         setWeekPlanTimes({});
+        setMatchData({});
       }
       setOpen(true);
     };
@@ -76,6 +84,36 @@ export default function WeekPlanModal() {
 
   const toggleDay = (ymd: string) =>
     setWeekPlanDays((prev) => prev.includes(ymd) ? prev.filter((x) => x !== ymd) : [...prev, ymd]);
+
+  const handleFile = async (ymd: string, file: File) => {
+    if (file.size > 4 * 1024 * 1024) {
+      setUploadError((e) => ({ ...e, [ymd]: "Image too large (max 4 MB)." }));
+      return;
+    }
+    setUploadError((e) => ({ ...e, [ymd]: "" }));
+    setUploading((u) => ({ ...u, [ymd]: true }));
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64 = (reader.result as string).split(",")[1];
+      try {
+        const res = await fetch("/api/extract-match", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: base64, mediaType: file.type }),
+        });
+        const data = await res.json();
+        if (data.error) {
+          setUploadError((e) => ({ ...e, [ymd]: data.message || "Couldn't read that screenshot." }));
+        } else {
+          setMatchData((m) => ({ ...m, [ymd]: data }));
+        }
+      } catch {
+        setUploadError((e) => ({ ...e, [ymd]: "Network error. Please try again." }));
+      }
+      setUploading((u) => ({ ...u, [ymd]: false }));
+    };
+    reader.readAsDataURL(file);
+  };
 
   return (
     <div
@@ -156,7 +194,6 @@ export default function WeekPlanModal() {
           {/* Month view */}
           {view === "month" && (
             <div>
-              {/* Month nav */}
               <div className="flex items-center justify-between mb-3">
                 <button
                   onClick={() => setMonthOffset((o) => o - 1)}
@@ -176,13 +213,11 @@ export default function WeekPlanModal() {
                   </svg>
                 </button>
               </div>
-              {/* Day-of-week headers */}
               <div className="grid grid-cols-7 gap-1 mb-1">
                 {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
                   <div key={i} className="text-center text-[10px] font-bold text-[var(--muted)] py-1">{d}</div>
                 ))}
               </div>
-              {/* Day cells */}
               <div className="grid grid-cols-7 gap-1">
                 {Array.from({ length: startDow }, (_, i) => <div key={`e${i}`} />)}
                 {Array.from({ length: daysInMonth }, (_, i) => {
@@ -209,9 +244,9 @@ export default function WeekPlanModal() {
             </div>
           )}
 
-          {/* Time pickers for selected days */}
+          {/* Time pickers + screenshot upload for each selected day */}
           {weekPlanDays.length > 0 && (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-5">
               {weekPlanDays
                 .slice()
                 .sort()
@@ -219,9 +254,14 @@ export default function WeekPlanModal() {
                   const d = new Date(ymd);
                   const dayName = d.toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "short" });
                   const selected = weekPlanTimes[ymd];
+                  const isUploading = uploading[ymd];
+                  const extracted = matchData[ymd];
+                  const err = uploadError[ymd];
                   return (
-                    <div key={ymd}>
-                      <p className="text-xs font-bold text-[var(--text)] mb-2">{dayName}</p>
+                    <div key={ymd} className="flex flex-col gap-3">
+                      <p className="text-xs font-bold text-[var(--text)]">{dayName}</p>
+
+                      {/* Time slot picker */}
                       <div className="grid grid-cols-4 gap-2">
                         {TIME_SLOTS.map(({ v, label, hint }) => (
                           <button
@@ -240,6 +280,61 @@ export default function WeekPlanModal() {
                           </button>
                         ))}
                       </div>
+
+                      {/* Screenshot upload */}
+                      <input
+                        ref={(el) => { fileRefs.current[ymd] = el; }}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleFile(ymd, file);
+                          e.target.value = "";
+                        }}
+                      />
+
+                      {extracted ? (
+                        /* Extracted state */
+                        <div className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-[#f0fdf4] border border-[#bbf7d0]">
+                          <div className="flex items-center gap-2">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <circle cx="12" cy="12" r="10"/><polyline points="8,12 11,15 16,9"/>
+                            </svg>
+                            <span className="text-[12px] font-semibold text-[#16a34a]">
+                              Match info added{extracted.club ? ` · ${extracted.club}` : ""}
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => setMatchData((m) => { const next = { ...m }; delete next[ymd]; return next; })}
+                            className="text-[11px] font-semibold text-[#747878] active:opacity-60"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ) : isUploading ? (
+                        /* Loading state */
+                        <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[#f4f4f4]">
+                          <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round">
+                            <path d="M12 2a10 10 0 0 1 10 10" />
+                          </svg>
+                          <span className="text-[12px] font-semibold text-[#747878]">Reading screenshot…</span>
+                        </div>
+                      ) : (
+                        /* Upload prompt */
+                        <div className="flex flex-col gap-1">
+                          <button
+                            onClick={() => fileRefs.current[ymd]?.click()}
+                            className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-[#d4d7d9] active:bg-[#f4f4f4] transition-colors"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9aab96" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/>
+                            </svg>
+                            <span className="text-[12px] font-medium text-[#747878]">Upload match screenshot <span className="text-[#b0b3b3]">(optional)</span></span>
+                          </button>
+                          {err && <p className="text-[11px] text-[#dc2626] px-1">{err}</p>}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -262,6 +357,9 @@ export default function WeekPlanModal() {
               localStorage.setItem(STORAGE_KEY, JSON.stringify(weekPlanDays));
               localStorage.setItem(GAME_TIMES_KEY, JSON.stringify(weekPlanTimes));
               localStorage.setItem(WEEK_PLAN_PREFIX + mondayYMD, "1");
+              if (Object.keys(matchData).length > 0) {
+                localStorage.setItem(MATCH_DATA_KEY, JSON.stringify(matchData));
+              }
               window.dispatchEvent(new CustomEvent("week-plan-saved"));
               setOpen(false);
             }}
