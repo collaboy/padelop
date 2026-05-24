@@ -31,10 +31,16 @@ function getMondayYMD(): string {
   return offsetYMD(today, -dow);
 }
 
+function ymdStr(year: number, month: number, day: number): string {
+  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
 export default function WeekPlanModal() {
   const [open, setOpen] = useState(false);
+  const [view, setView] = useState<"week" | "month">("week");
   const [weekPlanDays, setWeekPlanDays] = useState<string[]>([]);
   const [weekPlanTimes, setWeekPlanTimes] = useState<Record<string, TimeSlot>>({});
+  const [monthOffset, setMonthOffset] = useState(0);
   const mondayYMD = getMondayYMD();
 
   useEffect(() => {
@@ -59,6 +65,18 @@ export default function WeekPlanModal() {
   const missingTimes = weekPlanDays.filter((ymd) => !weekPlanTimes[ymd]);
   const canSave = weekPlanDays.length > 0 && missingTimes.length === 0;
 
+  const today = new Date();
+  const displayDate = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1);
+  const year = displayDate.getFullYear();
+  const month = displayDate.getMonth();
+  const monthName = displayDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  const startDow = (new Date(year, month, 1).getDay() + 6) % 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const todayYMD = todayYMDStr();
+
+  const toggleDay = (ymd: string) =>
+    setWeekPlanDays((prev) => prev.includes(ymd) ? prev.filter((x) => x !== ymd) : [...prev, ymd]);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center px-5"
@@ -73,12 +91,29 @@ export default function WeekPlanModal() {
         {/* Sticky header */}
         <div className="sticky top-0 bg-white z-10 px-6 pt-6 pb-4 flex items-center justify-between border-b border-[#f4f4f4]">
           <div>
-            <p className="text-[18px] font-bold text-[var(--text)]">Plan this week</p>
+            <p className="text-[18px] font-bold text-[var(--text)]">
+              Plan this{" "}
+              <button
+                onClick={() => setView("week")}
+                className="transition-colors"
+                style={{ color: view === "week" ? "var(--text)" : "var(--muted)", fontWeight: view === "week" ? 700 : 500 }}
+              >
+                week
+              </button>
+              <span className="text-[var(--muted)] font-normal mx-1">|</span>
+              <button
+                onClick={() => setView("month")}
+                className="transition-colors"
+                style={{ color: view === "month" ? "var(--text)" : "var(--muted)", fontWeight: view === "month" ? 700 : 500 }}
+              >
+                month
+              </button>
+            </p>
             <p className="text-[13px] text-[var(--muted)] mt-0.5">When are you playing? Tap the days.</p>
           </div>
           <button
             onClick={() => setOpen(false)}
-            className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4] transition-colors"
+            className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4] transition-colors flex-shrink-0"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round">
               <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -87,37 +122,92 @@ export default function WeekPlanModal() {
         </div>
 
         <div className="px-6 pt-5 pb-8 flex flex-col gap-6">
-          {/* Day tiles */}
-          <div className="grid grid-cols-7 gap-2">
-            {Array.from({ length: 7 }, (_, i) => {
-              const ymd = offsetYMD(mondayYMD, i);
-              const d = new Date(ymd);
-              const selected = weekPlanDays.includes(ymd);
-              const dayLetter = ["M", "T", "W", "T", "F", "S", "S"][i];
-              return (
+
+          {/* Week view */}
+          {view === "week" && (
+            <div className="grid grid-cols-7 gap-2">
+              {Array.from({ length: 7 }, (_, i) => {
+                const ymd = offsetYMD(mondayYMD, i);
+                const d = new Date(ymd);
+                const selected = weekPlanDays.includes(ymd);
+                const dayLetter = ["M", "T", "W", "T", "F", "S", "S"][i];
+                return (
+                  <button
+                    key={ymd}
+                    onClick={() => toggleDay(ymd)}
+                    className="flex flex-col items-center rounded-xl py-3 gap-1 border-2 transition-all active:scale-95"
+                    style={{
+                      borderColor: selected ? "#2653d4" : "var(--border)",
+                      background: selected ? "#2653d4" : "var(--bg)",
+                    }}
+                  >
+                    <span className="text-[9px] font-bold uppercase" style={{ color: selected ? "rgba(255,255,255,0.7)" : "var(--muted)" }}>
+                      {dayLetter}
+                    </span>
+                    <span className="text-sm font-bold" style={{ color: selected ? "#fff" : "var(--text)" }}>
+                      {d.getDate()}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Month view */}
+          {view === "month" && (
+            <div>
+              {/* Month nav */}
+              <div className="flex items-center justify-between mb-3">
                 <button
-                  key={ymd}
-                  onClick={() =>
-                    setWeekPlanDays((prev) =>
-                      prev.includes(ymd) ? prev.filter((x) => x !== ymd) : [...prev, ymd]
-                    )
-                  }
-                  className="flex flex-col items-center rounded-xl py-3 gap-1 border-2 transition-all active:scale-95"
-                  style={{
-                    borderColor: selected ? "#2653d4" : "var(--border)",
-                    background: selected ? "#2653d4" : "var(--bg)",
-                  }}
+                  onClick={() => setMonthOffset((o) => o - 1)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full active:bg-[#f4f4f4] transition-colors"
                 >
-                  <span className="text-[9px] font-bold uppercase" style={{ color: selected ? "rgba(255,255,255,0.7)" : "var(--muted)" }}>
-                    {dayLetter}
-                  </span>
-                  <span className="text-sm font-bold" style={{ color: selected ? "#fff" : "var(--text)" }}>
-                    {d.getDate()}
-                  </span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 18l-6-6 6-6" />
+                  </svg>
                 </button>
-              );
-            })}
-          </div>
+                <p className="text-[13px] font-bold text-[var(--text)]">{monthName}</p>
+                <button
+                  onClick={() => setMonthOffset((o) => o + 1)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full active:bg-[#f4f4f4] transition-colors"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
+              </div>
+              {/* Day-of-week headers */}
+              <div className="grid grid-cols-7 gap-1 mb-1">
+                {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+                  <div key={i} className="text-center text-[10px] font-bold text-[var(--muted)] py-1">{d}</div>
+                ))}
+              </div>
+              {/* Day cells */}
+              <div className="grid grid-cols-7 gap-1">
+                {Array.from({ length: startDow }, (_, i) => <div key={`e${i}`} />)}
+                {Array.from({ length: daysInMonth }, (_, i) => {
+                  const day = i + 1;
+                  const ymd = ymdStr(year, month, day);
+                  const selected = weekPlanDays.includes(ymd);
+                  const isToday = ymd === todayYMD;
+                  return (
+                    <button
+                      key={ymd}
+                      onClick={() => toggleDay(ymd)}
+                      className="aspect-square flex items-center justify-center rounded-xl text-[12px] font-semibold border-2 transition-all active:scale-95"
+                      style={{
+                        borderColor: selected ? "#2653d4" : isToday ? "#2653d430" : "transparent",
+                        background: selected ? "#2653d4" : isToday ? "#eef2ff" : "transparent",
+                        color: selected ? "#fff" : "var(--text)",
+                      }}
+                    >
+                      {day}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Time pickers for selected days */}
           {weekPlanDays.length > 0 && (
