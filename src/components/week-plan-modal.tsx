@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 const STORAGE_KEY = "padelop:game-days";
 const GAME_TIMES_KEY = "padelop:game-times";
@@ -45,7 +45,6 @@ export default function WeekPlanModal() {
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
   const [matchData, setMatchData] = useState<Record<string, Record<string, string>>>({});
   const [uploadError, setUploadError] = useState<Record<string, string>>({});
-  const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const mondayYMD = getMondayYMD();
 
   useEffect(() => {
@@ -282,18 +281,6 @@ export default function WeekPlanModal() {
                       </div>
 
                       {/* Screenshot upload */}
-                      <input
-                        ref={(el) => { fileRefs.current[ymd] = el; }}
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleFile(ymd, file);
-                          e.target.value = "";
-                        }}
-                      />
-
                       {extracted ? (
                         /* Extracted state */
                         <div className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-[#f0fdf4] border border-[#bbf7d0]">
@@ -321,17 +308,28 @@ export default function WeekPlanModal() {
                           <span className="text-[12px] font-semibold text-[#747878]">Reading screenshot…</span>
                         </div>
                       ) : (
-                        /* Upload prompt */
+                        /* Upload prompt — label triggers hidden input natively */
                         <div className="flex flex-col gap-1">
-                          <button
-                            onClick={() => fileRefs.current[ymd]?.click()}
-                            className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-[#d4d7d9] active:bg-[#f4f4f4] transition-colors"
+                          <label
+                            htmlFor={`upload-${ymd}`}
+                            className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-[#d4d7d9] cursor-pointer active:bg-[#f4f4f4] transition-colors"
                           >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9aab96" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/>
                             </svg>
                             <span className="text-[12px] font-medium text-[#747878]">Upload match screenshot <span className="text-[#b0b3b3]">(optional)</span></span>
-                          </button>
+                          </label>
+                          <input
+                            id={`upload-${ymd}`}
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleFile(ymd, file);
+                              e.target.value = "";
+                            }}
+                          />
                           {err && <p className="text-[11px] text-[#dc2626] px-1">{err}</p>}
                         </div>
                       )}
