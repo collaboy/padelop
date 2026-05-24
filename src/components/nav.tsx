@@ -120,17 +120,14 @@ export default function Nav() {
 
       {/* Notifications modal */}
       {notifOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center px-3 pb-3" onClick={() => setNotifOpen(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-5" onClick={() => setNotifOpen(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div
-            className="relative w-full max-w-lg bg-white rounded-[28px] overflow-hidden flex flex-col max-h-[80vh]"
+            className="relative w-full max-w-lg bg-white rounded-[28px] overflow-hidden flex flex-col max-h-[88vh]"
             style={{ fontFamily: "var(--font-hanken)" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
-              <div className="w-10 h-1 rounded-full bg-[#e2e2e2]" />
-            </div>
-            <div className="px-6 pt-3 pb-4 flex items-center justify-between flex-shrink-0">
+            <div className="px-6 pt-5 pb-4 flex items-center justify-between flex-shrink-0">
               <p className="text-[18px] font-semibold text-[var(--text)]">Notifications</p>
               <button onClick={() => setNotifOpen(false)} className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4] transition-colors">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round">

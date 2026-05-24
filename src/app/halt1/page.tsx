@@ -32,7 +32,7 @@ export default function Halt1Page() {
   const [mustDoExpanded, setMustDoExpanded] = useState(false);
   const [addMatchOpen, setAddMatchOpen] = useState(false);
   const [hydroOpen, setHydroOpen] = useState(false);
-  const [hydroLitres, setHydroLitres] = useState("");
+  const [hydrationLog, setHydrationLog] = useState({ litres: "", timing: [] as string[], quality: "", urine: "" });
 
   // Match info state
   const [matchInfoOpen, setMatchInfoOpen] = useState(false);
@@ -648,18 +648,14 @@ export default function Halt1Page() {
 
       {/* Daily Check-In modal */}
       {checkInOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center px-3 pb-3" onClick={() => setCheckInOpen(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-5" onClick={() => setCheckInOpen(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div
             className="h1-font relative w-full max-w-lg bg-white rounded-[28px] overflow-hidden flex flex-col max-h-[88vh]"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Handle */}
-            <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
-              <div className="w-10 h-1 rounded-full bg-[#e2e2e2]" />
-            </div>
             {/* Header */}
-            <div className="px-6 pt-3 pb-4 flex items-center justify-between flex-shrink-0">
+            <div className="px-6 pt-5 pb-4 flex items-center justify-between flex-shrink-0">
               <div>
                 <p className="h1-headline-md text-[#1a1c1c]">Update your stats</p>
                 <p className="h1-label-sm text-[#747878] mt-0.5">Rate each on a scale of 1–5</p>
@@ -885,11 +881,10 @@ export default function Halt1Page() {
       )}
       {/* Add Match modal */}
       {addMatchOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center px-3 pb-3" onClick={() => setAddMatchOpen(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-5" onClick={() => setAddMatchOpen(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div className="h1-font relative w-full max-w-lg bg-white rounded-[28px] overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-[#e2e2e2]" /></div>
-            <div className="px-6 pt-3 pb-2">
+            <div className="px-6 pt-5 pb-2">
               <p className="h1-headline-md text-[#1a1c1c]">Add Match</p>
               <p className="text-[13px] text-[#747878] mt-0.5">How would you like to add it?</p>
             </div>
@@ -923,71 +918,110 @@ export default function Halt1Page() {
         </div>
       )}
 
-      {/* Hydro Tracker modal */}
+      {/* Hydration Check modal */}
       {hydroOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-4" onClick={() => setHydroOpen(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-5" onClick={() => setHydroOpen(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-          <div className="h1-font relative w-full max-w-lg bg-white rounded-[28px] overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-[#e2e2e2]" /></div>
-            <div className="px-6 pt-3 pb-4 flex items-center justify-between">
+          <div className="h1-font relative w-full max-w-lg bg-white rounded-[28px] overflow-y-auto max-h-[88vh] shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 pt-6 pb-4 flex items-center justify-between">
               <div>
-                <p className="h1-headline-md text-[#1a1c1c]">Hydro Tracker</p>
-                <p className="text-[13px] text-[#747878] mt-0.5">Target: 3.5L today</p>
+                <p className="h1-headline-md text-[#1a1c1c]">Hydration Check</p>
+                <p className="text-[13px] text-[#747878] mt-0.5">Log your water intake today</p>
               </div>
               <button onClick={() => setHydroOpen(false)} className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4]">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
-            <div className="px-6 pb-6 flex flex-col gap-5">
-              {/* Quick amounts */}
+            <div className="px-6 pb-8 flex flex-col gap-6">
               <div>
-                <p className="text-[12px] font-semibold text-[#747878] mb-2">How much did you just drink?</p>
-                <div className="grid grid-cols-4 gap-2">
-                  {["250ml", "500ml", "750ml", "1L"].map(amt => (
-                    <button
-                      key={amt}
-                      onClick={() => setHydroLitres(amt)}
-                      className="py-3 rounded-2xl text-[13px] font-semibold border transition-all active:scale-95"
-                      style={{ background: hydroLitres === amt ? "#0891b2" : "#f4f4f4", color: hydroLitres === amt ? "#fff" : "#747878", borderColor: hydroLitres === amt ? "#0891b2" : "#e2e2e2" }}
-                    >
-                      {amt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {/* Questions */}
-              <div className="flex flex-col gap-3">
-                <div>
-                  <p className="text-[12px] font-semibold text-[#747878] mb-1.5">Total so far today</p>
-                  <input type="text" placeholder="e.g. 1.5L" className="h1-field-input" />
-                </div>
-                <div>
-                  <p className="text-[12px] font-semibold text-[#747878] mb-1.5">Electrolytes today?</p>
-                  <div className="flex gap-2">
-                    {["Yes", "No"].map(opt => (
-                      <button key={opt} className="flex-1 py-2.5 rounded-2xl text-[13px] font-semibold border border-[#e2e2e2] bg-[#f4f4f4] text-[#747878] active:scale-95 transition-all">
-                        {opt}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-[12px] font-semibold text-[#747878] mb-1.5">Thirst level (1–5)</p>
-                  <div className="flex gap-2">
-                    {[1,2,3,4,5].map(n => (
-                      <button key={n} className="flex-1 h-9 rounded-full text-[13px] font-semibold border border-[#e2e2e2] bg-[#f4f4f4] text-[#747878] active:scale-95 transition-all">
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#747878] mb-3">How much have you drunk today?</p>
+                <div className="flex gap-2 flex-wrap">
+                  {["<1L","1–1.5L","1.5–2L","2–2.5L","2.5–3L","3L+"].map(n => {
+                    const sel = hydrationLog.litres === n;
+                    return (
+                      <button key={n} onClick={() => setHydrationLog(l => ({ ...l, litres: n }))}
+                        className="flex-1 py-2.5 rounded-2xl border-2 text-[12px] font-bold transition-all active:scale-95"
+                        style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9", color: sel ? "#2653d4" : "#747878" }}>
                         {n}
                       </button>
-                    ))}
-                  </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#747878] mb-3">What did you drink?</p>
+                <div className="flex flex-wrap gap-2">
+                  {["Water","Sparkling water","Sports drink","Coconut water","Tea / Coffee","Juice","Milk","Protein shake"].map(drink => {
+                    const sel = hydrationLog.timing.includes(drink);
+                    return (
+                      <button key={drink}
+                        onClick={() => setHydrationLog(l => ({ ...l, timing: sel ? l.timing.filter(d => d !== drink) : [...l.timing, drink] }))}
+                        className="px-3 py-1.5 rounded-full border text-[12px] font-bold transition-all active:scale-95"
+                        style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9", color: sel ? "#2653d4" : "#747878" }}>
+                        {drink}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#747878] mb-1">Urine colour check</p>
+                <p className="text-[11px] text-[#747878] mb-3">Best proxy for hydration status</p>
+                <div className="flex gap-2">
+                  {[
+                    { v: "clear",  label: "Clear",       bg: "#f0f9ff", border: "#bae6fd" },
+                    { v: "pale",   label: "Pale yellow",  bg: "#fefce8", border: "#fde047" },
+                    { v: "yellow", label: "Yellow",       bg: "#fef9c3", border: "#facc15" },
+                    { v: "dark",   label: "Dark",         bg: "#fef3c7", border: "#f59e0b" },
+                    { v: "brown",  label: "Brown",        bg: "#fdf4dc", border: "#b45309" },
+                  ].map(({ v, label, bg, border }) => {
+                    const sel = hydrationLog.urine === v;
+                    return (
+                      <button key={v} onClick={() => setHydrationLog(l => ({ ...l, urine: v }))}
+                        className="flex-1 py-2.5 rounded-2xl border-2 text-[10px] font-bold transition-all active:scale-95 text-center"
+                        style={{ borderColor: sel ? border : "#e2e2e2", background: sel ? bg : "#f9f9f9", color: "#747878" }}>
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#747878] mb-3">How do you feel?</p>
+                <div className="flex gap-3">
+                  {([["bad","Thirsty"],["ok","OK"],["great","Hydrated"]] as const).map(([v, label]) => {
+                    const sel = hydrationLog.quality === v;
+                    return (
+                      <button key={v} onClick={() => setHydrationLog(l => ({ ...l, quality: v }))}
+                        className="flex-1 flex flex-col items-center gap-1.5 py-3 rounded-2xl border-2 transition-all active:scale-95"
+                        style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9" }}>
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={sel ? "#2653d4" : "#747878"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="9" />
+                          {v === "bad"   && <path d="M8 17c0-1.5 1.5-2.5 4-2.5s4 1 4 2.5" />}
+                          {v === "ok"    && <line x1="9" y1="15.5" x2="15" y2="15.5" />}
+                          {v === "great" && <path d="M8 14c1 2 6 2 8 0" />}
+                          <circle cx="9" cy="9.5" r="0.8" fill={sel ? "#2653d4" : "#747878"} stroke="none" />
+                          <circle cx="15" cy="9.5" r="0.8" fill={sel ? "#2653d4" : "#747878"} stroke="none" />
+                        </svg>
+                        <span className="text-[10px] font-bold tracking-wide" style={{ color: sel ? "#2653d4" : "#747878" }}>{label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
               <button
-                onClick={() => setHydroOpen(false)}
+                onClick={() => {
+                  try {
+                    const entry = { ...hydrationLog, ts: new Date().toISOString() };
+                    const prev = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]");
+                    localStorage.setItem("padelop:hydration-logs", JSON.stringify([entry, ...prev].slice(0, 50)));
+                  } catch {}
+                  setHydroOpen(false);
+                }}
                 className="w-full py-3.5 rounded-2xl text-white text-[14px] font-semibold active:scale-[0.98] transition-transform"
-                style={{ background: "#0891b2" }}
+                style={{ background: "#2653d4" }}
               >
-                Log
+                Save
               </button>
             </div>
           </div>
