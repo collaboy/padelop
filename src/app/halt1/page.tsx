@@ -397,7 +397,7 @@ export default function Halt1Page() {
                 const sorted = [...items.filter(i => !i.checked), ...items.filter(i => i.checked)];
                 const doneCount = items.filter(i => i.checked).length;
                 const total = items.length;
-                const visible = mustDoExpanded ? sorted : sorted.slice(0, 3);
+                const visible = mustDoExpanded ? sorted : sorted.slice(0, 2);
                 return (
                   <>
                     <div className="flex items-center justify-between mb-4">
@@ -441,17 +441,15 @@ export default function Halt1Page() {
                         </div>
                       ))}
                     </div>
-                    {!mustDoExpanded && (
-                      <button
-                        onClick={() => setMustDoExpanded(true)}
-                        className="flex items-center gap-1 pt-3 active:opacity-60 transition-opacity"
-                      >
-                        <span className="text-[13px] font-semibold text-[#747878]">More</span>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M6 9l6 6 6-6" />
-                        </svg>
-                      </button>
-                    )}
+                    <button
+                      onClick={() => setMustDoExpanded(o => !o)}
+                      className="flex items-center gap-1 pt-3 active:opacity-60 transition-opacity"
+                    >
+                      <span className="text-[13px] font-semibold text-[#747878]">{mustDoExpanded ? "Less" : "More"}</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: mustDoExpanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </button>
                   </>
                 );
               })()}
@@ -475,7 +473,10 @@ export default function Halt1Page() {
               const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
               return (
                 <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 p-6">
-                  <h3 className="h1-headline-md text-black mb-5">Today&apos;s Schedule</h3>
+                  <div className="mb-5">
+                    <h3 className="h1-headline-md text-black">Today&apos;s Schedule</h3>
+                    <p className="text-[13px] font-semibold mt-0.5" style={{ color: "#1e3a1e" }}>🎾 Game Day</p>
+                  </div>
                   <div>
                     {schedule.map(({ time, title, subtitle, color }, idx, arr) => {
                       const isLast = idx === arr.length - 1;
