@@ -1088,18 +1088,18 @@ export default function HomePage() {
                     <div className="flex-1">
                       <p className="text-[10px] font-bold tracking-widest uppercase text-[#747878] mb-1.5">Date</p>
                       <input
+                        type="date"
                         className="h1-field-input text-[13px] text-center"
                         value={editedData.date ?? ""}
-                        placeholder="YYYY-MM-DD"
                         onChange={e => setEditedData(d => ({ ...d, date: e.target.value }))}
                       />
                     </div>
                     <div className="flex-1">
                       <p className="text-[10px] font-bold tracking-widest uppercase text-[#747878] mb-1.5">Time</p>
                       <input
+                        type="time"
                         className="h1-field-input text-[13px] text-center"
                         value={editedData.time ?? ""}
-                        placeholder="18:30"
                         onChange={e => setEditedData(d => ({ ...d, time: e.target.value }))}
                       />
                     </div>
@@ -1107,33 +1107,18 @@ export default function HomePage() {
 
                   {/* Teams */}
                   <div>
-                    <p className="text-[10px] font-bold tracking-widest uppercase text-[#747878] mb-2">
-                      Players — tap two to swap
-                    </p>
+                    <p className="text-[10px] font-bold tracking-widest uppercase text-[#747878] mb-2">Players</p>
                     <div className="flex items-center gap-2">
                       {/* Team A */}
                       <div className="flex-1 flex flex-col gap-2">
                         {[0, 1].map(idx => (
-                          <button
+                          <input
                             key={idx}
-                            draggable
-                            onDragStart={() => { dragSlot.current = idx; setSelectedSlot(null); }}
-                            onDragOver={e => e.preventDefault()}
-                            onDrop={() => {
-                              if (dragSlot.current === null || dragSlot.current === idx) return;
-                              setPlayerSlots(s => { const n = [...s]; [n[dragSlot.current!], n[idx]] = [n[idx], n[dragSlot.current!]]; return n; });
-                              dragSlot.current = null;
-                            }}
-                            onClick={() => handleSlotTap(idx)}
-                            className="w-full px-3 py-2.5 rounded-2xl text-[13px] font-semibold text-center transition-all active:scale-95 border-2"
-                            style={{
-                              borderColor: selectedSlot === idx ? "#2653d4" : "#e2e2e2",
-                              background: selectedSlot === idx ? "#eef2ff" : "#f9f9f9",
-                              color: playerSlots[idx] ? "#1a1c1c" : "#c4c7c7",
-                            }}
-                          >
-                            {playerSlots[idx] || "Player"}
-                          </button>
+                            className="h1-field-input text-[13px] text-center"
+                            value={playerSlots[idx]}
+                            placeholder={idx === 0 ? "You" : "Partner"}
+                            onChange={e => setPlayerSlots(s => { const n = [...s]; n[idx] = e.target.value; return n; })}
+                          />
                         ))}
                       </div>
 
@@ -1141,9 +1126,9 @@ export default function HomePage() {
                       <div className="flex flex-col items-center gap-1 px-1">
                         <span className="text-[11px] font-black text-[#747878] tracking-widest">VS</span>
                         <button
-                          onClick={() => setPlayerSlots(s => [s[0], s[2], s[1], s[3]])}
+                          onClick={() => setPlayerSlots(s => [s[2], s[3], s[0], s[1]])}
                           className="w-7 h-7 rounded-full bg-[#f4f4f4] flex items-center justify-center active:scale-90 transition-transform"
-                          title="Swap partners"
+                          title="Swap teams"
                         >
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
@@ -1154,26 +1139,13 @@ export default function HomePage() {
                       {/* Team B */}
                       <div className="flex-1 flex flex-col gap-2">
                         {[2, 3].map(idx => (
-                          <button
+                          <input
                             key={idx}
-                            draggable
-                            onDragStart={() => { dragSlot.current = idx; setSelectedSlot(null); }}
-                            onDragOver={e => e.preventDefault()}
-                            onDrop={() => {
-                              if (dragSlot.current === null || dragSlot.current === idx) return;
-                              setPlayerSlots(s => { const n = [...s]; [n[dragSlot.current!], n[idx]] = [n[idx], n[dragSlot.current!]]; return n; });
-                              dragSlot.current = null;
-                            }}
-                            onClick={() => handleSlotTap(idx)}
-                            className="w-full px-3 py-2.5 rounded-2xl text-[13px] font-semibold text-center transition-all active:scale-95 border-2"
-                            style={{
-                              borderColor: selectedSlot === idx ? "#2653d4" : "#e2e2e2",
-                              background: selectedSlot === idx ? "#eef2ff" : "#f9f9f9",
-                              color: playerSlots[idx] ? "#1a1c1c" : "#c4c7c7",
-                            }}
-                          >
-                            {playerSlots[idx] || "Player"}
-                          </button>
+                            className="h1-field-input text-[13px] text-center"
+                            value={playerSlots[idx]}
+                            placeholder="Opponent"
+                            onChange={e => setPlayerSlots(s => { const n = [...s]; n[idx] = e.target.value; return n; })}
+                          />
                         ))}
                       </div>
                     </div>
