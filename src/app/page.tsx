@@ -512,12 +512,12 @@ export default function HomePage() {
                 <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 px-4 pt-5 pb-4">
 
                   {/* Header */}
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="mb-4">
                     <p className="h1-headline-md text-[#1a1c1c]">
                       {dayType === "match" ? "Your Game Day Plan" : dayType === "recovery" ? "Your Recovery Plan" : dayType === "training" ? "Your Training Plan" : "Your Day Plan"}
                     </p>
                     {dayType === "match" && editedData.time && (
-                      <span className="text-[13px] font-medium text-[#747878]">Gametime: <span className="font-semibold text-[#1a1c1c]">{editedData.time}</span></span>
+                      <p className="text-[13px] font-medium text-[#747878] mt-0.5">Gametime: <span className="font-semibold text-[#1a1c1c]">{editedData.time}</span></p>
                     )}
                   </div>
 
