@@ -82,7 +82,7 @@ export default function Nav() {
 
   return (
     <>
-      <header className="fixed top-0 w-full z-50 bg-[var(--surface)]/80 backdrop-blur-md border-b border-[var(--border)]">
+      <header className="vt-header fixed top-0 w-full z-50 bg-[var(--surface)]/80 backdrop-blur-md border-b border-[var(--border)]">
         <div className="grid grid-cols-3 items-center w-full px-5 md:px-12 max-w-7xl mx-auto h-16">
           {/* Left: hamburger */}
           <div className="flex items-center">

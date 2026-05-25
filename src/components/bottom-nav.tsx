@@ -73,7 +73,7 @@ const items = [
 export default function BottomNav() {
   const pathname = usePathname();
   return (
-    <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-[var(--surface)]/95 backdrop-blur-md border-t border-[var(--border)] shadow-2xl rounded-t-xl">
+    <nav className="vt-footer md:hidden fixed bottom-0 inset-x-0 z-50 bg-[var(--surface)]/95 backdrop-blur-md border-t border-[var(--border)] shadow-2xl rounded-t-xl">
       <div className="flex justify-around items-center py-3 px-2">
         {items.map((item) => {
           const active = pathname === item.href;
