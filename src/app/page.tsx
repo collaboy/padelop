@@ -48,6 +48,8 @@ export default function HomePage() {
   const [now, setNow] = useState<Date | null>(null);
   const [matchReviewOpen, setMatchReviewOpen] = useState(false);
   const [matchReview, setMatchReview] = useState({ feeling: "", result: "", opponent: "", energy: "", injury: "", wellDone: [] as string[], improved: [] as string[], mentalBefore: "", mentalDuring: "", mentalAfter: "" });
+  const [postGamePrompt, setPostGamePrompt] = useState(false);
+  const [matchListOpen, setMatchListOpen] = useState(false);
 
   function loadAndScore() {
     const data = loadScoringData();
@@ -124,6 +126,23 @@ export default function HomePage() {
     const id = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(id);
   }, []);
+
+  // Post-game review prompt: show once per match after match ends (30 min grace)
+  useEffect(() => {
+    if (!editedData.date || !editedData.time) return;
+    const matchMs = new Date(`${editedData.date}T${editedData.time}:00`).getTime();
+    if (isNaN(matchMs)) return;
+    const now = Date.now();
+    if (now < matchMs + 30 * 60 * 1000) return; // match hasn't ended yet
+    // Check if already dismissed or reviewed today
+    const dismissedKey = `padelop:post-game-dismissed:${editedData.date}`;
+    if (localStorage.getItem(dismissedKey)) return;
+    try {
+      const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+      if (reviews[0]?.ts?.slice(0, 10) === editedData.date) return; // already reviewed
+    } catch {}
+    setPostGamePrompt(true);
+  }, [editedData.date, editedData.time]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -912,7 +931,7 @@ export default function HomePage() {
             label: "Review a match", sub: "Log your last match performance",
             color: "#7c3aed", done: reviewDone, badge: reviewDone ? reviewAgo : "Not yet",
             icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 14c1 2 6 2 8 0"/><circle cx="9" cy="9.5" r="0.8" fill="#7c3aed" stroke="none"/><circle cx="15" cy="9.5" r="0.8" fill="#7c3aed" stroke="none"/></svg>,
-            action: () => { setFabOpen(false); setMatchReviewOpen(true); },
+            action: () => { setFabOpen(false); setMatchListOpen(true); },
           };
           const addMatchRow = {
             label: "Add a match", sub: "Upload booking or enter manually",
@@ -1492,6 +1511,168 @@ export default function HomePage() {
         </div>
       )}
 
+      {/* Match list modal */}
+      {matchListOpen && (() => {
+        let reviews: { ts: string; result?: string; feeling?: string }[] = [];
+        try { reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]"); } catch {}
+
+        const hasMatch = !!(editedData.date && editedData.time);
+        const matchPast = hasMatch && new Date(`${editedData.date}T${editedData.time}:00`).getTime() < Date.now();
+        const alreadyReviewed = reviews[0]?.ts?.slice(0, 10) === editedData.date;
+        const hasUnrated = hasMatch && matchPast && !alreadyReviewed;
+        const allDone = !hasUnrated && reviews.length > 0;
+        const nothing = !hasUnrated && reviews.length === 0;
+
+        const fmtDate = (d: string) => new Date(d + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+        const fmtReviewDate = (ts: string) => new Date(ts).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+
+        return (
+          <div className="fixed inset-0 z-[70] flex items-end justify-center" onClick={() => setMatchListOpen(false)}>
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+            <div
+              className="h1-font relative w-full max-w-lg bg-white rounded-t-[28px] overflow-hidden shadow-2xl"
+              style={{ maxHeight: "80vh", animation: "slideUp 0.28s cubic-bezier(0.22,1,0.36,1)" }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4 mb-1" />
+              <div className="px-6 pt-3 pb-4 flex items-center justify-between">
+                <div>
+                  <p className="h1-headline-md text-[#1a1c1c]">Match Reviews</p>
+                  <p className="text-[13px] text-[#747878] mt-0.5">Rate your games to track performance</p>
+                </div>
+                <button onClick={() => setMatchListOpen(false)} className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4]">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+
+              <div className="overflow-y-auto" style={{ maxHeight: "calc(80vh - 96px)" }}>
+                {nothing && (
+                  <div className="px-6 py-12 text-center">
+                    <p className="text-[32px] mb-3">🎾</p>
+                    <p className="text-[16px] font-semibold text-[#1a1c1c]">No matches yet</p>
+                    <p className="text-[13px] text-[#747878] mt-1">Add a match to start tracking your game.</p>
+                  </div>
+                )}
+
+                {allDone && !hasUnrated && reviews.length === 1 && (
+                  <div className="px-6 py-12 text-center">
+                    <p className="text-[32px] mb-3">✅</p>
+                    <p className="text-[16px] font-semibold text-[#1a1c1c]">You're all done updating matches!</p>
+                    <p className="text-[13px] text-[#747878] mt-1">Your latest game is reviewed. Keep it up.</p>
+                  </div>
+                )}
+
+                {/* Unrated match */}
+                {hasUnrated && (
+                  <>
+                    <div className="px-6 py-2 bg-[#f9f9f9]">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-[#9aab96]">Needs a rating</p>
+                    </div>
+                    <button
+                      onClick={() => { setMatchListOpen(false); setMatchReviewOpen(true); }}
+                      className="w-full flex items-center gap-4 px-6 py-4 active:bg-[#f9f9f9] transition-colors"
+                      style={{ borderBottom: "1px solid #f4f4f4" }}
+                    >
+                      <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-[#f0f4ff]">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M8 21h8M12 17v4"/><path d="M7 4H4a2 2 0 0 0-2 2v2c0 3.3 2.7 6 6 6"/><path d="M17 4h3a2 2 0 0 1 2 2v2c0 3.3-2.7 6-6 6"/><path d="M7 4h10v8a5 5 0 0 1-10 0V4z"/>
+                        </svg>
+                      </div>
+                      <div className="flex-1 min-w-0 text-left">
+                        <p className="text-[15px] font-semibold text-[#1a1c1c]">{editedData.date ? fmtDate(editedData.date) : "Recent match"}</p>
+                        <p className="text-[12px] text-[#747878] mt-0.5">{editedData.time}{editedData.club ? ` · ${editedData.club}` : ""}</p>
+                      </div>
+                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#fff3cd] text-[#a16207] whitespace-nowrap flex-shrink-0">Rate now</span>
+                    </button>
+                  </>
+                )}
+
+                {/* Previous reviews */}
+                {reviews.length > 0 && (
+                  <>
+                    <div className="px-6 py-2 bg-[#f9f9f9]">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-[#9aab96]">Previous games</p>
+                    </div>
+                    {reviews.map((rev, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center gap-4 px-6 py-4"
+                        style={{ borderBottom: i < reviews.length - 1 ? "1px solid #f4f4f4" : "none" }}
+                      >
+                        <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-[#f4f4f4]">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="9"/><path d="M8 14c1 2 6 2 8 0"/><circle cx="9" cy="9.5" r="0.8" fill="#747878" stroke="none"/><circle cx="15" cy="9.5" r="0.8" fill="#747878" stroke="none"/>
+                          </svg>
+                        </div>
+                        <div className="flex-1 min-w-0 text-left">
+                          <p className="text-[15px] font-semibold text-[#1a1c1c]">{fmtReviewDate(rev.ts)}</p>
+                          <p className="text-[12px] text-[#747878] mt-0.5">
+                            {[rev.result, rev.feeling ? `Felt ${rev.feeling}` : ""].filter(Boolean).join(" · ") || "Reviewed"}
+                          </p>
+                        </div>
+                        <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#caecbc] text-[#496640] whitespace-nowrap flex-shrink-0">Rated</span>
+                      </div>
+                    ))}
+                  </>
+                )}
+
+                {/* All done banner when there's unrated + history */}
+                {allDone && reviews.length > 1 && (
+                  <div className="px-6 py-4 text-center border-t border-[#f4f4f4]">
+                    <p className="text-[13px] text-[#747878]">You're all done — all matches reviewed 🎾</p>
+                  </div>
+                )}
+
+                <div className="h-6" />
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Post-game prompt */}
+      {postGamePrompt && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center px-5" onClick={() => {
+          localStorage.setItem(`padelop:post-game-dismissed:${editedData.date}`, "1");
+          setPostGamePrompt(false);
+        }}>
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-sm bg-white rounded-[28px] px-6 py-7 shadow-2xl text-center"
+            style={{ fontFamily: "var(--font-hanken)", animation: "slideUp 0.28s cubic-bezier(0.22,1,0.36,1)" }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Trophy icon */}
+            <div className="w-14 h-14 rounded-full bg-[#f0f4ff] flex items-center justify-center mx-auto mb-4">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M8 21h8M12 17v4"/><path d="M7 4H4a2 2 0 0 0-2 2v2c0 3.3 2.7 6 6 6"/><path d="M17 4h3a2 2 0 0 1 2 2v2c0 3.3-2.7 6-6 6"/><path d="M7 4h10v8a5 5 0 0 1-10 0V4z"/>
+              </svg>
+            </div>
+            <p className="text-[20px] font-bold text-[#1a1c1c] mb-1">Great game!</p>
+            <p className="text-[14px] text-[#747878] mb-6 leading-snug">Take a second to rate your match — it helps track your progress and readiness.</p>
+            <button
+              onClick={() => {
+                setPostGamePrompt(false);
+                setMatchReviewOpen(true);
+              }}
+              className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white mb-3 active:opacity-80 transition-opacity"
+              style={{ background: "#2653d4" }}
+            >
+              Rate my match
+            </button>
+            <button
+              onClick={() => {
+                localStorage.setItem(`padelop:post-game-dismissed:${editedData.date}`, "1");
+                setPostGamePrompt(false);
+              }}
+              className="w-full py-2.5 text-[14px] font-semibold text-[#747878] active:opacity-60 transition-opacity"
+            >
+              Maybe later
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Match Review modal */}
       {matchReviewOpen && (
         <div className="fixed inset-0 z-[60] flex items-end justify-center" onClick={() => setMatchReviewOpen(false)}>
@@ -1687,8 +1868,10 @@ export default function HomePage() {
                     const entry = { ...matchReview, ts: new Date().toISOString() };
                     const prev = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
                     localStorage.setItem("padelop:match-reviews", JSON.stringify([entry, ...prev].slice(0, 50)));
+                    if (editedData.date) localStorage.setItem(`padelop:post-game-dismissed:${editedData.date}`, "1");
                   } catch {}
                   setMatchReviewOpen(false);
+                  setPostGamePrompt(false);
                   loadAndScore();
                 }}
                 className="w-full py-3.5 rounded-2xl text-white text-[14px] font-semibold active:scale-[0.98] transition-transform"
