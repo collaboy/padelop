@@ -6,10 +6,11 @@ import { useRef, useState, useEffect } from "react";
 import { downloadSnapshot, importData } from "@/lib/storage";
 import ProfileModal from "@/components/profile-modal";
 import { computeNotifications, type Notif } from "@/lib/notifications";
+import { computeScores, computeAllTimeScores, loadScoringData } from "@/lib/scoring";
 
 export default function Nav() {
-  const pct = 71;
   const router = useRouter();
+  const [pct, setPct] = useState(71);
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [importDone, setImportDone] = useState(false);
@@ -18,9 +19,20 @@ export default function Nav() {
   const importRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    function refreshScore() {
+      const data = loadScoringData();
+      const today = computeScores(data.checkIn, data.hydration, data.review, data.nutrition, data.gameDaysThisWeek);
+      setPct(today.overall);
+    }
+    refreshScore();
     setNotifications(computeNotifications());
-    const id = setInterval(() => setNotifications(computeNotifications()), 60_000);
-    return () => clearInterval(id);
+    const id = setInterval(() => {
+      refreshScore();
+      setNotifications(computeNotifications());
+    }, 60_000);
+    // Also refresh on storage changes from other tabs/pages
+    window.addEventListener("storage", refreshScore);
+    return () => { clearInterval(id); window.removeEventListener("storage", refreshScore); };
   }, []);
 
   const items = [
@@ -106,37 +118,38 @@ export default function Nav() {
             </Link>
           </div>
 
-          {/* Right: score arc + notification dot */}
-          <div className="flex justify-end">
+          {/* Right: score arc */}
+          <div className="flex items-center justify-end gap-2">
+            {/* Score ring */}
             <button onClick={() => { setNotifications(computeNotifications()); setNotifOpen(true); }} className="relative active:scale-90 transition-transform">
-              <svg width="48" height="48" viewBox="0 0 48 48">
-                <defs>
-                  <linearGradient id="g1" gradientUnits="userSpaceOnUse" x1="24" y1="4" x2="44" y2="24">
-                    <stop offset="0%" stopColor="#ef4444" />
-                    <stop offset="100%" stopColor="#f97316" />
-                  </linearGradient>
-                  <linearGradient id="g2" gradientUnits="userSpaceOnUse" x1="44" y1="24" x2="24" y2="44">
-                    <stop offset="0%" stopColor="#f97316" />
-                    <stop offset="100%" stopColor="#eab308" />
-                  </linearGradient>
-                  <linearGradient id="g3" gradientUnits="userSpaceOnUse" x1="24" y1="44" x2="4" y2="24">
-                    <stop offset="0%" stopColor="#eab308" />
-                    <stop offset="100%" stopColor="#84cc16" />
-                  </linearGradient>
-                  <linearGradient id="g4" gradientUnits="userSpaceOnUse" x1="4" y1="24" x2="24" y2="4">
-                    <stop offset="0%" stopColor="#84cc16" />
-                    <stop offset="100%" stopColor="#22c55e" />
-                  </linearGradient>
-                </defs>
-                <path d="M 24 4 A 20 20 0 0 1 44 24" fill="none" stroke="url(#g1)" strokeWidth="2.5" strokeLinecap="butt" />
-                <path d="M 44 24 A 20 20 0 0 1 24 44" fill="none" stroke="url(#g2)" strokeWidth="2.5" strokeLinecap="butt" />
-                <path d="M 24 44 A 20 20 0 0 1 4 24"  fill="none" stroke="url(#g3)" strokeWidth="2.5" strokeLinecap="butt" />
-                <path d="M 4 24 A 20 20 0 0 1 24 4"   fill="none" stroke="url(#g4)" strokeWidth="2.5" strokeLinecap="butt" />
-                <text x="24" y="28" textAnchor="middle" fontSize="11" fontWeight="bold" fill="var(--text)" fontFamily="var(--font-hanken)">{pct}%</text>
-              </svg>
-              {notifications.length > 0 && (
-                <span className="absolute w-3.5 h-3.5 rounded-full bg-[#ef4444] border-2 border-[var(--surface)]" style={{ top: 1, right: 1 }} />
-              )}
+            <svg width="48" height="48" viewBox="0 0 48 48">
+              <defs>
+                <linearGradient id="g1" gradientUnits="userSpaceOnUse" x1="24" y1="4" x2="44" y2="24">
+                  <stop offset="0%" stopColor="#ef4444" />
+                  <stop offset="100%" stopColor="#f97316" />
+                </linearGradient>
+                <linearGradient id="g2" gradientUnits="userSpaceOnUse" x1="44" y1="24" x2="24" y2="44">
+                  <stop offset="0%" stopColor="#f97316" />
+                  <stop offset="100%" stopColor="#eab308" />
+                </linearGradient>
+                <linearGradient id="g3" gradientUnits="userSpaceOnUse" x1="24" y1="44" x2="4" y2="24">
+                  <stop offset="0%" stopColor="#eab308" />
+                  <stop offset="100%" stopColor="#84cc16" />
+                </linearGradient>
+                <linearGradient id="g4" gradientUnits="userSpaceOnUse" x1="4" y1="24" x2="24" y2="4">
+                  <stop offset="0%" stopColor="#84cc16" />
+                  <stop offset="100%" stopColor="#22c55e" />
+                </linearGradient>
+              </defs>
+              <path d="M 24 4 A 20 20 0 0 1 44 24" fill="none" stroke="url(#g1)" strokeWidth="2.5" strokeLinecap="butt" />
+              <path d="M 44 24 A 20 20 0 0 1 24 44" fill="none" stroke="url(#g2)" strokeWidth="2.5" strokeLinecap="butt" />
+              <path d="M 24 44 A 20 20 0 0 1 4 24"  fill="none" stroke="url(#g3)" strokeWidth="2.5" strokeLinecap="butt" />
+              <path d="M 4 24 A 20 20 0 0 1 24 4"   fill="none" stroke="url(#g4)" strokeWidth="2.5" strokeLinecap="butt" />
+              <text x="24" y="28" textAnchor="middle" fontSize="11" fontWeight="bold" fill="var(--text)" fontFamily="var(--font-hanken)">{pct}%</text>
+            </svg>
+            {notifications.length > 0 && (
+              <span className="absolute w-3.5 h-3.5 rounded-full bg-[#ef4444] border-2 border-[var(--surface)]" style={{ top: 1, right: 1 }} />
+            )}
             </button>
           </div>
         </div>
