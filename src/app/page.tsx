@@ -49,6 +49,7 @@ export default function HomePage() {
   const [scoreView, setScoreView] = useState<"today" | "alltime">("today");
   const [dayTypeOverride, setDayTypeOverride] = useState<"recovery" | "training" | "rest" | null>(null);
   const [improveOpen, setImproveOpen] = useState(false);
+  const [timelineIdx, setTimelineIdx] = useState<number | null>(null);
   const [matchReviewOpen, setMatchReviewOpen] = useState(false);
   const [matchReview, setMatchReview] = useState({ feeling: "", result: "", opponent: "", energy: "", injury: "", wellDone: [] as string[], improved: [] as string[], mentalBefore: "", mentalDuring: "", mentalAfter: "" });
 
@@ -420,6 +421,177 @@ export default function HomePage() {
                 </button>
               </div>
             </div>
+
+            {/* Horizontal Day Timeline */}
+            {(() => {
+              const now = new Date();
+              const pad = (n: number) => String(n).padStart(2, "0");
+              const matchTimeStr = editedData.time || "18:30";
+              const [mH, mM] = matchTimeStr.split(":").map(Number);
+              const addMins = (h: number, m: number, delta: number) => {
+                const total = h * 60 + m + delta;
+                return `${pad(Math.floor(total / 60) % 24)}:${pad(total % 60)}`;
+              };
+              const matchVenue = [editedData.club, editedData.court ? `Court ${editedData.court}` : ""].filter(Boolean).join(" — ") || "Court";
+
+              const scheduleData: Record<string, { time: string; title: string; subtitle: string; color: string }[]> = {
+                match: [
+                  { time: "07:00", title: "Wake up & hydrate",    subtitle: "500ml water",                              color: "#f59e0b" },
+                  { time: "07:30", title: "Breakfast",             subtitle: "Oats, eggs, fruit",                        color: "#16a34a" },
+                  { time: "09:00", title: "Morning mobility",      subtitle: "Foam roll & light stretching",             color: "#0891b2" },
+                  { time: addMins(mH, mM, -360), title: "Pre-game meal",        subtitle: "Chicken, rice, light salad",             color: "#16a34a" },
+                  { time: addMins(mH, mM, -60),  title: "Warmup & activation", subtitle: "Dynamic drills, 30 min",                 color: "#2653d4" },
+                  { time: matchTimeStr,           title: "Match",               subtitle: matchVenue,                              color: "#1e3a1e" },
+                  { time: addMins(mH, mM, 90),   title: "Post-match cool down", subtitle: "Stretch & mobility, 15 min",            color: "#7c3aed" },
+                  { time: addMins(mH, mM, 120),  title: "Recovery meal",       subtitle: "Protein + carbs within 30 min",          color: "#16a34a" },
+                  { time: "22:30", title: "Wind down",             subtitle: "No screens, light reading",                color: "#94a3b8" },
+                ],
+                recovery: [
+                  { time: "07:30", title: "Wake up & hydrate",    subtitle: "500ml water",                              color: "#f59e0b" },
+                  { time: "08:00", title: "Light breakfast",       subtitle: "Eggs, fruit, Greek yogurt",                color: "#16a34a" },
+                  { time: "09:30", title: "Recovery walk",         subtitle: "20 min easy",                              color: "#0891b2" },
+                  { time: "10:30", title: "Foam roll & stretch",   subtitle: "Quads, hip flexors, calves",               color: "#7c3aed" },
+                  { time: "13:00", title: "Protein-rich lunch",    subtitle: "Chicken, salmon or legumes",               color: "#16a34a" },
+                  { time: "15:30", title: "Cold shower",           subtitle: "2 min cold",                               color: "#2653d4" },
+                  { time: "18:30", title: "Dinner",                subtitle: "Anti-inflammatory focus",                  color: "#16a34a" },
+                  { time: "21:30", title: "Early wind down",       subtitle: "Sleep is your best recovery tool",         color: "#94a3b8" },
+                ],
+                training: [
+                  { time: "07:00", title: "Wake up & hydrate",       subtitle: "500ml water",                           color: "#f59e0b" },
+                  { time: "07:30", title: "Breakfast",                subtitle: "Oats, eggs, fruit",                     color: "#16a34a" },
+                  { time: "09:00", title: "Morning mobility",         subtitle: "Foam roll & light stretching",           color: "#0891b2" },
+                  { time: "15:00", title: "Pre-training meal",        subtitle: "Carbs + protein, 1.5–2h before",        color: "#16a34a" },
+                  { time: "17:00", title: "Pre-training activation",  subtitle: "10 min dynamic warm-up",                color: "#2653d4" },
+                  { time: "17:30", title: "Training session",         subtitle: "Focus on deliberate patterns",           color: "#1e3a1e" },
+                  { time: "19:00", title: "Post-training stretch",    subtitle: "30–45 sec holds",                       color: "#7c3aed" },
+                  { time: "19:30", title: "Post-training protein",    subtitle: "20–40g protein within 30 min",          color: "#16a34a" },
+                  { time: "22:30", title: "Wind down",                subtitle: "No screens, consistent bedtime",        color: "#94a3b8" },
+                ],
+                rest: [
+                  { time: "07:00", title: "Wake up & hydrate",    subtitle: "500ml water",                              color: "#f59e0b" },
+                  { time: "07:30", title: "Breakfast",             subtitle: "Eggs, yogurt, fruit",                      color: "#16a34a" },
+                  { time: "09:30", title: "Light mobility",        subtitle: "Hip flexors, thoracic spine, ankles",      color: "#0891b2" },
+                  { time: "12:30", title: "Balanced lunch",        subtitle: "Carbs + protein + greens",                 color: "#16a34a" },
+                  { time: "15:00", title: "Active recovery",       subtitle: "Walk, swim or light cycling",              color: "#2653d4" },
+                  { time: "18:30", title: "Dinner",                subtitle: "Variety and micronutrients",               color: "#16a34a" },
+                  { time: "21:00", title: "Visualisation",         subtitle: "5 min mental rehearsal",                   color: "#7c3aed" },
+                  { time: "22:30", title: "Wind down",             subtitle: "No screens, consistent bedtime",           color: "#94a3b8" },
+                ],
+              };
+
+              const schedule = scheduleData[dayType];
+              const n = schedule.length;
+              const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+              const curMins = now.getHours() * 60 + now.getMinutes();
+
+              // Auto-detect current item
+              let autoIdx = 0;
+              if (curMins >= toMins(schedule[schedule.length - 1].time)) {
+                autoIdx = schedule.length - 1;
+              } else {
+                for (let i = 0; i < schedule.length - 1; i++) {
+                  if (curMins >= toMins(schedule[i].time) && curMins < toMins(schedule[i + 1].time)) { autoIdx = i; break; }
+                }
+              }
+
+              const displayIdx = timelineIdx ?? autoIdx;
+              const item = schedule[displayIdx];
+              const detail = SCHEDULE_DETAILS[item.title];
+
+              // Notch x-position: accounts for px-3 (12px) padding on each side
+              const notchPct = Math.min(Math.max(((displayIdx + 0.5) / n) * 100, 4), 96);
+
+              const fmtTime = (t: string) => {
+                const [h, m] = t.split(":").map(Number);
+                const ampm = h >= 12 ? "pm" : "am";
+                const h12 = h % 12 || 12;
+                return m === 0 ? `${h12}${ampm}` : `${h12}:${pad(m)}${ampm}`;
+              };
+
+              return (
+                <div>
+                  {/* Timeline strip */}
+                  <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 px-3 pt-4 pb-3">
+                    {/* Dots + line */}
+                    <div className="relative flex items-center" style={{ height: 28 }}>
+                      {/* Background line */}
+                      <div className="absolute inset-x-3 top-1/2 -translate-y-1/2" style={{ height: 1, background: "#e8e8e8" }} />
+                      {/* Progress line */}
+                      <div
+                        className="absolute top-1/2 -translate-y-1/2 transition-all duration-500"
+                        style={{ left: "12px", width: `calc(${((displayIdx + 0.5) / n) * 100}% - 12px)`, height: 1, background: item.color, opacity: 0.5 }}
+                      />
+                      {/* Dots */}
+                      {schedule.map((s, idx) => {
+                        const isPast = idx < displayIdx;
+                        const isCurrent = idx === displayIdx;
+                        const isAuto = idx === autoIdx;
+                        return (
+                          <button
+                            key={idx}
+                            onClick={() => setTimelineIdx(idx === autoIdx && timelineIdx === null ? null : idx)}
+                            className="flex-1 flex justify-center items-center relative z-10 active:scale-110 transition-transform"
+                            style={{ height: 28 }}
+                          >
+                            <div style={{
+                              width:  isCurrent ? 13 : isAuto ? 9 : 7,
+                              height: isCurrent ? 13 : isAuto ? 9 : 7,
+                              borderRadius: "50%",
+                              background: isCurrent ? s.color : isPast ? "#d4d7d9" : "white",
+                              border: `2px solid ${isCurrent ? s.color : isPast ? "#d4d7d9" : "#e2e2e2"}`,
+                              boxShadow: isCurrent ? `0 0 0 3px ${s.color}22` : "none",
+                              transition: "all 0.25s",
+                            }} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {/* Time labels */}
+                    <div className="flex mt-1.5">
+                      {schedule.map((s, idx) => (
+                        <div key={idx} className="flex-1 flex justify-center">
+                          <span className="text-[8px] font-semibold leading-none transition-colors" style={{ color: idx === displayIdx ? item.color : "#c4c7c7" }}>
+                            {fmtTime(s.time)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Info card with upward notch */}
+                  <div className="relative mt-1.5">
+                    {/* Notch border */}
+                    <div className="absolute z-10 pointer-events-none" style={{
+                      top: -9, left: `calc(${notchPct}% - 9px)`,
+                      width: 0, height: 0,
+                      borderLeft: "9px solid transparent", borderRight: "9px solid transparent",
+                      borderBottom: "9px solid rgba(196,199,199,0.2)",
+                    }} />
+                    {/* Notch fill */}
+                    <div className="absolute z-20 pointer-events-none" style={{
+                      top: -7, left: `calc(${notchPct}% - 7px)`,
+                      width: 0, height: 0,
+                      borderLeft: "7px solid transparent", borderRight: "7px solid transparent",
+                      borderBottom: "7px solid white",
+                    }} />
+                    <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 px-6 py-5">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-2 h-2 rounded-full flex-shrink-0 transition-colors" style={{ background: item.color }} />
+                        <span className="text-[11px] font-bold text-[#747878] uppercase tracking-wide">{item.time}</span>
+                        {timelineIdx !== null && (
+                          <button onClick={() => setTimelineIdx(null)} className="ml-auto text-[11px] font-semibold text-[#4169e1] active:opacity-60">
+                            Now
+                          </button>
+                        )}
+                      </div>
+                      <p className="h1-headline-md text-[#1a1c1c] mb-0.5">{item.title}</p>
+                      <p className="text-[13px] text-[#747878] mb-3 leading-snug">{item.subtitle}</p>
+                      {detail && <p className="text-[13px] text-[#444748] leading-relaxed line-clamp-4">{detail}</p>}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Daily Check-In + Metrics (connected) */}
             <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden">
