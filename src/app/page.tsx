@@ -514,7 +514,7 @@ export default function HomePage() {
                   {/* Header */}
                   <div className="mb-4">
                     <p className="h1-headline-md text-[#1a1c1c]">
-                      {`Today's Plan: ${dayType === "match" ? "Game Day" : dayType === "recovery" ? "Recovery Day" : dayType === "training" ? "Training Day" : "Rest Day"}`}
+                      Today&apos;s Plan: <span className="text-[15px] font-medium text-[#747878]">{dayType === "match" ? "Game Day" : dayType === "recovery" ? "Recovery Day" : dayType === "training" ? "Training Day" : "Rest Day"}</span>
                     </p>
                     {dayType === "match" && editedData.time && (
                       <p className="text-[13px] font-medium text-[#747878] mt-0.5">Gametime: <span className="font-semibold text-[#1a1c1c]">{editedData.time}</span></p>
