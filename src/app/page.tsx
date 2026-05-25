@@ -249,6 +249,7 @@ export default function HomePage() {
         .h1-spin { animation: spin 0.9s linear infinite; }
         @keyframes speedDialUp { from { opacity:0; transform:translateY(10px) scale(0.88); } to { opacity:1; transform:translateY(0) scale(1); } }
         @keyframes slideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
+        @keyframes confettiFall { 0% { transform:translateY(-10px) rotate(0deg); opacity:0; } 12% { opacity:1; } 88% { opacity:1; } 100% { transform:translateY(58px) rotate(220deg); opacity:0; } }
         .h1-slider { -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:9999px; background:#e2e2e2; outline:none; }
         .h1-slider::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:22px; height:22px; border-radius:50%; background:#496640; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,0.15); }
         .h1-slider::-moz-range-thumb { width:22px; height:22px; border-radius:50%; background:#496640; cursor:pointer; border:none; }
@@ -513,11 +514,40 @@ export default function HomePage() {
 
                   {/* Header */}
                   <div className="mb-4">
-                    <p className="h1-headline-md text-[#1a1c1c]">
-                      Today&apos;s Plan: <span className="text-[15px] font-medium text-[#747878]">{dayType === "match" ? "Game Day" : dayType === "recovery" ? "Recovery Day" : dayType === "training" ? "Training Day" : "Rest Day"}</span>
-                    </p>
-                    {dayType === "match" && editedData.time && (
-                      <p className="text-[13px] font-medium text-[#747878] mt-0.5">Gametime: <span className="font-semibold text-[#1a1c1c]">{editedData.time}</span></p>
+                    <p className="text-[11px] font-semibold text-[#747878] uppercase tracking-widest mb-1">Today&apos;s Plan</p>
+                    {dayType === "match" ? (
+                      <>
+                        <div className="relative flex justify-center overflow-hidden" style={{ height: 36 }}>
+                          {[
+                            { left:"6%",  delay:"0s",    dur:"2.2s", color:"#f59e0b", w:5, h:8  },
+                            { left:"16%", delay:"0.4s",  dur:"1.8s", color:"#2653d4", w:6, h:5  },
+                            { left:"26%", delay:"0.1s",  dur:"2.5s", color:"#ef4444", w:4, h:7  },
+                            { left:"36%", delay:"0.7s",  dur:"1.9s", color:"#16a34a", w:7, h:5  },
+                            { left:"46%", delay:"0.3s",  dur:"2.1s", color:"#f59e0b", w:5, h:8  },
+                            { left:"56%", delay:"1.0s",  dur:"1.7s", color:"#7c3aed", w:6, h:5  },
+                            { left:"66%", delay:"0.2s",  dur:"2.3s", color:"#ef4444", w:4, h:9  },
+                            { left:"76%", delay:"0.6s",  dur:"1.8s", color:"#2653d4", w:7, h:5  },
+                            { left:"86%", delay:"0.9s",  dur:"2.0s", color:"#16a34a", w:5, h:7  },
+                            { left:"12%", delay:"1.2s",  dur:"1.9s", color:"#f97316", w:6, h:5  },
+                            { left:"52%", delay:"0.8s",  dur:"2.2s", color:"#0891b2", w:4, h:8  },
+                            { left:"78%", delay:"1.4s",  dur:"1.6s", color:"#f59e0b", w:7, h:5  },
+                          ].map((p, i) => (
+                            <div key={i} className="absolute pointer-events-none" style={{
+                              left: p.left, top: 0, width: p.w, height: p.h,
+                              background: p.color, borderRadius: 1.5, opacity: 0,
+                              animation: `confettiFall ${p.dur} ${p.delay} ease-in infinite`,
+                            }} />
+                          ))}
+                          <p className="h1-headline-md text-[#1a1c1c] relative z-10 self-center">Game Day</p>
+                        </div>
+                        {editedData.time && (
+                          <p className="text-[13px] font-medium text-[#747878] text-center mt-1">Gametime: <span className="font-semibold text-[#1a1c1c]">{editedData.time}</span></p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="h1-headline-md text-[#1a1c1c]">
+                        {dayType === "recovery" ? "Recovery Day" : dayType === "training" ? "Training Day" : "Rest Day"}
+                      </p>
                     )}
                   </div>
 
