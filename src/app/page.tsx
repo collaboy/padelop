@@ -509,74 +509,75 @@ export default function HomePage() {
               };
 
               return (
-                <div>
-                  {/* Timeline strip */}
-                  <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 px-3 pt-4 pb-3">
-                    {/* Dots + line */}
-                    <div className="relative flex items-center" style={{ height: 28 }}>
-                      {/* Background line */}
-                      <div className="absolute inset-x-3 top-1/2 -translate-y-1/2" style={{ height: 1, background: "#e8e8e8" }} />
-                      {/* Progress line */}
-                      <div
-                        className="absolute top-1/2 -translate-y-1/2 transition-all duration-500"
-                        style={{ left: "12px", width: `calc(${((displayIdx + 0.5) / n) * 100}% - 12px)`, height: 1, background: item.color, opacity: 0.5 }}
-                      />
-                      {/* Dots */}
+                <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 px-4 pt-5 pb-4">
+
+                  {/* Timeline */}
+                  <div className="relative">
+                    {/* Track line */}
+                    <div className="absolute inset-x-0 pointer-events-none" style={{ top: 18, height: 1.5, background: "#ebebeb" }} />
+                    {/* Elapsed line */}
+                    <div
+                      className="absolute pointer-events-none transition-all duration-500"
+                      style={{ top: 18, left: 0, height: 1.5, width: `${notchPct}%`, background: item.color, opacity: 0.45 }}
+                    />
+                    {/* Dot + label columns */}
+                    <div className="flex">
                       {schedule.map((s, idx) => {
-                        const isPast = idx < displayIdx;
+                        const isPast    = idx < displayIdx;
                         const isCurrent = idx === displayIdx;
-                        const isAuto = idx === autoIdx;
                         return (
                           <button
                             key={idx}
-                            onClick={() => setTimelineIdx(idx === autoIdx && timelineIdx === null ? null : idx)}
-                            className="flex-1 flex justify-center items-center relative z-10 active:scale-110 transition-transform"
-                            style={{ height: 28 }}
+                            onClick={() => setTimelineIdx(timelineIdx === idx && idx === autoIdx ? null : idx)}
+                            className="flex-1 flex flex-col items-center gap-2 active:opacity-60 transition-opacity"
                           >
+                            {/* Dot */}
                             <div style={{
-                              width:  isCurrent ? 13 : isAuto ? 9 : 7,
-                              height: isCurrent ? 13 : isAuto ? 9 : 7,
+                              marginTop: isCurrent ? 11 : 14,
+                              width:  isCurrent ? 15 : 8,
+                              height: isCurrent ? 15 : 8,
                               borderRadius: "50%",
-                              background: isCurrent ? s.color : isPast ? "#d4d7d9" : "white",
-                              border: `2px solid ${isCurrent ? s.color : isPast ? "#d4d7d9" : "#e2e2e2"}`,
-                              boxShadow: isCurrent ? `0 0 0 3px ${s.color}22` : "none",
+                              background: isCurrent ? s.color : isPast ? "#cdd0d1" : "white",
+                              border: `2px solid ${isCurrent ? s.color : isPast ? "#cdd0d1" : "#dde0e1"}`,
+                              boxShadow: isCurrent ? `0 0 0 4px ${s.color}1e` : "none",
+                              flexShrink: 0,
                               transition: "all 0.25s",
                             }} />
+                            {/* Time label */}
+                            <span
+                              className="leading-none transition-all"
+                              style={{
+                                fontSize: isCurrent ? 10 : 8.5,
+                                fontWeight: isCurrent ? 700 : 500,
+                                color: isCurrent ? s.color : isPast ? "#bbbec0" : "#d0d3d4",
+                              }}
+                            >{fmtTime(s.time)}</span>
                           </button>
                         );
                       })}
                     </div>
-                    {/* Time labels */}
-                    <div className="flex mt-1.5">
-                      {schedule.map((s, idx) => (
-                        <div key={idx} className="flex-1 flex justify-center">
-                          <span className="text-[8px] font-semibold leading-none transition-colors" style={{ color: idx === displayIdx ? item.color : "#c4c7c7" }}>
-                            {fmtTime(s.time)}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
                   </div>
 
-                  {/* Info card with upward notch */}
-                  <div className="relative mt-1.5">
-                    {/* Notch border */}
-                    <div className="absolute z-10 pointer-events-none" style={{
-                      top: -9, left: `calc(${notchPct}% - 9px)`,
+                  {/* Notch + nested info card */}
+                  <div className="relative mt-4">
+                    {/* Notch shadow triangle */}
+                    <div className="absolute pointer-events-none" style={{
+                      top: -9, left: `calc(${notchPct}% - 9px)`, zIndex: 1,
                       width: 0, height: 0,
                       borderLeft: "9px solid transparent", borderRight: "9px solid transparent",
-                      borderBottom: "9px solid rgba(196,199,199,0.2)",
+                      borderBottom: "9px solid rgba(180,184,184,0.25)",
                     }} />
-                    {/* Notch fill */}
-                    <div className="absolute z-20 pointer-events-none" style={{
-                      top: -7, left: `calc(${notchPct}% - 7px)`,
+                    {/* Notch white fill */}
+                    <div className="absolute pointer-events-none" style={{
+                      top: -7, left: `calc(${notchPct}% - 7px)`, zIndex: 2,
                       width: 0, height: 0,
                       borderLeft: "7px solid transparent", borderRight: "7px solid transparent",
-                      borderBottom: "7px solid white",
+                      borderBottom: "7px solid #f4f5f5",
                     }} />
-                    <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 px-6 py-5">
+                    {/* Inner card */}
+                    <div className="rounded-[18px] px-5 py-4" style={{ background: "#f4f5f5" }}>
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-2 h-2 rounded-full flex-shrink-0 transition-colors" style={{ background: item.color }} />
+                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: item.color }} />
                         <span className="text-[11px] font-bold text-[#747878] uppercase tracking-wide">{item.time}</span>
                         {timelineIdx !== null && (
                           <button onClick={() => setTimelineIdx(null)} className="ml-auto text-[11px] font-semibold text-[#4169e1] active:opacity-60">
@@ -589,6 +590,7 @@ export default function HomePage() {
                       {detail && <p className="text-[13px] text-[#444748] leading-relaxed line-clamp-4">{detail}</p>}
                     </div>
                   </div>
+
                 </div>
               );
             })()}
