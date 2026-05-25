@@ -535,7 +535,7 @@ export default function HomePage() {
                             <div key={i} className="absolute pointer-events-none" style={{
                               left: p.left, top: 0, width: p.w, height: p.h,
                               background: p.color, borderRadius: 1.5, opacity: 0,
-                              animation: `confettiFall ${p.dur} ${p.delay} ease-in infinite`,
+                              animation: `confettiFall ${p.dur} ${p.delay} ease-in 2 forwards`,
                             }} />
                           ))}
                           <p className="h1-headline-md text-[#1a1c1c] relative z-10 self-center">Game Day</p>
