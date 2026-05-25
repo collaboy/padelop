@@ -355,7 +355,7 @@ export default function HomePage() {
 
             {/* Match Card */}
             <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden">
-              {!editedData.time ? (
+              {!editedData.time || (!!editedData.time && countdown.past) ? (
                 /* Empty state */
                 <button
                   onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }}
