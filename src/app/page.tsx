@@ -438,19 +438,14 @@ export default function HomePage() {
           </div>
 
           {/* Improve today card */}
-          <button className="w-full mb-5 bg-white h1-ambient border border-[#c4c7c7]/10 rounded-[24px] px-5 py-4 flex items-center justify-between active:opacity-60 transition-opacity">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#2653d4]/10 flex items-center justify-center flex-shrink-0">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                  <polyline points="17 6 23 6 23 12" />
-                </svg>
-              </div>
-              <p className="text-[15px] font-semibold text-[#1a1c1c]">Improve today</p>
+          <button className="w-full mb-5 bg-white h1-ambient border border-[#c4c7c7]/10 rounded-[24px] px-5 py-4 flex items-center justify-center gap-3 active:opacity-60 transition-opacity">
+            <div className="w-8 h-8 rounded-full bg-[#2653d4]/10 flex items-center justify-center flex-shrink-0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                <polyline points="17 6 23 6 23 12" />
+              </svg>
             </div>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+            <p className="text-[15px] font-semibold text-[#1a1c1c]">Improve today</p>
           </button>
 
           {/* Do this now */}
@@ -885,7 +880,7 @@ export default function HomePage() {
         <div className="fixed right-6 bottom-24 z-[70]">
           <button
             onClick={() => setFabOpen(o => !o)}
-            className="w-14 h-14 bg-[#ffe600] rounded-full flex items-center justify-center shadow-lg active:scale-90"
+            className="w-10 h-10 bg-[#ffe600] rounded-full flex items-center justify-center shadow-lg active:scale-90"
             style={{ transition: "transform 0.22s ease", transform: fabOpen ? "rotate(45deg)" : "rotate(0deg)" }}
           >
             <span className="material-symbols-outlined text-[#1a1c1c]">add</span>
