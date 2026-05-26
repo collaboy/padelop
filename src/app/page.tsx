@@ -341,7 +341,7 @@ export default function HomePage() {
             return (
               <div className="mb-5 mt-2 px-1 text-center">
                 <p className="text-[22px] font-bold text-[#1a1c1c] leading-snug" style={{ fontFamily: "var(--font-hanken)" }}>Good {tod}.</p>
-                <p className="text-[14px] text-[#5a6370] mt-1 leading-snug">{msg}</p>
+                <p className="text-[16px] text-[#5a6370] mt-1 leading-snug">{msg}</p>
               </div>
             );
           })()}
