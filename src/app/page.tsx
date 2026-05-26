@@ -348,6 +348,8 @@ export default function HomePage() {
             );
           })()}
 
+          <div className="h-px bg-[#e8eaea] mx-1 mb-5" />
+
           {/* Match Card */}
           <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden mb-4">
             {!editedData.time || countdown.past ? (
