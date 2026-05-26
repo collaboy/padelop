@@ -46,7 +46,7 @@ body {
 .vt-page-content { view-transition-name: vt-page-content; }
 
 /* Swipe page transitions — content area only */
-@keyframes breathe { 0%, 100% { box-shadow: 0 0 0 0 var(--glow, #16a34a); } 50% { box-shadow: 0 0 3px 2px var(--glow, #16a34a); } }
+@keyframes breathe { 0%, 100% { box-shadow: 0 0 1px 0px var(--glow, #16a34a); } 50% { box-shadow: 0 0 4px 1px var(--glow, #16a34a); } }
 .animate-breathe { animation: breathe 2.5s ease-in-out infinite; }
 
 @keyframes nav-slide-out-left  { to   { transform: translateX(-28%); opacity: 0; } }
