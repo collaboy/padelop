@@ -311,6 +311,88 @@ export default function HomePage() {
       <div className="h1-font bg-[#f9f9f9] text-[#1a1c1c] min-h-screen">
         <main className="pt-4 pb-8 px-5 max-w-lg mx-auto">
 
+          {/* Match Card */}
+          <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden mb-4">
+            {!editedData.time || countdown.past ? (
+              /* Empty state */
+              <button
+                onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }}
+                className="w-full px-6 py-5 flex items-center gap-4 active:opacity-60 transition-opacity"
+              >
+                <div className="w-10 h-10 rounded-full border-2 border-dashed border-[#c4c7c7] flex items-center justify-center flex-shrink-0">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#9aab96" strokeWidth="2" strokeLinecap="round">
+                    <line x1="7" y1="1" x2="7" y2="13" /><line x1="1" y1="7" x2="13" y2="7" />
+                  </svg>
+                </div>
+                <div className="text-left">
+                  <p className="text-[15px] font-semibold text-[#1a1c1c]">Add a match</p>
+                  <p className="text-[13px] text-[#9aab96] mt-0.5">Upload booking or enter details</p>
+                </div>
+              </button>
+            ) : (
+              <>
+                {/* Collapsed one-liner — tap to expand */}
+                <div className="w-full px-5 py-3.5 flex items-center justify-between">
+                  <button
+                    onClick={() => setMatchCardExpanded(e => !e)}
+                    className="flex items-center gap-2.5 active:opacity-60 transition-opacity"
+                  >
+                    <span className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96]">Next Match</span>
+                    {editedData.date && now && (() => {
+                      const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+                      const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
+                      const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+                      return <>
+                        <span className="text-[#dde0e1] text-[11px]">·</span>
+                        <span className="text-[13px] font-semibold text-[#1a1c1c]">{label}</span>
+                      </>;
+                    })()}
+                    <span className="text-[#dde0e1] text-[11px]">·</span>
+                    <span className="text-[13px] font-semibold text-[#747878]">{editedData.time}</span>
+                  </button>
+                  <button
+                    onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }}
+                    className="w-6 h-6 rounded-full flex items-center justify-center active:opacity-50 transition-opacity"
+                    aria-label="Add / edit match"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#c4c7c7" strokeWidth="2" strokeLinecap="round">
+                      <line x1="6" y1="1" x2="6" y2="11" /><line x1="1" y1="6" x2="11" y2="6" />
+                    </svg>
+                  </button>
+                </div>
+                {/* Expanded detail */}
+                {matchCardExpanded && (() => {
+                  const club = editedData.club || "Location TBD";
+                  const court = editedData.court ? `Court ${editedData.court}` : "";
+                  return (
+                    <div className="border-t border-[#f0f0f0] px-5 pt-3 pb-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="h1-headline-md text-[#1a1c1c]">Padel Match</p>
+                        <button
+                          onClick={() => setMatchInfoOpen(true)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#e2e2e2] active:bg-[#f0f0f0] transition-colors"
+                        >
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                          </svg>
+                          <span className="text-[12px] font-semibold text-[#747878]">Edit</span>
+                        </button>
+                      </div>
+                      <div className="flex items-center justify-between text-[#747878]">
+                        <div className="flex items-center gap-1.5">
+                          <span className="material-symbols-outlined" style={{ fontSize: 13 }}>location_on</span>
+                          <span className="text-[13px] font-medium">{club}</span>
+                        </div>
+                        {court && <span className="text-[13px] font-medium text-[#9aab96]">{court}</span>}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </>
+            )}
+          </div>
+
           {/* Greeting */}
           {(() => {
             const h = now ? now.getHours() : 12;
@@ -353,90 +435,6 @@ export default function HomePage() {
           </div>
 
           <div className="space-y-4">
-
-            {/* Match Card */}
-            <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden">
-              {!editedData.time || countdown.past ? (
-                /* Empty state */
-                <button
-                  onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }}
-                  className="w-full px-6 py-5 flex items-center gap-4 active:opacity-60 transition-opacity"
-                >
-                  <div className="w-10 h-10 rounded-full border-2 border-dashed border-[#c4c7c7] flex items-center justify-center flex-shrink-0">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#9aab96" strokeWidth="2" strokeLinecap="round">
-                      <line x1="7" y1="1" x2="7" y2="13" /><line x1="1" y1="7" x2="13" y2="7" />
-                    </svg>
-                  </div>
-                  <div className="text-left">
-                    <p className="text-[15px] font-semibold text-[#1a1c1c]">Add a match</p>
-                    <p className="text-[13px] text-[#9aab96] mt-0.5">Upload booking or enter details</p>
-                  </div>
-                </button>
-              ) : (
-                <>
-                  {/* Collapsed one-liner — tap to expand */}
-                  <div className="w-full px-5 py-3.5 flex items-center justify-between">
-                    <button
-                      onClick={() => setMatchCardExpanded(e => !e)}
-                      className="flex items-center gap-2.5 active:opacity-60 transition-opacity"
-                    >
-                      <span className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96]">Next Match</span>
-                      {editedData.date && now && (() => {
-                        const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-                        const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
-                        const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-                        return <>
-                          <span className="text-[#dde0e1] text-[11px]">·</span>
-                          <span className="text-[13px] font-semibold text-[#1a1c1c]">{label}</span>
-                        </>;
-                      })()}
-                      <span className="text-[#dde0e1] text-[11px]">·</span>
-                      <span className="text-[13px] font-semibold text-[#747878]">{editedData.time}</span>
-                    </button>
-                    <button
-                      onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }}
-                      className="w-6 h-6 rounded-full flex items-center justify-center active:opacity-50 transition-opacity"
-                      aria-label="Add / edit match"
-                    >
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#c4c7c7" strokeWidth="2" strokeLinecap="round">
-                        <line x1="6" y1="1" x2="6" y2="11" /><line x1="1" y1="6" x2="11" y2="6" />
-                      </svg>
-                    </button>
-                  </div>
-
-                  {/* Expanded detail */}
-                  {matchCardExpanded && (() => {
-                    const club = editedData.club || "Location TBD";
-                    const court = editedData.court ? `Court ${editedData.court}` : "";
-                    return (
-                      <div className="border-t border-[#f0f0f0] px-5 pt-3 pb-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="h1-headline-md text-[#1a1c1c]">Padel Match</p>
-                          <button
-                            onClick={() => setMatchInfoOpen(true)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#e2e2e2] active:bg-[#f0f0f0] transition-colors"
-                          >
-                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                            </svg>
-                            <span className="text-[12px] font-semibold text-[#747878]">Edit</span>
-                          </button>
-                        </div>
-                        <div className="flex items-center justify-between text-[#747878]">
-                          <div className="flex items-center gap-1.5">
-                            <span className="material-symbols-outlined" style={{ fontSize: 13 }}>location_on</span>
-                            <span className="text-[13px] font-medium">{club}</span>
-                          </div>
-                          {court && <span className="text-[13px] font-medium text-[#9aab96]">{court}</span>}
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </>
-              )}
-            </div>
-
 
             {/* Do This Right Now */}
             <div className="bg-white rounded-[24px] p-6 h1-ambient border border-[#c4c7c7]/10">
