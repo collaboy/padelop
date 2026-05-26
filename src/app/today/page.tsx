@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const SCHEDULE_DETAILS: Record<string, string> = {
   "Wake up & hydrate": "Starting your day with 500 ml of water re-hydrates you after 7–8 hours without fluids. Do this before coffee — caffeine is a mild diuretic and amplifies morning dehydration.",
@@ -42,6 +42,7 @@ export default function TodayPage() {
   const [dayTypeOverride, setDayTypeOverride] = useState<"recovery" | "training" | "rest" | null>(null);
   const [scheduleModal, setScheduleModal] = useState<{ title: string; subtitle?: string; detail: string; color: string } | null>(null);
   const [matchData, setMatchData] = useState<Record<string, string>>({});
+  const currentRowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setNow(new Date());
@@ -135,6 +136,12 @@ export default function TodayPage() {
   const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
   const curMins = now ? now.getHours() * 60 + now.getMinutes() : -1;
 
+  useEffect(() => {
+    if (now && currentRowRef.current) {
+      currentRowRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [now]);
+
   return (
     <>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
@@ -162,7 +169,7 @@ export default function TodayPage() {
               const isPast = curMins >= nMins;
               const detail = SCHEDULE_DETAILS[title];
               return (
-                <div key={idx} className="flex gap-3">
+                <div key={idx} ref={isCurrent ? currentRowRef : undefined} className="flex gap-3">
                   <div className="w-11 flex-shrink-0 pt-0.5">
                     <p className="text-[13px] font-semibold text-[#444748] text-right leading-none">{time}</p>
                   </div>
