@@ -387,7 +387,7 @@ export default function HomePage() {
                       const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
                       return <span className="text-[13px] font-semibold text-[#1a1c1c] text-center">{label}</span>;
                     })()}
-                    <span className="text-[13px] font-semibold text-[#747878] text-left">{editedData.time}</span>
+                    <span className="text-[13px] font-semibold text-[#747878] text-right">{editedData.time}</span>
                   </button>
 
                   {/* Expanded detail */}
