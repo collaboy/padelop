@@ -377,17 +377,16 @@ export default function HomePage() {
                   {/* Collapsed one-liner — tap to expand */}
                   <button
                     onClick={() => setMatchCardExpanded(e => !e)}
-                    className="w-full px-5 py-3.5 grid items-center active:opacity-60 transition-opacity"
-                    style={{ gridTemplateColumns: "1fr 1fr 1fr" }}
+                    className="relative w-full px-5 py-3.5 flex items-center justify-between active:opacity-60 transition-opacity"
                   >
-                    <span className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96] text-left">Next Match</span>
+                    <span className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96]">Next Match</span>
                     {editedData.date && now && (() => {
                       const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
                       const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
                       const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-                      return <span className="text-[13px] font-semibold text-[#1a1c1c] text-center">{label}</span>;
+                      return <span className="absolute left-1/2 -translate-x-1/2 text-[13px] font-semibold text-[#1a1c1c]">{label}</span>;
                     })()}
-                    <span className="text-[13px] font-semibold text-[#747878] text-right">{editedData.time}</span>
+                    <span className="text-[13px] font-semibold text-[#747878]">{editedData.time}</span>
                   </button>
 
                   {/* Expanded detail */}
