@@ -17,7 +17,7 @@ export default function ScoreRing() {
   }, []);
 
   const p = scores.overall / 100;
-  const cx = 50, cy = 50, r = 42, sw = 6;
+  const cx = 50, cy = 50, r = 42, sw = 10;
   const SEGS = 60;
   const pt = (a: number) => ({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
   const lerp = (a: number, b: number, t: number) => Math.round(a + (b - a) * t);
@@ -40,14 +40,14 @@ export default function ScoreRing() {
       <path key={i}
         d={`M${p0.x} ${p0.y} A${r} ${r} 0 0 1 ${p1.x} ${p1.y}`}
         fill="none" stroke={segColor((t0 + t1) / 2)} strokeWidth={sw}
-        strokeLinecap={i === 0 || isLast ? "round" : "butt"}
+        strokeLinecap={isLast ? "round" : "butt"}
       />
     );
   }
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative" style={{ width: 210, height: 210 }}>
+      <div className="relative" style={{ width: 189, height: 189 }}>
         <svg className="w-full h-full" viewBox="0 0 100 100">
           <circle cx={cx} cy={cy} r={r} fill="transparent" strokeWidth={sw} stroke="#e2e2e2" />
           {arcs}
