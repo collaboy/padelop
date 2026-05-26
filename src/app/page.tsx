@@ -380,25 +380,25 @@ export default function HomePage() {
                     return (
                       <>
                         <div className="flex items-center justify-between mb-1.5">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
                             <p className="text-xs font-bold tracking-widest uppercase text-[#9aab96]">Next Match</p>
-                            {editedData.date && now && (() => {
-                              const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-                              const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
-                              const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" });
-                              return <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#f0f4ff] text-[#2653d4]">{label}</span>;
-                            })()}
+                            <button
+                              onClick={() => setMatchInfoOpen(true)}
+                              className="w-6 h-6 rounded-full flex items-center justify-center active:bg-[#f0f0f0] transition-colors"
+                              aria-label="Edit match"
+                            >
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                              </svg>
+                            </button>
                           </div>
-                          <button
-                            onClick={() => setMatchInfoOpen(true)}
-                            className="w-7 h-7 rounded-full flex items-center justify-center active:bg-[#f0f0f0] transition-colors"
-                            aria-label="Edit match"
-                          >
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                            </svg>
-                          </button>
+                          {editedData.date && now && (() => {
+                            const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+                            const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
+                            const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" });
+                            return <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#f0f4ff] text-[#2653d4]">{label}</span>;
+                          })()}
                         </div>
                         <div className="flex items-center justify-between mb-1.5">
                           <p className="h1-headline-md text-[#1a1c1c]">Padel Match</p>
