@@ -388,15 +388,6 @@ export default function HomePage() {
                       <span className="text-[15px] font-semibold text-[#747878]">{editedData.time}</span>
                     </div>
                   </button>
-                  <button
-                    onClick={() => setMatchCardExpanded(e => !e)}
-                    className="w-6 h-6 rounded-full flex items-center justify-center active:opacity-50 transition-opacity"
-                    aria-label="Expand match details"
-                  >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M6 9l6 6 6-6" />
-                    </svg>
-                  </button>
                 </div>
                 {/* Expanded detail */}
                 {matchCardExpanded && (() => {
