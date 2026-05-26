@@ -183,23 +183,27 @@ export default function Nav() {
             </Link>
           </div>
 
-          {/* Center: Next Match + date */}
+          {/* Center: Next Match + date (single line) */}
           <div className="flex flex-col items-center justify-center text-center">
-            <span className="text-[9px] font-bold tracking-widest uppercase text-[#9aab96] leading-none text-center">Next Match</span>
+            <span className="text-[9px] font-bold tracking-widest uppercase text-[#9aab96] leading-none">Next Match</span>
             {matchDate && nowDate ? (() => {
               const todayY = nowDate.getFullYear(), todayM = nowDate.getMonth(), todayD = nowDate.getDate();
               const todayYMD = `${todayY}-${String(todayM + 1).padStart(2, "0")}-${String(todayD).padStart(2, "0")}`;
               const tom = new Date(nowDate); tom.setDate(todayD + 1);
               const tomYMD = `${tom.getFullYear()}-${String(tom.getMonth() + 1).padStart(2, "0")}-${String(tom.getDate()).padStart(2, "0")}`;
-              const label = matchDate === todayYMD ? "Today" : matchDate === tomYMD ? "Tomorrow" : new Date(matchDate + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-              return <span className="text-[13px] font-semibold text-[var(--text)] leading-tight mt-0.5 text-center">{label}{matchTime ? ` · ${matchTime}` : ""}</span>;
-            })() : <span className="text-[12px] text-[#c4c7c7] leading-tight mt-0.5 text-center">No match scheduled</span>}
+              const d = new Date(matchDate + "T12:00:00");
+              const label = matchDate === todayYMD ? "Today" : matchDate === tomYMD ? "Tomorrow" : `${d.toLocaleDateString(undefined, { weekday: "short" })} ${d.getDate()} ${d.toLocaleDateString(undefined, { month: "short" })}`;
+              return <span className="text-[13px] font-semibold text-[var(--text)] leading-tight mt-0.5 whitespace-nowrap">{label}{matchTime ? ` · ${matchTime}` : ""}</span>;
+            })() : <span className="text-[12px] text-[#c4c7c7] leading-tight mt-0.5">No match scheduled</span>}
           </div>
 
-          {/* Right: ring + Match Readiness label */}
-          <div className="flex items-center justify-end gap-1.5">
-            <span className="text-[9px] font-bold tracking-widest uppercase text-[#9aab96] text-right leading-snug">Match<br/>Readiness</span>
-            <svg width="40" height="40" viewBox="0 0 48 48">
+          {/* Right: ring with inline Match Readiness label */}
+          <div className="flex items-center justify-end gap-2">
+            <div className="flex flex-col items-end">
+              <span className="text-[9px] font-bold tracking-widest uppercase text-[#9aab96] leading-none whitespace-nowrap">Match</span>
+              <span className="text-[9px] font-bold tracking-widest uppercase text-[#9aab96] leading-none whitespace-nowrap">Readiness</span>
+            </div>
+            <svg width="44" height="44" viewBox="0 0 48 48">
               <defs>
                 <linearGradient id="nb1" gradientUnits="userSpaceOnUse" x1="24" y1="4" x2="44" y2="24">
                   <stop offset="0%" stopColor="#ef4444" /><stop offset="100%" stopColor="#f97316" />
