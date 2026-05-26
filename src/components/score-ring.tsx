@@ -16,8 +16,7 @@ export default function ScoreRing() {
     return () => window.removeEventListener("storage", load);
   }, []);
 
-  const BASE = 65;
-  const p = Math.max(0, (scores.overall - BASE) / (100 - BASE));
+  const p = scores.overall / 100;
   const cx = 50, cy = 50, r = 42, sw = 10;
   const SEGS = 60;
   const pt = (a: number) => ({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
