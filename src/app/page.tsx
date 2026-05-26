@@ -439,7 +439,7 @@ export default function HomePage() {
             </button>
           </div>
 
-          <div className="h-px bg-[#e8eaea] mx-1 mb-2" />
+          <div className="mb-4" />
 
           {/* Do this now */}
           {(() => {
