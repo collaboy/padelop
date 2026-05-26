@@ -184,16 +184,16 @@ export default function Nav() {
           </div>
 
           {/* Center: Next Match + date */}
-          <div className="flex flex-col items-center justify-center">
-            <span className="text-[9px] font-bold tracking-widest uppercase text-[#9aab96] leading-none">Next Match</span>
+          <div className="flex flex-col items-center justify-center text-center">
+            <span className="text-[9px] font-bold tracking-widest uppercase text-[#9aab96] leading-none text-center">Next Match</span>
             {matchDate && nowDate ? (() => {
               const todayY = nowDate.getFullYear(), todayM = nowDate.getMonth(), todayD = nowDate.getDate();
               const todayYMD = `${todayY}-${String(todayM + 1).padStart(2, "0")}-${String(todayD).padStart(2, "0")}`;
               const tom = new Date(nowDate); tom.setDate(todayD + 1);
               const tomYMD = `${tom.getFullYear()}-${String(tom.getMonth() + 1).padStart(2, "0")}-${String(tom.getDate()).padStart(2, "0")}`;
               const label = matchDate === todayYMD ? "Today" : matchDate === tomYMD ? "Tomorrow" : new Date(matchDate + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-              return <span className="text-[13px] font-semibold text-[var(--text)] leading-tight mt-0.5">{label}{matchTime ? ` · ${matchTime}` : ""}</span>;
-            })() : <span className="text-[12px] text-[#c4c7c7] leading-tight mt-0.5">No match scheduled</span>}
+              return <span className="text-[13px] font-semibold text-[var(--text)] leading-tight mt-0.5 text-center">{label}{matchTime ? ` · ${matchTime}` : ""}</span>;
+            })() : <span className="text-[12px] text-[#c4c7c7] leading-tight mt-0.5 text-center">No match scheduled</span>}
           </div>
 
           {/* Right: ring + Match Readiness label */}
