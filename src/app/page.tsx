@@ -18,17 +18,6 @@ const FIELD_LABELS: Record<string, string> = {
 };
 
 export default function HomePage() {
-  const [hydration, setHydration] = useState(false);
-  const [mobility, setMobility] = useState(false);
-  const [visualise, setVisualise] = useState(true);
-  const [preMatchMeal, setPreMatchMeal] = useState(false);
-  const [sleep, setSleep] = useState(false);
-  const [boxBreathing, setBoxBreathing] = useState(false);
-  const [foamRoll, setFoamRoll] = useState(false);
-  const [coldShower, setColdShower] = useState(false);
-  const [proteinMeal, setProteinMeal] = useState(false);
-  const [lightWalk, setLightWalk] = useState(false);
-  const [balancedNutrition, setBalancedNutrition] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [scheduleModal, setScheduleModal] = useState<{ title: string; subtitle?: string; detail: string; color: string } | null>(null);
   const [checkInOpen, setCheckInOpen] = useState(false);
@@ -36,8 +25,6 @@ export default function HomePage() {
   const [checkIn, setCheckIn] = useState({ sleep: 3, energy: 3, soreness: 3, hydration: 3 });
   const [countdown, setCountdown] = useState({ h: 0, m: 0, past: false });
   const [fabOpen, setFabOpen] = useState(false);
-  const [routineModal, setRoutineModal] = useState<{ label: string; detail: string } | null>(null);
-  const [mustDoExpanded, setMustDoExpanded] = useState(false);
   const [addMatchOpen, setAddMatchOpen] = useState(false);
   const [hydroOpen, setHydroOpen] = useState(false);
   const [hydrationLog, setHydrationLog] = useState({ litres: "", timing: [] as string[], quality: "", urine: "" });
@@ -536,95 +523,6 @@ export default function HomePage() {
 
           <div className="space-y-4">
 
-
-            {/* Do This Right Now */}
-            <div className="bg-white rounded-[24px] p-6 h1-ambient border border-[#c4c7c7]/10">
-              {(() => {
-                const allItems = {
-                  match: [
-                    { label: "Hydration 3.5L",           checked: hydration,        set: setHydration,        detail: "Drink 500ml of water with electrolytes before you do anything else. After hours of sleep your body is dehydrated — even mild dehydration (1–2%) measurably reduces reaction time, concentration, and physical output." },
-                    { label: "Pre-match meal (2–3h out)", checked: preMatchMeal,     set: setPreMatchMeal,     detail: "Eat a moderate meal 2–3 hours before the match: carbohydrates for fuel (rice, pasta, oats), lean protein to protect muscle, and nothing heavy or unfamiliar. Avoid high-fat and high-fibre foods — they slow digestion and can cause discomfort mid-game." },
-                    { label: "10min Dynamic Mobility",    checked: mobility,         set: setMobility,         detail: "Spend 10 minutes on dynamic mobility — leg swings, hip circles, thoracic rotations, and lateral lunges. This increases blood flow to the joints and primes the neuromuscular system for explosive movement." },
-                    { label: "Visualise Key Tactics",     checked: visualise,        set: setVisualise,        detail: "Close your eyes for 3–5 minutes and mentally rehearse your key patterns: your serve placement, your net approach after a quality drive, and your reset lob when under pressure. Visualisation activates the same neural pathways as physical practice." },
-                    { label: "Box Breathing (4x4)",       checked: boxBreathing,     set: setBoxBreathing,     detail: "Box breathing regulates your autonomic nervous system before competition. Inhale for 4 counts, hold for 4, exhale for 4, hold for 4 — repeat 4–6 cycles. Do it 15–30 minutes before warm-up." },
-                    { label: "Sleep 7–9h tonight",        checked: sleep,            set: setSleep,            detail: "Sleep is the single highest-leverage recovery tool available. During deep sleep your body releases growth hormone, repairs muscle tissue, and consolidates motor patterns learned during training." },
-                  ],
-                  recovery: [
-                    { label: "Hydration 2.5L+",          checked: hydration,        set: setHydration,        detail: "You lost significant fluid during yesterday's match. Rehydrating takes longer than most people expect — sip steadily throughout the day rather than drinking large amounts at once. Aim for pale yellow urine by mid-morning." },
-                    { label: "Foam roll 15 min",          checked: foamRoll,         set: setFoamRoll,         detail: "Today is your best window for foam rolling — muscles are recovered enough to tolerate pressure but still have residual tension. Focus on quads, IT band, hip flexors, glutes, and calves. 60–90 seconds per area." },
-                    { label: "Protein-rich meal",         checked: proteinMeal,      set: setProteinMeal,      detail: "Muscle protein synthesis is elevated for 24–48 hours after exercise. Hit 30–40g of protein at both lunch and dinner today: chicken, fish, eggs, Greek yogurt, or legumes all work well." },
-                    { label: "Recovery walk 20 min",      checked: lightWalk,        set: setLightWalk,        detail: "Low-intensity walking increases blood flow to fatigued muscles without adding stress. It flushes metabolic waste, reduces soreness, and keeps your aerobic system ticking without loading your joints." },
-                    { label: "Cold shower 2 min",         checked: coldShower,       set: setColdShower,       detail: "Two minutes of cold water constricts blood vessels, reduces inflammation, and blunts delayed onset muscle soreness. It also activates the nervous system — useful if you feel flat on a recovery day." },
-                    { label: "Sleep 8–9h tonight",        checked: sleep,            set: setSleep,            detail: "Recovery happens during sleep, not during rest. Growth hormone release peaks in deep sleep — getting an extra hour tonight compounds the repair work your body is already doing from yesterday's session." },
-                  ],
-                  rest: [
-                    { label: "Hydration 2–3L",            checked: hydration,        set: setHydration,        detail: "Hydration isn't just for match days. Staying consistently hydrated on rest days maintains blood volume, joint lubrication, and cognitive function. Aim for 2–3L spread through the day." },
-                    { label: "10min Light Mobility",       checked: mobility,         set: setMobility,         detail: "On rest days, gentle mobility keeps joints lubricated and prevents stiffness from accumulating. Focus on hip flexors, thoracic rotation, and ankle circles. 10–15 minutes is enough — this is maintenance, not training." },
-                    { label: "Visualise Key Tactics",      checked: visualise,        set: setVisualise,        detail: "Rest days are ideal for mental training. Spend 5 minutes visualising your key patterns: positioning after a lob, your net approach, your response under pressure. Athletes who visualise consistently outperform those who don't." },
-                    { label: "Balanced nutrition",         checked: balancedNutrition, set: setBalancedNutrition, detail: "Rest days are an opportunity to refuel properly. Focus on variety — plenty of vegetables, complex carbs, and protein. Don't under-eat on rest days; your body is still rebuilding from recent sessions." },
-                    { label: "Sleep 7–9h tonight",         checked: sleep,            set: setSleep,            detail: "Consistent sleep is the foundation of performance. Aim for the same bedtime every night — even on rest days. Variability in sleep timing disrupts your circadian rhythm and reduces sleep quality." },
-                  ],
-                  training: [
-                    { label: "Pre-training meal",          checked: preMatchMeal,     set: setPreMatchMeal,     detail: "Fuel up 1.5–2 hours before your session: moderate carbs (oats, rice, banana) and some protein. Don't train fasted for high-intensity sessions — your output drops and you retain less of the session." },
-                    { label: "Pre-training activation",    checked: mobility,         set: setMobility,         detail: "10 minutes of dynamic movement before training improves power output and reduces injury risk. Lateral shuffles, hip circles, leg swings, and arm rotations prime the patterns you'll use on court." },
-                    { label: "Hydration 2.5–3L",           checked: hydration,        set: setHydration,        detail: "On a training day your sweat loss may not match a full match, but you still need to stay ahead of thirst. Aim for 2.5–3L total. Sip regularly through the session to maintain output quality." },
-                    { label: "Post-training protein",       checked: proteinMeal,      set: setProteinMeal,      detail: "Consume 20–40g protein within 30 minutes of finishing training to maximise muscle protein synthesis. A protein shake, Greek yogurt, or eggs paired with fast carbs (banana, rice cake) all work." },
-                    { label: "Post-training stretch",       checked: foamRoll,         set: setFoamRoll,         detail: "After training, your muscles are warm and pliable — the best window for flexibility work. Hold each stretch for 30–45 seconds. Prioritise hip flexors, hamstrings, and shoulder external rotators." },
-                    { label: "Sleep 7–9h tonight",          checked: sleep,            set: setSleep,            detail: "Training creates micro-damage that your body repairs during sleep. Consistent 7–9 hour nights let you absorb the session's adaptations and show up ready for the next one." },
-                  ],
-                };
-                const items = allItems[dayType];
-                const sorted = [...items.filter(i => !i.checked), ...items.filter(i => i.checked)];
-                const doneCount = items.filter(i => i.checked).length;
-                const total = items.length;
-                const visible = mustDoExpanded ? sorted : sorted.slice(0, 2);
-                return (
-                  <>
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className="h1-headline-md text-black">{dayType === "match" ? "Match Day Essentials" : dayType === "recovery" ? "Recovery Essentials" : dayType === "training" ? "Training Essentials" : "Must Do's Today"}</h3>
-                      {doneCount > 0 && (
-                        <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: doneCount === total ? "#caecbc" : "#f4f4f4", color: doneCount === total ? "#496640" : "#747878" }}>
-                          {doneCount === total ? "⚡ All done" : `${doneCount}/${total}`}
-                        </span>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => { if (dayType !== "match") setDayTypeOverride(v => v === "recovery" ? "training" : v === "training" ? "rest" : "recovery"); }}
-                      className="flex items-center gap-1.5 mb-4 active:opacity-60 transition-opacity"
-                      style={{ cursor: dayType === "match" ? "default" : "pointer" }}
-                    >
-                      <span className="text-[#747878]">{DAY_TYPE_META[dayType].icon}</span>
-                      <span className="text-[11px] font-semibold text-[#747878]">{DAY_TYPE_META[dayType].label}</span>
-                      {dayType !== "match" && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>}
-                    </button>
-                    <div className="space-y-4">
-                      {visible.map(({ label, checked, set, detail }) => (
-                        <div key={label} className="flex items-center gap-4">
-                          <label className="flex items-center gap-4 flex-1 cursor-pointer group">
-                            <div className="relative flex items-center justify-center w-6 h-6 rounded-lg border-2 border-[#747878] group-active:scale-90 transition-transform flex-shrink-0">
-                              <input type="checkbox" checked={checked} onChange={(e) => set(e.target.checked)} className="peer absolute opacity-0 w-full h-full cursor-pointer" />
-                              <span className="material-symbols-outlined text-[#496640] opacity-0 peer-checked:opacity-100 transition-opacity" style={{ fontSize: 18, fontVariationSettings: "'FILL' 1, 'wght' 600" }}>check</span>
-                            </div>
-                            <span className={`h1-body-md text-[#444748] ${checked ? "line-through opacity-50" : ""}`}>{label}</span>
-                          </label>
-                          <button onClick={() => setRoutineModal({ label, detail })} className="flex-shrink-0 w-6 h-6 flex items-center justify-center active:scale-90 transition-transform">
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#c4c7c7" strokeWidth="1.8" strokeLinecap="round">
-                              <line x1="7" y1="2" x2="7" y2="12" /><line x1="2" y1="7" x2="12" y2="7" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                    <button onClick={() => setMustDoExpanded(o => !o)} className="flex items-center gap-1 pt-3 active:opacity-60 transition-opacity">
-                      <span className="text-[13px] font-semibold text-[#747878]">{mustDoExpanded ? "Less" : "More"}</span>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: mustDoExpanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
-                        <path d="M6 9l6 6 6-6" />
-                      </svg>
-                    </button>
-                  </>
-                );
-              })()}
-            </div>
 
             {/* More / Less toggle */}
             <button
@@ -1746,31 +1644,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Routine info modal */}
-      {routineModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-6" onClick={() => setRoutineModal(null)}>
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-          <div
-            className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="px-6 pt-5 pb-4" style={{ background: "#49664018" }}>
-              <div className="flex items-center gap-2 mb-1">
-                <svg width="14" height="14" viewBox="0 0 18 18" fill="none" stroke="#496640" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="9" y1="1" x2="9" y2="13" />
-                  <polyline points="5,9 9,13 13,9" />
-                  <line x1="3" y1="17" x2="15" y2="17" />
-                </svg>
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#496640]">Do This Right Now</p>
-              </div>
-              <h3 className="h1-headline-md text-[#1a1c1c]">{routineModal.label}</h3>
-            </div>
-            <div className="px-6 py-5 pb-10">
-              <p className="h1-body-lg text-[#444748] leading-relaxed">{routineModal.detail}</p>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }
