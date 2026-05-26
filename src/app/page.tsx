@@ -355,33 +355,32 @@ export default function HomePage() {
 
             {/* Next Match summary card */}
             {editedData.time && !countdown.past && (
-              <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 px-5 py-5 flex flex-col items-center text-center">
-                <p className="text-[10px] font-bold tracking-widest uppercase text-[#9aab96] mb-3">Next Match</p>
-                {/* Date block */}
-                {editedData.date && (() => {
-                  const d = new Date(editedData.date + "T12:00:00");
-                  return (
-                    <div className="flex flex-col items-center bg-[#f0f4ff] rounded-2xl px-6 py-3 mb-3">
-                      <span className="text-[11px] font-bold text-[#2653d4] uppercase">{d.toLocaleDateString(undefined, { month: "short" })}</span>
-                      <span className="text-[32px] font-extrabold text-[#2653d4] leading-none">{d.getDate()}</span>
-                      <span className="text-[11px] font-semibold text-[#2653d4]">{d.toLocaleDateString(undefined, { weekday: "short" })}</span>
-                    </div>
-                  );
-                })()}
-                <p className="text-[24px] font-bold text-[#1a1c1c] leading-tight">{editedData.time}</p>
-                {editedData.club && (
-                  <div className="flex items-center justify-center gap-1.5 mt-1.5">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9aab96" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-                    <span className="text-[13px] font-medium text-[#747878]">{editedData.club}{editedData.court ? ` · Court ${editedData.court}` : ""}</span>
+              <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden">
+                <div className="flex divide-x divide-[#f0f0f0]">
+                  {/* Left: time + date */}
+                  <div className="flex-1 px-5 py-4 flex flex-col justify-center">
+                    <p className="text-[10px] font-bold tracking-widest uppercase text-[#9aab96] mb-2">Next Match</p>
+                    <p className="text-[26px] font-extrabold text-[#1a1c1c] leading-none">{editedData.time}</p>
+                    {editedData.date && (() => {
+                      const d = new Date(editedData.date + "T12:00:00");
+                      return <p className="text-[13px] font-medium text-[#747878] mt-1">{d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</p>;
+                    })()}
                   </div>
-                )}
-                {playerSlots.some(Boolean) && (
-                  <p className="text-[12px] text-[#c4c7c7] mt-2">
-                    {[playerSlots[0], playerSlots[1]].filter(Boolean).join(" & ") || "Team A"}
-                    {" vs "}
-                    {[playerSlots[2], playerSlots[3]].filter(Boolean).join(" & ") || "Team B"}
-                  </p>
-                )}
+                  {/* Right: location + court */}
+                  <div className="flex-1 px-5 py-4 flex flex-col justify-center">
+                    {editedData.club ? (
+                      <>
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9aab96" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                          <span className="text-[13px] font-semibold text-[#1a1c1c] leading-tight">{editedData.club}</span>
+                        </div>
+                        {editedData.court && <p className="text-[12px] text-[#9aab96] font-medium">Court {editedData.court}</p>}
+                      </>
+                    ) : (
+                      <p className="text-[13px] text-[#c4c7c7]">Location TBD</p>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
