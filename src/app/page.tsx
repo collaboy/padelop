@@ -537,7 +537,7 @@ export default function HomePage() {
 
             {/* See today’s full schedule */}
             <button className="w-full bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 px-5 py-4 flex items-center justify-between active:opacity-60 transition-opacity">
-              <span className="text-[15px] font-semibold text-[#1a1c1c]">See today&apos;s full schedule</span>
+              <span className="text-[15px] font-semibold text-[#1a1c1c]">Today&apos;s Schedule</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M6 9l6 6 6-6" />
               </svg>
