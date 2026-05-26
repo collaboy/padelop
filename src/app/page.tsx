@@ -523,6 +523,10 @@ export default function HomePage() {
                   <p className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96] mb-0.5">Do this now</p>
                   <p className="text-[16px] font-semibold text-[#1a1c1c] leading-tight">{item.title}</p>
                   {item.subtitle && <p className="text-[13px] text-[#747878] mt-0.5 leading-snug">{item.subtitle}</p>}
+                  <span className="inline-flex items-center gap-1 mt-1.5 text-[11px] font-semibold text-[#9aab96]">
+                    see full schedule
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9aab96" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                  </span>
                 </div>
                 {detail && (
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
