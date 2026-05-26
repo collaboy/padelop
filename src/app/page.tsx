@@ -347,6 +347,11 @@ export default function HomePage() {
             );
           })()}
 
+          {/* Score ring */}
+          <div className="flex justify-center mb-6">
+            <ScoreRing />
+          </div>
+
           {/* Match Card */}
           <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden mb-4">
             {!editedData.time || countdown.past ? (
@@ -427,11 +432,6 @@ export default function HomePage() {
                 })()}
               </>
             )}
-          </div>
-
-          {/* Score ring */}
-          <div className="flex justify-center mb-6">
-            <ScoreRing />
           </div>
 
           <div className="space-y-4">
