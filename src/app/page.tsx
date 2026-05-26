@@ -390,9 +390,9 @@ export default function HomePage() {
                     <span className="text-[13px] font-semibold text-[#747878]">{editedData.time}</span>
                   </button>
                   <button
-                    onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }}
+                    onClick={() => setMatchCardExpanded(e => !e)}
                     className="w-6 h-6 rounded-full flex items-center justify-center active:opacity-50 transition-opacity"
-                    aria-label="Add / edit match"
+                    aria-label="Expand match details"
                   >
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#c4c7c7" strokeWidth="2" strokeLinecap="round">
                       <line x1="6" y1="1" x2="6" y2="11" /><line x1="1" y1="6" x2="11" y2="6" />
