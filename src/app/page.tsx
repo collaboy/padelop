@@ -351,7 +351,7 @@ export default function HomePage() {
           <div className="h-px bg-[#e8eaea] mx-1 mb-5" />
 
           {/* Match Card */}
-          <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden mb-2">
+          <div className="overflow-hidden mb-2">
             {!editedData.time || countdown.past ? (
               /* Empty state */
               <button
@@ -370,24 +370,23 @@ export default function HomePage() {
               </button>
             ) : (
               <>
-                {/* Collapsed one-liner — tap to expand */}
-                <div className="w-full px-5 py-3.5 flex items-center justify-between">
+                {/* Collapsed — tap to expand */}
+                <div className="w-full px-1 py-2 flex items-center justify-between">
                   <button
                     onClick={() => setMatchCardExpanded(e => !e)}
-                    className="flex items-center gap-2.5 active:opacity-60 transition-opacity"
+                    className="flex flex-col items-start gap-0.5 active:opacity-60 transition-opacity"
                   >
                     <span className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96]">Next Match</span>
-                    {editedData.date && now && (() => {
-                      const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-                      const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
-                      const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-                      return <>
-                        <span className="text-[#dde0e1] text-[11px]">·</span>
-                        <span className="text-[13px] font-semibold text-[#1a1c1c]">{label}</span>
-                      </>;
-                    })()}
-                    <span className="text-[#dde0e1] text-[11px]">·</span>
-                    <span className="text-[13px] font-semibold text-[#747878]">{editedData.time}</span>
+                    <div className="flex items-center gap-2">
+                      {editedData.date && now && (() => {
+                        const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+                        const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
+                        const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+                        return <span className="text-[15px] font-semibold text-[#1a1c1c]">{label}</span>;
+                      })()}
+                      <span className="text-[#dde0e1] text-[11px]">·</span>
+                      <span className="text-[15px] font-semibold text-[#747878]">{editedData.time}</span>
+                    </div>
                   </button>
                   <button
                     onClick={() => setMatchCardExpanded(e => !e)}
