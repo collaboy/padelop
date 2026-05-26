@@ -371,7 +371,7 @@ export default function HomePage() {
             ) : (
               <>
                 {/* Collapsed — tap to expand */}
-                <div className="w-full px-1 py-2 flex items-center justify-between">
+                <div className="w-full px-1 py-2 flex items-center justify-center">
                   <button
                     onClick={() => setMatchCardExpanded(e => !e)}
                     className="flex flex-col items-center gap-0.5 active:opacity-60 transition-opacity"
