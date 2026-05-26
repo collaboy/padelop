@@ -534,25 +534,19 @@ export default function HomePage() {
                   )}
                 </button>
 
-                {/* New two-cell Do this now card */}
+                {/* New centered stacked Do this now card */}
                 <button
-                  className="w-full bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 mb-4 flex active:opacity-60 transition-opacity text-left overflow-hidden"
+                  className="w-full bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 mb-4 flex flex-col items-center px-5 py-4 gap-1.5 active:opacity-60 transition-opacity"
                   onClick={() => detail && setScheduleModal({ title: item.title, subtitle: item.subtitle, detail, color: item.color })}
                 >
-                  {/* Left cell */}
-                  <div className="flex-1 flex flex-col items-center justify-center gap-2 px-4 py-4 border-r border-[#ebebeb]">
-                    <div className="w-3 h-3 rounded-full animate-breathe" style={{ background: item.color, "--glow": item.color } as React.CSSProperties} />
-                    <p className="text-[10px] font-bold tracking-widest uppercase text-[#9aab96]">Do this now</p>
-                  </div>
-                  {/* Right cell */}
-                  <div className="flex-1 flex flex-col justify-center px-4 py-4">
-                    <p className="text-[15px] font-semibold text-[#1a1c1c] leading-tight">{item.title}</p>
-                    {item.subtitle && <p className="text-[12px] text-[#747878] mt-0.5 leading-snug">{item.subtitle}</p>}
-                    <Link href="/today" className="inline-flex items-center gap-1 mt-2 px-2.5 py-1 rounded-full bg-[#f4f4f4] text-[12px] font-semibold text-[#747878] self-start">
-                      see full plan
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-                    </Link>
-                  </div>
+                  <div className="w-3 h-3 rounded-full animate-breathe" style={{ background: item.color, "--glow": item.color } as React.CSSProperties} />
+                  <p className="text-[10px] font-bold tracking-widest uppercase text-[#9aab96]">Do this now</p>
+                  <p className="text-[16px] font-semibold text-[#1a1c1c] leading-tight text-center">{item.title}</p>
+                  {item.subtitle && <p className="text-[13px] text-[#747878] leading-snug text-center">{item.subtitle}</p>}
+                  <Link href="/today" className="inline-flex items-center gap-1 mt-1 px-2.5 py-1 rounded-full bg-[#f4f4f4] text-[12px] font-semibold text-[#747878]">
+                    see full plan
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                  </Link>
                 </button>
               </>
             );
