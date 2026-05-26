@@ -351,7 +351,7 @@ export default function HomePage() {
           <div className="h-px bg-[#e8eaea] mx-1 mb-5" />
 
           {/* Match Card */}
-          <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden mb-4">
+          <div className="overflow-hidden mb-4">
             {!editedData.time || countdown.past ? (
               /* Empty state */
               <button
@@ -394,9 +394,7 @@ export default function HomePage() {
                     className="w-6 h-6 rounded-full flex items-center justify-center active:opacity-50 transition-opacity"
                     aria-label="Expand match details"
                   >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M6 9l6 6 6-6" />
-                    </svg>
+                    <span className="text-[13px] font-bold text-[#c4c7c7]" style={{ fontFamily: "serif", fontStyle: "italic" }}>i</span>
                   </button>
                 </div>
                 {/* Expanded detail */}
