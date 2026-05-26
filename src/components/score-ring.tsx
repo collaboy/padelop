@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { computeScores, loadScoringData, type Scores } from "@/lib/scoring";
 
 export default function ScoreRing() {
-  const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 60, hydration: 52, energy: 58, mobility: 58 });
+  const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 65, hydration: 65, energy: 65, mobility: 65 });
 
   useEffect(() => {
     function load() {

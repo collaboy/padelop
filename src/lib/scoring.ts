@@ -45,7 +45,7 @@ const LITRE_DELTA: Record<string, number> = {
   "<1L": -20, "1–1.5L": -12, "1.5–2L": -4, "2–2.5L": 4, "2.5–3L": 12, "3L+": 18,
 };
 
-const clamp = (n: number) => Math.max(10, Math.min(99, Math.round(n)));
+const clamp = (n: number) => Math.max(65, Math.min(100, Math.round(n)));
 
 export function computeScores(
   checkIn: DailyCheckIn | null,
@@ -57,7 +57,7 @@ export function computeScores(
   const ci = checkIn ?? { sleep: 3, energy: 3, soreness: 3, hydration: 3, date: "" };
 
   // Recovery: sleep quality, muscle soreness, injury status, hydration quality
-  let recovery = 60;
+  let recovery = 65;
   recovery += (ci.sleep - 3) * 8;     // ±16
   recovery += (ci.soreness - 3) * 6;  // ±12 (5 = no soreness = good)
   if (hydration) {
@@ -71,7 +71,7 @@ export function computeScores(
   }
 
   // Hydration: logged litres, urine colour, subjective quality, check-in self-rating
-  let hydr = 52;
+  let hydr = 65;
   hydr += (ci.hydration - 3) * 7;  // ±14
   if (hydration) {
     hydr += LITRE_DELTA[hydration.litres] ?? 0;  // ±20
@@ -83,7 +83,7 @@ export function computeScores(
   }
 
   // Energy: check-in energy + sleep (sleep debt tanks energy), nutrition quality
-  let energy = 58;
+  let energy = 65;
   energy += (ci.energy - 3) * 9;   // ±18
   energy += (ci.sleep - 3) * 5;    // ±10 — sleep heavily affects energy
   if (nutrition) {
@@ -95,7 +95,7 @@ export function computeScores(
   }
 
   // Mobility: soreness (primary driver), injury, activity frequency this week
-  let mobility = 58;
+  let mobility = 65;
   mobility += (ci.soreness - 3) * 8;  // ±16
   mobility += (ci.energy - 3) * 2;    // low energy usually means stiff
   if (review) {
@@ -179,7 +179,7 @@ export function computeAllTimeScores(): Scores {
     const revLogs = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]") as ReviewEntry[];
 
     const len = Math.max(hydLogs.length, nutLogs.length, revLogs.length);
-    if (len === 0) return { overall: 65, recovery: 60, hydration: 52, energy: 58, mobility: 58 };
+    if (len === 0) return { overall: 65, recovery: 65, hydration: 65, energy: 65, mobility: 65 };
 
     const all: Scores[] = [];
     for (let i = 0; i < len; i++) {
@@ -195,6 +195,6 @@ export function computeAllTimeScores(): Scores {
       mobility:  avg(all.map(s => s.mobility)),
     };
   } catch {
-    return { overall: 65, recovery: 60, hydration: 52, energy: 58, mobility: 58 };
+    return { overall: 65, recovery: 65, hydration: 65, energy: 65, mobility: 65 };
   }
 }
