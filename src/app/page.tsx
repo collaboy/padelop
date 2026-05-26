@@ -375,20 +375,34 @@ export default function HomePage() {
               ) : (
                 <>
                   {/* Collapsed one-liner — tap to expand */}
-                  <button
-                    onClick={() => setMatchCardExpanded(e => !e)}
-                    className="w-full px-5 py-3.5 grid items-center active:opacity-60 transition-opacity"
-                    style={{ gridTemplateColumns: "1fr 1fr 1fr" }}
-                  >
-                    <span className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96] text-left">Next Match</span>
-                    {editedData.date && now && (() => {
-                      const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-                      const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
-                      const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-                      return <span className="text-[13px] font-semibold text-[#1a1c1c] text-center">{label}</span>;
-                    })()}
-                    <span className="text-[13px] font-semibold text-[#747878] text-right">{editedData.time}</span>
-                  </button>
+                  <div className="w-full px-5 py-3.5 flex items-center justify-between">
+                    <button
+                      onClick={() => setMatchCardExpanded(e => !e)}
+                      className="flex items-center gap-2.5 active:opacity-60 transition-opacity"
+                    >
+                      <span className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96]">Next Match</span>
+                      {editedData.date && now && (() => {
+                        const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+                        const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
+                        const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+                        return <>
+                          <span className="text-[#dde0e1] text-[11px]">·</span>
+                          <span className="text-[13px] font-semibold text-[#1a1c1c]">{label}</span>
+                        </>;
+                      })()}
+                      <span className="text-[#dde0e1] text-[11px]">·</span>
+                      <span className="text-[13px] font-semibold text-[#747878]">{editedData.time}</span>
+                    </button>
+                    <button
+                      onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }}
+                      className="w-6 h-6 rounded-full flex items-center justify-center active:opacity-50 transition-opacity"
+                      aria-label="Add / edit match"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#c4c7c7" strokeWidth="2" strokeLinecap="round">
+                        <line x1="6" y1="1" x2="6" y2="11" /><line x1="1" y1="6" x2="11" y2="6" />
+                      </svg>
+                    </button>
+                  </div>
 
                   {/* Expanded detail */}
                   {matchCardExpanded && (() => {
