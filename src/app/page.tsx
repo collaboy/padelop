@@ -351,7 +351,7 @@ export default function HomePage() {
           <div className="h-px bg-[#e8eaea] mx-1 mb-5" />
 
           {/* Match Card */}
-          <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden mb-4">
+          <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden mb-2">
             {!editedData.time || countdown.past ? (
               /* Empty state */
               <button
@@ -433,7 +433,7 @@ export default function HomePage() {
           </div>
 
           {/* Score ring */}
-          <div className="flex justify-center mb-0">
+          <div className="flex justify-center mb-2">
             <ScoreRing />
           </div>
 
