@@ -349,7 +349,7 @@ export default function HomePage() {
           })()}
 
           {/* Match Card */}
-          <div className="overflow-hidden mb-2">
+          <div className="overflow-hidden mb-0">
             {!editedData.time || countdown.past ? (
               /* Empty state */
               <button
