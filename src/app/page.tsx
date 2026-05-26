@@ -353,10 +353,10 @@ export default function HomePage() {
 
           <div className="space-y-4">
 
-            {/* Next Match card */}
-            {!editedData.time || countdown.past ? (
-              /* Empty state */
-              <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden">
+            {/* Match Card */}
+            <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden">
+              {!editedData.time || countdown.past ? (
+                /* Empty state */
                 <button
                   onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }}
                   className="w-full px-6 py-5 flex items-center gap-4 active:opacity-60 transition-opacity"
@@ -371,48 +371,52 @@ export default function HomePage() {
                     <p className="text-[13px] text-[#9aab96] mt-0.5">Upload booking or enter details</p>
                   </div>
                 </button>
-              </div>
-            ) : (
-              /* Match info */
-              <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden relative">
-                <div className="flex divide-x divide-[#f0f0f0]">
-                  {/* Left: date + time */}
-                  <div className="flex-1 px-5 py-4 flex flex-col justify-center">
-                    <p className="text-[10px] font-bold tracking-widest uppercase text-[#9aab96] mb-2">Next Match</p>
-                    {editedData.date && (() => {
-                      const d = new Date(editedData.date + "T12:00:00");
-                      return <p className="text-[18px] font-extrabold text-[#1a1c1c] leading-none">{d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</p>;
-                    })()}
-                    <p className="text-[14px] font-medium text-[#747878] mt-1">{editedData.time}</p>
-                  </div>
-                  {/* Right: location + court */}
-                  <div className="flex-1 px-5 py-4 flex flex-col justify-center">
-                    {editedData.club ? (
+              ) : (
+                /* Match info */
+                <div className="px-5 pt-3 pb-3 relative">
+                  {(() => {
+                    const club = editedData.club || "Location TBD";
+                    const court = editedData.court ? `Court ${editedData.court}` : "";
+                    return (
                       <>
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9aab96" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-                          <span className="text-[13px] font-semibold text-[#1a1c1c] leading-tight">{editedData.club}</span>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <p className="text-xs font-bold tracking-widest uppercase text-[#9aab96]">Next Match</p>
+                          {editedData.date && now && (() => {
+                            const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+                            const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
+                            const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" });
+                            return <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#f0f4ff] text-[#2653d4]">{label}</span>;
+                          })()}
                         </div>
-                        {editedData.court && <p className="text-[12px] text-[#9aab96] font-medium">Court {editedData.court}</p>}
+                        <div className="flex items-center justify-between mb-1.5">
+                          <p className="h1-headline-md text-[#1a1c1c]">Padel Match</p>
+                          <span className="text-[15px] font-semibold text-[#747878] mr-8">{editedData.time}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-[#747878]">
+                          <div className="flex items-center gap-1.5">
+                            <span className="material-symbols-outlined" style={{ fontSize: 13 }}>location_on</span>
+                            <span className="text-[12px] font-medium leading-tight">{club}</span>
+                          </div>
+                          {court && (
+                            <span className="text-[12px] font-medium text-[#9aab96] mr-8">{court}</span>
+                          )}
+                        </div>
                       </>
-                    ) : (
-                      <p className="text-[13px] text-[#c4c7c7]">Location TBD</p>
-                    )}
-                  </div>
+                    );
+                  })()}
+                  <button
+                    onClick={() => setMatchInfoOpen(true)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center active:bg-[#f0f0f0] transition-colors"
+                    aria-label="Edit match"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                  </button>
                 </div>
-                {/* Edit button */}
-                <button
-                  onClick={() => setMatchInfoOpen(true)}
-                  className="absolute right-3 top-3 w-7 h-7 rounded-full flex items-center justify-center active:bg-[#f0f0f0] transition-colors"
-                  aria-label="Edit match"
-                >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                  </svg>
-                </button>
-              </div>
-            )}
+              )}
+            </div>
 
 
             {/* Horizontal Day Timeline */}
