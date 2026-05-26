@@ -311,6 +311,42 @@ export default function HomePage() {
       <div className="h1-font bg-[#f9f9f9] text-[#1a1c1c] min-h-screen">
         <main className="pt-4 pb-8 px-5 max-w-lg mx-auto">
 
+          {/* Greeting */}
+          {(() => {
+            const h = now ? now.getHours() : 12;
+            const tod = h < 12 ? "morning" : h < 17 ? "afternoon" : "evening";
+            let msg = "";
+            if (dayType === "match") {
+              const matchTimeStr = editedData.time || "18:30";
+              const [mH, mM] = matchTimeStr.split(":").map(Number);
+              const matchMins = mH * 60 + mM;
+              const nowMins = h * 60 + (now ? now.getMinutes() : 0);
+              const diffMins = matchMins - nowMins;
+              if (diffMins > 180) {
+                const hrs = Math.floor(diffMins / 60);
+                msg = `Match in ${hrs}h. Stay light, hydrate steadily, and eat your pre-game meal ${hrs > 4 ? "a few hours before" : "soon"}.`;
+              } else if (diffMins > 60) {
+                msg = "Time to warm up. Dynamic activation, no heavy food — just sip water and focus.";
+              } else if (diffMins > 0) {
+                msg = "Almost game time. Breathe, visualise, and trust your prep.";
+              } else {
+                msg = "Great match today. Prioritise recovery — stretch, eat protein, and rest up.";
+              }
+            } else if (dayType === "recovery") {
+              msg = "Recovery day. Keep moving gently, drink plenty of water, and get your protein in.";
+            } else if (dayType === "training") {
+              msg = "Training day. Make sure you're fuelled, warmed up, and ready to work on your patterns.";
+            } else {
+              msg = "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy.";
+            }
+            return (
+              <div className="mb-5 mt-2 px-1 text-center">
+                <p className="text-[22px] font-bold text-[#1a1c1c] leading-snug" style={{ fontFamily: "var(--font-hanken)" }}>Good {tod}.</p>
+                <p className="text-[16px] text-[#5a6370] mt-1 leading-snug">{msg}</p>
+              </div>
+            );
+          })()}
+
           {/* Match Card */}
           <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden mb-4">
             {!editedData.time || countdown.past ? (
@@ -392,42 +428,6 @@ export default function HomePage() {
               </>
             )}
           </div>
-
-          {/* Greeting */}
-          {(() => {
-            const h = now ? now.getHours() : 12;
-            const tod = h < 12 ? "morning" : h < 17 ? "afternoon" : "evening";
-            let msg = "";
-            if (dayType === "match") {
-              const matchTimeStr = editedData.time || "18:30";
-              const [mH, mM] = matchTimeStr.split(":").map(Number);
-              const matchMins = mH * 60 + mM;
-              const nowMins = h * 60 + (now ? now.getMinutes() : 0);
-              const diffMins = matchMins - nowMins;
-              if (diffMins > 180) {
-                const hrs = Math.floor(diffMins / 60);
-                msg = `Match in ${hrs}h. Stay light, hydrate steadily, and eat your pre-game meal ${hrs > 4 ? "a few hours before" : "soon"}.`;
-              } else if (diffMins > 60) {
-                msg = "Time to warm up. Dynamic activation, no heavy food — just sip water and focus.";
-              } else if (diffMins > 0) {
-                msg = "Almost game time. Breathe, visualise, and trust your prep.";
-              } else {
-                msg = "Great match today. Prioritise recovery — stretch, eat protein, and rest up.";
-              }
-            } else if (dayType === "recovery") {
-              msg = "Recovery day. Keep moving gently, drink plenty of water, and get your protein in.";
-            } else if (dayType === "training") {
-              msg = "Training day. Make sure you're fuelled, warmed up, and ready to work on your patterns.";
-            } else {
-              msg = "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy.";
-            }
-            return (
-              <div className="mb-5 mt-2 px-1 text-center">
-                <p className="text-[22px] font-bold text-[#1a1c1c] leading-snug" style={{ fontFamily: "var(--font-hanken)" }}>Good {tod}.</p>
-                <p className="text-[16px] text-[#5a6370] mt-1 leading-snug">{msg}</p>
-              </div>
-            );
-          })()}
 
           {/* Score ring */}
           <div className="flex justify-center mb-6">
