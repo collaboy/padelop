@@ -353,6 +353,47 @@ export default function HomePage() {
 
           <div className="space-y-4">
 
+            {/* Next Match summary card */}
+            {editedData.time && !countdown.past && (
+              <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 px-5 py-4">
+                <p className="text-[10px] font-bold tracking-widest uppercase text-[#9aab96] mb-3">Next Match</p>
+                <div className="flex items-start justify-between gap-3">
+                  {/* Date block */}
+                  <div className="flex-shrink-0 flex flex-col items-center bg-[#f0f4ff] rounded-2xl px-4 py-3 min-w-[56px]">
+                    {editedData.date && (() => {
+                      const d = new Date(editedData.date + "T12:00:00");
+                      return (
+                        <>
+                          <span className="text-[11px] font-bold text-[#2653d4] uppercase">{d.toLocaleDateString(undefined, { month: "short" })}</span>
+                          <span className="text-[28px] font-extrabold text-[#2653d4] leading-none">{d.getDate()}</span>
+                          <span className="text-[11px] font-semibold text-[#2653d4]">{d.toLocaleDateString(undefined, { weekday: "short" })}</span>
+                        </>
+                      );
+                    })()}
+                  </div>
+                  {/* Details */}
+                  <div className="flex-1 min-w-0 pt-1">
+                    <p className="text-[20px] font-bold text-[#1a1c1c] leading-tight">
+                      {editedData.time}
+                    </p>
+                    {editedData.club && (
+                      <div className="flex items-center gap-1.5 mt-1.5">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9aab96" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                        <span className="text-[13px] font-medium text-[#747878] truncate">{editedData.club}{editedData.court ? ` · Court ${editedData.court}` : ""}</span>
+                      </div>
+                    )}
+                    {playerSlots.some(Boolean) && (
+                      <p className="text-[12px] text-[#c4c7c7] mt-2 truncate">
+                        {[playerSlots[0], playerSlots[1]].filter(Boolean).join(" & ") || "Team A"}
+                        {" vs "}
+                        {[playerSlots[2], playerSlots[3]].filter(Boolean).join(" & ") || "Team B"}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Match Card */}
             <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden">
               {!editedData.time || (!!editedData.time && countdown.past) ? (
