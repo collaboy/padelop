@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { computeScores, loadScoringData, computeAllTimeScores, type Scores } from "@/lib/scoring";
 import { computeNotifications, type Notif } from "@/lib/notifications";
 import ScoreRing from "@/components/score-ring";
@@ -523,10 +524,10 @@ export default function HomePage() {
                   <p className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96] mb-0.5">Do this now</p>
                   <p className="text-[16px] font-semibold text-[#1a1c1c] leading-tight">{item.title}</p>
                   {item.subtitle && <p className="text-[13px] text-[#747878] mt-0.5 leading-snug">{item.subtitle}</p>}
-                  <span className="inline-flex items-center gap-1 mt-1.5 text-[13px] font-semibold text-[#9aab96]">
+                  <Link href="/today" className="inline-flex items-center gap-1 mt-1.5 text-[13px] font-semibold text-[#9aab96]">
                     see full schedule
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aab96" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-                  </span>
+                  </Link>
                 </div>
                 {detail && (
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -539,147 +540,13 @@ export default function HomePage() {
 
           <div className="space-y-4">
 
-            {/* See today’s full schedule */}
-            <button className="w-full bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 px-5 py-4 flex items-center justify-between active:opacity-60 transition-opacity">
+            {/* Today’s Schedule link */}
+            <Link href="/today" className="w-full bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 px-5 py-4 flex items-center justify-between active:opacity-60 transition-opacity">
               <span className="text-[15px] font-semibold text-[#1a1c1c]">Today&apos;s Schedule</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6 9l6 6 6-6" />
+                <path d="M9 18l6-6-6-6" />
               </svg>
-            </button>
-
-            {/* Today’s Schedule */}
-            {(() => {
-              const pad = (n: number) => String(n).padStart(2, "0");
-
-              // Match time helpers
-              const matchTime = editedData.time || "18:30";
-              const [mH, mM] = matchTime.split(":").map(Number);
-              const addMins = (h: number, m: number, delta: number) => {
-                const total = h * 60 + m + delta;
-                return `${pad(Math.floor(total / 60) % 24)}:${pad(total % 60)}`;
-              };
-              const matchVenue = [editedData.club, editedData.court ? `Court ${editedData.court}` : ""].filter(Boolean).join(" — ") || "Court";
-
-              const schedules = {
-                match: [
-                  { time: "07:00", title: "Wake up & hydrate",    subtitle: "500ml water before anything else",   color: "#f59e0b" },
-                  { time: "07:30", title: "Breakfast",             subtitle: "Oats, eggs, fruit",                  color: "#16a34a" },
-                  { time: "09:00", title: "Morning mobility",      subtitle: "Foam roll & light stretching",        color: "#0891b2" },
-                  { time: addMins(mH, mM, -360), title: "Pre-game meal", subtitle: "Chicken, rice, light salad",   color: "#16a34a" },
-                  { time: addMins(mH, mM, -60),  title: "Warmup & activation", subtitle: "Dynamic drills, 30 min", color: "#2653d4" },
-                  { time: matchTime,             title: "Match",   subtitle: matchVenue,                           color: "#1e3a1e" },
-                  { time: addMins(mH, mM, 90),   title: "Post-match cool down", subtitle: "Stretch & mobility, 15 min", color: "#7c3aed" },
-                  { time: addMins(mH, mM, 120),  title: "Recovery meal", subtitle: "Protein + carbs within 30 min", color: "#16a34a" },
-                  { time: "22:30", title: "Wind down",             subtitle: "No screens, light reading",           color: "#94a3b8" },
-                ],
-                recovery: [
-                  { time: "07:30", title: "Wake up & hydrate",      subtitle: "500ml water — rehydrate after yesterday", color: "#f59e0b" },
-                  { time: "08:00", title: "Light breakfast",         subtitle: "Eggs, fruit, Greek yogurt",               color: "#16a34a" },
-                  { time: "09:30", title: "Recovery walk",           subtitle: "20 min easy — flush out lactic acid",     color: "#0891b2" },
-                  { time: "10:30", title: "Foam roll & stretch",     subtitle: "Quads, hip flexors, calves, shoulders",   color: "#7c3aed" },
-                  { time: "13:00", title: "Protein-rich lunch",      subtitle: "Chicken, salmon or legumes + veg",        color: "#16a34a" },
-                  { time: "15:30", title: "Cold shower",             subtitle: "2 min cold — reduces inflammation",       color: "#2653d4" },
-                  { time: "18:30", title: "Dinner",                  subtitle: "Anti-inflammatory focus — fish, greens",  color: "#16a34a" },
-                  { time: "21:30", title: "Early wind down",         subtitle: "Sleep is your best recovery tool tonight", color: "#94a3b8" },
-                ],
-                rest: [
-                  { time: "07:00", title: "Wake up & hydrate",      subtitle: "500ml water before coffee",               color: "#f59e0b" },
-                  { time: "07:30", title: "Breakfast",               subtitle: "High protein — eggs, yogurt, fruit",      color: "#16a34a" },
-                  { time: "09:30", title: "Light mobility",          subtitle: "Hip flexors, thoracic spine, ankles",      color: "#0891b2" },
-                  { time: "12:30", title: "Balanced lunch",          subtitle: "Carbs + protein + greens",                color: "#16a34a" },
-                  { time: "15:00", title: "Active recovery",         subtitle: "Walk, swim or light cycling",             color: "#2653d4" },
-                  { time: "18:30", title: "Dinner",                  subtitle: "Focus on variety and micronutrients",     color: "#16a34a" },
-                  { time: "21:00", title: "Visualisation",           subtitle: "5 min mental rehearsal of key patterns",  color: "#7c3aed" },
-                  { time: "22:30", title: "Wind down",               subtitle: "No screens, consistent bedtime",          color: "#94a3b8" },
-                ],
-                training: [
-                  { time: "07:00", title: "Wake up & hydrate",       subtitle: "500ml water before anything else",        color: "#f59e0b" },
-                  { time: "07:30", title: "Breakfast",                subtitle: "Oats, eggs, fruit",                       color: "#16a34a" },
-                  { time: "09:00", title: "Morning mobility",         subtitle: "Foam roll & light stretching",             color: "#0891b2" },
-                  { time: "15:00", title: "Pre-training meal",        subtitle: "Carbs + protein, 1.5–2h before session",  color: "#16a34a" },
-                  { time: "17:00", title: "Pre-training activation",  subtitle: "10 min dynamic warm-up",                   color: "#2653d4" },
-                  { time: "17:30", title: "Training session",         subtitle: "Focus on one or two deliberate patterns",  color: "#1e3a1e" },
-                  { time: "19:00", title: "Post-training stretch",    subtitle: "30–45 sec holds — hip flexors, shoulders", color: "#7c3aed" },
-                  { time: "19:30", title: "Post-training protein",    subtitle: "20–40g protein within 30 min",             color: "#16a34a" },
-                  { time: "21:00", title: "Dinner",                   subtitle: "Anti-inflammatory focus — fish, greens",   color: "#16a34a" },
-                  { time: "22:30", title: "Wind down",                subtitle: "No screens, consistent bedtime",           color: "#94a3b8" },
-                ],
-              };
-
-              const schedule = schedules[dayType];
-
-              const curMins = now ? now.getHours() * 60 + now.getMinutes() : -1;
-              const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
-              return (
-                <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 p-6">
-                  <div className="mb-5 flex items-center justify-between">
-                    <h3 className="h1-headline-md text-black">Today&apos;s Schedule</h3>
-                    <button
-                      onClick={() => { if (dayType !== "match") setDayTypeOverride(v => v === "recovery" ? "training" : v === "training" ? "rest" : "recovery"); }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#e2e2e2] active:opacity-60 transition-opacity"
-                      style={{ cursor: dayType === "match" ? "default" : "pointer" }}
-                    >
-                      <span className="text-[#747878]">{DAY_TYPE_META[dayType].icon}</span>
-                      <span className="text-[11px] font-semibold text-[#747878]">{DAY_TYPE_META[dayType].label}</span>
-                      {dayType !== "match" && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>}
-                    </button>
-                  </div>
-                  <div>
-                    {schedule.map(({ time, title, subtitle, color }, idx, arr) => {
-                      const isLast = idx === arr.length - 1;
-                      const bMins = toMins(time);
-                      const nMins = !isLast ? toMins(arr[idx + 1].time) : 24 * 60;
-                      const isCurrent = !isLast && curMins >= bMins && curMins < nMins;
-                      const segPct = isCurrent ? ((curMins - bMins) / (nMins - bMins)) * 100 : 0;
-                      const isPast = curMins >= nMins;
-                      const detail = SCHEDULE_DETAILS[title];
-                      return (
-                        <div key={idx} className="flex gap-3">
-                          {/* Time */}
-                          <div className="w-11 flex-shrink-0 pt-0.5">
-                            <p className="text-[13px] font-semibold text-[#444748] text-right leading-none">{time}</p>
-                          </div>
-                          {/* Dot + line */}
-                          <div className="flex flex-col items-center flex-shrink-0">
-                            <div
-                              className="w-2 h-2 rounded-full mt-0.5 flex-shrink-0 transition-opacity"
-                              style={{ background: color, opacity: isPast ? 0.35 : 1 }}
-                            />
-                            {!isLast && (
-                              <div className="relative mt-1" style={{ width: 1, flex: 1, minHeight: 32, background: "#e2e2e2", overflow: "visible" }}>
-                                {isCurrent && (
-                                  <div className="absolute flex items-center" style={{ top: `${segPct}%`, right: 0, transform: "translateY(-50%)" }}>
-                                    <span className="text-[13px] font-bold text-white px-2 py-0.5 rounded whitespace-nowrap mr-0.5" style={{ background: "#496640" }}>
-                                      {now ? `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}` : "--:--"}
-                                    </span>
-                                    <svg width="6" height="8" viewBox="0 0 6 8"><polygon points="0,0 6,4 0,8" fill="#1a1c1c" /></svg>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                          {/* Content */}
-                          <button
-                            className="pb-4 flex-1 min-w-0 flex items-start justify-between gap-2 text-left active:opacity-60 transition-opacity"
-                            onClick={() => detail && setScheduleModal({ title, subtitle, detail, color })}
-                          >
-                            <div className="min-w-0">
-                              <p className="text-[18px] font-semibold text-[#1a1c1c] leading-tight" style={{ opacity: isPast ? 0.4 : 1 }}>{title}</p>
-                              {subtitle && <p className="text-[14px] text-[#444748] leading-snug mt-0.5" style={{ opacity: isPast ? 0.4 : 1 }}>{subtitle}</p>}
-                            </div>
-                            {detail && (
-                              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#d4d7d9" strokeWidth="1.5" strokeLinecap="round" className="flex-shrink-0 mt-1.5">
-                                <line x1="5" y1="1" x2="5" y2="9" /><line x1="1" y1="5" x2="9" y2="5" />
-                              </svg>
-                            )}
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })()}
+            </Link>
 
             {/* Do This Right Now */}
             <div className="bg-white rounded-[24px] p-6 h1-ambient border border-[#c4c7c7]/10">

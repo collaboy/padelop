@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 const items = [
   {
-    href: "/wellbeing",
+    href: "/today",
     label: "Today",
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
