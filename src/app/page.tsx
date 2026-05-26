@@ -341,14 +341,14 @@ export default function HomePage() {
               msg = "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy.";
             }
             return (
-              <div className="mb-5 mt-2 px-1 text-center">
+              <div className="mb-2 mt-2 px-1 text-center">
                 <p className="text-[22px] font-bold text-[#1a1c1c] leading-snug" style={{ fontFamily: "var(--font-hanken)" }}>Good {tod}.</p>
                 <p className="text-[16px] text-[#5a6370] mt-1 leading-snug">{msg}</p>
               </div>
             );
           })()}
 
-          <div className="h-px bg-[#e8eaea] mx-1 mb-5" />
+          <div className="h-px bg-[#e8eaea] mx-1 mb-2" />
 
           {/* Match Card */}
           <div className="overflow-hidden mb-2">
@@ -428,7 +428,7 @@ export default function HomePage() {
           </div>
 
           {/* Improve today card */}
-          <button className="w-full mb-5 bg-white h1-ambient border border-[#c4c7c7]/10 rounded-[24px] px-5 py-4 flex items-center justify-center gap-3 active:opacity-60 transition-opacity">
+          <button className="w-full mb-2 bg-white h1-ambient border border-[#c4c7c7]/10 rounded-[24px] px-5 py-4 flex items-center justify-center gap-3 active:opacity-60 transition-opacity">
             <div className="w-8 h-8 rounded-full bg-[#2653d4]/10 flex items-center justify-center flex-shrink-0">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
@@ -438,7 +438,7 @@ export default function HomePage() {
             <p className="text-[15px] font-semibold text-[#1a1c1c]">Improve today</p>
           </button>
 
-          <div className="h-px bg-[#e8eaea] mx-1 mb-5" />
+          <div className="h-px bg-[#e8eaea] mx-1 mb-2" />
 
           {/* Do this now */}
           {(() => {
