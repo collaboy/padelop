@@ -509,9 +509,7 @@ export default function HomePage() {
             const item = schedule[autoIdx];
             const detail = SCHEDULE_DETAILS[item.title];
             return (
-              <>
-                {/* Original Do this now card */}
-                <button
+              <button
                   className="w-full bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 px-5 py-3 flex items-center gap-3 mb-4 active:opacity-60 transition-opacity text-left"
                   onClick={() => detail && setScheduleModal({ title: item.title, subtitle: item.subtitle, detail, color: item.color })}
                 >
@@ -532,23 +530,7 @@ export default function HomePage() {
                       <path d="M9 18l6-6-6-6" />
                     </svg>
                   )}
-                </button>
-
-                {/* New centered stacked Do this now card */}
-                <button
-                  className="w-full bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 mb-4 flex flex-col items-center px-5 py-4 gap-1.5 active:opacity-60 transition-opacity"
-                  onClick={() => detail && setScheduleModal({ title: item.title, subtitle: item.subtitle, detail, color: item.color })}
-                >
-                  <div className="w-3 h-3 rounded-full animate-breathe" style={{ background: item.color, "--glow": item.color } as React.CSSProperties} />
-                  <p className="text-[10px] font-bold tracking-widest uppercase text-[#9aab96]">Do this now</p>
-                  <p className="text-[16px] font-semibold text-[#1a1c1c] leading-tight text-center">{item.title}</p>
-                  {item.subtitle && <p className="text-[13px] text-[#747878] leading-snug text-center">{item.subtitle}</p>}
-                  <Link href="/today" className="inline-flex items-center gap-1 mt-1 px-2.5 py-1 rounded-full bg-[#f4f4f4] text-[12px] font-semibold text-[#747878]">
-                    see full plan
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-                  </Link>
-                </button>
-              </>
+              </button>
             );
           })()}
 
