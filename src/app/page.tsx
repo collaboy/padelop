@@ -375,18 +375,17 @@ export default function HomePage() {
                 /* One-line match row — tap to open full edit */
                 <button
                   onClick={() => setMatchInfoOpen(true)}
-                  className="w-full px-5 py-3.5 flex items-center gap-2 active:opacity-60 transition-opacity"
+                  className="w-full px-5 py-3.5 grid items-center active:opacity-60 transition-opacity"
+                  style={{ gridTemplateColumns: "1fr 1fr 1fr" }}
                 >
-                  <span className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96] flex-shrink-0">Next Match</span>
-                  <span className="text-[#c4c7c7] text-[11px] flex-shrink-0">·</span>
+                  <span className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96] text-left">Next Match</span>
                   {editedData.date && now && (() => {
                     const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
                     const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
                     const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-                    return <span className="text-[13px] font-semibold text-[#1a1c1c] flex-shrink-0">{label}</span>;
+                    return <span className="text-[13px] font-semibold text-[#1a1c1c] text-center">{label}</span>;
                   })()}
-                  <span className="text-[#c4c7c7] text-[11px] flex-shrink-0">·</span>
-                  <span className="text-[13px] font-semibold text-[#747878]">{editedData.time}</span>
+                  <span className="text-[13px] font-semibold text-[#747878] text-right">{editedData.time}</span>
                 </button>
               )}
             </div>
