@@ -437,19 +437,24 @@ export default function HomePage() {
             <ScoreRing />
           </div>
 
-          {/* Improve pill */}
-          <div className="flex justify-center mb-5">
-            <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white h1-ambient border border-[#c4c7c7]/10 active:opacity-60 transition-opacity">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                <polyline points="17 6 23 6 23 12" />
-              </svg>
-              <span className="text-[13px] font-semibold text-[#1a1c1c]">Improve today</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </button>
-          </div>
+          {/* Improve today card */}
+          <button className="w-full mb-5 bg-[#2653d4] rounded-[24px] px-5 py-4 flex items-center justify-between active:opacity-80 transition-opacity">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                  <polyline points="17 6 23 6 23 12" />
+                </svg>
+              </div>
+              <div className="text-left">
+                <p className="text-[15px] font-semibold text-white">Improve today</p>
+                <p className="text-[12px] text-white/60 mt-0.5">Drills, tactics & training tips</p>
+              </div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </button>
 
           {/* Do this now */}
           {(() => {
