@@ -390,10 +390,8 @@ export default function HomePage() {
                 <div className="w-full px-5 py-3.5 flex items-center justify-between">
                   <button
                     onClick={() => setMatchCardExpanded(e => !e)}
-                    className="flex flex-col items-start gap-0.5 active:opacity-60 transition-opacity"
+                    className="flex items-center gap-2.5 active:opacity-60 transition-opacity"
                   >
-                    <span className="text-[10px] font-medium text-[#b0b8b8] tracking-wide">Optimizing for</span>
-                    <div className="flex items-center gap-2.5">
                     <span className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96]">Next Match</span>
                     {editedData.date && now && (() => {
                       const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
@@ -406,7 +404,6 @@ export default function HomePage() {
                     })()}
                     <span className="text-[#dde0e1] text-[11px]">·</span>
                     <span className="text-[13px] font-semibold text-[#747878]">{editedData.time}</span>
-                    </div>
                   </button>
                   <button
                     onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }}
