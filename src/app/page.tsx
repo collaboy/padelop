@@ -335,9 +335,7 @@ export default function HomePage() {
             );
           })()}
 
-          <div className="flex justify-center my-4">
-            <div className="w-8 border-t border-[#dfe3e7]" />
-          </div>
+
 
           {/* Score ring */}
           <div className="flex justify-center mb-2">
