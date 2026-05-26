@@ -509,27 +509,52 @@ export default function HomePage() {
             const item = schedule[autoIdx];
             const detail = SCHEDULE_DETAILS[item.title];
             return (
-              <button
-                className="w-full bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 px-4 py-3 flex gap-0 mb-4 active:opacity-60 transition-opacity text-left"
-                onClick={() => detail && setScheduleModal({ title: item.title, subtitle: item.subtitle, detail, color: item.color })}
-              >
-                {/* Left cell */}
-                <div className="flex flex-col items-center pt-1 pr-4 flex-shrink-0">
-                  <div className="w-3 h-3 rounded-full animate-breathe mb-1.5" style={{ background: item.color, "--glow": item.color } as React.CSSProperties} />
-                  <p className="text-[10px] font-bold tracking-widest uppercase text-[#9aab96]" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", letterSpacing: "0.15em" }}>Do this now</p>
-                </div>
-                {/* Divider */}
-                <div className="w-px bg-[#ebebeb] self-stretch mr-4 flex-shrink-0" />
-                {/* Right cell */}
-                <div className="flex-1 min-w-0 py-0.5">
-                  <p className="text-[17px] font-semibold text-[#1a1c1c] leading-tight">{item.title}</p>
-                  {item.subtitle && <p className="text-[13px] text-[#747878] mt-0.5 leading-snug">{item.subtitle}</p>}
-                  <Link href="/today" className="inline-flex items-center gap-1 mt-2 px-2.5 py-1 rounded-full bg-[#f4f4f4] text-[12px] font-semibold text-[#747878]">
-                    see full plan
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-                  </Link>
-                </div>
-              </button>
+              <>
+                {/* Original Do this now card */}
+                <button
+                  className="w-full bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 px-5 py-3 flex items-center gap-3 mb-4 active:opacity-60 transition-opacity text-left"
+                  onClick={() => detail && setScheduleModal({ title: item.title, subtitle: item.subtitle, detail, color: item.color })}
+                >
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: item.color + "18" }}>
+                    <div className="w-3 h-3 rounded-full animate-breathe" style={{ background: item.color, "--glow": item.color } as React.CSSProperties} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96] mb-0.5">Do this now</p>
+                    <p className="text-[16px] font-semibold text-[#1a1c1c] leading-tight">{item.title}</p>
+                    {item.subtitle && <p className="text-[13px] text-[#747878] mt-0.5 leading-snug">{item.subtitle}</p>}
+                    <Link href="/today" className="inline-flex items-center gap-1 mt-2 px-2.5 py-1 rounded-full bg-[#f4f4f4] text-[12px] font-semibold text-[#747878]">
+                      see full schedule
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                    </Link>
+                  </div>
+                  {detail && (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  )}
+                </button>
+
+                {/* New two-cell Do this now card */}
+                <button
+                  className="w-full bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 mb-4 flex active:opacity-60 transition-opacity text-left overflow-hidden"
+                  onClick={() => detail && setScheduleModal({ title: item.title, subtitle: item.subtitle, detail, color: item.color })}
+                >
+                  {/* Left cell */}
+                  <div className="flex-1 flex flex-col items-center justify-center gap-2 px-4 py-4 border-r border-[#ebebeb]">
+                    <div className="w-3 h-3 rounded-full animate-breathe" style={{ background: item.color, "--glow": item.color } as React.CSSProperties} />
+                    <p className="text-[10px] font-bold tracking-widest uppercase text-[#9aab96]">Do this now</p>
+                  </div>
+                  {/* Right cell */}
+                  <div className="flex-1 flex flex-col justify-center px-4 py-4">
+                    <p className="text-[15px] font-semibold text-[#1a1c1c] leading-tight">{item.title}</p>
+                    {item.subtitle && <p className="text-[12px] text-[#747878] mt-0.5 leading-snug">{item.subtitle}</p>}
+                    <Link href="/today" className="inline-flex items-center gap-1 mt-2 px-2.5 py-1 rounded-full bg-[#f4f4f4] text-[12px] font-semibold text-[#747878] self-start">
+                      see full plan
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                    </Link>
+                  </div>
+                </button>
+              </>
             );
           })()}
 
