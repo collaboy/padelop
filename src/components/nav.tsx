@@ -16,6 +16,9 @@ export default function Nav() {
   const [importDone, setImportDone] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notif[]>([]);
+  const [matchDate, setMatchDate] = useState<string>("");
+  const [matchTime, setMatchTime] = useState<string>("");
+  const [nowDate, setNowDate] = useState<Date | null>(null);
   const importRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -24,15 +27,28 @@ export default function Nav() {
       const today = computeScores(data.checkIn, data.hydration, data.review, data.nutrition, data.gameDaysThisWeek);
       setPct(today.overall);
     }
+    function refreshMatch() {
+      try {
+        const saved = localStorage.getItem("padelop:next-match");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          setMatchDate(parsed.date ?? "");
+          setMatchTime(parsed.time ?? "");
+        } else {
+          setMatchDate(""); setMatchTime("");
+        }
+      } catch {}
+    }
+    setNowDate(new Date());
     refreshScore();
+    refreshMatch();
     setNotifications(computeNotifications());
     const id = setInterval(() => {
       refreshScore();
       setNotifications(computeNotifications());
     }, 60_000);
-    // Also refresh on storage changes from other tabs/pages
-    window.addEventListener("storage", refreshScore);
-    return () => { clearInterval(id); window.removeEventListener("storage", refreshScore); };
+    window.addEventListener("storage", () => { refreshScore(); refreshMatch(); });
+    return () => { clearInterval(id); window.removeEventListener("storage", () => {}); };
   }, []);
 
   const items = [
@@ -154,6 +170,59 @@ export default function Nav() {
           </div>
         </div>
       </header>
+
+      {/* Second header band */}
+      <div className="fixed top-16 w-full z-40 bg-[var(--surface)]/90 backdrop-blur-md border-b border-[var(--border)]">
+        <div className="grid grid-cols-3 items-center w-full px-5 md:px-12 max-w-7xl mx-auto h-14">
+          {/* Left: Padelop! */}
+          <div className="flex items-center">
+            <Link href="/" className="text-base font-semibold tracking-tight text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>
+              {"Padelop!".split("").map((char, i) => (
+                <span key={i} style={{ position: "relative", top: `${-i * 1.5}px` }}>{char}</span>
+              ))}
+            </Link>
+          </div>
+
+          {/* Center: Next Match + date */}
+          <div className="flex flex-col items-center justify-center">
+            <span className="text-[9px] font-bold tracking-widest uppercase text-[#9aab96] leading-none">Next Match</span>
+            {matchDate && nowDate ? (() => {
+              const todayY = nowDate.getFullYear(), todayM = nowDate.getMonth(), todayD = nowDate.getDate();
+              const todayYMD = `${todayY}-${String(todayM + 1).padStart(2, "0")}-${String(todayD).padStart(2, "0")}`;
+              const tom = new Date(nowDate); tom.setDate(todayD + 1);
+              const tomYMD = `${tom.getFullYear()}-${String(tom.getMonth() + 1).padStart(2, "0")}-${String(tom.getDate()).padStart(2, "0")}`;
+              const label = matchDate === todayYMD ? "Today" : matchDate === tomYMD ? "Tomorrow" : new Date(matchDate + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+              return <span className="text-[13px] font-semibold text-[var(--text)] leading-tight mt-0.5">{label}{matchTime ? ` · ${matchTime}` : ""}</span>;
+            })() : <span className="text-[12px] text-[#c4c7c7] leading-tight mt-0.5">No match scheduled</span>}
+          </div>
+
+          {/* Right: ring + Match Readiness label */}
+          <div className="flex items-center justify-end gap-1.5">
+            <span className="text-[9px] font-bold tracking-widest uppercase text-[#9aab96] text-right leading-snug">Match<br/>Readiness</span>
+            <svg width="40" height="40" viewBox="0 0 48 48">
+              <defs>
+                <linearGradient id="nb1" gradientUnits="userSpaceOnUse" x1="24" y1="4" x2="44" y2="24">
+                  <stop offset="0%" stopColor="#ef4444" /><stop offset="100%" stopColor="#f97316" />
+                </linearGradient>
+                <linearGradient id="nb2" gradientUnits="userSpaceOnUse" x1="44" y1="24" x2="24" y2="44">
+                  <stop offset="0%" stopColor="#f97316" /><stop offset="100%" stopColor="#eab308" />
+                </linearGradient>
+                <linearGradient id="nb3" gradientUnits="userSpaceOnUse" x1="24" y1="44" x2="4" y2="24">
+                  <stop offset="0%" stopColor="#eab308" /><stop offset="100%" stopColor="#84cc16" />
+                </linearGradient>
+                <linearGradient id="nb4" gradientUnits="userSpaceOnUse" x1="4" y1="24" x2="24" y2="4">
+                  <stop offset="0%" stopColor="#84cc16" /><stop offset="100%" stopColor="#22c55e" />
+                </linearGradient>
+              </defs>
+              <path d="M 24 4 A 20 20 0 0 1 44 24" fill="none" stroke="url(#nb1)" strokeWidth="2.5" strokeLinecap="butt" />
+              <path d="M 44 24 A 20 20 0 0 1 24 44" fill="none" stroke="url(#nb2)" strokeWidth="2.5" strokeLinecap="butt" />
+              <path d="M 24 44 A 20 20 0 0 1 4 24"  fill="none" stroke="url(#nb3)" strokeWidth="2.5" strokeLinecap="butt" />
+              <path d="M 4 24 A 20 20 0 0 1 24 4"   fill="none" stroke="url(#nb4)" strokeWidth="2.5" strokeLinecap="butt" />
+              <text x="24" y="28" textAnchor="middle" fontSize="11" fontWeight="bold" fill="var(--text)" fontFamily="var(--font-hanken)">{pct}%</text>
+            </svg>
+          </div>
+        </div>
+      </div>
 
       {/* Notifications modal */}
       {notifOpen && (
