@@ -362,7 +362,7 @@ export default function HomePage() {
                     <p className="text-[10px] font-bold tracking-widest uppercase text-[#9aab96] mb-2">Next Match</p>
                     {editedData.date && (() => {
                       const d = new Date(editedData.date + "T12:00:00");
-                      return <p className="text-[26px] font-extrabold text-[#1a1c1c] leading-none">{d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</p>;
+                      return <p className="text-[18px] font-extrabold text-[#1a1c1c] leading-none">{d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</p>;
                     })()}
                     <p className="text-[14px] font-medium text-[#747878] mt-1">{editedData.time}</p>
                   </div>
