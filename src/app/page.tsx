@@ -372,51 +372,22 @@ export default function HomePage() {
                   </div>
                 </button>
               ) : (
-                /* Match info */
-                <div className="px-5 pt-3 pb-3">
-                  {(() => {
-                    const club = editedData.club || "Location TBD";
-                    const court = editedData.court ? `Court ${editedData.court}` : "";
-                    return (
-                      <>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <div className="flex items-center gap-1">
-                            <p className="text-xs font-bold tracking-widest uppercase text-[#9aab96]">Next Match</p>
-                            <button
-                              onClick={() => setMatchInfoOpen(true)}
-                              className="w-6 h-6 rounded-full flex items-center justify-center active:bg-[#f0f0f0] transition-colors"
-                              aria-label="Edit match"
-                            >
-                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                              </svg>
-                            </button>
-                          </div>
-                          {editedData.date && now && (() => {
-                            const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-                            const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
-                            const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" });
-                            return <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#f0f4ff] text-[#2653d4]">{label}</span>;
-                          })()}
-                        </div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <p className="h1-headline-md text-[#1a1c1c]">Padel Match</p>
-                          <span className="text-[15px] font-semibold text-[#747878]">{editedData.time}</span>
-                        </div>
-                        <div className="flex items-center justify-between text-[#747878]">
-                          <div className="flex items-center gap-1.5">
-                            <span className="material-symbols-outlined" style={{ fontSize: 13 }}>location_on</span>
-                            <span className="text-[12px] font-medium leading-tight">{club}</span>
-                          </div>
-                          {court && (
-                            <span className="text-[12px] font-medium text-[#9aab96]">{court}</span>
-                          )}
-                        </div>
-                      </>
-                    );
+                /* One-line match row — tap to open full edit */
+                <button
+                  onClick={() => setMatchInfoOpen(true)}
+                  className="w-full px-5 py-3.5 flex items-center gap-2 active:opacity-60 transition-opacity"
+                >
+                  <span className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96] flex-shrink-0">Next Match</span>
+                  <span className="text-[#c4c7c7] text-[11px] flex-shrink-0">·</span>
+                  {editedData.date && now && (() => {
+                    const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+                    const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
+                    const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+                    return <span className="text-[13px] font-semibold text-[#1a1c1c] flex-shrink-0">{label}</span>;
                   })()}
-                </div>
+                  <span className="text-[#c4c7c7] text-[11px] flex-shrink-0">·</span>
+                  <span className="text-[13px] font-semibold text-[#747878]">{editedData.time}</span>
+                </button>
               )}
             </div>
 
