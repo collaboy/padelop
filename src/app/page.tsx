@@ -328,14 +328,14 @@ export default function HomePage() {
               msg = "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy.";
             }
             return (
-              <div className="mb-2 mt-2 px-1 text-center">
+              <div className="mb-5 mt-2 px-1 text-center">
                 <p className="text-[22px] font-bold text-[#1a1c1c] leading-snug" style={{ fontFamily: "var(--font-hanken)" }}>Good {tod}.</p>
                 <p className="text-[16px] text-[#5a6370] mt-1 leading-snug">{msg}</p>
               </div>
             );
           })()}
 
-          <div className="flex justify-center my-2">
+          <div className="flex justify-center my-4">
             <div className="w-8 border-t border-[#dfe3e7]" />
           </div>
 
