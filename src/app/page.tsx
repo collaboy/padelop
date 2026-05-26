@@ -378,13 +378,11 @@ export default function HomePage() {
                   >
                     <span className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96]">Next Match</span>
                     <div className="flex items-center gap-2">
-                      {editedData.date && now && (() => {
-                        const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-                        const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
-                        const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-                        return <span className="text-[15px] font-semibold text-[#1a1c1c]">{label}</span>;
+                      {editedData.date && (() => {
+                        const [y, m, d] = editedData.date.split("-");
+                        return <span className="text-[15px] font-semibold text-[#1a1c1c]">{d}/{m}</span>;
                       })()}
-                      <span className="text-[#dde0e1] text-[11px]">·</span>
+                      <span className="w-1 h-1 rounded-full bg-[#dde0e1] flex-shrink-0" />
                       <span className="text-[15px] font-semibold text-[#747878]">{editedData.time}</span>
                     </div>
                   </button>
