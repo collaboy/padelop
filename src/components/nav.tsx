@@ -147,15 +147,15 @@ export default function Nav() {
           {/* Right: profile avatar */}
           <div className="flex items-center justify-end">
             <Link href="/profile" className="relative active:scale-90 transition-transform block">
-              <div className="w-9 h-9 rounded-full overflow-hidden bg-[#e8ede8] flex items-center justify-center flex-shrink-0 border border-[var(--border)]">
+              <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
                 {profileAvatar ? (
                   <img src={profileAvatar} alt="Profile" className="w-full h-full object-cover" />
                 ) : profileName ? (
                   <span className="text-[14px] font-bold text-[#1e3a1e]">{profileName.trim()[0].toUpperCase()}</span>
                 ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a6370" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="8" r="4" />
-                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#5a6370" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="7" r="4" />
+                    <rect x="4" y="14" width="16" height="8" rx="4" />
                   </svg>
                 )}
               </div>
