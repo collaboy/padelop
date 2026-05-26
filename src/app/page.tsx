@@ -374,7 +374,7 @@ export default function HomePage() {
                 <div className="w-full px-1 py-2 flex items-center justify-between">
                   <button
                     onClick={() => setMatchCardExpanded(e => !e)}
-                    className="flex flex-col items-start gap-0.5 active:opacity-60 transition-opacity"
+                    className="flex flex-col items-center gap-0.5 active:opacity-60 transition-opacity"
                   >
                     <span className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96]">Next Match</span>
                     <div className="flex items-center gap-2">
