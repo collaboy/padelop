@@ -540,13 +540,6 @@ export default function HomePage() {
 
           <div className="space-y-4">
 
-            {/* Today’s Schedule link */}
-            <Link href="/today" className="w-full bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 px-5 py-4 flex items-center justify-between active:opacity-60 transition-opacity">
-              <span className="text-[15px] font-semibold text-[#1a1c1c]">Today&apos;s Schedule</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </Link>
 
             {/* Do This Right Now */}
             <div className="bg-white rounded-[24px] p-6 h1-ambient border border-[#c4c7c7]/10">
