@@ -19,6 +19,8 @@ export default function Nav() {
   const [matchDate, setMatchDate] = useState<string>("");
   const [matchTime, setMatchTime] = useState<string>("");
   const [nowDate, setNowDate] = useState<Date | null>(null);
+  const [profileAvatar, setProfileAvatar] = useState<string>("");
+  const [profileName, setProfileName] = useState<string>("");
   const importRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -39,9 +41,17 @@ export default function Nav() {
         }
       } catch {}
     }
+    function refreshProfile() {
+      try {
+        const p = JSON.parse(localStorage.getItem("padelop:profile") || "{}");
+        setProfileAvatar(p.avatar ?? "");
+        setProfileName(p.name ?? "");
+      } catch {}
+    }
     setNowDate(new Date());
     refreshScore();
     refreshMatch();
+    refreshProfile();
     setNotifications(computeNotifications());
     const id = setInterval(() => {
       refreshScore();
@@ -134,39 +144,22 @@ export default function Nav() {
             </Link>
           </div>
 
-          {/* Right: score arc */}
-          <div className="flex items-center justify-end gap-2">
-            {/* Score ring */}
-            <button onClick={() => { setNotifications(computeNotifications()); setNotifOpen(true); }} className="relative active:scale-90 transition-transform">
-            <svg width="48" height="48" viewBox="0 0 48 48">
-              <defs>
-                <linearGradient id="g1" gradientUnits="userSpaceOnUse" x1="24" y1="4" x2="44" y2="24">
-                  <stop offset="0%" stopColor="#ef4444" />
-                  <stop offset="100%" stopColor="#f97316" />
-                </linearGradient>
-                <linearGradient id="g2" gradientUnits="userSpaceOnUse" x1="44" y1="24" x2="24" y2="44">
-                  <stop offset="0%" stopColor="#f97316" />
-                  <stop offset="100%" stopColor="#eab308" />
-                </linearGradient>
-                <linearGradient id="g3" gradientUnits="userSpaceOnUse" x1="24" y1="44" x2="4" y2="24">
-                  <stop offset="0%" stopColor="#eab308" />
-                  <stop offset="100%" stopColor="#84cc16" />
-                </linearGradient>
-                <linearGradient id="g4" gradientUnits="userSpaceOnUse" x1="4" y1="24" x2="24" y2="4">
-                  <stop offset="0%" stopColor="#84cc16" />
-                  <stop offset="100%" stopColor="#22c55e" />
-                </linearGradient>
-              </defs>
-              <path d="M 24 4 A 20 20 0 0 1 44 24" fill="none" stroke="url(#g1)" strokeWidth="2.5" strokeLinecap="butt" />
-              <path d="M 44 24 A 20 20 0 0 1 24 44" fill="none" stroke="url(#g2)" strokeWidth="2.5" strokeLinecap="butt" />
-              <path d="M 24 44 A 20 20 0 0 1 4 24"  fill="none" stroke="url(#g3)" strokeWidth="2.5" strokeLinecap="butt" />
-              <path d="M 4 24 A 20 20 0 0 1 24 4"   fill="none" stroke="url(#g4)" strokeWidth="2.5" strokeLinecap="butt" />
-              <text x="24" y="28" textAnchor="middle" fontSize="11" fontWeight="bold" fill="var(--text)" fontFamily="var(--font-hanken)">{pct}%</text>
-            </svg>
-            {notifications.length > 0 && (
-              <span className="absolute w-3.5 h-3.5 rounded-full bg-[#ef4444] border-2 border-[var(--surface)]" style={{ top: 1, right: 1 }} />
-            )}
-            </button>
+          {/* Right: profile avatar */}
+          <div className="flex items-center justify-end">
+            <Link href="/profile" className="relative active:scale-90 transition-transform block">
+              <div className="w-9 h-9 rounded-full overflow-hidden bg-[#e8ede8] flex items-center justify-center flex-shrink-0 border border-[var(--border)]">
+                {profileAvatar ? (
+                  <img src={profileAvatar} alt="Profile" className="w-full h-full object-cover" />
+                ) : profileName ? (
+                  <span className="text-[14px] font-bold text-[#1e3a1e]">{profileName.trim()[0].toUpperCase()}</span>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a6370" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="8" r="4" />
+                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                  </svg>
+                )}
+              </div>
+            </Link>
           </div>
         </div>
       </header>
