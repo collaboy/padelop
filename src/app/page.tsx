@@ -394,8 +394,8 @@ export default function HomePage() {
                     className="w-6 h-6 rounded-full flex items-center justify-center active:opacity-50 transition-opacity"
                     aria-label="Expand match details"
                   >
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#c4c7c7" strokeWidth="2" strokeLinecap="round">
-                      <line x1="6" y1="1" x2="6" y2="11" /><line x1="1" y1="6" x2="11" y2="6" />
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M6 9l6 6 6-6" />
                     </svg>
                   </button>
                 </div>
