@@ -352,24 +352,19 @@ export default function HomePage() {
             <ScoreRing />
           </div>
 
-          {/* Improve card */}
-          <button className="w-full bg-white rounded-[20px] h1-ambient border border-[#c4c7c7]/10 px-4 py-3 flex items-center mb-2 active:opacity-60 transition-opacity">
-            <div className="flex-1" />
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#f0f4ff" }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                  <polyline points="17 6 23 6 23 12" />
-                </svg>
-              </div>
-              <span className="text-[14px] font-semibold text-[#1a1c1c]">Improve</span>
-            </div>
-            <div className="flex-1 flex justify-end">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          {/* Improve pill */}
+          <div className="flex justify-center mb-2">
+            <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-white h1-ambient border border-[#c4c7c7]/10 active:opacity-60 transition-opacity">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                <polyline points="17 6 23 6 23 12" />
+              </svg>
+              <span className="text-[13px] font-semibold text-[#1a1c1c]">Improve</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 18l6-6-6-6" />
               </svg>
-            </div>
-          </button>
+            </button>
+          </div>
 
           {/* Match Card */}
           <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden mb-4">
