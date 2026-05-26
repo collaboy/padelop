@@ -1,27 +1,22 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { computeScores, loadScoringData, computeAllTimeScores, type Scores } from "@/lib/scoring";
+import { computeScores, loadScoringData, type Scores } from "@/lib/scoring";
 
 export default function ScoreRing() {
   const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 60, hydration: 52, energy: 58, mobility: 58 });
-  const [allTimeScores, setAllTimeScores] = useState<Scores>({ overall: 65, recovery: 60, hydration: 52, energy: 58, mobility: 58 });
-  const [scoreView, setScoreView] = useState<"today" | "alltime">("today");
 
   useEffect(() => {
     function load() {
       const data = loadScoringData();
       setScores(computeScores(data.checkIn, data.hydration, data.review, data.nutrition, data.gameDaysThisWeek));
-      setAllTimeScores(computeAllTimeScores());
     }
     load();
     window.addEventListener("storage", load);
     return () => window.removeEventListener("storage", load);
   }, []);
 
-  const active = scoreView === "today" ? scores : allTimeScores;
-
-  const p = active.overall / 100;
+  const p = scores.overall / 100;
   const cx = 50, cy = 50, r = 42, sw = 6;
   const SEGS = 60;
   const pt = (a: number) => ({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
@@ -52,31 +47,15 @@ export default function ScoreRing() {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative mb-3" style={{ width: 210, height: 210 }}>
+      <div className="relative" style={{ width: 210, height: 210 }}>
         <svg className="w-full h-full" viewBox="0 0 100 100">
           <circle cx={cx} cy={cy} r={r} fill="transparent" strokeWidth={sw} stroke="#e2e2e2" />
           {arcs}
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-black" style={{ fontSize: 68, lineHeight: 1, fontWeight: 700, letterSpacing: "-0.02em" }}>{active.overall}</span>
+          <span className="text-black" style={{ fontSize: 68, lineHeight: 1, fontWeight: 700, letterSpacing: "-0.02em" }}>{scores.overall}</span>
           <span style={{ fontSize: 12, fontWeight: 500, letterSpacing: "0.05em", color: "#444748", textTransform: "uppercase" }}>Readiness</span>
         </div>
-      </div>
-      <div className="flex items-center bg-[#f0f0f0] rounded-full p-1">
-        {(["today", "alltime"] as const).map(v => (
-          <button
-            key={v}
-            onClick={() => setScoreView(v)}
-            className="px-4 py-1 rounded-full text-[12px] font-semibold transition-all"
-            style={{
-              background: scoreView === v ? "#fff" : "transparent",
-              color: scoreView === v ? "#1a1c1c" : "#747878",
-              boxShadow: scoreView === v ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
-            }}
-          >
-            {v === "today" ? "Today" : "All time"}
-          </button>
-        ))}
       </div>
     </div>
   );
