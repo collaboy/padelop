@@ -357,7 +357,7 @@ export default function HomePage() {
           </div>
 
           {/* Match Card */}
-          <div className="overflow-hidden mt-6 mb-0">
+          <div className="mt-6 mb-0">
             {!editedData.time || countdown.past ? (
               <button
                 onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }}
