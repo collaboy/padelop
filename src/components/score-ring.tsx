@@ -53,6 +53,7 @@ export default function ScoreRing() {
           {arcs}
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", color: "#9aab96", textTransform: "uppercase" }}>Match</span>
           <span className="text-black" style={{ fontSize: 68, lineHeight: 1, fontWeight: 700, letterSpacing: "-0.02em" }}>{scores.overall}</span>
           <span style={{ fontSize: 12, fontWeight: 500, letterSpacing: "0.05em", color: "#444748", textTransform: "uppercase" }}>Readiness</span>
         </div>

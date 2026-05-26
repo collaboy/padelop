@@ -98,7 +98,6 @@ export default function ReadinessWidget() {
             {arcs}
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", color: "#9aab96", textTransform: "uppercase" }}>Match</span>
             <span className="text-black" style={{ fontSize: 68, lineHeight: 1, fontWeight: 700, letterSpacing: "-0.02em" }}>{active.overall}</span>
             <span className="h1-label-sm text-[#444748] uppercase tracking-wider">Readiness</span>
           </div>
