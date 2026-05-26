@@ -517,7 +517,7 @@ export default function HomePage() {
                 onClick={() => detail && setScheduleModal({ title: item.title, subtitle: item.subtitle, detail, color: item.color })}
               >
                 <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: item.color + "18" }}>
-                  <div className="w-3 h-3 rounded-full animate-breathe" style={{ background: item.color }} />
+                  <div className="w-3 h-3 rounded-full animate-breathe" style={{ background: item.color, "--glow": item.color } as React.CSSProperties} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96] mb-0.5">Do this now</p>

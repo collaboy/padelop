@@ -46,8 +46,8 @@ body {
 .vt-page-content { view-transition-name: vt-page-content; }
 
 /* Swipe page transitions — content area only */
-@keyframes breathe { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.45); opacity: 0.6; } }
-.animate-breathe { animation: breathe 3s ease-in-out infinite; }
+@keyframes breathe { 0%, 100% { box-shadow: 0 0 0 0 var(--glow, #16a34a); } 50% { box-shadow: 0 0 10px 6px var(--glow, #16a34a); } }
+.animate-breathe { animation: breathe 2.5s ease-in-out infinite; }
 
 @keyframes nav-slide-out-left  { to   { transform: translateX(-28%); opacity: 0; } }
 @keyframes nav-slide-out-right { to   { transform: translateX(28%);  opacity: 0; } }
