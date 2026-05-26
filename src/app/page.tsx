@@ -348,7 +348,7 @@ export default function HomePage() {
           })()}
 
           {/* Score ring */}
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-2">
             <ScoreRing />
           </div>
 
