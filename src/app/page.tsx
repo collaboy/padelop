@@ -433,6 +433,9 @@ export default function HomePage() {
                 <polyline points="17 6 23 6 23 12" />
               </svg>
               <span className="text-[14px] font-semibold text-[#1a1c1c]">Improve today</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
             </button>
           </div>
 
