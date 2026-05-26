@@ -448,6 +448,8 @@ export default function HomePage() {
             <p className="text-[15px] font-semibold text-[#1a1c1c]">Improve today</p>
           </button>
 
+          <div className="h-px bg-[#e8eaea] mx-1 mb-5" />
+
           {/* Do this now */}
           {(() => {
             const pad = (n: number) => String(n).padStart(2, "0");
