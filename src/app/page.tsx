@@ -357,14 +357,14 @@ export default function HomePage() {
             {editedData.time && !countdown.past && (
               <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden">
                 <div className="flex divide-x divide-[#f0f0f0]">
-                  {/* Left: time + date */}
+                  {/* Left: date + time */}
                   <div className="flex-1 px-5 py-4 flex flex-col justify-center">
                     <p className="text-[10px] font-bold tracking-widest uppercase text-[#9aab96] mb-2">Next Match</p>
-                    <p className="text-[26px] font-extrabold text-[#1a1c1c] leading-none">{editedData.time}</p>
                     {editedData.date && (() => {
                       const d = new Date(editedData.date + "T12:00:00");
-                      return <p className="text-[13px] font-medium text-[#747878] mt-1">{d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</p>;
+                      return <p className="text-[26px] font-extrabold text-[#1a1c1c] leading-none">{d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</p>;
                     })()}
+                    <p className="text-[14px] font-medium text-[#747878] mt-1">{editedData.time}</p>
                   </div>
                   {/* Right: location + court */}
                   <div className="flex-1 px-5 py-4 flex flex-col justify-center">
