@@ -36,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="flex flex-col min-h-full bg-[var(--bg)]" suppressHydrationWarning>
         <Nav />
         <SwipeNav>
-          <main className="vt-page-content flex-1 pt-[7.5rem] pb-24">
+          <main className="vt-page-content flex-1 pt-16 pb-24">
             <div className="mx-auto w-full max-w-[640px]">{children}</div>
           </main>
         </SwipeNav>

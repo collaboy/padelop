@@ -171,58 +171,6 @@ export default function Nav() {
         </div>
       </header>
 
-      {/* Second header band */}
-      <div className="fixed top-16 w-full z-40 bg-[var(--surface)]/90 backdrop-blur-md border-b border-[var(--border)]">
-        <div className="grid grid-cols-3 items-center w-full px-5 md:px-12 max-w-7xl mx-auto h-14">
-          {/* Left: Padelop! */}
-          <div className="flex items-center">
-            <Link href="/" className="text-base font-semibold tracking-tight text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>
-              {"Padelop!".split("").map((char, i) => (
-                <span key={i} style={{ position: "relative", top: `${-i * 1.5}px` }}>{char}</span>
-              ))}
-            </Link>
-          </div>
-
-          {/* Center: date · time, no label */}
-          <div className="flex items-center justify-center">
-            {matchDate && nowDate ? (() => {
-              const todayY = nowDate.getFullYear(), todayM = nowDate.getMonth(), todayD = nowDate.getDate();
-              const todayYMD = `${todayY}-${String(todayM + 1).padStart(2, "0")}-${String(todayD).padStart(2, "0")}`;
-              const tom = new Date(nowDate); tom.setDate(todayD + 1);
-              const tomYMD = `${tom.getFullYear()}-${String(tom.getMonth() + 1).padStart(2, "0")}-${String(tom.getDate()).padStart(2, "0")}`;
-              const d = new Date(matchDate + "T12:00:00");
-              const label = matchDate === todayYMD ? "Today" : matchDate === tomYMD ? "Tomorrow" : `${d.toLocaleDateString(undefined, { weekday: "short" })} ${d.getDate()} ${d.toLocaleDateString(undefined, { month: "short" })}`;
-              return <span className="text-[13px] font-semibold text-[var(--text)] whitespace-nowrap">{label}{matchTime ? ` · ${matchTime}` : ""}</span>;
-            })() : <span className="text-[13px] text-[#c4c7c7]">—</span>}
-          </div>
-
-          {/* Right: ring only, no label */}
-          <div className="flex items-center justify-end">
-            <svg width="44" height="44" viewBox="0 0 48 48">
-              <defs>
-                <linearGradient id="nb1" gradientUnits="userSpaceOnUse" x1="24" y1="4" x2="44" y2="24">
-                  <stop offset="0%" stopColor="#ef4444" /><stop offset="100%" stopColor="#f97316" />
-                </linearGradient>
-                <linearGradient id="nb2" gradientUnits="userSpaceOnUse" x1="44" y1="24" x2="24" y2="44">
-                  <stop offset="0%" stopColor="#f97316" /><stop offset="100%" stopColor="#eab308" />
-                </linearGradient>
-                <linearGradient id="nb3" gradientUnits="userSpaceOnUse" x1="24" y1="44" x2="4" y2="24">
-                  <stop offset="0%" stopColor="#eab308" /><stop offset="100%" stopColor="#84cc16" />
-                </linearGradient>
-                <linearGradient id="nb4" gradientUnits="userSpaceOnUse" x1="4" y1="24" x2="24" y2="4">
-                  <stop offset="0%" stopColor="#84cc16" /><stop offset="100%" stopColor="#22c55e" />
-                </linearGradient>
-              </defs>
-              <path d="M 24 4 A 20 20 0 0 1 44 24" fill="none" stroke="url(#nb1)" strokeWidth="2.5" strokeLinecap="butt" />
-              <path d="M 44 24 A 20 20 0 0 1 24 44" fill="none" stroke="url(#nb2)" strokeWidth="2.5" strokeLinecap="butt" />
-              <path d="M 24 44 A 20 20 0 0 1 4 24"  fill="none" stroke="url(#nb3)" strokeWidth="2.5" strokeLinecap="butt" />
-              <path d="M 4 24 A 20 20 0 0 1 24 4"   fill="none" stroke="url(#nb4)" strokeWidth="2.5" strokeLinecap="butt" />
-              <text x="24" y="28" textAnchor="middle" fontSize="11" fontWeight="bold" fill="var(--text)" fontFamily="var(--font-hanken)">{pct}%</text>
-            </svg>
-          </div>
-        </div>
-      </div>
-
       {/* Notifications modal */}
       {notifOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-5" onClick={() => setNotifOpen(false)}>
