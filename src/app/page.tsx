@@ -353,9 +353,28 @@ export default function HomePage() {
 
           <div className="space-y-4">
 
-            {/* Next Match summary card */}
-            {editedData.time && !countdown.past && (
+            {/* Next Match card */}
+            {!editedData.time || countdown.past ? (
+              /* Empty state */
               <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden">
+                <button
+                  onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }}
+                  className="w-full px-6 py-5 flex items-center gap-4 active:opacity-60 transition-opacity"
+                >
+                  <div className="w-10 h-10 rounded-full border-2 border-dashed border-[#c4c7c7] flex items-center justify-center flex-shrink-0">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#9aab96" strokeWidth="2" strokeLinecap="round">
+                      <line x1="7" y1="1" x2="7" y2="13" /><line x1="1" y1="7" x2="13" y2="7" />
+                    </svg>
+                  </div>
+                  <div className="text-left">
+                    <p className="text-[15px] font-semibold text-[#1a1c1c]">Add a match</p>
+                    <p className="text-[13px] text-[#9aab96] mt-0.5">Upload booking or enter details</p>
+                  </div>
+                </button>
+              </div>
+            ) : (
+              /* Match info */
+              <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden relative">
                 <div className="flex divide-x divide-[#f0f0f0]">
                   {/* Left: date + time */}
                   <div className="flex-1 px-5 py-4 flex flex-col justify-center">
@@ -381,76 +400,20 @@ export default function HomePage() {
                     )}
                   </div>
                 </div>
+                {/* Edit button */}
+                <button
+                  onClick={() => setMatchInfoOpen(true)}
+                  className="absolute right-3 top-3 w-7 h-7 rounded-full flex items-center justify-center active:bg-[#f0f0f0] transition-colors"
+                  aria-label="Edit match"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
               </div>
             )}
 
-            {/* Match Card */}
-            <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden">
-              {!editedData.time || (!!editedData.time && countdown.past) ? (
-                /* Empty state */
-                <button
-                  onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }}
-                  className="w-full px-6 py-5 flex items-center gap-4 active:opacity-60 transition-opacity"
-                >
-                  <div className="w-10 h-10 rounded-full border-2 border-dashed border-[#c4c7c7] flex items-center justify-center flex-shrink-0">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#9aab96" strokeWidth="2" strokeLinecap="round">
-                      <line x1="7" y1="1" x2="7" y2="13" /><line x1="1" y1="7" x2="13" y2="7" />
-                    </svg>
-                  </div>
-                  <div className="text-left">
-                    <p className="text-[15px] font-semibold text-[#1a1c1c]">Add a match</p>
-                    <p className="text-[13px] text-[#9aab96] mt-0.5">Upload booking or enter details</p>
-                  </div>
-                </button>
-              ) : (
-                /* Match info */
-                <div className="px-6 pt-4 pb-4 relative">
-                  {(() => {
-                    const club = editedData.club || "Location TBD";
-                    const court = editedData.court ? `Court ${editedData.court}` : "";
-                    return (
-                      <>
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-xs font-bold tracking-widest uppercase text-[#9aab96]">Next Match</p>
-                          {editedData.date && now && (() => {
-                            const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-                            const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
-                            const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" });
-                            return <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#f0f4ff] text-[#2653d4]">{label}</span>;
-                          })()}
-                        </div>
-                        <div className="flex items-center justify-between mb-3">
-                          <p className="h1-headline-md text-[#1a1c1c]">Padel Match</p>
-                          <span className="text-[15px] font-semibold text-[#747878]">{editedData.time}</span>
-                        </div>
-                        <div className="flex flex-col gap-0.5 text-[#747878] mb-3">
-                          <div className="flex items-center gap-2">
-                            <span className="material-symbols-outlined" style={{ fontSize: 14 }}>location_on</span>
-                            <span className="text-[13px] font-medium leading-tight">{club}</span>
-                          </div>
-                          {court && (
-                            <div className="flex items-center gap-2">
-                              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>sports_tennis</span>
-                              <span className="text-[13px] font-medium leading-tight">{court}</span>
-                            </div>
-                          )}
-                        </div>
-                      </>
-                    );
-                  })()}
-                  <button
-                    onClick={() => setMatchInfoOpen(true)}
-                    className="absolute right-5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center active:bg-[#f0f0f0] transition-colors"
-                    aria-label="Edit match"
-                  >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                    </svg>
-                  </button>
-                </div>
-              )}
-            </div>
 
             {/* Horizontal Day Timeline */}
             {(() => {
