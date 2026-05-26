@@ -428,7 +428,7 @@ export default function HomePage() {
           </div>
 
           {/* Improve today card */}
-          <button className="w-full mb-2 bg-white h1-ambient border border-[#c4c7c7]/10 rounded-[24px] px-5 py-4 flex items-center justify-center gap-3 active:opacity-60 transition-opacity">
+          <button className="w-full mb-2 bg-white h1-ambient border border-[#c4c7c7]/10 rounded-[24px] px-5 py-2 flex items-center justify-center gap-3 active:opacity-60 transition-opacity">
             <div className="w-8 h-8 rounded-full bg-[#2653d4]/10 flex items-center justify-center flex-shrink-0">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
