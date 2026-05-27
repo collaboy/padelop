@@ -39,6 +39,7 @@ export default function HomePage() {
   const [postGamePrompt, setPostGamePrompt] = useState(false);
   const [matchListOpen, setMatchListOpen] = useState(false);
   const [matchCardExpanded, setMatchCardExpanded] = useState(false);
+  const [dailyLogOpen, setDailyLogOpen] = useState(false);
 
   function loadAndScore() {
     const data = loadScoringData();
@@ -353,12 +354,14 @@ export default function HomePage() {
                 <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
                 <polyline points="17 6 23 6 23 12" />
               </svg>
-              <span className="text-[15px] font-semibold text-[#1a1c1c]">Improve today</span>
+              <span className="text-[15px] font-semibold text-[#1a1c1c]">Boost Score</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e9196" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 18l6-6-6-6" />
               </svg>
             </button>
           </div>
+
+          <Link href="/today" className="block text-center text-[11px] font-bold tracking-widest uppercase text-[#9aab96] mb-2 active:opacity-60">From your schedule</Link>
 
           {/* Do this now */}
           {(() => {
@@ -438,7 +441,7 @@ export default function HomePage() {
             const pendingPts = SCHEDULE_PTS[item.title] ?? 0;
             return (
               <button
-                  className="w-full bg-white rounded-[24px] border border-[#c4c7c7]/10 px-5 py-3 flex items-center gap-3 mb-4 active:opacity-60 transition-opacity text-left animate-card-breathe"
+                  className="w-full bg-white rounded-[24px] border border-[#c4c7c7]/10 px-5 py-3 flex items-center gap-3 mb-12 active:opacity-60 transition-opacity text-left animate-card-breathe"
                   style={{ "--card-glow": item.color + "28" } as React.CSSProperties}
                   onClick={() => detail && setScheduleModal({ title: item.title, subtitle: item.subtitle, detail, color: item.color })}
                 >
@@ -446,88 +449,18 @@ export default function HomePage() {
                     <div className="w-3 h-3 rounded-full animate-breathe" style={{ background: item.color, "--glow": item.color } as React.CSSProperties} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96] mb-0.5">Do this now</p>
+                    <p className="text-[11px] font-bold tracking-widests uppercase text-[#9aab96] mb-0.5">Do this now</p>
                     <p className="text-[16px] font-semibold text-[#1a1c1c] leading-tight">{item.title}</p>
                     {item.subtitle && <p className="text-[13px] text-[#747878] mt-0.5 leading-snug">{item.subtitle}</p>}
                   </div>
-                  {pendingPts > 0 && (
-                    <div className="flex flex-col items-center justify-center flex-shrink-0 px-2.5 py-1.5 rounded-xl" style={{ background: item.color + "14" }}>
-                      <span className="text-[13px] font-bold leading-none" style={{ color: item.color }}>+{pendingPts}</span>
-                      <span className="text-[9px] font-bold tracking-wide uppercase leading-none mt-0.5" style={{ color: item.color + "99" }}>pts</span>
-                    </div>
+                  {detail && (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
                   )}
               </button>
             );
           })()}
-
-          {/* Match Card */}
-          <div className="mt-6 mb-0">
-            {!editedData.time || countdown.past ? (
-              <button
-                onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }}
-                className="w-full px-6 py-5 flex items-center gap-4 active:opacity-60 transition-opacity"
-              >
-                <div className="w-10 h-10 rounded-full border-2 border-dashed border-[#c4c7c7] flex items-center justify-center flex-shrink-0">
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#9aab96" strokeWidth="2" strokeLinecap="round">
-                    <line x1="7" y1="1" x2="7" y2="13" /><line x1="1" y1="7" x2="13" y2="7" />
-                  </svg>
-                </div>
-                <div className="text-left">
-                  <p className="text-[15px] font-semibold text-[#1a1c1c]">Add a match</p>
-                  <p className="text-[13px] text-[#9aab96] mt-0.5">Upload booking or enter details</p>
-                </div>
-              </button>
-            ) : (
-              <>
-                <div className="w-full px-1 py-0 flex items-center justify-center">
-                  <button
-                    onClick={() => setMatchCardExpanded(e => !e)}
-                    className="flex flex-col items-center gap-0 active:opacity-60 transition-opacity"
-                  >
-                    <span className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96]">Next Match</span>
-                    <div className="flex items-center gap-2">
-                      {editedData.date && now && (() => {
-                        const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-                        const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
-                        const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-                        return <span className="text-[15px] font-semibold text-[#1a1c1c]">{label}</span>;
-                      })()}
-                      <span className="w-1 h-1 rounded-full bg-[#dde0e1] flex-shrink-0" />
-                      <span className="text-[15px] font-semibold text-[#747878]">{editedData.time}</span>
-                    </div>
-                  </button>
-                </div>
-                {matchCardExpanded && (() => {
-                  const club = editedData.club || "Location TBD";
-                  const court = editedData.court ? `Court ${editedData.court}` : "";
-                  return (
-                    <div className="border-t border-[#f0f0f0] px-5 pt-3 pb-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="h1-headline-md text-[#1a1c1c]">Padel Match</p>
-                        <button
-                          onClick={() => setMatchInfoOpen(true)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#e2e2e2] active:bg-[#f0f0f0] transition-colors"
-                        >
-                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                          </svg>
-                          <span className="text-[12px] font-semibold text-[#747878]">Edit</span>
-                        </button>
-                      </div>
-                      <div className="flex items-center justify-between text-[#747878]">
-                        <div className="flex items-center gap-1.5">
-                          <span className="material-symbols-outlined" style={{ fontSize: 13 }}>location_on</span>
-                          <span className="text-[13px] font-medium">{club}</span>
-                        </div>
-                        {court && <span className="text-[13px] font-medium text-[#9aab96]">{court}</span>}
-                      </div>
-                    </div>
-                  );
-                })()}
-              </>
-            )}
-          </div>
 
           <div className="space-y-4">
 
@@ -701,41 +634,34 @@ export default function HomePage() {
           let reviewDone = false, reviewAgo = "";
           try { const r = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]")[0]; if (r?.ts.slice(0, 10) === todayYMD) { reviewDone = true; reviewAgo = timeAgo(r.ts); } } catch {}
 
-          const rows = [
+          const logItems = [
             {
               label: "Daily Check-in", sub: "Sleep · energy · soreness · hydration",
-              color: "#4169e1", done: ciDone, badge: ciDone ? "Done today" : "Not yet", pts: 12,
+              color: "#4169e1", done: ciDone, badge: ciDone ? "Done today" : "Not yet",
               icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4169e1" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
               action: () => { setFabOpen(false); setCheckInOpen(true); },
             },
             {
               label: "Hydration", sub: "Log today's water intake",
-              color: "#0891b2", done: hydroDone, badge: hydroDone ? hydroAgo : "Not yet", pts: 8,
+              color: "#0891b2", done: hydroDone, badge: hydroDone ? hydroAgo : "Not yet",
               icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0891b2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C12 2 5 10 5 15a7 7 0 0 0 14 0c0-5-7-13-7-13z"/></svg>,
               action: () => { setFabOpen(false); setHydroOpen(true); },
             },
             {
               label: "Nutrition", sub: "Protein & recovery fuel",
-              color: "#ea580c", done: nutriDone, badge: nutriDone ? nutriAgo : "Not yet", pts: 5,
+              color: "#ea580c", done: nutriDone, badge: nutriDone ? nutriAgo : "Not yet",
               icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>,
               action: () => { setFabOpen(false); setNutritionOpen(true); },
             },
+            {
+              label: "Review a match", sub: "Log your last match performance",
+              color: "#7c3aed", done: reviewDone, badge: reviewDone ? reviewAgo : "Not yet",
+              icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 14c1 2 6 2 8 0"/><circle cx="9" cy="9.5" r="0.8" fill="#7c3aed" stroke="none"/><circle cx="15" cy="9.5" r="0.8" fill="#7c3aed" stroke="none"/></svg>,
+              action: () => { setFabOpen(false); setMatchListOpen(true); },
+            },
           ];
 
-          const reviewRow = {
-            label: "Review a match", sub: "Log your last match performance",
-            color: "#7c3aed", done: reviewDone, badge: reviewDone ? reviewAgo : "Not yet", pts: 10,
-            icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 14c1 2 6 2 8 0"/><circle cx="9" cy="9.5" r="0.8" fill="#7c3aed" stroke="none"/><circle cx="15" cy="9.5" r="0.8" fill="#7c3aed" stroke="none"/></svg>,
-            action: () => { setFabOpen(false); setMatchListOpen(true); },
-          };
-          const addMatchRow = {
-            label: "Add a match", sub: "Upload booking or enter manually",
-            color: "#2653d4", done: false, badge: "", pts: 0,
-            icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>,
-            action: () => { setFabOpen(false); setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); },
-          };
-
-          rows.push(...(reviewDone ? [addMatchRow, reviewRow] : [reviewRow, addMatchRow]));
+          const doneCount = logItems.filter(i => i.done).length;
 
           return (
             <div className="fixed inset-0 z-[60]" onClick={() => setFabOpen(false)}>
@@ -747,51 +673,74 @@ export default function HomePage() {
               >
                 <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4 mb-1" />
                 <div className="px-6 pt-3 pb-4">
-                  <p className="h1-headline-md text-[#1a1c1c]">Daily Log</p>
-                  <p className="text-[13px] text-[#747878] mt-0.5">Tap to update — scores recalculate instantly</p>
+                  <p className="h1-headline-md text-[#1a1c1c]">Boost Score</p>
+                  <p className="text-[13px] text-[#747878] mt-0.5">Scores recalculate instantly</p>
                 </div>
-                {rows.map((row) => (
+
+                {/* Daily Log row */}
+                <button
+                  onClick={() => setDailyLogOpen(o => !o)}
+                  className="w-full flex items-center gap-4 px-6 py-4 active:bg-[#f9f9f9] transition-colors"
+                  style={{ borderTop: "1px solid #f4f4f4" }}
+                >
+                  <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-[#4169e114]">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4169e1" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                  </div>
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="text-[15px] font-semibold text-[#1a1c1c]">Daily Log</p>
+                    <p className="text-[12px] text-[#747878] mt-0.5">{doneCount} of {logItems.length} logged today</p>
+                  </div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: dailyLogOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+
+                {/* Daily Log items */}
+                {dailyLogOpen && logItems.map((row) => (
                   <button
                     key={row.label}
                     onClick={row.action}
-                    className="w-full flex items-center gap-4 px-6 py-4 active:bg-[#f9f9f9] transition-colors"
+                    className="w-full flex items-center gap-4 px-6 py-3.5 active:bg-[#f9f9f9] transition-colors bg-[#fafafa]"
                     style={{ borderTop: "1px solid #f4f4f4" }}
                   >
-                    <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: row.color + "18" }}>
+                    <div className="w-1 h-8 rounded-full flex-shrink-0" style={{ background: row.color + "40" }} />
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: row.color + "14" }}>
                       {row.icon}
                     </div>
                     <div className="flex-1 min-w-0 text-left">
-                      <p className="text-[15px] font-semibold text-[#1a1c1c]">{row.label}</p>
+                      <p className="text-[14px] font-semibold text-[#1a1c1c]">{row.label}</p>
                       <p className="text-[12px] text-[#747878] mt-0.5">{row.sub}</p>
                     </div>
-                    {row.label === "Add a match" ? (
-                      <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#c4c7c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1,1 6,6 1,11"/></svg>
-                    ) : row.done ? (
+                    {row.done ? (
                       <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#caecbc] text-[#496640] whitespace-nowrap flex-shrink-0">{row.badge}</span>
                     ) : (
-                      <div className="flex flex-col items-center justify-center flex-shrink-0 px-2.5 py-1.5 rounded-xl" style={{ background: row.color + "14" }}>
-                        <span className="text-[12px] font-bold leading-none" style={{ color: row.color }}>+{row.pts}</span>
-                        <span className="text-[8px] font-bold tracking-wide uppercase leading-none mt-0.5" style={{ color: row.color + "99" }}>pts</span>
-                      </div>
+                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#f4f4f4] text-[#747878] flex-shrink-0">Not yet</span>
                     )}
                   </button>
                 ))}
+
+                {/* Add a match */}
+                <button
+                  onClick={() => { setFabOpen(false); setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }}
+                  className="w-full flex items-center gap-4 px-6 py-4 active:bg-[#f9f9f9] transition-colors"
+                  style={{ borderTop: "1px solid #f4f4f4" }}
+                >
+                  <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-[#2653d414]">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+                  </div>
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="text-[15px] font-semibold text-[#1a1c1c]">Add a match</p>
+                    <p className="text-[12px] text-[#747878] mt-0.5">Upload booking or enter manually</p>
+                  </div>
+                  <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#c4c7c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1,1 6,6 1,11"/></svg>
+                </button>
+
                 <div style={{ paddingBottom: "max(2rem, env(safe-area-inset-bottom))" }} />
               </div>
             </div>
           );
         })()}
 
-        {/* FAB */}
-        <div className="fixed right-6 bottom-24 z-[70]">
-          <button
-            onClick={() => setFabOpen(o => !o)}
-            className="w-10 h-10 bg-[#ffe600] rounded-full flex items-center justify-center shadow-lg active:scale-90"
-            style={{ transition: "transform 0.22s ease", transform: fabOpen ? "rotate(45deg)" : "rotate(0deg)" }}
-          >
-            <span className="material-symbols-outlined text-[#1a1c1c]">add</span>
-          </button>
-        </div>
       </div>
 
       {/* Match Info modal */}
