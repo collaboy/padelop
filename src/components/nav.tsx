@@ -136,7 +136,7 @@ export default function Nav() {
           </div>
 
           {/* Center: title */}
-          <div className="flex justify-center">
+          <div className="flex justify-center items-center">
             <Link href="/" className="text-lg font-semibold tracking-tight text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>
               {"Padelop!".split("").map((char, i) => (
                 <span key={i} style={{ position: "relative", top: `${-i * 1.5}px` }}>{char}</span>
