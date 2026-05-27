@@ -301,92 +301,6 @@ export default function HomePage() {
       <div className="h1-font bg-[#f9f9f9] text-[#1a1c1c] min-h-screen">
         <main className="pt-4 pb-8 px-5 max-w-lg mx-auto">
 
-          {/* Do this now */}
-          {(() => {
-            const pad = (n: number) => String(n).padStart(2, "0");
-            const matchTime = editedData.time || "18:30";
-            const [mH, mM] = matchTime.split(":").map(Number);
-            const addMins = (h: number, m: number, delta: number) => {
-              const total = h * 60 + m + delta;
-              return `${pad(Math.floor(total / 60) % 24)}:${pad(total % 60)}`;
-            };
-            const matchVenue = [editedData.club, editedData.court ? `Court ${editedData.court}` : ""].filter(Boolean).join(" — ") || "Court";
-            const schedules = {
-              match: [
-                { time: "07:00", title: "Wake up & hydrate",    subtitle: "500ml water before anything else",   color: "#f59e0b" },
-                { time: "07:30", title: "Breakfast",             subtitle: "Oats, eggs, fruit",                  color: "#16a34a" },
-                { time: "09:00", title: "Morning mobility",      subtitle: "Foam roll & light stretching",        color: "#0891b2" },
-                { time: addMins(mH, mM, -360), title: "Pre-game meal", subtitle: "Chicken, rice, light salad",   color: "#16a34a" },
-                { time: addMins(mH, mM, -60),  title: "Warmup & activation", subtitle: "Dynamic drills, 30 min", color: "#2653d4" },
-                { time: matchTime,             title: "Match",   subtitle: matchVenue,                           color: "#1e3a1e" },
-                { time: addMins(mH, mM, 90),   title: "Post-match cool down", subtitle: "Stretch & mobility, 15 min", color: "#7c3aed" },
-                { time: addMins(mH, mM, 120),  title: "Recovery meal", subtitle: "Protein + carbs within 30 min", color: "#16a34a" },
-                { time: "22:30", title: "Wind down",             subtitle: "No screens, light reading",           color: "#94a3b8" },
-              ],
-              recovery: [
-                { time: "07:30", title: "Wake up & hydrate",      subtitle: "500ml water — rehydrate after yesterday", color: "#f59e0b" },
-                { time: "08:00", title: "Light breakfast",         subtitle: "Eggs, fruit, Greek yogurt",               color: "#16a34a" },
-                { time: "09:30", title: "Recovery walk",           subtitle: "20 min easy — flush out lactic acid",     color: "#0891b2" },
-                { time: "10:30", title: "Foam roll & stretch",     subtitle: "Quads, hip flexors, calves, shoulders",   color: "#7c3aed" },
-                { time: "13:00", title: "Protein-rich lunch",      subtitle: "Chicken, salmon or legumes + veg",        color: "#16a34a" },
-                { time: "15:30", title: "Cold shower",             subtitle: "2 min cold — reduces inflammation",       color: "#2653d4" },
-                { time: "18:30", title: "Dinner",                  subtitle: "Anti-inflammatory focus — fish, greens",  color: "#16a34a" },
-                { time: "21:30", title: "Early wind down",         subtitle: "Sleep is your best recovery tool tonight", color: "#94a3b8" },
-              ],
-              rest: [
-                { time: "07:00", title: "Wake up & hydrate",      subtitle: "500ml water before coffee",               color: "#f59e0b" },
-                { time: "07:30", title: "Breakfast",               subtitle: "High protein — eggs, yogurt, fruit",      color: "#16a34a" },
-                { time: "09:30", title: "Light mobility",          subtitle: "Hip flexors, thoracic spine, ankles",      color: "#0891b2" },
-                { time: "12:30", title: "Balanced lunch",          subtitle: "Carbs + protein + greens",                color: "#16a34a" },
-                { time: "15:00", title: "Active recovery",         subtitle: "Walk, swim or light cycling",             color: "#2653d4" },
-                { time: "18:30", title: "Dinner",                  subtitle: "Focus on variety and micronutrients",     color: "#16a34a" },
-                { time: "21:00", title: "Visualisation",           subtitle: "5 min mental rehearsal of key patterns",  color: "#7c3aed" },
-                { time: "22:30", title: "Wind down",               subtitle: "No screens, consistent bedtime",          color: "#94a3b8" },
-              ],
-              training: [
-                { time: "07:00", title: "Wake up & hydrate",       subtitle: "500ml water before anything else",        color: "#f59e0b" },
-                { time: "07:30", title: "Breakfast",                subtitle: "Oats, eggs, fruit",                       color: "#16a34a" },
-                { time: "09:00", title: "Morning mobility",         subtitle: "Foam roll & light stretching",             color: "#0891b2" },
-                { time: "15:00", title: "Pre-training meal",        subtitle: "Carbs + protein, 1.5–2h before session",  color: "#16a34a" },
-                { time: "17:00", title: "Pre-training activation",  subtitle: "10 min dynamic warm-up",                   color: "#2653d4" },
-                { time: "17:30", title: "Training session",         subtitle: "Focus on one or two deliberate patterns",  color: "#1e3a1e" },
-                { time: "19:00", title: "Post-training stretch",    subtitle: "30–45 sec holds — hip flexors, shoulders", color: "#7c3aed" },
-                { time: "19:30", title: "Post-training protein",    subtitle: "20–40g protein within 30 min",             color: "#16a34a" },
-                { time: "21:00", title: "Dinner",                   subtitle: "Anti-inflammatory focus — fish, greens",   color: "#16a34a" },
-                { time: "22:30", title: "Wind down",                subtitle: "No screens, consistent bedtime",           color: "#94a3b8" },
-              ],
-            };
-            const schedule = schedules[dayType];
-            const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
-            const curMins = now ? now.getHours() * 60 + now.getMinutes() : -1;
-            let autoIdx = 0;
-            if (curMins >= toMins(schedule[schedule.length - 1].time)) { autoIdx = schedule.length - 1; }
-            else { for (let i = 0; i < schedule.length - 1; i++) { if (curMins >= toMins(schedule[i].time) && curMins < toMins(schedule[i + 1].time)) { autoIdx = i; break; } } }
-            const item = schedule[autoIdx];
-            const detail = SCHEDULE_DETAILS[item.title];
-            return (
-              <button
-                  className="w-full bg-white rounded-[24px] border border-[#c4c7c7]/10 px-5 py-3 flex items-center gap-3 mb-4 active:opacity-60 transition-opacity text-left animate-card-breathe"
-                  style={{ "--card-glow": item.color + "28" } as React.CSSProperties}
-                  onClick={() => detail && setScheduleModal({ title: item.title, subtitle: item.subtitle, detail, color: item.color })}
-                >
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: item.color + "18" }}>
-                    <div className="w-3 h-3 rounded-full animate-breathe" style={{ background: item.color, "--glow": item.color } as React.CSSProperties} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96] mb-0.5">Do this now</p>
-                    <p className="text-[16px] font-semibold text-[#1a1c1c] leading-tight">{item.title}</p>
-                    {item.subtitle && <p className="text-[13px] text-[#747878] mt-0.5 leading-snug">{item.subtitle}</p>}
-                  </div>
-                  {detail && (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M9 18l6-6-6-6" />
-                    </svg>
-                  )}
-              </button>
-            );
-          })()}
-
           {/* Greeting */}
           {(() => {
             const h = now ? now.getHours() : 12;
@@ -423,16 +337,11 @@ export default function HomePage() {
             );
           })()}
 
-
-
-          {/* Score ring */}
-          <div className="flex justify-center mb-2">
+          {/* Score ring + Improve today card */}
+          <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 flex flex-col items-center py-5 mb-4">
+            <p className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96] mb-4">Padel Match Optimizer</p>
             <ScoreRing />
-          </div>
-
-          {/* Improve today button */}
-          <div className="flex justify-center mt-4 mb-2">
-            <button onClick={() => setFabOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-md active:opacity-60 transition-opacity">
+            <button onClick={() => setFabOpen(true)} className="flex items-center gap-2 px-4 py-2 mt-4 rounded-full bg-[#f4f4f4] active:opacity-60 transition-opacity">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
                 <polyline points="17 6 23 6 23 12" />
@@ -443,6 +352,106 @@ export default function HomePage() {
               </svg>
             </button>
           </div>
+
+          {/* Do this now */}
+          {(() => {
+            const pad = (n: number) => String(n).padStart(2, "0");
+            const matchTime = editedData.time || "18:30";
+            const [mH, mM] = matchTime.split(":").map(Number);
+            const addMins = (h: number, m: number, delta: number) => {
+              const total = h * 60 + m + delta;
+              return `${pad(Math.floor(total / 60) % 24)}:${pad(total % 60)}`;
+            };
+            const matchVenue = [editedData.club, editedData.court ? `Court ${editedData.court}` : ""].filter(Boolean).join(" — ") || "Court";
+            const schedules = {
+              match: [
+                { time: "07:00", title: "Wake up & hydrate",    subtitle: "500ml water before anything else",   color: "#f59e0b" },
+                { time: "07:30", title: "Breakfast",             subtitle: "Oats, eggs, fruit",                  color: "#16a34a" },
+                { time: "09:00", title: "Morning mobility",      subtitle: "Foam roll & light stretching",        color: "#0891b2" },
+                { time: addMins(mH, mM, -360), title: "Pre-game meal", subtitle: "Chicken, rice, light salad",   color: "#16a34a" },
+                { time: addMins(mH, mM, -60),  title: "Warmup & activation", subtitle: "Dynamic drills, 30 min", color: "#2653d4" },
+                { time: matchTime,             title: "Match",   subtitle: matchVenue,                           color: "#1e3a1e" },
+                { time: addMins(mH, mM, 90),   title: "Post-match cool down", subtitle: "Stretch & mobility, 15 min", color: "#7c3aed" },
+                { time: addMins(mH, mM, 120),  title: "Recovery meal", subtitle: "Protein + carbs within 30 min", color: "#16a34a" },
+                { time: "22:30", title: "Wind down",             subtitle: "No screens, light reading",           color: "#94a3b8" },
+              ],
+              recovery: [
+                { time: "07:30", title: "Wake up & hydrate",      subtitle: "500ml water — rehydrate after yesterday", color: "#f59e0b" },
+                { time: "08:00", title: "Light breakfast",         subtitle: "Eggs, fruit, Greek yogurt",               color: "#16a34a" },
+                { time: "09:30", title: "Recovery walk",           subtitle: "20 min easy — flush out lactic acid",     color: "#0891b2" },
+                { time: "10:30", title: "Foam roll & stretch",     subtitle: "Quads, hip flexors, calves, shoulders",   color: "#7c3aed" },
+                { time: "13:00", title: "Protein-rich lunch",      subtitle: "Chicken, salmon or legumes + veg",        color: "#16a34a" },
+                { time: "15:30", title: "Cold shower",             subtitle: "2 min cold — reduces inflammation",       color: "#2653d4" },
+                { time: "19:00", title: "Dinner",                  subtitle: "Anti-inflammatory focus — fish, greens",  color: "#16a34a" },
+                { time: "21:30", title: "Early wind down",         subtitle: "Sleep is your best recovery tool tonight", color: "#94a3b8" },
+              ],
+              rest: [
+                { time: "07:00", title: "Wake up & hydrate",      subtitle: "500ml water before coffee",               color: "#f59e0b" },
+                { time: "07:30", title: "Breakfast",               subtitle: "High protein — eggs, yogurt, fruit",      color: "#16a34a" },
+                { time: "09:30", title: "Light mobility",          subtitle: "Hip flexors, thoracic spine, ankles",      color: "#0891b2" },
+                { time: "12:30", title: "Balanced lunch",          subtitle: "Carbs + protein + greens",                color: "#16a34a" },
+                { time: "15:00", title: "Active recovery",         subtitle: "Walk, swim or light cycling",             color: "#2653d4" },
+                { time: "19:00", title: "Dinner",                  subtitle: "Focus on variety and micronutrients",     color: "#16a34a" },
+                { time: "21:00", title: "Visualisation",           subtitle: "5 min mental rehearsal of key patterns",  color: "#7c3aed" },
+                { time: "22:30", title: "Wind down",               subtitle: "No screens, consistent bedtime",          color: "#94a3b8" },
+              ],
+              training: [
+                { time: "07:00", title: "Wake up & hydrate",       subtitle: "500ml water before anything else",        color: "#f59e0b" },
+                { time: "07:30", title: "Breakfast",                subtitle: "Oats, eggs, fruit",                       color: "#16a34a" },
+                { time: "09:00", title: "Morning mobility",         subtitle: "Foam roll & light stretching",             color: "#0891b2" },
+                { time: "15:00", title: "Pre-training meal",        subtitle: "Carbs + protein, 1.5–2h before session",  color: "#16a34a" },
+                { time: "17:00", title: "Pre-training activation",  subtitle: "10 min dynamic warm-up",                   color: "#2653d4" },
+                { time: "17:30", title: "Training session",         subtitle: "Focus on one or two deliberate patterns",  color: "#1e3a1e" },
+                { time: "19:00", title: "Post-training stretch",    subtitle: "30–45 sec holds — hip flexors, shoulders", color: "#7c3aed" },
+                { time: "19:30", title: "Post-training protein",    subtitle: "20–40g protein within 30 min",             color: "#16a34a" },
+                { time: "21:00", title: "Dinner",                   subtitle: "Anti-inflammatory focus — fish, greens",   color: "#16a34a" },
+                { time: "22:30", title: "Wind down",                subtitle: "No screens, consistent bedtime",           color: "#94a3b8" },
+              ],
+            };
+            const schedule = schedules[dayType];
+            const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+            const curMins = now ? now.getHours() * 60 + now.getMinutes() : -1;
+            let autoIdx = 0;
+            if (curMins >= toMins(schedule[schedule.length - 1].time)) { autoIdx = schedule.length - 1; }
+            else { for (let i = 0; i < schedule.length - 1; i++) { if (curMins >= toMins(schedule[i].time) && curMins < toMins(schedule[i + 1].time)) { autoIdx = i; break; } } }
+            const item = schedule[autoIdx];
+            const detail = SCHEDULE_DETAILS[item.title];
+            const SCHEDULE_PTS: Record<string, number> = {
+              "Wake up & hydrate": 8, "Light breakfast": 5, "Breakfast": 5,
+              "Morning mobility": 4, "Light mobility": 4, "Foam roll & stretch": 4,
+              "Pre-game meal": 5, "Pre-training meal": 5, "Balanced lunch": 5,
+              "Protein-rich lunch": 5, "Dinner": 5, "Recovery meal": 5,
+              "Warmup & activation": 4, "Pre-training activation": 4,
+              "Match": 10, "Training session": 8,
+              "Post-match cool down": 4, "Post-training stretch": 4,
+              "Post-training protein": 5, "Recovery walk": 4,
+              "Cold shower": 4, "Active recovery": 4,
+              "Visualisation": 3, "Wind down": 3, "Early wind down": 3,
+            };
+            const pendingPts = SCHEDULE_PTS[item.title] ?? 0;
+            return (
+              <button
+                  className="w-full bg-white rounded-[24px] border border-[#c4c7c7]/10 px-5 py-3 flex items-center gap-3 mb-4 active:opacity-60 transition-opacity text-left animate-card-breathe"
+                  style={{ "--card-glow": item.color + "28" } as React.CSSProperties}
+                  onClick={() => detail && setScheduleModal({ title: item.title, subtitle: item.subtitle, detail, color: item.color })}
+                >
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: item.color + "18" }}>
+                    <div className="w-3 h-3 rounded-full animate-breathe" style={{ background: item.color, "--glow": item.color } as React.CSSProperties} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96] mb-0.5">Do this now</p>
+                    <p className="text-[16px] font-semibold text-[#1a1c1c] leading-tight">{item.title}</p>
+                    {item.subtitle && <p className="text-[13px] text-[#747878] mt-0.5 leading-snug">{item.subtitle}</p>}
+                  </div>
+                  {pendingPts > 0 && (
+                    <div className="flex flex-col items-center justify-center flex-shrink-0 px-2.5 py-1.5 rounded-xl" style={{ background: item.color + "14" }}>
+                      <span className="text-[13px] font-bold leading-none" style={{ color: item.color }}>+{pendingPts}</span>
+                      <span className="text-[9px] font-bold tracking-wide uppercase leading-none mt-0.5" style={{ color: item.color + "99" }}>pts</span>
+                    </div>
+                  )}
+              </button>
+            );
+          })()}
 
           {/* Match Card */}
           <div className="mt-6 mb-0">
@@ -583,7 +592,7 @@ export default function HomePage() {
                       { time: "10:30", title: "Foam roll & stretch", subtitle: "Quads, hip flexors, calves",              color: "#7c3aed" },
                       { time: "13:00", title: "Protein-rich lunch", subtitle: "Chicken, salmon or legumes",               color: "#16a34a" },
                       { time: "15:30", title: "Cold shower",        subtitle: "2 min cold",                               color: "#2653d4" },
-                      { time: "18:30", title: "Dinner",             subtitle: "Anti-inflammatory focus",                  color: "#16a34a" },
+                      { time: "19:00", title: "Dinner",             subtitle: "Anti-inflammatory focus",                  color: "#16a34a" },
                       { time: "21:30", title: "Early wind down",    subtitle: "Sleep is your best recovery tool",         color: "#94a3b8" },
                     ],
                     training: [
@@ -603,7 +612,7 @@ export default function HomePage() {
                       { time: "09:30", title: "Light mobility",     subtitle: "Hip flexors, thoracic spine, ankles",       color: "#0891b2" },
                       { time: "12:30", title: "Balanced lunch",     subtitle: "Carbs + protein + greens",                  color: "#16a34a" },
                       { time: "15:00", title: "Active recovery",    subtitle: "Walk, swim or light cycling",               color: "#2653d4" },
-                      { time: "18:30", title: "Dinner",             subtitle: "Variety and micronutrients",                color: "#16a34a" },
+                      { time: "19:00", title: "Dinner",             subtitle: "Variety and micronutrients",                color: "#16a34a" },
                       { time: "21:00", title: "Visualisation",      subtitle: "5 min mental rehearsal",                    color: "#7c3aed" },
                       { time: "22:30", title: "Wind down",          subtitle: "No screens, consistent bedtime",            color: "#94a3b8" },
                     ],
@@ -688,19 +697,19 @@ export default function HomePage() {
           const rows = [
             {
               label: "Daily Check-in", sub: "Sleep · energy · soreness · hydration",
-              color: "#4169e1", done: ciDone, badge: ciDone ? "Done today" : "Not yet",
+              color: "#4169e1", done: ciDone, badge: ciDone ? "Done today" : "Not yet", pts: 12,
               icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4169e1" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
               action: () => { setFabOpen(false); setCheckInOpen(true); },
             },
             {
               label: "Hydration", sub: "Log today's water intake",
-              color: "#0891b2", done: hydroDone, badge: hydroDone ? hydroAgo : "Not yet",
+              color: "#0891b2", done: hydroDone, badge: hydroDone ? hydroAgo : "Not yet", pts: 8,
               icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0891b2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C12 2 5 10 5 15a7 7 0 0 0 14 0c0-5-7-13-7-13z"/></svg>,
               action: () => { setFabOpen(false); setHydroOpen(true); },
             },
             {
               label: "Nutrition", sub: "Protein & recovery fuel",
-              color: "#ea580c", done: nutriDone, badge: nutriDone ? nutriAgo : "Not yet",
+              color: "#ea580c", done: nutriDone, badge: nutriDone ? nutriAgo : "Not yet", pts: 5,
               icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>,
               action: () => { setFabOpen(false); setNutritionOpen(true); },
             },
@@ -708,13 +717,13 @@ export default function HomePage() {
 
           const reviewRow = {
             label: "Review a match", sub: "Log your last match performance",
-            color: "#7c3aed", done: reviewDone, badge: reviewDone ? reviewAgo : "Not yet",
+            color: "#7c3aed", done: reviewDone, badge: reviewDone ? reviewAgo : "Not yet", pts: 10,
             icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 14c1 2 6 2 8 0"/><circle cx="9" cy="9.5" r="0.8" fill="#7c3aed" stroke="none"/><circle cx="15" cy="9.5" r="0.8" fill="#7c3aed" stroke="none"/></svg>,
             action: () => { setFabOpen(false); setMatchListOpen(true); },
           };
           const addMatchRow = {
             label: "Add a match", sub: "Upload booking or enter manually",
-            color: "#2653d4", done: false, badge: "",
+            color: "#2653d4", done: false, badge: "", pts: 0,
             icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>,
             action: () => { setFabOpen(false); setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); },
           };
@@ -753,7 +762,10 @@ export default function HomePage() {
                     ) : row.done ? (
                       <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#caecbc] text-[#496640] whitespace-nowrap flex-shrink-0">{row.badge}</span>
                     ) : (
-                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#f4f4f4] text-[#747878] flex-shrink-0">Not yet</span>
+                      <div className="flex flex-col items-center justify-center flex-shrink-0 px-2.5 py-1.5 rounded-xl" style={{ background: row.color + "14" }}>
+                        <span className="text-[12px] font-bold leading-none" style={{ color: row.color }}>+{row.pts}</span>
+                        <span className="text-[8px] font-bold tracking-wide uppercase leading-none mt-0.5" style={{ color: row.color + "99" }}>pts</span>
+                      </div>
                     )}
                   </button>
                 ))}
