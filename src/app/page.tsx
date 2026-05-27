@@ -39,7 +39,6 @@ export default function HomePage() {
   const [postGamePrompt, setPostGamePrompt] = useState(false);
   const [matchListOpen, setMatchListOpen] = useState(false);
   const [matchCardExpanded, setMatchCardExpanded] = useState(false);
-  const [dailyLogOpen, setDailyLogOpen] = useState(false);
 
   function loadAndScore() {
     const data = loadScoringData();
@@ -664,13 +663,12 @@ export default function HomePage() {
             },
           ];
 
-          const doneCount = logItems.filter(i => i.done).length;
 
           return (
             <div className="fixed inset-0 z-[60] flex items-center justify-center px-4" onClick={() => setFabOpen(false)}>
               <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
               <div
-                className="h1-font relative w-full max-w-sm bg-white rounded-[28px]"
+                className="h1-font relative w-full max-w-sm bg-white rounded-[28px] overflow-y-auto max-h-[88vh]"
                 style={{ animation: "speedDialUp 0.25s cubic-bezier(0.22,1,0.36,1)" }}
                 onClick={e => e.stopPropagation()}
               >
@@ -680,38 +678,19 @@ export default function HomePage() {
                   <p className="text-[13px] text-[#747878] mt-0.5">Scores recalculate instantly</p>
                 </div>
 
-                {/* Daily Log row */}
-                <button
-                  onClick={() => setDailyLogOpen(o => !o)}
-                  className="w-full flex items-center gap-4 px-6 py-4 active:bg-[#f9f9f9] transition-colors"
-                  style={{ borderTop: "1px solid #f4f4f4" }}
-                >
-                  <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-[#4169e114]">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4169e1" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                  </div>
-                  <div className="flex-1 min-w-0 text-left">
-                    <p className="text-[15px] font-semibold text-[#1a1c1c]">Daily Log</p>
-                    <p className="text-[12px] text-[#747878] mt-0.5">{doneCount} of {logItems.length} logged today</p>
-                  </div>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: dailyLogOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
-                </button>
-
                 {/* Daily Log items */}
-                {dailyLogOpen && logItems.map((row) => (
+                {logItems.map((row) => (
                   <button
                     key={row.label}
                     onClick={row.action}
-                    className="w-full flex items-center gap-4 px-6 py-3.5 active:bg-[#f9f9f9] transition-colors bg-[#fafafa]"
+                    className="w-full flex items-center gap-4 px-6 py-3.5 active:bg-[#f9f9f9] transition-colors"
                     style={{ borderTop: "1px solid #f4f4f4" }}
                   >
-                    <div className="w-1 h-8 rounded-full flex-shrink-0" style={{ background: row.color + "40" }} />
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: row.color + "14" }}>
+                    <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: row.color + "14" }}>
                       {row.icon}
                     </div>
                     <div className="flex-1 min-w-0 text-left">
-                      <p className="text-[14px] font-semibold text-[#1a1c1c]">{row.label}</p>
+                      <p className="text-[15px] font-semibold text-[#1a1c1c]">{row.label}</p>
                       <p className="text-[12px] text-[#747878] mt-0.5">{row.sub}</p>
                       <p className="text-[10px] font-semibold mt-1" style={{ color: row.color + "99" }}>→ {row.affects}</p>
                     </div>
