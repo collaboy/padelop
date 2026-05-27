@@ -302,6 +302,29 @@ export default function HomePage() {
       <div className="h1-font bg-[#f9f9f9] text-[#1a1c1c] min-h-screen">
         <main className="pt-4 pb-8 px-5 max-w-lg mx-auto">
 
+          {/* Score ring + Improve today card */}
+          <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 flex flex-col items-center py-5 mb-4">
+            {editedData.time && now ? (() => {
+              const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+              const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
+              const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+              return <p className="text-[15px] font-semibold text-[#1a1c1c] mb-4">Next Match · <span className="text-[#2653d4]">{label} {editedData.time}</span></p>;
+            })() : (
+              <button onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }} className="text-[13px] font-semibold text-[#9aab96] mb-4 active:opacity-60">Add your next match</button>
+            )}
+            <ScoreRing />
+            <button onClick={() => setFabOpen(true)} className="flex items-center gap-2 px-4 py-2 mt-4 rounded-full bg-[#f4f4f4] active:opacity-60 transition-opacity">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                <polyline points="17 6 23 6 23 12" />
+              </svg>
+              <span className="text-[15px] font-semibold text-[#1a1c1c]">Boost Score</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e9196" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </button>
+          </div>
+
           {/* Greeting */}
           {(() => {
             const h = now ? now.getHours() : 12;
@@ -331,37 +354,13 @@ export default function HomePage() {
               msg = "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy.";
             }
             return (
-              <div className="mb-5 mt-2 px-1 text-center">
+              <div className="mb-2 px-1 text-center">
                 <p className="text-[22px] font-bold text-[#1a1c1c] leading-snug" style={{ fontFamily: "var(--font-hanken)" }}>Good {tod}.</p>
-                <p className="text-[16px] text-[#5a6370] mt-1 leading-snug">{msg}</p>
+                <p className="text-[15px] text-[#5a6370] mt-1 leading-snug">{msg}</p>
+                <Link href="/today" className="inline-block mt-3 text-[11px] font-bold tracking-widest uppercase text-[#9aab96] active:opacity-60">From your schedule</Link>
               </div>
             );
           })()}
-
-          {/* Score ring + Improve today card */}
-          <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 flex flex-col items-center py-5 mb-4">
-            {editedData.time && now ? (() => {
-              const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-              const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
-              const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-              return <p className="text-[15px] font-semibold text-[#1a1c1c] mb-4">Next Match · <span className="text-[#2653d4]">{label} {editedData.time}</span></p>;
-            })() : (
-              <button onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }} className="text-[13px] font-semibold text-[#9aab96] mb-4 active:opacity-60">Add your next match</button>
-            )}
-            <ScoreRing />
-            <button onClick={() => setFabOpen(true)} className="flex items-center gap-2 px-4 py-2 mt-4 rounded-full bg-[#f4f4f4] active:opacity-60 transition-opacity">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                <polyline points="17 6 23 6 23 12" />
-              </svg>
-              <span className="text-[15px] font-semibold text-[#1a1c1c]">Boost Score</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e9196" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </button>
-          </div>
-
-          <Link href="/today" className="block text-center text-[11px] font-bold tracking-widest uppercase text-[#9aab96] mb-2 active:opacity-60">From your schedule</Link>
 
           {/* Do this now */}
           {(() => {
@@ -637,24 +636,28 @@ export default function HomePage() {
           const logItems = [
             {
               label: "Daily Check-in", sub: "Sleep · energy · soreness · hydration",
+              affects: "Recovery · Energy · Mobility",
               color: "#4169e1", done: ciDone, badge: ciDone ? "Done today" : "Not yet",
               icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4169e1" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
               action: () => { setFabOpen(false); setCheckInOpen(true); },
             },
             {
               label: "Hydration", sub: "Log today's water intake",
+              affects: "Hydration · Recovery",
               color: "#0891b2", done: hydroDone, badge: hydroDone ? hydroAgo : "Not yet",
               icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0891b2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C12 2 5 10 5 15a7 7 0 0 0 14 0c0-5-7-13-7-13z"/></svg>,
               action: () => { setFabOpen(false); setHydroOpen(true); },
             },
             {
               label: "Nutrition", sub: "Protein & recovery fuel",
+              affects: "Energy",
               color: "#ea580c", done: nutriDone, badge: nutriDone ? nutriAgo : "Not yet",
               icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>,
               action: () => { setFabOpen(false); setNutritionOpen(true); },
             },
             {
               label: "Review a match", sub: "Log your last match performance",
+              affects: "Recovery · Energy · Mobility",
               color: "#7c3aed", done: reviewDone, badge: reviewDone ? reviewAgo : "Not yet",
               icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 14c1 2 6 2 8 0"/><circle cx="9" cy="9.5" r="0.8" fill="#7c3aed" stroke="none"/><circle cx="15" cy="9.5" r="0.8" fill="#7c3aed" stroke="none"/></svg>,
               action: () => { setFabOpen(false); setMatchListOpen(true); },
@@ -664,11 +667,11 @@ export default function HomePage() {
           const doneCount = logItems.filter(i => i.done).length;
 
           return (
-            <div className="fixed inset-0 z-[60]" onClick={() => setFabOpen(false)}>
+            <div className="fixed inset-0 z-[60] flex items-center justify-center px-4" onClick={() => setFabOpen(false)}>
               <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
               <div
-                className="h1-font absolute bottom-0 left-0 right-0 bg-white rounded-t-[28px] mx-3 rounded-b-none"
-                style={{ animation: "slideUp 0.28s cubic-bezier(0.22,1,0.36,1)" }}
+                className="h1-font relative w-full max-w-sm bg-white rounded-[28px]"
+                style={{ animation: "speedDialUp 0.25s cubic-bezier(0.22,1,0.36,1)" }}
                 onClick={e => e.stopPropagation()}
               >
                 <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4 mb-1" />
@@ -710,6 +713,7 @@ export default function HomePage() {
                     <div className="flex-1 min-w-0 text-left">
                       <p className="text-[14px] font-semibold text-[#1a1c1c]">{row.label}</p>
                       <p className="text-[12px] text-[#747878] mt-0.5">{row.sub}</p>
+                      <p className="text-[10px] font-semibold mt-1" style={{ color: row.color + "99" }}>→ {row.affects}</p>
                     </div>
                     {row.done ? (
                       <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#caecbc] text-[#496640] whitespace-nowrap flex-shrink-0">{row.badge}</span>
@@ -735,7 +739,7 @@ export default function HomePage() {
                   <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#c4c7c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1,1 6,6 1,11"/></svg>
                 </button>
 
-                <div style={{ paddingBottom: "max(2rem, env(safe-area-inset-bottom))" }} />
+                <div className="pb-4" />
               </div>
             </div>
           );
