@@ -6,6 +6,7 @@ import { computeScores, loadScoringData, computeAllTimeScores, saveHabits, saveC
 import { computeNotifications, type Notif } from "@/lib/notifications";
 import ScoreRing from "@/components/score-ring";
 import ScoreGauge from "@/components/score-gauge";
+import ReadinessWidget from "@/components/readiness-widget";
 
 const FIELD_LABELS: Record<string, string> = {
   date: "Date",
@@ -324,6 +325,8 @@ export default function HomePage() {
 
       <div className="h1-font bg-[#f9f9f9] text-[#1a1c1c] min-h-screen">
         <main className="pt-3 pb-8 px-5 max-w-lg mx-auto">
+
+          <ReadinessWidget hideCard />
 
           <p className="text-[15px] font-bold tracking-widest uppercase text-[#1a1c1c] text-center leading-snug mb-2" style={{ fontFamily: "var(--font-hanken)" }}>Coach Says...</p>
 

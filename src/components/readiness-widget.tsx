@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { computeScores, loadScoringData, saveCheckIn, computeAllTimeScores, type Scores } from "@/lib/scoring";
 
-export default function ReadinessWidget() {
+export default function ReadinessWidget({ hideCard = false }: { hideCard?: boolean }) {
   const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 60, hydration: 52, energy: 58, mobility: 58 });
   const [allTimeScores, setAllTimeScores] = useState<Scores>({ overall: 65, recovery: 60, hydration: 52, energy: 58, mobility: 58 });
   const [scoreView, setScoreView] = useState<"today" | "alltime">("today");
@@ -13,6 +13,7 @@ export default function ReadinessWidget() {
   const [advOpen, setAdvOpen] = useState(false);
   const [improveOpen, setImproveOpen] = useState(false);
   const [categoryModal, setCategoryModal] = useState<{ label: string; pct: number; color: string; subtitle: string; detail: string } | null>(null);
+  const [selectedMetric, setSelectedMetric] = useState<"overall" | "recovery" | "hydration" | "energy" | "mobility">("overall");
 
   function loadAndScore() {
     const data = loadScoringData();
@@ -26,10 +27,29 @@ export default function ReadinessWidget() {
 
   useEffect(() => { loadAndScore(); }, []);
 
+  const logsToday = (() => {
+    try {
+      const todayYMD = new Date().toISOString().slice(0, 10);
+      let count = 0;
+      const ci = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null");
+      if (ci?.date === todayYMD) count++;
+      const hyd = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]")[0];
+      if (hyd?.ts?.slice(0, 10) === todayYMD) count++;
+      const nut = JSON.parse(localStorage.getItem("padelop:nutrition-logs") || "[]")[0];
+      if (nut?.ts?.slice(0, 10) === todayYMD) count++;
+      const rev = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]")[0];
+      if (rev?.ts?.slice(0, 10) === todayYMD) count++;
+      return count;
+    } catch { return 0; }
+  })();
+
   const active = scoreView === "today" ? scores : allTimeScores;
 
   // Segment ring logic
-  const p = active.overall / 100;
+  const METRIC_COLORS: Record<string, string> = { overall: "#2653d4", recovery: "#7c3aed", hydration: "#0891b2", energy: "#f59e0b", mobility: "#16a34a" };
+  const activeMetricValue = active[selectedMetric] ?? active.overall;
+  const activeMetricColor = METRIC_COLORS[selectedMetric];
+  const p = activeMetricValue / 100;
   const cx = 50, cy = 50, r = 42, sw = 6;
   const SEGS = 60;
   const pt = (a: number) => ({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
@@ -52,7 +72,7 @@ export default function ReadinessWidget() {
     arcs.push(
       <path key={i}
         d={`M${p0.x} ${p0.y} A${r} ${r} 0 0 1 ${p1.x} ${p1.y}`}
-        fill="none" stroke={segColor((t0 + t1) / 2)} strokeWidth={sw}
+        fill="none" stroke={selectedMetric === "overall" ? segColor((t0 + t1) / 2) : activeMetricColor} strokeWidth={sw}
         strokeLinecap={i === 0 || isLast ? "round" : "butt"}
       />
     );
@@ -92,14 +112,14 @@ export default function ReadinessWidget() {
     <>
       {/* Daily Readiness ring */}
       <section className="flex flex-col items-center text-center mb-8 mt-4">
+        <p className="text-[11px] font-bold tracking-widest uppercase text-[#8a9096] mb-3">Padel Match Readiness</p>
         <div className="relative mb-3" style={{ width: 210, height: 210 }}>
           <svg className="w-full h-full" viewBox="0 0 100 100">
             <circle cx={cx} cy={cy} r={r} fill="transparent" strokeWidth={sw} stroke="#e2e2e2" />
             {arcs}
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-black" style={{ fontSize: 68, lineHeight: 1, fontWeight: 700, letterSpacing: "-0.02em" }}>{active.overall}</span>
-            <span className="h1-label-sm text-[#444748] uppercase tracking-wider">Readiness</span>
+            <span style={{ fontSize: 68, lineHeight: 1, fontWeight: 700, letterSpacing: "-0.02em", color: "#1a1c1c" }}>{Math.round(activeMetricValue)}</span>
           </div>
         </div>
         {/* Toggle */}
@@ -119,6 +139,62 @@ export default function ReadinessWidget() {
             </button>
           ))}
         </div>
+        <div className="flex gap-1 mt-2 mb-3 justify-center rounded-full px-1 py-1 w-full max-w-xs" style={{ background: "rgb(244, 244, 246)" }}>
+          {([
+            { key: "overall",   label: "Overall",   color: "#2653d4" },
+            { key: "recovery",  label: "Recovery",  color: "#7c3aed" },
+            { key: "hydration", label: "Hydration", color: "#0891b2" },
+            { key: "energy",    label: "Energy",    color: "#f59e0b" },
+            { key: "mobility",  label: "Mobility",  color: "#16a34a" },
+          ] as { key: typeof selectedMetric; label: string; color: string }[]).map(m => (
+            <button
+              key={m.key}
+              onClick={() => setSelectedMetric(m.key)}
+              className="flex-1 rounded-full font-semibold transition-all whitespace-nowrap"
+              style={{
+                fontSize: 10,
+                padding: "5px 2px",
+                background: selectedMetric === m.key ? m.color : "transparent",
+                color: selectedMetric === m.key ? "#fff" : "rgb(107, 116, 128)",
+              }}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+        {selectedMetric !== "overall" && (() => {
+          const details: Record<string, { color: string; desc: string; drivers: string[]; tip: string }> = {
+            recovery:  { color: "#7c3aed", desc: "How well your body has bounced back.", drivers: ["Sleep quality & duration", "Muscle soreness level", "Hydration & injury status", "Recovery habits (foam roll, cold shower, walk)"], tip: "Sleep and foam rolling have the biggest impact here." },
+            hydration: { color: "#0891b2", desc: "Your fluid balance and hydration status.", drivers: ["Litres of water logged today", "Urine colour (clear = good)", "Subjective hydration quality", "Check-in self-rating"], tip: "Log your water intake to get an accurate score." },
+            energy:    { color: "#f59e0b", desc: "Your fuel and readiness to perform.", drivers: ["Check-in energy level", "Sleep quality (sleep debt tanks energy)", "Nutrition quality & protein intake", "Post-match energy logged in review"], tip: "Protein-rich meals and good sleep move this the most." },
+            mobility:  { color: "#16a34a", desc: "Joint freedom and movement quality.", drivers: ["Soreness level (primary driver)", "Injury status", "Game activity this week", "Mobility habits (dynamic warm-up, foam roll, walk)"], tip: "10 min of daily mobility adds up fast over a week." },
+          };
+          const d = details[selectedMetric];
+          if (!d) return null;
+          return (
+            <div className="mt-1 mb-3 w-full max-w-xs rounded-2xl overflow-hidden text-left" style={{ background: d.color + "0d", border: `1px solid ${d.color}22` }}>
+              <div className="px-4 pt-3 pb-1 flex items-center justify-between">
+                <p className="text-[12px] font-bold" style={{ color: d.color }}>{d.desc}</p>
+                <span className="text-[18px] font-bold" style={{ color: d.color }}>{Math.round(activeMetricValue)}</span>
+              </div>
+              <div className="px-4 pb-1">
+                <div className="h-1 rounded-full overflow-hidden" style={{ background: d.color + "22" }}>
+                  <div className="h-full rounded-full" style={{ width: `${activeMetricValue}%`, background: d.color }} />
+                </div>
+              </div>
+              <div className="px-4 pt-2 pb-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#8a9096] mb-1.5">What drives it</p>
+                {d.drivers.map((dr, i) => (
+                  <div key={i} className="flex items-start gap-1.5 mb-1">
+                    <span className="text-[10px] mt-0.5 flex-shrink-0" style={{ color: d.color }}>·</span>
+                    <span className="text-[12px] text-[#4a5050] leading-snug">{dr}</span>
+                  </div>
+                ))}
+                <p className="text-[11px] font-semibold mt-2" style={{ color: d.color }}>💡 {d.tip}</p>
+              </div>
+            </div>
+          );
+        })()}
         <p className="text-[17px] leading-[26px] text-[#444748] px-4 mb-4">
           {active.overall >= 85
             ? "Optimal recovery achieved. You're primed for high-intensity movement today."
@@ -133,12 +209,12 @@ export default function ReadinessWidget() {
             <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
             <polyline points="17 6 23 6 23 12"/>
           </svg>
-          <span className="text-[13px] font-semibold text-[#1a1c1c]">Improve</span>
+          <span className="text-[13px] font-semibold text-[#1a1c1c]">Log your info <span style={{ color: "#ef4444" }}>({logsToday}/4)</span></span>
         </button>
       </section>
 
       {/* Daily Check-In + Metrics (connected) */}
-      <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden mb-4">
+      {!hideCard && <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 overflow-hidden mb-4">
         {checkInDone ? (
           <button
             onClick={() => setCheckInOpen(true)}
@@ -219,7 +295,7 @@ export default function ReadinessWidget() {
             <path d="M9 18l6-6-6-6" />
           </svg>
         </button>
-      </div>
+      </div>}
 
       {/* Improve bottom sheet */}
       {improveOpen && (() => {
