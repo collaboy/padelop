@@ -390,12 +390,35 @@ export default function HomePage() {
             } else if (dayType === "training") { msg = "Training day. Make sure you're fuelled, warmed up, and ready to work on your patterns.";
             } else { msg = "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy."; }
             return (
-              <div className="-mx-5 border-b border-[var(--border)] bg-white px-5 py-3 text-center mb-4">
+              <div className="-mx-5 px-5 py-3 text-center mb-4">
                 <p className="text-[22px] font-bold text-[#1a1c1c] leading-snug mb-0.5" style={{ fontFamily: "var(--font-hanken)" }}>Good {tod}.</p>
                 <p className="text-[14px] text-[#3a4550] leading-snug">{msg}</p>
               </div>
             );
           })()}
+
+          {/* Score ring + Improve Score card */}
+          <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 flex flex-col items-center py-5 mb-4">
+            {editedData.time && now ? (() => {
+              const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+              const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
+              const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+              return <p className="text-[15px] font-semibold text-[#1a1c1c] mb-4">Next Match · <span className="text-[#2653d4]">{label} {editedData.time}</span></p>;
+            })() : (
+              <button onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }} className="text-[13px] font-semibold text-[#5a7055] mb-4 active:opacity-60">Add your next match</button>
+            )}
+            <ScoreRing />
+            <button onClick={() => setFabOpen(true)} className="flex items-center gap-2 px-4 py-2 mt-4 rounded-full bg-[#f4f4f4] active:opacity-60 transition-opacity">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                <polyline points="17 6 23 6 23 12" />
+              </svg>
+              <span className="text-[15px] font-semibold text-[#1a1c1c]">Improve Score</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e9196" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </button>
+          </div>
 
           {/* Horizontal day timeline */}
           {(() => {
@@ -599,29 +622,6 @@ export default function HomePage() {
           <div style={{ height: 300 }} />
 
           <Link href="/today" className="block text-center mb-2 text-[11px] font-bold tracking-widest uppercase text-[#5a7055] active:opacity-60">From your schedule</Link>
-
-          {/* Score ring + Improve Score card */}
-          <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 flex flex-col items-center py-5 mb-4">
-            {editedData.time && now ? (() => {
-              const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-              const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
-              const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-              return <p className="text-[15px] font-semibold text-[#1a1c1c] mb-4">Next Match · <span className="text-[#2653d4]">{label} {editedData.time}</span></p>;
-            })() : (
-              <button onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }} className="text-[13px] font-semibold text-[#5a7055] mb-4 active:opacity-60">Add your next match</button>
-            )}
-            <ScoreRing />
-            <button onClick={() => setFabOpen(true)} className="flex items-center gap-2 px-4 py-2 mt-4 rounded-full bg-[#f4f4f4] active:opacity-60 transition-opacity">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                <polyline points="17 6 23 6 23 12" />
-              </svg>
-              <span className="text-[15px] font-semibold text-[#1a1c1c]">Improve Score</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e9196" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </button>
-          </div>
 
           {/* Score gauge card */}
           <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 px-5 py-5 mb-4">
