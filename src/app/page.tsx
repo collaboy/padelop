@@ -488,7 +488,7 @@ export default function HomePage() {
             <ScoreGauge />
             <div className="flex items-baseline gap-2 mt-2">
               <p className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96]">Match Readiness</p>
-              <span className="text-[11px] font-bold text-[#2653d4]">{Math.round(scores.overall / 10)}/10</span>
+              <span className="text-[11px] font-bold text-[#2653d4]">{Math.round(scores.overall)}</span>
             </div>
             <button onClick={() => setFabOpen(true)} className="flex items-center gap-2 px-4 py-2 mt-4 rounded-full bg-[#f4f4f4] active:opacity-60 transition-opacity">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
