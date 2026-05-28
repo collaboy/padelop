@@ -87,6 +87,14 @@ export default function HomePage() {
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const dragSlot = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const logCameraRef = useRef<HTMLInputElement>(null);
+  const logUploadRef = useRef<HTMLInputElement>(null);
+  const [logMethod, setLogMethod] = useState<"camera" | "upload" | "wizard" | null>(null);
+  const [customCategories, setCustomCategories] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem("padelop:custom-categories") || "[]"); } catch { return []; }
+  });
+  const [addingNewCat, setAddingNewCat] = useState(false);
+  const [newCatName, setNewCatName] = useState("");
 
   const handleSlotTap = (idx: number) => {
     if (selectedSlot === null) { setSelectedSlot(idx); return; }
@@ -960,6 +968,28 @@ export default function HomePage() {
 
         </main>
 
+        {/* FAB */}
+        {!fabOpen && (
+          <button
+            onClick={() => { setFabLogOnly(false); setFabOpen(true); }}
+            className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
+            style={{
+              bottom: "calc(5rem + env(safe-area-inset-bottom))",
+              right: "1.25rem",
+              width: 56,
+              height: 56,
+              borderRadius: 28,
+              background: "#2653d4",
+              boxShadow: "0 4px 16px rgba(38,83,212,0.35)",
+            }}
+            aria-label="Log activity"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
+        )}
+
         {/* Daily Log bottom sheet */}
         {fabOpen && (() => {
           const todayYMD = new Date().toISOString().slice(0, 10);
@@ -1018,77 +1048,160 @@ export default function HomePage() {
           const weakest = [...metricBreakdown].sort((a, b) => a.value - b.value)[0];
 
           return (
-            <div className="fixed inset-0 z-[60] flex items-end justify-center px-4 pb-4" onClick={() => { setFabOpen(false); setFabLogOnly(false); }}>
+            <div className="fixed inset-0 z-[60] flex items-center justify-center px-4 py-8" onClick={() => { setFabOpen(false); setFabLogOnly(false); setLogMethod(null); setAddingNewCat(false); setNewCatName(""); }}>
               <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
               <div
-                className="h1-font relative w-full max-w-lg bg-white rounded-[28px] flex flex-col"
-                style={{ animation: "speedDialUp 0.25s cubic-bezier(0.22,1,0.36,1)", maxHeight: "90vh" }}
+                className="h1-font relative w-full max-w-lg bg-white rounded-[28px] flex flex-col overflow-hidden"
+                style={{ animation: "speedDialUp 0.25s cubic-bezier(0.22,1,0.36,1)", maxHeight: "85vh" }}
                 onClick={e => e.stopPropagation()}
               >
                 <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4 mb-2 flex-shrink-0" />
-                <div className="overflow-y-auto flex-1">
+                <div className="overflow-y-auto flex-1 overscroll-contain">
                 {/* Score header */}
-                {!fabLogOnly && <div className="px-6 pt-2 pb-5" style={{ borderBottom: "1px solid #f0f0f0" }}>
-                  <div className="flex items-baseline gap-3 mb-1">
-                    <span className="text-[48px] font-bold leading-none text-[#1a1c1c]">{Math.round(scores.overall)}</span>
-                    <span className="text-[15px] font-semibold text-[#4a5050]">Match Readiness</span>
+                {!fabLogOnly && <div className="px-6 pt-2 pb-3" style={{ borderBottom: "1px solid #f0f0f0" }}>
+                  <div className="flex items-baseline gap-2.5">
+                    <span className="text-[32px] font-bold leading-none text-[#1a1c1c]">{Math.round(scores.overall)}</span>
+                    <span className="text-[13px] font-semibold text-[#4a5050]">Match Readiness</span>
                   </div>
-                  <p className="text-[14px] text-[#4a5050] leading-snug">
-                    {scores.overall >= 85
-                      ? "You're in great shape today. Keep up your routine."
-                      : scores.overall >= 70
-                      ? `Your ${weakest.label.toLowerCase()} is pulling the score down — log it to update.`
-                      : `Focus on ${weakest.label.toLowerCase()} first — it has the biggest impact today.`}
-                  </p>
                 </div>}
 
-                {/* Metric breakdown */}
-                {!fabLogOnly && <div className="px-6 pt-4 pb-2">
-                  <p className="text-[10px] font-bold tracking-widest uppercase text-[#5a7055] mb-3">How it's calculated</p>
-                  <div className="flex flex-col gap-3">
-                    {metricBreakdown.map(m => (
-                      <div key={m.label}>
-                        <div className="flex items-center justify-between mb-1">
-                          <div>
-                            <span className="text-[13px] font-semibold text-[#1a1c1c]">{m.label}</span>
-                            <span className="text-[12px] text-[#8a9096] ml-2">{m.desc}</span>
-                          </div>
-                          <span className="text-[14px] font-bold" style={{ color: m.color }}>{Math.round(m.value)}</span>
+                {/* Step 1 — input method picker */}
+                {!logMethod && (
+                  <div className="px-5 pt-4 pb-3">
+                    <p className="text-[10px] font-bold tracking-widest uppercase text-[#8a9096] mb-3">Log something to update your score</p>
+                    <div className="grid grid-cols-3 gap-2.5">
+                      <button onClick={() => {
+                          const input = document.createElement("input");
+                          input.type = "file";
+                          input.accept = "image/*";
+                          input.setAttribute("capture", "environment");
+                          input.click();
+                        }} className="flex flex-col items-center gap-2 py-4 rounded-2xl active:scale-95 transition-transform" style={{ background: "#f4f6ff" }}>
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "#2653d4" }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+                          </svg>
                         </div>
-                        <div className="h-1.5 rounded-full bg-[#f0f0f0] overflow-hidden">
-                          <div className="h-full rounded-full transition-all" style={{ width: `${m.value}%`, background: m.color }} />
+                        <span className="text-[12px] font-semibold text-[#2653d4]">Camera</span>
+                      </button>
+                      <button onClick={() => logUploadRef.current?.click()} className="flex flex-col items-center gap-2 py-4 rounded-2xl active:scale-95 transition-transform" style={{ background: "#f4f6ff" }}>
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "#2653d4" }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                          </svg>
                         </div>
+                        <span className="text-[12px] font-semibold text-[#2653d4]">Upload</span>
+                      </button>
+                      <button onClick={() => setLogMethod("wizard")} className="flex flex-col items-center gap-2 py-4 rounded-2xl active:scale-95 transition-transform" style={{ background: "#f4f6ff" }}>
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "#2653d4" }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M15 3l-4 8h6l-4 10"/><path d="M5 12h2"/><path d="M17 12h2"/><path d="M12 5v-2"/><path d="M12 21v-2"/>
+                          </svg>
+                        </div>
+                        <span className="text-[12px] font-semibold text-[#2653d4]">Wizard</span>
+                      </button>
+                    </div>
+                    <input ref={logUploadRef} type="file" accept="image/*" className="hidden" onChange={() => {}} />
+                  </div>
+                )}
+
+                {/* Step 2 — wizard category picker */}
+                {logMethod === "wizard" && (() => {
+                  const builtinCategories = [
+                    { label: "Daily Check-in", sub: "Sleep · energy · soreness", color: "#4169e1", done: ciDone,
+                      icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4169e1" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
+                      action: () => { setFabOpen(false); setFabLogOnly(false); setLogMethod(null); setCheckInOpen(true); },
+                    },
+                    { label: "Hydration", sub: "Water intake", color: "#0891b2", done: hydroDone,
+                      icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0891b2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C12 2 5 10 5 15a7 7 0 0 0 14 0c0-5-7-13-7-13z"/></svg>,
+                      action: () => { setFabOpen(false); setFabLogOnly(false); setLogMethod(null); setHydroOpen(true); },
+                    },
+                    { label: "Nutrition", sub: "Protein & recovery fuel", color: "#ea580c", done: nutriDone,
+                      icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>,
+                      action: () => { setFabOpen(false); setFabLogOnly(false); setLogMethod(null); setNutritionOpen(true); },
+                    },
+                    { label: "Match Review", sub: "Last match performance", color: "#7c3aed", done: reviewDone,
+                      icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 14c1 2 6 2 8 0"/><circle cx="9" cy="9.5" r="0.8" fill="#7c3aed" stroke="none"/><circle cx="15" cy="9.5" r="0.8" fill="#7c3aed" stroke="none"/></svg>,
+                      action: () => { setFabOpen(false); setFabLogOnly(false); setLogMethod(null); setMatchListOpen(true); },
+                    },
+                  ];
+
+                  function handleCustomCat(name: string) {
+                    if (logMethod === "camera") { logCameraRef.current?.click(); }
+                    else if (logMethod === "upload") { logUploadRef.current?.click(); }
+                    const todayYMD = new Date().toISOString().slice(0, 10);
+                    try {
+                      const existing = JSON.parse(localStorage.getItem("padelop:custom-logs") || "[]");
+                      existing.unshift({ category: name, method: logMethod, ts: new Date().toISOString(), date: todayYMD });
+                      localStorage.setItem("padelop:custom-logs", JSON.stringify(existing));
+                      window.dispatchEvent(new Event("storage"));
+                    } catch {}
+                    setFabOpen(false); setFabLogOnly(false); setLogMethod(null);
+                  }
+
+                  function saveNewCategory() {
+                    const name = newCatName.trim();
+                    if (!name) return;
+                    const updated = [...customCategories, name];
+                    setCustomCategories(updated);
+                    localStorage.setItem("padelop:custom-categories", JSON.stringify(updated));
+                    setAddingNewCat(false);
+                    setNewCatName("");
+                    handleCustomCat(name);
+                  }
+
+                  return (
+                    <div className="px-5 pt-4 pb-3">
+                      {/* Header row with back button */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <button onClick={() => { setLogMethod(null); setAddingNewCat(false); setNewCatName(""); }} className="w-7 h-7 rounded-full flex items-center justify-center active:bg-[#f0f0f0]" style={{ background: "#f4f4f6" }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.5" strokeLinecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+                        </button>
+                        <p className="text-[10px] font-bold tracking-widest uppercase text-[#8a9096]">
+                          Wizard
+                        </p>
                       </div>
-                    ))}
-                  </div>
-                </div>}
 
-                {/* Logging actions */}
-                <div className="px-6 pt-5 pb-2">
-                  <p className="text-[10px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Log to update your score</p>
-                  <p className="text-[12px] text-[#8a9096] mb-3">Scores recalculate instantly when you log.</p>
-                </div>
-                {logItems.map((row) => (
-                  <button
-                    key={row.label}
-                    onClick={row.action}
-                    className="w-full flex items-center gap-4 px-6 py-3.5 active:bg-[#f9f9f9] transition-colors"
-                    style={{ borderTop: "1px solid #f4f4f4" }}
-                  >
-                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: row.color + "14" }}>
-                      {row.icon}
+                      {/* Built-in categories */}
+                      <div className="flex flex-col rounded-2xl overflow-hidden" style={{ border: "1px solid #f0f0f0" }}>
+                        {builtinCategories.map((cat, i) => (
+                          <button key={cat.label} onClick={cat.action}
+                            className="flex items-center gap-3 px-4 py-3 active:bg-[#f9f9f9] transition-colors text-left"
+                            style={{ borderTop: i > 0 ? "1px solid #f4f4f4" : "none" }}
+                          >
+                            <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: cat.color + "14" }}>
+                              {cat.icon}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[13px] font-semibold text-[#1a1c1c]">{cat.label}</p>
+                              <p className="text-[11px] text-[#8a9096]">{cat.sub}</p>
+                            </div>
+                            {cat.done && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#caecbc] text-[#496640] flex-shrink-0">Done</span>}
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+                          </button>
+                        ))}
+
+                        {/* Custom categories */}
+                        {customCategories.map((name, i) => (
+                          <button key={name} onClick={() => handleCustomCat(name)}
+                            className="flex items-center gap-3 px-4 py-3 active:bg-[#f9f9f9] transition-colors text-left"
+                            style={{ borderTop: "1px solid #f4f4f4" }}
+                          >
+                            <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#f4f4f6" }}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[13px] font-semibold text-[#1a1c1c]">{name}</p>
+                              <p className="text-[11px] text-[#8a9096]">Custom category</p>
+                            </div>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+                          </button>
+                        ))}
+
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0 text-left">
-                      <p className="text-[14px] font-semibold text-[#1a1c1c]">{row.label}</p>
-                      <p className="text-[11px] text-[#8a9096] mt-0.5">→ {row.affects}</p>
-                    </div>
-                    {row.done ? (
-                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#caecbc] text-[#496640] whitespace-nowrap flex-shrink-0">{row.badge}</span>
-                    ) : (
-                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#f4f4f4] text-[#4a5050] flex-shrink-0">Log</span>
-                    )}
-                  </button>
-                ))}
+                  );
+                })()}
 
                 <div className="pb-8" />
                 </div>{/* end scrollable */}
