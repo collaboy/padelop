@@ -34,6 +34,7 @@ export default function HomePage() {
   const [allTimeScores, setAllTimeScores] = useState<Scores>({ overall: 65, recovery: 60, hydration: 52, energy: 58, mobility: 58 });
   const [dayTypeOverride, setDayTypeOverride] = useState<"recovery" | "training" | "rest" | null>(null);
   const [selectedScheduleIdx, setSelectedScheduleIdx] = useState<number | null>(null);
+  const [selectedMetric, setSelectedMetric] = useState<string>("overall");
   const [now, setNow] = useState<Date | null>(null);
   const [matchReviewOpen, setMatchReviewOpen] = useState(false);
   const [matchReview, setMatchReview] = useState({ feeling: "", result: "", opponent: "", energy: "", injury: "", wellDone: [] as string[], improved: [] as string[], mentalBefore: "", mentalDuring: "", mentalAfter: "" });
@@ -407,7 +408,32 @@ export default function HomePage() {
             })() : (
               <button onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }} className="text-[13px] font-semibold text-[#5a7055] mb-4 active:opacity-60">Add your next match</button>
             )}
-            <ScoreRing />
+            <ScoreRing metric={selectedMetric} />
+            {/* Metric pill selector */}
+            <div className="flex gap-1 mt-3 mx-4 justify-center rounded-full px-1 py-1" style={{ background: "#f0f0f0" }}>
+              {[
+                { key: "overall",   label: "Overall",   color: "#2653d4" },
+                { key: "recovery",  label: "Recovery",  color: "#7c3aed" },
+                { key: "hydration", label: "Hydration", color: "#0891b2" },
+                { key: "energy",    label: "Energy",    color: "#f59e0b" },
+                { key: "mobility",  label: "Mobility",  color: "#16a34a" },
+              ].map(m => (
+                <button
+                  key={m.key}
+                  onClick={() => setSelectedMetric(m.key)}
+                  className="rounded-full font-semibold transition-colors whitespace-nowrap"
+                  style={{
+                    fontSize: 10,
+                    padding: "4px 8px",
+                    ...(selectedMetric === m.key
+                      ? { background: m.color, color: "#fff" }
+                      : { background: "transparent", color: "#3a4550" })
+                  }}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
             <button onClick={() => setFabOpen(true)} className="flex items-center gap-2 px-4 py-2 mt-4 rounded-full bg-[#f4f4f4] active:opacity-60 transition-opacity">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
@@ -591,22 +617,18 @@ export default function HomePage() {
             };
             const pendingPts = SCHEDULE_PTS[item.title] ?? 0;
             return (
-              <div className="mb-1">
-                <div className="flex justify-center">
-                  <div style={{ width: 0, height: 0, borderLeft: "11px solid transparent", borderRight: "11px solid transparent", borderBottom: `11px solid ${item.color}` }} />
-                </div>
               <button
-                  className="w-full bg-white rounded-[24px] px-5 py-3 flex items-center gap-3 active:opacity-60 transition-opacity text-left"
+                  className="w-full bg-white rounded-[24px] px-5 py-5 flex items-center gap-4 active:opacity-60 transition-opacity text-left"
                   style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${item.color}` }}
                   onClick={() => detail && setScheduleModal({ title: item.title, subtitle: item.subtitle, detail, color: item.color })}
                 >
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: item.color + "18" }}>
-                    <div className="w-3 h-3 rounded-full animate-breathe" style={{ background: item.color, "--glow": item.color } as React.CSSProperties} />
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: item.color + "18" }}>
+                    <div className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: item.color, "--glow": item.color } as React.CSSProperties} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-bold tracking-widests uppercase text-[#5a7055] mb-0.5">Do this now</p>
-                    <p className="text-[16px] font-semibold text-[#1a1c1c] leading-tight">{item.title}</p>
-                    {item.subtitle && <p className="text-[13px] text-[#4a5050] mt-0.5 leading-snug">{item.subtitle}</p>}
+                    <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Do this now</p>
+                    <p className="text-[20px] font-bold text-[#1a1c1c] leading-tight">{item.title}</p>
+                    {item.subtitle && <p className="text-[13px] text-[#4a5050] mt-1 leading-snug">{item.subtitle}</p>}
                   </div>
                   {detail && (
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -614,7 +636,6 @@ export default function HomePage() {
                     </svg>
                   )}
               </button>
-              </div>
             );
           })()}
 
