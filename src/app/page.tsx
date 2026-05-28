@@ -34,6 +34,7 @@ export default function HomePage() {
   const [allTimeScores, setAllTimeScores] = useState<Scores>({ overall: 65, recovery: 60, hydration: 52, energy: 58, mobility: 58 });
   const [dayTypeOverride, setDayTypeOverride] = useState<"recovery" | "training" | "rest" | null>(null);
   const [selectedMetric, setSelectedMetric] = useState<string>("overall");
+  const [weekExpanded, setWeekExpanded] = useState(false);
   const [now, setNow] = useState<Date | null>(null);
   const [matchReviewOpen, setMatchReviewOpen] = useState(false);
   const [matchReview, setMatchReview] = useState({ feeling: "", result: "", opponent: "", energy: "", injury: "", wellDone: [] as string[], improved: [] as string[], mentalBefore: "", mentalDuring: "", mentalAfter: "" });
@@ -342,11 +343,279 @@ export default function HomePage() {
             } else { msg = "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy."; }
             return (
               <div className="mb-5">
-                <p className="text-[22px] font-bold text-[#1a1c1c] leading-snug mb-0.5" style={{ fontFamily: "var(--font-hanken)" }}>Good {tod}.</p>
-                <p className="text-[14px] text-[#3a4550] leading-snug">{msg}</p>
+                <p className="text-[22px] font-bold text-[#1a1c1c] leading-snug" style={{ fontFamily: "var(--font-hanken)" }}>Good {tod}.</p>
               </div>
             );
           })()}
+
+          <p className="text-[15px] font-bold tracking-widest uppercase text-[#1a1c1c] text-center leading-snug mb-2" style={{ fontFamily: "var(--font-hanken)" }}>Here&apos;s What&apos;s Going On</p>
+
+          {/* Today + Readiness hero card */}
+          {(() => {
+            const dayTypeMeta: Record<string, { label: string; color: string; bg: string; border: string }> = {
+              match:    { label: "Game Day",     color: "#fff", bg: "#16a34a", border: "#16a34a" },
+              recovery: { label: "Recovery Day", color: "#fff", bg: "#7c3aed", border: "#7c3aed" },
+              training: { label: "Training Day", color: "#fff", bg: "#2563eb", border: "#2563eb" },
+              rest:     { label: "Rest Day",     color: "#fff", bg: "#64748b", border: "#64748b" },
+            };
+            const meta = dayTypeMeta[dayType] ?? dayTypeMeta.rest;
+            const todayStr = now ? `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}` : "";
+            const { logsToday, logLabel } = (() => {
+              try {
+                let count = 0;
+                const ci = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null");
+                if (ci?.date === todayStr) count++;
+                const hyd = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]")[0];
+                if (hyd?.ts.slice(0, 10) === todayStr) count++;
+                const nut = JSON.parse(localStorage.getItem("padelop:nutrition-logs") || "[]")[0];
+                if (nut?.ts.slice(0, 10) === todayStr) count++;
+                const rev = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]")[0];
+                if (rev?.ts.slice(0, 10) === todayStr) count++;
+                const label = count === 0
+                  ? "How are you feeling today?"
+                  : count >= 4
+                  ? "All caught up — great work"
+                  : "Add more info!";
+                return { logsToday: count, logLabel: label };
+              } catch { return { logsToday: 0, logLabel: "How are you feeling today?" }; }
+            })();
+            const allLogged = logsToday >= 4;
+            const weekday = now ? now.toLocaleDateString(undefined, { weekday: "long" }) : "";
+            const dateShort = now ? now.toLocaleDateString(undefined, { month: "long", day: "numeric" }) : "";
+            const venue = [editedData.club, editedData.court ? `Court ${editedData.court}` : ""].filter(Boolean).join(" · ");
+            const players = [editedData.player_1, editedData.player_2, editedData.player_3, editedData.player_4].filter(Boolean);
+            return (
+              <div className="rounded-[28px] mb-2 overflow-hidden" style={{ background: "#fff", boxShadow: "0 2px 24px rgba(38,83,212,0.08)", border: "1px solid #e8e8e8" }}>
+                {/* Header row */}
+                <div className="flex items-center justify-between px-5 pt-5 pb-3">
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-[18px] font-bold leading-none text-[#1a1c1c]" style={{ fontFamily: "var(--font-hanken)" }}>{weekday}</p>
+                    <p className="text-[13px] text-[#8a9096] font-medium">{dateShort}</p>
+                  </div>
+                  {dayType === "match" && editedData.time ? (
+                    <button
+                      className="flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full tracking-wide active:opacity-70 transition-opacity"
+                      style={{ background: meta.bg, color: meta.color, border: `1px solid ${meta.border}` }}
+                      onClick={() => setMatchCardExpanded(e => !e)}
+                    >
+                      {meta.label}
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"
+                        style={{ transform: matchCardExpanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </button>
+                  ) : (
+                    <span className="text-[11px] font-bold px-3 py-1.5 rounded-full tracking-wide" style={{ background: meta.bg, color: meta.color, border: `1px solid ${meta.border}` }}>{meta.label}</span>
+                  )}
+                </div>
+
+                {/* Match strip — expands when pill is clicked */}
+                {dayType === "match" && editedData.time && matchCardExpanded && (
+                  <button className="mx-4 mb-3 px-4 py-3 rounded-2xl flex items-center gap-3 w-[calc(100%-2rem)] active:opacity-60 transition-opacity text-left" style={{ background: "#f4f4f6", border: "1px solid #e8e8e8" }} onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4b5563" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-bold text-[#1a1c1c]">
+                        {editedData.time}
+                        {!countdown.past && (countdown.h > 0 || countdown.m > 0) ? ` · ${countdown.h > 0 ? `${countdown.h}h ${countdown.m}m` : `${countdown.m}m`} to go` : countdown.past ? " · Underway" : ""}
+                      </p>
+                      {(venue || players.length > 0) && (
+                        <p className="text-[11px] text-[#6b7480] mt-0.5 truncate">{[venue, players.join(", ")].filter(Boolean).join(" · ")}</p>
+                      )}
+                    </div>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  </button>
+                )}
+
+                {/* Divider */}
+                <div style={{ height: 1, background: "#f0f0f0", margin: "0 0" }} />
+
+                {/* Ring section */}
+                <div className="flex flex-col items-center pt-4 pb-4 px-5">
+                  {(() => {
+                    const h = now ? now.getHours() : 12;
+                    let ctxMsg = "";
+                    if (dayType === "match") {
+                      const matchTimeStr = editedData.time || "18:30";
+                      const [mH, mM] = matchTimeStr.split(":").map(Number);
+                      const diffMins = mH * 60 + mM - h * 60 - (now ? now.getMinutes() : 0);
+                      if (diffMins > 180) { const hrs = Math.floor(diffMins / 60); ctxMsg = `Match in ${hrs}h. Stay light, hydrate steadily, and eat your pre-game meal ${hrs > 4 ? "a few hours before" : "soon"}.`; }
+                      else if (diffMins > 60) { ctxMsg = "Time to warm up. Dynamic activation, no heavy food — just sip water and focus."; }
+                      else if (diffMins > 0) { ctxMsg = "Almost game time. Breathe, visualise, and trust your prep."; }
+                      else { ctxMsg = "Great match today. Prioritise recovery — stretch, eat protein, and rest up."; }
+                    } else if (dayType === "recovery") { ctxMsg = "Recovery day. Keep moving gently, drink plenty of water, and get your protein in.";
+                    } else if (dayType === "training") { ctxMsg = "Training day. Make sure you're fuelled, warmed up, and ready to work on your patterns.";
+                    } else { ctxMsg = "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy."; }
+                    return (
+                      <div className="w-full pb-4 mb-4" style={{ borderBottom: "1px solid #f0f0f0" }}>
+                        <p className="text-[13px] text-[#4a5050] leading-snug text-center">{ctxMsg}</p>
+                      </div>
+                    );
+                  })()}
+                  {!editedData.time && (
+                    <button onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }} className="text-[12px] font-semibold text-[#2653d4] mb-3 active:opacity-60 px-3 py-1.5 rounded-full" style={{ background: "#eef2ff", border: "1px solid #c5d0ff" }}>
+                      + Add next match
+                    </button>
+                  )}
+                  <p className="text-[11px] font-bold tracking-widest uppercase text-[#8a9096] mb-2">Your Match Readiness</p>
+                  <ScoreRing metric={selectedMetric} />
+                  <div className="flex gap-1 mt-4 justify-center rounded-full px-1 py-1 w-full max-w-xs" style={{ background: "#f4f4f6" }}>
+                    {[
+                      { key: "overall",   label: "Overall",   color: "#2653d4" },
+                      { key: "recovery",  label: "Recovery",  color: "#7c3aed" },
+                      { key: "hydration", label: "Hydration", color: "#0891b2" },
+                      { key: "energy",    label: "Energy",    color: "#f59e0b" },
+                      { key: "mobility",  label: "Mobility",  color: "#16a34a" },
+                    ].map(m => (
+                      <button
+                        key={m.key}
+                        onClick={() => setSelectedMetric(m.key)}
+                        className="flex-1 rounded-full font-semibold transition-all whitespace-nowrap"
+                        style={{
+                          fontSize: 10,
+                          padding: "5px 2px",
+                          ...(selectedMetric === m.key
+                            ? { background: m.color, color: "#fff" }
+                            : { background: "transparent", color: "#6b7480" })
+                        }}
+                      >
+                        {m.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Metric detail popdown */}
+                  {selectedMetric !== "overall" && (() => {
+                    const details: Record<string, { color: string; desc: string; drivers: string[]; tip: string }> = {
+                      recovery:  { color: "#7c3aed", desc: "How well your body has bounced back.", drivers: ["Sleep quality & duration", "Muscle soreness level", "Hydration & injury status", "Recovery habits (foam roll, cold shower, walk)"], tip: "Sleep and foam rolling have the biggest impact here." },
+                      hydration: { color: "#0891b2", desc: "Your fluid balance and hydration status.", drivers: ["Litres of water logged today", "Urine colour (clear = good)", "Subjective hydration quality", "Check-in self-rating"], tip: "Log your water intake to get an accurate score." },
+                      energy:    { color: "#f59e0b", desc: "Your fuel and readiness to perform.", drivers: ["Check-in energy level", "Sleep quality (sleep debt tanks energy)", "Nutrition quality & protein intake", "Post-match energy logged in review"], tip: "Protein-rich meals and good sleep move this the most." },
+                      mobility:  { color: "#16a34a", desc: "Joint freedom and movement quality.", drivers: ["Soreness level (primary driver)", "Injury status", "Game activity this week", "Mobility habits (dynamic warm-up, foam roll, walk)"], tip: "10 min of daily mobility adds up fast over a week." },
+                    };
+                    const d = details[selectedMetric];
+                    if (!d) return null;
+                    const score = scores[selectedMetric as keyof Scores] ?? 65;
+                    return (
+                      <div className="mt-3 w-full rounded-2xl overflow-hidden" style={{ background: d.color + "0d", border: `1px solid ${d.color}22` }}>
+                        <div className="px-4 pt-3 pb-1 flex items-center justify-between">
+                          <p className="text-[12px] font-bold" style={{ color: d.color }}>{d.desc}</p>
+                          <span className="text-[18px] font-bold" style={{ color: d.color }}>{Math.round(score)}</span>
+                        </div>
+                        <div className="px-4 pb-1">
+                          <div className="h-1 rounded-full overflow-hidden" style={{ background: d.color + "22" }}>
+                            <div className="h-full rounded-full" style={{ width: `${score}%`, background: d.color }} />
+                          </div>
+                        </div>
+                        <div className="px-4 pt-2 pb-3">
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-[#8a9096] mb-1.5">What drives it</p>
+                          {d.drivers.map((dr, i) => (
+                            <div key={i} className="flex items-start gap-1.5 mb-1">
+                              <span className="text-[10px] mt-0.5 flex-shrink-0" style={{ color: d.color }}>·</span>
+                              <span className="text-[12px] text-[#4a5050] leading-snug">{dr}</span>
+                            </div>
+                          ))}
+                          <p className="text-[11px] font-semibold mt-2" style={{ color: d.color }}>💡 {d.tip}</p>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* Check-in footer */}
+                <div style={{ borderTop: "1px solid #f0f0f0" }}>
+                  <button
+                    onClick={() => setFabOpen(true)}
+                    className="w-full flex items-center justify-between px-5 py-4 active:opacity-60 transition-opacity"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: allLogged ? "#eef2ff" : "#f4f4f6" }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={allLogged ? "#2653d4" : "#8a9096"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" />
+                        </svg>
+                      </div>
+                      <span className="text-[14px] font-semibold" style={{ color: allLogged ? "#2653d4" : "#4a5050" }}>
+                        {logLabel}
+                      </span>
+                    </div>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* This Week collapsible card */}
+          {(() => {
+            const todayW = now ?? new Date();
+            const todayYMDLocal = `${todayW.getFullYear()}-${String(todayW.getMonth()+1).padStart(2,"0")}-${String(todayW.getDate()).padStart(2,"0")}`;
+            const dow = (todayW.getDay() + 6) % 7;
+            const weekDays = Array.from({ length: 7 }, (_, i) => {
+              const d = new Date(todayW); d.setDate(todayW.getDate() - dow + i);
+              const ymd = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+              return { d, ymd, isToday: ymd === todayYMDLocal, isMatch: editedData.date === ymd, dayName: ["M","T","W","T","F","S","S"][i] };
+            });
+            let gameDays: string[] = [];
+            try { gameDays = JSON.parse(localStorage.getItem("padelop:game-days") || "[]"); } catch {}
+            return (
+              <div className="bg-white rounded-[24px] mb-4" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8" }}>
+                <button
+                  className="w-full flex items-center justify-between px-5 py-3.5 active:opacity-60 transition-opacity"
+                  onClick={() => setWeekExpanded(e => !e)}
+                >
+                  <p className="text-[13px] font-bold tracking-widest uppercase text-[#5a7055]">This Week</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-[12px] text-[#8a9096]">
+                      {todayW.toLocaleDateString(undefined, { month: "short", day: "numeric" })} — {weekDays[6].d.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                    </p>
+                    <svg
+                      width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a0a5aa" strokeWidth="2.5" strokeLinecap="round"
+                      style={{ transform: weekExpanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}
+                    >
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </div>
+                </button>
+                {weekExpanded && (
+                  <div className="px-4 pb-4 pt-1" style={{ borderTop: "1px solid #f4f4f4" }}>
+                    <div className="grid grid-cols-7 gap-1 pt-3">
+                      {weekDays.map(({ d, ymd, isToday, isMatch, dayName }) => {
+                        const isPast = ymd < todayYMDLocal;
+                        const isGameDay = gameDays.includes(ymd);
+                        const dotColor = isMatch ? "#1e3a1e" : isGameDay ? "#2653d4" : "#e2e2e2";
+                        return (
+                          <div key={ymd} className="flex flex-col items-center gap-1.5">
+                            <span className="text-[10px] font-bold" style={{ color: isToday ? "#2653d4" : "#a0a5aa" }}>{dayName}</span>
+                            <div
+                              className="w-8 h-8 rounded-full flex items-center justify-center"
+                              style={{
+                                background: isToday ? "#2653d4" : isMatch ? "#1e3a1e" : "transparent",
+                                border: isToday || isMatch ? "none" : "1.5px solid #e8e8e8",
+                              }}
+                            >
+                              <span className="text-[12px] font-bold" style={{ color: isToday || isMatch ? "#fff" : isPast ? "#c4c7c7" : "#1a1c1c" }}>
+                                {d.getDate()}
+                              </span>
+                            </div>
+                            <div className="w-1.5 h-1.5 rounded-full" style={{ background: isMatch || isGameDay ? dotColor : "transparent" }} />
+                            <span className="text-[9px] font-semibold text-center leading-tight" style={{ color: isMatch ? "#1e3a1e" : isGameDay ? "#2653d4" : "transparent" }}>
+                              {isMatch ? "Match" : isGameDay ? "Match" : "·"}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
+          <p className="text-[15px] font-bold tracking-widest uppercase text-[#1a1c1c] text-center leading-snug mb-2" style={{ fontFamily: "var(--font-hanken)" }}>Coach Says...</p>
 
           {/* Do this now */}
           {(() => {
@@ -446,53 +715,6 @@ export default function HomePage() {
                     )}
                 </button>
 
-                {/* Score ring + Improve Score card */}
-                <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 flex flex-col items-center py-5 mt-2">
-                  {editedData.time && now ? (() => {
-                    const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-                    const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
-                    const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-                    return <p className="text-[15px] font-semibold text-[#1a1c1c] mb-4">Next Match · <span className="text-[#2653d4]">{label} {editedData.time}</span></p>;
-                  })() : (
-                    <button onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }} className="text-[13px] font-semibold text-[#5a7055] mb-4 active:opacity-60">Add your next match</button>
-                  )}
-                  <ScoreRing metric={selectedMetric} />
-                  <div className="flex gap-1 mt-3 mx-4 justify-center rounded-full px-1 py-1" style={{ background: "#f0f0f0" }}>
-                    {[
-                      { key: "overall",   label: "Overall",   color: "#2653d4" },
-                      { key: "recovery",  label: "Recovery",  color: "#7c3aed" },
-                      { key: "hydration", label: "Hydration", color: "#0891b2" },
-                      { key: "energy",    label: "Energy",    color: "#f59e0b" },
-                      { key: "mobility",  label: "Mobility",  color: "#16a34a" },
-                    ].map(m => (
-                      <button
-                        key={m.key}
-                        onClick={() => setSelectedMetric(m.key)}
-                        className="rounded-full font-semibold transition-colors whitespace-nowrap"
-                        style={{
-                          fontSize: 10,
-                          padding: "4px 8px",
-                          ...(selectedMetric === m.key
-                            ? { background: m.color, color: "#fff" }
-                            : { background: "transparent", color: "#3a4550" })
-                        }}
-                      >
-                        {m.label}
-                      </button>
-                    ))}
-                  </div>
-                  <button onClick={() => setFabOpen(true)} className="flex items-center gap-2 px-4 py-2 mt-4 rounded-full active:opacity-60 transition-opacity" style={{ background: checkInDone ? "#f4f4f4" : "#fff0f0", border: checkInDone ? "none" : "1.5px solid #ef444460" }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                      <polyline points="17 6 23 6 23 12" />
-                    </svg>
-                    <span className="text-[15px] font-semibold text-[#1a1c1c]">Check-in to update score</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e9196" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M9 18l6-6-6-6" />
-                    </svg>
-                  </button>
-                </div>
-
                 {/* Today's schedule inline */}
                 <div className="bg-white rounded-[24px] mt-2" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8" }}>
                   <div className="px-5 pt-4 pb-1 flex items-center justify-between">
@@ -569,11 +791,9 @@ export default function HomePage() {
                   { label: "Sleep 7–9h tonight",      pts: 8, checked: sleep,    set: setSleep,    detail: "Training creates micro-damage that your body repairs during sleep. Consistent 7–9 hour nights let you absorb the session's adaptations and show up ready for the next one." },
                 ],
               };
-              const items = allItems[dayType];
-              const sorted = [...items.filter(i => !i.checked), ...items.filter(i => i.checked)];
+              const items = allItems[dayType as keyof typeof allItems] ?? allItems.rest;
               const doneCount = items.filter(i => i.checked).length;
               const total = items.length;
-              const visible = mustDoExpanded ? sorted : sorted;
               const title = dayType === "match" ? "Match Day Essentials" : dayType === "recovery" ? "Recovery Essentials" : dayType === "training" ? "Training Essentials" : "Rest Day Essentials";
               return (
                 <>
@@ -586,7 +806,7 @@ export default function HomePage() {
                     )}
                   </div>
                   <div className="px-5 pb-4 pt-2 flex flex-col gap-3.5">
-                    {visible.map(({ label, pts, checked, set, detail }) => (
+                    {items.map(({ label, pts, checked, set, detail }) => (
                       <div key={label} className="flex items-center gap-3" style={{ opacity: checked ? 0.5 : 1 }}>
                         <label className="relative flex items-center justify-center w-6 h-6 rounded-lg border-2 border-[#d4d7d9] cursor-pointer active:scale-90 transition-transform flex-shrink-0" style={{ borderColor: checked ? "#5a7055" : "#d4d7d9", background: checked ? "#edf7ea" : "white" }}>
                           <input type="checkbox" checked={checked} onChange={(e) => {
@@ -615,6 +835,59 @@ export default function HomePage() {
             })()}
           </div>
 
+
+          {/* Today */}
+          {(() => {
+            const dayTypeMeta: Record<string, { label: string; color: string; bg: string }> = {
+              match:    { label: "Game Day",     color: "#1e3a1e", bg: "#1e3a1e18" },
+              recovery: { label: "Recovery Day", color: "#7c3aed", bg: "#7c3aed18" },
+              training: { label: "Training Day", color: "#2653d4", bg: "#2653d418" },
+              rest:     { label: "Rest Day",     color: "#64748b", bg: "#94a3b818" },
+            };
+            const meta = dayTypeMeta[dayType] ?? dayTypeMeta.rest;
+            const dateLabel = now ? now.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" }) : "";
+            const venue = [editedData.club, editedData.court ? `Court ${editedData.court}` : ""].filter(Boolean).join(" · ");
+            const players = [editedData.player_1, editedData.player_2, editedData.player_3, editedData.player_4].filter(Boolean);
+            return (
+              <div className="bg-white rounded-[24px] mt-2" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8" }}>
+                <div className="px-5 pt-4 pb-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-[13px] font-bold tracking-widest uppercase text-[#5a7055]">Today</p>
+                    <p className="text-[15px] font-semibold text-[#1a1c1c] mt-0.5">{dateLabel}</p>
+                  </div>
+                  <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: meta.bg, color: meta.color }}>{meta.label}</span>
+                </div>
+                {dayType === "match" && editedData.time && (
+                  <div className="px-5 pb-4 pt-2" style={{ borderTop: "1px solid #f4f4f4" }}>
+                    <div className="flex items-start gap-3">
+                      <div className="w-9 h-9 rounded-2xl flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: "#1e3a1e18" }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1e3a1e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M7 4H4a2 2 0 0 0-2 2v2c0 3.3 2.7 6 6 6"/><path d="M17 4h3a2 2 0 0 1 2 2v2c0 3.3-2.7 6-6 6"/><path d="M7 4h10v8a5 5 0 0 1-10 0V4z"/><path d="M8 21h8M12 17v4"/>
+                        </svg>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[14px] font-bold text-[#1a1c1c]">
+                          {editedData.date ? new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) : "Today"} · {editedData.time}
+                        </p>
+                        {venue && <p className="text-[12px] text-[#4a5050] mt-0.5">{venue}</p>}
+                        {players.length > 0 && (
+                          <p className="text-[12px] text-[#4a5050] mt-0.5">{players.join(" · ")}</p>
+                        )}
+                        {!countdown.past && (countdown.h > 0 || countdown.m > 0) && (
+                          <p className="text-[12px] font-semibold mt-1.5" style={{ color: "#1e3a1e" }}>
+                            {countdown.h > 0 ? `${countdown.h}h ${countdown.m}m` : `${countdown.m}m`} until match
+                          </p>
+                        )}
+                        {countdown.past && (
+                          <p className="text-[12px] font-semibold mt-1.5 text-[#7c3aed]">Match underway or finished</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Week at a Glance */}
           {(() => {
