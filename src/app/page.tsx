@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { computeScores, loadScoringData, computeAllTimeScores, type Scores } from "@/lib/scoring";
+import { computeScores, loadScoringData, computeAllTimeScores, saveHabits, type Scores } from "@/lib/scoring";
 import { computeNotifications, type Notif } from "@/lib/notifications";
 import ScoreRing from "@/components/score-ring";
 import ScoreGauge from "@/components/score-gauge";
@@ -56,12 +56,20 @@ export default function HomePage() {
 
   function loadAndScore() {
     const data = loadScoringData();
-    setScores(computeScores(data.checkIn, data.hydration, data.review, data.nutrition, data.gameDaysThisWeek));
+    setScores(computeScores(data.checkIn, data.hydration, data.review, data.nutrition, data.gameDaysThisWeek, data.habits));
     setAllTimeScores(computeAllTimeScores());
-    // Pre-populate check-in if we have today's saved entry
     if (data.checkIn) {
       setCheckIn({ sleep: data.checkIn.sleep, energy: data.checkIn.energy, soreness: data.checkIn.soreness, hydration: data.checkIn.hydration });
       setCheckInDone(true);
+    }
+    if (data.habits) {
+      setSleep(data.habits.sleep);
+      setMobility(data.habits.mobility);
+      setVisualise(data.habits.visualise);
+      setBoxBreathing(data.habits.boxBreathing);
+      setFoamRoll(data.habits.foamRoll);
+      setLightWalk(data.habits.lightWalk);
+      setColdShower(data.habits.coldShower);
     }
   }
 
@@ -316,28 +324,6 @@ export default function HomePage() {
       <div className="h1-font bg-[#f9f9f9] text-[#1a1c1c] min-h-screen">
         <main className="pt-3 pb-8 px-5 max-w-lg mx-auto">
 
-          {/* Info cells */}
-          {(() => {
-            const tomorrowDate = now ? new Date(now) : new Date(); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-            const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
-            const matchLabel = editedData.date && editedData.time
-              ? `${editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} · ${editedData.time}`
-              : "—";
-            const dayLabels: Record<string, string> = { match: "Game Day", recovery: "Recovery Day", training: "Training Day", rest: "Rest Day" };
-            return (
-              <div className="bg-white rounded-[20px] h1-ambient border border-[#c4c7c7]/10 grid grid-cols-2 mb-3 overflow-hidden">
-                <div className="px-5 py-2 flex flex-col items-center text-center border-r border-[#e8e8e8]">
-                  <p className="text-[9px] font-bold tracking-widest uppercase text-[#5a7055] mb-0.5">Next Match</p>
-                  <p className="text-[13px] font-semibold text-[#1a1c1c]">{matchLabel}</p>
-                </div>
-                <div className="px-5 py-2 flex flex-col items-center text-center">
-                  <p className="text-[9px] font-bold tracking-widest uppercase text-[#5a7055] mb-0.5">Today is a</p>
-                  <p className="text-[13px] font-semibold text-[#1a1c1c]">{dayLabels[dayType]}</p>
-                </div>
-              </div>
-            );
-          })()}
-
           {/* Greeting bar */}
           {(() => {
             const h = now ? now.getHours() : 12;
@@ -357,9 +343,31 @@ export default function HomePage() {
             } else if (dayType === "training") { msg = "Training day. Make sure you're fuelled, warmed up, and ready to work on your patterns.";
             } else { msg = "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy."; }
             return (
-              <div className="-mx-5 px-5 py-3 text-center mb-4">
+              <div className="-mx-5 px-5 pt-3 pb-1 text-center mb-3">
                 <p className="text-[22px] font-bold text-[#1a1c1c] leading-snug mb-0.5" style={{ fontFamily: "var(--font-hanken)" }}>Good {tod}.</p>
-                <p className="text-[14px] text-[#3a4550] leading-snug">{msg}</p>
+                <p className="text-[18px] text-[#3a4550] leading-snug">{msg}</p>
+              </div>
+            );
+          })()}
+
+          {/* Info cells */}
+          {(() => {
+            const tomorrowDate = now ? new Date(now) : new Date(); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+            const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
+            const matchLabel = editedData.date && editedData.time
+              ? `${editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} · ${editedData.time}`
+              : "—";
+            const dayLabels: Record<string, string> = { match: "Game Day", recovery: "Recovery Day", training: "Training Day", rest: "Rest Day" };
+            return (
+              <div className="bg-white rounded-[20px] h1-ambient border border-[#c4c7c7] grid grid-cols-2 mb-3 overflow-hidden">
+                <div className="px-5 py-5 flex flex-col items-center text-center border-r border-[#e8e8e8]">
+                  <p className="text-[9px] font-bold tracking-widest uppercase text-[#5a7055] mb-0.5">Next Match</p>
+                  <p className="text-[13px] font-semibold text-[#1a1c1c]">{matchLabel}</p>
+                </div>
+                <div className="px-5 py-5 flex flex-col items-center text-center">
+                  <p className="text-[9px] font-bold tracking-widest uppercase text-[#5a7055] mb-0.5">Today is a</p>
+                  <p className="text-[13px] font-semibold text-[#1a1c1c]">{dayLabels[dayType]}</p>
+                </div>
               </div>
             );
           })()}
@@ -588,35 +596,26 @@ export default function HomePage() {
               {(() => {
                 const allItems = {
                   match: [
-                    { label: "Hydration 3.5L",           pts: 10, checked: hydration,        set: setHydration,        detail: "Drink 500ml of water with electrolytes before you do anything else. After hours of sleep your body is dehydrated — even mild dehydration (1–2%) measurably reduces reaction time, concentration, and physical output." },
-                    { label: "Pre-match meal (2–3h out)", pts: 7,  checked: preMatchMeal,     set: setPreMatchMeal,     detail: "Eat a moderate meal 2–3 hours before the match: carbohydrates for fuel (rice, pasta, oats), lean protein to protect muscle, and nothing heavy or unfamiliar. Avoid high-fat and high-fibre foods — they slow digestion and can cause discomfort mid-game." },
-                    { label: "10min Dynamic Mobility",    pts: 6,  checked: mobility,         set: setMobility,         detail: "Spend 10 minutes on dynamic mobility — leg swings, hip circles, thoracic rotations, and lateral lunges. This increases blood flow to the joints and primes the neuromuscular system for explosive movement." },
-                    { label: "Visualise Key Tactics",     pts: 5,  checked: visualise,        set: setVisualise,        detail: "Close your eyes for 3–5 minutes and mentally rehearse your key patterns: your serve placement, your net approach after a quality drive, and your reset lob when under pressure. Visualisation activates the same neural pathways as physical practice." },
-                    { label: "Box Breathing (4x4)",       pts: 4,  checked: boxBreathing,     set: setBoxBreathing,     detail: "Box breathing regulates your autonomic nervous system before competition. Inhale for 4 counts, hold for 4, exhale for 4, hold for 4 — repeat 4–6 cycles. Do it 15–30 minutes before warm-up." },
-                    { label: "Sleep 7–9h tonight",        pts: 8,  checked: sleep,            set: setSleep,            detail: "Sleep is the single highest-leverage recovery tool available. During deep sleep your body releases growth hormone, repairs muscle tissue, and consolidates motor patterns learned during training." },
+                    { label: "10min Dynamic Mobility",    pts: 6,  checked: mobility,     set: setMobility,     detail: "Spend 10 minutes on dynamic mobility — leg swings, hip circles, thoracic rotations, and lateral lunges. This increases blood flow to the joints and primes the neuromuscular system for explosive movement." },
+                    { label: "Visualise Key Tactics",     pts: 5,  checked: visualise,    set: setVisualise,    detail: "Close your eyes for 3–5 minutes and mentally rehearse your key patterns: your serve placement, your net approach after a quality drive, and your reset lob when under pressure. Visualisation activates the same neural pathways as physical practice." },
+                    { label: "Box Breathing (4x4)",       pts: 4,  checked: boxBreathing, set: setBoxBreathing, detail: "Box breathing regulates your autonomic nervous system before competition. Inhale for 4 counts, hold for 4, exhale for 4, hold for 4 — repeat 4–6 cycles. Do it 15–30 minutes before warm-up." },
+                    { label: "Sleep 7–9h tonight",        pts: 8,  checked: sleep,        set: setSleep,        detail: "Sleep is the single highest-leverage recovery tool available. During deep sleep your body releases growth hormone, repairs muscle tissue, and consolidates motor patterns learned during training." },
                   ],
                   recovery: [
-                    { label: "Hydration 2.5L+",          pts: 8,  checked: hydration,        set: setHydration,        detail: "You lost significant fluid during yesterday's match. Rehydrating takes longer than most people expect — sip steadily throughout the day rather than drinking large amounts at once. Aim for pale yellow urine by mid-morning." },
-                    { label: "Foam roll 15 min",          pts: 7,  checked: foamRoll,         set: setFoamRoll,         detail: "Today is your best window for foam rolling — muscles are recovered enough to tolerate pressure but still have residual tension. Focus on quads, IT band, hip flexors, glutes, and calves. 60–90 seconds per area." },
-                    { label: "Protein-rich meal",         pts: 6,  checked: proteinMeal,      set: setProteinMeal,      detail: "Muscle protein synthesis is elevated for 24–48 hours after exercise. Hit 30–40g of protein at both lunch and dinner today: chicken, fish, eggs, Greek yogurt, or legumes all work well." },
-                    { label: "Recovery walk 20 min",      pts: 5,  checked: lightWalk,        set: setLightWalk,        detail: "Low-intensity walking increases blood flow to fatigued muscles without adding stress. It flushes metabolic waste, reduces soreness, and keeps your aerobic system ticking without loading your joints." },
-                    { label: "Cold shower 2 min",         pts: 4,  checked: coldShower,       set: setColdShower,       detail: "Two minutes of cold water constricts blood vessels, reduces inflammation, and blunts delayed onset muscle soreness. It also activates the nervous system — useful if you feel flat on a recovery day." },
-                    { label: "Sleep 8–9h tonight",        pts: 9,  checked: sleep,            set: setSleep,            detail: "Recovery happens during sleep, not during rest. Growth hormone release peaks in deep sleep — getting an extra hour tonight compounds the repair work your body is already doing from yesterday's session." },
+                    { label: "Foam roll 15 min",      pts: 7, checked: foamRoll,  set: setFoamRoll,  detail: "Today is your best window for foam rolling — muscles are recovered enough to tolerate pressure but still have residual tension. Focus on quads, IT band, hip flexors, glutes, and calves. 60–90 seconds per area." },
+                    { label: "Recovery walk 20 min",  pts: 5, checked: lightWalk, set: setLightWalk, detail: "Low-intensity walking increases blood flow to fatigued muscles without adding stress. It flushes metabolic waste, reduces soreness, and keeps your aerobic system ticking without loading your joints." },
+                    { label: "Cold shower 2 min",     pts: 4, checked: coldShower, set: setColdShower, detail: "Two minutes of cold water constricts blood vessels, reduces inflammation, and blunts delayed onset muscle soreness. It also activates the nervous system — useful if you feel flat on a recovery day." },
+                    { label: "Sleep 8–9h tonight",    pts: 9, checked: sleep,     set: setSleep,     detail: "Recovery happens during sleep, not during rest. Growth hormone release peaks in deep sleep — getting an extra hour tonight compounds the repair work your body is already doing from yesterday's session." },
                   ],
                   rest: [
-                    { label: "Hydration 2–3L",            pts: 7,  checked: hydration,        set: setHydration,        detail: "Hydration isn't just for match days. Staying consistently hydrated on rest days maintains blood volume, joint lubrication, and cognitive function. Aim for 2–3L spread through the day." },
-                    { label: "10min Light Mobility",       pts: 5,  checked: mobility,         set: setMobility,         detail: "On rest days, gentle mobility keeps joints lubricated and prevents stiffness from accumulating. Focus on hip flexors, thoracic rotation, and ankle circles. 10–15 minutes is enough — this is maintenance, not training." },
-                    { label: "Visualise Key Tactics",      pts: 4,  checked: visualise,        set: setVisualise,        detail: "Rest days are ideal for mental training. Spend 5 minutes visualising your key patterns: positioning after a lob, your net approach, your response under pressure. Athletes who visualise consistently outperform those who don't." },
-                    { label: "Balanced nutrition",         pts: 5,  checked: balancedNutrition, set: setBalancedNutrition, detail: "Rest days are an opportunity to refuel properly. Focus on variety — plenty of vegetables, complex carbs, and protein. Don't under-eat on rest days; your body is still rebuilding from recent sessions." },
-                    { label: "Sleep 7–9h tonight",         pts: 8,  checked: sleep,            set: setSleep,            detail: "Consistent sleep is the foundation of performance. Aim for the same bedtime every night — even on rest days. Variability in sleep timing disrupts your circadian rhythm and reduces sleep quality." },
+                    { label: "10min Light Mobility",   pts: 5, checked: mobility,  set: setMobility,  detail: "On rest days, gentle mobility keeps joints lubricated and prevents stiffness from accumulating. Focus on hip flexors, thoracic rotation, and ankle circles. 10–15 minutes is enough — this is maintenance, not training." },
+                    { label: "Visualise Key Tactics",  pts: 4, checked: visualise, set: setVisualise, detail: "Rest days are ideal for mental training. Spend 5 minutes visualising your key patterns: positioning after a lob, your net approach, your response under pressure. Athletes who visualise consistently outperform those who don't." },
+                    { label: "Sleep 7–9h tonight",     pts: 8, checked: sleep,     set: setSleep,     detail: "Consistent sleep is the foundation of performance. Aim for the same bedtime every night — even on rest days. Variability in sleep timing disrupts your circadian rhythm and reduces sleep quality." },
                   ],
                   training: [
-                    { label: "Pre-training meal",          pts: 7,  checked: preMatchMeal,     set: setPreMatchMeal,     detail: "Fuel up 1.5–2 hours before your session: moderate carbs (oats, rice, banana) and some protein. Don't train fasted for high-intensity sessions — your output drops and you retain less of the session." },
-                    { label: "Pre-training activation",    pts: 6,  checked: mobility,         set: setMobility,         detail: "10 minutes of dynamic movement before training improves power output and reduces injury risk. Lateral shuffles, hip circles, leg swings, and arm rotations prime the patterns you'll use on court." },
-                    { label: "Hydration 2.5–3L",           pts: 8,  checked: hydration,        set: setHydration,        detail: "On a training day your sweat loss may not match a full match, but you still need to stay ahead of thirst. Aim for 2.5–3L total. Sip regularly through the session to maintain output quality." },
-                    { label: "Post-training protein",       pts: 6,  checked: proteinMeal,      set: setProteinMeal,      detail: "Consume 20–40g protein within 30 minutes of finishing training to maximise muscle protein synthesis. A protein shake, Greek yogurt, or eggs paired with fast carbs (banana, rice cake) all work." },
-                    { label: "Post-training stretch",       pts: 5,  checked: foamRoll,         set: setFoamRoll,         detail: "After training, your muscles are warm and pliable — the best window for flexibility work. Hold each stretch for 30–45 seconds. Prioritise hip flexors, hamstrings, and shoulder external rotators." },
-                    { label: "Sleep 7–9h tonight",          pts: 8,  checked: sleep,            set: setSleep,            detail: "Training creates micro-damage that your body repairs during sleep. Consistent 7–9 hour nights let you absorb the session's adaptations and show up ready for the next one." },
+                    { label: "Pre-training activation", pts: 6, checked: mobility,  set: setMobility,  detail: "10 minutes of dynamic movement before training improves power output and reduces injury risk. Lateral shuffles, hip circles, leg swings, and arm rotations prime the patterns you'll use on court." },
+                    { label: "Post-training stretch",   pts: 5, checked: foamRoll,  set: setFoamRoll,  detail: "After training, your muscles are warm and pliable — the best window for flexibility work. Hold each stretch for 30–45 seconds. Prioritise hip flexors, hamstrings, and shoulder external rotators." },
+                    { label: "Sleep 7–9h tonight",      pts: 8, checked: sleep,     set: setSleep,     detail: "Training creates micro-damage that your body repairs during sleep. Consistent 7–9 hour nights let you absorb the session's adaptations and show up ready for the next one." },
                   ],
                 };
                 const items = allItems[dayType];
@@ -647,7 +646,19 @@ export default function HomePage() {
                       {visible.map(({ label, pts, checked, set, detail }) => (
                         <div key={label} className="flex items-center gap-3">
                           <label className="relative flex items-center justify-center w-6 h-6 rounded-lg border-2 border-[#d4d7d9] cursor-pointer active:scale-90 transition-transform flex-shrink-0">
-                            <input type="checkbox" checked={checked} onChange={(e) => set(e.target.checked)} className="peer absolute opacity-0 w-full h-full cursor-pointer" />
+                            <input type="checkbox" checked={checked} onChange={(e) => {
+                              set(e.target.checked);
+                              const next = { sleep, mobility, visualise, boxBreathing, foamRoll, lightWalk, coldShower };
+                              // identify which state is being changed by matching the setter
+                              if (set === setSleep)        next.sleep        = e.target.checked;
+                              if (set === setMobility)     next.mobility     = e.target.checked;
+                              if (set === setVisualise)    next.visualise    = e.target.checked;
+                              if (set === setBoxBreathing) next.boxBreathing = e.target.checked;
+                              if (set === setFoamRoll)     next.foamRoll     = e.target.checked;
+                              if (set === setLightWalk)    next.lightWalk    = e.target.checked;
+                              if (set === setColdShower)   next.coldShower   = e.target.checked;
+                              saveHabits(next);
+                            }} className="peer absolute opacity-0 w-full h-full cursor-pointer" />
                             <span className="material-symbols-outlined text-[#496640] opacity-0 peer-checked:opacity-100 transition-opacity" style={{ fontSize: 18, fontVariationSettings: "'FILL' 1, 'wght' 600" }}>check</span>
                           </label>
                           <button onClick={() => setRoutineModal({ label, detail })} className="flex-1 text-left active:opacity-60 transition-opacity">
@@ -720,21 +731,65 @@ export default function HomePage() {
           ];
 
 
+          const metricBreakdown = [
+            { label: "Recovery",  value: scores.recovery,  color: "#7c3aed", desc: "Sleep, soreness & rest quality" },
+            { label: "Hydration", value: scores.hydration, color: "#0891b2", desc: "Water intake logged today" },
+            { label: "Energy",    value: scores.energy,    color: "#f59e0b", desc: "Nutrition & fuel quality" },
+            { label: "Mobility",  value: scores.mobility,  color: "#16a34a", desc: "Movement & flexibility" },
+          ];
+          const weakest = [...metricBreakdown].sort((a, b) => a.value - b.value)[0];
+
           return (
-            <div className="fixed inset-0 z-[60] flex items-center justify-center px-4" onClick={() => setFabOpen(false)}>
-              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+            <div className="fixed inset-0 z-[60] flex items-end justify-center" onClick={() => setFabOpen(false)}>
+              <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
               <div
-                className="h1-font relative w-full max-w-sm bg-white rounded-[28px] overflow-y-auto max-h-[88vh]"
+                className="h1-font relative w-full max-w-lg bg-white rounded-t-[28px] overflow-y-auto max-h-[90vh]"
                 style={{ animation: "speedDialUp 0.25s cubic-bezier(0.22,1,0.36,1)" }}
                 onClick={e => e.stopPropagation()}
               >
-                <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4 mb-1" />
-                <div className="px-6 pt-3 pb-4">
-                  <p className="h1-headline-md text-[#1a1c1c]">Improve Score</p>
-                  <p className="text-[13px] text-[#4a5050] mt-0.5">Scores recalculate instantly</p>
+                <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4 mb-2" />
+
+                {/* Score header */}
+                <div className="px-6 pt-2 pb-5" style={{ borderBottom: "1px solid #f0f0f0" }}>
+                  <div className="flex items-baseline gap-3 mb-1">
+                    <span className="text-[48px] font-bold leading-none text-[#1a1c1c]">{Math.round(scores.overall)}</span>
+                    <span className="text-[15px] font-semibold text-[#4a5050]">Match Readiness</span>
+                  </div>
+                  <p className="text-[14px] text-[#4a5050] leading-snug">
+                    {scores.overall >= 85
+                      ? "You're in great shape today. Keep up your routine."
+                      : scores.overall >= 70
+                      ? `Your ${weakest.label.toLowerCase()} is pulling the score down — log it to update.`
+                      : `Focus on ${weakest.label.toLowerCase()} first — it has the biggest impact today.`}
+                  </p>
                 </div>
 
-                {/* Daily Log items */}
+                {/* Metric breakdown */}
+                <div className="px-6 pt-4 pb-2">
+                  <p className="text-[10px] font-bold tracking-widest uppercase text-[#5a7055] mb-3">How it's calculated</p>
+                  <div className="flex flex-col gap-3">
+                    {metricBreakdown.map(m => (
+                      <div key={m.label}>
+                        <div className="flex items-center justify-between mb-1">
+                          <div>
+                            <span className="text-[13px] font-semibold text-[#1a1c1c]">{m.label}</span>
+                            <span className="text-[12px] text-[#8a9096] ml-2">{m.desc}</span>
+                          </div>
+                          <span className="text-[14px] font-bold" style={{ color: m.color }}>{Math.round(m.value)}</span>
+                        </div>
+                        <div className="h-1.5 rounded-full bg-[#f0f0f0] overflow-hidden">
+                          <div className="h-full rounded-full transition-all" style={{ width: `${m.value}%`, background: m.color }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Logging actions */}
+                <div className="px-6 pt-5 pb-2">
+                  <p className="text-[10px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Log to update your score</p>
+                  <p className="text-[12px] text-[#8a9096] mb-3">Scores recalculate instantly when you log.</p>
+                </div>
                 {logItems.map((row) => (
                   <button
                     key={row.label}
@@ -742,39 +797,22 @@ export default function HomePage() {
                     className="w-full flex items-center gap-4 px-6 py-3.5 active:bg-[#f9f9f9] transition-colors"
                     style={{ borderTop: "1px solid #f4f4f4" }}
                   >
-                    <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: row.color + "14" }}>
+                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: row.color + "14" }}>
                       {row.icon}
                     </div>
                     <div className="flex-1 min-w-0 text-left">
-                      <p className="text-[15px] font-semibold text-[#1a1c1c]">{row.label}</p>
-                      <p className="text-[12px] text-[#4a5050] mt-0.5">{row.sub}</p>
-                      <p className="text-[10px] font-semibold mt-1" style={{ color: row.color + "99" }}>→ {row.affects}</p>
+                      <p className="text-[14px] font-semibold text-[#1a1c1c]">{row.label}</p>
+                      <p className="text-[11px] text-[#8a9096] mt-0.5">→ {row.affects}</p>
                     </div>
                     {row.done ? (
                       <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#caecbc] text-[#496640] whitespace-nowrap flex-shrink-0">{row.badge}</span>
                     ) : (
-                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#f4f4f4] text-[#4a5050] flex-shrink-0">Not yet</span>
+                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#f4f4f4] text-[#4a5050] flex-shrink-0">Log</span>
                     )}
                   </button>
                 ))}
 
-                {/* Add a match */}
-                <button
-                  onClick={() => { setFabOpen(false); setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }}
-                  className="w-full flex items-center gap-4 px-6 py-4 active:bg-[#f9f9f9] transition-colors"
-                  style={{ borderTop: "1px solid #f4f4f4" }}
-                >
-                  <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-[#2653d414]">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
-                  </div>
-                  <div className="flex-1 min-w-0 text-left">
-                    <p className="text-[15px] font-semibold text-[#1a1c1c]">Add a match</p>
-                    <p className="text-[12px] text-[#4a5050] mt-0.5">Upload booking or enter manually</p>
-                  </div>
-                  <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#c4c7c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1,1 6,6 1,11"/></svg>
-                </button>
-
-                <div className="pb-4" />
+                <div className="pb-8" />
               </div>
             </div>
           );

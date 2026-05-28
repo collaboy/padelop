@@ -41,6 +41,17 @@ export type Scores = {
   mobility: number;
 };
 
+export type HabitsEntry = {
+  date: string;
+  sleep: boolean;
+  mobility: boolean;
+  visualise: boolean;
+  boxBreathing: boolean;
+  foamRoll: boolean;
+  lightWalk: boolean;
+  coldShower: boolean;
+};
+
 const LITRE_DELTA: Record<string, number> = {
   "<1L": -20, "1–1.5L": -12, "1.5–2L": -4, "2–2.5L": 4, "2.5–3L": 12, "3L+": 18,
 };
@@ -53,6 +64,7 @@ export function computeScores(
   review: ReviewEntry | null,
   nutrition: NutritionEntry | null,
   gameDaysThisWeek: number,
+  habits: HabitsEntry | null = null,
 ): Scores {
   const ci = checkIn ?? { sleep: 3, energy: 3, soreness: 3, hydration: 3, date: "" };
 
@@ -104,6 +116,17 @@ export function computeScores(
   // Active players maintain mobility better (capped at 2 game days to avoid over-inflation)
   mobility += Math.min(gameDaysThisWeek, 2) * 3;
 
+  // Habit contributions
+  if (habits) {
+    if (habits.sleep)        { recovery += 10; energy += 8;  mobility += 4; }
+    if (habits.mobility)     { mobility += 8; }
+    if (habits.visualise)    { energy += 4;   recovery += 2; }
+    if (habits.boxBreathing) { recovery += 6; energy += 4; }
+    if (habits.foamRoll)     { recovery += 8; mobility += 6; }
+    if (habits.lightWalk)    { recovery += 5; mobility += 3; }
+    if (habits.coldShower)   { recovery += 7; }
+  }
+
   const r = clamp(recovery);
   const h = clamp(hydr);
   const e = clamp(energy);
@@ -115,12 +138,19 @@ export function computeScores(
   return { overall, recovery: r, hydration: h, energy: e, mobility: m };
 }
 
+export function saveHabits(habits: Omit<HabitsEntry, "date">): void {
+  const entry: HabitsEntry = { ...habits, date: new Date().toISOString().slice(0, 10) };
+  localStorage.setItem("padelop:habits", JSON.stringify(entry));
+  window.dispatchEvent(new Event("storage"));
+}
+
 export function loadScoringData(): {
   checkIn: DailyCheckIn | null;
   hydration: HydrationEntry | null;
   review: ReviewEntry | null;
   nutrition: NutritionEntry | null;
   gameDaysThisWeek: number;
+  habits: HabitsEntry | null;
 } {
   const todayYMD = new Date().toISOString().slice(0, 10);
 
@@ -164,7 +194,16 @@ export function loadScoringData(): {
     gameDaysThisWeek = days.filter(d => d >= weekStart && d <= todayYMD).length;
   } catch {}
 
-  return { checkIn, hydration, review, nutrition, gameDaysThisWeek };
+  let habits: HabitsEntry | null = null;
+  try {
+    const raw = localStorage.getItem("padelop:habits");
+    if (raw) {
+      const parsed = JSON.parse(raw) as HabitsEntry;
+      if (parsed.date === todayYMD) habits = parsed;
+    }
+  } catch {}
+
+  return { checkIn, hydration, review, nutrition, gameDaysThisWeek, habits };
 }
 
 export function saveCheckIn(ci: Omit<DailyCheckIn, "date">): void {

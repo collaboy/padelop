@@ -69,14 +69,6 @@ export default function ScoreRing({ metric = "overall" }: { metric?: string }) {
           <span style={{ fontSize: 12, fontWeight: 500, letterSpacing: "0.05em", color: "#2c3235", textTransform: "uppercase" }}>{meta.sublabel}</span>
         </div>
       </div>
-      <div className="flex justify-between w-full px-4 mt-4">
-        {subMetrics.map(m => (
-          <div key={m.label} className="flex flex-col items-center gap-1">
-            <span style={{ fontSize: 16, fontWeight: 700, color: m.color }}>{Math.round(m.value)}</span>
-            <span style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.08em", color: "#5a7055", textTransform: "uppercase" }}>{m.label}</span>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
