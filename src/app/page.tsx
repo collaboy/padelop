@@ -347,7 +347,7 @@ export default function HomePage() {
       `}</style>
 
       <div className="h1-font bg-[#f9f9f9] text-[#1a1c1c] min-h-screen">
-        <main className="pt-4 pb-8 px-5 max-w-lg mx-auto">
+        <main className="pt-[76px] pb-8 px-5 max-w-lg mx-auto">
 
           {/* Horizontal day timeline */}
           {(() => {
@@ -414,7 +414,7 @@ export default function HomePage() {
                 className="overflow-x-auto mb-1 -mx-5"
                 style={{ scrollbarWidth: "none", scrollSnapType: "x mandatory" }}
               >
-                <div className="flex items-start" style={{ width: "max-content", paddingLeft: "calc(50vw - 60px)", paddingRight: "calc(50vw - 60px)" }}>
+                <div className="flex items-start" style={{ width: "max-content", paddingLeft: "calc(50vw - 45px)", paddingRight: "calc(50vw - 45px)" }}>
                   {schedule.map((item, i) => {
                     const activeIdx = selectedScheduleIdx ?? autoIdx;
                     const isCurrent = i === activeIdx;
@@ -422,18 +422,18 @@ export default function HomePage() {
                     return (
                       <React.Fragment key={i}>
                         {i > 0 && (
-                          <div style={{ width: "calc(50vw - 120px)", minWidth: 20, height: 2, background: isPast ? "#c4c7c7" : "#e2e2e2", marginTop: 59, flexShrink: 0 }} />
+                          <div style={{ width: "calc(50vw - 90px)", minWidth: 16, height: 2, background: isPast ? "#c4c7c7" : "#e2e2e2", marginTop: 44, flexShrink: 0 }} />
                         )}
-                        <div className="flex flex-col items-center" style={{ width: 120, scrollSnapAlign: "center" }} data-idx={i} {...(i === autoIdx ? { "data-active": "true" } : {})}>
+                        <div className="flex flex-col items-center" style={{ width: 90, scrollSnapAlign: "center" }} data-idx={i} {...(i === autoIdx ? { "data-active": "true" } : {})}>
                           <div style={{
-                            width: 120, height: 120, borderRadius: 60, flexShrink: 0,
+                            width: 90, height: 90, borderRadius: 45, flexShrink: 0,
                             border: `2.5px solid ${isCurrent ? item.color : isPast ? "#c4c7c7" : "#e2e2e2"}`,
                             background: isCurrent ? item.color : "white",
                             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3,
                           }}>
-                            <span style={{ fontSize: 15, fontWeight: 700, color: isCurrent ? "white" : isPast ? "#b0b5b8" : "#c4c7c7" }}>{item.time}</span>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: isCurrent ? "white" : isPast ? "#b0b5b8" : "#c4c7c7" }}>{item.time}</span>
                           </div>
-                          <p style={{ fontSize: 11, fontWeight: 600, color: isCurrent ? item.color : isPast ? "#b0b5b8" : "#c4c7c7", textAlign: "center", marginTop: 6, lineHeight: 1.3, maxWidth: 108 }}>{item.title}</p>
+                          <p style={{ fontSize: 10, fontWeight: 600, color: isCurrent ? item.color : isPast ? "#b0b5b8" : "#c4c7c7", textAlign: "center", marginTop: 5, lineHeight: 1.3, maxWidth: 82 }}>{item.title}</p>
                         </div>
                       </React.Fragment>
                     );

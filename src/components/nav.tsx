@@ -19,6 +19,7 @@ export default function Nav() {
   const [matchDate, setMatchDate] = useState<string>("");
   const [matchTime, setMatchTime] = useState<string>("");
   const [nowDate, setNowDate] = useState<Date | null>(null);
+  const [dayType, setDayType] = useState<string>("Rest Day");
   const [profileAvatar, setProfileAvatar] = useState<string>("");
   const [profileName, setProfileName] = useState<string>("");
   const importRef = useRef<HTMLInputElement>(null);
@@ -32,12 +33,18 @@ export default function Nav() {
     function refreshMatch() {
       try {
         const saved = localStorage.getItem("padelop:next-match");
+        const today = new Date().toISOString().slice(0, 10);
+        const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
         if (saved) {
           const parsed = JSON.parse(saved);
           setMatchDate(parsed.date ?? "");
           setMatchTime(parsed.time ?? "");
+          if (parsed.date === today) setDayType("Game Day");
+          else if (parsed.date === yesterday) setDayType("Recovery Day");
+          else setDayType("Rest Day");
         } else {
           setMatchDate(""); setMatchTime("");
+          setDayType("Rest Day");
         }
       } catch {}
     }
@@ -164,6 +171,24 @@ export default function Nav() {
           </div>
         </div>
       </header>
+
+      {/* Sub-header info bar */}
+      <div className="fixed top-16 w-full z-40 bg-[var(--surface)]/90 backdrop-blur-md border-b border-[var(--border)]">
+        <div className="grid grid-cols-2 max-w-7xl mx-auto">
+          <div className="px-5 py-1.5 border-r border-[var(--border)] flex flex-col items-center text-center">
+            <p className="text-[9px] font-bold tracking-widest uppercase text-[#5a7055] mb-0.5">Next Match</p>
+            <p className="text-[13px] font-semibold text-[var(--text)] truncate">
+              {matchDate && matchTime
+                ? `${new Date(matchDate + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} · ${matchTime}`
+                : "—"}
+            </p>
+          </div>
+          <div className="px-5 py-1.5 flex flex-col items-center text-center">
+            <p className="text-[9px] font-bold tracking-widest uppercase text-[#5a7055] mb-0.5">Today is a</p>
+            <p className="text-[13px] font-semibold text-[var(--text)]">{dayType}</p>
+          </div>
+        </div>
+      </div>
 
       {/* Notifications modal */}
       {notifOpen && (
