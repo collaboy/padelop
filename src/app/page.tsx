@@ -324,54 +324,6 @@ export default function HomePage() {
       <div className="h1-font bg-[#f9f9f9] text-[#1a1c1c] min-h-screen">
         <main className="pt-3 pb-8 px-5 max-w-lg mx-auto">
 
-          {/* Greeting bar */}
-          {(() => {
-            const h = now ? now.getHours() : 12;
-            const tod = h < 12 ? "morning" : h < 17 ? "afternoon" : "evening";
-            let msg = "";
-            if (dayType === "match") {
-              const matchTimeStr = editedData.time || "18:30";
-              const [mH, mM] = matchTimeStr.split(":").map(Number);
-              const matchMins = mH * 60 + mM;
-              const nowMins = h * 60 + (now ? now.getMinutes() : 0);
-              const diffMins = matchMins - nowMins;
-              if (diffMins > 180) { const hrs = Math.floor(diffMins / 60); msg = `Match in ${hrs}h. Stay light, hydrate steadily, and eat your pre-game meal ${hrs > 4 ? "a few hours before" : "soon"}.`; }
-              else if (diffMins > 60) { msg = "Time to warm up. Dynamic activation, no heavy food — just sip water and focus."; }
-              else if (diffMins > 0) { msg = "Almost game time. Breathe, visualise, and trust your prep."; }
-              else { msg = "Great match today. Prioritise recovery — stretch, eat protein, and rest up."; }
-            } else if (dayType === "recovery") { msg = "Recovery day. Keep moving gently, drink plenty of water, and get your protein in.";
-            } else if (dayType === "training") { msg = "Training day. Make sure you're fuelled, warmed up, and ready to work on your patterns.";
-            } else { msg = "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy."; }
-            return (
-              <div className="-mx-5 px-5 pt-3 pb-1 text-center mb-3">
-                <p className="text-[22px] font-bold text-[#1a1c1c] leading-snug mb-0.5" style={{ fontFamily: "var(--font-hanken)" }}>Good {tod}.</p>
-                <p className="text-[18px] text-[#3a4550] leading-snug">{msg}</p>
-              </div>
-            );
-          })()}
-
-          {/* Info cells */}
-          {(() => {
-            const tomorrowDate = now ? new Date(now) : new Date(); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-            const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
-            const matchLabel = editedData.date && editedData.time
-              ? `${editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} · ${editedData.time}`
-              : "—";
-            const dayLabels: Record<string, string> = { match: "Game Day", recovery: "Recovery Day", training: "Training Day", rest: "Rest Day" };
-            return (
-              <div className="bg-white rounded-[20px] h1-ambient border border-[#c4c7c7] grid grid-cols-2 mb-3 overflow-hidden">
-                <div className="px-5 py-5 flex flex-col items-center text-center border-r border-[#e8e8e8]">
-                  <p className="text-[9px] font-bold tracking-widest uppercase text-[#5a7055] mb-0.5">Next Match</p>
-                  <p className="text-[13px] font-semibold text-[#1a1c1c]">{matchLabel}</p>
-                </div>
-                <div className="px-5 py-5 flex flex-col items-center text-center">
-                  <p className="text-[9px] font-bold tracking-widest uppercase text-[#5a7055] mb-0.5">Today is a</p>
-                  <p className="text-[13px] font-semibold text-[#1a1c1c]">{dayLabels[dayType]}</p>
-                </div>
-              </div>
-            );
-          })()}
-
           {/* Score ring + Improve Score card */}
           <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 flex flex-col items-center py-5 mb-4">
             {editedData.time && now ? (() => {
@@ -408,12 +360,35 @@ export default function HomePage() {
                 </button>
               ))}
             </div>
-            <button onClick={() => setFabOpen(true)} className="flex items-center gap-2 px-4 py-2 mt-4 rounded-full bg-[#f4f4f4] active:opacity-60 transition-opacity">
+            {/* Greeting inside ring card */}
+            {(() => {
+              const h = now ? now.getHours() : 12;
+              const tod = h < 12 ? "morning" : h < 17 ? "afternoon" : "evening";
+              let msg = "";
+              if (dayType === "match") {
+                const matchTimeStr = editedData.time || "18:30";
+                const [mH, mM] = matchTimeStr.split(":").map(Number);
+                const diffMins = mH * 60 + mM - h * 60 - (now ? now.getMinutes() : 0);
+                if (diffMins > 180) { const hrs = Math.floor(diffMins / 60); msg = `Match in ${hrs}h. Stay light, hydrate steadily, and eat your pre-game meal ${hrs > 4 ? "a few hours before" : "soon"}.`; }
+                else if (diffMins > 60) { msg = "Time to warm up. Dynamic activation, no heavy food — just sip water and focus."; }
+                else if (diffMins > 0) { msg = "Almost game time. Breathe, visualise, and trust your prep."; }
+                else { msg = "Great match today. Prioritise recovery — stretch, eat protein, and rest up."; }
+              } else if (dayType === "recovery") { msg = "Recovery day. Keep moving gently, drink plenty of water, and get your protein in.";
+              } else if (dayType === "training") { msg = "Training day. Make sure you're fuelled, warmed up, and ready to work on your patterns.";
+              } else { msg = "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy."; }
+              return (
+                <div className="text-center px-4 mt-4">
+                  <p className="text-[20px] font-bold text-[#1a1c1c] leading-snug mb-0.5" style={{ fontFamily: "var(--font-hanken)" }}>Good {tod}.</p>
+                  <p className="text-[14px] text-[#3a4550] leading-snug">{msg}</p>
+                </div>
+              );
+            })()}
+            <button onClick={() => setCheckInOpen(true)} className="flex items-center gap-2 px-4 py-2 mt-4 rounded-full bg-[#f4f4f4] active:opacity-60 transition-opacity">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
                 <polyline points="17 6 23 6 23 12" />
               </svg>
-              <span className="text-[15px] font-semibold text-[#1a1c1c]">Improve Score</span>
+              <span className="text-[15px] font-semibold text-[#1a1c1c]">Check-in to update score</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e9196" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 18l6-6-6-6" />
               </svg>
@@ -520,8 +495,18 @@ export default function HomePage() {
 
                 {/* Today's schedule inline */}
                 <div className="bg-white rounded-[24px] mt-2" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8" }}>
-                  <div className="px-5 pt-4 pb-1">
+                  <div className="px-5 pt-4 pb-1 flex items-center justify-between">
                     <p className="text-[13px] font-bold tracking-widest uppercase text-[#5a7055]">Today's Schedule</p>
+                    {(() => {
+                      const meta: Record<string, { label: string; bg: string; color: string }> = {
+                        match:    { label: "Game Day",     bg: "#1e3a1e18", color: "#1e3a1e" },
+                        recovery: { label: "Recovery Day", bg: "#7c3aed18", color: "#7c3aed" },
+                        training: { label: "Training Day", bg: "#2653d418", color: "#2653d4" },
+                        rest:     { label: "Rest Day",     bg: "#94a3b818", color: "#64748b" },
+                      };
+                      const m = meta[dayType] ?? meta.rest;
+                      return <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: m.bg, color: m.color }}>{m.label}</span>;
+                    })()}
                   </div>
                   <div className="px-5 pb-4">
                     {schedule.map((s, i) => {
@@ -544,8 +529,8 @@ export default function HomePage() {
                             {s.subtitle && <p className="text-[12px] mt-0.5 leading-snug" style={{ color: isPast ? "#c4c7c7" : "#4a5050" }}>{s.subtitle}</p>}
                           </div>
                           {isCur && (
-                            <div className="flex-shrink-0 self-start mt-1">
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white" style={{ background: s.color }}>Now</span>
+                            <div className="flex-shrink-0 self-center">
+                              <div className="w-2.5 h-2.5 rounded-full animate-breathe" style={{ background: s.color, "--glow": s.color } as React.CSSProperties} />
                             </div>
                           )}
                         </div>
@@ -558,128 +543,140 @@ export default function HomePage() {
           })()}
 
 
-          <div style={{ height: 300 }} />
-
-          <Link href="/today" className="block text-center mb-2 text-[11px] font-bold tracking-widest uppercase text-[#5a7055] active:opacity-60">From your schedule</Link>
-
-          {/* Score gauge card */}
-          <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 px-5 py-5 mb-4">
-            {editedData.time && now ? (() => {
-              const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-              const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
-              const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-              return <p className="text-[15px] font-semibold text-[#1a1c1c] mb-2">Next Match · <span className="text-[#2653d4]">{label} {editedData.time}</span></p>;
-            })() : (
-              <button onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }} className="text-[13px] font-semibold text-[#5a7055] mb-2 active:opacity-60">Add your next match</button>
-            )}
-            <ScoreGauge />
-            <div className="flex items-baseline gap-2 mt-2">
-              <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055]">Match Readiness</p>
-              <span className="text-[11px] font-bold text-[#2653d4]">{Math.round(scores.overall)}</span>
-            </div>
-            <button onClick={() => setFabOpen(true)} className="flex items-center gap-2 px-4 py-2 mt-4 rounded-full bg-[#f4f4f4] active:opacity-60 transition-opacity">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                <polyline points="17 6 23 6 23 12" />
-              </svg>
-              <span className="text-[15px] font-semibold text-[#1a1c1c]">Improve Score</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e9196" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </button>
+          {/* Match Day Essentials */}
+          <div className="bg-white rounded-[24px] mt-2" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8" }}>
+            {(() => {
+              const allItems = {
+                match: [
+                  { label: "10min Dynamic Mobility",    pts: 6,  checked: mobility,     set: setMobility,     detail: "Spend 10 minutes on dynamic mobility — leg swings, hip circles, thoracic rotations, and lateral lunges. This increases blood flow to the joints and primes the neuromuscular system for explosive movement." },
+                  { label: "Visualise Key Tactics",     pts: 5,  checked: visualise,    set: setVisualise,    detail: "Close your eyes for 3–5 minutes and mentally rehearse your key patterns: your serve placement, your net approach after a quality drive, and your reset lob when under pressure. Visualisation activates the same neural pathways as physical practice." },
+                  { label: "Box Breathing (4x4)",       pts: 4,  checked: boxBreathing, set: setBoxBreathing, detail: "Box breathing regulates your autonomic nervous system before competition. Inhale for 4 counts, hold for 4, exhale for 4, hold for 4 — repeat 4–6 cycles. Do it 15–30 minutes before warm-up." },
+                  { label: "Sleep 7–9h tonight",        pts: 8,  checked: sleep,        set: setSleep,        detail: "Sleep is the single highest-leverage recovery tool available. During deep sleep your body releases growth hormone, repairs muscle tissue, and consolidates motor patterns learned during training." },
+                ],
+                recovery: [
+                  { label: "Foam roll 15 min",      pts: 7, checked: foamRoll,   set: setFoamRoll,   detail: "Today is your best window for foam rolling — muscles are recovered enough to tolerate pressure but still have residual tension. Focus on quads, IT band, hip flexors, glutes, and calves. 60–90 seconds per area." },
+                  { label: "Recovery walk 20 min",  pts: 5, checked: lightWalk,  set: setLightWalk,  detail: "Low-intensity walking increases blood flow to fatigued muscles without adding stress. It flushes metabolic waste, reduces soreness, and keeps your aerobic system ticking without loading your joints." },
+                  { label: "Cold shower 2 min",     pts: 4, checked: coldShower, set: setColdShower, detail: "Two minutes of cold water constricts blood vessels, reduces inflammation, and blunts delayed onset muscle soreness. It also activates the nervous system — useful if you feel flat on a recovery day." },
+                  { label: "Sleep 8–9h tonight",    pts: 9, checked: sleep,      set: setSleep,      detail: "Recovery happens during sleep, not during rest. Growth hormone release peaks in deep sleep — getting an extra hour tonight compounds the repair work your body is already doing from yesterday's session." },
+                ],
+                rest: [
+                  { label: "10min Light Mobility",  pts: 5, checked: mobility,  set: setMobility,  detail: "On rest days, gentle mobility keeps joints lubricated and prevents stiffness from accumulating. Focus on hip flexors, thoracic rotation, and ankle circles. 10–15 minutes is enough — this is maintenance, not training." },
+                  { label: "Visualise Key Tactics", pts: 4, checked: visualise, set: setVisualise, detail: "Rest days are ideal for mental training. Spend 5 minutes visualising your key patterns: positioning after a lob, your net approach, your response under pressure. Athletes who visualise consistently outperform those who don't." },
+                  { label: "Sleep 7–9h tonight",    pts: 8, checked: sleep,     set: setSleep,     detail: "Consistent sleep is the foundation of performance. Aim for the same bedtime every night — even on rest days. Variability in sleep timing disrupts your circadian rhythm and reduces sleep quality." },
+                ],
+                training: [
+                  { label: "Pre-training activation", pts: 6, checked: mobility, set: setMobility, detail: "10 minutes of dynamic movement before training improves power output and reduces injury risk. Lateral shuffles, hip circles, leg swings, and arm rotations prime the patterns you'll use on court." },
+                  { label: "Post-training stretch",   pts: 5, checked: foamRoll, set: setFoamRoll, detail: "After training, your muscles are warm and pliable — the best window for flexibility work. Hold each stretch for 30–45 seconds. Prioritise hip flexors, hamstrings, and shoulder external rotators." },
+                  { label: "Sleep 7–9h tonight",      pts: 8, checked: sleep,    set: setSleep,    detail: "Training creates micro-damage that your body repairs during sleep. Consistent 7–9 hour nights let you absorb the session's adaptations and show up ready for the next one." },
+                ],
+              };
+              const items = allItems[dayType];
+              const sorted = [...items.filter(i => !i.checked), ...items.filter(i => i.checked)];
+              const doneCount = items.filter(i => i.checked).length;
+              const total = items.length;
+              const visible = mustDoExpanded ? sorted : sorted;
+              const title = dayType === "match" ? "Match Day Essentials" : dayType === "recovery" ? "Recovery Essentials" : dayType === "training" ? "Training Essentials" : "Rest Day Essentials";
+              return (
+                <>
+                  <div className="px-5 pt-4 pb-1 flex items-center justify-between">
+                    <p className="text-[13px] font-bold tracking-widest uppercase text-[#5a7055]">{title}</p>
+                    {doneCount > 0 && (
+                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: doneCount === total ? "#caecbc" : "#f0f0f0", color: doneCount === total ? "#496640" : "#4a5050" }}>
+                        {doneCount === total ? "All done" : `${doneCount}/${total}`}
+                      </span>
+                    )}
+                  </div>
+                  <div className="px-5 pb-4 pt-2 flex flex-col gap-3.5">
+                    {visible.map(({ label, pts, checked, set, detail }) => (
+                      <div key={label} className="flex items-center gap-3" style={{ opacity: checked ? 0.5 : 1 }}>
+                        <label className="relative flex items-center justify-center w-6 h-6 rounded-lg border-2 border-[#d4d7d9] cursor-pointer active:scale-90 transition-transform flex-shrink-0" style={{ borderColor: checked ? "#5a7055" : "#d4d7d9", background: checked ? "#edf7ea" : "white" }}>
+                          <input type="checkbox" checked={checked} onChange={(e) => {
+                            set(e.target.checked);
+                            const next = { sleep, mobility, visualise, boxBreathing, foamRoll, lightWalk, coldShower };
+                            if (set === setSleep)        next.sleep        = e.target.checked;
+                            if (set === setMobility)     next.mobility     = e.target.checked;
+                            if (set === setVisualise)    next.visualise    = e.target.checked;
+                            if (set === setBoxBreathing) next.boxBreathing = e.target.checked;
+                            if (set === setFoamRoll)     next.foamRoll     = e.target.checked;
+                            if (set === setLightWalk)    next.lightWalk    = e.target.checked;
+                            if (set === setColdShower)   next.coldShower   = e.target.checked;
+                            saveHabits(next);
+                          }} className="peer absolute opacity-0 w-full h-full cursor-pointer" />
+                          <span className="material-symbols-outlined text-[#496640] opacity-0 peer-checked:opacity-100 transition-opacity" style={{ fontSize: 16, fontVariationSettings: "'FILL' 1, 'wght' 700" }}>check</span>
+                        </label>
+                        <button onClick={() => setRoutineModal({ label, detail })} className="flex-1 text-left active:opacity-60 transition-opacity">
+                          <span className="text-[15px] font-semibold text-[#1a1c1c]" style={{ textDecoration: checked ? "line-through" : "none" }}>{label}</span>
+                        </button>
+                        <span className="text-[11px] font-bold flex-shrink-0" style={{ color: checked ? "#5a7055" : "#2653d4" }}>+{pts}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
           </div>
 
-          <div className="space-y-4">
 
-            {/* Must Do's Today */}
-            <div className="bg-white rounded-[24px] px-5 py-5 h1-ambient border border-[#c4c7c7]/10">
-              {(() => {
-                const allItems = {
-                  match: [
-                    { label: "10min Dynamic Mobility",    pts: 6,  checked: mobility,     set: setMobility,     detail: "Spend 10 minutes on dynamic mobility — leg swings, hip circles, thoracic rotations, and lateral lunges. This increases blood flow to the joints and primes the neuromuscular system for explosive movement." },
-                    { label: "Visualise Key Tactics",     pts: 5,  checked: visualise,    set: setVisualise,    detail: "Close your eyes for 3–5 minutes and mentally rehearse your key patterns: your serve placement, your net approach after a quality drive, and your reset lob when under pressure. Visualisation activates the same neural pathways as physical practice." },
-                    { label: "Box Breathing (4x4)",       pts: 4,  checked: boxBreathing, set: setBoxBreathing, detail: "Box breathing regulates your autonomic nervous system before competition. Inhale for 4 counts, hold for 4, exhale for 4, hold for 4 — repeat 4–6 cycles. Do it 15–30 minutes before warm-up." },
-                    { label: "Sleep 7–9h tonight",        pts: 8,  checked: sleep,        set: setSleep,        detail: "Sleep is the single highest-leverage recovery tool available. During deep sleep your body releases growth hormone, repairs muscle tissue, and consolidates motor patterns learned during training." },
-                  ],
-                  recovery: [
-                    { label: "Foam roll 15 min",      pts: 7, checked: foamRoll,  set: setFoamRoll,  detail: "Today is your best window for foam rolling — muscles are recovered enough to tolerate pressure but still have residual tension. Focus on quads, IT band, hip flexors, glutes, and calves. 60–90 seconds per area." },
-                    { label: "Recovery walk 20 min",  pts: 5, checked: lightWalk, set: setLightWalk, detail: "Low-intensity walking increases blood flow to fatigued muscles without adding stress. It flushes metabolic waste, reduces soreness, and keeps your aerobic system ticking without loading your joints." },
-                    { label: "Cold shower 2 min",     pts: 4, checked: coldShower, set: setColdShower, detail: "Two minutes of cold water constricts blood vessels, reduces inflammation, and blunts delayed onset muscle soreness. It also activates the nervous system — useful if you feel flat on a recovery day." },
-                    { label: "Sleep 8–9h tonight",    pts: 9, checked: sleep,     set: setSleep,     detail: "Recovery happens during sleep, not during rest. Growth hormone release peaks in deep sleep — getting an extra hour tonight compounds the repair work your body is already doing from yesterday's session." },
-                  ],
-                  rest: [
-                    { label: "10min Light Mobility",   pts: 5, checked: mobility,  set: setMobility,  detail: "On rest days, gentle mobility keeps joints lubricated and prevents stiffness from accumulating. Focus on hip flexors, thoracic rotation, and ankle circles. 10–15 minutes is enough — this is maintenance, not training." },
-                    { label: "Visualise Key Tactics",  pts: 4, checked: visualise, set: setVisualise, detail: "Rest days are ideal for mental training. Spend 5 minutes visualising your key patterns: positioning after a lob, your net approach, your response under pressure. Athletes who visualise consistently outperform those who don't." },
-                    { label: "Sleep 7–9h tonight",     pts: 8, checked: sleep,     set: setSleep,     detail: "Consistent sleep is the foundation of performance. Aim for the same bedtime every night — even on rest days. Variability in sleep timing disrupts your circadian rhythm and reduces sleep quality." },
-                  ],
-                  training: [
-                    { label: "Pre-training activation", pts: 6, checked: mobility,  set: setMobility,  detail: "10 minutes of dynamic movement before training improves power output and reduces injury risk. Lateral shuffles, hip circles, leg swings, and arm rotations prime the patterns you'll use on court." },
-                    { label: "Post-training stretch",   pts: 5, checked: foamRoll,  set: setFoamRoll,  detail: "After training, your muscles are warm and pliable — the best window for flexibility work. Hold each stretch for 30–45 seconds. Prioritise hip flexors, hamstrings, and shoulder external rotators." },
-                    { label: "Sleep 7–9h tonight",      pts: 8, checked: sleep,     set: setSleep,     detail: "Training creates micro-damage that your body repairs during sleep. Consistent 7–9 hour nights let you absorb the session's adaptations and show up ready for the next one." },
-                  ],
-                };
-                const items = allItems[dayType];
-                const sorted = [...items.filter(i => !i.checked), ...items.filter(i => i.checked)];
-                const doneCount = items.filter(i => i.checked).length;
-                const total = items.length;
-                const visible = mustDoExpanded ? sorted : sorted.slice(0, 2);
-                return (
-                  <>
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className="text-[16px] font-semibold text-black">{dayType === "match" ? "Match Day Essentials" : dayType === "recovery" ? "Recovery Essentials" : dayType === "training" ? "Training Essentials" : "Rest Day Essentials"}</h3>
-                      {doneCount > 0 && (
-                        <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: doneCount === total ? "#caecbc" : "#f4f4f4", color: doneCount === total ? "#496640" : "#4a5050" }}>
-                          {doneCount === total ? "⚡ All done" : `${doneCount}/${total}`}
-                        </span>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => { if (dayType !== "match") setDayTypeOverride(v => v === "recovery" ? "training" : v === "training" ? "rest" : "recovery"); }}
-                      className="flex items-center gap-1.5 mb-4 active:opacity-60 transition-opacity"
-                      style={{ cursor: dayType === "match" ? "default" : "pointer" }}
-                    >
-                      <span className="text-[#4a5050]">{DAY_TYPE_META[dayType].icon}</span>
-                      <span className="text-[11px] font-semibold text-[#4a5050]">{DAY_TYPE_META[dayType].label}</span>
-                      {dayType !== "match" && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>}
-                    </button>
-                    <div className="space-y-4">
-                      {visible.map(({ label, pts, checked, set, detail }) => (
-                        <div key={label} className="flex items-center gap-3">
-                          <label className="relative flex items-center justify-center w-6 h-6 rounded-lg border-2 border-[#d4d7d9] cursor-pointer active:scale-90 transition-transform flex-shrink-0">
-                            <input type="checkbox" checked={checked} onChange={(e) => {
-                              set(e.target.checked);
-                              const next = { sleep, mobility, visualise, boxBreathing, foamRoll, lightWalk, coldShower };
-                              // identify which state is being changed by matching the setter
-                              if (set === setSleep)        next.sleep        = e.target.checked;
-                              if (set === setMobility)     next.mobility     = e.target.checked;
-                              if (set === setVisualise)    next.visualise    = e.target.checked;
-                              if (set === setBoxBreathing) next.boxBreathing = e.target.checked;
-                              if (set === setFoamRoll)     next.foamRoll     = e.target.checked;
-                              if (set === setLightWalk)    next.lightWalk    = e.target.checked;
-                              if (set === setColdShower)   next.coldShower   = e.target.checked;
-                              saveHabits(next);
-                            }} className="peer absolute opacity-0 w-full h-full cursor-pointer" />
-                            <span className="material-symbols-outlined text-[#496640] opacity-0 peer-checked:opacity-100 transition-opacity" style={{ fontSize: 18, fontVariationSettings: "'FILL' 1, 'wght' 600" }}>check</span>
-                          </label>
-                          <button onClick={() => setRoutineModal({ label, detail })} className="flex-1 text-left active:opacity-60 transition-opacity">
-                            <span className={`h1-body-md text-[#2c3235] ${checked ? "line-through opacity-50" : ""}`}>{label}</span>
-                          </button>
-                          <span className={`text-[11px] font-bold flex-shrink-0 ${checked ? "text-[#5a7055]" : "text-[#2653d4]"}`}>+{pts}</span>
+          {/* Week at a Glance */}
+          {(() => {
+            const today = now ?? new Date();
+            const todayYMDLocal = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,"0")}-${String(today.getDate()).padStart(2,"0")}`;
+            // Monday-anchored week
+            const dow = (today.getDay() + 6) % 7;
+            const weekDays = Array.from({ length: 7 }, (_, i) => {
+              const d = new Date(today); d.setDate(today.getDate() - dow + i);
+              const ymd = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+              const isToday = ymd === todayYMDLocal;
+              const isMatch = editedData.date === ymd;
+              let label = "Rest"; let color = "#c4c7c7"; let bg = "#f4f4f4";
+              if (isMatch) { label = "Match"; color = "#1e3a1e"; bg = "#1e3a1e18"; }
+              else if (editedData.date && ymd > editedData.date && i > dow) { label = "—"; }
+              return { d, ymd, isToday, isMatch, label, color, bg, dayName: ["M","T","W","T","F","S","S"][i] };
+            });
+
+            // Load game days from storage for past match markers
+            let gameDays: string[] = [];
+            try { gameDays = JSON.parse(localStorage.getItem("padelop:game-days") || "[]"); } catch {}
+
+            return (
+              <div className="bg-white rounded-[24px] mt-2" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8" }}>
+                <div className="px-5 pt-4 pb-1 flex items-center justify-between">
+                  <p className="text-[13px] font-bold tracking-widest uppercase text-[#5a7055]">This Week</p>
+                  <p className="text-[12px] text-[#8a9096]">
+                    {today.toLocaleDateString(undefined, { month: "short", day: "numeric" })} — {weekDays[6].d.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                  </p>
+                </div>
+                <div className="px-4 pb-4 pt-3 grid grid-cols-7 gap-1">
+                  {weekDays.map(({ d, ymd, isToday, isMatch, dayName, color, bg }) => {
+                    const isPast = ymd < todayYMDLocal;
+                    const isGameDay = gameDays.includes(ymd);
+                    const dotColor = isMatch ? "#1e3a1e" : isGameDay ? "#2653d4" : isToday ? "#2653d4" : isPast ? "#d0d3d6" : "#e2e2e2";
+                    return (
+                      <div key={ymd} className="flex flex-col items-center gap-1.5">
+                        <span className="text-[10px] font-bold" style={{ color: isToday ? "#2653d4" : "#a0a5aa" }}>{dayName}</span>
+                        <div
+                          className="w-8 h-8 rounded-full flex items-center justify-center flex-col"
+                          style={{
+                            background: isToday ? "#2653d4" : isMatch ? "#1e3a1e" : "transparent",
+                            border: isToday || isMatch ? "none" : `1.5px solid ${isPast ? "#e8e8e8" : "#e8e8e8"}`,
+                          }}
+                        >
+                          <span className="text-[12px] font-bold" style={{ color: isToday || isMatch ? "#fff" : isPast ? "#c4c7c7" : "#1a1c1c" }}>
+                            {d.getDate()}
+                          </span>
                         </div>
-                      ))}
-                    </div>
-                    <button onClick={() => setMustDoExpanded(o => !o)} className="flex items-center gap-1 pt-3 active:opacity-60 transition-opacity">
-                      <span className="text-[13px] font-semibold text-[#4a5050]">{mustDoExpanded ? "Less" : "More"}</span>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: mustDoExpanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
-                        <path d="M6 9l6 6 6-6" />
-                      </svg>
-                    </button>
-                  </>
-                );
-              })()}
-            </div>
+                        <div className="w-1.5 h-1.5 rounded-full" style={{ background: isMatch || isGameDay ? dotColor : "transparent" }} />
+                        <span className="text-[9px] font-semibold text-center leading-tight" style={{ color: isMatch ? "#1e3a1e" : isGameDay ? "#2653d4" : "transparent" }}>
+                          {isMatch ? "Match" : isGameDay ? "Match" : "·"}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
 
-          </div>
         </main>
 
         {/* Daily Log bottom sheet */}
@@ -740,15 +737,15 @@ export default function HomePage() {
           const weakest = [...metricBreakdown].sort((a, b) => a.value - b.value)[0];
 
           return (
-            <div className="fixed inset-0 z-[60] flex items-end justify-center" onClick={() => setFabOpen(false)}>
+            <div className="fixed inset-0 z-[60] flex items-end justify-center px-4 pb-4" onClick={() => setFabOpen(false)}>
               <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
               <div
-                className="h1-font relative w-full max-w-lg bg-white rounded-t-[28px] overflow-y-auto max-h-[90vh]"
-                style={{ animation: "speedDialUp 0.25s cubic-bezier(0.22,1,0.36,1)" }}
+                className="h1-font relative w-full max-w-lg bg-white rounded-[28px] flex flex-col"
+                style={{ animation: "speedDialUp 0.25s cubic-bezier(0.22,1,0.36,1)", maxHeight: "90vh" }}
                 onClick={e => e.stopPropagation()}
               >
-                <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4 mb-2" />
-
+                <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4 mb-2 flex-shrink-0" />
+                <div className="overflow-y-auto flex-1">
                 {/* Score header */}
                 <div className="px-6 pt-2 pb-5" style={{ borderBottom: "1px solid #f0f0f0" }}>
                   <div className="flex items-baseline gap-3 mb-1">
@@ -813,6 +810,7 @@ export default function HomePage() {
                 ))}
 
                 <div className="pb-8" />
+                </div>{/* end scrollable */}
               </div>
             </div>
           );
