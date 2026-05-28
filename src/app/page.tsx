@@ -349,43 +349,6 @@ export default function HomePage() {
       <div className="h1-font bg-[#f9f9f9] text-[#1a1c1c] min-h-screen">
         <main className="pt-4 pb-8 px-5 max-w-lg mx-auto">
 
-          {/* Greeting title */}
-          {(() => {
-            const h = now ? now.getHours() : 12;
-            const tod = h < 12 ? "morning" : h < 17 ? "afternoon" : "evening";
-            return <p className="text-[22px] font-bold text-[#1a1c1c] leading-snug text-center px-1 mb-1" style={{ fontFamily: "var(--font-hanken)" }}>Good {tod}.</p>;
-          })()}
-
-          {/* Greeting subtext */}
-          {(() => {
-            const h = now ? now.getHours() : 12;
-            let msg = "";
-            if (dayType === "match") {
-              const matchTimeStr = editedData.time || "18:30";
-              const [mH, mM] = matchTimeStr.split(":").map(Number);
-              const matchMins = mH * 60 + mM;
-              const nowMins = h * 60 + (now ? now.getMinutes() : 0);
-              const diffMins = matchMins - nowMins;
-              if (diffMins > 180) {
-                const hrs = Math.floor(diffMins / 60);
-                msg = `Match in ${hrs}h. Stay light, hydrate steadily, and eat your pre-game meal ${hrs > 4 ? "a few hours before" : "soon"}.`;
-              } else if (diffMins > 60) {
-                msg = "Time to warm up. Dynamic activation, no heavy food — just sip water and focus.";
-              } else if (diffMins > 0) {
-                msg = "Almost game time. Breathe, visualise, and trust your prep.";
-              } else {
-                msg = "Great match today. Prioritise recovery — stretch, eat protein, and rest up.";
-              }
-            } else if (dayType === "recovery") {
-              msg = "Recovery day. Keep moving gently, drink plenty of water, and get your protein in.";
-            } else if (dayType === "training") {
-              msg = "Training day. Make sure you're fuelled, warmed up, and ready to work on your patterns.";
-            } else {
-              msg = "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy.";
-            }
-            return <p className="text-[15px] text-[#3a4550] leading-snug text-center px-1 mb-5">{msg}</p>;
-          })()}
-
           {/* Horizontal day timeline */}
           {(() => {
             const pad = (n: number) => String(n).padStart(2, "0");
@@ -470,7 +433,7 @@ export default function HomePage() {
                           }}>
                             <span style={{ fontSize: 15, fontWeight: 700, color: isCurrent ? "white" : isPast ? "#b0b5b8" : "#c4c7c7" }}>{item.time}</span>
                           </div>
-                          <p style={{ fontSize: 10, fontWeight: 600, color: isCurrent ? item.color : isPast ? "#b0b5b8" : "#c4c7c7", textAlign: "center", marginTop: 6, lineHeight: 1.3, maxWidth: 108 }}>{item.title}</p>
+                          <p style={{ fontSize: 11, fontWeight: 600, color: isCurrent ? item.color : isPast ? "#b0b5b8" : "#c4c7c7", textAlign: "center", marginTop: 6, lineHeight: 1.3, maxWidth: 108 }}>{item.title}</p>
                         </div>
                       </React.Fragment>
                     );
@@ -583,6 +546,45 @@ export default function HomePage() {
               </div>
             );
           })()}
+
+          {/* Greeting title */}
+          {(() => {
+            const h = now ? now.getHours() : 12;
+            const tod = h < 12 ? "morning" : h < 17 ? "afternoon" : "evening";
+            return <p className="text-[22px] font-bold text-[#1a1c1c] leading-snug text-center px-1 mt-4 mb-1" style={{ fontFamily: "var(--font-hanken)" }}>Good {tod}.</p>;
+          })()}
+
+          {/* Greeting subtext */}
+          {(() => {
+            const h = now ? now.getHours() : 12;
+            let msg = "";
+            if (dayType === "match") {
+              const matchTimeStr = editedData.time || "18:30";
+              const [mH, mM] = matchTimeStr.split(":").map(Number);
+              const matchMins = mH * 60 + mM;
+              const nowMins = h * 60 + (now ? now.getMinutes() : 0);
+              const diffMins = matchMins - nowMins;
+              if (diffMins > 180) {
+                const hrs = Math.floor(diffMins / 60);
+                msg = `Match in ${hrs}h. Stay light, hydrate steadily, and eat your pre-game meal ${hrs > 4 ? "a few hours before" : "soon"}.`;
+              } else if (diffMins > 60) {
+                msg = "Time to warm up. Dynamic activation, no heavy food — just sip water and focus.";
+              } else if (diffMins > 0) {
+                msg = "Almost game time. Breathe, visualise, and trust your prep.";
+              } else {
+                msg = "Great match today. Prioritise recovery — stretch, eat protein, and rest up.";
+              }
+            } else if (dayType === "recovery") {
+              msg = "Recovery day. Keep moving gently, drink plenty of water, and get your protein in.";
+            } else if (dayType === "training") {
+              msg = "Training day. Make sure you're fuelled, warmed up, and ready to work on your patterns.";
+            } else {
+              msg = "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy.";
+            }
+            return <p className="text-[15px] text-[#3a4550] leading-snug text-center px-1 mb-2">{msg}</p>;
+          })()}
+
+          <div style={{ height: 300 }} />
 
           <Link href="/today" className="block text-center mb-2 text-[11px] font-bold tracking-widest uppercase text-[#5a7055] active:opacity-60">From your schedule</Link>
 
