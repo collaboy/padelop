@@ -172,24 +172,6 @@ export default function Nav() {
         </div>
       </header>
 
-      {/* Sub-header info bar */}
-      <div className="fixed top-16 w-full z-40 bg-[var(--surface)]/90 backdrop-blur-md border-b border-[var(--border)]">
-        <div className="grid grid-cols-2 max-w-7xl mx-auto">
-          <div className="px-5 py-1.5 border-r border-[var(--border)] flex flex-col items-center text-center">
-            <p className="text-[9px] font-bold tracking-widest uppercase text-[#5a7055] mb-0.5">Next Match</p>
-            <p className="text-[13px] font-semibold text-[var(--text)] truncate">
-              {matchDate && matchTime
-                ? `${new Date(matchDate + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} · ${matchTime}`
-                : "—"}
-            </p>
-          </div>
-          <div className="px-5 py-1.5 flex flex-col items-center text-center">
-            <p className="text-[9px] font-bold tracking-widest uppercase text-[#5a7055] mb-0.5">Today is a</p>
-            <p className="text-[13px] font-semibold text-[var(--text)]">{dayType}</p>
-          </div>
-        </div>
-      </div>
-
       {/* Notifications modal */}
       {notifOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-5" onClick={() => setNotifOpen(false)}>

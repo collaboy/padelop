@@ -347,7 +347,55 @@ export default function HomePage() {
       `}</style>
 
       <div className="h1-font bg-[#f9f9f9] text-[#1a1c1c] min-h-screen">
-        <main className="pt-[76px] pb-8 px-5 max-w-lg mx-auto">
+        <main className="pb-8 px-5 max-w-lg mx-auto">
+
+          {/* Info cells */}
+          {(() => {
+            const tomorrowDate = now ? new Date(now) : new Date(); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+            const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
+            const matchLabel = editedData.date && editedData.time
+              ? `${editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })} · ${editedData.time}`
+              : "—";
+            const dayLabels: Record<string, string> = { match: "Game Day", recovery: "Recovery Day", training: "Training Day", rest: "Rest Day" };
+            return (
+              <div className="grid grid-cols-2 -mx-5 border-b border-[var(--border)] bg-white">
+                <div className="px-5 py-2 flex flex-col items-center text-center border-r border-[var(--border)]">
+                  <p className="text-[9px] font-bold tracking-widest uppercase text-[#5a7055] mb-0.5">Next Match</p>
+                  <p className="text-[13px] font-semibold text-[#1a1c1c]">{matchLabel}</p>
+                </div>
+                <div className="px-5 py-2 flex flex-col items-center text-center">
+                  <p className="text-[9px] font-bold tracking-widest uppercase text-[#5a7055] mb-0.5">Today is a</p>
+                  <p className="text-[13px] font-semibold text-[#1a1c1c]">{dayLabels[dayType]}</p>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Greeting bar */}
+          {(() => {
+            const h = now ? now.getHours() : 12;
+            const tod = h < 12 ? "morning" : h < 17 ? "afternoon" : "evening";
+            let msg = "";
+            if (dayType === "match") {
+              const matchTimeStr = editedData.time || "18:30";
+              const [mH, mM] = matchTimeStr.split(":").map(Number);
+              const matchMins = mH * 60 + mM;
+              const nowMins = h * 60 + (now ? now.getMinutes() : 0);
+              const diffMins = matchMins - nowMins;
+              if (diffMins > 180) { const hrs = Math.floor(diffMins / 60); msg = `Match in ${hrs}h. Stay light, hydrate steadily, and eat your pre-game meal ${hrs > 4 ? "a few hours before" : "soon"}.`; }
+              else if (diffMins > 60) { msg = "Time to warm up. Dynamic activation, no heavy food — just sip water and focus."; }
+              else if (diffMins > 0) { msg = "Almost game time. Breathe, visualise, and trust your prep."; }
+              else { msg = "Great match today. Prioritise recovery — stretch, eat protein, and rest up."; }
+            } else if (dayType === "recovery") { msg = "Recovery day. Keep moving gently, drink plenty of water, and get your protein in.";
+            } else if (dayType === "training") { msg = "Training day. Make sure you're fuelled, warmed up, and ready to work on your patterns.";
+            } else { msg = "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy."; }
+            return (
+              <div className="-mx-5 border-b border-[var(--border)] bg-white px-5 py-3 text-center mb-4">
+                <p className="text-[22px] font-bold text-[#1a1c1c] leading-snug mb-0.5" style={{ fontFamily: "var(--font-hanken)" }}>Good {tod}.</p>
+                <p className="text-[14px] text-[#3a4550] leading-snug">{msg}</p>
+              </div>
+            );
+          })()}
 
           {/* Horizontal day timeline */}
           {(() => {
@@ -547,42 +595,6 @@ export default function HomePage() {
             );
           })()}
 
-          {/* Greeting title */}
-          {(() => {
-            const h = now ? now.getHours() : 12;
-            const tod = h < 12 ? "morning" : h < 17 ? "afternoon" : "evening";
-            return <p className="text-[22px] font-bold text-[#1a1c1c] leading-snug text-center px-1 mt-4 mb-1" style={{ fontFamily: "var(--font-hanken)" }}>Good {tod}.</p>;
-          })()}
-
-          {/* Greeting subtext */}
-          {(() => {
-            const h = now ? now.getHours() : 12;
-            let msg = "";
-            if (dayType === "match") {
-              const matchTimeStr = editedData.time || "18:30";
-              const [mH, mM] = matchTimeStr.split(":").map(Number);
-              const matchMins = mH * 60 + mM;
-              const nowMins = h * 60 + (now ? now.getMinutes() : 0);
-              const diffMins = matchMins - nowMins;
-              if (diffMins > 180) {
-                const hrs = Math.floor(diffMins / 60);
-                msg = `Match in ${hrs}h. Stay light, hydrate steadily, and eat your pre-game meal ${hrs > 4 ? "a few hours before" : "soon"}.`;
-              } else if (diffMins > 60) {
-                msg = "Time to warm up. Dynamic activation, no heavy food — just sip water and focus.";
-              } else if (diffMins > 0) {
-                msg = "Almost game time. Breathe, visualise, and trust your prep.";
-              } else {
-                msg = "Great match today. Prioritise recovery — stretch, eat protein, and rest up.";
-              }
-            } else if (dayType === "recovery") {
-              msg = "Recovery day. Keep moving gently, drink plenty of water, and get your protein in.";
-            } else if (dayType === "training") {
-              msg = "Training day. Make sure you're fuelled, warmed up, and ready to work on your patterns.";
-            } else {
-              msg = "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy.";
-            }
-            return <p className="text-[15px] text-[#3a4550] leading-snug text-center px-1 mb-2">{msg}</p>;
-          })()}
 
           <div style={{ height: 300 }} />
 
