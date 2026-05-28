@@ -33,7 +33,6 @@ export default function HomePage() {
   const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 60, hydration: 52, energy: 58, mobility: 58 });
   const [allTimeScores, setAllTimeScores] = useState<Scores>({ overall: 65, recovery: 60, hydration: 52, energy: 58, mobility: 58 });
   const [dayTypeOverride, setDayTypeOverride] = useState<"recovery" | "training" | "rest" | null>(null);
-  const [selectedScheduleIdx, setSelectedScheduleIdx] = useState<number | null>(null);
   const [selectedMetric, setSelectedMetric] = useState<string>("overall");
   const [now, setNow] = useState<Date | null>(null);
   const [matchReviewOpen, setMatchReviewOpen] = useState(false);
@@ -77,8 +76,6 @@ export default function HomePage() {
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const dragSlot = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const timelineRef = useRef<HTMLDivElement>(null);
-  const timelineScrolled = useRef(false);
 
   const handleSlotTap = (idx: number) => {
     if (selectedSlot === null) { setSelectedSlot(idx); return; }
@@ -133,37 +130,6 @@ export default function HomePage() {
     return () => clearInterval(id);
   }, []);
 
-  useEffect(() => {
-    if (timelineScrolled.current || !now) return;
-    const el = timelineRef.current;
-    if (!el) return;
-    const active = el.querySelector<HTMLElement>("[data-active]");
-    if (active) {
-      el.scrollLeft = active.offsetLeft - el.offsetWidth / 2 + active.offsetWidth / 2;
-      timelineScrolled.current = true;
-    }
-  }, [now]);
-
-  useEffect(() => {
-    const el = timelineRef.current;
-    if (!el) return;
-    const updateSelected = () => {
-      const center = el.scrollLeft + el.offsetWidth / 2;
-      const rings = el.querySelectorAll<HTMLElement>("[data-idx]");
-      let closest = 0, minDist = Infinity;
-      rings.forEach((ring) => {
-        const ringCenter = ring.offsetLeft + ring.offsetWidth / 2;
-        const dist = Math.abs(ringCenter - center);
-        if (dist < minDist) { minDist = dist; closest = parseInt(ring.dataset.idx!); }
-      });
-      setSelectedScheduleIdx(closest);
-    };
-    let timer: ReturnType<typeof setTimeout>;
-    const onScroll = () => { clearTimeout(timer); timer = setTimeout(updateSelected, 120); };
-    el.addEventListener("scrollend", updateSelected);
-    el.addEventListener("scroll", onScroll);
-    return () => { el.removeEventListener("scrollend", updateSelected); el.removeEventListener("scroll", onScroll); clearTimeout(timer); };
-  }, []);
 
   // Post-game review prompt: show once per match after match ends (30 min grace)
   useEffect(() => {
@@ -348,7 +314,7 @@ export default function HomePage() {
       `}</style>
 
       <div className="h1-font bg-[#f9f9f9] text-[#1a1c1c] min-h-screen">
-        <main className="pb-8 px-5 max-w-lg mx-auto">
+        <main className="pt-3 pb-8 px-5 max-w-lg mx-auto">
 
           {/* Info cells */}
           {(() => {
@@ -359,8 +325,8 @@ export default function HomePage() {
               : "—";
             const dayLabels: Record<string, string> = { match: "Game Day", recovery: "Recovery Day", training: "Training Day", rest: "Rest Day" };
             return (
-              <div className="grid grid-cols-2 -mx-5 border-b border-[var(--border)] bg-white">
-                <div className="px-5 py-2 flex flex-col items-center text-center border-r border-[var(--border)]">
+              <div className="bg-white rounded-[20px] h1-ambient border border-[#c4c7c7]/10 grid grid-cols-2 mb-3 overflow-hidden">
+                <div className="px-5 py-2 flex flex-col items-center text-center border-r border-[#e8e8e8]">
                   <p className="text-[9px] font-bold tracking-widest uppercase text-[#5a7055] mb-0.5">Next Match</p>
                   <p className="text-[13px] font-semibold text-[#1a1c1c]">{matchLabel}</p>
                 </div>
@@ -446,100 +412,6 @@ export default function HomePage() {
             </button>
           </div>
 
-          {/* Horizontal day timeline */}
-          {(() => {
-            const pad = (n: number) => String(n).padStart(2, "0");
-            const matchTime = editedData.time || "18:30";
-            const [mH, mM] = matchTime.split(":").map(Number);
-            const addMins = (h: number, m: number, delta: number) => { const total = h * 60 + m + delta; return `${pad(Math.floor(total / 60) % 24)}:${pad(total % 60)}`; };
-            const matchVenue = [editedData.club, editedData.court ? `Court ${editedData.court}` : ""].filter(Boolean).join(" — ") || "Court";
-            const schedules = {
-              match: [
-                { time: "07:00", title: "Wake up",           color: "#f59e0b" },
-                { time: "07:30", title: "Breakfast",          color: "#16a34a" },
-                { time: "09:00", title: "Mobility",           color: "#0891b2" },
-                { time: addMins(mH, mM, -360), title: "Pre-game meal", color: "#16a34a" },
-                { time: addMins(mH, mM, -60),  title: "Warmup",        color: "#2653d4" },
-                { time: matchTime,             title: "Match",          color: "#1e3a1e" },
-                { time: addMins(mH, mM, 90),   title: "Cool down",      color: "#7c3aed" },
-                { time: addMins(mH, mM, 120),  title: "Recovery meal",  color: "#16a34a" },
-                { time: "22:30", title: "Wind down",          color: "#94a3b8" },
-              ],
-              recovery: [
-                { time: "07:30", title: "Wake up",            color: "#f59e0b" },
-                { time: "08:00", title: "Breakfast",          color: "#16a34a" },
-                { time: "09:30", title: "Walk",               color: "#0891b2" },
-                { time: "10:30", title: "Foam roll",          color: "#7c3aed" },
-                { time: "13:00", title: "Lunch",              color: "#16a34a" },
-                { time: "15:30", title: "Cold shower",        color: "#2653d4" },
-                { time: "19:00", title: "Dinner",             color: "#16a34a" },
-                { time: "21:30", title: "Wind down",          color: "#94a3b8" },
-              ],
-              rest: [
-                { time: "07:00", title: "Wake up",            color: "#f59e0b" },
-                { time: "07:30", title: "Breakfast",          color: "#16a34a" },
-                { time: "09:30", title: "Mobility",           color: "#0891b2" },
-                { time: "12:30", title: "Lunch",              color: "#16a34a" },
-                { time: "15:00", title: "Active rest",        color: "#2653d4" },
-                { time: "19:00", title: "Dinner",             color: "#16a34a" },
-                { time: "21:00", title: "Visualise",          color: "#7c3aed" },
-                { time: "22:30", title: "Wind down",          color: "#94a3b8" },
-              ],
-              training: [
-                { time: "07:00", title: "Wake up",            color: "#f59e0b" },
-                { time: "07:30", title: "Breakfast",          color: "#16a34a" },
-                { time: "09:00", title: "Mobility",           color: "#0891b2" },
-                { time: "15:00", title: "Pre-session meal",   color: "#16a34a" },
-                { time: "17:00", title: "Activation",         color: "#2653d4" },
-                { time: "17:30", title: "Training",           color: "#1e3a1e" },
-                { time: "19:00", title: "Stretch",            color: "#7c3aed" },
-                { time: "19:30", title: "Protein",            color: "#16a34a" },
-                { time: "21:00", title: "Dinner",             color: "#16a34a" },
-                { time: "22:30", title: "Wind down",          color: "#94a3b8" },
-              ],
-            };
-            const schedule = schedules[dayType];
-            const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
-            const curMins = now ? now.getHours() * 60 + now.getMinutes() : -1;
-            let autoIdx = 0;
-            if (curMins >= toMins(schedule[schedule.length - 1].time)) { autoIdx = schedule.length - 1; }
-            else { for (let i = 0; i < schedule.length - 1; i++) { if (curMins >= toMins(schedule[i].time) && curMins < toMins(schedule[i + 1].time)) { autoIdx = i; break; } } }
-
-            return (
-              <div
-                ref={timelineRef}
-                className="overflow-x-auto mb-1 -mx-5"
-                style={{ scrollbarWidth: "none", scrollSnapType: "x mandatory" }}
-              >
-                <div className="flex items-start" style={{ width: "max-content", paddingLeft: "calc(50vw - 45px)", paddingRight: "calc(50vw - 45px)" }}>
-                  {schedule.map((item, i) => {
-                    const activeIdx = selectedScheduleIdx ?? autoIdx;
-                    const isCurrent = i === activeIdx;
-                    const isPast = i < activeIdx;
-                    return (
-                      <React.Fragment key={i}>
-                        {i > 0 && (
-                          <div style={{ width: "calc(50vw - 90px)", minWidth: 16, height: 2, background: isPast ? "#c4c7c7" : "#e2e2e2", marginTop: 44, flexShrink: 0 }} />
-                        )}
-                        <div className="flex flex-col items-center" style={{ width: 90, scrollSnapAlign: "center" }} data-idx={i} {...(i === autoIdx ? { "data-active": "true" } : {})}>
-                          <div style={{
-                            width: 90, height: 90, borderRadius: 45, flexShrink: 0,
-                            border: `2.5px solid ${isCurrent ? item.color : isPast ? "#c4c7c7" : "#e2e2e2"}`,
-                            background: isCurrent ? item.color : "white",
-                            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3,
-                          }}>
-                            <span style={{ fontSize: 13, fontWeight: 700, color: isCurrent ? "white" : isPast ? "#b0b5b8" : "#c4c7c7" }}>{item.time}</span>
-                          </div>
-                          <p style={{ fontSize: 10, fontWeight: 600, color: isCurrent ? item.color : isPast ? "#b0b5b8" : "#c4c7c7", textAlign: "center", marginTop: 5, lineHeight: 1.3, maxWidth: 82 }}>{item.title}</p>
-                        </div>
-                      </React.Fragment>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })()}
-
           {/* Do this now */}
           {(() => {
             const pad = (n: number) => String(n).padStart(2, "0");
@@ -601,7 +473,7 @@ export default function HomePage() {
             let autoIdx = 0;
             if (curMins >= toMins(schedule[schedule.length - 1].time)) { autoIdx = schedule.length - 1; }
             else { for (let i = 0; i < schedule.length - 1; i++) { if (curMins >= toMins(schedule[i].time) && curMins < toMins(schedule[i + 1].time)) { autoIdx = i; break; } } }
-            const item = schedule[selectedScheduleIdx ?? autoIdx];
+            const item = schedule[autoIdx];
             const detail = SCHEDULE_DETAILS[item.title];
             const SCHEDULE_PTS: Record<string, number> = {
               "Wake up & hydrate": 8, "Light breakfast": 5, "Breakfast": 5,
@@ -617,25 +489,63 @@ export default function HomePage() {
             };
             const pendingPts = SCHEDULE_PTS[item.title] ?? 0;
             return (
-              <button
-                  className="w-full bg-white rounded-[24px] px-5 py-5 flex items-center gap-4 active:opacity-60 transition-opacity text-left"
-                  style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${item.color}` }}
-                  onClick={() => detail && setScheduleModal({ title: item.title, subtitle: item.subtitle, detail, color: item.color })}
-                >
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: item.color + "18" }}>
-                    <div className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: item.color, "--glow": item.color } as React.CSSProperties} />
+              <>
+                <button
+                    className="w-full bg-white rounded-[24px] px-5 py-5 flex items-center gap-4 active:opacity-60 transition-opacity text-left"
+                    style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${item.color}` }}
+                    onClick={() => detail && setScheduleModal({ title: item.title, subtitle: item.subtitle, detail, color: item.color })}
+                  >
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: item.color + "18" }}>
+                      <div className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: item.color, "--glow": item.color } as React.CSSProperties} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Do this now</p>
+                      <p className="text-[20px] font-bold text-[#1a1c1c] leading-tight">{item.title}</p>
+                      {item.subtitle && <p className="text-[13px] text-[#4a5050] mt-1 leading-snug">{item.subtitle}</p>}
+                    </div>
+                    {detail && (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 18l6-6-6-6" />
+                      </svg>
+                    )}
+                </button>
+
+                {/* Today's schedule inline */}
+                <div className="bg-white rounded-[24px] mt-2" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8" }}>
+                  <div className="px-5 pt-4 pb-1">
+                    <p className="text-[13px] font-bold tracking-widest uppercase text-[#5a7055]">Today's Schedule</p>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Do this now</p>
-                    <p className="text-[20px] font-bold text-[#1a1c1c] leading-tight">{item.title}</p>
-                    {item.subtitle && <p className="text-[13px] text-[#4a5050] mt-1 leading-snug">{item.subtitle}</p>}
+                  <div className="px-5 pb-4">
+                    {schedule.map((s, i) => {
+                      const isCur = i === autoIdx;
+                      const isPast = !isCur && curMins > toMins(s.time);
+                      return (
+                        <div key={i} className="flex gap-4 py-2.5" style={{ borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f4" : "none" }}>
+                          <div className="flex flex-col items-center flex-shrink-0" style={{ width: 28 }}>
+                            <div
+                              className="w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0"
+                              style={{ background: isPast ? "#d0d3d6" : s.color, boxShadow: isCur ? `0 0 0 3px ${s.color}28` : "none" }}
+                            />
+                            {i < schedule.length - 1 && (
+                              <div className="w-0.5 mt-1 flex-1" style={{ background: isPast ? "#e2e2e2" : "#ebebeb", minHeight: 20 }} />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[11px] font-bold tracking-widest uppercase mb-0.5" style={{ color: isPast ? "#c4c7c7" : s.color }}>{s.time}</p>
+                            <p className="text-[15px] font-semibold leading-snug" style={{ color: isPast ? "#a0a5aa" : "#1a1c1c" }}>{s.title}</p>
+                            {s.subtitle && <p className="text-[12px] mt-0.5 leading-snug" style={{ color: isPast ? "#c4c7c7" : "#4a5050" }}>{s.subtitle}</p>}
+                          </div>
+                          {isCur && (
+                            <div className="flex-shrink-0 self-start mt-1">
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white" style={{ background: s.color }}>Now</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                  {detail && (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M9 18l6-6-6-6" />
-                    </svg>
-                  )}
-              </button>
+                </div>
+              </>
             );
           })()}
 
