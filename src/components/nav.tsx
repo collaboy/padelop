@@ -170,22 +170,22 @@ export default function Nav() {
         <div className="fixed inset-0 z-50 flex items-center justify-center px-5" onClick={() => setNotifOpen(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div
-            className="relative w-full max-w-lg bg-white rounded-[28px] overflow-hidden flex flex-col max-h-[88vh]"
+            className="relative w-full max-w-lg bg-[#1c1f23] rounded-[28px] overflow-hidden flex flex-col max-h-[88vh]"
             style={{ fontFamily: "var(--font-hanken)" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-6 pt-5 pb-4 flex items-center justify-between flex-shrink-0">
               <p className="text-[18px] font-semibold text-[var(--text)]">Notifications</p>
-              <button onClick={() => setNotifOpen(false)} className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4] transition-colors">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round">
+              <button onClick={() => setNotifOpen(false)} className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#272b30] transition-colors">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round">
                   <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
               </button>
             </div>
-            <div className="overflow-y-auto divide-y divide-[#f4f4f4]">
+            <div className="overflow-y-auto divide-y divide-[#272b30]">
               {notifications.length === 0 ? (
                 <div className="px-6 py-8 text-center">
-                  <p className="text-[14px] text-[#747878]">You&apos;re all caught up.</p>
+                  <p className="text-[14px] text-[#6b7480]">You&apos;re all caught up.</p>
                 </div>
               ) : (
                 <>
@@ -206,7 +206,7 @@ export default function Nav() {
                         )}
                         {rest.map((n, i) => (
                           <div key={i} className="flex items-start gap-4 px-6 py-4">
-                            <span className="text-[11px] font-semibold text-[#747878] flex-shrink-0 w-12 pt-0.5">{n.time}</span>
+                            <span className="text-[11px] font-semibold text-[#6b7480] flex-shrink-0 w-12 pt-0.5">{n.time}</span>
                             <div className="flex-1 min-w-0">
                               <p className="text-[14px] text-[var(--text)] leading-snug">{n.message}</p>
                               {n.link && <p className="text-[12px] font-semibold mt-1 text-[#4169e1]">{n.link} →</p>}
@@ -254,7 +254,7 @@ export default function Nav() {
       {/* Hamburger menu modal */}
       {menuOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-start justify-start pt-16" onClick={() => setMenuOpen(false)}>
-          <div className="w-full max-w-[320px] bg-white shadow-2xl mx-5 mt-2 rounded-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-[320px] bg-[#1c1f23] shadow-2xl mx-5 mt-2 rounded-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
             {items.map((item, i) => (
               <button
                 key={item.label}
@@ -277,7 +277,7 @@ export default function Nav() {
                 className="w-full flex items-center gap-4 px-6 py-5 text-base font-bold text-[var(--text)] active:bg-[var(--bg)] transition-colors"
                 style={{ borderTop: "1px solid var(--border)", borderBottom: i < dataItems.length - 1 ? "1px solid var(--border)" : "none" }}
               >
-                <span style={{ color: "#747878" }}>{item.icon}</span>
+                <span style={{ color: "#6b7480" }}>{item.icon}</span>
                 {item.label}
               </button>
             ))}

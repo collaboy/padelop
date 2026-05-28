@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { computeScores, loadScoringData, computeAllTimeScores, type Scores } from "@/lib/scoring";
 import { computeNotifications, type Notif } from "@/lib/notifications";
@@ -75,6 +75,8 @@ export default function HomePage() {
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
   const dragSlot = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const timelineScrolled = useRef(false);
 
   const handleSlotTap = (idx: number) => {
     if (selectedSlot === null) { setSelectedSlot(idx); return; }
@@ -128,6 +130,17 @@ export default function HomePage() {
     const id = setInterval(() => setNow(new Date()), 60_000);
     return () => clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    if (timelineScrolled.current || !now) return;
+    const el = timelineRef.current;
+    if (!el) return;
+    const active = el.querySelector<HTMLElement>("[data-active]");
+    if (active) {
+      el.scrollLeft = active.offsetLeft - el.offsetWidth / 2 + active.offsetWidth / 2;
+      timelineScrolled.current = true;
+    }
+  }, [now]);
 
   // Post-game review prompt: show once per match after match ends (30 min grace)
   useEffect(() => {
@@ -348,10 +361,103 @@ export default function HomePage() {
             } else {
               msg = "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy.";
             }
-            return <p className="text-[15px] text-[#5a6370] leading-snug text-center px-1 mb-4">{msg}</p>;
+            return <p className="text-[15px] text-[#3a4550] leading-snug text-center px-1 mb-5">{msg}</p>;
           })()}
 
-          <Link href="/today" className="block text-center mb-2 text-[11px] font-bold tracking-widest uppercase text-[#9aab96] active:opacity-60">From your schedule</Link>
+          {/* Horizontal day timeline */}
+          {(() => {
+            const pad = (n: number) => String(n).padStart(2, "0");
+            const matchTime = editedData.time || "18:30";
+            const [mH, mM] = matchTime.split(":").map(Number);
+            const addMins = (h: number, m: number, delta: number) => { const total = h * 60 + m + delta; return `${pad(Math.floor(total / 60) % 24)}:${pad(total % 60)}`; };
+            const matchVenue = [editedData.club, editedData.court ? `Court ${editedData.court}` : ""].filter(Boolean).join(" — ") || "Court";
+            const schedules = {
+              match: [
+                { time: "07:00", title: "Wake up",           color: "#f59e0b" },
+                { time: "07:30", title: "Breakfast",          color: "#16a34a" },
+                { time: "09:00", title: "Mobility",           color: "#0891b2" },
+                { time: addMins(mH, mM, -360), title: "Pre-game meal", color: "#16a34a" },
+                { time: addMins(mH, mM, -60),  title: "Warmup",        color: "#2653d4" },
+                { time: matchTime,             title: "Match",          color: "#1e3a1e" },
+                { time: addMins(mH, mM, 90),   title: "Cool down",      color: "#7c3aed" },
+                { time: addMins(mH, mM, 120),  title: "Recovery meal",  color: "#16a34a" },
+                { time: "22:30", title: "Wind down",          color: "#94a3b8" },
+              ],
+              recovery: [
+                { time: "07:30", title: "Wake up",            color: "#f59e0b" },
+                { time: "08:00", title: "Breakfast",          color: "#16a34a" },
+                { time: "09:30", title: "Walk",               color: "#0891b2" },
+                { time: "10:30", title: "Foam roll",          color: "#7c3aed" },
+                { time: "13:00", title: "Lunch",              color: "#16a34a" },
+                { time: "15:30", title: "Cold shower",        color: "#2653d4" },
+                { time: "19:00", title: "Dinner",             color: "#16a34a" },
+                { time: "21:30", title: "Wind down",          color: "#94a3b8" },
+              ],
+              rest: [
+                { time: "07:00", title: "Wake up",            color: "#f59e0b" },
+                { time: "07:30", title: "Breakfast",          color: "#16a34a" },
+                { time: "09:30", title: "Mobility",           color: "#0891b2" },
+                { time: "12:30", title: "Lunch",              color: "#16a34a" },
+                { time: "15:00", title: "Active rest",        color: "#2653d4" },
+                { time: "19:00", title: "Dinner",             color: "#16a34a" },
+                { time: "21:00", title: "Visualise",          color: "#7c3aed" },
+                { time: "22:30", title: "Wind down",          color: "#94a3b8" },
+              ],
+              training: [
+                { time: "07:00", title: "Wake up",            color: "#f59e0b" },
+                { time: "07:30", title: "Breakfast",          color: "#16a34a" },
+                { time: "09:00", title: "Mobility",           color: "#0891b2" },
+                { time: "15:00", title: "Pre-session meal",   color: "#16a34a" },
+                { time: "17:00", title: "Activation",         color: "#2653d4" },
+                { time: "17:30", title: "Training",           color: "#1e3a1e" },
+                { time: "19:00", title: "Stretch",            color: "#7c3aed" },
+                { time: "19:30", title: "Protein",            color: "#16a34a" },
+                { time: "21:00", title: "Dinner",             color: "#16a34a" },
+                { time: "22:30", title: "Wind down",          color: "#94a3b8" },
+              ],
+            };
+            const schedule = schedules[dayType];
+            const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+            const curMins = now ? now.getHours() * 60 + now.getMinutes() : -1;
+            let autoIdx = 0;
+            if (curMins >= toMins(schedule[schedule.length - 1].time)) { autoIdx = schedule.length - 1; }
+            else { for (let i = 0; i < schedule.length - 1; i++) { if (curMins >= toMins(schedule[i].time) && curMins < toMins(schedule[i + 1].time)) { autoIdx = i; break; } } }
+
+            return (
+              <div
+                ref={timelineRef}
+                className="overflow-x-auto mb-5 -mx-5"
+                style={{ scrollbarWidth: "none", scrollSnapType: "x mandatory" }}
+              >
+                <div className="flex items-start" style={{ width: "max-content", paddingLeft: "calc(50vw - 60px)", paddingRight: "calc(50vw - 60px)" }}>
+                  {schedule.map((item, i) => {
+                    const isCurrent = i === autoIdx;
+                    const isPast = i < autoIdx;
+                    return (
+                      <React.Fragment key={i}>
+                        {i > 0 && (
+                          <div style={{ width: "calc(50vw - 120px)", minWidth: 20, height: 2, background: isPast ? "#c4c7c7" : "#e2e2e2", marginTop: 59, flexShrink: 0 }} />
+                        )}
+                        <div className="flex flex-col items-center" style={{ width: 120, scrollSnapAlign: "center" }} {...(isCurrent ? { "data-active": "true" } : {})}>
+                          <div style={{
+                            width: 120, height: 120, borderRadius: 60, flexShrink: 0,
+                            border: `2.5px solid ${isCurrent ? item.color : isPast ? "#c4c7c7" : "#e2e2e2"}`,
+                            background: isCurrent ? item.color : "white",
+                            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3,
+                          }}>
+                            <span style={{ fontSize: 15, fontWeight: 700, color: isCurrent ? "white" : isPast ? "#b0b5b8" : "#c4c7c7" }}>{item.time}</span>
+                          </div>
+                          <p style={{ fontSize: 10, fontWeight: 600, color: isCurrent ? item.color : isPast ? "#b0b5b8" : "#c4c7c7", textAlign: "center", marginTop: 6, lineHeight: 1.3, maxWidth: 108 }}>{item.title}</p>
+                        </div>
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
+          <Link href="/today" className="block text-center mb-2 text-[11px] font-bold tracking-widest uppercase text-[#5a7055] active:opacity-60">From your schedule</Link>
 
           {/* Do this now */}
           {(() => {
@@ -430,8 +536,12 @@ export default function HomePage() {
             };
             const pendingPts = SCHEDULE_PTS[item.title] ?? 0;
             return (
+              <div className="mb-3">
+                <div className="flex justify-center">
+                  <div style={{ width: 0, height: 0, borderLeft: "11px solid transparent", borderRight: "11px solid transparent", borderBottom: `11px solid ${item.color}` }} />
+                </div>
               <button
-                  className="w-full bg-white rounded-[24px] border border-[#c4c7c7]/10 px-5 py-3 flex items-center gap-3 mb-3 active:opacity-60 transition-opacity text-left"
+                  className="w-full bg-white rounded-[24px] border border-[#c4c7c7]/10 px-5 py-3 flex items-center gap-3 active:opacity-60 transition-opacity text-left"
                   style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)" }}
                   onClick={() => detail && setScheduleModal({ title: item.title, subtitle: item.subtitle, detail, color: item.color })}
                 >
@@ -439,9 +549,9 @@ export default function HomePage() {
                     <div className="w-3 h-3 rounded-full animate-breathe" style={{ background: item.color, "--glow": item.color } as React.CSSProperties} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-bold tracking-widests uppercase text-[#9aab96] mb-0.5">Do this now</p>
+                    <p className="text-[11px] font-bold tracking-widests uppercase text-[#5a7055] mb-0.5">Do this now</p>
                     <p className="text-[16px] font-semibold text-[#1a1c1c] leading-tight">{item.title}</p>
-                    {item.subtitle && <p className="text-[13px] text-[#747878] mt-0.5 leading-snug">{item.subtitle}</p>}
+                    {item.subtitle && <p className="text-[13px] text-[#4a5050] mt-0.5 leading-snug">{item.subtitle}</p>}
                   </div>
                   {detail && (
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -449,6 +559,7 @@ export default function HomePage() {
                     </svg>
                   )}
               </button>
+              </div>
             );
           })()}
 
@@ -460,7 +571,7 @@ export default function HomePage() {
               const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
               return <p className="text-[15px] font-semibold text-[#1a1c1c] mb-4">Next Match · <span className="text-[#2653d4]">{label} {editedData.time}</span></p>;
             })() : (
-              <button onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }} className="text-[13px] font-semibold text-[#9aab96] mb-4 active:opacity-60">Add your next match</button>
+              <button onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }} className="text-[13px] font-semibold text-[#5a7055] mb-4 active:opacity-60">Add your next match</button>
             )}
             <ScoreRing />
             <button onClick={() => setFabOpen(true)} className="flex items-center gap-2 px-4 py-2 mt-4 rounded-full bg-[#f4f4f4] active:opacity-60 transition-opacity">
@@ -483,11 +594,11 @@ export default function HomePage() {
               const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
               return <p className="text-[15px] font-semibold text-[#1a1c1c] mb-2">Next Match · <span className="text-[#2653d4]">{label} {editedData.time}</span></p>;
             })() : (
-              <button onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }} className="text-[13px] font-semibold text-[#9aab96] mb-2 active:opacity-60">Add your next match</button>
+              <button onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }} className="text-[13px] font-semibold text-[#5a7055] mb-2 active:opacity-60">Add your next match</button>
             )}
             <ScoreGauge />
             <div className="flex items-baseline gap-2 mt-2">
-              <p className="text-[11px] font-bold tracking-widest uppercase text-[#9aab96]">Match Readiness</p>
+              <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055]">Match Readiness</p>
               <span className="text-[11px] font-bold text-[#2653d4]">{Math.round(scores.overall)}</span>
             </div>
             <button onClick={() => setFabOpen(true)} className="flex items-center gap-2 px-4 py-2 mt-4 rounded-full bg-[#f4f4f4] active:opacity-60 transition-opacity">
@@ -550,7 +661,7 @@ export default function HomePage() {
                     <div className="flex items-center justify-between mb-1">
                       <h3 className="text-[16px] font-semibold text-black">{dayType === "match" ? "Match Day Essentials" : dayType === "recovery" ? "Recovery Essentials" : dayType === "training" ? "Training Essentials" : "Rest Day Essentials"}</h3>
                       {doneCount > 0 && (
-                        <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: doneCount === total ? "#caecbc" : "#f4f4f4", color: doneCount === total ? "#496640" : "#747878" }}>
+                        <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: doneCount === total ? "#caecbc" : "#f4f4f4", color: doneCount === total ? "#496640" : "#4a5050" }}>
                           {doneCount === total ? "⚡ All done" : `${doneCount}/${total}`}
                         </span>
                       )}
@@ -560,8 +671,8 @@ export default function HomePage() {
                       className="flex items-center gap-1.5 mb-4 active:opacity-60 transition-opacity"
                       style={{ cursor: dayType === "match" ? "default" : "pointer" }}
                     >
-                      <span className="text-[#747878]">{DAY_TYPE_META[dayType].icon}</span>
-                      <span className="text-[11px] font-semibold text-[#747878]">{DAY_TYPE_META[dayType].label}</span>
+                      <span className="text-[#4a5050]">{DAY_TYPE_META[dayType].icon}</span>
+                      <span className="text-[11px] font-semibold text-[#4a5050]">{DAY_TYPE_META[dayType].label}</span>
                       {dayType !== "match" && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>}
                     </button>
                     <div className="space-y-4">
@@ -572,15 +683,15 @@ export default function HomePage() {
                             <span className="material-symbols-outlined text-[#496640] opacity-0 peer-checked:opacity-100 transition-opacity" style={{ fontSize: 18, fontVariationSettings: "'FILL' 1, 'wght' 600" }}>check</span>
                           </label>
                           <button onClick={() => setRoutineModal({ label, detail })} className="flex-1 text-left active:opacity-60 transition-opacity">
-                            <span className={`h1-body-md text-[#444748] ${checked ? "line-through opacity-50" : ""}`}>{label}</span>
+                            <span className={`h1-body-md text-[#2c3235] ${checked ? "line-through opacity-50" : ""}`}>{label}</span>
                           </button>
-                          <span className={`text-[11px] font-bold flex-shrink-0 ${checked ? "text-[#9aab96]" : "text-[#2653d4]"}`}>+{pts}</span>
+                          <span className={`text-[11px] font-bold flex-shrink-0 ${checked ? "text-[#5a7055]" : "text-[#2653d4]"}`}>+{pts}</span>
                         </div>
                       ))}
                     </div>
                     <button onClick={() => setMustDoExpanded(o => !o)} className="flex items-center gap-1 pt-3 active:opacity-60 transition-opacity">
-                      <span className="text-[13px] font-semibold text-[#747878]">{mustDoExpanded ? "Less" : "More"}</span>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: mustDoExpanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                      <span className="text-[13px] font-semibold text-[#4a5050]">{mustDoExpanded ? "Less" : "More"}</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: mustDoExpanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
                         <path d="M6 9l6 6 6-6" />
                       </svg>
                     </button>
@@ -652,7 +763,7 @@ export default function HomePage() {
                 <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4 mb-1" />
                 <div className="px-6 pt-3 pb-4">
                   <p className="h1-headline-md text-[#1a1c1c]">Boost Score</p>
-                  <p className="text-[13px] text-[#747878] mt-0.5">Scores recalculate instantly</p>
+                  <p className="text-[13px] text-[#4a5050] mt-0.5">Scores recalculate instantly</p>
                 </div>
 
                 {/* Daily Log items */}
@@ -668,13 +779,13 @@ export default function HomePage() {
                     </div>
                     <div className="flex-1 min-w-0 text-left">
                       <p className="text-[15px] font-semibold text-[#1a1c1c]">{row.label}</p>
-                      <p className="text-[12px] text-[#747878] mt-0.5">{row.sub}</p>
+                      <p className="text-[12px] text-[#4a5050] mt-0.5">{row.sub}</p>
                       <p className="text-[10px] font-semibold mt-1" style={{ color: row.color + "99" }}>→ {row.affects}</p>
                     </div>
                     {row.done ? (
                       <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#caecbc] text-[#496640] whitespace-nowrap flex-shrink-0">{row.badge}</span>
                     ) : (
-                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#f4f4f4] text-[#747878] flex-shrink-0">Not yet</span>
+                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#f4f4f4] text-[#4a5050] flex-shrink-0">Not yet</span>
                     )}
                   </button>
                 ))}
@@ -690,7 +801,7 @@ export default function HomePage() {
                   </div>
                   <div className="flex-1 min-w-0 text-left">
                     <p className="text-[15px] font-semibold text-[#1a1c1c]">Add a match</p>
-                    <p className="text-[12px] text-[#747878] mt-0.5">Upload booking or enter manually</p>
+                    <p className="text-[12px] text-[#4a5050] mt-0.5">Upload booking or enter manually</p>
                   </div>
                   <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="#c4c7c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1,1 6,6 1,11"/></svg>
                 </button>
@@ -719,14 +830,14 @@ export default function HomePage() {
                   {extractedData ? "Confirm Match Info" : "Add Match Info"}
                 </p>
                 {!uploading && (
-                  <button onClick={() => setMatchInfoOpen(false)} className="text-[#747878] active:opacity-50">
+                  <button onClick={() => setMatchInfoOpen(false)} className="text-[#4a5050] active:opacity-50">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                       <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
                     </svg>
                   </button>
                 )}
               </div>
-              <p className="h1-body-md text-[#444748] mt-0.5">
+              <p className="h1-body-md text-[#2c3235] mt-0.5">
                 {extractedData ? "Check the details and edit if needed." : "Upload a screenshot of your booking or group chat."}
               </p>
             </div>
@@ -738,7 +849,7 @@ export default function HomePage() {
                   <svg className="h1-spin" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#496640" strokeWidth="2.5" strokeLinecap="round">
                     <path d="M12 2a10 10 0 0 1 10 10" />
                   </svg>
-                  <p className="text-[14px] font-semibold text-[#444748]">Analysing screenshot…</p>
+                  <p className="text-[14px] font-semibold text-[#2c3235]">Analysing screenshot…</p>
                 </div>
               )}
 
@@ -764,7 +875,7 @@ export default function HomePage() {
                     </svg>
                     <div className="text-center">
                       <p className="text-[14px] font-semibold text-[#1a1c1c]">Choose screenshot</p>
-                      <p className="text-[12px] text-[#747878] mt-0.5">Booking confirmation or WhatsApp message</p>
+                      <p className="text-[12px] text-[#4a5050] mt-0.5">Booking confirmation or WhatsApp message</p>
                     </div>
                   </label>
                   {uploadError && (
@@ -772,7 +883,7 @@ export default function HomePage() {
                   )}
                   <button
                     onClick={() => { const blank = Object.fromEntries(Object.keys(FIELD_LABELS).map(k => [k, ""])); setExtractedData(blank); setEditedData(blank); setPlayerSlots(["","","",""]); }}
-                    className="w-full text-center text-[13px] font-semibold text-[#747878] active:opacity-50 transition-opacity"
+                    className="w-full text-center text-[13px] font-semibold text-[#4a5050] active:opacity-50 transition-opacity"
                   >
                     or insert manually
                   </button>
@@ -786,7 +897,7 @@ export default function HomePage() {
                   {/* Date + Time row */}
                   <div className="flex gap-3">
                     <div className="flex-1">
-                      <p className="text-[10px] font-bold tracking-widest uppercase text-[#747878] mb-1.5">Date</p>
+                      <p className="text-[10px] font-bold tracking-widest uppercase text-[#4a5050] mb-1.5">Date</p>
                       <input
                         type="date"
                         className="h1-field-input text-[13px] text-center"
@@ -795,7 +906,7 @@ export default function HomePage() {
                       />
                     </div>
                     <div className="flex-1">
-                      <p className="text-[10px] font-bold tracking-widest uppercase text-[#747878] mb-1.5">Time</p>
+                      <p className="text-[10px] font-bold tracking-widest uppercase text-[#4a5050] mb-1.5">Time</p>
                       <input
                         type="time"
                         className="h1-field-input text-[13px] text-center"
@@ -807,7 +918,7 @@ export default function HomePage() {
 
                   {/* Teams */}
                   <div>
-                    <p className="text-[10px] font-bold tracking-widest uppercase text-[#747878] mb-2">Players</p>
+                    <p className="text-[10px] font-bold tracking-widest uppercase text-[#4a5050] mb-2">Players</p>
                     <div className="flex items-center gap-2">
                       {/* Team A */}
                       <div className="flex-1 flex flex-col gap-2">
@@ -824,13 +935,13 @@ export default function HomePage() {
 
                       {/* VS */}
                       <div className="flex flex-col items-center gap-1 px-1">
-                        <span className="text-[11px] font-black text-[#747878] tracking-widest">VS</span>
+                        <span className="text-[11px] font-black text-[#4a5050] tracking-widest">VS</span>
                         <button
                           onClick={() => setPlayerSlots(s => [s[2], s[3], s[0], s[1]])}
                           className="w-7 h-7 rounded-full bg-[#f4f4f4] flex items-center justify-center active:scale-90 transition-transform"
                           title="Swap teams"
                         >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M7 16V4m0 0L3 8m4-4l4 4"/><path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
                           </svg>
                         </button>
@@ -854,7 +965,7 @@ export default function HomePage() {
                   {/* Club + Court */}
                   <div className="flex gap-3">
                     <div className="flex-1">
-                      <p className="text-[10px] font-bold tracking-widest uppercase text-[#747878] mb-1.5">Club</p>
+                      <p className="text-[10px] font-bold tracking-widest uppercase text-[#4a5050] mb-1.5">Club</p>
                       <input
                         className="h1-field-input text-[13px]"
                         value={editedData.club ?? ""}
@@ -863,7 +974,7 @@ export default function HomePage() {
                       />
                     </div>
                     <div className="flex-1">
-                      <p className="text-[10px] font-bold tracking-widest uppercase text-[#747878] mb-1.5">Court</p>
+                      <p className="text-[10px] font-bold tracking-widest uppercase text-[#4a5050] mb-1.5">Court</p>
                       <input
                         className="h1-field-input text-[13px] text-center"
                         value={editedData.court ?? ""}
@@ -883,7 +994,7 @@ export default function HomePage() {
 
                   <button
                     onClick={() => { setExtractedData(null); setUploadError(null); setPlayerSlots(["","","",""]); setSelectedSlot(null); }}
-                    className="w-full py-2 text-[13px] text-[#747878] active:opacity-50"
+                    className="w-full py-2 text-[13px] text-[#4a5050] active:opacity-50"
                   >
                     Upload a different screenshot
                   </button>
@@ -914,7 +1025,7 @@ export default function HomePage() {
               <h3 className="h1-headline-md text-[#1a1c1c]">{routineModal.label}</h3>
             </div>
             <div className="px-6 py-5 pb-10">
-              <p className="h1-body-lg text-[#444748] leading-relaxed">{routineModal.detail}</p>
+              <p className="h1-body-lg text-[#2c3235] leading-relaxed">{routineModal.detail}</p>
             </div>
           </div>
         </div>
@@ -935,11 +1046,11 @@ export default function HomePage() {
                 <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: scheduleModal.color }}>Today&apos;s Schedule</p>
               </div>
               <h3 className="h1-headline-md text-[#1a1c1c]">{scheduleModal.title}</h3>
-              {scheduleModal.subtitle && <p className="text-[13px] text-[#444748] mt-0.5">{scheduleModal.subtitle}</p>}
+              {scheduleModal.subtitle && <p className="text-[13px] text-[#2c3235] mt-0.5">{scheduleModal.subtitle}</p>}
             </div>
             {/* Body */}
             <div className="px-6 py-5 pb-10">
-              <p className="h1-body-lg text-[#444748] leading-relaxed">{scheduleModal.detail}</p>
+              <p className="h1-body-lg text-[#2c3235] leading-relaxed">{scheduleModal.detail}</p>
             </div>
           </div>
         </div>
@@ -952,7 +1063,7 @@ export default function HomePage() {
           <div className="h1-font relative w-full max-w-lg bg-white rounded-[28px] overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <div className="px-6 pt-5 pb-2">
               <p className="h1-headline-md text-[#1a1c1c]">Add Match</p>
-              <p className="text-[13px] text-[#747878] mt-0.5">How would you like to add it?</p>
+              <p className="text-[13px] text-[#4a5050] mt-0.5">How would you like to add it?</p>
             </div>
             <div className="px-6 pb-6 mt-3 flex flex-col gap-3">
               <button
@@ -964,7 +1075,7 @@ export default function HomePage() {
                 </svg>
                 <div>
                   <p className="text-[14px] font-semibold text-[#1a1c1c]">Upload Screenshot</p>
-                  <p className="text-[12px] text-[#747878]">Booking confirmation or WhatsApp</p>
+                  <p className="text-[12px] text-[#4a5050]">Booking confirmation or WhatsApp</p>
                 </div>
               </button>
               <button
@@ -976,7 +1087,7 @@ export default function HomePage() {
                 </svg>
                 <div>
                   <p className="text-[14px] font-semibold text-[#1a1c1c]">Insert Manually</p>
-                  <p className="text-[12px] text-[#747878]">Enter date, time, location, players</p>
+                  <p className="text-[12px] text-[#4a5050]">Enter date, time, location, players</p>
                 </div>
               </button>
             </div>
@@ -992,22 +1103,22 @@ export default function HomePage() {
             <div className="px-6 pt-6 pb-4 flex items-center justify-between">
               <div>
                 <p className="h1-headline-md text-[#1a1c1c]">Hydration Check</p>
-                <p className="text-[13px] text-[#747878] mt-0.5">Log your water intake today</p>
+                <p className="text-[13px] text-[#4a5050] mt-0.5">Log your water intake today</p>
               </div>
               <button onClick={() => setHydroOpen(false)} className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4]">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
             <div className="px-6 pb-8 flex flex-col gap-6">
               <div>
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#747878] mb-3">How much have you drunk today?</p>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">How much have you drunk today?</p>
                 <div className="flex gap-2 flex-wrap">
                   {["<1L","1–1.5L","1.5–2L","2–2.5L","2.5–3L","3L+"].map(n => {
                     const sel = hydrationLog.litres === n;
                     return (
                       <button key={n} onClick={() => setHydrationLog(l => ({ ...l, litres: n }))}
                         className="flex-1 py-2.5 rounded-2xl border-2 text-[12px] font-bold transition-all active:scale-95"
-                        style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9", color: sel ? "#2653d4" : "#747878" }}>
+                        style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9", color: sel ? "#2653d4" : "#4a5050" }}>
                         {n}
                       </button>
                     );
@@ -1015,7 +1126,7 @@ export default function HomePage() {
                 </div>
               </div>
               <div>
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#747878] mb-3">What did you drink?</p>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">What did you drink?</p>
                 <div className="flex flex-wrap gap-2">
                   {["Water","Sparkling water","Sports drink","Coconut water","Tea / Coffee","Juice","Milk","Protein shake"].map(drink => {
                     const sel = hydrationLog.timing.includes(drink);
@@ -1023,7 +1134,7 @@ export default function HomePage() {
                       <button key={drink}
                         onClick={() => setHydrationLog(l => ({ ...l, timing: sel ? l.timing.filter(d => d !== drink) : [...l.timing, drink] }))}
                         className="px-3 py-1.5 rounded-full border text-[12px] font-bold transition-all active:scale-95"
-                        style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9", color: sel ? "#2653d4" : "#747878" }}>
+                        style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9", color: sel ? "#2653d4" : "#4a5050" }}>
                         {drink}
                       </button>
                     );
@@ -1031,8 +1142,8 @@ export default function HomePage() {
                 </div>
               </div>
               <div>
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#747878] mb-1">Urine colour check</p>
-                <p className="text-[11px] text-[#747878] mb-3">Best proxy for hydration status</p>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-1">Urine colour check</p>
+                <p className="text-[11px] text-[#4a5050] mb-3">Best proxy for hydration status</p>
                 <div className="flex gap-2">
                   {[
                     { v: "clear",  label: "Clear",       bg: "#f0f9ff", border: "#bae6fd" },
@@ -1045,7 +1156,7 @@ export default function HomePage() {
                     return (
                       <button key={v} onClick={() => setHydrationLog(l => ({ ...l, urine: v }))}
                         className="flex-1 py-2.5 rounded-2xl border-2 text-[10px] font-bold transition-all active:scale-95 text-center"
-                        style={{ borderColor: sel ? border : "#e2e2e2", background: sel ? bg : "#f9f9f9", color: "#747878" }}>
+                        style={{ borderColor: sel ? border : "#e2e2e2", background: sel ? bg : "#f9f9f9", color: "#4a5050" }}>
                         {label}
                       </button>
                     );
@@ -1053,7 +1164,7 @@ export default function HomePage() {
                 </div>
               </div>
               <div>
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#747878] mb-3">How do you feel?</p>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">How do you feel?</p>
                 <div className="flex gap-3">
                   {([["bad","Thirsty"],["ok","OK"],["great","Hydrated"]] as const).map(([v, label]) => {
                     const sel = hydrationLog.quality === v;
@@ -1061,15 +1172,15 @@ export default function HomePage() {
                       <button key={v} onClick={() => setHydrationLog(l => ({ ...l, quality: v }))}
                         className="flex-1 flex flex-col items-center gap-1.5 py-3 rounded-2xl border-2 transition-all active:scale-95"
                         style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9" }}>
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={sel ? "#2653d4" : "#747878"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={sel ? "#2653d4" : "#4a5050"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                           <circle cx="12" cy="12" r="9" />
                           {v === "bad"   && <path d="M8 17c0-1.5 1.5-2.5 4-2.5s4 1 4 2.5" />}
                           {v === "ok"    && <line x1="9" y1="15.5" x2="15" y2="15.5" />}
                           {v === "great" && <path d="M8 14c1 2 6 2 8 0" />}
-                          <circle cx="9" cy="9.5" r="0.8" fill={sel ? "#2653d4" : "#747878"} stroke="none" />
-                          <circle cx="15" cy="9.5" r="0.8" fill={sel ? "#2653d4" : "#747878"} stroke="none" />
+                          <circle cx="9" cy="9.5" r="0.8" fill={sel ? "#2653d4" : "#4a5050"} stroke="none" />
+                          <circle cx="15" cy="9.5" r="0.8" fill={sel ? "#2653d4" : "#4a5050"} stroke="none" />
                         </svg>
-                        <span className="text-[10px] font-bold tracking-wide" style={{ color: sel ? "#2653d4" : "#747878" }}>{label}</span>
+                        <span className="text-[10px] font-bold tracking-wide" style={{ color: sel ? "#2653d4" : "#4a5050" }}>{label}</span>
                       </button>
                     );
                   })}
@@ -1103,17 +1214,17 @@ export default function HomePage() {
             <div className="px-6 pt-6 pb-4 flex items-center justify-between">
               <div>
                 <p className="h1-headline-md text-[#1a1c1c]">Log Nutrition</p>
-                <p className="text-[13px] text-[#747878] mt-0.5">Track your recovery fuelling today</p>
+                <p className="text-[13px] text-[#4a5050] mt-0.5">Track your recovery fuelling today</p>
               </div>
               <button onClick={() => setNutritionOpen(false)} className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4]">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
             <div className="px-6 pb-8 flex flex-col gap-6">
 
               {/* Protein rating */}
               <div>
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#747878] mb-3">How was your protein intake today?</p>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">How was your protein intake today?</p>
                 <div className="flex gap-3">
                   {([["low", "Not enough"], ["mid", "Getting there"], ["high", "Nailed it"]] as const).map(([v, label]) => {
                     const sel = nutritionLog.proteinRating === v;
@@ -1121,15 +1232,15 @@ export default function HomePage() {
                       <button key={v} onClick={() => setNutritionLog(l => ({ ...l, proteinRating: v }))}
                         className="flex-1 flex flex-col items-center gap-2 py-3 rounded-2xl border-2 transition-all active:scale-95"
                         style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9" }}>
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={sel ? "#2653d4" : "#747878"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={sel ? "#2653d4" : "#4a5050"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                           <circle cx="12" cy="12" r="9" />
                           {v === "low"  && <path d="M8 17c0-1.5 1.5-2.5 4-2.5s4 1 4 2.5" />}
                           {v === "mid"  && <line x1="9" y1="15.5" x2="15" y2="15.5" />}
                           {v === "high" && <path d="M8 14c1 2 6 2 8 0" />}
-                          <circle cx="9" cy="9.5" r="0.8" fill={sel ? "#2653d4" : "#747878"} stroke="none" />
-                          <circle cx="15" cy="9.5" r="0.8" fill={sel ? "#2653d4" : "#747878"} stroke="none" />
+                          <circle cx="9" cy="9.5" r="0.8" fill={sel ? "#2653d4" : "#4a5050"} stroke="none" />
+                          <circle cx="15" cy="9.5" r="0.8" fill={sel ? "#2653d4" : "#4a5050"} stroke="none" />
                         </svg>
-                        <span className="text-[10px] font-bold tracking-wide" style={{ color: sel ? "#2653d4" : "#747878" }}>{label}</span>
+                        <span className="text-[10px] font-bold tracking-wide" style={{ color: sel ? "#2653d4" : "#4a5050" }}>{label}</span>
                       </button>
                     );
                   })}
@@ -1138,7 +1249,7 @@ export default function HomePage() {
 
               {/* Protein sources */}
               <div>
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#747878] mb-3">What protein sources did you have?</p>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">What protein sources did you have?</p>
                 <div className="flex flex-wrap gap-2">
                   {["Eggs","Chicken","Fish","Red meat","Greek yogurt","Protein shake","Legumes","Tofu / Tempeh","Cottage cheese","Nuts & seeds"].map(food => {
                     const sel = nutritionLog.foods.includes(food);
@@ -1146,7 +1257,7 @@ export default function HomePage() {
                       <button key={food}
                         onClick={() => setNutritionLog(l => ({ ...l, foods: sel ? l.foods.filter(f => f !== food) : [...l.foods, food] }))}
                         className="px-3 py-1.5 rounded-full border text-[12px] font-bold transition-all active:scale-95"
-                        style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9", color: sel ? "#2653d4" : "#747878" }}>
+                        style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9", color: sel ? "#2653d4" : "#4a5050" }}>
                         {food}
                       </button>
                     );
@@ -1156,14 +1267,14 @@ export default function HomePage() {
 
               {/* Post-match meal */}
               <div>
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#747878] mb-3">Did you eat within 30 min post-match?</p>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">Did you eat within 30 min post-match?</p>
                 <div className="flex gap-3">
                   {[{ v: "yes", label: "Yes" }, { v: "no", label: "No" }].map(({ v, label }) => {
                     const sel = nutritionLog.postMatch === v;
                     return (
                       <button key={v} onClick={() => setNutritionLog(l => ({ ...l, postMatch: v }))}
                         className="flex-1 py-3 rounded-2xl border-2 text-[13px] font-bold transition-all active:scale-95"
-                        style={{ borderColor: sel ? (v === "yes" ? "#16a34a" : "#dc2626") : "#e2e2e2", background: sel ? (v === "yes" ? "#f0fdf4" : "#fef2f2") : "#f9f9f9", color: sel ? (v === "yes" ? "#16a34a" : "#dc2626") : "#747878" }}>
+                        style={{ borderColor: sel ? (v === "yes" ? "#16a34a" : "#dc2626") : "#e2e2e2", background: sel ? (v === "yes" ? "#f0fdf4" : "#fef2f2") : "#f9f9f9", color: sel ? (v === "yes" ? "#16a34a" : "#dc2626") : "#4a5050" }}>
                         {label}
                       </button>
                     );
@@ -1173,7 +1284,7 @@ export default function HomePage() {
 
               {/* Overall quality */}
               <div>
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#747878] mb-3">Overall nutrition quality today?</p>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">Overall nutrition quality today?</p>
                 <div className="flex gap-3">
                   {([["bad", "Poor"], ["ok", "Decent"], ["great", "Great"]] as const).map(([v, label]) => {
                     const sel = nutritionLog.quality === v;
@@ -1181,15 +1292,15 @@ export default function HomePage() {
                       <button key={v} onClick={() => setNutritionLog(l => ({ ...l, quality: v }))}
                         className="flex-1 flex flex-col items-center gap-2 py-3 rounded-2xl border-2 transition-all active:scale-95"
                         style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9" }}>
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={sel ? "#2653d4" : "#747878"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={sel ? "#2653d4" : "#4a5050"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                           <circle cx="12" cy="12" r="9" />
                           {v === "bad"   && <path d="M8 17c0-1.5 1.5-2.5 4-2.5s4 1 4 2.5" />}
                           {v === "ok"    && <line x1="9" y1="15.5" x2="15" y2="15.5" />}
                           {v === "great" && <path d="M8 14c1 2 6 2 8 0" />}
-                          <circle cx="9" cy="9.5" r="0.8" fill={sel ? "#2653d4" : "#747878"} stroke="none" />
-                          <circle cx="15" cy="9.5" r="0.8" fill={sel ? "#2653d4" : "#747878"} stroke="none" />
+                          <circle cx="9" cy="9.5" r="0.8" fill={sel ? "#2653d4" : "#4a5050"} stroke="none" />
+                          <circle cx="15" cy="9.5" r="0.8" fill={sel ? "#2653d4" : "#4a5050"} stroke="none" />
                         </svg>
-                        <span className="text-[10px] font-bold tracking-wide" style={{ color: sel ? "#2653d4" : "#747878" }}>{label}</span>
+                        <span className="text-[10px] font-bold tracking-wide" style={{ color: sel ? "#2653d4" : "#4a5050" }}>{label}</span>
                       </button>
                     );
                   })}
@@ -1243,10 +1354,10 @@ export default function HomePage() {
               <div className="px-6 pt-3 pb-4 flex items-center justify-between">
                 <div>
                   <p className="h1-headline-md text-[#1a1c1c]">Match Reviews</p>
-                  <p className="text-[13px] text-[#747878] mt-0.5">Rate your games to track performance</p>
+                  <p className="text-[13px] text-[#4a5050] mt-0.5">Rate your games to track performance</p>
                 </div>
                 <button onClick={() => setMatchListOpen(false)} className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4]">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
               </div>
 
@@ -1255,7 +1366,7 @@ export default function HomePage() {
                   <div className="px-6 py-12 text-center">
                     <p className="text-[32px] mb-3">🎾</p>
                     <p className="text-[16px] font-semibold text-[#1a1c1c]">No matches yet</p>
-                    <p className="text-[13px] text-[#747878] mt-1">Add a match to start tracking your game.</p>
+                    <p className="text-[13px] text-[#4a5050] mt-1">Add a match to start tracking your game.</p>
                   </div>
                 )}
 
@@ -1263,7 +1374,7 @@ export default function HomePage() {
                   <div className="px-6 py-12 text-center">
                     <p className="text-[32px] mb-3">✅</p>
                     <p className="text-[16px] font-semibold text-[#1a1c1c]">You're all done updating matches!</p>
-                    <p className="text-[13px] text-[#747878] mt-1">Your latest game is reviewed. Keep it up.</p>
+                    <p className="text-[13px] text-[#4a5050] mt-1">Your latest game is reviewed. Keep it up.</p>
                   </div>
                 )}
 
@@ -1271,7 +1382,7 @@ export default function HomePage() {
                 {hasUnrated && (
                   <>
                     <div className="px-6 py-2 bg-[#f9f9f9]">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-[#9aab96]">Needs a rating</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-[#5a7055]">Needs a rating</p>
                     </div>
                     <button
                       onClick={() => { setMatchListOpen(false); setMatchReviewOpen(true); }}
@@ -1285,7 +1396,7 @@ export default function HomePage() {
                       </div>
                       <div className="flex-1 min-w-0 text-left">
                         <p className="text-[15px] font-semibold text-[#1a1c1c]">{editedData.date ? fmtDate(editedData.date) : "Recent match"}</p>
-                        <p className="text-[12px] text-[#747878] mt-0.5">{editedData.time}{editedData.club ? ` · ${editedData.club}` : ""}</p>
+                        <p className="text-[12px] text-[#4a5050] mt-0.5">{editedData.time}{editedData.club ? ` · ${editedData.club}` : ""}</p>
                       </div>
                       <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-[#fff3cd] text-[#a16207] whitespace-nowrap flex-shrink-0">Rate now</span>
                     </button>
@@ -1296,7 +1407,7 @@ export default function HomePage() {
                 {reviews.length > 0 && (
                   <>
                     <div className="px-6 py-2 bg-[#f9f9f9]">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-[#9aab96]">Previous games</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-[#5a7055]">Previous games</p>
                     </div>
                     {reviews.map((rev, i) => (
                       <div
@@ -1305,13 +1416,13 @@ export default function HomePage() {
                         style={{ borderBottom: i < reviews.length - 1 ? "1px solid #f4f4f4" : "none" }}
                       >
                         <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-[#f4f4f4]">
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="9"/><path d="M8 14c1 2 6 2 8 0"/><circle cx="9" cy="9.5" r="0.8" fill="#747878" stroke="none"/><circle cx="15" cy="9.5" r="0.8" fill="#747878" stroke="none"/>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="9"/><path d="M8 14c1 2 6 2 8 0"/><circle cx="9" cy="9.5" r="0.8" fill="#4a5050" stroke="none"/><circle cx="15" cy="9.5" r="0.8" fill="#4a5050" stroke="none"/>
                           </svg>
                         </div>
                         <div className="flex-1 min-w-0 text-left">
                           <p className="text-[15px] font-semibold text-[#1a1c1c]">{fmtReviewDate(rev.ts)}</p>
-                          <p className="text-[12px] text-[#747878] mt-0.5">
+                          <p className="text-[12px] text-[#4a5050] mt-0.5">
                             {[rev.result, rev.feeling ? `Felt ${rev.feeling}` : ""].filter(Boolean).join(" · ") || "Reviewed"}
                           </p>
                         </div>
@@ -1324,7 +1435,7 @@ export default function HomePage() {
                 {/* All done banner when there's unrated + history */}
                 {allDone && reviews.length > 1 && (
                   <div className="px-6 py-4 text-center border-t border-[#f4f4f4]">
-                    <p className="text-[13px] text-[#747878]">You're all done — all matches reviewed 🎾</p>
+                    <p className="text-[13px] text-[#4a5050]">You're all done — all matches reviewed 🎾</p>
                   </div>
                 )}
 
@@ -1354,7 +1465,7 @@ export default function HomePage() {
               </svg>
             </div>
             <p className="text-[20px] font-bold text-[#1a1c1c] mb-1">Great game!</p>
-            <p className="text-[14px] text-[#747878] mb-6 leading-snug">Take a second to rate your match — it helps track your progress and readiness.</p>
+            <p className="text-[14px] text-[#4a5050] mb-6 leading-snug">Take a second to rate your match — it helps track your progress and readiness.</p>
             <button
               onClick={() => {
                 setPostGamePrompt(false);
@@ -1370,7 +1481,7 @@ export default function HomePage() {
                 localStorage.setItem(`padelop:post-game-dismissed:${editedData.date}`, "1");
                 setPostGamePrompt(false);
               }}
-              className="w-full py-2.5 text-[14px] font-semibold text-[#747878] active:opacity-60 transition-opacity"
+              className="w-full py-2.5 text-[14px] font-semibold text-[#4a5050] active:opacity-60 transition-opacity"
             >
               Maybe later
             </button>
@@ -1391,10 +1502,10 @@ export default function HomePage() {
             <div className="px-6 pt-3 pb-2 flex items-center justify-between">
               <div>
                 <p className="h1-headline-md text-[#1a1c1c]">Match Review</p>
-                <p className="text-[13px] text-[#747878] mt-0.5">Quick check-in while it&apos;s fresh</p>
+                <p className="text-[13px] text-[#4a5050] mt-0.5">Quick check-in while it&apos;s fresh</p>
               </div>
               <button onClick={() => setMatchReviewOpen(false)} className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4]">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
 
@@ -1402,7 +1513,7 @@ export default function HomePage() {
 
               {/* Feeling */}
               <div>
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#747878] mb-3">How did the match feel?</p>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">How did the match feel?</p>
                 <div className="flex gap-3">
                   {([["bad","Rough"],["ok","Decent"],["great","Great"]] as const).map(([v, label]) => {
                     const sel = matchReview.feeling === v;
@@ -1410,15 +1521,15 @@ export default function HomePage() {
                       <button key={v} onClick={() => setMatchReview(r => ({ ...r, feeling: v }))}
                         className="flex-1 flex flex-col items-center gap-1.5 py-3 rounded-2xl border-2 transition-all active:scale-95"
                         style={{ borderColor: sel ? "#7c3aed" : "#e2e2e2", background: sel ? "#f5f3ff" : "#f9f9f9" }}>
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={sel ? "#7c3aed" : "#747878"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={sel ? "#7c3aed" : "#4a5050"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                           <circle cx="12" cy="12" r="9" />
                           {v === "bad"   && <path d="M8 17c0-1.5 1.5-2.5 4-2.5s4 1 4 2.5" />}
                           {v === "ok"    && <line x1="9" y1="15.5" x2="15" y2="15.5" />}
                           {v === "great" && <path d="M8 14c1 2 6 2 8 0" />}
-                          <circle cx="9" cy="9.5" r="0.8" fill={sel ? "#7c3aed" : "#747878"} stroke="none" />
-                          <circle cx="15" cy="9.5" r="0.8" fill={sel ? "#7c3aed" : "#747878"} stroke="none" />
+                          <circle cx="9" cy="9.5" r="0.8" fill={sel ? "#7c3aed" : "#4a5050"} stroke="none" />
+                          <circle cx="15" cy="9.5" r="0.8" fill={sel ? "#7c3aed" : "#4a5050"} stroke="none" />
                         </svg>
-                        <span className="text-[10px] font-bold tracking-wide" style={{ color: sel ? "#7c3aed" : "#747878" }}>{label}</span>
+                        <span className="text-[10px] font-bold tracking-wide" style={{ color: sel ? "#7c3aed" : "#4a5050" }}>{label}</span>
                       </button>
                     );
                   })}
@@ -1427,14 +1538,14 @@ export default function HomePage() {
 
               {/* Result */}
               <div>
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#747878] mb-3">Result?</p>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">Result?</p>
                 <div className="flex gap-3">
                   {[{ v: "win", label: "Win", color: "#16a34a", bg: "#f0fdf4" }, { v: "loss", label: "Loss", color: "#dc2626", bg: "#fef2f2" }].map(({ v, label, color, bg }) => {
                     const sel = matchReview.result === v;
                     return (
                       <button key={v} onClick={() => setMatchReview(r => ({ ...r, result: v }))}
                         className="flex-1 py-3 rounded-2xl border-2 text-[13px] font-bold transition-all active:scale-95"
-                        style={{ borderColor: sel ? color : "#e2e2e2", background: sel ? bg : "#f9f9f9", color: sel ? color : "#747878" }}>
+                        style={{ borderColor: sel ? color : "#e2e2e2", background: sel ? bg : "#f9f9f9", color: sel ? color : "#4a5050" }}>
                         {label}
                       </button>
                     );
@@ -1444,14 +1555,14 @@ export default function HomePage() {
 
               {/* Opponent level */}
               <div>
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#747878] mb-3">Opponent level?</p>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">Opponent level?</p>
                 <div className="flex gap-3">
                   {[{ v: "easy", label: "Easier" }, { v: "equal", label: "Equal" }, { v: "tough", label: "Tougher" }].map(({ v, label }) => {
                     const sel = matchReview.opponent === v;
                     return (
                       <button key={v} onClick={() => setMatchReview(r => ({ ...r, opponent: v }))}
                         className="flex-1 py-3 rounded-2xl border-2 text-[13px] font-bold transition-all active:scale-95"
-                        style={{ borderColor: sel ? "#7c3aed" : "#e2e2e2", background: sel ? "#f5f3ff" : "#f9f9f9", color: sel ? "#7c3aed" : "#747878" }}>
+                        style={{ borderColor: sel ? "#7c3aed" : "#e2e2e2", background: sel ? "#f5f3ff" : "#f9f9f9", color: sel ? "#7c3aed" : "#4a5050" }}>
                         {label}
                       </button>
                     );
@@ -1461,21 +1572,21 @@ export default function HomePage() {
 
               {/* Energy on court */}
               <div>
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#747878] mb-3">Your energy on court?</p>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">Your energy on court?</p>
                 <div className="flex gap-3">
                   {([["low","Low"],["mid","Mid"],["high","High"]] as const).map(([v, label]) => {
                     const sel = matchReview.energy === v;
                     const icon = v === "low"
-                      ? <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={sel ? "#7c3aed" : "#747878"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="16" height="10" rx="1.5"/><path d="M20 11v2"/></svg>
+                      ? <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={sel ? "#7c3aed" : "#4a5050"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="16" height="10" rx="1.5"/><path d="M20 11v2"/></svg>
                       : v === "mid"
-                      ? <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={sel ? "#7c3aed" : "#747878"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="13,2 13,10 19,10 11,22 11,14 5,14 13,2"/></svg>
-                      : <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={sel ? "#7c3aed" : "#747878"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C10 6 7 9 7 13a5 5 0 0 0 10 0c0-2-1-3.5-2-5 0 2-1 3-2 3-1.5 0-2.5-1.5-1-3z"/></svg>;
+                      ? <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={sel ? "#7c3aed" : "#4a5050"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="13,2 13,10 19,10 11,22 11,14 5,14 13,2"/></svg>
+                      : <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={sel ? "#7c3aed" : "#4a5050"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C10 6 7 9 7 13a5 5 0 0 0 10 0c0-2-1-3.5-2-5 0 2-1 3-2 3-1.5 0-2.5-1.5-1-3z"/></svg>;
                     return (
                       <button key={v} onClick={() => setMatchReview(r => ({ ...r, energy: v }))}
                         className="flex-1 flex flex-col items-center gap-1.5 py-3 rounded-2xl border-2 transition-all active:scale-95"
                         style={{ borderColor: sel ? "#7c3aed" : "#e2e2e2", background: sel ? "#f5f3ff" : "#f9f9f9" }}>
                         {icon}
-                        <span className="text-[10px] font-bold tracking-wide" style={{ color: sel ? "#7c3aed" : "#747878" }}>{label}</span>
+                        <span className="text-[10px] font-bold tracking-wide" style={{ color: sel ? "#7c3aed" : "#4a5050" }}>{label}</span>
                       </button>
                     );
                   })}
@@ -1484,14 +1595,14 @@ export default function HomePage() {
 
               {/* Injury */}
               <div>
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#747878] mb-3">Any injuries or niggles?</p>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">Any injuries or niggles?</p>
                 <div className="flex gap-3">
                   {[{ v: "yes", label: "Yes", color: "#dc2626", bg: "#fef2f2" }, { v: "no", label: "All good", color: "#16a34a", bg: "#f0fdf4" }].map(({ v, label, color, bg }) => {
                     const sel = matchReview.injury === v;
                     return (
                       <button key={v} onClick={() => setMatchReview(r => ({ ...r, injury: v }))}
                         className="flex-1 py-3 rounded-2xl border-2 text-[13px] font-bold transition-all active:scale-95"
-                        style={{ borderColor: sel ? color : "#e2e2e2", background: sel ? bg : "#f9f9f9", color: sel ? color : "#747878" }}>
+                        style={{ borderColor: sel ? color : "#e2e2e2", background: sel ? bg : "#f9f9f9", color: sel ? color : "#4a5050" }}>
                         {label}
                       </button>
                     );
@@ -1501,7 +1612,7 @@ export default function HomePage() {
 
               {/* What did you do well */}
               <div>
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#747878] mb-3">What did you do well?</p>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">What did you do well?</p>
                 <div className="flex flex-wrap gap-2">
                   {["Serve","Bandeja","Smash","Volleys","Defense","Attack","Positioning","Communication","Movement","Mental strength"].map(tag => {
                     const sel = matchReview.wellDone.includes(tag);
@@ -1509,7 +1620,7 @@ export default function HomePage() {
                       <button key={tag}
                         onClick={() => setMatchReview(r => ({ ...r, wellDone: sel ? r.wellDone.filter(t => t !== tag) : [...r.wellDone, tag] }))}
                         className="px-3 py-1.5 rounded-full border text-[12px] font-bold transition-all active:scale-95"
-                        style={{ borderColor: sel ? "#16a34a" : "#e2e2e2", background: sel ? "#f0fdf4" : "#f9f9f9", color: sel ? "#16a34a" : "#747878" }}>
+                        style={{ borderColor: sel ? "#16a34a" : "#e2e2e2", background: sel ? "#f0fdf4" : "#f9f9f9", color: sel ? "#16a34a" : "#4a5050" }}>
                         {tag}
                       </button>
                     );
@@ -1519,7 +1630,7 @@ export default function HomePage() {
 
               {/* What needs work */}
               <div>
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#747878] mb-3">What needs work?</p>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">What needs work?</p>
                 <div className="flex flex-wrap gap-2">
                   {["Serve","Bandeja","Smash","Volleys","Defense","Attack","Positioning","Communication","Movement","Mental strength"].map(tag => {
                     const sel = matchReview.improved.includes(tag);
@@ -1527,7 +1638,7 @@ export default function HomePage() {
                       <button key={tag}
                         onClick={() => setMatchReview(r => ({ ...r, improved: sel ? r.improved.filter(t => t !== tag) : [...r.improved, tag] }))}
                         className="px-3 py-1.5 rounded-full border text-[12px] font-bold transition-all active:scale-95"
-                        style={{ borderColor: sel ? "#dc2626" : "#e2e2e2", background: sel ? "#fef2f2" : "#f9f9f9", color: sel ? "#dc2626" : "#747878" }}>
+                        style={{ borderColor: sel ? "#dc2626" : "#e2e2e2", background: sel ? "#fef2f2" : "#f9f9f9", color: sel ? "#dc2626" : "#4a5050" }}>
                         {tag}
                       </button>
                     );
@@ -1537,11 +1648,11 @@ export default function HomePage() {
 
               {/* Mental state */}
               <div>
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#747878] mb-3">Mental state</p>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">Mental state</p>
                 <div className="flex flex-col gap-3">
                   {([["Before","mentalBefore"],["During","mentalDuring"],["After","mentalAfter"]] as [string, "mentalBefore"|"mentalDuring"|"mentalAfter"][]).map(([phase, key]) => (
                     <div key={phase} className="flex items-center gap-3">
-                      <span className="text-[11px] font-bold text-[#747878] w-12 flex-shrink-0">{phase}</span>
+                      <span className="text-[11px] font-bold text-[#4a5050] w-12 flex-shrink-0">{phase}</span>
                       <div className="flex gap-2 flex-1">
                         {(["bad","ok","great"] as const).map(v => {
                           const sel = matchReview[key] === v;
@@ -1550,13 +1661,13 @@ export default function HomePage() {
                               onClick={() => setMatchReview(r => ({ ...r, [key]: v }))}
                               className="flex-1 py-2 rounded-xl border-2 flex items-center justify-center transition-all active:scale-95"
                               style={{ borderColor: sel ? "#7c3aed" : "#e2e2e2", background: sel ? "#f5f3ff" : "#f9f9f9" }}>
-                              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={sel ? "#7c3aed" : "#747878"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={sel ? "#7c3aed" : "#4a5050"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                                 <circle cx="12" cy="12" r="9" />
                                 {v === "bad"   && <path d="M8 17c0-1.5 1.5-2.5 4-2.5s4 1 4 2.5" />}
                                 {v === "ok"    && <line x1="9" y1="15.5" x2="15" y2="15.5" />}
                                 {v === "great" && <path d="M8 14c1 2 6 2 8 0" />}
-                                <circle cx="9" cy="9.5" r="0.8" fill={sel ? "#7c3aed" : "#747878"} stroke="none" />
-                                <circle cx="15" cy="9.5" r="0.8" fill={sel ? "#7c3aed" : "#747878"} stroke="none" />
+                                <circle cx="9" cy="9.5" r="0.8" fill={sel ? "#7c3aed" : "#4a5050"} stroke="none" />
+                                <circle cx="15" cy="9.5" r="0.8" fill={sel ? "#7c3aed" : "#4a5050"} stroke="none" />
                               </svg>
                             </button>
                           );

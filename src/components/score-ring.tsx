@@ -55,16 +55,16 @@ export default function ScoreRing() {
           {arcs}
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", color: "#444748", textTransform: "uppercase" }}>Match</span>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", color: "#2c3235", textTransform: "uppercase" }}>Match</span>
           <span className="text-black" style={{ fontSize: 68, lineHeight: 1, fontWeight: 700, letterSpacing: "-0.02em" }}>{Math.round(scores.overall)}</span>
-          <span style={{ fontSize: 12, fontWeight: 500, letterSpacing: "0.05em", color: "#444748", textTransform: "uppercase" }}>Readiness</span>
+          <span style={{ fontSize: 12, fontWeight: 500, letterSpacing: "0.05em", color: "#2c3235", textTransform: "uppercase" }}>Readiness</span>
         </div>
       </div>
       <div className="flex justify-between w-full px-4 mt-4">
         {metrics.map(m => (
           <div key={m.label} className="flex flex-col items-center gap-1">
             <span style={{ fontSize: 16, fontWeight: 700, color: m.color }}>{Math.round(m.value)}</span>
-            <span style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.08em", color: "#9aab96", textTransform: "uppercase" }}>{m.label}</span>
+            <span style={{ fontSize: 9, fontWeight: 600, letterSpacing: "0.08em", color: "#5a7055", textTransform: "uppercase" }}>{m.label}</span>
           </div>
         ))}
       </div>
