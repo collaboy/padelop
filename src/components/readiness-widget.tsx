@@ -122,26 +122,9 @@ export default function ReadinessWidget({ hideCard = false }: { hideCard?: boole
             <span style={{ fontSize: 68, lineHeight: 1, fontWeight: 700, letterSpacing: "-0.02em", color: "#1a1c1c" }}>{Math.round(activeMetricValue)}</span>
           </div>
         </div>
-        {/* Toggle */}
-        <div className="flex items-center bg-[#f0f0f0] rounded-full p-1 mb-3">
-          {(["today", "alltime"] as const).map(v => (
-            <button
-              key={v}
-              onClick={() => setScoreView(v)}
-              className="px-4 py-1 rounded-full text-[12px] font-semibold transition-all"
-              style={{
-                background: scoreView === v ? "#fff" : "transparent",
-                color: scoreView === v ? "#1a1c1c" : "#747878",
-                boxShadow: scoreView === v ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
-              }}
-            >
-              {v === "today" ? "Today" : "All-time"}
-            </button>
-          ))}
-        </div>
-        <div className="flex gap-1 mt-2 mb-3 justify-center rounded-full px-1 py-1 w-full max-w-xs" style={{ background: "rgb(244, 244, 246)" }}>
+        <div className="flex gap-1 mt-2 mb-2 justify-center rounded-full px-1 py-1 w-full max-w-xs" style={{ background: "rgb(244, 244, 246)" }}>
           {([
-            { key: "overall",   label: "Overall",   color: "#2653d4" },
+            { key: "overall",   label: "All",   color: "#2653d4" },
             { key: "recovery",  label: "Recovery",  color: "#7c3aed" },
             { key: "hydration", label: "Hydration", color: "#0891b2" },
             { key: "energy",    label: "Energy",    color: "#f59e0b" },
@@ -154,8 +137,9 @@ export default function ReadinessWidget({ hideCard = false }: { hideCard?: boole
               style={{
                 fontSize: 10,
                 padding: "5px 2px",
-                background: selectedMetric === m.key ? m.color : "transparent",
-                color: selectedMetric === m.key ? "#fff" : "rgb(107, 116, 128)",
+                background: selectedMetric === m.key ? "#fff" : "transparent",
+                color: selectedMetric === m.key ? "#1a1c1c" : "rgb(107, 116, 128)",
+                boxShadow: selectedMetric === m.key ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
               }}
             >
               {m.label}
@@ -172,7 +156,7 @@ export default function ReadinessWidget({ hideCard = false }: { hideCard?: boole
           const d = details[selectedMetric];
           if (!d) return null;
           return (
-            <div className="mt-1 mb-3 w-full max-w-xs rounded-2xl overflow-hidden text-left" style={{ background: d.color + "0d", border: `1px solid ${d.color}22` }}>
+            <div className="w-full max-w-xs rounded-2xl overflow-hidden text-left" style={{ background: d.color + "0d", border: `1px solid ${d.color}22` }}>
               <div className="px-4 pt-3 pb-1 flex items-center justify-between">
                 <p className="text-[12px] font-bold" style={{ color: d.color }}>{d.desc}</p>
                 <span className="text-[18px] font-bold" style={{ color: d.color }}>{Math.round(activeMetricValue)}</span>
@@ -204,7 +188,7 @@ export default function ReadinessWidget({ hideCard = false }: { hideCard?: boole
             ? "Some gaps in recovery or fuel. Log your check-in to get a clearer picture."
             : "Your readiness is low — prioritise sleep, hydration, and recovery today."}
         </p>
-        <button onClick={() => setImproveOpen(true)} className="flex items-center gap-1.5 px-5 py-2 rounded-full bg-white border border-[#e2e2e2] active:opacity-70 transition-opacity">
+        <button onClick={() => window.dispatchEvent(new CustomEvent("open-log-sheet"))} className="flex items-center gap-1.5 px-5 py-2 rounded-full bg-white border border-[#e2e2e2] active:opacity-70 transition-opacity">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
             <polyline points="17 6 23 6 23 12"/>

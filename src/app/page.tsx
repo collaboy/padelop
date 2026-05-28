@@ -26,6 +26,7 @@ export default function HomePage() {
   const [checkIn, setCheckIn] = useState({ sleep: 3, energy: 3, soreness: 3, hydration: 3 });
   const [countdown, setCountdown] = useState({ h: 0, m: 0, past: false });
   const [fabOpen, setFabOpen] = useState(false);
+  const [fabLogOnly, setFabLogOnly] = useState(false);
   const [addMatchOpen, setAddMatchOpen] = useState(false);
   const [hydroOpen, setHydroOpen] = useState(false);
   const [hydrationLog, setHydrationLog] = useState({ litres: "", timing: [] as string[], quality: "", urine: "" });
@@ -95,7 +96,12 @@ export default function HomePage() {
   };
 
   // Load scoring data and compute scores on mount
-  useEffect(() => { loadAndScore(); }, []);
+  useEffect(() => {
+    loadAndScore();
+    const openLogSheet = () => { setFabLogOnly(true); setFabOpen(true); };
+    window.addEventListener("open-log-sheet", openLogSheet);
+    return () => window.removeEventListener("open-log-sheet", openLogSheet);
+  }, []);
 
   // Load saved match info from localStorage
   useEffect(() => {
@@ -1012,7 +1018,7 @@ export default function HomePage() {
           const weakest = [...metricBreakdown].sort((a, b) => a.value - b.value)[0];
 
           return (
-            <div className="fixed inset-0 z-[60] flex items-end justify-center px-4 pb-4" onClick={() => setFabOpen(false)}>
+            <div className="fixed inset-0 z-[60] flex items-end justify-center px-4 pb-4" onClick={() => { setFabOpen(false); setFabLogOnly(false); }}>
               <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
               <div
                 className="h1-font relative w-full max-w-lg bg-white rounded-[28px] flex flex-col"
@@ -1022,7 +1028,7 @@ export default function HomePage() {
                 <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4 mb-2 flex-shrink-0" />
                 <div className="overflow-y-auto flex-1">
                 {/* Score header */}
-                <div className="px-6 pt-2 pb-5" style={{ borderBottom: "1px solid #f0f0f0" }}>
+                {!fabLogOnly && <div className="px-6 pt-2 pb-5" style={{ borderBottom: "1px solid #f0f0f0" }}>
                   <div className="flex items-baseline gap-3 mb-1">
                     <span className="text-[48px] font-bold leading-none text-[#1a1c1c]">{Math.round(scores.overall)}</span>
                     <span className="text-[15px] font-semibold text-[#4a5050]">Match Readiness</span>
@@ -1034,10 +1040,10 @@ export default function HomePage() {
                       ? `Your ${weakest.label.toLowerCase()} is pulling the score down — log it to update.`
                       : `Focus on ${weakest.label.toLowerCase()} first — it has the biggest impact today.`}
                   </p>
-                </div>
+                </div>}
 
                 {/* Metric breakdown */}
-                <div className="px-6 pt-4 pb-2">
+                {!fabLogOnly && <div className="px-6 pt-4 pb-2">
                   <p className="text-[10px] font-bold tracking-widest uppercase text-[#5a7055] mb-3">How it's calculated</p>
                   <div className="flex flex-col gap-3">
                     {metricBreakdown.map(m => (
@@ -1055,7 +1061,7 @@ export default function HomePage() {
                       </div>
                     ))}
                   </div>
-                </div>
+                </div>}
 
                 {/* Logging actions */}
                 <div className="px-6 pt-5 pb-2">
