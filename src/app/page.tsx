@@ -33,6 +33,7 @@ export default function HomePage() {
   const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 60, hydration: 52, energy: 58, mobility: 58 });
   const [allTimeScores, setAllTimeScores] = useState<Scores>({ overall: 65, recovery: 60, hydration: 52, energy: 58, mobility: 58 });
   const [dayTypeOverride, setDayTypeOverride] = useState<"recovery" | "training" | "rest" | null>(null);
+  const [selectedScheduleIdx, setSelectedScheduleIdx] = useState<number | null>(null);
   const [now, setNow] = useState<Date | null>(null);
   const [matchReviewOpen, setMatchReviewOpen] = useState(false);
   const [matchReview, setMatchReview] = useState({ feeling: "", result: "", opponent: "", energy: "", injury: "", wellDone: [] as string[], improved: [] as string[], mentalBefore: "", mentalDuring: "", mentalAfter: "" });
@@ -141,6 +142,27 @@ export default function HomePage() {
       timelineScrolled.current = true;
     }
   }, [now]);
+
+  useEffect(() => {
+    const el = timelineRef.current;
+    if (!el) return;
+    const updateSelected = () => {
+      const center = el.scrollLeft + el.offsetWidth / 2;
+      const rings = el.querySelectorAll<HTMLElement>("[data-idx]");
+      let closest = 0, minDist = Infinity;
+      rings.forEach((ring) => {
+        const ringCenter = ring.offsetLeft + ring.offsetWidth / 2;
+        const dist = Math.abs(ringCenter - center);
+        if (dist < minDist) { minDist = dist; closest = parseInt(ring.dataset.idx!); }
+      });
+      setSelectedScheduleIdx(closest);
+    };
+    let timer: ReturnType<typeof setTimeout>;
+    const onScroll = () => { clearTimeout(timer); timer = setTimeout(updateSelected, 120); };
+    el.addEventListener("scrollend", updateSelected);
+    el.addEventListener("scroll", onScroll);
+    return () => { el.removeEventListener("scrollend", updateSelected); el.removeEventListener("scroll", onScroll); clearTimeout(timer); };
+  }, []);
 
   // Post-game review prompt: show once per match after match ends (30 min grace)
   useEffect(() => {
@@ -426,19 +448,20 @@ export default function HomePage() {
             return (
               <div
                 ref={timelineRef}
-                className="overflow-x-auto mb-5 -mx-5"
+                className="overflow-x-auto mb-1 -mx-5"
                 style={{ scrollbarWidth: "none", scrollSnapType: "x mandatory" }}
               >
                 <div className="flex items-start" style={{ width: "max-content", paddingLeft: "calc(50vw - 60px)", paddingRight: "calc(50vw - 60px)" }}>
                   {schedule.map((item, i) => {
-                    const isCurrent = i === autoIdx;
-                    const isPast = i < autoIdx;
+                    const activeIdx = selectedScheduleIdx ?? autoIdx;
+                    const isCurrent = i === activeIdx;
+                    const isPast = i < activeIdx;
                     return (
                       <React.Fragment key={i}>
                         {i > 0 && (
                           <div style={{ width: "calc(50vw - 120px)", minWidth: 20, height: 2, background: isPast ? "#c4c7c7" : "#e2e2e2", marginTop: 59, flexShrink: 0 }} />
                         )}
-                        <div className="flex flex-col items-center" style={{ width: 120, scrollSnapAlign: "center" }} {...(isCurrent ? { "data-active": "true" } : {})}>
+                        <div className="flex flex-col items-center" style={{ width: 120, scrollSnapAlign: "center" }} data-idx={i} {...(i === autoIdx ? { "data-active": "true" } : {})}>
                           <div style={{
                             width: 120, height: 120, borderRadius: 60, flexShrink: 0,
                             border: `2.5px solid ${isCurrent ? item.color : isPast ? "#c4c7c7" : "#e2e2e2"}`,
@@ -456,8 +479,6 @@ export default function HomePage() {
               </div>
             );
           })()}
-
-          <Link href="/today" className="block text-center mb-2 text-[11px] font-bold tracking-widest uppercase text-[#5a7055] active:opacity-60">From your schedule</Link>
 
           {/* Do this now */}
           {(() => {
@@ -520,7 +541,7 @@ export default function HomePage() {
             let autoIdx = 0;
             if (curMins >= toMins(schedule[schedule.length - 1].time)) { autoIdx = schedule.length - 1; }
             else { for (let i = 0; i < schedule.length - 1; i++) { if (curMins >= toMins(schedule[i].time) && curMins < toMins(schedule[i + 1].time)) { autoIdx = i; break; } } }
-            const item = schedule[autoIdx];
+            const item = schedule[selectedScheduleIdx ?? autoIdx];
             const detail = SCHEDULE_DETAILS[item.title];
             const SCHEDULE_PTS: Record<string, number> = {
               "Wake up & hydrate": 8, "Light breakfast": 5, "Breakfast": 5,
@@ -536,13 +557,13 @@ export default function HomePage() {
             };
             const pendingPts = SCHEDULE_PTS[item.title] ?? 0;
             return (
-              <div className="mb-3">
+              <div className="mb-1">
                 <div className="flex justify-center">
                   <div style={{ width: 0, height: 0, borderLeft: "11px solid transparent", borderRight: "11px solid transparent", borderBottom: `11px solid ${item.color}` }} />
                 </div>
               <button
-                  className="w-full bg-white rounded-[24px] border border-[#c4c7c7]/10 px-5 py-3 flex items-center gap-3 active:opacity-60 transition-opacity text-left"
-                  style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)" }}
+                  className="w-full bg-white rounded-[24px] px-5 py-3 flex items-center gap-3 active:opacity-60 transition-opacity text-left"
+                  style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${item.color}` }}
                   onClick={() => detail && setScheduleModal({ title: item.title, subtitle: item.subtitle, detail, color: item.color })}
                 >
                   <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: item.color + "18" }}>
@@ -563,7 +584,9 @@ export default function HomePage() {
             );
           })()}
 
-          {/* Score ring + Boost Score card */}
+          <Link href="/today" className="block text-center mb-2 text-[11px] font-bold tracking-widest uppercase text-[#5a7055] active:opacity-60">From your schedule</Link>
+
+          {/* Score ring + Improve Score card */}
           <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 flex flex-col items-center py-5 mb-4">
             {editedData.time && now ? (() => {
               const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
@@ -579,7 +602,7 @@ export default function HomePage() {
                 <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
                 <polyline points="17 6 23 6 23 12" />
               </svg>
-              <span className="text-[15px] font-semibold text-[#1a1c1c]">Boost Score</span>
+              <span className="text-[15px] font-semibold text-[#1a1c1c]">Improve Score</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e9196" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 18l6-6-6-6" />
               </svg>
@@ -606,7 +629,7 @@ export default function HomePage() {
                 <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
                 <polyline points="17 6 23 6 23 12" />
               </svg>
-              <span className="text-[15px] font-semibold text-[#1a1c1c]">Boost Score</span>
+              <span className="text-[15px] font-semibold text-[#1a1c1c]">Improve Score</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e9196" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 18l6-6-6-6" />
               </svg>
@@ -762,7 +785,7 @@ export default function HomePage() {
               >
                 <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4 mb-1" />
                 <div className="px-6 pt-3 pb-4">
-                  <p className="h1-headline-md text-[#1a1c1c]">Boost Score</p>
+                  <p className="h1-headline-md text-[#1a1c1c]">Improve Score</p>
                   <p className="text-[13px] text-[#4a5050] mt-0.5">Scores recalculate instantly</p>
                 </div>
 
