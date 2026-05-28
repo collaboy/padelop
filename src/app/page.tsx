@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { computeScores, loadScoringData, computeAllTimeScores, saveHabits, type Scores } from "@/lib/scoring";
+import { computeScores, loadScoringData, computeAllTimeScores, saveHabits, saveCheckIn, type Scores } from "@/lib/scoring";
 import { computeNotifications, type Notif } from "@/lib/notifications";
 import ScoreRing from "@/components/score-ring";
 import ScoreGauge from "@/components/score-gauge";
@@ -324,76 +324,29 @@ export default function HomePage() {
       <div className="h1-font bg-[#f9f9f9] text-[#1a1c1c] min-h-screen">
         <main className="pt-3 pb-8 px-5 max-w-lg mx-auto">
 
-          {/* Score ring + Improve Score card */}
-          <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 flex flex-col items-center py-5 mb-4">
-            {editedData.time && now ? (() => {
-              const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-              const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
-              const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-              return <p className="text-[15px] font-semibold text-[#1a1c1c] mb-4">Next Match · <span className="text-[#2653d4]">{label} {editedData.time}</span></p>;
-            })() : (
-              <button onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }} className="text-[13px] font-semibold text-[#5a7055] mb-4 active:opacity-60">Add your next match</button>
-            )}
-            <ScoreRing metric={selectedMetric} />
-            {/* Metric pill selector */}
-            <div className="flex gap-1 mt-3 mx-4 justify-center rounded-full px-1 py-1" style={{ background: "#f0f0f0" }}>
-              {[
-                { key: "overall",   label: "Overall",   color: "#2653d4" },
-                { key: "recovery",  label: "Recovery",  color: "#7c3aed" },
-                { key: "hydration", label: "Hydration", color: "#0891b2" },
-                { key: "energy",    label: "Energy",    color: "#f59e0b" },
-                { key: "mobility",  label: "Mobility",  color: "#16a34a" },
-              ].map(m => (
-                <button
-                  key={m.key}
-                  onClick={() => setSelectedMetric(m.key)}
-                  className="rounded-full font-semibold transition-colors whitespace-nowrap"
-                  style={{
-                    fontSize: 10,
-                    padding: "4px 8px",
-                    ...(selectedMetric === m.key
-                      ? { background: m.color, color: "#fff" }
-                      : { background: "transparent", color: "#3a4550" })
-                  }}
-                >
-                  {m.label}
-                </button>
-              ))}
-            </div>
-            {/* Greeting inside ring card */}
-            {(() => {
-              const h = now ? now.getHours() : 12;
-              const tod = h < 12 ? "morning" : h < 17 ? "afternoon" : "evening";
-              let msg = "";
-              if (dayType === "match") {
-                const matchTimeStr = editedData.time || "18:30";
-                const [mH, mM] = matchTimeStr.split(":").map(Number);
-                const diffMins = mH * 60 + mM - h * 60 - (now ? now.getMinutes() : 0);
-                if (diffMins > 180) { const hrs = Math.floor(diffMins / 60); msg = `Match in ${hrs}h. Stay light, hydrate steadily, and eat your pre-game meal ${hrs > 4 ? "a few hours before" : "soon"}.`; }
-                else if (diffMins > 60) { msg = "Time to warm up. Dynamic activation, no heavy food — just sip water and focus."; }
-                else if (diffMins > 0) { msg = "Almost game time. Breathe, visualise, and trust your prep."; }
-                else { msg = "Great match today. Prioritise recovery — stretch, eat protein, and rest up."; }
-              } else if (dayType === "recovery") { msg = "Recovery day. Keep moving gently, drink plenty of water, and get your protein in.";
-              } else if (dayType === "training") { msg = "Training day. Make sure you're fuelled, warmed up, and ready to work on your patterns.";
-              } else { msg = "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy."; }
-              return (
-                <div className="text-center px-4 mt-4">
-                  <p className="text-[20px] font-bold text-[#1a1c1c] leading-snug mb-0.5" style={{ fontFamily: "var(--font-hanken)" }}>Good {tod}.</p>
-                  <p className="text-[14px] text-[#3a4550] leading-snug">{msg}</p>
-                </div>
-              );
-            })()}
-            <button onClick={() => setCheckInOpen(true)} className="flex items-center gap-2 px-4 py-2 mt-4 rounded-full bg-[#f4f4f4] active:opacity-60 transition-opacity">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                <polyline points="17 6 23 6 23 12" />
-              </svg>
-              <span className="text-[15px] font-semibold text-[#1a1c1c]">Check-in to update score</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e9196" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </button>
-          </div>
+          {/* Greeting */}
+          {(() => {
+            const h = now ? now.getHours() : 12;
+            const tod = h < 12 ? "morning" : h < 17 ? "afternoon" : "evening";
+            let msg = "";
+            if (dayType === "match") {
+              const matchTimeStr = editedData.time || "18:30";
+              const [mH, mM] = matchTimeStr.split(":").map(Number);
+              const diffMins = mH * 60 + mM - h * 60 - (now ? now.getMinutes() : 0);
+              if (diffMins > 180) { const hrs = Math.floor(diffMins / 60); msg = `Match in ${hrs}h. Stay light, hydrate steadily, and eat your pre-game meal ${hrs > 4 ? "a few hours before" : "soon"}.`; }
+              else if (diffMins > 60) { msg = "Time to warm up. Dynamic activation, no heavy food — just sip water and focus."; }
+              else if (diffMins > 0) { msg = "Almost game time. Breathe, visualise, and trust your prep."; }
+              else { msg = "Great match today. Prioritise recovery — stretch, eat protein, and rest up."; }
+            } else if (dayType === "recovery") { msg = "Recovery day. Keep moving gently, drink plenty of water, and get your protein in.";
+            } else if (dayType === "training") { msg = "Training day. Make sure you're fuelled, warmed up, and ready to work on your patterns.";
+            } else { msg = "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy."; }
+            return (
+              <div className="mb-5">
+                <p className="text-[22px] font-bold text-[#1a1c1c] leading-snug mb-0.5" style={{ fontFamily: "var(--font-hanken)" }}>Good {tod}.</p>
+                <p className="text-[14px] text-[#3a4550] leading-snug">{msg}</p>
+              </div>
+            );
+          })()}
 
           {/* Do this now */}
           {(() => {
@@ -542,6 +495,53 @@ export default function HomePage() {
             );
           })()}
 
+          {/* Score ring + Improve Score card */}
+          <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 flex flex-col items-center py-5 mb-2 mt-2">
+            {editedData.time && now ? (() => {
+              const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+              const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
+              const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+              return <p className="text-[15px] font-semibold text-[#1a1c1c] mb-4">Next Match · <span className="text-[#2653d4]">{label} {editedData.time}</span></p>;
+            })() : (
+              <button onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }} className="text-[13px] font-semibold text-[#5a7055] mb-4 active:opacity-60">Add your next match</button>
+            )}
+            <ScoreRing metric={selectedMetric} />
+            {/* Metric pill selector */}
+            <div className="flex gap-1 mt-3 mx-4 justify-center rounded-full px-1 py-1" style={{ background: "#f0f0f0" }}>
+              {[
+                { key: "overall",   label: "Overall",   color: "#2653d4" },
+                { key: "recovery",  label: "Recovery",  color: "#7c3aed" },
+                { key: "hydration", label: "Hydration", color: "#0891b2" },
+                { key: "energy",    label: "Energy",    color: "#f59e0b" },
+                { key: "mobility",  label: "Mobility",  color: "#16a34a" },
+              ].map(m => (
+                <button
+                  key={m.key}
+                  onClick={() => setSelectedMetric(m.key)}
+                  className="rounded-full font-semibold transition-colors whitespace-nowrap"
+                  style={{
+                    fontSize: 10,
+                    padding: "4px 8px",
+                    ...(selectedMetric === m.key
+                      ? { background: m.color, color: "#fff" }
+                      : { background: "transparent", color: "#3a4550" })
+                  }}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setFabOpen(true)} className="flex items-center gap-2 px-4 py-2 mt-4 rounded-full active:opacity-60 transition-opacity" style={{ background: checkInDone ? "#f4f4f4" : "#fff0f0", border: checkInDone ? "none" : "1.5px solid #ef444460" }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                <polyline points="17 6 23 6 23 12" />
+              </svg>
+              <span className="text-[15px] font-semibold text-[#1a1c1c]">Check-in to update score</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e9196" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </button>
+          </div>
 
           {/* Match Day Essentials */}
           <div className="bg-white rounded-[24px] mt-2" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8" }}>
@@ -1700,6 +1700,79 @@ export default function HomePage() {
                 Save Review
               </button>
               <div style={{ paddingBottom: "env(safe-area-inset-bottom)" }} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Daily Check-in modal */}
+      {checkInOpen && (
+        <div className="fixed inset-0 z-[70] flex items-end justify-center px-4 pb-4" onClick={() => setCheckInOpen(false)}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div
+            className="h1-font relative w-full max-w-lg bg-white rounded-[28px] overflow-hidden shadow-2xl"
+            style={{ animation: "slideUp 0.28s cubic-bezier(0.22,1,0.36,1)" }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4 mb-1" />
+            <div className="px-6 pt-3 pb-4 flex items-center justify-between">
+              <div>
+                <p className="h1-headline-md text-[#1a1c1c]">Daily Check-in</p>
+                <p className="text-[13px] text-[#4a5050] mt-0.5">How are you feeling today?</p>
+              </div>
+              <button onClick={() => setCheckInOpen(false)} className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4]">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div className="px-6 pb-8 flex flex-col gap-6">
+              {([
+                { key: "sleep",     label: "Sleep quality",    lo: "Poor",        hi: "Excellent" },
+                { key: "energy",    label: "Energy level",     lo: "Exhausted",   hi: "Energised" },
+                { key: "soreness",  label: "Muscle soreness",  lo: "Very sore",   hi: "No soreness" },
+                { key: "hydration", label: "Hydration",        lo: "Dehydrated",  hi: "Well hydrated" },
+              ] as { key: keyof typeof checkIn; label: string; lo: string; hi: string }[]).map(({ key, label, lo, hi }) => (
+                <div key={key}>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[13px] font-semibold text-[#1a1c1c]">{label}</p>
+                    <span className="text-[13px] font-bold text-[#2653d4]">{checkIn[key]}/5</span>
+                  </div>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map(v => {
+                      const sel = checkIn[key] === v;
+                      return (
+                        <button
+                          key={v}
+                          onClick={() => setCheckIn(c => ({ ...c, [key]: v }))}
+                          className="flex-1 py-2.5 rounded-2xl border-2 text-[13px] font-bold transition-all active:scale-95"
+                          style={{
+                            borderColor: sel ? "#2653d4" : "#e2e2e2",
+                            background: sel ? "#eef2ff" : "#f9f9f9",
+                            color: sel ? "#2653d4" : "#4a5050",
+                          }}
+                        >
+                          {v}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="flex justify-between mt-1">
+                    <span className="text-[10px] text-[#8a9096]">{lo}</span>
+                    <span className="text-[10px] text-[#8a9096]">{hi}</span>
+                  </div>
+                </div>
+              ))}
+              <button
+                onClick={() => {
+                  saveCheckIn(checkIn);
+                  setCheckInDone(true);
+                  setCheckInOpen(false);
+                  loadAndScore();
+                }}
+                className="w-full py-3.5 rounded-2xl text-white text-[14px] font-semibold active:scale-[0.98] transition-transform"
+                style={{ background: "#2653d4" }}
+              >
+                Save check-in
+              </button>
             </div>
           </div>
         </div>

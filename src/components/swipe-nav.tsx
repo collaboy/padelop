@@ -51,7 +51,7 @@ export default function SwipeNav({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} style={{ minHeight: "100%" }}>
+    <div style={{ minHeight: "100%" }}>
       {children}
     </div>
   );
