@@ -446,6 +446,53 @@ export default function HomePage() {
                     )}
                 </button>
 
+                {/* Score ring + Improve Score card */}
+                <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 flex flex-col items-center py-5 mt-2">
+                  {editedData.time && now ? (() => {
+                    const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+                    const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
+                    const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+                    return <p className="text-[15px] font-semibold text-[#1a1c1c] mb-4">Next Match · <span className="text-[#2653d4]">{label} {editedData.time}</span></p>;
+                  })() : (
+                    <button onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }} className="text-[13px] font-semibold text-[#5a7055] mb-4 active:opacity-60">Add your next match</button>
+                  )}
+                  <ScoreRing metric={selectedMetric} />
+                  <div className="flex gap-1 mt-3 mx-4 justify-center rounded-full px-1 py-1" style={{ background: "#f0f0f0" }}>
+                    {[
+                      { key: "overall",   label: "Overall",   color: "#2653d4" },
+                      { key: "recovery",  label: "Recovery",  color: "#7c3aed" },
+                      { key: "hydration", label: "Hydration", color: "#0891b2" },
+                      { key: "energy",    label: "Energy",    color: "#f59e0b" },
+                      { key: "mobility",  label: "Mobility",  color: "#16a34a" },
+                    ].map(m => (
+                      <button
+                        key={m.key}
+                        onClick={() => setSelectedMetric(m.key)}
+                        className="rounded-full font-semibold transition-colors whitespace-nowrap"
+                        style={{
+                          fontSize: 10,
+                          padding: "4px 8px",
+                          ...(selectedMetric === m.key
+                            ? { background: m.color, color: "#fff" }
+                            : { background: "transparent", color: "#3a4550" })
+                        }}
+                      >
+                        {m.label}
+                      </button>
+                    ))}
+                  </div>
+                  <button onClick={() => setFabOpen(true)} className="flex items-center gap-2 px-4 py-2 mt-4 rounded-full active:opacity-60 transition-opacity" style={{ background: checkInDone ? "#f4f4f4" : "#fff0f0", border: checkInDone ? "none" : "1.5px solid #ef444460" }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                      <polyline points="17 6 23 6 23 12" />
+                    </svg>
+                    <span className="text-[15px] font-semibold text-[#1a1c1c]">Check-in to update score</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e9196" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  </button>
+                </div>
+
                 {/* Today's schedule inline */}
                 <div className="bg-white rounded-[24px] mt-2" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8" }}>
                   <div className="px-5 pt-4 pb-1 flex items-center justify-between">
@@ -494,54 +541,6 @@ export default function HomePage() {
               </>
             );
           })()}
-
-          {/* Score ring + Improve Score card */}
-          <div className="bg-white rounded-[24px] h1-ambient border border-[#c4c7c7]/10 flex flex-col items-center py-5 mb-2 mt-2">
-            {editedData.time && now ? (() => {
-              const tomorrowDate = new Date(now); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
-              const tomorrowYMD = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth() + 1).padStart(2, "0")}-${String(tomorrowDate.getDate()).padStart(2, "0")}`;
-              const label = editedData.date === todayYMD ? "Today" : editedData.date === tomorrowYMD ? "Tomorrow" : new Date(editedData.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-              return <p className="text-[15px] font-semibold text-[#1a1c1c] mb-4">Next Match · <span className="text-[#2653d4]">{label} {editedData.time}</span></p>;
-            })() : (
-              <button onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }} className="text-[13px] font-semibold text-[#5a7055] mb-4 active:opacity-60">Add your next match</button>
-            )}
-            <ScoreRing metric={selectedMetric} />
-            {/* Metric pill selector */}
-            <div className="flex gap-1 mt-3 mx-4 justify-center rounded-full px-1 py-1" style={{ background: "#f0f0f0" }}>
-              {[
-                { key: "overall",   label: "Overall",   color: "#2653d4" },
-                { key: "recovery",  label: "Recovery",  color: "#7c3aed" },
-                { key: "hydration", label: "Hydration", color: "#0891b2" },
-                { key: "energy",    label: "Energy",    color: "#f59e0b" },
-                { key: "mobility",  label: "Mobility",  color: "#16a34a" },
-              ].map(m => (
-                <button
-                  key={m.key}
-                  onClick={() => setSelectedMetric(m.key)}
-                  className="rounded-full font-semibold transition-colors whitespace-nowrap"
-                  style={{
-                    fontSize: 10,
-                    padding: "4px 8px",
-                    ...(selectedMetric === m.key
-                      ? { background: m.color, color: "#fff" }
-                      : { background: "transparent", color: "#3a4550" })
-                  }}
-                >
-                  {m.label}
-                </button>
-              ))}
-            </div>
-            <button onClick={() => setFabOpen(true)} className="flex items-center gap-2 px-4 py-2 mt-4 rounded-full active:opacity-60 transition-opacity" style={{ background: checkInDone ? "#f4f4f4" : "#fff0f0", border: checkInDone ? "none" : "1.5px solid #ef444460" }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                <polyline points="17 6 23 6 23 12" />
-              </svg>
-              <span className="text-[15px] font-semibold text-[#1a1c1c]">Check-in to update score</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8e9196" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </button>
-          </div>
 
           {/* Match Day Essentials */}
           <div className="bg-white rounded-[24px] mt-2" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8" }}>
