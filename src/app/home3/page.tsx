@@ -125,20 +125,15 @@ export default function Home3() {
       {/* Do This Now */}
       <button
         onClick={() => setModalOpen(true)}
-        className="bg-white rounded-[24px] px-6 py-6 flex items-center gap-5 active:opacity-60 transition-opacity text-left w-full"
+        className="bg-white rounded-[24px] p-6 aspect-square flex flex-col items-center justify-between active:opacity-60 transition-opacity w-full"
         style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "2px solid #f59e0b" }}
       >
-        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#f59e0b18" }}>
-          <div ref={dotRef} className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Do this now</p>
+        <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] w-full text-center mb-4">Do this now</p>
+        <div ref={dotRef} className="w-3/4 aspect-square rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
+        <div className="w-full text-center mt-4">
           <p className="text-[20px] font-bold text-[#1a1c1c] leading-tight">Drink 500ml water</p>
-          <p className="text-[13px] text-[#4a5050] mt-1 leading-snug">Before anything else this morning</p>
+          <p className="text-[13px] text-[#4a5050] mt-2 leading-snug">Before anything else this morning</p>
         </div>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-          <path d="M9 18l6-6-6-6"/>
-        </svg>
       </button>
 
       {/* Do This Now modal — homepage schedule style */}

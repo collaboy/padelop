@@ -10,11 +10,30 @@ function greeting() {
   return "Good Evening";
 }
 
+function getDayMsg(match: { date: string; time: string } | null, now: Date): string {
+  const today = now.toISOString().slice(0, 10);
+  const yesterday = new Date(now.getTime() - 864e5).toISOString().slice(0, 10);
+  if (match?.date === today) {
+    const [mH, mM] = match.time.split(":").map(Number);
+    const diffMins = mH * 60 + mM - now.getHours() * 60 - now.getMinutes();
+    if (diffMins > 180) { const hrs = Math.floor(diffMins / 60); return `Match in ${hrs}h. Stay light, hydrate steadily, and eat your pre-game meal ${hrs > 4 ? "a few hours before" : "soon"}.`; }
+    if (diffMins > 60) return "Time to warm up. Dynamic activation, no heavy food — just sip water and focus.";
+    if (diffMins > 0) return "Almost game time. Breathe, visualise, and trust your prep.";
+    return "Great match today. Prioritise recovery — stretch, eat protein, and rest up.";
+  }
+  if (match?.date === yesterday) return "Recovery day. Keep moving gently, drink plenty of water, and get your protein in.";
+  return "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy.";
+}
+
 function matchLabel(date: string, time: string): string {
   const today = new Date().toISOString().slice(0, 10);
   const tomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
-  const day = date === today ? "Today" : date === tomorrow ? "Tomorrow" : date;
-  return `Match ${day} at ${time}`;
+  const d = new Date(date + "T12:00");
+  const dayNum = d.getDate();
+  const month = d.toLocaleDateString("en-GB", { month: "short" });
+  const weekday = d.toLocaleDateString("en-GB", { weekday: "short" });
+  const dateStr = date === today ? "Today" : date === tomorrow ? "Tomorrow" : `${weekday} ${dayNum} ${month}`;
+  return `Next Match: ${dateStr} · ${time}`;
 }
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -24,7 +43,7 @@ const addMins = (h: number, m: number, delta: number) => {
 };
 const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
 
-function getCurrentItem(matchDate: string | null, matchTime: string | null) {
+function getScheduleData(matchDate: string | null, matchTime: string | null) {
   const today = new Date().toISOString().slice(0, 10);
   const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
   let dayType: "match" | "recovery" | "rest" = "rest";
@@ -79,7 +98,12 @@ function getCurrentItem(matchDate: string | null, matchTime: string | null) {
       if (curMins >= toMins(schedule[i].time) && curMins < toMins(schedule[i + 1].time)) { idx = i; break; }
     }
   }
-  return schedule[idx];
+  return { schedule, currentIdx: idx };
+}
+
+function getCurrentItem(matchDate: string | null, matchTime: string | null) {
+  const { schedule, currentIdx } = getScheduleData(matchDate, matchTime);
+  return schedule[currentIdx];
 }
 
 const S: React.CSSProperties = {
@@ -115,10 +139,34 @@ const labelS: React.CSSProperties = {
   letterSpacing: "0.06em",
 };
 
+const SCHEDULE_DETAILS: Record<string, string> = {
+  "Wake up & hydrate": "Starting your day with 500 ml of water re-hydrates you after 7–8 hours without fluids. Do this before coffee — caffeine is a mild diuretic and amplifies morning dehydration.",
+  "Breakfast": "Oats are a slow-releasing carbohydrate that keeps blood sugar stable for hours. Eggs deliver complete protein to protect muscle. Fruit provides natural sugars and hydrating water content.",
+  "Light breakfast": "Keep it light and easily digestible on a recovery day. Eggs provide amino acids for tissue repair. Greek yogurt delivers protein and probiotics. Avoid heavy or greasy foods that slow digestion and increase inflammation.",
+  "Morning mobility": "Light mobility work increases range of motion and blood flow without fatiguing your muscles before a match. Foam rolling uses your body weight to apply pressure and release adhesions. Key areas for padel: hip flexors, IT band, calves, thoracic spine.",
+  "Light mobility": "On rest days, gentle mobility keeps joints lubricated and prevents stiffness from accumulating. Focus on hip flexors (60-sec holds), thoracic rotation, and ankle circles. 10–15 minutes is enough — this is maintenance, not training.",
+  "Pre-game meal": "A small solid meal 60–90 min before the match tops off energy stores without sitting heavy in your stomach. Eggs provide fast-absorbing protein; toast adds digestible carbs. Keep portions modest.",
+  "Warmup & activation": "Dynamic warmup primes the neuromuscular system — it signals your fast-twitch fibres that explosive movement is coming. Lateral drills mimic court-side movement patterns. Build from 60% to 80–90% intensity.",
+  "Match": "Match time. Focus on early rhythm — the first few games set the tempo. Communicate constantly with your partner. If losing points from the back, use the lob as a reset rather than going for winners. Stay hydrated between sets.",
+  "Post-match cool down": "Cooling down gradually lowers your heart rate. Static stretching (30-sec holds) is most effective now — muscles are warm and pliable. Focus on quads, hip flexors, calves, and shoulder external rotators.",
+  "Recovery meal": "The 30-minute post-exercise window has the highest rate of muscle protein synthesis. Aim for 20–40 g protein + 60–80 g carbs. A protein shake + banana works; so does chicken + rice.",
+  "Recovery walk": "Low-intensity movement increases blood flow to fatigued muscles without adding stress. Walking at a comfortable pace for 20 minutes helps flush metabolic waste, reduces soreness, and keeps your aerobic system active without loading your joints.",
+  "Foam roll & stretch": "Post-match, your muscles are still warm enough to respond well to sustained pressure. Work through quads, IT band, hip flexors, glutes, and calves. Spend 60–90 seconds on each area. Finish with static stretches — your range of motion is at its peak the day after a session.",
+  "Protein-rich lunch": "Muscle repair peaks in the 24 hours after exercise. Aim for 30–40g of protein at lunch from high-quality sources. Combine with complex carbs to restore glycogen and healthy fats to reduce inflammation.",
+  "Cold shower": "Two minutes of cold water constricts blood vessels, reduces inflammation, and blunts delayed onset muscle soreness. It also activates the nervous system — useful if you have low energy on a recovery day.",
+  "Dinner": "Evening meals should focus on anti-inflammatory foods: fatty fish (omega-3s), leafy greens (magnesium), and complex carbs to restore glycogen for tomorrow. Avoid alcohol — it significantly impairs muscle protein synthesis overnight.",
+  "Early wind down": "After a match, your nervous system is still activated — cortisol and adrenaline take hours to clear. An early wind-down accelerates recovery: dim lights by 9pm, avoid screens, and aim to be in bed by 10:30. Tonight's sleep quality directly determines how fast you recover.",
+  "Balanced lunch": "Rest days are an opportunity to catch up on micronutrients. Build your lunch around a variety of colours — each pigment represents a different class of antioxidant that supports tissue repair and immune function. Don't under-eat on rest days; your body is still rebuilding.",
+  "Active recovery": "Light aerobic activity on rest days maintains cardiovascular fitness without accumulating fatigue. Swimming is ideal — zero impact, full range of motion. Cycling works well too. Keep heart rate below 130 bpm and duration under 45 minutes.",
+  "Visualisation": "Mental rehearsal activates the same motor pathways as physical practice. Spend 5 minutes visualising your strongest patterns: a sharp bandeija from the net, your positioning after a deep lob, your return when under pressure.",
+  "Wind down": "Blue light from screens suppresses melatonin production by up to 50%. In the 60 minutes before bed: dim lights, avoid screens, try light reading or slow breathing. A consistent bedtime stabilises your circadian rhythm.",
+};
+
 type Step = "pick" | "upload" | "form";
 
 export default function Home4() {
   const [doModalOpen, setDoModalOpen] = useState(false);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
   const [match, setMatch] = useState<{ date: string; time: string } | null>(null);
   const [now, setNow] = useState(new Date());
   const [addOpen, setAddOpen] = useState(false);
@@ -198,20 +246,8 @@ export default function Home4() {
   return (
     <main style={{ ...S, padding: "40px 28px", minHeight: "100vh", background: "#f9f9f9", fontWeight: 300 }}>
 
-      <p style={{ margin: "0 0 24px" }}>{greeting()} Eddie</p>
-
-      {match ? (
-        <p style={{ margin: "0 0 32px" }}>{matchLabel(match.date, match.time)}</p>
-      ) : (
-        <div style={{ margin: "0 0 32px", display: "flex", alignItems: "baseline", gap: 8 }}>
-          <p style={{ margin: 0 }}>Next Match:</p>
-          <button onClick={() => setAddOpen(true)} style={{ ...S, background: "none", border: "none", padding: 0, cursor: "pointer" }}>
-            + Add a match
-          </button>
-        </div>
-      )}
-
-      <hr style={{ width: 160, margin: "0 0 32px", border: "none", borderTop: "1.5px solid #111" }} />
+      <p style={{ margin: "0 0 6px" }}>{greeting()} Eddie</p>
+      <p style={{ ...S, fontSize: 13, color: "#888", fontWeight: 300, margin: "0 0 24px", lineHeight: 1.5 }}>{getDayMsg(match, now)}</p>
 
       {(() => {
         const item = getCurrentItem(match?.date ?? null, match?.time ?? null);
@@ -220,20 +256,15 @@ export default function Home4() {
           <>
             <button
               onClick={() => setDoModalOpen(true)}
-              className="bg-white rounded-[24px] px-6 py-6 flex items-center gap-5 active:opacity-60 transition-opacity text-left w-full"
+              className="bg-white rounded-[24px] p-6 aspect-square flex flex-col items-center justify-between active:opacity-60 transition-opacity w-full"
               style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "2px solid #f59e0b", marginBottom: 32 }}
             >
-              <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#f59e0b18" }}>
-                <div className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Do this now</p>
+              <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] w-full text-center mb-4">Do this now</p>
+              <div className="w-3/4 aspect-square rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
+              <div className="w-full text-center mt-4">
                 <p className="text-[20px] font-bold text-[#1a1c1c] leading-tight">{item.title}</p>
-                {item.subtitle && <p className="text-[13px] text-[#4a5050] mt-1 leading-snug">{item.subtitle}</p>}
+                {item.subtitle && <p className="text-[13px] text-[#4a5050] mt-2 leading-snug">{item.subtitle}</p>}
               </div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-                <path d="M9 18l6-6-6-6"/>
-              </svg>
             </button>
 
             {doModalOpen && (
@@ -247,17 +278,63 @@ export default function Home4() {
                   <div className="px-6 pt-5 pb-4" style={{ background: "#f59e0b18" }}>
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#f59e0b" }} />
-                      <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: "#f59e0b" }}>Today&apos;s Schedule</p>
+                      <p className="text-[14px] font-bold tracking-wide" style={{ color: "#f59e0b" }}>Today&apos;s Schedule</p>
                     </div>
                     <h3 className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{item.title}</h3>
                     {item.subtitle && <p className="text-[13px] text-[#2c3235] mt-0.5">{item.subtitle}</p>}
                   </div>
+                  {SCHEDULE_DETAILS[item.title] && (
+                    <div className="px-6 py-5">
+                      <p className="text-[15px] text-[#2c3235] leading-relaxed">{SCHEDULE_DETAILS[item.title]}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
           </>
         );
       })()}
+
+      <button
+        onClick={() => setScheduleOpen(o => !o)}
+        style={{ ...S, background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, margin: "0 0 12px" }}
+      >
+        <span style={{ fontSize: 13, color: "#888" }}>See full schedule</span>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: scheduleOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+          <path d="M6 9l6 6 6-6"/>
+        </svg>
+      </button>
+
+      {scheduleOpen && (() => {
+        const { schedule, currentIdx } = getScheduleData(match?.date ?? null, match?.time ?? null);
+        void now;
+        return (
+          <div style={{ margin: "0 0 20px", borderLeft: "1.5px solid #ddd", paddingLeft: 12 }}>
+            {schedule.map((item, i) => {
+              const isCurrent = i === currentIdx;
+              return (
+                <div key={i} style={{ display: "flex", gap: 14, marginBottom: 8, opacity: i < currentIdx ? 0.4 : 1 }}>
+                  <span style={{ ...S, fontSize: 12, color: "#888", flexShrink: 0, width: 38 }}>{item.time}</span>
+                  <span style={{ ...S, fontSize: 13, fontWeight: isCurrent ? 400 : 300, color: isCurrent ? "#111" : "#555" }}>
+                    {isCurrent ? "→ " : ""}{item.title}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        );
+      })()}
+
+      {match ? (
+        <p style={{ margin: "0 0 32px" }}>{matchLabel(match.date, match.time)}</p>
+      ) : (
+        <div style={{ margin: "0 0 32px", display: "flex", alignItems: "baseline", gap: 8 }}>
+          <p style={{ margin: 0 }}>Next Match:</p>
+          <button onClick={() => setAddOpen(true)} style={{ ...S, background: "none", border: "none", padding: 0, cursor: "pointer" }}>
+            + Add a match
+          </button>
+        </div>
+      )}
 
       <hr style={{ width: 160, margin: "0 0 32px", border: "none", borderTop: "1.5px solid #111" }} />
 
