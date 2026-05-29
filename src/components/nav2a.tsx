@@ -55,7 +55,7 @@ export default function Nav2a() {
     <nav
       className="fixed inset-x-0 z-[100]"
       style={{
-        bottom: "calc(72px + env(safe-area-inset-bottom))",
+        bottom: "calc(47px + env(safe-area-inset-bottom))",
         background: "#ffffff",
         borderTop: "1px solid #e8eaed",
         borderBottom: "1px solid #e8eaed",
