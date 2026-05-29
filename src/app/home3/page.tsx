@@ -67,20 +67,27 @@ export default function Home3() {
       </div>
 
       {/* Do This Now */}
-      <div className="bg-white rounded-[24px] px-6 py-6" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-        <p className="text-[10px] font-bold tracking-widest uppercase text-[#8a9096] mb-4">Do This Now</p>
-        <p className="text-[20px] font-bold text-[#1a1c1c] leading-snug mb-6">
-          Drink 500ml water
-        </p>
+      <div
+        className="bg-white rounded-[24px] px-5 py-5 flex items-center gap-4 active:opacity-60 transition-opacity"
+        style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "2px solid #f59e0b" }}
+      >
+        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#f59e0b18" }}>
+          <div className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Do this now</p>
+          <p className="text-[20px] font-bold text-[#1a1c1c] leading-tight">Drink 500ml water</p>
+          <p className="text-[13px] text-[#4a5050] mt-1 leading-snug">Before anything else this morning</p>
+        </div>
         <button
           onClick={() => setDone(d => !d)}
-          className="w-full py-4 rounded-2xl font-bold text-[15px] tracking-wide transition-all active:scale-[0.97]"
+          className="flex-shrink-0 text-[12px] font-bold px-3 py-2 rounded-xl transition-all active:scale-95"
           style={{
             background: done ? "#caecbc" : "#2a5c2a",
             color: done ? "#2a5c2a" : "#fff",
           }}
         >
-          {done ? "✓  Completed" : "Complete"}
+          {done ? "✓" : "Done"}
         </button>
       </div>
 
