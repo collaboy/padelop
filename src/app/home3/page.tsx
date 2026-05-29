@@ -38,7 +38,7 @@ const UP_NEXT = [
 
 export default function Home3() {
   const [matchTime, setMatchTime] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const countdown = useCountdown(matchTime);
 
   useEffect(() => {
@@ -67,8 +67,9 @@ export default function Home3() {
       </div>
 
       {/* Do This Now */}
-      <div
-        className="bg-white rounded-[24px] px-5 py-5 flex items-center gap-4 active:opacity-60 transition-opacity"
+      <button
+        onClick={() => setModalOpen(true)}
+        className="bg-white rounded-[24px] px-5 py-5 flex items-center gap-4 active:opacity-60 transition-opacity text-left w-full"
         style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "2px solid #f59e0b" }}
       >
         <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#f59e0b18" }}>
@@ -79,17 +80,43 @@ export default function Home3() {
           <p className="text-[20px] font-bold text-[#1a1c1c] leading-tight">Drink 500ml water</p>
           <p className="text-[13px] text-[#4a5050] mt-1 leading-snug">Before anything else this morning</p>
         </div>
-        <button
-          onClick={() => setDone(d => !d)}
-          className="flex-shrink-0 text-[12px] font-bold px-3 py-2 rounded-xl transition-all active:scale-95"
-          style={{
-            background: done ? "#caecbc" : "#2a5c2a",
-            color: done ? "#2a5c2a" : "#fff",
-          }}
-        >
-          {done ? "✓" : "Done"}
-        </button>
-      </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </button>
+
+      {/* Explanatory modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-[200] flex items-end justify-center px-4 pb-8" onClick={() => setModalOpen(false)}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-lg bg-white rounded-[28px] px-6 py-7"
+            style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.15)" }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#f59e0b18" }}>
+                <div className="w-3.5 h-3.5 rounded-full" style={{ background: "#f59e0b" }} />
+              </div>
+              <div>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055]">Do this now</p>
+                <p className="text-[18px] font-bold text-[#1a1c1c] leading-tight">Drink 500ml water</p>
+              </div>
+            </div>
+            <p className="text-[15px] text-[#4a5050] leading-relaxed mb-3">
+              Your body loses water overnight — even mild dehydration affects energy, focus, and physical output. Drinking 500ml first thing kicks off your hydration for the day.
+            </p>
+            <p className="text-[13px] font-semibold text-[#8a9096]">→ Affects: Hydration · Recovery · Energy</p>
+            <button
+              onClick={() => setModalOpen(false)}
+              className="mt-6 w-full py-3.5 rounded-2xl text-[15px] font-bold text-white active:opacity-70 transition-opacity"
+              style={{ background: "#2653d4" }}
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Up Next */}
       <div className="bg-white rounded-[24px] px-6 py-6" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
