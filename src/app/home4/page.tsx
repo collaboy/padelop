@@ -185,8 +185,7 @@ type Step = "pick" | "upload" | "form";
 
 export default function Home4() {
   const [doModalOpen, setDoModalOpen] = useState(false);
-  const [scheduleOpen, setScheduleOpen] = useState(false);
-  const [todaySchedOpen, setTodaySchedOpen] = useState(false);
+  const [slideIdx, setSlideIdx] = useState(0);
   const [match, setMatch] = useState<{ date: string; time: string } | null>(null);
   const [now, setNow] = useState(new Date());
   const [addOpen, setAddOpen] = useState(false);
@@ -194,7 +193,14 @@ export default function Home4() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [form, setForm] = useState({ date: "", time: "", venue: "", player1: "", player2: "", player3: "", player4: "" });
+  const [logThumb, setLogThumb] = useState<string | null>(null);
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [newCatActive, setNewCatActive] = useState(false);
+  const [newCatValue, setNewCatValue] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const logCameraRef = useRef<HTMLInputElement>(null);
+  const logUploadRef = useRef<HTMLInputElement>(null);
+  const touchStartX = useRef<number>(0);
 
   useEffect(() => {
     try {
@@ -223,6 +229,15 @@ export default function Home4() {
     window.dispatchEvent(new Event("storage"));
     setMatch({ date: form.date, time: form.time });
     closeModal();
+  }
+
+  function handleLogFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+    const url = URL.createObjectURL(file);
+    setLogThumb(url);
+    setSlideIdx(2);
   }
 
   function closeModal() {
@@ -272,21 +287,248 @@ export default function Home4() {
 
       {(() => {
         const item = getCurrentItem(match?.date ?? null, match?.time ?? null);
+        const { schedule, currentIdx, dayType } = getScheduleData(match?.date ?? null, match?.time ?? null);
+        const meta = DAY_TYPE_META[dayType];
+        const curMins = now.getHours() * 60 + now.getMinutes();
         void now;
         return (
           <>
-            <button
-              onClick={() => setDoModalOpen(true)}
-              className="bg-white rounded-[24px] p-6 aspect-square flex flex-col items-center justify-between active:opacity-60 transition-opacity w-full"
-              style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "2px solid #f59e0b", marginBottom: 32 }}
+            {/* Swipeable carousel */}
+            <div
+              className="w-full aspect-square overflow-hidden"
+              style={{ borderRadius: 24, marginBottom: 10 }}
+              onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
+              onTouchEnd={e => {
+                const dx = e.changedTouches[0].clientX - touchStartX.current;
+                if (Math.abs(dx) > 40) setSlideIdx(prev => dx < 0 ? Math.min(prev + 1, 2) : Math.max(prev - 1, 0));
+              }}
             >
-              <p className="text-[13px] font-bold tracking-widest uppercase text-[#5a7055] w-full text-center">Do this now</p>
-              <div className="w-16 h-16 rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
-              <div className="w-full text-center">
-                <p className="text-[20px] font-bold text-[#1a1c1c] leading-tight">{item.title}</p>
-                {item.subtitle && <p className="text-[13px] text-[#4a5050] mt-1 leading-snug">{item.subtitle}</p>}
+              <div
+                style={{
+                  display: "flex",
+                  height: "100%",
+                  transform: `translateX(-${slideIdx * 100}%)`,
+                  transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
+                }}
+              >
+                {/* Slide 1: Do This Now */}
+                <div style={{ flex: "0 0 100%", height: "100%" }}>
+                  <button
+                    onClick={() => setDoModalOpen(true)}
+                    className="bg-white flex flex-col items-center justify-between active:opacity-60 transition-opacity"
+                    style={{ width: "100%", height: "100%", borderRadius: 24, padding: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "2px solid #f59e0b", overflowY: "auto" }}
+                  >
+                    <p className="text-[13px] font-bold tracking-widest uppercase text-[#5a7055] w-full text-center">Do this now</p>
+                    <div className="w-28 h-28 rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
+                    <div className="w-full text-center">
+                      <p className="text-[20px] font-bold text-[#1a1c1c] leading-tight">{item.title}</p>
+                      {item.subtitle && <p className="text-[13px] text-[#4a5050] mt-1 leading-snug">{item.subtitle}</p>}
+                      <div className="flex justify-center mt-3">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M6 9l6 6 6-6"/>
+                        </svg>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+
+                {/* Slide 2: Today's Schedule */}
+                <div style={{ flex: "0 0 100%", height: "100%", overflow: "hidden" }}>
+                  <div
+                    className="bg-white flex flex-col"
+                    style={{ width: "100%", height: "100%", borderRadius: 24, padding: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflowY: "auto" }}
+                  >
+                    <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 12 }}>
+                      <p className="text-[13px] font-bold tracking-widest uppercase text-[#5a7055]">Today&apos;s Schedule</p>
+                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: meta.bg, color: meta.color }}>{meta.label}</span>
+                    </div>
+                    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 0 }}>
+                      {schedule.map((s, i) => {
+                        const isCur = i === currentIdx;
+                        const isPast = !isCur && curMins > toMins(s.time);
+                        return (
+                          <div key={i} className="flex gap-3" style={{ flex: "1 1 0", minHeight: 0, alignItems: "center", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f4" : "none" }}>
+                            <div className="flex flex-col items-center flex-shrink-0 self-stretch justify-center" style={{ width: 18 }}>
+                              <div style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0, background: isPast ? "#d0d3d6" : s.color, boxShadow: isCur ? `0 0 0 2px ${s.color}30` : "none" }} />
+                            </div>
+                            <div className="flex-1 min-w-0 py-1">
+                              <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: isPast ? "#c4c7c7" : s.color, margin: 0 }}>{s.time}</p>
+                              <p style={{ fontSize: 12, fontWeight: isCur ? 700 : 500, color: isPast ? "#a0a5aa" : "#1a1c1c", margin: 0, lineHeight: 1.3 }}>{s.title}</p>
+                            </div>
+                            {isCur && (
+                              <div className="flex-shrink-0">
+                                <div className="animate-breathe" style={{ width: 6, height: 6, borderRadius: "50%", background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Slide 3: Log anything */}
+                <div style={{ flex: "0 0 100%", height: "100%" }}>
+                  <div
+                    className="bg-white flex flex-col"
+                    style={{ width: "100%", height: "100%", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflow: "hidden" }}
+                  >
+                    {logThumb ? (
+                      /* Categorise view — inner div scrolls */
+                      <div style={{ flex: 1, overflowY: "auto", padding: 24 }}>
+                        <div className="flex items-center gap-2" style={{ marginBottom: 16 }}>
+                          <button onClick={() => { setLogThumb(null); setNewCatActive(false); setNewCatValue(""); }} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center" }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                          </button>
+                          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "#5a7055", margin: 0 }}>Categorise</p>
+                        </div>
+                        <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
+                          <img src={logThumb} alt="upload" style={{ width: 72, height: 72, borderRadius: 14, objectFit: "cover", flexShrink: 0 }} />
+                          <p style={{ fontSize: 13, color: "#6b7480", lineHeight: 1.5, margin: 0, alignSelf: "center" }}>What is this?<br/><span style={{ color: "#a0a5aa", fontSize: 12 }}>Pick a category below</span></p>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                          {["Food pic", "Hydration", "Racket grip"].map(cat => (
+                            <button
+                              key={cat}
+                              onClick={() => { setLogThumb(null); setNewCatActive(false); setNewCatValue(""); }}
+                              style={{ background: "#f4f6ff", border: "none", borderRadius: 14, padding: "13px 16px", fontSize: 14, fontWeight: 600, color: "#2653d4", cursor: "pointer", textAlign: "left" }}
+                            >
+                              {cat}
+                            </button>
+                          ))}
+                          {newCatActive ? (
+                            <div style={{ display: "flex", gap: 8 }}>
+                              <input
+                                autoFocus
+                                value={newCatValue}
+                                onChange={e => setNewCatValue(e.target.value)}
+                                placeholder="Category name"
+                                style={{ flex: 1, border: "1.5px solid #2653d4", borderRadius: 14, padding: "10px 14px", fontSize: 13, outline: "none", background: "#fff" }}
+                              />
+                              <button
+                                onClick={() => { if (newCatValue.trim()) { setLogThumb(null); setNewCatActive(false); setNewCatValue(""); } }}
+                                style={{ background: "#2653d4", border: "none", borderRadius: 14, padding: "0 16px", color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+                              >
+                                Save
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setNewCatActive(true)}
+                              style={{ background: "none", border: "1.5px dashed #d0d3d6", borderRadius: 14, padding: "10px 16px", fontSize: 13, fontWeight: 600, color: "#8a9096", cursor: "pointer", textAlign: "left" }}
+                            >
+                              + New category
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      /* Default view — inner div is the flex column that scrolls */
+                      <div style={{ flex: 1, overflowY: "auto", padding: 24, display: "flex", flexDirection: "column" }}>
+                        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "#5a7055", margin: 0, textAlign: "center" }}>Log anything</p>
+                        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 12 }}>
+                          <button
+                            onClick={() => {
+                              const input = document.createElement("input");
+                              input.type = "file";
+                              input.accept = "image/*";
+                              input.setAttribute("capture", "environment");
+                              input.onchange = (ev) => {
+                                const file = (ev.target as HTMLInputElement).files?.[0];
+                                if (!file) return;
+                                const url = URL.createObjectURL(file);
+                                setLogThumb(url);
+                              };
+                              input.click();
+                            }}
+                            style={{ width: "100%", background: "#f4f6ff", border: "none", borderRadius: 16, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}
+                          >
+                            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2653d418", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+                              </svg>
+                            </div>
+                            <div style={{ textAlign: "left" }}>
+                              <p style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Camera</p>
+                              <p style={{ fontSize: 11, color: "#8a9096", margin: 0 }}>Take a photo now</p>
+                            </div>
+                          </button>
+                          <button
+                            onClick={() => logUploadRef.current?.click()}
+                            style={{ width: "100%", background: "#f4f6ff", border: "none", borderRadius: 16, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}
+                          >
+                            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2653d418", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                              </svg>
+                            </div>
+                            <div style={{ textAlign: "left" }}>
+                              <p style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Upload</p>
+                              <p style={{ fontSize: 11, color: "#8a9096", margin: 0 }}>Choose from library</p>
+                            </div>
+                          </button>
+                          <button
+                            onClick={() => setWizardOpen(true)}
+                            style={{ width: "100%", background: "#f4f6ff", border: "none", borderRadius: 16, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}
+                          >
+                            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2653d418", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                              </svg>
+                            </div>
+                            <div style={{ textAlign: "left" }}>
+                              <p style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Wizard</p>
+                              <p style={{ fontSize: 11, color: "#8a9096", margin: 0 }}>Step-by-step logging</p>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-            </button>
+            </div>
+
+            {/* Hidden upload input */}
+            <input ref={logUploadRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleLogFile} />
+
+            {/* Dot navigation */}
+            <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 32 }}>
+              {[0, 1, 2].map(i => (
+                <button
+                  key={i}
+                  onClick={() => setSlideIdx(i)}
+                  style={{ width: 6, height: 6, borderRadius: "50%", background: i === slideIdx ? "#1a1c1c" : "#d0d3d6", border: "none", padding: 0, cursor: "pointer", transition: "background 0.2s" }}
+                />
+              ))}
+            </div>
+
+            {/* Wizard modal */}
+            {wizardOpen && (
+              <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => setWizardOpen(false)}>
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+                <div
+                  className="relative w-full max-w-sm bg-white rounded-[28px] px-6 py-7"
+                  style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.15)" }}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <p className="text-[18px] font-bold text-[#1a1c1c] mb-1">Wizard</p>
+                  <p className="text-[13px] text-[#8a9096] mb-5">What would you like to log?</p>
+                  <div className="flex flex-col gap-2">
+                    {["Check-in", "Hydration", "Nutrition", "Match Review"].map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => setWizardOpen(false)}
+                        className="w-full text-left px-4 py-3.5 rounded-2xl text-[15px] font-semibold text-[#1a1c1c] active:opacity-60 transition-opacity"
+                        style={{ background: "#f4f6ff" }}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {doModalOpen && (
               <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => setDoModalOpen(false)}>
@@ -313,55 +555,6 @@ export default function Home4() {
               </div>
             )}
           </>
-        );
-      })()}
-
-      {/* Today's Schedule collapsible */}
-      {(() => {
-        const { schedule, currentIdx, dayType } = getScheduleData(match?.date ?? null, match?.time ?? null);
-        const meta = DAY_TYPE_META[dayType];
-        const curMins = now.getHours() * 60 + now.getMinutes();
-        return (
-          <div className="bg-white rounded-[24px] mb-8" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8" }}>
-            <button
-              onClick={() => setTodaySchedOpen(o => !o)}
-              className="w-full px-5 pt-4 pb-4 flex items-center justify-between active:opacity-60 transition-opacity"
-            >
-              <p className="text-[13px] font-bold tracking-widest uppercase text-[#5a7055]">Today&apos;s Schedule</p>
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: meta.bg, color: meta.color }}>{meta.label}</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: todaySchedOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
-                  <path d="M6 9l6 6 6-6"/>
-                </svg>
-              </div>
-            </button>
-            {todaySchedOpen && (
-              <div className="px-5 pb-4" style={{ borderTop: "1px solid #f4f4f4" }}>
-                {schedule.map((s, i) => {
-                  const isCur = i === currentIdx;
-                  const isPast = !isCur && curMins > toMins(s.time);
-                  return (
-                    <div key={i} className="flex gap-4 py-2.5" style={{ borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f4" : "none" }}>
-                      <div className="flex flex-col items-center flex-shrink-0" style={{ width: 28 }}>
-                        <div className="w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0" style={{ background: isPast ? "#d0d3d6" : s.color, boxShadow: isCur ? `0 0 0 3px ${s.color}28` : "none" }} />
-                        {i < schedule.length - 1 && <div className="w-0.5 mt-1 flex-1" style={{ background: isPast ? "#e2e2e2" : "#ebebeb", minHeight: 20 }} />}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[11px] font-bold tracking-widest uppercase mb-0.5" style={{ color: isPast ? "#c4c7c7" : s.color }}>{s.time}</p>
-                        <p className="text-[15px] font-semibold leading-snug" style={{ color: isPast ? "#a0a5aa" : "#1a1c1c" }}>{s.title}</p>
-                        {s.subtitle && <p className="text-[12px] mt-0.5 leading-snug" style={{ color: isPast ? "#c4c7c7" : "#4a5050" }}>{s.subtitle}</p>}
-                      </div>
-                      {isCur && (
-                        <div className="flex-shrink-0 self-center">
-                          <div className="w-2.5 h-2.5 rounded-full animate-breathe" style={{ background: s.color, ["--glow" as string]: s.color }} />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
         );
       })()}
 
