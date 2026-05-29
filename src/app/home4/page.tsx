@@ -49,7 +49,10 @@ export default function Home4() {
       const raw = localStorage.getItem("padelop:next-match");
       if (raw) {
         const m = JSON.parse(raw);
-        if (m.date && m.time) setMatch({ date: m.date, time: m.time });
+        if (m.date && m.time) {
+          const matchMs = new Date(`${m.date}T${m.time}`).getTime();
+          if (matchMs > Date.now()) setMatch({ date: m.date, time: m.time });
+        }
       }
     } catch {}
   }, []);
