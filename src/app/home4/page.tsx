@@ -13,7 +13,7 @@ function greeting() {
 const S: React.CSSProperties = {
   fontFamily: "Menlo, Monaco, 'Courier New', monospace",
   fontSize: 16,
-  fontWeight: 400,
+  fontWeight: 300,
   color: "#111",
   lineHeight: 1.5,
 };
@@ -22,7 +22,7 @@ export default function Home4() {
   const [done, setDone] = useState(false);
 
   return (
-    <main style={{ ...S, padding: "40px 28px", minHeight: "100vh", background: "#fff" }}>
+    <main style={{ ...S, padding: "40px 28px", minHeight: "100vh", background: "#fff", fontWeight: 300 }}>
 
       <p style={{ margin: "0 0 24px" }}>{greeting()} Eddie</p>
       <p style={{ margin: "0 0 32px" }}>Match Tonight</p>
