@@ -87,7 +87,7 @@ export default function Home3() {
 
       {/* Explanatory modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-[200] flex items-end justify-center px-4 pb-8" onClick={() => setModalOpen(false)}>
+        <div className="fixed inset-0 z-[200] flex items-center justify-center px-4" onClick={() => setModalOpen(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div
             className="relative w-full max-w-lg bg-white rounded-[28px] px-6 py-7"
