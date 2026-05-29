@@ -135,10 +135,12 @@ export default function Home4() {
       {match ? (
         <p style={{ margin: "0 0 32px" }}>{matchLabel(match.date, match.time)}</p>
       ) : (
-        <p style={{ margin: "0 0 8px" }}>Next Match:</p>
-        <button onClick={() => setAddOpen(true)} style={{ ...S, background: "none", border: "none", padding: 0, cursor: "pointer", margin: "0 0 32px", display: "block" }}>
-          + Add a match
-        </button>
+        <div style={{ margin: "0 0 32px" }}>
+          <p style={{ margin: "0 0 8px" }}>Next Match:</p>
+          <button onClick={() => setAddOpen(true)} style={{ ...S, background: "none", border: "none", padding: 0, cursor: "pointer", display: "block" }}>
+            + Add a match
+          </button>
+        </div>
       )}
 
       <hr style={{ width: 160, margin: "0 0 32px", border: "none", borderTop: "1.5px solid #111" }} />
