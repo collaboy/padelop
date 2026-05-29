@@ -118,7 +118,7 @@ const labelS: React.CSSProperties = {
 type Step = "pick" | "upload" | "form";
 
 export default function Home4() {
-  const [done, setDone] = useState(false);
+  const [doModalOpen, setDoModalOpen] = useState(false);
   const [match, setMatch] = useState<{ date: string; time: string } | null>(null);
   const [now, setNow] = useState(new Date());
   const [addOpen, setAddOpen] = useState(false);
@@ -218,15 +218,43 @@ export default function Home4() {
         void now;
         return (
           <>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "0 0 16px" }}>
-              <div className="w-2 h-2 rounded-full animate-breathe flex-shrink-0" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
-              <p style={{ margin: 0 }}>DO THIS NOW</p>
-            </div>
-            <p style={{ margin: "0 0 4px" }}>{item.title}</p>
-            <p style={{ margin: "0 0 20px", color: "#888", fontSize: 14 }}>{item.subtitle}</p>
-            <button onClick={() => setDone(d => !d)} style={{ ...S, background: "none", border: "none", padding: 0, cursor: "pointer", margin: "0 0 32px", display: "block" }}>
-              {done ? "[✓ Done]" : "[Done]"}
+            <button
+              onClick={() => setDoModalOpen(true)}
+              className="bg-white rounded-[24px] px-6 py-6 flex items-center gap-5 active:opacity-60 transition-opacity text-left w-full"
+              style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "2px solid #f59e0b", marginBottom: 32 }}
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#f59e0b18" }}>
+                <div className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Do this now</p>
+                <p className="text-[20px] font-bold text-[#1a1c1c] leading-tight">{item.title}</p>
+                {item.subtitle && <p className="text-[13px] text-[#4a5050] mt-1 leading-snug">{item.subtitle}</p>}
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
             </button>
+
+            {doModalOpen && (
+              <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => setDoModalOpen(false)}>
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+                <div
+                  className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden max-h-[88vh] overflow-y-auto"
+                  style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.15)" }}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <div className="px-6 pt-5 pb-4" style={{ background: "#f59e0b18" }}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#f59e0b" }} />
+                      <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: "#f59e0b" }}>Today&apos;s Schedule</p>
+                    </div>
+                    <h3 className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{item.title}</h3>
+                    {item.subtitle && <p className="text-[13px] text-[#2c3235] mt-0.5">{item.subtitle}</p>}
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         );
       })()}

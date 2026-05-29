@@ -37,6 +37,9 @@ export default function Home3() {
   const [fabOpen, setFabOpen] = useState(false);
   const [logMethod, setLogMethod] = useState<"camera" | "upload" | "wizard" | null>(null);
   const uploadRef = useRef<HTMLInputElement>(null);
+  const dotRef = useRef<HTMLDivElement>(null);
+  const flyRef = useRef<HTMLDivElement>(null);
+  const [flyVisible, setFlyVisible] = useState(false);
   const countdown = useCountdown(matchTime);
 
   useEffect(() => {
@@ -47,6 +50,45 @@ export default function Home3() {
         if (m.date && m.time) setMatchTime(`${m.date}T${m.time}`);
       }
     } catch {}
+  }, []);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const logo = document.getElementById("logo-circle");
+      const dot = dotRef.current;
+      const fly = flyRef.current;
+      if (!logo || !dot || !fly) return;
+
+      const lr = logo.getBoundingClientRect();
+      const dr = dot.getBoundingClientRect();
+
+      const lCX = lr.left + lr.width / 2;
+      const lCY = lr.top + lr.height / 2;
+      const lSize = lr.width;
+      const dCX = dr.left + dr.width / 2;
+      const dCY = dr.top + dr.height / 2;
+      const dSize = dr.width;
+
+      fly.style.left = `${lCX - lSize / 2}px`;
+      fly.style.top = `${lCY - lSize / 2}px`;
+      fly.style.width = `${lSize}px`;
+      fly.style.height = `${lSize}px`;
+      logo.style.visibility = "hidden";
+      setFlyVisible(true);
+
+      const anim = fly.animate([
+        { left: `${lCX - lSize / 2}px`,  top: `${lCY - lSize / 2}px`,       width: `${lSize}px`,  height: `${lSize}px`  },
+        { left: `${dCX - dSize / 2}px`,  top: `${dCY - dSize / 2}px`,       width: `${dSize}px`,  height: `${dSize}px`, offset: 0.38 },
+        { left: `${dCX - dSize / 2}px`,  top: `${dCY - dSize / 2 - 22}px`,  width: `${dSize}px`,  height: `${dSize}px`, offset: 0.50 },
+        { left: `${dCX - dSize / 2}px`,  top: `${dCY - dSize / 2}px`,       width: `${dSize}px`,  height: `${dSize}px`, offset: 0.60 },
+        { left: `${dCX - dSize / 2}px`,  top: `${dCY - dSize / 2 - 9}px`,   width: `${dSize}px`,  height: `${dSize}px`, offset: 0.67 },
+        { left: `${dCX - dSize / 2}px`,  top: `${dCY - dSize / 2}px`,       width: `${dSize}px`,  height: `${dSize}px`, offset: 0.74 },
+        { left: `${lCX - lSize / 2}px`,  top: `${lCY - lSize / 2}px`,       width: `${lSize}px`,  height: `${lSize}px`  },
+      ], { duration: 2000, easing: "ease-in-out", fill: "none" });
+
+      anim.onfinish = () => { setFlyVisible(false); logo.style.visibility = ""; };
+    }, 500);
+    return () => clearTimeout(t);
   }, []);
 
   function handleCamera() {
@@ -87,7 +129,7 @@ export default function Home3() {
         style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "2px solid #f59e0b" }}
       >
         <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#f59e0b18" }}>
-          <div className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
+          <div ref={dotRef} className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Do this now</p>
@@ -159,6 +201,18 @@ export default function Home3() {
       </Link>
 
       <Nav2a />
+
+      {/* Flying logo circle overlay */}
+      <div
+        ref={flyRef}
+        className="fixed z-[9999] rounded-full pointer-events-none"
+        style={{
+          background: "#22c55e",
+          display: flyVisible ? "block" : "none",
+          top: 0,
+          left: 0,
+        }}
+      />
 
       {/* Hidden upload input */}
       <input ref={uploadRef} type="file" accept="image/*" className="hidden" />
