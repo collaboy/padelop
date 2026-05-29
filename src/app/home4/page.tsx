@@ -194,6 +194,7 @@ export default function Home4() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [form, setForm] = useState({ date: "", time: "", venue: "", player1: "", player2: "", player3: "", player4: "" });
   const [logThumb, setLogThumb] = useState<string | null>(null);
+  const [logSuccess, setLogSuccess] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [newCatActive, setNewCatActive] = useState(false);
   const [newCatValue, setNewCatValue] = useState("");
@@ -201,6 +202,9 @@ export default function Home4() {
   const logCameraRef = useRef<HTMLInputElement>(null);
   const logUploadRef = useRef<HTMLInputElement>(null);
   const touchStartX = useRef<number>(0);
+  const touchStartY = useRef<number>(0);
+  const swipeAxis = useRef<"h" | "v" | null>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     try {
@@ -217,6 +221,19 @@ export default function Home4() {
     return () => clearInterval(id);
   }, []);
 
+  useEffect(() => {
+    const el = carouselRef.current;
+    if (!el) return;
+    function onTouchMove(e: TouchEvent) {
+      const dx = Math.abs(e.touches[0].clientX - touchStartX.current);
+      const dy = Math.abs(e.touches[0].clientY - touchStartY.current);
+      if (swipeAxis.current === null) swipeAxis.current = dx > dy ? "h" : "v";
+      if (swipeAxis.current === "h") e.preventDefault();
+    }
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+    return () => el.removeEventListener("touchmove", onTouchMove);
+  }, []);
+
   function saveMatch() {
     if (!form.date || !form.time) return;
     const data = {
@@ -229,6 +246,16 @@ export default function Home4() {
     window.dispatchEvent(new Event("storage"));
     setMatch({ date: form.date, time: form.time });
     closeModal();
+  }
+
+  function confirmCategory() {
+    setLogSuccess(true);
+    setTimeout(() => {
+      setLogSuccess(false);
+      setLogThumb(null);
+      setNewCatActive(false);
+      setNewCatValue("");
+    }, 2000);
   }
 
   function handleLogFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -295,12 +322,18 @@ export default function Home4() {
           <>
             {/* Swipeable carousel */}
             <div
+              ref={carouselRef}
               className="w-full aspect-square overflow-hidden"
               style={{ borderRadius: 24, marginBottom: 10 }}
-              onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
+              onTouchStart={e => {
+                touchStartX.current = e.touches[0].clientX;
+                touchStartY.current = e.touches[0].clientY;
+                swipeAxis.current = null;
+              }}
               onTouchEnd={e => {
                 const dx = e.changedTouches[0].clientX - touchStartX.current;
-                if (Math.abs(dx) > 40) setSlideIdx(prev => dx < 0 ? Math.min(prev + 1, 2) : Math.max(prev - 1, 0));
+                if (swipeAxis.current === "h" && Math.abs(dx) > 40)
+                  setSlideIdx(prev => dx < 0 ? Math.min(prev + 1, 2) : Math.max(prev - 1, 0));
               }}
             >
               <div
@@ -373,7 +406,18 @@ export default function Home4() {
                     className="bg-white flex flex-col"
                     style={{ width: "100%", height: "100%", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflow: "hidden" }}
                   >
-                    {logThumb ? (
+                    {logSuccess ? (
+                      /* Success state */
+                      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, textAlign: "center" }}>
+                        <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#22c55e18", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+                          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
+                        </div>
+                        <p style={{ fontSize: 18, fontWeight: 700, color: "#1a1c1c", margin: "0 0 6px" }}>Great!</p>
+                        <p style={{ fontSize: 14, color: "#6b7480", margin: 0, lineHeight: 1.5 }}>We&apos;ll add it to your log</p>
+                      </div>
+                    ) : logThumb ? (
                       /* Categorise view — inner div scrolls */
                       <div style={{ flex: 1, overflowY: "auto", padding: 24 }}>
                         <div className="flex items-center gap-2" style={{ marginBottom: 16 }}>
@@ -390,7 +434,7 @@ export default function Home4() {
                           {["Food pic", "Hydration", "Racket grip"].map(cat => (
                             <button
                               key={cat}
-                              onClick={() => { setLogThumb(null); setNewCatActive(false); setNewCatValue(""); }}
+                              onClick={confirmCategory}
                               style={{ background: "#f4f6ff", border: "none", borderRadius: 14, padding: "13px 16px", fontSize: 14, fontWeight: 600, color: "#2653d4", cursor: "pointer", textAlign: "left" }}
                             >
                               {cat}
@@ -406,7 +450,7 @@ export default function Home4() {
                                 style={{ flex: 1, border: "1.5px solid #2653d4", borderRadius: 14, padding: "10px 14px", fontSize: 13, outline: "none", background: "#fff" }}
                               />
                               <button
-                                onClick={() => { if (newCatValue.trim()) { setLogThumb(null); setNewCatActive(false); setNewCatValue(""); } }}
+                                onClick={() => { if (newCatValue.trim()) confirmCategory(); }}
                                 style={{ background: "#2653d4", border: "none", borderRadius: 14, padding: "0 16px", color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
                               >
                                 Save
