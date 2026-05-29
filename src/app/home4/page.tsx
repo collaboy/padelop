@@ -76,7 +76,7 @@ export default function Home4() {
       ) : (
         <button
           onClick={() => setAddOpen(true)}
-          style={{ ...S, background: "none", border: "none", padding: 0, cursor: "pointer", margin: "0 0 32px", display: "block", textDecoration: "underline" }}
+          style={{ ...S, background: "none", border: "none", padding: 0, cursor: "pointer", margin: "0 0 32px", display: "block" }}
         >
           + Add a match
         </button>
