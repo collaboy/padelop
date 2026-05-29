@@ -15,7 +15,7 @@ const IMPROVE = ["Drink water", "Mobility session", "Early dinner"];
 export default function Insights2a() {
   return (
     <main
-      className="h1-font min-h-screen flex flex-col gap-4 px-4 pt-10 pb-24"
+      className="h1-font min-h-screen flex flex-col gap-4 px-4 pt-10 pb-32"
       style={{ background: "#e2e5e9" }}
     >
       <div

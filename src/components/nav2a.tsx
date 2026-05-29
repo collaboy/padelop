@@ -56,8 +56,9 @@ export default function Nav2a() {
       className="fixed bottom-0 inset-x-0 z-50"
       style={{
         background: "#ffffff",
-        paddingBottom: "env(safe-area-inset-bottom)",
+        paddingBottom: "max(env(safe-area-inset-bottom), 12px)",
         borderTop: "1px solid #e8eaed",
+        boxShadow: "0 -4px 20px rgba(0,0,0,0.06)",
       }}
     >
       <div className="flex justify-around items-center py-2 px-2">
