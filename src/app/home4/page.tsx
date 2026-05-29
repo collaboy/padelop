@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
 function greeting() {
@@ -8,6 +8,13 @@ function greeting() {
   if (h < 12) return "Good Morning";
   if (h < 18) return "Good Afternoon";
   return "Good Evening";
+}
+
+function matchLabel(date: string, time: string): string {
+  const today = new Date().toISOString().slice(0, 10);
+  const tomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
+  const day = date === today ? "Today" : date === tomorrow ? "Tomorrow" : date;
+  return `Match ${day} at ${time}`;
 }
 
 const S: React.CSSProperties = {
@@ -20,12 +27,23 @@ const S: React.CSSProperties = {
 
 export default function Home4() {
   const [done, setDone] = useState(false);
+  const [match, setMatch] = useState<{ date: string; time: string } | null>(null);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("padelop:next-match");
+      if (raw) {
+        const m = JSON.parse(raw);
+        if (m.date && m.time) setMatch({ date: m.date, time: m.time });
+      }
+    } catch {}
+  }, []);
 
   return (
     <main style={{ ...S, padding: "40px 28px", minHeight: "100vh", background: "#f9f9f9", fontWeight: 300 }}>
 
       <p style={{ margin: "0 0 24px" }}>{greeting()} Eddie</p>
-      <p style={{ margin: "0 0 32px" }}>Match Tonight</p>
+      {match && <p style={{ margin: "0 0 32px" }}>{matchLabel(match.date, match.time)}</p>}
 
       <hr style={{ width: 160, margin: "0 0 32px", border: "none", borderTop: "1.5px solid #111" }} />
 
