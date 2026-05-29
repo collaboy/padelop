@@ -29,12 +29,6 @@ function greeting() {
   return "Good Evening";
 }
 
-const UP_NEXT = [
-  { time: "13:00", label: "Protein lunch" },
-  { time: "18:00", label: "Mobility" },
-  { time: "20:00", label: "Pack bag" },
-  { time: "22:30", label: "Wind down" },
-];
 
 export default function Home3() {
   const [matchTime, setMatchTime] = useState<string | null>(null);
@@ -118,20 +112,8 @@ export default function Home3() {
         </div>
       )}
 
-      {/* Up Next */}
-      <div className="bg-white rounded-[24px] px-6 py-6" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-        <p className="text-[10px] font-bold tracking-widest uppercase text-[#8a9096] mb-4">Up Next</p>
-        <div className="flex flex-col gap-3">
-          {UP_NEXT.map((item) => (
-            <div key={item.time} className="flex items-center gap-3">
-              <span className="text-[13px] text-[#8a9096] font-mono w-12 flex-shrink-0">{item.time}</span>
-              <span className="text-[16px] font-medium text-[#1a1c1c]">{item.label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
 
-      <Link
+<Link
         href="/insights2a"
         className="bg-white rounded-[24px] px-6 py-5 flex items-center justify-between active:opacity-70 transition-opacity"
         style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}
