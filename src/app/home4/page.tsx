@@ -14,7 +14,7 @@ export default function Home4() {
   const [done, setDone] = useState(false);
 
   return (
-    <main style={{ padding: "32px 24px", fontFamily: "inherit", maxWidth: 480, margin: "0 auto" }}>
+    <main style={{ padding: "32px 24px", fontFamily: "Menlo, Monaco, 'Courier New', monospace", maxWidth: 480, margin: "0 auto" }}>
       <p style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{greeting()} Eddie</p>
       <p style={{ fontSize: 15, color: "#555", marginTop: 6 }}>Match Tonight</p>
 
