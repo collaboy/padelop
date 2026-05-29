@@ -267,7 +267,7 @@ export default function Nav() {
       {/* Hamburger menu modal */}
       {menuOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-start justify-start pt-16" onClick={() => setMenuOpen(false)}>
-          <div className="w-full max-w-[320px] bg-white shadow-2xl mx-5 mt-2 rounded-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-[320px] bg-white shadow-2xl mx-5 mt-2 rounded-2xl overflow-y-auto" style={{ maxHeight: "80vh" }} onClick={(e) => e.stopPropagation()}>
             {items.map((item) => (
               <button
                 key={item.label}
