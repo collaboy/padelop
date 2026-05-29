@@ -17,6 +17,71 @@ function matchLabel(date: string, time: string): string {
   return `Match ${day} at ${time}`;
 }
 
+const pad = (n: number) => String(n).padStart(2, "0");
+const addMins = (h: number, m: number, delta: number) => {
+  const total = h * 60 + m + delta;
+  return `${pad(Math.floor(total / 60) % 24)}:${pad(total % 60)}`;
+};
+const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+
+function getCurrentItem(matchDate: string | null, matchTime: string | null) {
+  const today = new Date().toISOString().slice(0, 10);
+  const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+  let dayType: "match" | "recovery" | "rest" = "rest";
+  if (matchDate === today) dayType = "match";
+  else if (matchDate === yesterday) dayType = "recovery";
+
+  const mH = matchTime ? parseInt(matchTime.split(":")[0]) : 18;
+  const mM = matchTime ? parseInt(matchTime.split(":")[1]) : 30;
+  const mt = matchTime ?? "18:30";
+
+  const schedules = {
+    match: [
+      { time: "07:00", title: "Wake up & hydrate",   subtitle: "500ml water before anything else" },
+      { time: "07:30", title: "Breakfast",            subtitle: "Oats, eggs, fruit" },
+      { time: "09:00", title: "Morning mobility",     subtitle: "Foam roll & light stretching" },
+      { time: addMins(mH, mM, -360), title: "Pre-game meal",        subtitle: "Chicken, rice, light salad" },
+      { time: addMins(mH, mM, -60),  title: "Warmup & activation",  subtitle: "Dynamic drills, 30 min" },
+      { time: mt,                    title: "Match",                 subtitle: "Game time" },
+      { time: addMins(mH, mM, 90),   title: "Post-match cool down", subtitle: "Stretch & mobility, 15 min" },
+      { time: addMins(mH, mM, 120),  title: "Recovery meal",        subtitle: "Protein + carbs within 30 min" },
+      { time: "22:30", title: "Wind down",            subtitle: "No screens, light reading" },
+    ],
+    recovery: [
+      { time: "07:30", title: "Wake up & hydrate",   subtitle: "500ml water — rehydrate after yesterday" },
+      { time: "08:00", title: "Light breakfast",      subtitle: "Eggs, fruit, Greek yogurt" },
+      { time: "09:30", title: "Recovery walk",        subtitle: "20 min easy — flush out lactic acid" },
+      { time: "10:30", title: "Foam roll & stretch",  subtitle: "Quads, hip flexors, calves, shoulders" },
+      { time: "13:00", title: "Protein-rich lunch",   subtitle: "Chicken, salmon or legumes + veg" },
+      { time: "15:30", title: "Cold shower",          subtitle: "2 min cold — reduces inflammation" },
+      { time: "19:00", title: "Dinner",               subtitle: "Anti-inflammatory focus — fish, greens" },
+      { time: "21:30", title: "Early wind down",      subtitle: "Sleep is your best recovery tool tonight" },
+    ],
+    rest: [
+      { time: "07:00", title: "Wake up & hydrate",   subtitle: "500ml water before coffee" },
+      { time: "07:30", title: "Breakfast",            subtitle: "High protein — eggs, yogurt, fruit" },
+      { time: "09:30", title: "Light mobility",       subtitle: "Hip flexors, thoracic spine, ankles" },
+      { time: "12:30", title: "Balanced lunch",       subtitle: "Carbs + protein + greens" },
+      { time: "15:00", title: "Active recovery",      subtitle: "Walk, swim or light cycling" },
+      { time: "19:00", title: "Dinner",               subtitle: "Focus on variety and micronutrients" },
+      { time: "21:00", title: "Visualisation",        subtitle: "5 min mental rehearsal of key patterns" },
+      { time: "22:30", title: "Wind down",            subtitle: "No screens, consistent bedtime" },
+    ],
+  };
+
+  const schedule = schedules[dayType];
+  const curMins = new Date().getHours() * 60 + new Date().getMinutes();
+  let idx = 0;
+  if (curMins >= toMins(schedule[schedule.length - 1].time)) {
+    idx = schedule.length - 1;
+  } else {
+    for (let i = 0; i < schedule.length - 1; i++) {
+      if (curMins >= toMins(schedule[i].time) && curMins < toMins(schedule[i + 1].time)) { idx = i; break; }
+    }
+  }
+  return schedule[idx];
+}
+
 const S: React.CSSProperties = {
   fontFamily: "Menlo, Monaco, 'Courier New', monospace",
   fontSize: 16,
@@ -55,6 +120,7 @@ type Step = "pick" | "upload" | "form";
 export default function Home4() {
   const [done, setDone] = useState(false);
   const [match, setMatch] = useState<{ date: string; time: string } | null>(null);
+  const [now, setNow] = useState(new Date());
   const [addOpen, setAddOpen] = useState(false);
   const [step, setStep] = useState<Step>("pick");
   const [uploading, setUploading] = useState(false);
@@ -73,6 +139,8 @@ export default function Home4() {
         }
       }
     } catch {}
+    const id = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(id);
   }, []);
 
   function saveMatch() {
@@ -145,14 +213,23 @@ export default function Home4() {
 
       <hr style={{ width: 160, margin: "0 0 32px", border: "none", borderTop: "1.5px solid #111" }} />
 
-      <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "0 0 24px" }}>
-        <div className="w-2 h-2 rounded-full animate-breathe flex-shrink-0" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
-        <p style={{ margin: 0 }}>DO THIS NOW</p>
-      </div>
-      <p style={{ margin: "0 0 24px" }}>Drink 500ml water</p>
-      <button onClick={() => setDone(d => !d)} style={{ ...S, background: "none", border: "none", padding: 0, cursor: "pointer", margin: "0 0 32px", display: "block" }}>
-        {done ? "[✓ Done]" : "[Done]"}
-      </button>
+      {(() => {
+        const item = getCurrentItem(match?.date ?? null, match?.time ?? null);
+        void now;
+        return (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "0 0 16px" }}>
+              <div className="w-2 h-2 rounded-full animate-breathe flex-shrink-0" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
+              <p style={{ margin: 0 }}>DO THIS NOW</p>
+            </div>
+            <p style={{ margin: "0 0 4px" }}>{item.title}</p>
+            <p style={{ margin: "0 0 20px", color: "#888", fontSize: 14 }}>{item.subtitle}</p>
+            <button onClick={() => setDone(d => !d)} style={{ ...S, background: "none", border: "none", padding: 0, cursor: "pointer", margin: "0 0 32px", display: "block" }}>
+              {done ? "[✓ Done]" : "[Done]"}
+            </button>
+          </>
+        );
+      })()}
 
       <hr style={{ width: 160, margin: "0 0 32px", border: "none", borderTop: "1.5px solid #111" }} />
 
