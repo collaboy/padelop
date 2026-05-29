@@ -43,6 +43,25 @@ const addMins = (h: number, m: number, delta: number) => {
 };
 const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
 
+const ITEM_COLORS: Record<string, string> = {
+  "Wake up & hydrate": "#0891b2", "Light breakfast": "#16a34a", "Breakfast": "#16a34a",
+  "Morning mobility": "#7c3aed", "Light mobility": "#7c3aed",
+  "Pre-game meal": "#16a34a", "Warmup & activation": "#f59e0b",
+  "Match": "#2653d4", "Post-match cool down": "#7c3aed",
+  "Recovery meal": "#16a34a", "Recovery walk": "#0891b2",
+  "Foam roll & stretch": "#7c3aed", "Protein-rich lunch": "#16a34a",
+  "Cold shower": "#0891b2", "Dinner": "#16a34a",
+  "Early wind down": "#8b5cf6", "Balanced lunch": "#16a34a",
+  "Active recovery": "#0891b2", "Visualisation": "#8b5cf6",
+  "Wind down": "#8b5cf6",
+};
+
+const DAY_TYPE_META = {
+  match:    { label: "Game Day",     bg: "#1e3a1e18", color: "#1e3a1e" },
+  recovery: { label: "Recovery Day", bg: "#7c3aed18", color: "#7c3aed" },
+  rest:     { label: "Rest Day",     bg: "#94a3b818", color: "#64748b" },
+};
+
 function getScheduleData(matchDate: string | null, matchTime: string | null) {
   const today = new Date().toISOString().slice(0, 10);
   const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
@@ -88,7 +107,7 @@ function getScheduleData(matchDate: string | null, matchTime: string | null) {
     ],
   };
 
-  const schedule = schedules[dayType];
+  const schedule = schedules[dayType].map(item => ({ ...item, color: ITEM_COLORS[item.title] ?? "#8a9096" }));
   const curMins = new Date().getHours() * 60 + new Date().getMinutes();
   let idx = 0;
   if (curMins >= toMins(schedule[schedule.length - 1].time)) {
@@ -98,7 +117,7 @@ function getScheduleData(matchDate: string | null, matchTime: string | null) {
       if (curMins >= toMins(schedule[i].time) && curMins < toMins(schedule[i + 1].time)) { idx = i; break; }
     }
   }
-  return { schedule, currentIdx: idx };
+  return { schedule, currentIdx: idx, dayType };
 }
 
 function getCurrentItem(matchDate: string | null, matchTime: string | null) {
@@ -167,6 +186,7 @@ type Step = "pick" | "upload" | "form";
 export default function Home4() {
   const [doModalOpen, setDoModalOpen] = useState(false);
   const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [todaySchedOpen, setTodaySchedOpen] = useState(false);
   const [match, setMatch] = useState<{ date: string; time: string } | null>(null);
   const [now, setNow] = useState(new Date());
   const [addOpen, setAddOpen] = useState(false);
@@ -244,10 +264,11 @@ export default function Home4() {
   }
 
   return (
-    <main style={{ ...S, padding: "40px 28px", minHeight: "100vh", background: "#f9f9f9", fontWeight: 300 }}>
+    <main style={{ ...S, padding: "24px 20px", minHeight: "100vh", background: "#f9f9f9", fontWeight: 300 }}>
 
       <p style={{ margin: "0 0 6px" }}>{greeting()} Eddie</p>
-      <p style={{ ...S, fontSize: 13, color: "#888", fontWeight: 300, margin: "0 0 24px", lineHeight: 1.5 }}>{getDayMsg(match, now)}</p>
+      <p style={{ ...S, fontSize: 13, color: "#888", fontWeight: 300, margin: "0 0 16px", lineHeight: 1.5 }}>{getDayMsg(match, now)}</p>
+      <hr style={{ width: 160, margin: "0 0 24px", border: "none", borderTop: "1.5px solid #111" }} />
 
       {(() => {
         const item = getCurrentItem(match?.date ?? null, match?.time ?? null);
@@ -259,11 +280,11 @@ export default function Home4() {
               className="bg-white rounded-[24px] p-6 aspect-square flex flex-col items-center justify-between active:opacity-60 transition-opacity w-full"
               style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "2px solid #f59e0b", marginBottom: 32 }}
             >
-              <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] w-full text-center mb-4">Do this now</p>
-              <div className="w-3/4 aspect-square rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
-              <div className="w-full text-center mt-4">
+              <p className="text-[13px] font-bold tracking-widest uppercase text-[#5a7055] w-full text-center">Do this now</p>
+              <div className="w-16 h-16 rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
+              <div className="w-full text-center">
                 <p className="text-[20px] font-bold text-[#1a1c1c] leading-tight">{item.title}</p>
-                {item.subtitle && <p className="text-[13px] text-[#4a5050] mt-2 leading-snug">{item.subtitle}</p>}
+                {item.subtitle && <p className="text-[13px] text-[#4a5050] mt-1 leading-snug">{item.subtitle}</p>}
               </div>
             </button>
 
@@ -295,35 +316,56 @@ export default function Home4() {
         );
       })()}
 
-      <button
-        onClick={() => setScheduleOpen(o => !o)}
-        style={{ ...S, background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, margin: "0 0 12px" }}
-      >
-        <span style={{ fontSize: 13, color: "#888" }}>See full schedule</span>
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: scheduleOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
-          <path d="M6 9l6 6 6-6"/>
-        </svg>
-      </button>
-
-      {scheduleOpen && (() => {
-        const { schedule, currentIdx } = getScheduleData(match?.date ?? null, match?.time ?? null);
-        void now;
+      {/* Today's Schedule collapsible */}
+      {(() => {
+        const { schedule, currentIdx, dayType } = getScheduleData(match?.date ?? null, match?.time ?? null);
+        const meta = DAY_TYPE_META[dayType];
+        const curMins = now.getHours() * 60 + now.getMinutes();
         return (
-          <div style={{ margin: "0 0 20px", borderLeft: "1.5px solid #ddd", paddingLeft: 12 }}>
-            {schedule.map((item, i) => {
-              const isCurrent = i === currentIdx;
-              return (
-                <div key={i} style={{ display: "flex", gap: 14, marginBottom: 8, opacity: i < currentIdx ? 0.4 : 1 }}>
-                  <span style={{ ...S, fontSize: 12, color: "#888", flexShrink: 0, width: 38 }}>{item.time}</span>
-                  <span style={{ ...S, fontSize: 13, fontWeight: isCurrent ? 400 : 300, color: isCurrent ? "#111" : "#555" }}>
-                    {isCurrent ? "→ " : ""}{item.title}
-                  </span>
-                </div>
-              );
-            })}
+          <div className="bg-white rounded-[24px] mb-8" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8" }}>
+            <button
+              onClick={() => setTodaySchedOpen(o => !o)}
+              className="w-full px-5 pt-4 pb-4 flex items-center justify-between active:opacity-60 transition-opacity"
+            >
+              <p className="text-[13px] font-bold tracking-widest uppercase text-[#5a7055]">Today&apos;s Schedule</p>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: meta.bg, color: meta.color }}>{meta.label}</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: todaySchedOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </div>
+            </button>
+            {todaySchedOpen && (
+              <div className="px-5 pb-4" style={{ borderTop: "1px solid #f4f4f4" }}>
+                {schedule.map((s, i) => {
+                  const isCur = i === currentIdx;
+                  const isPast = !isCur && curMins > toMins(s.time);
+                  return (
+                    <div key={i} className="flex gap-4 py-2.5" style={{ borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f4" : "none" }}>
+                      <div className="flex flex-col items-center flex-shrink-0" style={{ width: 28 }}>
+                        <div className="w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0" style={{ background: isPast ? "#d0d3d6" : s.color, boxShadow: isCur ? `0 0 0 3px ${s.color}28` : "none" }} />
+                        {i < schedule.length - 1 && <div className="w-0.5 mt-1 flex-1" style={{ background: isPast ? "#e2e2e2" : "#ebebeb", minHeight: 20 }} />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] font-bold tracking-widest uppercase mb-0.5" style={{ color: isPast ? "#c4c7c7" : s.color }}>{s.time}</p>
+                        <p className="text-[15px] font-semibold leading-snug" style={{ color: isPast ? "#a0a5aa" : "#1a1c1c" }}>{s.title}</p>
+                        {s.subtitle && <p className="text-[12px] mt-0.5 leading-snug" style={{ color: isPast ? "#c4c7c7" : "#4a5050" }}>{s.subtitle}</p>}
+                      </div>
+                      {isCur && (
+                        <div className="flex-shrink-0 self-center">
+                          <div className="w-2.5 h-2.5 rounded-full animate-breathe" style={{ background: s.color, ["--glow" as string]: s.color }} />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         );
       })()}
+
+      <hr style={{ width: 160, margin: "0 0 24px", border: "none", borderTop: "1.5px solid #111" }} />
 
       {match ? (
         <p style={{ margin: "0 0 32px" }}>{matchLabel(match.date, match.time)}</p>
