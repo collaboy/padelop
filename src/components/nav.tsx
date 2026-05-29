@@ -155,7 +155,11 @@ export default function Nav() {
           {/* Center: title */}
           <div className="flex justify-center items-center">
             <Link href="/" className="text-lg font-semibold tracking-tight text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>
-              Padelop
+              {(["P","a","d","e","l"] as const).map((ch, i) => (
+                <span key={i} style={{ display: "inline-block", transform: `translateY(${5 - i}px)` }}>{ch}</span>
+              ))}
+              <span style={{ display: "inline-block", width: "0.55em", height: "0.55em", borderRadius: "50%", background: "#22c55e", verticalAlign: "middle", margin: "0 0.02em 0.05em", transform: "translateY(-1px)" }} />
+              <span style={{ display: "inline-block", transform: "translateY(-2px)" }}>p</span>
             </Link>
           </div>
 
