@@ -10,41 +10,42 @@ function greeting() {
   return "Good Evening";
 }
 
+const S: React.CSSProperties = {
+  fontFamily: "Menlo, Monaco, 'Courier New', monospace",
+  fontSize: 16,
+  fontWeight: 400,
+  color: "#111",
+  lineHeight: 1.5,
+};
+
 export default function Home4() {
   const [done, setDone] = useState(false);
 
   return (
-    <main style={{ padding: "32px 24px", fontFamily: "Menlo, Monaco, 'Courier New', monospace", maxWidth: 480, margin: "0 auto", minHeight: "100vh", background: "#f9f9f7" }}>
-      <p style={{ fontSize: 22, fontWeight: 400, margin: 0 }}>{greeting()} Eddie</p>
-      <p style={{ fontSize: 15, color: "#555", marginTop: 6 }}>Match Tonight</p>
+    <main style={{ ...S, padding: "40px 28px", minHeight: "100vh", background: "#fff" }}>
 
-      <hr style={{ margin: "20px 0", border: "none", borderTop: "1px solid #ddd" }} />
+      <p style={{ margin: "0 0 24px" }}>{greeting()} Eddie</p>
+      <p style={{ margin: "0 0 32px" }}>Match Tonight</p>
 
-      <p style={{ fontSize: 11, fontWeight: 400, letterSpacing: "0.1em", textTransform: "uppercase", color: "#888", margin: 0 }}>Do This Now</p>
-      <p style={{ fontSize: 18, fontWeight: 400, marginTop: 10, marginBottom: 16 }}>Drink 500ml water</p>
+      <hr style={{ width: 160, margin: "0 0 32px", border: "none", borderTop: "1.5px solid #111" }} />
+
+      <p style={{ margin: "0 0 24px" }}>DO THIS NOW</p>
+      <p style={{ margin: "0 0 24px" }}>Drink 500ml water</p>
       <button
         onClick={() => setDone(d => !d)}
-        style={{
-          padding: "10px 24px",
-          fontSize: 14,
-          fontWeight: 400,
-          border: "1.5px solid #ccc",
-          borderRadius: 8,
-          background: done ? "#f0f0f0" : "#fff",
-          color: done ? "#888" : "#000",
-          cursor: "pointer",
-        }}
+        style={{ ...S, background: "none", border: "none", padding: 0, cursor: "pointer", margin: "0 0 32px", display: "block" }}
       >
-        {done ? "✓ Done" : "Done"}
+        {done ? "[✓ Done]" : "[Done]"}
       </button>
 
-      <hr style={{ margin: "28px 0", border: "none", borderTop: "1px solid #ddd" }} />
+      <hr style={{ width: 160, margin: "0 0 32px", border: "none", borderTop: "1.5px solid #111" }} />
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <Link href="/insights2a" style={{ fontSize: 16, fontWeight: 400, color: "#000", textDecoration: "none" }}>View Insights →</Link>
-        <Link href="/track2a" style={{ fontSize: 16, fontWeight: 400, color: "#000", textDecoration: "none" }}>Track Something →</Link>
-        <Link href="/matches2a" style={{ fontSize: 16, fontWeight: 400, color: "#000", textDecoration: "none" }}>Upcoming Matches →</Link>
+      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+        <Link href="/insights2a" style={{ ...S, textDecoration: "none", display: "block", marginBottom: 4 }}>View Insights</Link>
+        <Link href="/track2a" style={{ ...S, textDecoration: "none", display: "block", marginBottom: 4 }}>Track Something</Link>
+        <Link href="/matches2a" style={{ ...S, textDecoration: "none", display: "block" }}>Upcoming Matches</Link>
       </div>
+
     </main>
   );
 }
