@@ -127,10 +127,10 @@ function getCurrentItem(matchDate: string | null, matchTime: string | null) {
 
 const S: React.CSSProperties = {
   fontFamily: "Menlo, Monaco, 'Courier New', monospace",
-  fontSize: 16,
+  fontSize: 17,
   fontWeight: 300,
   color: "#111",
-  lineHeight: 1.5,
+  lineHeight: 1.6,
 };
 
 const fieldS: React.CSSProperties = {
@@ -309,7 +309,7 @@ export default function Home4() {
     <main style={{ ...S, padding: "24px 20px", minHeight: "100vh", background: "#f9f9f9", fontWeight: 300 }}>
 
       <p style={{ margin: "0 0 6px" }}>{greeting()} Eddie</p>
-      <p style={{ ...S, fontSize: 13, color: "#888", fontWeight: 300, margin: "0 0 16px", lineHeight: 1.5 }}>{getDayMsg(match, now)}</p>
+      <p style={{ ...S, fontSize: 15, color: "#888", fontWeight: 300, margin: "0 0 16px", lineHeight: 1.6 }}>{getDayMsg(match, now)}</p>
       <hr style={{ width: 160, margin: "0 0 24px", border: "none", borderTop: "1.5px solid #111" }} />
 
       {(() => {
@@ -351,11 +351,11 @@ export default function Home4() {
                     className="bg-white flex flex-col items-center justify-between active:opacity-60 transition-opacity"
                     style={{ width: "100%", height: "100%", borderRadius: 24, padding: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "2px solid #f59e0b", overflowY: "auto" }}
                   >
-                    <p className="text-[13px] font-bold tracking-widest uppercase text-[#5a7055] w-full text-center">Do this now</p>
+                    <p className="text-[15px] font-bold tracking-widest uppercase text-[#5a7055] w-full text-center">Do this now</p>
                     <div className="w-28 h-28 rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
                     <div className="w-full text-center">
                       <p className="text-[20px] font-bold text-[#1a1c1c] leading-tight">{item.title}</p>
-                      {item.subtitle && <p className="text-[13px] text-[#4a5050] mt-1 leading-snug">{item.subtitle}</p>}
+                      {item.subtitle && <p className="text-[15px] text-[#4a5050] mt-1 leading-snug">{item.subtitle}</p>}
                       <div className="flex justify-center mt-3">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M6 9l6 6 6-6"/>
@@ -372,8 +372,8 @@ export default function Home4() {
                     style={{ width: "100%", height: "100%", borderRadius: 24, padding: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflowY: "auto" }}
                   >
                     <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 12 }}>
-                      <p className="text-[13px] font-bold tracking-widest uppercase text-[#5a7055]">Today&apos;s Schedule</p>
-                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: meta.bg, color: meta.color }}>{meta.label}</span>
+                      <p className="text-[15px] font-bold tracking-widest uppercase text-[#5a7055]">Today&apos;s Schedule</p>
+                      <span className="text-[13px] font-bold px-2.5 py-1 rounded-full" style={{ background: meta.bg, color: meta.color }}>{meta.label}</span>
                     </div>
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 0 }}>
                       {schedule.map((s, i) => {
@@ -385,8 +385,8 @@ export default function Home4() {
                               <div style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0, background: isPast ? "#d0d3d6" : s.color, boxShadow: isCur ? `0 0 0 2px ${s.color}30` : "none" }} />
                             </div>
                             <div className="flex-1 min-w-0 py-1">
-                              <p style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: isPast ? "#c4c7c7" : s.color, margin: 0 }}>{s.time}</p>
-                              <p style={{ fontSize: 12, fontWeight: isCur ? 700 : 500, color: isPast ? "#a0a5aa" : "#1a1c1c", margin: 0, lineHeight: 1.3 }}>{s.title}</p>
+                              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: isPast ? "#c4c7c7" : s.color, margin: 0 }}>{s.time}</p>
+                              <p style={{ fontSize: 14, fontWeight: isCur ? 700 : 500, color: isPast ? "#a0a5aa" : "#1a1c1c", margin: 0, lineHeight: 1.3 }}>{s.title}</p>
                             </div>
                             {isCur && (
                               <div className="flex-shrink-0">
@@ -414,8 +414,8 @@ export default function Home4() {
                             <polyline points="20 6 9 17 4 12"/>
                           </svg>
                         </div>
-                        <p style={{ fontSize: 18, fontWeight: 700, color: "#1a1c1c", margin: "0 0 6px" }}>Great!</p>
-                        <p style={{ fontSize: 14, color: "#6b7480", margin: 0, lineHeight: 1.5 }}>We&apos;ll add it to your log</p>
+                        <p style={{ fontSize: 20, fontWeight: 700, color: "#1a1c1c", margin: "0 0 6px" }}>Great!</p>
+                        <p style={{ fontSize: 16, color: "#6b7480", margin: 0, lineHeight: 1.5 }}>We&apos;ll add it to your log</p>
                       </div>
                     ) : logThumb ? (
                       /* Categorise view — inner div scrolls */
@@ -424,18 +424,18 @@ export default function Home4() {
                           <button onClick={() => { setLogThumb(null); setNewCatActive(false); setNewCatValue(""); }} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center" }}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                           </button>
-                          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "#5a7055", margin: 0 }}>Categorise</p>
+                          <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "#5a7055", margin: 0 }}>Categorise</p>
                         </div>
                         <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
                           <img src={logThumb} alt="upload" style={{ width: 72, height: 72, borderRadius: 14, objectFit: "cover", flexShrink: 0 }} />
-                          <p style={{ fontSize: 13, color: "#6b7480", lineHeight: 1.5, margin: 0, alignSelf: "center" }}>What is this?<br/><span style={{ color: "#a0a5aa", fontSize: 12 }}>Pick a category below</span></p>
+                          <p style={{ fontSize: 15, color: "#6b7480", lineHeight: 1.5, margin: 0, alignSelf: "center" }}>What is this?<br/><span style={{ color: "#a0a5aa", fontSize: 13 }}>Pick a category below</span></p>
                         </div>
                         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                           {["Food pic", "Hydration", "Racket grip"].map(cat => (
                             <button
                               key={cat}
                               onClick={confirmCategory}
-                              style={{ background: "#f4f6ff", border: "none", borderRadius: 14, padding: "13px 16px", fontSize: 14, fontWeight: 600, color: "#2653d4", cursor: "pointer", textAlign: "left" }}
+                              style={{ background: "#f4f6ff", border: "none", borderRadius: 14, padding: "13px 16px", fontSize: 16, fontWeight: 600, color: "#2653d4", cursor: "pointer", textAlign: "left" }}
                             >
                               {cat}
                             </button>
@@ -447,11 +447,11 @@ export default function Home4() {
                                 value={newCatValue}
                                 onChange={e => setNewCatValue(e.target.value)}
                                 placeholder="Category name"
-                                style={{ flex: 1, border: "1.5px solid #2653d4", borderRadius: 14, padding: "10px 14px", fontSize: 13, outline: "none", background: "#fff" }}
+                                style={{ flex: 1, border: "1.5px solid #2653d4", borderRadius: 14, padding: "10px 14px", fontSize: 15, outline: "none", background: "#fff" }}
                               />
                               <button
                                 onClick={() => { if (newCatValue.trim()) confirmCategory(); }}
-                                style={{ background: "#2653d4", border: "none", borderRadius: 14, padding: "0 16px", color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+                                style={{ background: "#2653d4", border: "none", borderRadius: 14, padding: "0 16px", color: "#fff", fontSize: 15, fontWeight: 600, cursor: "pointer" }}
                               >
                                 Save
                               </button>
@@ -459,7 +459,7 @@ export default function Home4() {
                           ) : (
                             <button
                               onClick={() => setNewCatActive(true)}
-                              style={{ background: "none", border: "1.5px dashed #d0d3d6", borderRadius: 14, padding: "10px 16px", fontSize: 13, fontWeight: 600, color: "#8a9096", cursor: "pointer", textAlign: "left" }}
+                              style={{ background: "none", border: "1.5px dashed #d0d3d6", borderRadius: 14, padding: "10px 16px", fontSize: 15, fontWeight: 600, color: "#8a9096", cursor: "pointer", textAlign: "left" }}
                             >
                               + New category
                             </button>
@@ -469,7 +469,7 @@ export default function Home4() {
                     ) : (
                       /* Default view — inner div is the flex column that scrolls */
                       <div style={{ flex: 1, overflowY: "auto", padding: 24, display: "flex", flexDirection: "column" }}>
-                        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "#5a7055", margin: 0, textAlign: "center" }}>Log anything</p>
+                        <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "#5a7055", margin: 0, textAlign: "center" }}>Log anything</p>
                         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 12 }}>
                           <button
                             onClick={() => {
@@ -493,8 +493,8 @@ export default function Home4() {
                               </svg>
                             </div>
                             <div style={{ textAlign: "left" }}>
-                              <p style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Camera</p>
-                              <p style={{ fontSize: 11, color: "#8a9096", margin: 0 }}>Take a photo now</p>
+                              <p style={{ fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Camera</p>
+                              <p style={{ fontSize: 13, color: "#8a9096", margin: 0 }}>Take a photo now</p>
                             </div>
                           </button>
                           <button
@@ -507,8 +507,8 @@ export default function Home4() {
                               </svg>
                             </div>
                             <div style={{ textAlign: "left" }}>
-                              <p style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Upload</p>
-                              <p style={{ fontSize: 11, color: "#8a9096", margin: 0 }}>Choose from library</p>
+                              <p style={{ fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Upload</p>
+                              <p style={{ fontSize: 13, color: "#8a9096", margin: 0 }}>Choose from library</p>
                             </div>
                           </button>
                           <button
@@ -521,8 +521,8 @@ export default function Home4() {
                               </svg>
                             </div>
                             <div style={{ textAlign: "left" }}>
-                              <p style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Wizard</p>
-                              <p style={{ fontSize: 11, color: "#8a9096", margin: 0 }}>Step-by-step logging</p>
+                              <p style={{ fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Wizard</p>
+                              <p style={{ fontSize: 13, color: "#8a9096", margin: 0 }}>Step-by-step logging</p>
                             </div>
                           </button>
                         </div>
@@ -557,7 +557,7 @@ export default function Home4() {
                   onClick={e => e.stopPropagation()}
                 >
                   <p className="text-[18px] font-bold text-[#1a1c1c] mb-1">Wizard</p>
-                  <p className="text-[13px] text-[#8a9096] mb-5">What would you like to log?</p>
+                  <p className="text-[15px] text-[#8a9096] mb-5">What would you like to log?</p>
                   <div className="flex flex-col gap-2">
                     {["Check-in", "Hydration", "Nutrition", "Match Review"].map(cat => (
                       <button
