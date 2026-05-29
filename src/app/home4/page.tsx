@@ -369,28 +369,35 @@ export default function Home4() {
                 <div style={{ flex: "0 0 100%", height: "100%", overflow: "hidden" }}>
                   <div
                     className="bg-white flex flex-col"
-                    style={{ width: "100%", height: "100%", borderRadius: 24, padding: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflowY: "auto" }}
+                    style={{ width: "100%", height: "100%", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflowY: "auto" }}
                   >
-                    <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 12 }}>
+                    <div className="px-5 pt-4 pb-1 flex items-center justify-between flex-shrink-0">
                       <p className="text-[15px] font-bold tracking-widest uppercase text-[#5a7055]">Today&apos;s Schedule</p>
                       <span className="text-[13px] font-bold px-2.5 py-1 rounded-full" style={{ background: meta.bg, color: meta.color }}>{meta.label}</span>
                     </div>
-                    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 0 }}>
+                    <div className="px-5 pb-4">
                       {schedule.map((s, i) => {
                         const isCur = i === currentIdx;
                         const isPast = !isCur && curMins > toMins(s.time);
                         return (
-                          <div key={i} className="flex gap-3" style={{ flex: "1 1 0", minHeight: 0, alignItems: "center", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f4" : "none" }}>
-                            <div className="flex flex-col items-center flex-shrink-0 self-stretch justify-center" style={{ width: 18 }}>
-                              <div style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0, background: isPast ? "#d0d3d6" : s.color, boxShadow: isCur ? `0 0 0 2px ${s.color}30` : "none" }} />
+                          <div key={i} className="flex gap-4 py-2.5" style={{ borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f4" : "none" }}>
+                            <div className="flex flex-col items-center flex-shrink-0" style={{ width: 28 }}>
+                              <div
+                                className="w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0"
+                                style={{ background: isPast ? "#d0d3d6" : s.color, boxShadow: isCur ? `0 0 0 3px ${s.color}28` : "none" }}
+                              />
+                              {i < schedule.length - 1 && (
+                                <div className="w-0.5 mt-1 flex-1" style={{ background: isPast ? "#e2e2e2" : "#ebebeb", minHeight: 20 }} />
+                              )}
                             </div>
-                            <div className="flex-1 min-w-0 py-1">
-                              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: isPast ? "#c4c7c7" : s.color, margin: 0 }}>{s.time}</p>
-                              <p style={{ fontSize: 14, fontWeight: isCur ? 700 : 500, color: isPast ? "#a0a5aa" : "#1a1c1c", margin: 0, lineHeight: 1.3 }}>{s.title}</p>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[11px] font-bold tracking-widest uppercase mb-0.5" style={{ color: isPast ? "#c4c7c7" : s.color }}>{s.time}</p>
+                              <p className="text-[15px] font-semibold leading-snug" style={{ color: isPast ? "#a0a5aa" : "#1a1c1c" }}>{s.title}</p>
+                              {s.subtitle && <p className="text-[12px] mt-0.5 leading-snug" style={{ color: isPast ? "#c4c7c7" : "#4a5050" }}>{s.subtitle}</p>}
                             </div>
                             {isCur && (
-                              <div className="flex-shrink-0">
-                                <div className="animate-breathe" style={{ width: 6, height: 6, borderRadius: "50%", background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
+                              <div className="flex-shrink-0 self-center">
+                                <div className="w-2.5 h-2.5 rounded-full animate-breathe" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
                               </div>
                             )}
                           </div>
