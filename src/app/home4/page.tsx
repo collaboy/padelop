@@ -186,13 +186,15 @@ type Step = "pick" | "upload" | "form";
 export default function Home4() {
   const [doModalOpen, setDoModalOpen] = useState(false);
   const [slideIdx, setSlideIdx] = useState(0);
-  const [match, setMatch] = useState<{ date: string; time: string } | null>(null);
+  const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
+  const [matchModalOpen, setMatchModalOpen] = useState(false);
   const [now, setNow] = useState(new Date());
   const [addOpen, setAddOpen] = useState(false);
   const [step, setStep] = useState<Step>("pick");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [form, setForm] = useState({ date: "", time: "", venue: "", player1: "", player2: "", player3: "", player4: "" });
+  const [schedItemModal, setSchedItemModal] = useState<{ title: string; subtitle?: string; detail: string; color: string } | null>(null);
   const [logThumb, setLogThumb] = useState<string | null>(null);
   const [logSuccess, setLogSuccess] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -213,7 +215,11 @@ export default function Home4() {
         const m = JSON.parse(raw);
         if (m.date && m.time) {
           const matchMs = new Date(`${m.date}T${m.time}`).getTime();
-          if (matchMs > Date.now()) setMatch({ date: m.date, time: m.time });
+          if (matchMs > Date.now()) setMatch({
+            date: m.date, time: m.time,
+            club: m.club || undefined,
+            players: [m.player_1, m.player_2, m.player_3, m.player_4].filter(Boolean),
+          });
         }
       }
     } catch {}
@@ -379,8 +385,14 @@ export default function Home4() {
                       {schedule.map((s, i) => {
                         const isCur = i === currentIdx;
                         const isPast = !isCur && curMins > toMins(s.time);
+                        const detail = SCHEDULE_DETAILS[s.title];
                         return (
-                          <div key={i} className="flex gap-4 py-2.5" style={{ borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f4" : "none" }}>
+                          <div
+                            key={i}
+                            className="flex gap-4 py-2.5 active:opacity-60 transition-opacity"
+                            style={{ borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f4" : "none", cursor: detail ? "pointer" : "default" }}
+                            onClick={() => detail && setSchedItemModal({ title: s.title, subtitle: s.subtitle, detail, color: s.color })}
+                          >
                             <div className="flex flex-col items-center flex-shrink-0" style={{ width: 28 }}>
                               <div
                                 className="w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0"
@@ -395,11 +407,16 @@ export default function Home4() {
                               <p className="text-[15px] font-semibold leading-snug" style={{ color: isPast ? "#a0a5aa" : "#1a1c1c" }}>{s.title}</p>
                               {s.subtitle && <p className="text-[12px] mt-0.5 leading-snug" style={{ color: isPast ? "#c4c7c7" : "#4a5050" }}>{s.subtitle}</p>}
                             </div>
-                            {isCur && (
-                              <div className="flex-shrink-0 self-center">
+                            <div className="flex-shrink-0 self-center flex items-center gap-1.5">
+                              {isCur && (
                                 <div className="w-2.5 h-2.5 rounded-full animate-breathe" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
-                              </div>
-                            )}
+                              )}
+                              {detail && (
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d0d3d6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M9 18l6-6-6-6"/>
+                                </svg>
+                              )}
+                            </div>
                           </div>
                         );
                       })}
@@ -581,6 +598,29 @@ export default function Home4() {
               </div>
             )}
 
+            {schedItemModal && (
+              <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => setSchedItemModal(null)}>
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+                <div
+                  className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden max-h-[88vh] overflow-y-auto"
+                  style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.15)" }}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <div className="px-6 pt-5 pb-4" style={{ background: `${schedItemModal.color}18` }}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: schedItemModal.color }} />
+                      <p className="text-[13px] font-bold tracking-wide uppercase" style={{ color: schedItemModal.color }}>Today&apos;s Schedule</p>
+                    </div>
+                    <h3 className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{schedItemModal.title}</h3>
+                    {schedItemModal.subtitle && <p className="text-[14px] text-[#2c3235] mt-1">{schedItemModal.subtitle}</p>}
+                  </div>
+                  <div className="px-6 py-5">
+                    <p className="text-[15px] text-[#2c3235] leading-relaxed">{schedItemModal.detail}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {doModalOpen && (
               <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => setDoModalOpen(false)}>
                 <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
@@ -612,7 +652,15 @@ export default function Home4() {
       <hr style={{ width: 160, margin: "0 0 24px", border: "none", borderTop: "1.5px solid #111" }} />
 
       {match ? (
-        <p style={{ margin: "0 0 32px" }}>{matchLabel(match.date, match.time)}</p>
+        <button
+          onClick={() => setMatchModalOpen(true)}
+          style={{ ...S, background: "none", border: "none", padding: 0, margin: "0 0 32px", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, textAlign: "left" }}
+        >
+          {matchLabel(match.date, match.time)}
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </button>
       ) : (
         <div style={{ margin: "0 0 32px", display: "flex", alignItems: "baseline", gap: 8 }}>
           <p style={{ margin: 0 }}>Next Match:</p>
@@ -629,6 +677,58 @@ export default function Home4() {
         <Link href="/track2a" style={{ ...S, textDecoration: "none", display: "block", marginBottom: 4 }}>Track Something</Link>
         <Link href="/matches2a" style={{ ...S, textDecoration: "none", display: "block" }}>Upcoming Matches</Link>
       </div>
+
+      {/* Match detail modal */}
+      {matchModalOpen && match && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => setMatchModalOpen(false)}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div
+            className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden"
+            style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.15)" }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="px-6 pt-5 pb-4" style={{ background: "#2653d418" }}>
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#2653d4" }} />
+                <p className="text-[13px] font-bold tracking-wide uppercase" style={{ color: "#2653d4" }}>Next Match</p>
+              </div>
+              <h3 className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{matchLabel(match.date, match.time).replace("Next Match: ", "")}</h3>
+              {match.club && <p className="text-[14px] text-[#4a5050] mt-1">{match.club}</p>}
+            </div>
+            {match.players && match.players.length > 0 && (
+              <div className="px-6 py-5">
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#8a9096] mb-3">Players</p>
+                <div className="flex flex-col gap-2">
+                  {match.players.map((p, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-[12px] font-bold text-white" style={{ background: "#2653d4" }}>
+                        {p.trim()[0]?.toUpperCase()}
+                      </div>
+                      <p className="text-[15px] text-[#1a1c1c]" style={{ fontFamily: "Menlo, Monaco, 'Courier New', monospace" }}>{p}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="px-6 pb-5 flex gap-3">
+              <button
+                onClick={() => { setMatchModalOpen(false); setAddOpen(true); }}
+                className="flex-1 text-[14px] font-semibold py-2.5 rounded-2xl active:opacity-60 transition-opacity"
+                style={{ background: "#f4f4f4", border: "none", cursor: "pointer", color: "#1a1c1c" }}
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => setMatchModalOpen(false)}
+                className="flex-1 text-[14px] font-semibold py-2.5 rounded-2xl active:opacity-60 transition-opacity"
+                style={{ background: "#2653d4", border: "none", cursor: "pointer", color: "#fff" }}
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add Match modal */}
       {addOpen && (
