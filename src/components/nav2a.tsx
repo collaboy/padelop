@@ -53,11 +53,12 @@ export default function Nav2a() {
   const pathname = usePathname();
   return (
     <nav
-      className="fixed bottom-0 inset-x-0 z-[100]"
+      className="fixed inset-x-0 z-[100]"
       style={{
+        bottom: "calc(72px + env(safe-area-inset-bottom))",
         background: "#ffffff",
-        paddingBottom: "max(env(safe-area-inset-bottom), 12px)",
         borderTop: "1px solid #e8eaed",
+        borderBottom: "1px solid #e8eaed",
         boxShadow: "0 -4px 20px rgba(0,0,0,0.06)",
       }}
     >
