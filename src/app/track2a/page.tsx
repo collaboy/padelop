@@ -13,7 +13,7 @@ const ITEMS = [
 export default function Track2a() {
   return (
     <main
-      className="h1-font min-h-screen flex flex-col pb-32"
+      className="h1-font min-h-screen flex flex-col pb-44"
       style={{ background: "#e2e5e9" }}
     >
       <p className="text-[26px] font-bold text-[#1a1c1c] px-4 pt-10 pb-4 leading-tight tracking-tight">
