@@ -22,7 +22,7 @@ export default function Home4() {
   const [done, setDone] = useState(false);
 
   return (
-    <main style={{ ...S, padding: "40px 28px", minHeight: "100vh", background: "#fff", fontWeight: 300 }}>
+    <main style={{ ...S, padding: "40px 28px", minHeight: "100vh", background: "#f2f2f0", fontWeight: 300 }}>
 
       <p style={{ margin: "0 0 24px" }}>{greeting()} Eddie</p>
       <p style={{ margin: "0 0 32px" }}>Match Tonight</p>
