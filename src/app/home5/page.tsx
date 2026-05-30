@@ -342,7 +342,9 @@ export default function HomePage() {
 
           <ReadinessWidget hideCard showImprove />
 
-          <p className="text-[15px] font-bold tracking-widest uppercase text-[#1a1c1c] text-center leading-snug mb-2" style={{ fontFamily: "var(--font-hanken)" }}>Padelop Says:</p>
+          <p className="text-[15px] font-bold tracking-widest uppercase text-[#1a1c1c] text-center leading-snug mb-2" style={{ fontFamily: "var(--font-hanken)" }}>
+            <span style={{ display: "inline-block", width: "0.55em", height: "0.55em", borderRadius: "50%", background: "#22c55e", verticalAlign: "middle", margin: "0 0.04em 0.15em" }} />p Says:
+          </p>
 
           {/* Do this now */}
           {(() => {
