@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import Nav2a from "@/components/nav2a";
+import Nav4 from "@/components/nav4";
 
 function greeting() {
   const h = new Date().getHours();
@@ -437,20 +437,22 @@ export default function Home4() {
                   <button
                     onClick={() => setDoModalOpen(true)}
                     className="bg-white rounded-[24px] px-6 py-6 flex items-center gap-5 active:opacity-60 transition-opacity text-left w-full h-full"
-                    style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "2px solid #f59e0b" }}
+                    style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${item.color}` }}
                   >
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#f59e0b18" }}>
-                      <div className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: `${item.color}18` }}>
+                      <div className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: item.color, ["--glow" as string]: item.color }} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Do this now</p>
-                      <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">Drink 500ml water</p>
-                      <span className="inline-flex items-center gap-1 mt-1">
-                        <span className="text-[13px] text-[#6b7480] leading-snug">Before anything else this morning</span>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                          <path d="M9 18l6-6-6-6"/>
-                        </svg>
-                      </span>
+                      <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{item.title}</p>
+                      {item.subtitle && (
+                        <span className="inline-flex items-center gap-1 mt-1">
+                          <span className="text-[13px] text-[#6b7480] leading-snug">{item.subtitle}</span>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                            <path d="M9 18l6-6-6-6"/>
+                          </svg>
+                        </span>
+                      )}
                     </div>
                   </button>
                 </div>
@@ -608,7 +610,7 @@ export default function Home4() {
         );
       })()}
 
-      <hr style={{ width: 80, margin: "0 auto 24px", border: "none", borderTop: "1.5px solid #ccc" }} />
+      <hr style={{ width: 27, margin: "0 auto 24px", border: "none", borderTop: "1.5px solid #ccc" }} />
 
       {match ? (
         <button
@@ -626,7 +628,7 @@ export default function Home4() {
         </button>
       )}
 
-      <hr style={{ width: 80, margin: "0 auto 32px", border: "none", borderTop: "1.5px solid #ccc" }} />
+      <hr style={{ width: 27, margin: "0 auto 32px", border: "none", borderTop: "1.5px solid #ccc" }} />
 
       <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
         {[
@@ -795,7 +797,7 @@ export default function Home4() {
         </div>
       )}
 
-      <Nav2a />
+      <Nav4 />
     </main>
   );
 }
