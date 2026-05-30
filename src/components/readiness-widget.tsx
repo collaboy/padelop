@@ -134,7 +134,7 @@ export default function ReadinessWidget({ hideCard = false, showImprove = false 
             <span className="text-[13px] font-semibold text-[#1a1c1c]">Improve</span>
           </button>
         )}
-        <div className="flex gap-1 mt-2 mb-2 justify-center rounded-full px-1 py-1 w-full max-w-xs" style={{ background: "rgb(244, 244, 246)" }}>
+        {!showImprove && <div className="flex gap-1 mt-2 mb-2 justify-center rounded-full px-1 py-1 w-full max-w-xs" style={{ background: "rgb(244, 244, 246)" }}>
           {([
             { key: "overall",   label: "All",   color: "#2653d4" },
             { key: "recovery",  label: "Recovery",  color: "#7c3aed" },
@@ -157,8 +157,8 @@ export default function ReadinessWidget({ hideCard = false, showImprove = false 
               {m.label}
             </button>
           ))}
-        </div>
-        {selectedMetric !== "overall" && (() => {
+        </div>}
+        {!showImprove && selectedMetric !== "overall" && (() => {
           const details: Record<string, { color: string; desc: string; drivers: string[]; tip: string }> = {
             recovery:  { color: "#7c3aed", desc: "How well your body has bounced back.", drivers: ["Sleep quality & duration", "Muscle soreness level", "Hydration & injury status", "Recovery habits (foam roll, cold shower, walk)"], tip: "Sleep and foam rolling have the biggest impact here." },
             hydration: { color: "#0891b2", desc: "Your fluid balance and hydration status.", drivers: ["Litres of water logged today", "Urine colour (clear = good)", "Subjective hydration quality", "Check-in self-rating"], tip: "Log your water intake to get an accurate score." },
@@ -191,7 +191,7 @@ export default function ReadinessWidget({ hideCard = false, showImprove = false 
             </div>
           );
         })()}
-        <p className="text-[17px] leading-[26px] text-[#444748] px-4 mb-4">
+        {!showImprove && <p className="text-[17px] leading-[26px] text-[#444748] px-4 mb-4">
           {active.overall >= 85
             ? "Optimal recovery achieved. You're primed for high-intensity movement today."
             : active.overall >= 70
@@ -199,7 +199,7 @@ export default function ReadinessWidget({ hideCard = false, showImprove = false 
             : active.overall >= 55
             ? "Some gaps in recovery or fuel. Log your check-in to get a clearer picture."
             : "Your readiness is low — prioritise sleep, hydration, and recovery today."}
-        </p>
+        </p>}
         <button onClick={() => window.dispatchEvent(new CustomEvent("open-log-sheet"))} className="flex items-center gap-1.5 px-5 py-2 rounded-full bg-white border border-[#e2e2e2] active:opacity-70 transition-opacity">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
