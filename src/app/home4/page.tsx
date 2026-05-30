@@ -331,25 +331,6 @@ export default function Home4() {
         void now;
         return (
           <>
-            {/* Do This Now card */}
-            <button
-              onClick={() => setDoModalOpen(true)}
-              className="bg-white rounded-[24px] px-6 py-6 flex items-center gap-5 active:opacity-60 transition-opacity text-left w-full"
-              style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "2px solid #f59e0b", marginBottom: 12 }}
-            >
-              <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#f59e0b18" }}>
-                <div className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Do this now</p>
-                <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">Drink 500ml water</p>
-                <p className="text-[13px] text-[#6b7480] mt-1 leading-snug">Before anything else this morning</p>
-              </div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-                <path d="M9 18l6-6-6-6"/>
-              </svg>
-            </button>
-
             {/* Page overlay — darkens content outside carousel when on Log anything */}
             <div
               className="fixed inset-0 pointer-events-none"
@@ -454,21 +435,21 @@ export default function Home4() {
                 <div style={{ flex: "0 0 100%", height: "100%" }}>
                   <button
                     onClick={() => setDoModalOpen(true)}
-                    className="bg-white flex flex-col items-center justify-between active:opacity-60 transition-opacity"
-                    style={{ width: "100%", height: "100%", borderRadius: 24, padding: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "2px solid #f59e0b", overflowY: "auto" }}
+                    className="bg-white rounded-[24px] px-6 py-6 flex items-center gap-5 active:opacity-60 transition-opacity text-left w-full h-full"
+                    style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "2px solid #f59e0b" }}
                   >
-                    <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] w-full text-center">Do this now</p>
-                    <div className="w-28 h-28 rounded-full flex items-center justify-center" style={{ background: "#f59e0b18" }}>
-                      <div className="w-10 h-10 rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#f59e0b18" }}>
+                      <div className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
                     </div>
-                    <div className="w-full text-center">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Do this now</p>
                       <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">Drink 500ml water</p>
-                      <p className="text-[13px] text-[#6b7480] mt-1 leading-snug">Before anything else this morning</p>
-                      <div className="flex justify-center mt-3">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M6 9l6 6 6-6"/>
+                      <span className="inline-flex items-center gap-1 mt-1">
+                        <span className="text-[13px] text-[#6b7480] leading-snug">Before anything else this morning</span>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                          <path d="M9 18l6-6-6-6"/>
                         </svg>
-                      </div>
+                      </span>
                     </div>
                   </button>
                 </div>
@@ -501,7 +482,7 @@ export default function Home4() {
                               borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f4" : "none",
                               padding: "8px 0",
                               cursor: detail ? "pointer" : "default",
-                              ...(isCur ? { border: `1px solid ${s.color}`, borderRadius: 14, padding: "8px 8px 8px 0", marginBottom: i < schedule.length - 1 ? 4 : 0 } : {}),
+                              ...(isCur ? { border: `1px solid ${s.color}`, borderRadius: 14, padding: "8px 8px 8px 8px", marginBottom: i < schedule.length - 1 ? 4 : 0 } : { paddingLeft: 8 }),
                             }}
                             onClick={() => detail && setSchedItemModal({ title: s.title, subtitle: s.subtitle, detail, color: s.color })}
                           >
