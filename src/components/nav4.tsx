@@ -69,14 +69,13 @@ export default function Nav4() {
     <nav
       className="fixed inset-x-0 z-[100]"
       style={{
-        bottom: "calc(47px + env(safe-area-inset-bottom))",
+        bottom: "env(safe-area-inset-bottom)",
         background: "#ffffff",
         borderTop: "1px solid #e8eaed",
-        borderBottom: "1px solid #e8eaed",
         boxShadow: "0 -4px 20px rgba(0,0,0,0.06)",
       }}
     >
-      <div className="flex justify-around items-center py-2 px-2">
+      <div className="flex justify-around items-center pt-3 pb-5 px-2">
         {items.map((item) => {
           const active = pathname === item.href;
           return (

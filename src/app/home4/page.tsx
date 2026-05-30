@@ -1,10 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import Link from "next/link";
 import Nav4 from "@/components/nav4";
-import ScoreRing from "@/components/score-ring";
-import { computeScores, loadScoringData, type Scores } from "@/lib/scoring";
 
 function greeting() {
   const h = new Date().getHours();
@@ -28,17 +25,6 @@ function getDayMsg(match: { date: string; time: string } | null, now: Date): str
   return "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy.";
 }
 
-function matchLabel(date: string, time: string): string {
-  const today = new Date().toISOString().slice(0, 10);
-  const tomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
-  const d = new Date(date + "T12:00");
-  const dayNum = d.getDate();
-  const month = d.toLocaleDateString("en-GB", { month: "short" });
-  const weekday = d.toLocaleDateString("en-GB", { weekday: "short" });
-  const dateStr = date === today ? "Today" : date === tomorrow ? "Tomorrow" : `${weekday} ${dayNum} ${month}`;
-  return `Next Match: ${dateStr} · ${time}`;
-}
-
 const pad = (n: number) => String(n).padStart(2, "0");
 const addMins = (h: number, m: number, delta: number) => {
   const total = h * 60 + m + delta;
@@ -57,12 +43,6 @@ const ITEM_COLORS: Record<string, string> = {
   "Early wind down": "#8b5cf6", "Balanced lunch": "#16a34a",
   "Active recovery": "#0891b2", "Visualisation": "#8b5cf6",
   "Wind down": "#8b5cf6",
-};
-
-const DAY_TYPE_META = {
-  match:    { label: "Game Day",     bg: "#1e3a1e18", color: "#1e3a1e" },
-  recovery: { label: "Recovery Day", bg: "#7c3aed18", color: "#7c3aed" },
-  rest:     { label: "Rest Day",     bg: "#94a3b818", color: "#64748b" },
 };
 
 function getScheduleData(matchDate: string | null, matchTime: string | null) {
@@ -120,48 +100,8 @@ function getScheduleData(matchDate: string | null, matchTime: string | null) {
       if (curMins >= toMins(schedule[i].time) && curMins < toMins(schedule[i + 1].time)) { idx = i; break; }
     }
   }
-  return { schedule, currentIdx: idx, dayType };
+  return { schedule, currentIdx: idx };
 }
-
-function getCurrentItem(matchDate: string | null, matchTime: string | null) {
-  const { schedule, currentIdx } = getScheduleData(matchDate, matchTime);
-  return schedule[currentIdx];
-}
-
-const READINESS = 85;
-
-const S: React.CSSProperties = {
-  fontFamily: "Inter, sans-serif",
-  fontSize: 17,
-  fontWeight: 400,
-  color: "#111",
-  lineHeight: 1.6,
-};
-
-const fieldS: React.CSSProperties = {
-  fontFamily: "Inter, sans-serif",
-  fontSize: 14,
-  fontWeight: 400,
-  color: "#111",
-  border: "1px solid #ddd",
-  borderRadius: 8,
-  padding: "8px 10px",
-  width: "100%",
-  background: "#fafafa",
-  boxSizing: "border-box",
-  outline: "none",
-};
-
-const labelS: React.CSSProperties = {
-  fontFamily: "Inter, sans-serif",
-  fontSize: 11,
-  fontWeight: 400,
-  color: "#888",
-  display: "block",
-  marginBottom: 4,
-  textTransform: "uppercase",
-  letterSpacing: "0.06em",
-};
 
 const SCHEDULE_DETAILS: Record<string, string> = {
   "Wake up & hydrate": "Starting your day with 500 ml of water re-hydrates you after 7–8 hours without fluids. Do this before coffee — caffeine is a mild diuretic and amplifies morning dehydration.",
@@ -186,40 +126,31 @@ const SCHEDULE_DETAILS: Record<string, string> = {
   "Wind down": "Blue light from screens suppresses melatonin production by up to 50%. In the 60 minutes before bed: dim lights, avoid screens, try light reading or slow breathing. A consistent bedtime stabilises your circadian rhythm.",
 };
 
-type Step = "pick" | "upload" | "form";
+const S: React.CSSProperties = {
+  fontFamily: "Inter, sans-serif",
+  fontSize: 17,
+  fontWeight: 400,
+  color: "#111",
+  lineHeight: 1.6,
+};
 
 export default function Home4() {
   const [doModalOpen, setDoModalOpen] = useState(false);
-  const [readinessOpen, setReadinessOpen] = useState(false);
-  const [readinessLogMethod, setReadinessLogMethod] = useState<"wizard" | null>(null);
   const [slideIdx, setSlideIdx] = useState(1);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
-  const [matchModalOpen, setMatchModalOpen] = useState(false);
   const [now, setNow] = useState(new Date());
-  const [addOpen, setAddOpen] = useState(false);
-  const [step, setStep] = useState<Step>("pick");
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [form, setForm] = useState({ date: "", time: "", venue: "", player1: "", player2: "", player3: "", player4: "" });
-  const [schedItemModal, setSchedItemModal] = useState<{ title: string; subtitle?: string; detail: string; color: string } | null>(null);
   const [logThumb, setLogThumb] = useState<string | null>(null);
   const [logSuccess, setLogSuccess] = useState(false);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [newCatActive, setNewCatActive] = useState(false);
   const [newCatValue, setNewCatValue] = useState("");
-  const fileRef = useRef<HTMLInputElement>(null);
-  const logCameraRef = useRef<HTMLInputElement>(null);
   const logUploadRef = useRef<HTMLInputElement>(null);
   const touchStartX = useRef<number>(0);
   const touchStartY = useRef<number>(0);
   const swipeAxis = useRef<"h" | "v" | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const curItemRef = useRef<HTMLDivElement>(null);
   const [doSlideIdx, setDoSlideIdx] = useState(0);
   const doTouchStartX = useRef(0);
-  const [selectedMetric, setSelectedMetric] = useState("overall");
-  const [matchCardExpanded, setMatchCardExpanded] = useState(false);
-  const [heroScores, setHeroScores] = useState<Scores>({ overall: 65, recovery: 65, hydration: 65, energy: 65, mobility: 65 });
 
   useEffect(() => {
     try {
@@ -244,16 +175,6 @@ export default function Home4() {
   }, []);
 
   useEffect(() => {
-    function load() {
-      const data = loadScoringData();
-      setHeroScores(computeScores(data.checkIn, data.hydration, data.review, data.nutrition, data.gameDaysThisWeek));
-    }
-    load();
-    window.addEventListener("storage", load);
-    return () => window.removeEventListener("storage", load);
-  }, []);
-
-  useEffect(() => {
     const el = carouselRef.current;
     if (!el) return;
     function onTouchMove(e: TouchEvent) {
@@ -265,21 +186,6 @@ export default function Home4() {
     el.addEventListener("touchmove", onTouchMove, { passive: false });
     return () => el.removeEventListener("touchmove", onTouchMove);
   }, []);
-
-
-  function saveMatch() {
-    if (!form.date || !form.time) return;
-    const data = {
-      date: form.date, time: form.time,
-      club: form.venue,
-      player_1: form.player1, player_2: form.player2,
-      player_3: form.player3, player_4: form.player4,
-    };
-    localStorage.setItem("padelop:next-match", JSON.stringify(data));
-    window.dispatchEvent(new Event("storage"));
-    setMatch({ date: form.date, time: form.time });
-    closeModal();
-  }
 
   function confirmCategory() {
     setLogSuccess(true);
@@ -300,51 +206,11 @@ export default function Home4() {
     setSlideIdx(0);
   }
 
-  function closeModal() {
-    setAddOpen(false);
-    setStep("pick");
-    setUploading(false);
-    setUploadError(null);
-    setForm({ date: "", time: "", venue: "", player1: "", player2: "", player3: "", player4: "" });
-  }
-
-  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    e.target.value = "";
-    if (file.size > 4 * 1024 * 1024) { setUploadError("Image too large (max 4 MB)."); return; }
-    setUploadError(null);
-    setUploading(true);
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const base64 = (reader.result as string).split(",")[1];
-      try {
-        const res = await fetch("/api/extract-match", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ image: base64, mediaType: file.type }),
-        });
-        const data = await res.json();
-        if (data.error) { setUploadError(data.message || "Couldn't read screenshot."); setUploading(false); return; }
-        setForm({
-          date: data.date ?? "", time: data.time ?? "", venue: data.club ?? "",
-          player1: data.player_1 ?? "", player2: data.player_2 ?? "",
-          player3: data.player_3 ?? "", player4: data.player_4 ?? "",
-        });
-        setStep("form");
-        setUploading(false);
-      } catch { setUploadError("Network error. Try again."); setUploading(false); }
-    };
-    reader.readAsDataURL(file);
-  }
-
   return (
-    <main style={{ ...S, padding: "24px 20px 160px", minHeight: "100vh", background: "#f9f9f9" }}>
+    <main style={{ ...S, padding: "24px 20px 120px", minHeight: "100vh", background: "#f9f9f9" }}>
 
       {(() => {
-        const { schedule, currentIdx, dayType } = getScheduleData(match?.date ?? null, match?.time ?? null);
-        const meta = DAY_TYPE_META[dayType];
-        const curMins = now.getHours() * 60 + now.getMinutes();
+        const { schedule, currentIdx } = getScheduleData(match?.date ?? null, match?.time ?? null);
         const safeDoIdx = Math.min(doSlideIdx, schedule.length - 1);
         const doItem = schedule[safeDoIdx];
         void now;
@@ -355,12 +221,6 @@ export default function Home4() {
               className="fixed inset-0 pointer-events-none"
               style={{ background: "rgba(0,0,0,0.45)", opacity: slideIdx === 0 ? 1 : 0, transition: "opacity 0.35s ease", zIndex: 5 }}
             />
-
-            {/* Greeting */}
-            <div style={{ padding: "0 4px", marginBottom: 10, textAlign: "center" }}>
-              <p style={{ ...S, fontSize: "clamp(16px, 5.5vw, 22px)", fontWeight: 700, color: "#111", margin: "0 0 2px", lineHeight: 1.2 }}>{greeting()} Eddie</p>
-              <p style={{ ...S, fontSize: "clamp(12px, 3.8vw, 15px)", color: "#888", margin: 0, lineHeight: 1.5 }}>{getDayMsg(match, now)}</p>
-            </div>
 
             {/* Swipeable carousel */}
             <div
@@ -493,49 +353,32 @@ export default function Home4() {
                             style={{ opacity: 0.3 }}
                           >
                             {(i % 6 === 0) && <>
-                              {/* Large blob: anchors at T(98,32) R(165,72) B(112,145) L(52,100), handles tangent at each */}
                               <path d="M 98,32 C 122,32 165,50 165,72 C 165,95 138,145 112,145 C 85,145 52,125 52,100 C 52,75 74,32 98,32 Z" />
-                              {/* Small blob lower-left: anchors T(48,142) R(62,158) B(48,174) L(34,158) */}
                               <path d="M 48,142 C 56,142 62,150 62,158 C 62,166 56,174 48,174 C 40,174 34,166 34,158 C 34,150 40,142 48,142 Z" />
-                              {/* Tiny blob upper-left: anchors T(38,30) R(54,46) B(38,62) L(22,46) */}
                               <path d="M 38,30 C 47,30 54,38 54,46 C 54,54 47,62 38,62 C 29,62 22,54 22,46 C 22,38 29,30 38,30 Z" />
                             </>}
                             {(i % 6 === 1) && <>
-                              {/* Tall narrow blob: anchors T(75,30) R(118,82) B(78,158) L(40,95) */}
                               <path d="M 75,30 C 98,30 118,58 118,82 C 118,108 100,158 78,158 C 56,158 40,122 40,95 C 40,68 52,30 75,30 Z" />
-                              {/* Medium blob lower-right: anchors T(145,90) R(168,112) B(148,132) L(126,112) */}
                               <path d="M 145,90 C 158,90 168,100 168,112 C 168,124 160,132 148,132 C 136,132 126,122 126,112 C 126,102 132,90 145,90 Z" />
-                              {/* Tiny blob upper-right: anchors T(155,30) R(170,46) B(155,62) L(140,46) */}
                               <path d="M 155,30 C 163,30 170,38 170,46 C 170,54 163,62 155,62 C 147,62 140,54 140,46 C 140,38 147,30 155,30 Z" />
                             </>}
                             {(i % 6 === 2) && <>
-                              {/* Large centred blob: anchors T(95,28) R(168,90) B(105,168) L(32,100) */}
                               <path d="M 95,28 C 130,28 168,58 168,90 C 168,122 142,168 105,168 C 68,168 32,132 32,100 C 32,68 60,28 95,28 Z" />
-                              {/* Small blob lower-right: anchors T(155,148) R(172,162) B(155,176) L(138,162) */}
                               <path d="M 155,148 C 164,148 172,155 172,162 C 172,169 164,176 155,176 C 146,176 138,169 138,162 C 138,155 146,148 155,148 Z" />
                             </>}
                             {(i % 6 === 3) && <>
-                              {/* Left oval, slightly tilted: anchors T(62,35) R(108,78) B(70,128) L(30,82) */}
                               <path d="M 62,35 C 86,35 108,55 108,78 C 108,102 92,128 70,128 C 48,128 30,105 30,82 C 30,59 38,35 62,35 Z" />
-                              {/* Right blob: anchors T(148,92) R(170,115) B(150,138) L(128,115) */}
                               <path d="M 148,92 C 160,92 170,102 170,115 C 170,128 162,138 150,138 C 138,138 128,128 128,115 C 128,102 136,92 148,92 Z" />
-                              {/* Tiny upper-right: anchors T(158,32) R(172,46) B(158,60) L(144,46) */}
                               <path d="M 158,32 C 166,32 172,39 172,46 C 172,53 166,60 158,60 C 150,60 144,53 144,46 C 144,39 150,32 158,32 Z" />
                             </>}
                             {(i % 6 === 4) && <>
-                              {/* Large blob offset lower-left: anchors T(100,35) R(160,88) B(108,152) L(48,100) */}
                               <path d="M 100,35 C 130,35 160,60 160,88 C 160,116 138,152 108,152 C 78,152 48,128 48,100 C 48,72 70,35 100,35 Z" />
-                              {/* Small blob upper-left: anchors T(42,32) R(58,50) B(42,68) L(26,50) */}
                               <path d="M 42,32 C 51,32 58,40 58,50 C 58,60 51,68 42,68 C 33,68 26,60 26,50 C 26,40 33,32 42,32 Z" />
-                              {/* Tiny lower-right: anchors T(158,152) R(172,165) B(158,178) L(144,165) */}
                               <path d="M 158,152 C 166,152 172,158 172,165 C 172,172 166,178 158,178 C 150,178 144,172 144,165 C 144,158 150,152 158,152 Z" />
                             </>}
                             {(i % 6 === 5) && <>
-                              {/* Wide landscape blob: anchors T(95,40) R(165,82) B(108,132) L(36,88) */}
                               <path d="M 95,40 C 132,40 165,60 165,82 C 165,104 142,132 108,132 C 74,132 36,110 36,88 C 36,66 58,40 95,40 Z" />
-                              {/* Small blob upper-right: anchors T(158,30) R(174,46) B(158,62) L(142,46) */}
                               <path d="M 158,30 C 167,30 174,38 174,46 C 174,54 167,62 158,62 C 149,62 142,54 142,46 C 142,38 149,30 158,30 Z" />
-                              {/* Small blob lower-left: anchors T(42,148) R(58,162) B(42,176) L(26,162) */}
                               <path d="M 42,148 C 51,148 58,155 58,162 C 58,169 51,176 42,176 C 33,176 26,169 26,162 C 26,155 33,148 42,148 Z" />
                             </>}
                           </svg>
@@ -561,244 +404,17 @@ export default function Home4() {
                     ))}
                   </div>
                 </div>
-
-
               </div>
             </div>
 
             {/* Hidden upload input */}
             <input ref={logUploadRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleLogFile} />
 
-            {/* Match + Readiness card */}
-            {(() => {
-              const r = 44;
-              const stroke = 6;
-              const norm = r - stroke / 2;
-              const circ = 2 * Math.PI * norm;
-              const fill = ((READINESS - 65) / 35) * circ;
-              return (
-                <div className="bg-white rounded-[24px] mb-3" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", display: "flex", overflow: "hidden" }}>
-                  {/* Left: Next Match */}
-                  <button
-                    onClick={() => match ? setMatchModalOpen(true) : setAddOpen(true)}
-                    style={{ flex: 1, padding: "18px 16px", textAlign: "left", background: "none", border: "none", cursor: "pointer", borderRight: "1px solid #f0f0f0" }}
-                  >
-                    <p style={{ ...S, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 6px" }}>Next Match</p>
-                    {match ? (
-                      <>
-                        <p style={{ ...S, fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: "0 0 2px", lineHeight: 1.2 }}>
-                          {(() => {
-                            const today = new Date().toISOString().slice(0, 10);
-                            const tomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
-                            const d = new Date(match.date + "T12:00");
-                            if (match.date === today) return "Today";
-                            if (match.date === tomorrow) return "Tomorrow";
-                            return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
-                          })()}
-                        </p>
-                        <p style={{ ...S, fontSize: 14, fontWeight: 600, color: "#2653d4", margin: "0 0 2px" }}>{match.time}</p>
-                        {match.club && <p style={{ ...S, fontSize: 12, color: "#8a9096", margin: 0 }}>{match.club}</p>}
-                      </>
-                    ) : (
-                      <p style={{ ...S, fontSize: 14, fontWeight: 600, color: "#2653d4", margin: 0 }}>+ Add a match</p>
-                    )}
-                  </button>
-                  {/* Right: Match Readiness */}
-                  <button onClick={() => setReadinessOpen(true)} style={{ width: 110, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "18px 12px", background: "none", border: "none", cursor: "pointer" }}>
-                    <div style={{ position: "relative", width: r * 2, height: r * 2 }}>
-                      <svg width={r * 2} height={r * 2} style={{ transform: "rotate(-90deg)" }}>
-                        <circle cx={r} cy={r} r={norm} fill="none" stroke="#e8eaed" strokeWidth={stroke} />
-                        <circle cx={r} cy={r} r={norm} fill="none" stroke="#2653d4" strokeWidth={stroke}
-                          strokeDasharray={`${fill} ${circ}`} strokeLinecap="round" />
-                      </svg>
-                      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                        <span style={{ ...S, fontSize: 18, fontWeight: 700, color: "#2653d4", lineHeight: 1 }}>{READINESS}</span>
-                        <span style={{ ...S, fontSize: 9, fontWeight: 600, color: "#8a9096" }}>/ 100</span>
-                      </div>
-                    </div>
-                    <p style={{ ...S, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "5px 0 0", textAlign: "center" }}>Readiness</p>
-                  </button>
-                </div>
-              );
-            })()}
-
-            {/* Today + Readiness hero card */}
-            {(() => {
-              const weekday = now.toLocaleDateString(undefined, { weekday: "long" });
-              const dateShort = now.toLocaleDateString(undefined, { month: "long", day: "numeric" });
-              const dayTypeMeta: Record<string, { label: string; color: string; bg: string; border: string }> = {
-                match:    { label: "Game Day",     color: "#fff", bg: "#16a34a", border: "#16a34a" },
-                recovery: { label: "Recovery Day", color: "#fff", bg: "#7c3aed", border: "#7c3aed" },
-                rest:     { label: "Rest Day",     color: "#fff", bg: "#64748b", border: "#64748b" },
-              };
-              const dtMeta = dayTypeMeta[dayType] ?? dayTypeMeta.rest;
-              const venue = match?.club ?? "";
-              const players = match?.players ?? [];
-              const { logsToday, logLabel } = (() => {
-                try {
-                  const todayStr = new Date().toISOString().slice(0, 10);
-                  let count = 0;
-                  const ci = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null");
-                  if (ci?.date === todayStr) count++;
-                  const hyd = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]")[0];
-                  if (hyd?.ts?.slice(0, 10) === todayStr) count++;
-                  const nut = JSON.parse(localStorage.getItem("padelop:nutrition-logs") || "[]")[0];
-                  if (nut?.ts?.slice(0, 10) === todayStr) count++;
-                  const rev = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]")[0];
-                  if (rev?.ts?.slice(0, 10) === todayStr) count++;
-                  const label = count === 0 ? "How are you feeling today?" : count >= 4 ? "All caught up — great work" : "Add more info!";
-                  return { logsToday: count, logLabel: label };
-                } catch { return { logsToday: 0, logLabel: "How are you feeling today?" }; }
-              })();
-              const allLogged = logsToday >= 4;
-              const countdown = (() => {
-                if (!match) return null;
-                const matchMs = new Date(`${match.date}T${match.time}`).getTime();
-                const diffMs = matchMs - now.getTime();
-                if (diffMs <= 0) return { h: 0, m: 0, past: true };
-                return { h: Math.floor(diffMs / 3600000), m: Math.floor((diffMs % 3600000) / 60000), past: false };
-              })();
-              const ctxMsg = getDayMsg(match, now);
-              const metricDetails: Record<string, { color: string; desc: string; drivers: string[]; tip: string }> = {
-                recovery:  { color: "#7c3aed", desc: "How well your body has bounced back.", drivers: ["Sleep quality & duration", "Muscle soreness level", "Hydration & injury status", "Recovery habits (foam roll, cold shower, walk)"], tip: "Sleep and foam rolling have the biggest impact here." },
-                hydration: { color: "#0891b2", desc: "Your fluid balance and hydration status.", drivers: ["Litres of water logged today", "Urine colour (clear = good)", "Subjective hydration quality", "Check-in self-rating"], tip: "Log your water intake to get an accurate score." },
-                energy:    { color: "#f59e0b", desc: "Your fuel and readiness to perform.", drivers: ["Check-in energy level", "Sleep quality (sleep debt tanks energy)", "Nutrition quality & protein intake", "Post-match energy logged in review"], tip: "Protein-rich meals and good sleep move this the most." },
-                mobility:  { color: "#16a34a", desc: "Joint freedom and movement quality.", drivers: ["Soreness level (primary driver)", "Injury status", "Game activity this week", "Mobility habits (dynamic warm-up, foam roll, walk)"], tip: "10 min of daily mobility adds up fast over a week." },
-              };
-              const d = metricDetails[selectedMetric];
-              const metricScore = heroScores[selectedMetric as keyof Scores] ?? 65;
-              return (
-                <div className="rounded-[28px] mb-3 overflow-hidden" style={{ background: "#fff", boxShadow: "0 2px 24px rgba(38,83,212,0.08)", border: "1px solid #e8e8e8" }}>
-                  {/* Header row */}
-                  <div className="flex items-center justify-between px-5 pt-5 pb-3">
-                    <div className="flex items-baseline gap-2">
-                      <p className="text-[18px] font-bold leading-none text-[#1a1c1c]">{weekday}</p>
-                      <p className="text-[13px] text-[#8a9096] font-medium">{dateShort}</p>
-                    </div>
-                    {dayType === "match" && match?.time ? (
-                      <button
-                        className="flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full tracking-wide active:opacity-70 transition-opacity"
-                        style={{ background: dtMeta.bg, color: dtMeta.color, border: `1px solid ${dtMeta.border}` }}
-                        onClick={() => setMatchCardExpanded(e => !e)}
-                      >
-                        {dtMeta.label}
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"
-                          style={{ transform: matchCardExpanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
-                          <path d="M6 9l6 6 6-6" />
-                        </svg>
-                      </button>
-                    ) : (
-                      <span className="text-[11px] font-bold px-3 py-1.5 rounded-full tracking-wide" style={{ background: dtMeta.bg, color: dtMeta.color, border: `1px solid ${dtMeta.border}` }}>{dtMeta.label}</span>
-                    )}
-                  </div>
-
-                  {/* Match strip — expands when pill is tapped */}
-                  {dayType === "match" && match?.time && matchCardExpanded && (
-                    <button className="mx-4 mb-3 px-4 py-3 rounded-2xl flex items-center gap-3 w-[calc(100%-2rem)] active:opacity-60 transition-opacity text-left" style={{ background: "#f4f4f6", border: "1px solid #e8e8e8" }} onClick={() => { setMatchCardExpanded(false); setAddOpen(true); }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4b5563" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                      </svg>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-bold text-[#1a1c1c]">
-                          {match.time}
-                          {countdown && !countdown.past && (countdown.h > 0 || countdown.m > 0) ? ` · ${countdown.h > 0 ? `${countdown.h}h ${countdown.m}m` : `${countdown.m}m`} to go` : countdown?.past ? " · Underway" : ""}
-                        </p>
-                        {(venue || players.length > 0) && (
-                          <p className="text-[11px] text-[#6b7480] mt-0.5 truncate">{[venue, players.join(", ")].filter(Boolean).join(" · ")}</p>
-                        )}
-                      </div>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M9 18l6-6-6-6" />
-                      </svg>
-                    </button>
-                  )}
-
-                  {/* Divider */}
-                  <div style={{ height: 1, background: "#f0f0f0" }} />
-
-                  {/* Ring section */}
-                  <div className="flex flex-col items-center pt-4 pb-4 px-5">
-                    <div className="w-full pb-4 mb-4" style={{ borderBottom: "1px solid #f0f0f0" }}>
-                      <p className="text-[13px] text-[#4a5050] leading-snug text-center">{ctxMsg}</p>
-                    </div>
-                    {!match && (
-                      <button onClick={() => setAddOpen(true)} className="text-[12px] font-semibold text-[#2653d4] mb-3 active:opacity-60 px-3 py-1.5 rounded-full" style={{ background: "#eef2ff", border: "1px solid #c5d0ff" }}>
-                        + Add next match
-                      </button>
-                    )}
-                    <p className="text-[11px] font-bold tracking-widest uppercase text-[#8a9096] mb-2">Your Match Readiness</p>
-                    <ScoreRing metric={selectedMetric} />
-                    <div className="flex gap-1 mt-4 justify-center rounded-full px-1 py-1 w-full max-w-xs" style={{ background: "#f4f4f6" }}>
-                      {[
-                        { key: "overall",   label: "Overall",   color: "#2653d4" },
-                        { key: "recovery",  label: "Recovery",  color: "#7c3aed" },
-                        { key: "hydration", label: "Hydration", color: "#0891b2" },
-                        { key: "energy",    label: "Energy",    color: "#f59e0b" },
-                        { key: "mobility",  label: "Mobility",  color: "#16a34a" },
-                      ].map(m => (
-                        <button
-                          key={m.key}
-                          onClick={() => setSelectedMetric(m.key)}
-                          className="flex-1 rounded-full font-semibold transition-all whitespace-nowrap"
-                          style={{
-                            fontSize: 10,
-                            padding: "5px 2px",
-                            ...(selectedMetric === m.key
-                              ? { background: m.color, color: "#fff" }
-                              : { background: "transparent", color: "#6b7480" })
-                          }}
-                        >
-                          {m.label}
-                        </button>
-                      ))}
-                    </div>
-                    {selectedMetric !== "overall" && d && (
-                      <div className="mt-3 w-full rounded-2xl overflow-hidden" style={{ background: d.color + "0d", border: `1px solid ${d.color}22` }}>
-                        <div className="px-4 pt-3 pb-1 flex items-center justify-between">
-                          <p className="text-[12px] font-bold" style={{ color: d.color }}>{d.desc}</p>
-                          <span className="text-[18px] font-bold" style={{ color: d.color }}>{Math.round(metricScore)}</span>
-                        </div>
-                        <div className="px-4 pb-1">
-                          <div className="h-1 rounded-full overflow-hidden" style={{ background: d.color + "22" }}>
-                            <div className="h-full rounded-full" style={{ width: `${metricScore}%`, background: d.color }} />
-                          </div>
-                        </div>
-                        <div className="px-4 pt-2 pb-3">
-                          <p className="text-[10px] font-bold uppercase tracking-widest text-[#8a9096] mb-1.5">What drives it</p>
-                          {d.drivers.map((dr, i) => (
-                            <div key={i} className="flex items-start gap-1.5 mb-1">
-                              <span className="text-[10px] mt-0.5 flex-shrink-0" style={{ color: d.color }}>·</span>
-                              <span className="text-[12px] text-[#4a5050] leading-snug">{dr}</span>
-                            </div>
-                          ))}
-                          <p className="text-[11px] font-semibold mt-2" style={{ color: d.color }}>💡 {d.tip}</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Check-in footer */}
-                  <div style={{ borderTop: "1px solid #f0f0f0" }}>
-                    <button
-                      onClick={() => setReadinessOpen(true)}
-                      className="w-full flex items-center justify-between px-5 py-4 active:opacity-60 transition-opacity"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: allLogged ? "#eef2ff" : "#f4f4f6" }}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={allLogged ? "#2653d4" : "#8a9096"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" />
-                          </svg>
-                        </div>
-                        <span className="text-[14px] font-semibold" style={{ color: allLogged ? "#2653d4" : "#4a5050" }}>{logLabel}</span>
-                      </div>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M9 18l6-6-6-6" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              );
-            })()}
+            {/* Greeting */}
+            <div style={{ padding: "12px 4px 0", textAlign: "center" }}>
+              <p style={{ ...S, fontSize: "clamp(16px, 5.5vw, 22px)", fontWeight: 700, color: "#111", margin: "0 0 2px", lineHeight: 1.2 }}>{greeting()} Eddie</p>
+              <p style={{ ...S, fontSize: "clamp(12px, 3.8vw, 15px)", color: "#888", margin: 0, lineHeight: 1.5 }}>{getDayMsg(match, now)}</p>
+            </div>
 
             {/* Wizard modal */}
             {wizardOpen && (
@@ -822,29 +438,6 @@ export default function Home4() {
                         {cat}
                       </button>
                     ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {schedItemModal && (
-              <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => setSchedItemModal(null)}>
-                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-                <div
-                  className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden max-h-[88vh] overflow-y-auto"
-                  style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.15)" }}
-                  onClick={e => e.stopPropagation()}
-                >
-                  <div className="px-6 pt-5 pb-4" style={{ background: `${schedItemModal.color}18` }}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: schedItemModal.color }} />
-                      <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: schedItemModal.color }}>Today&apos;s Schedule</p>
-                    </div>
-                    <h3 className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{schedItemModal.title}</h3>
-                    {schedItemModal.subtitle && <p className="text-[15px] text-[#6b7480] mt-1">{schedItemModal.subtitle}</p>}
-                  </div>
-                  <div className="px-6 py-5">
-                    <p className="text-[17px] text-[#2c3235] leading-relaxed">{schedItemModal.detail}</p>
                   </div>
                 </div>
               </div>
@@ -877,216 +470,6 @@ export default function Home4() {
           </>
         );
       })()}
-
-      <hr style={{ width: 27, margin: "0 auto 24px", border: "none", borderTop: "1.5px solid #ccc" }} />
-
-      <hr style={{ width: 27, margin: "0 auto 32px", border: "none", borderTop: "1.5px solid #ccc" }} />
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-        {[
-          { href: "/insights4", label: "Improve Readiness", icon: "riser" },
-          { href: "/insights2a", label: "View Insights" },
-          { href: "/track2a", label: "Track Something" },
-          { href: "/matches2a", label: "Upcoming Matches" },
-        ].map(({ href, label, icon }, i, arr) => (
-          <Link key={href} href={href} style={{ ...S, textDecoration: "none", display: "flex", alignItems: "center", gap: 4, paddingBottom: i < arr.length - 1 ? 4 : 0 }}>
-            {icon === "riser" && (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
-              </svg>
-            )}
-            {label}
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 18l6-6-6-6"/>
-            </svg>
-          </Link>
-        ))}
-      </div>
-
-      {/* Match detail modal */}
-      {matchModalOpen && match && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => setMatchModalOpen(false)}>
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-          <div
-            className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden"
-            style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.15)" }}
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="px-6 pt-5 pb-4" style={{ background: "#2653d418" }}>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#2653d4" }} />
-                <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: "#2653d4" }}>Next Match</p>
-              </div>
-              <h3 className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{matchLabel(match.date, match.time).replace("Next Match: ", "")}</h3>
-              {match.club && <p className="text-[15px] text-[#6b7480] mt-1">{match.club}</p>}
-              <p className="text-[13px] mt-2" style={{ color: "#4a5a70" }}>Match Readiness <span className="font-bold" style={{ color: "#2653d4" }}>{READINESS}%</span></p>
-            </div>
-            {match.players && match.players.length > 0 && (
-              <div className="px-6 py-5">
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#8a9096] mb-3">Players</p>
-                <div className="flex flex-col gap-2">
-                  {match.players.map((p, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-[12px] font-bold text-white" style={{ background: "#2653d4" }}>
-                        {p.trim()[0]?.toUpperCase()}
-                      </div>
-                      <p className="text-[17px] text-[#1a1c1c]" style={{ fontFamily: "Inter, sans-serif" }}>{p}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            <div className="px-6 pb-5 flex gap-3">
-              <button
-                onClick={() => { setMatchModalOpen(false); setAddOpen(true); }}
-                className="flex-1 text-[15px] font-semibold py-2.5 rounded-2xl active:opacity-60 transition-opacity"
-                style={{ background: "#f4f4f4", border: "none", cursor: "pointer", color: "#1a1c1c" }}
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => setMatchModalOpen(false)}
-                className="flex-1 text-[15px] font-semibold py-2.5 rounded-2xl active:opacity-60 transition-opacity"
-                style={{ background: "#2653d4", border: "none", cursor: "pointer", color: "#fff" }}
-              >
-                Done
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add Match modal */}
-      {addOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" style={{ background: "rgba(0,0,0,0.45)" }} onClick={closeModal}>
-          <div style={{ background: "#fff", borderRadius: 20, width: "100%", maxWidth: 420, maxHeight: "88vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
-
-            {/* Header */}
-            <div style={{ padding: "22px 22px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <p style={{ ...S, fontSize: 20, fontWeight: 700 }}>Add a match</p>
-              <button onClick={closeModal} style={{ background: "none", border: "none", cursor: "pointer", padding: 4 }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
-            </div>
-
-            <div style={{ padding: "18px 22px 24px" }}>
-
-              {/* Step 1: pick method */}
-              {step === "pick" && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  <button
-                    onClick={() => setStep("upload")}
-                    style={{ ...S, fontSize: 15, background: "#f4f4f4", border: "none", borderRadius: 12, padding: "14px 16px", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 12 }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
-                    <div>
-                      <div>Upload screenshot</div>
-                      <div style={{ fontSize: 13, color: "#888", marginTop: 2 }}>Booking confirmation or chat — autofilled</div>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => setStep("form")}
-                    style={{ ...S, fontSize: 15, background: "#f4f4f4", border: "none", borderRadius: 12, padding: "14px 16px", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 12 }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                    <div>
-                      <div>Enter manually</div>
-                      <div style={{ fontSize: 13, color: "#888", marginTop: 2 }}>Date, time, venue, players</div>
-                    </div>
-                  </button>
-                </div>
-              )}
-
-              {/* Step 2: upload */}
-              {step === "upload" && (
-                <div>
-                  {uploading ? (
-                    <div style={{ textAlign: "center", padding: "40px 0" }}>
-                      <p style={{ ...S, color: "#888" }}>Analysing screenshot…</p>
-                    </div>
-                  ) : (
-                    <>
-                      <label style={{ display: "block", border: "2px dashed #ddd", borderRadius: 14, padding: "36px 20px", textAlign: "center", cursor: "pointer" }}>
-                        <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: "none" }} onChange={handleFile} />
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: "0 auto 10px" }}><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
-                        <p style={{ ...S, color: "#555" }}>Choose screenshot</p>
-                        <p style={{ ...S, fontSize: 13, color: "#aaa", marginTop: 4 }}>Booking confirmation or WhatsApp</p>
-                      </label>
-                      {uploadError && <p style={{ ...S, fontSize: 13, color: "#dc2626", marginTop: 10 }}>{uploadError}</p>}
-                      <button onClick={() => setStep("pick")} style={{ ...S, fontSize: 13, color: "#888", background: "none", border: "none", cursor: "pointer", marginTop: 14, padding: 0 }}>← Back</button>
-                    </>
-                  )}
-                </div>
-              )}
-
-              {/* Step 3: form (manual or autofilled) */}
-              {step === "form" && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                  <div style={{ display: "flex", gap: 10 }}>
-                    <div style={{ flex: 1 }}>
-                      <label style={labelS}>Date</label>
-                      <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} style={fieldS} />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <label style={labelS}>Time</label>
-                      <input type="time" value={form.time} onChange={e => setForm(f => ({ ...f, time: e.target.value }))} style={fieldS} />
-                    </div>
-                  </div>
-                  <div>
-                    <label style={labelS}>Venue</label>
-                    <input type="text" value={form.venue} placeholder="Club / court" onChange={e => setForm(f => ({ ...f, venue: e.target.value }))} style={fieldS} />
-                  </div>
-                  <div>
-                    <label style={labelS}>Players</label>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                      {(["player1","player2","player3","player4"] as const).map((k, i) => (
-                        <input key={k} type="text" value={form[k]} placeholder={i === 0 ? "You" : `Player ${i + 1}`} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} style={fieldS} />
-                      ))}
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-                    <button onClick={() => setStep("pick")} style={{ ...S, flex: 1, padding: "10px 0", border: "1px solid #ddd", borderRadius: 10, cursor: "pointer", background: "#fff" }}>Back</button>
-                    <button onClick={saveMatch} style={{ ...S, flex: 2, padding: "10px 0", border: "none", borderRadius: 10, cursor: "pointer", background: "#111", color: "#fff" }}>Save match</button>
-                  </div>
-                </div>
-              )}
-
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Readiness / Log something modal */}
-      {readinessOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => { setReadinessOpen(false); setReadinessLogMethod(null); }}>
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-          <div className="relative w-full max-w-sm bg-white rounded-[28px] px-6 py-7" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.15)" }} onClick={e => e.stopPropagation()}>
-            <p style={{ ...S, fontSize: 22, fontWeight: 700, color: "#1a1c1c", margin: "0 0 4px" }}>Log something</p>
-            <p style={{ ...S, fontSize: 13, color: "#6b7480", margin: "0 0 20px" }}>to update your score</p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
-              <button onClick={() => { const i = document.createElement("input"); i.type="file"; i.accept="image/*"; i.setAttribute("capture","environment"); i.onchange=(ev)=>{const f=(ev.target as HTMLInputElement).files?.[0]; if(f){setLogThumb(URL.createObjectURL(f)); setReadinessOpen(false);}}; i.click(); }}
-                className="flex flex-col items-center gap-2 py-5 rounded-2xl active:opacity-60 transition-opacity" style={{ background: "#f4f6ff", border: "none", cursor: "pointer" }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                <span style={{ ...S, fontSize: 13, color: "#2653d4" }}>Camera</span>
-              </button>
-              <button onClick={() => { logUploadRef.current?.click(); setReadinessOpen(false); }}
-                className="flex flex-col items-center gap-2 py-5 rounded-2xl active:opacity-60 transition-opacity" style={{ background: "#f4f6ff", border: "none", cursor: "pointer" }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                <span style={{ ...S, fontSize: 13, color: "#2653d4" }}>Upload</span>
-              </button>
-            </div>
-            <div className="flex flex-col gap-2">
-              {["Check-in", "Hydration", "Nutrition", "Match Review"].map(cat => (
-                <button key={cat} onClick={() => { setReadinessOpen(false); }}
-                  className="w-full text-left px-4 py-3.5 rounded-2xl active:opacity-60 transition-opacity"
-                  style={{ ...S, fontSize: 17, fontWeight: 500, color: "#1a1c1c", background: "#f4f6ff", border: "none", cursor: "pointer" }}>
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
       <Nav4 />
     </main>

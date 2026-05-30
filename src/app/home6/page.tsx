@@ -237,6 +237,16 @@ export default function Home6() {
   const currentMins = now.getHours() * 60 + now.getMinutes();
   const parseMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
 
+  const currentItemIdx = (() => {
+    if (currentMins >= parseMins(schedule[schedule.length - 1].time)) return schedule.length - 1;
+    for (let i = 0; i < schedule.length - 1; i++) {
+      if (currentMins >= parseMins(schedule[i].time) && currentMins < parseMins(schedule[i + 1].time)) return i;
+    }
+    return 0;
+  })();
+  const currentItem = schedule[currentItemIdx];
+  const currentColor = SCHEDULE_COLORS[currentItem.category];
+
   return (
     <main
       className="h1-font min-h-screen flex flex-col px-6 pt-16 pb-44"
@@ -258,10 +268,10 @@ export default function Home6() {
       <div style={{ ...S.divider, margin: "0 0 20px" }} />
 
       {/* Do This Now */}
-      <button onClick={() => setDoNowOpen(true)} style={{ ...S.card, cursor: "pointer" }} className="active:opacity-60 transition-opacity">
-        <p style={{ ...S.label, color: "#f59e0b" }}>Do This Now</p>
-        <p style={S.h2}>Drink 500ml water</p>
-        <p style={S.sub}>Before anything else this morning</p>
+      <button onClick={() => setDoNowOpen(true)} style={{ ...S.card, cursor: "pointer", border: `1.5px solid ${currentColor}` }} className="active:opacity-60 transition-opacity">
+        <p style={{ ...S.label, color: currentColor }}>Do This Now</p>
+        <p style={S.h2}>{currentItem.title}</p>
+        {currentItem.subtitle && <p style={S.sub}>{currentItem.subtitle}</p>}
       </button>
 
       {/* Today */}
@@ -281,9 +291,11 @@ export default function Home6() {
               className="active:opacity-60 transition-opacity"
             >
               <div>
-                <p style={{ ...S.label, color: "#8a9096" }}>Today</p>
-                <p style={S.h2}>{dateStr}</p>
-                <span style={{ display: "inline-block", fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: dayTypeColor, background: dayTypeColor + "14", padding: "4px 10px", borderRadius: 99, marginTop: 4 }}>{dayType}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                  <p style={{ ...S.label, color: "#8a9096", margin: 0 }}>Today</p>
+                  <span style={{ fontFamily: "Inter, sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: dayTypeColor, background: dayTypeColor + "14", padding: "3px 8px", borderRadius: 99 }}>{dayType}</span>
+                </div>
+                <p style={{ ...S.h2, margin: 0 }}>{dateStr}</p>
               </div>
               <svg
                 width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
@@ -295,6 +307,7 @@ export default function Home6() {
             {/* Dropdown schedule */}
             {scheduleOpen && (
               <div style={{ borderTop: "1.5px solid #1a1c1c", padding: "16px 20px 20px" }}>
+                <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 14px" }}>Today&apos;s Schedule</p>
                 <div style={{ display: "flex", flexDirection: "column" }}>
                   {schedule.map((block, idx, arr) => {
                     const color = SCHEDULE_COLORS[block.category];
@@ -392,19 +405,19 @@ export default function Home6() {
         <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => setDoNowOpen(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div className="h1-font relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.15)" }} onClick={e => e.stopPropagation()}>
-            <div className="px-6 pt-5 pb-4" style={{ background: "#f59e0b18" }}>
+            <div className="px-6 pt-5 pb-4" style={{ background: currentColor + "18" }}>
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#f59e0b" }} />
-                <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: "#f59e0b" }}>Today&apos;s Schedule</p>
+                <div className="w-2.5 h-2.5 rounded-full" style={{ background: currentColor }} />
+                <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: currentColor }}>Today&apos;s Schedule</p>
               </div>
-              <h3 className="text-[22px] font-bold text-[#1a1c1c] leading-tight">Wake up &amp; hydrate</h3>
-              <p className="text-[15px] text-[#6b7480] mt-0.5">Drink 500ml water</p>
+              <h3 className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{currentItem.title}</h3>
+              {currentItem.subtitle && <p className="text-[15px] text-[#6b7480] mt-0.5">{currentItem.subtitle}</p>}
             </div>
-            <div className="px-6 py-5">
-              <p className="text-[17px] text-[#2c3235] leading-relaxed">
-                Starting your day with 500 ml of water re-hydrates you after 7–8 hours without fluids. Do this before coffee — caffeine is a mild diuretic and amplifies morning dehydration.
-              </p>
-            </div>
+            {SCHEDULE_DETAILS[currentItem.title] && (
+              <div className="px-6 py-5">
+                <p className="text-[17px] text-[#2c3235] leading-relaxed">{SCHEDULE_DETAILS[currentItem.title]}</p>
+              </div>
+            )}
           </div>
         </div>
       )}
