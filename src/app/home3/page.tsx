@@ -130,38 +130,6 @@ export default function Home3() {
       className="h1-font min-h-screen flex flex-col gap-4 px-4 pt-4 pb-44"
       style={{ background: "#e2e5e9" }}
     >
-      {/* Greeting */}
-      <div className="bg-white rounded-[24px] px-6 py-6" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-        <p className="text-[26px] font-bold text-[#1a1c1c] leading-tight tracking-tight">
-          {greeting()} Eddie
-        </p>
-        <p className="text-[15px] text-[#888] mt-2 leading-snug">
-          {getDayMsg(
-            matchTime ? { date: matchTime.split("T")[0], time: matchTime.split("T")[1] } : null,
-            new Date()
-          )}
-        </p>
-      </div>
-
-      {/* Do This Now */}
-      <button
-        onClick={() => setModalOpen(true)}
-        className="bg-white rounded-[24px] px-6 py-6 flex items-center gap-5 active:opacity-60 transition-opacity text-left w-full"
-        style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "2px solid #f59e0b" }}
-      >
-        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#f59e0b18" }}>
-          <div ref={dotRef} className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Do this now</p>
-          <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">Drink 500ml water</p>
-          <p className="text-[13px] text-[#6b7480] mt-1 leading-snug">Before anything else this morning</p>
-        </div>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-          <path d="M9 18l6-6-6-6"/>
-        </svg>
-      </button>
-
       {/* Next Match + Readiness two-cell card */}
       {(() => {
         const r = 44;
@@ -243,6 +211,38 @@ export default function Home3() {
           </div>
         </div>
       )}
+
+      {/* Greeting */}
+      <div className="bg-white rounded-[24px] px-6 py-6" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+        <p className="text-[26px] font-bold text-[#1a1c1c] leading-tight tracking-tight">
+          {greeting()} Eddie
+        </p>
+        <p className="text-[15px] text-[#888] mt-2 leading-snug">
+          {getDayMsg(
+            matchTime ? { date: matchTime.split("T")[0], time: matchTime.split("T")[1] } : null,
+            new Date()
+          )}
+        </p>
+      </div>
+
+      {/* Do This Now */}
+      <button
+        onClick={() => setModalOpen(true)}
+        className="bg-white rounded-[24px] px-6 py-6 flex items-center gap-5 active:opacity-60 transition-opacity text-left w-full"
+        style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "2px solid #f59e0b" }}
+      >
+        <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#f59e0b18" }}>
+          <div ref={dotRef} className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Do this now</p>
+          <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">Drink 500ml water</p>
+          <p className="text-[13px] text-[#6b7480] mt-1 leading-snug">Before anything else this morning</p>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </button>
 
       {/* Do This Now modal — homepage schedule style */}
       {modalOpen && (
