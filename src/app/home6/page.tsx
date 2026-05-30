@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Nav2a from "@/components/nav2a";
 import LogSheet from "@/components/log-sheet";
+import { computeScores, loadScoringData } from "@/lib/scoring";
 
 function greeting() {
   const h = new Date().getHours();
@@ -26,13 +27,18 @@ function getDayMsg(match: { date: string; time: string } | null, now: Date): str
   return "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy.";
 }
 
-const READINESS = 85;
-
 export default function Home6() {
   const [matchTime, setMatchTime] = useState<string | null>(null);
   const [doNowOpen, setDoNowOpen] = useState(false);
   const [matchOpen, setMatchOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
+  const [readiness, setReadiness] = useState(65);
+
+  function refreshScore() {
+    const data = loadScoringData();
+    const s = computeScores(data.checkIn, data.hydration, data.review, data.nutrition, data.gameDaysThisWeek, data.habits);
+    setReadiness(Math.round(s.overall));
+  }
 
   useEffect(() => {
     try {
@@ -42,9 +48,14 @@ export default function Home6() {
         if (m.date && m.time) setMatchTime(`${m.date}T${m.time}`);
       }
     } catch {}
+    refreshScore();
     const openLog = () => setLogOpen(true);
     window.addEventListener("open-log-sheet", openLog);
-    return () => window.removeEventListener("open-log-sheet", openLog);
+    window.addEventListener("storage", refreshScore);
+    return () => {
+      window.removeEventListener("open-log-sheet", openLog);
+      window.removeEventListener("storage", refreshScore);
+    };
   }, []);
 
   const datePart = matchTime?.split("T")[0] ?? null;
@@ -128,7 +139,7 @@ export default function Home6() {
       >
         <p style={{ ...S.label, color: "#8a9096" }}>Readiness</p>
         <p style={{ fontFamily: "Inter, sans-serif", fontSize: 48, fontWeight: 800, color: "#2653d4", margin: "0 0 12px", lineHeight: 1, letterSpacing: "-0.03em" }}>
-          {READINESS}
+          {readiness}
           <span style={{ fontSize: 18, fontWeight: 600, color: "#8a9096", marginLeft: 4 }}>/100</span>
         </p>
         {/* Bug */}
