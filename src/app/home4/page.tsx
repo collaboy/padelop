@@ -136,19 +136,8 @@ const S: React.CSSProperties = {
 
 export default function Home4() {
   const [doModalOpen, setDoModalOpen] = useState(false);
-  const [slideIdx, setSlideIdx] = useState(1);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
   const [now, setNow] = useState(new Date());
-  const [logThumb, setLogThumb] = useState<string | null>(null);
-  const [logSuccess, setLogSuccess] = useState(false);
-  const [wizardOpen, setWizardOpen] = useState(false);
-  const [newCatActive, setNewCatActive] = useState(false);
-  const [newCatValue, setNewCatValue] = useState("");
-  const logUploadRef = useRef<HTMLInputElement>(null);
-  const touchStartX = useRef<number>(0);
-  const touchStartY = useRef<number>(0);
-  const swipeAxis = useRef<"h" | "v" | null>(null);
-  const carouselRef = useRef<HTMLDivElement>(null);
   const [doSlideIdx, setDoSlideIdx] = useState(0);
   const doTouchStartX = useRef(0);
 
@@ -174,37 +163,6 @@ export default function Home4() {
     return () => clearInterval(id);
   }, []);
 
-  useEffect(() => {
-    const el = carouselRef.current;
-    if (!el) return;
-    function onTouchMove(e: TouchEvent) {
-      const dx = Math.abs(e.touches[0].clientX - touchStartX.current);
-      const dy = Math.abs(e.touches[0].clientY - touchStartY.current);
-      if (swipeAxis.current === null) swipeAxis.current = dx > dy ? "h" : "v";
-      if (swipeAxis.current === "h") e.preventDefault();
-    }
-    el.addEventListener("touchmove", onTouchMove, { passive: false });
-    return () => el.removeEventListener("touchmove", onTouchMove);
-  }, []);
-
-  function confirmCategory() {
-    setLogSuccess(true);
-    setTimeout(() => {
-      setLogSuccess(false);
-      setLogThumb(null);
-      setNewCatActive(false);
-      setNewCatValue("");
-    }, 2000);
-  }
-
-  function handleLogFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    e.target.value = "";
-    const url = URL.createObjectURL(file);
-    setLogThumb(url);
-    setSlideIdx(0);
-  }
 
   return (
     <main style={{ ...S, padding: "24px 20px 120px", minHeight: "100vh", background: "#f9f9f9" }}>
@@ -216,232 +174,59 @@ export default function Home4() {
         void now;
         return (
           <>
-            {/* Page overlay — darkens content outside carousel when on Log anything */}
+            {/* Do This Now — swipeable through schedule items */}
             <div
-              className="fixed inset-0 pointer-events-none"
-              style={{ background: "rgba(0,0,0,0.45)", opacity: slideIdx === 0 ? 1 : 0, transition: "opacity 0.35s ease", zIndex: 5 }}
-            />
-
-            {/* Swipeable carousel */}
-            <div
-              ref={carouselRef}
               className="w-full overflow-hidden"
-              style={{ borderRadius: 24, marginBottom: 10, position: "relative", zIndex: 6, aspectRatio: "1" }}
-              onTouchStart={e => {
-                touchStartX.current = e.touches[0].clientX;
-                touchStartY.current = e.touches[0].clientY;
-                swipeAxis.current = null;
-              }}
+              style={{ borderRadius: 24, marginBottom: 10, aspectRatio: "1" }}
+              onTouchStart={e => { doTouchStartX.current = e.touches[0].clientX; }}
               onTouchEnd={e => {
-                const dx = e.changedTouches[0].clientX - touchStartX.current;
-                if (swipeAxis.current === "h" && Math.abs(dx) > 40)
-                  setSlideIdx(prev => dx < 0 ? Math.min(prev + 1, 1) : Math.max(prev - 1, 0));
+                const dx = e.changedTouches[0].clientX - doTouchStartX.current;
+                if (Math.abs(dx) > 40)
+                  setDoSlideIdx(prev => dx < 0 ? Math.min(prev + 1, schedule.length - 1) : Math.max(prev - 1, 0));
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  height: "100%",
-                  transform: `translateX(-${slideIdx * 100}%)`,
-                  transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
-                }}
-              >
-                {/* Slide 0: Log anything */}
-                <div style={{ flex: "0 0 100%", height: "100%" }}>
-                  <div
-                    className="bg-white flex flex-col"
-                    style={{ width: "100%", height: "100%", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflow: "hidden" }}
-                  >
-                    {logSuccess ? (
-                      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, textAlign: "center" }}>
-                        <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#22c55e18", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-                          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="20 6 9 17 4 12"/>
-                          </svg>
-                        </div>
-                        <p style={{ fontSize: 20, fontWeight: 700, color: "#1a1c1c", margin: "0 0 6px" }}>Great!</p>
-                        <p style={{ fontSize: 15, color: "#6b7480", margin: 0, lineHeight: 1.5 }}>We&apos;ll add it to your log</p>
-                      </div>
-                    ) : logThumb ? (
-                      <div style={{ flex: 1, overflowY: "auto", padding: 24 }}>
-                        <div className="flex items-center gap-2" style={{ marginBottom: 16 }}>
-                          <button onClick={() => { setLogThumb(null); setNewCatActive(false); setNewCatValue(""); }} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center" }}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                          </button>
-                          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "#5a7055", margin: 0 }}>Categorise</p>
-                        </div>
-                        <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
-                          <img src={logThumb} alt="upload" style={{ width: 72, height: 72, borderRadius: 14, objectFit: "cover", flexShrink: 0 }} />
-                          <p style={{ fontSize: 15, color: "#6b7480", lineHeight: 1.5, margin: 0, alignSelf: "center" }}>What is this?<br/><span style={{ color: "#a0a5aa", fontSize: 13 }}>Pick a category below</span></p>
-                        </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                          {["Food pic", "Hydration", "Racket grip"].map(cat => (
-                            <button key={cat} onClick={confirmCategory} style={{ background: "#f4f6ff", border: "none", borderRadius: 14, padding: "13px 16px", fontSize: 16, fontWeight: 600, color: "#2653d4", cursor: "pointer", textAlign: "left" }}>{cat}</button>
-                          ))}
-                          {newCatActive ? (
-                            <div style={{ display: "flex", gap: 8 }}>
-                              <input autoFocus value={newCatValue} onChange={e => setNewCatValue(e.target.value)} placeholder="Category name" style={{ flex: 1, border: "1.5px solid #2653d4", borderRadius: 14, padding: "10px 14px", fontSize: 15, outline: "none", background: "#fff" }} />
-                              <button onClick={() => { if (newCatValue.trim()) confirmCategory(); }} style={{ background: "#2653d4", border: "none", borderRadius: 14, padding: "0 16px", color: "#fff", fontSize: 15, fontWeight: 600, cursor: "pointer" }}>Save</button>
-                            </div>
+              <div style={{
+                display: "flex",
+                height: "100%",
+                transform: `translateX(calc(-${safeDoIdx} * 100%))`,
+                transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
+              }}>
+                {schedule.map((s, i) => (
+                  <div key={i} style={{ flex: "0 0 100%", height: "100%", flexShrink: 0 }}>
+                    <button
+                      onClick={() => setDoModalOpen(true)}
+                      className="bg-white rounded-[24px] px-6 py-6 flex flex-col justify-end active:opacity-60 transition-opacity text-left w-full h-full relative overflow-hidden"
+                      style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${s.color}` }}
+                    >
+                      <svg aria-hidden="true" className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 200 200" fill="none" stroke={s.color} strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.3 }}>
+                        {(i % 6 === 0) && <><path d="M 98,32 C 122,32 165,50 165,72 C 165,95 138,145 112,145 C 85,145 52,125 52,100 C 52,75 74,32 98,32 Z" /><path d="M 48,142 C 56,142 62,150 62,158 C 62,166 56,174 48,174 C 40,174 34,166 34,158 C 34,150 40,142 48,142 Z" /><path d="M 38,30 C 47,30 54,38 54,46 C 54,54 47,62 38,62 C 29,62 22,54 22,46 C 22,38 29,30 38,30 Z" /></>}
+                        {(i % 6 === 1) && <><path d="M 75,30 C 98,30 118,58 118,82 C 118,108 100,158 78,158 C 56,158 40,122 40,95 C 40,68 52,30 75,30 Z" /><path d="M 145,90 C 158,90 168,100 168,112 C 168,124 160,132 148,132 C 136,132 126,122 126,112 C 126,102 132,90 145,90 Z" /><path d="M 155,30 C 163,30 170,38 170,46 C 170,54 163,62 155,62 C 147,62 140,54 140,46 C 140,38 147,30 155,30 Z" /></>}
+                        {(i % 6 === 2) && <><path d="M 95,28 C 130,28 168,58 168,90 C 168,122 142,168 105,168 C 68,168 32,132 32,100 C 32,68 60,28 95,28 Z" /><path d="M 155,148 C 164,148 172,155 172,162 C 172,169 164,176 155,176 C 146,176 138,169 138,162 C 138,155 146,148 155,148 Z" /></>}
+                        {(i % 6 === 3) && <><path d="M 62,35 C 86,35 108,55 108,78 C 108,102 92,128 70,128 C 48,128 30,105 30,82 C 30,59 38,35 62,35 Z" /><path d="M 148,92 C 160,92 170,102 170,115 C 170,128 162,138 150,138 C 138,138 128,128 128,115 C 128,102 136,92 148,92 Z" /><path d="M 158,32 C 166,32 172,39 172,46 C 172,53 166,60 158,60 C 150,60 144,53 144,46 C 144,39 150,32 158,32 Z" /></>}
+                        {(i % 6 === 4) && <><path d="M 100,35 C 130,35 160,60 160,88 C 160,116 138,152 108,152 C 78,152 48,128 48,100 C 48,72 70,35 100,35 Z" /><path d="M 42,32 C 51,32 58,40 58,50 C 58,60 51,68 42,68 C 33,68 26,60 26,50 C 26,40 33,32 42,32 Z" /><path d="M 158,152 C 166,152 172,158 172,165 C 172,172 166,178 158,178 C 150,178 144,172 144,165 C 144,158 150,152 158,152 Z" /></>}
+                        {(i % 6 === 5) && <><path d="M 95,40 C 132,40 165,60 165,82 C 165,104 142,132 108,132 C 74,132 36,110 36,88 C 36,66 58,40 95,40 Z" /><path d="M 158,30 C 167,30 174,38 174,46 C 174,54 167,62 158,62 C 149,62 142,54 142,46 C 142,38 149,30 158,30 Z" /><path d="M 42,148 C 51,148 58,155 58,162 C 58,169 51,176 42,176 C 33,176 26,169 26,162 C 26,155 33,148 42,148 Z" /></>}
+                      </svg>
+                      {/* Dot — centered in card */}
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="w-36 h-36 rounded-full flex items-center justify-center" style={{ background: `${s.color}12` }}>
+                          {i === currentIdx ? (
+                            <div className="w-16 h-16 rounded-full breathe-strong" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
                           ) : (
-                            <button onClick={() => setNewCatActive(true)} style={{ background: "none", border: "1.5px dashed #d0d3d6", borderRadius: 14, padding: "10px 16px", fontSize: 15, fontWeight: 600, color: "#8a9096", cursor: "pointer", textAlign: "left" }}>+ New category</button>
+                            <div className="w-16 h-16 rounded-full" style={{ background: s.color }} />
                           )}
                         </div>
                       </div>
-                    ) : (
-                      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: 24, gap: 20 }}>
-                        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "#5a7055", margin: 0, textAlign: "center" }}>Log something</p>
-                        <div style={{ display: "flex", gap: 10 }}>
-                          <button onClick={() => { const input = document.createElement("input"); input.type = "file"; input.accept = "image/*"; input.setAttribute("capture", "environment"); input.onchange = (ev) => { const file = (ev.target as HTMLInputElement).files?.[0]; if (!file) return; const url = URL.createObjectURL(file); setLogThumb(url); }; input.click(); }} style={{ flex: 1, background: "#f4f6ff", border: "none", borderRadius: 16, padding: "16px 8px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, cursor: "pointer" }}>
-                            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2653d418", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                            </div>
-                            <p style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Camera</p>
-                          </button>
-                          <button onClick={() => logUploadRef.current?.click()} style={{ flex: 1, background: "#f4f6ff", border: "none", borderRadius: 16, padding: "16px 8px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, cursor: "pointer" }}>
-                            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2653d418", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                            </div>
-                            <p style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Upload</p>
-                          </button>
-                          <button onClick={() => setWizardOpen(true)} style={{ flex: 1, background: "#f4f6ff", border: "none", borderRadius: 16, padding: "16px 8px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, cursor: "pointer" }}>
-                            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2653d418", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                            </div>
-                            <p style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Wizard</p>
-                          </button>
-                        </div>
+                      {/* Text — bottom */}
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">{i === currentIdx ? "Do this now" : s.time}</p>
+                        <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{s.title}</p>
+                        {s.subtitle && <span className="inline-flex items-center gap-1 mt-1"><span className="text-[13px] text-[#6b7480] leading-snug">{s.subtitle}</span></span>}
                       </div>
-                    )}
+                    </button>
                   </div>
-                </div>
-
-                {/* Slide 1: Do This Now — inner carousel */}
-                <div style={{ flex: "0 0 100%", height: "100%", overflow: "hidden" }}
-                  onTouchStart={e => { doTouchStartX.current = e.touches[0].clientX; e.stopPropagation(); }}
-                  onTouchMove={e => e.stopPropagation()}
-                  onTouchEnd={e => {
-                    const dx = e.changedTouches[0].clientX - doTouchStartX.current;
-                    if (Math.abs(dx) > 40)
-                      setDoSlideIdx(prev => dx < 0 ? Math.min(prev + 1, schedule.length - 1) : Math.max(prev - 1, 0));
-                    e.stopPropagation();
-                  }}
-                >
-                  <div style={{
-                    display: "flex",
-                    height: "100%",
-                    transform: `translateX(calc(-${safeDoIdx} * 100%))`,
-                    transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
-                  }}>
-                    {schedule.map((s, i) => (
-                      <div key={i} style={{ flex: "0 0 100%", height: "100%", flexShrink: 0 }}>
-                        <button
-                          onClick={() => setDoModalOpen(true)}
-                          className="bg-white rounded-[24px] px-6 py-6 flex flex-col justify-end gap-3 active:opacity-60 transition-opacity text-left w-full h-full relative overflow-hidden"
-                          style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${s.color}` }}
-                        >
-                          {/* Organic blob drawings — all paths use collinear handles at anchors for zero angles */}
-                          <svg
-                            aria-hidden="true"
-                            className="absolute inset-0 w-full h-full pointer-events-none"
-                            viewBox="0 0 200 200"
-                            fill="none"
-                            stroke={s.color}
-                            strokeWidth="1"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            style={{ opacity: 0.3 }}
-                          >
-                            {(i % 6 === 0) && <>
-                              <path d="M 98,32 C 122,32 165,50 165,72 C 165,95 138,145 112,145 C 85,145 52,125 52,100 C 52,75 74,32 98,32 Z" />
-                              <path d="M 48,142 C 56,142 62,150 62,158 C 62,166 56,174 48,174 C 40,174 34,166 34,158 C 34,150 40,142 48,142 Z" />
-                              <path d="M 38,30 C 47,30 54,38 54,46 C 54,54 47,62 38,62 C 29,62 22,54 22,46 C 22,38 29,30 38,30 Z" />
-                            </>}
-                            {(i % 6 === 1) && <>
-                              <path d="M 75,30 C 98,30 118,58 118,82 C 118,108 100,158 78,158 C 56,158 40,122 40,95 C 40,68 52,30 75,30 Z" />
-                              <path d="M 145,90 C 158,90 168,100 168,112 C 168,124 160,132 148,132 C 136,132 126,122 126,112 C 126,102 132,90 145,90 Z" />
-                              <path d="M 155,30 C 163,30 170,38 170,46 C 170,54 163,62 155,62 C 147,62 140,54 140,46 C 140,38 147,30 155,30 Z" />
-                            </>}
-                            {(i % 6 === 2) && <>
-                              <path d="M 95,28 C 130,28 168,58 168,90 C 168,122 142,168 105,168 C 68,168 32,132 32,100 C 32,68 60,28 95,28 Z" />
-                              <path d="M 155,148 C 164,148 172,155 172,162 C 172,169 164,176 155,176 C 146,176 138,169 138,162 C 138,155 146,148 155,148 Z" />
-                            </>}
-                            {(i % 6 === 3) && <>
-                              <path d="M 62,35 C 86,35 108,55 108,78 C 108,102 92,128 70,128 C 48,128 30,105 30,82 C 30,59 38,35 62,35 Z" />
-                              <path d="M 148,92 C 160,92 170,102 170,115 C 170,128 162,138 150,138 C 138,138 128,128 128,115 C 128,102 136,92 148,92 Z" />
-                              <path d="M 158,32 C 166,32 172,39 172,46 C 172,53 166,60 158,60 C 150,60 144,53 144,46 C 144,39 150,32 158,32 Z" />
-                            </>}
-                            {(i % 6 === 4) && <>
-                              <path d="M 100,35 C 130,35 160,60 160,88 C 160,116 138,152 108,152 C 78,152 48,128 48,100 C 48,72 70,35 100,35 Z" />
-                              <path d="M 42,32 C 51,32 58,40 58,50 C 58,60 51,68 42,68 C 33,68 26,60 26,50 C 26,40 33,32 42,32 Z" />
-                              <path d="M 158,152 C 166,152 172,158 172,165 C 172,172 166,178 158,178 C 150,178 144,172 144,165 C 144,158 150,152 158,152 Z" />
-                            </>}
-                            {(i % 6 === 5) && <>
-                              <path d="M 95,40 C 132,40 165,60 165,82 C 165,104 142,132 108,132 C 74,132 36,110 36,88 C 36,66 58,40 95,40 Z" />
-                              <path d="M 158,30 C 167,30 174,38 174,46 C 174,54 167,62 158,62 C 149,62 142,54 142,46 C 142,38 149,30 158,30 Z" />
-                              <path d="M 42,148 C 51,148 58,155 58,162 C 58,169 51,176 42,176 C 33,176 26,169 26,162 C 26,155 33,148 42,148 Z" />
-                            </>}
-                          </svg>
-                          {/* Dot — floated top-left */}
-                          <div className="absolute top-5 left-6 w-10 h-10 rounded-full flex items-center justify-center" style={{ background: `${s.color}18` }}>
-                            {i === currentIdx ? (
-                              <div className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
-                            ) : (
-                              <div className="w-3.5 h-3.5 rounded-full" style={{ background: s.color }} />
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">{i === currentIdx ? "Do this now" : s.time}</p>
-                            <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{s.title}</p>
-                            {s.subtitle && (
-                              <span className="inline-flex items-center gap-1 mt-1">
-                                <span className="text-[13px] text-[#6b7480] leading-snug">{s.subtitle}</span>
-                              </span>
-                            )}
-                          </div>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
-
-            {/* Hidden upload input */}
-            <input ref={logUploadRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleLogFile} />
-
-            {/* Greeting */}
-            <div style={{ padding: "12px 4px 0", textAlign: "center" }}>
-              <p style={{ ...S, fontSize: "clamp(16px, 5.5vw, 22px)", fontWeight: 700, color: "#111", margin: "0 0 2px", lineHeight: 1.2 }}>{greeting()} Eddie</p>
-              <p style={{ ...S, fontSize: "clamp(12px, 3.8vw, 15px)", color: "#888", margin: 0, lineHeight: 1.5 }}>{getDayMsg(match, now)}</p>
-            </div>
-
-            {/* Wizard modal */}
-            {wizardOpen && (
-              <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => setWizardOpen(false)}>
-                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-                <div
-                  className="relative w-full max-w-sm bg-white rounded-[28px] px-6 py-7"
-                  style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.15)" }}
-                  onClick={e => e.stopPropagation()}
-                >
-                  <p className="text-[22px] font-bold text-[#1a1c1c] mb-1">Wizard</p>
-                  <p className="text-[15px] text-[#8a9096] mb-5">What would you like to log?</p>
-                  <div className="flex flex-col gap-2">
-                    {["Check-in", "Hydration", "Nutrition", "Match Review"].map(cat => (
-                      <button
-                        key={cat}
-                        onClick={() => setWizardOpen(false)}
-                        className="w-full text-left px-4 py-3.5 rounded-2xl text-[17px] font-medium text-[#1a1c1c] active:opacity-60 transition-opacity"
-                        style={{ background: "#f4f6ff" }}
-                      >
-                        {cat}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
 
             {doModalOpen && (
               <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => setDoModalOpen(false)}>
