@@ -343,8 +343,8 @@ export default function HomePage() {
           <ReadinessWidget hideCard showImprove />
 
           <p className="text-[15px] font-bold tracking-widest uppercase text-[#1a1c1c] text-center leading-snug mb-2" style={{ fontFamily: "var(--font-hanken)" }}>
-            <span style={{ display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "50%", background: "#22c55e", verticalAlign: "middle", margin: "0 0.04em 0.1em", transform: "translateY(-1px)" }} />
-            <span style={{ display: "inline-block", transform: "translateY(-2px)", textTransform: "none" }}>p</span> Says:
+            <span style={{ display: "inline-block", width: "0.72em", height: "0.72em", borderRadius: "50%", background: "#22c55e", verticalAlign: "middle", margin: "0 0.04em 0.1em", transform: "translateY(3px)" }} />
+            <span style={{ display: "inline-block", transform: "translateY(-3px)", textTransform: "none" }}>p</span> Says:
           </p>
 
           {/* Do this now */}
