@@ -198,7 +198,7 @@ export default function Home3() {
               )}
             </button>
             {/* Right: Match Readiness ring */}
-            <button onClick={() => setReadinessOpen(true)} style={{ width: 110, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "18px 12px", background: "none", border: "none", cursor: "pointer" }}>
+            <button onClick={() => setReadinessOpen(true)} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "18px 12px", background: "none", border: "none", cursor: "pointer" }}>
               <div style={{ position: "relative", width: r * 2, height: r * 2 }}>
                 <svg width={r * 2} height={r * 2} style={{ transform: "rotate(-90deg)" }}>
                   <circle cx={r} cy={r} r={norm} fill="none" stroke="#e8eaed" strokeWidth={stroke} />
