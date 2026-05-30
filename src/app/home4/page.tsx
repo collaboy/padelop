@@ -479,10 +479,9 @@ export default function Home4() {
                             ref={isCur ? curItemRef : undefined}
                             className="flex items-center gap-3 active:opacity-60 transition-opacity"
                             style={{
-                              borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f4" : "none",
-                              padding: "8px 0",
+                              borderBottom: isCur ? "none" : i < schedule.length - 1 ? "1px solid #f4f4f4" : "none",
                               cursor: detail ? "pointer" : "default",
-                              ...(isCur ? { border: `1px solid ${s.color}`, borderRadius: 14, padding: "8px 8px 8px 8px", marginBottom: i < schedule.length - 1 ? 4 : 0 } : { paddingLeft: 8 }),
+                              ...(isCur ? { border: `1px solid ${s.color}`, borderRadius: 14, padding: "8px 8px 8px 8px", marginBottom: i < schedule.length - 1 ? 4 : 0 } : { padding: "8px 0", paddingLeft: 8 }),
                             }}
                             onClick={() => detail && setSchedItemModal({ title: s.title, subtitle: s.subtitle, detail, color: s.color })}
                           >
