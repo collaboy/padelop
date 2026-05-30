@@ -131,7 +131,7 @@ export default function ReadinessWidget({ hideCard = false, showImprove = false 
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
             </svg>
-            <span className="text-[13px] font-semibold text-[#1a1c1c]">Improve</span>
+            <span className="text-[13px] font-semibold text-[#1a1c1c]">Improve <span style={{ color: "#ef4444" }}>({logsToday}/4)</span></span>
           </button>
         )}
         {!showImprove && <div className="flex gap-1 mt-2 mb-2 justify-center rounded-full px-1 py-1 w-full max-w-xs" style={{ background: "rgb(244, 244, 246)" }}>
@@ -200,13 +200,13 @@ export default function ReadinessWidget({ hideCard = false, showImprove = false 
             ? "Some gaps in recovery or fuel. Log your check-in to get a clearer picture."
             : "Your readiness is low — prioritise sleep, hydration, and recovery today."}
         </p>}
-        <button onClick={() => window.dispatchEvent(new CustomEvent("open-log-sheet"))} className="flex items-center gap-1.5 px-5 py-2 rounded-full bg-white border border-[#e2e2e2] active:opacity-70 transition-opacity">
+        {!showImprove && <button onClick={() => window.dispatchEvent(new CustomEvent("open-log-sheet"))} className="flex items-center gap-1.5 px-5 py-2 rounded-full bg-white border border-[#e2e2e2] active:opacity-70 transition-opacity">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
             <polyline points="17 6 23 6 23 12"/>
           </svg>
           <span className="text-[13px] font-semibold text-[#1a1c1c]">Log your info <span style={{ color: "#ef4444" }}>({logsToday}/4)</span></span>
-        </button>
+        </button>}
       </section>
 
       {/* Daily Check-In + Metrics (connected) */}
