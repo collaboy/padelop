@@ -159,7 +159,7 @@ export default function Nav() {
 
           {/* Center: title */}
           <div className="flex justify-center items-center">
-            <Link href="/" className="text-lg font-semibold tracking-tight text-[var(--text)]" style={{ fontFamily: "Menlo, Monaco, 'Courier New', monospace" }}>
+            <Link href="/" className="text-lg font-semibold tracking-tight text-[var(--text)]" style={{ fontFamily: "Inter, sans-serif" }}>
               {(["P","a","d","e","l"] as const).map((ch, i) => (
                 <span key={i} style={{ display: "inline-block", transform: `translateY(${5 - i}px)` }}>{ch}</span>
               ))}

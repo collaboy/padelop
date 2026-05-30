@@ -29,6 +29,21 @@ function greeting() {
   return "Good Evening";
 }
 
+function getDayMsg(match: { date: string; time: string } | null, now: Date): string {
+  const today = now.toISOString().slice(0, 10);
+  const yesterday = new Date(now.getTime() - 864e5).toISOString().slice(0, 10);
+  if (match?.date === today) {
+    const [mH, mM] = match.time.split(":").map(Number);
+    const diffMins = mH * 60 + mM - now.getHours() * 60 - now.getMinutes();
+    if (diffMins > 180) { const hrs = Math.floor(diffMins / 60); return `Match in ${hrs}h. Stay light, hydrate steadily, and eat your pre-game meal ${hrs > 4 ? "a few hours before" : "soon"}.`; }
+    if (diffMins > 60) return "Time to warm up. Dynamic activation, no heavy food — just sip water and focus.";
+    if (diffMins > 0) return "Almost game time. Breathe, visualise, and trust your prep.";
+    return "Great match today. Prioritise recovery — stretch, eat protein, and rest up.";
+  }
+  if (match?.date === yesterday) return "Recovery day. Keep moving gently, drink plenty of water, and get your protein in.";
+  return "Rest day. Let your body absorb the work. Hydrate, eat well, and take it easy.";
+}
+
 const WIZARD_CATEGORIES = ["Check-in", "Hydration", "Nutrition", "Match Review"];
 
 export default function Home3() {
@@ -114,12 +129,15 @@ export default function Home3() {
     >
       {/* Greeting */}
       <div className="bg-white rounded-[24px] px-6 py-6" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-        <p className="text-[28px] font-bold text-[#1a1c1c] leading-tight tracking-tight">
+        <p className="text-[26px] font-bold text-[#1a1c1c] leading-tight tracking-tight">
           {greeting()} Eddie
         </p>
-        {countdown && (
-          <p className="text-[15px] font-medium text-[#6b7480] mt-1">{countdown}</p>
-        )}
+        <p className="text-[15px] text-[#888] mt-2 leading-snug">
+          {getDayMsg(
+            matchTime ? { date: matchTime.split("T")[0], time: matchTime.split("T")[1] } : null,
+            new Date()
+          )}
+        </p>
       </div>
 
       {/* Do This Now */}
@@ -133,8 +151,8 @@ export default function Home3() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Do this now</p>
-          <p className="text-[20px] font-bold text-[#1a1c1c] leading-tight">Drink 500ml water</p>
-          <p className="text-[13px] text-[#4a5050] mt-1 leading-snug">Before anything else this morning</p>
+          <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">Drink 500ml water</p>
+          <p className="text-[13px] text-[#6b7480] mt-1 leading-snug">Before anything else this morning</p>
         </div>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
           <path d="M9 18l6-6-6-6"/>
@@ -156,10 +174,10 @@ export default function Home3() {
                 <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: "#f59e0b" }}>Today&apos;s Schedule</p>
               </div>
               <h3 className="text-[22px] font-bold text-[#1a1c1c] leading-tight">Wake up &amp; hydrate</h3>
-              <p className="text-[13px] text-[#2c3235] mt-0.5">Drink 500ml water</p>
+              <p className="text-[15px] text-[#6b7480] mt-0.5">Drink 500ml water</p>
             </div>
             <div className="px-6 py-5">
-              <p className="text-[15px] text-[#2c3235] leading-relaxed">
+              <p className="text-[17px] text-[#2c3235] leading-relaxed">
                 Starting your day with 500 ml of water re-hydrates you after 7–8 hours without fluids. Do this before coffee — caffeine is a mild diuretic and amplifies morning dehydration.
               </p>
             </div>
@@ -167,38 +185,49 @@ export default function Home3() {
         </div>
       )}
 
-      <Link
-        href="/insights2a"
-        className="bg-white rounded-[24px] px-6 py-5 flex items-center justify-between active:opacity-70 transition-opacity"
-        style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}
-      >
-        <span className="text-[16px] font-bold text-[#1a1c1c]">View Optimization</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 18l6-6-6-6"/>
-        </svg>
-      </Link>
+      {/* Next Match card */}
+      {matchTime ? (() => {
+        const [datePart, timePart] = matchTime.split("T");
+        const d = new Date(datePart + "T12:00");
+        const today = new Date().toISOString().slice(0, 10);
+        const tomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
+        const weekday = d.toLocaleDateString("en-GB", { weekday: "short" });
+        const day = d.getDate();
+        const month = d.toLocaleDateString("en-GB", { month: "short" });
+        const dateStr = datePart === today ? "Today" : datePart === tomorrow ? "Tomorrow" : `${weekday} ${day} ${month}`;
+        return (
+          <div className="bg-white rounded-[24px] px-6 py-5" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)", border: "1px solid #e8eaed" }}>
+            <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Next Match</p>
+            <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{dateStr} · {timePart}</p>
+            {countdown && <p className="text-[13px] text-[#6b7480] mt-1">{countdown}</p>}
+          </div>
+        );
+      })() : (
+        <div className="bg-white rounded-[24px] px-6 py-5" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)", border: "1px solid #e8eaed" }}>
+          <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Next Match</p>
+          <p className="text-[15px] text-[#6b7480]">No match scheduled</p>
+        </div>
+      )}
 
-      <Link
-        href="/track2a"
-        className="bg-white rounded-[24px] px-6 py-5 flex items-center justify-between active:opacity-70 transition-opacity"
-        style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}
-      >
-        <span className="text-[16px] font-bold text-[#1a1c1c]">Track Something</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 18l6-6-6-6"/>
-        </svg>
-      </Link>
-
-      <Link
-        href="/matches2a"
-        className="bg-white rounded-[24px] px-6 py-5 flex items-center justify-between active:opacity-70 transition-opacity"
-        style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}
-      >
-        <span className="text-[16px] font-bold text-[#1a1c1c]">Match Log</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 18l6-6-6-6"/>
-        </svg>
-      </Link>
+      <div className="flex flex-col">
+        {[
+          { href: "/insights2a", label: "View Optimization" },
+          { href: "/track2a", label: "Track Something" },
+          { href: "/matches2a", label: "Match Log" },
+        ].map(({ href, label }, i, arr) => (
+          <Link
+            key={href}
+            href={href}
+            className="flex items-center justify-between px-2 py-4 active:opacity-50 transition-opacity"
+            style={{ borderBottom: i < arr.length - 1 ? "1px solid #e2e5e9" : "none" }}
+          >
+            <span className="text-[17px] text-[#1a1c1c]">{label}</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </Link>
+        ))}
+      </div>
 
       <Nav2a />
 
@@ -259,13 +288,13 @@ export default function Home3() {
                       <path d="M15 18l-6-6 6-6" />
                     </svg>
                   </button>
-                  <p className="text-[17px] font-bold text-[#1a1c1c]">Wizard</p>
+                  <p className="text-[22px] font-bold text-[#1a1c1c]">Wizard</p>
                 </div>
                 <div className="flex flex-col gap-2">
                   {WIZARD_CATEGORIES.map(cat => (
                     <button
                       key={cat}
-                      className="w-full text-left px-4 py-3.5 rounded-2xl text-[15px] font-semibold text-[#1a1c1c] active:opacity-60 transition-opacity"
+                      className="w-full text-left px-4 py-3.5 rounded-2xl text-[17px] font-medium text-[#1a1c1c] active:opacity-60 transition-opacity"
                       style={{ background: "#f4f6ff" }}
                       onClick={() => { setFabOpen(false); setLogMethod(null); }}
                     >
@@ -276,8 +305,8 @@ export default function Home3() {
               </>
             ) : (
               <>
-                <p className="text-[18px] font-bold text-[#1a1c1c] mb-1">Log something</p>
-                <p className="text-[13px] text-[#8a9096] mb-5">to update your score</p>
+                <p className="text-[22px] font-bold text-[#1a1c1c] mb-1">Log something</p>
+                <p className="text-[13px] text-[#6b7480] mb-5">to update your score</p>
                 <div className="grid grid-cols-3 gap-3">
                   <button
                     onClick={handleCamera}
@@ -288,7 +317,7 @@ export default function Home3() {
                       <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
                       <circle cx="12" cy="13" r="4" />
                     </svg>
-                    <span className="text-[12px] font-semibold text-[#2653d4]">Camera</span>
+                    <span className="text-[13px] text-[#2653d4]">Camera</span>
                   </button>
                   <button
                     onClick={handleUpload}
@@ -300,7 +329,7 @@ export default function Home3() {
                       <polyline points="17 8 12 3 7 8" />
                       <line x1="12" y1="3" x2="12" y2="15" />
                     </svg>
-                    <span className="text-[12px] font-semibold text-[#2653d4]">Upload</span>
+                    <span className="text-[13px] text-[#2653d4]">Upload</span>
                   </button>
                   <button
                     onClick={() => setLogMethod("wizard")}
@@ -310,7 +339,7 @@ export default function Home3() {
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                     </svg>
-                    <span className="text-[12px] font-semibold text-[#2653d4]">Wizard</span>
+                    <span className="text-[13px] text-[#2653d4]">Wizard</span>
                   </button>
                 </div>
               </>

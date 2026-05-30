@@ -126,17 +126,17 @@ function getCurrentItem(matchDate: string | null, matchTime: string | null) {
 }
 
 const S: React.CSSProperties = {
-  fontFamily: "Menlo, Monaco, 'Courier New', monospace",
+  fontFamily: "Inter, sans-serif",
   fontSize: 17,
-  fontWeight: 300,
+  fontWeight: 400,
   color: "#111",
   lineHeight: 1.6,
 };
 
 const fieldS: React.CSSProperties = {
-  fontFamily: "Menlo, Monaco, 'Courier New', monospace",
+  fontFamily: "Inter, sans-serif",
   fontSize: 14,
-  fontWeight: 300,
+  fontWeight: 400,
   color: "#111",
   border: "1px solid #ddd",
   borderRadius: 8,
@@ -148,9 +148,9 @@ const fieldS: React.CSSProperties = {
 };
 
 const labelS: React.CSSProperties = {
-  fontFamily: "Menlo, Monaco, 'Courier New', monospace",
+  fontFamily: "Inter, sans-serif",
   fontSize: 11,
-  fontWeight: 300,
+  fontWeight: 400,
   color: "#888",
   display: "block",
   marginBottom: 4,
@@ -185,7 +185,7 @@ type Step = "pick" | "upload" | "form";
 
 export default function Home4() {
   const [doModalOpen, setDoModalOpen] = useState(false);
-  const [slideIdx, setSlideIdx] = useState(0);
+  const [slideIdx, setSlideIdx] = useState(1);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
   const [matchModalOpen, setMatchModalOpen] = useState(false);
   const [now, setNow] = useState(new Date());
@@ -207,6 +207,7 @@ export default function Home4() {
   const touchStartY = useRef<number>(0);
   const swipeAxis = useRef<"h" | "v" | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const curItemRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     try {
@@ -240,6 +241,14 @@ export default function Home4() {
     return () => el.removeEventListener("touchmove", onTouchMove);
   }, []);
 
+  useEffect(() => {
+    if (slideIdx !== 2) return;
+    const t = setTimeout(() => {
+      curItemRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 380);
+    return () => clearTimeout(t);
+  }, [slideIdx]);
+
   function saveMatch() {
     if (!form.date || !form.time) return;
     const data = {
@@ -270,7 +279,7 @@ export default function Home4() {
     e.target.value = "";
     const url = URL.createObjectURL(file);
     setLogThumb(url);
-    setSlideIdx(2);
+    setSlideIdx(0);
   }
 
   function closeModal() {
@@ -312,11 +321,7 @@ export default function Home4() {
   }
 
   return (
-    <main style={{ ...S, padding: "24px 20px", minHeight: "100vh", background: "#f9f9f9", fontWeight: 300 }}>
-
-      <p style={{ margin: "0 0 6px" }}>{greeting()} Eddie</p>
-      <p style={{ ...S, fontSize: 15, color: "#888", fontWeight: 300, margin: "0 0 16px", lineHeight: 1.6 }}>{getDayMsg(match, now)}</p>
-      <hr style={{ width: 160, margin: "0 0 24px", border: "none", borderTop: "1.5px solid #111" }} />
+    <main style={{ ...S, padding: "24px 20px", minHeight: "100vh", background: "#f9f9f9" }}>
 
       {(() => {
         const item = getCurrentItem(match?.date ?? null, match?.time ?? null);
@@ -326,11 +331,36 @@ export default function Home4() {
         void now;
         return (
           <>
+            {/* Do This Now card */}
+            <button
+              onClick={() => setDoModalOpen(true)}
+              className="bg-white rounded-[24px] px-6 py-6 flex items-center gap-5 active:opacity-60 transition-opacity text-left w-full"
+              style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "2px solid #f59e0b", marginBottom: 12 }}
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#f59e0b18" }}>
+                <div className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Do this now</p>
+                <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">Drink 500ml water</p>
+                <p className="text-[13px] text-[#6b7480] mt-1 leading-snug">Before anything else this morning</p>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
+            </button>
+
+            {/* Page overlay — darkens content outside carousel when on Log anything */}
+            <div
+              className="fixed inset-0 pointer-events-none"
+              style={{ background: "rgba(0,0,0,0.45)", opacity: slideIdx === 0 ? 1 : 0, transition: "opacity 0.35s ease", zIndex: 5 }}
+            />
+
             {/* Swipeable carousel */}
             <div
               ref={carouselRef}
               className="w-full aspect-square overflow-hidden"
-              style={{ borderRadius: 24, marginBottom: 10 }}
+              style={{ borderRadius: 24, marginBottom: 10, position: "relative", zIndex: 6 }}
               onTouchStart={e => {
                 touchStartX.current = e.touches[0].clientX;
                 touchStartY.current = e.touches[0].clientY;
@@ -350,6 +380,76 @@ export default function Home4() {
                   transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
                 }}
               >
+                {/* Slide 0: Log anything */}
+                <div style={{ flex: "0 0 100%", height: "100%" }}>
+                  <div
+                    className="bg-white flex flex-col"
+                    style={{ width: "100%", height: "100%", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflow: "hidden" }}
+                  >
+                    {logSuccess ? (
+                      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, textAlign: "center" }}>
+                        <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#22c55e18", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+                          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
+                        </div>
+                        <p style={{ fontSize: 20, fontWeight: 700, color: "#1a1c1c", margin: "0 0 6px" }}>Great!</p>
+                        <p style={{ fontSize: 15, color: "#6b7480", margin: 0, lineHeight: 1.5 }}>We&apos;ll add it to your log</p>
+                      </div>
+                    ) : logThumb ? (
+                      <div style={{ flex: 1, overflowY: "auto", padding: 24 }}>
+                        <div className="flex items-center gap-2" style={{ marginBottom: 16 }}>
+                          <button onClick={() => { setLogThumb(null); setNewCatActive(false); setNewCatValue(""); }} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center" }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                          </button>
+                          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "#5a7055", margin: 0 }}>Categorise</p>
+                        </div>
+                        <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
+                          <img src={logThumb} alt="upload" style={{ width: 72, height: 72, borderRadius: 14, objectFit: "cover", flexShrink: 0 }} />
+                          <p style={{ fontSize: 15, color: "#6b7480", lineHeight: 1.5, margin: 0, alignSelf: "center" }}>What is this?<br/><span style={{ color: "#a0a5aa", fontSize: 13 }}>Pick a category below</span></p>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                          {["Food pic", "Hydration", "Racket grip"].map(cat => (
+                            <button key={cat} onClick={confirmCategory} style={{ background: "#f4f6ff", border: "none", borderRadius: 14, padding: "13px 16px", fontSize: 16, fontWeight: 600, color: "#2653d4", cursor: "pointer", textAlign: "left" }}>{cat}</button>
+                          ))}
+                          {newCatActive ? (
+                            <div style={{ display: "flex", gap: 8 }}>
+                              <input autoFocus value={newCatValue} onChange={e => setNewCatValue(e.target.value)} placeholder="Category name" style={{ flex: 1, border: "1.5px solid #2653d4", borderRadius: 14, padding: "10px 14px", fontSize: 15, outline: "none", background: "#fff" }} />
+                              <button onClick={() => { if (newCatValue.trim()) confirmCategory(); }} style={{ background: "#2653d4", border: "none", borderRadius: 14, padding: "0 16px", color: "#fff", fontSize: 15, fontWeight: 600, cursor: "pointer" }}>Save</button>
+                            </div>
+                          ) : (
+                            <button onClick={() => setNewCatActive(true)} style={{ background: "none", border: "1.5px dashed #d0d3d6", borderRadius: 14, padding: "10px 16px", fontSize: 15, fontWeight: 600, color: "#8a9096", cursor: "pointer", textAlign: "left" }}>+ New category</button>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ flex: 1, overflowY: "auto", padding: 24, display: "flex", flexDirection: "column" }}>
+                        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "#5a7055", margin: 0, textAlign: "center" }}>Log anything</p>
+                        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 12 }}>
+                          <button onClick={() => { const input = document.createElement("input"); input.type = "file"; input.accept = "image/*"; input.setAttribute("capture", "environment"); input.onchange = (ev) => { const file = (ev.target as HTMLInputElement).files?.[0]; if (!file) return; const url = URL.createObjectURL(file); setLogThumb(url); }; input.click(); }} style={{ width: "100%", background: "#f4f6ff", border: "none", borderRadius: 16, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}>
+                            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2653d418", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                            </div>
+                            <div style={{ textAlign: "left" }}><p style={{ fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Camera</p><p style={{ fontSize: 13, color: "#8a9096", margin: 0 }}>Take a photo now</p></div>
+                          </button>
+                          <button onClick={() => logUploadRef.current?.click()} style={{ width: "100%", background: "#f4f6ff", border: "none", borderRadius: 16, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}>
+                            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2653d418", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            </div>
+                            <div style={{ textAlign: "left" }}><p style={{ fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Upload</p><p style={{ fontSize: 13, color: "#8a9096", margin: 0 }}>Choose from library</p></div>
+                          </button>
+                          <button onClick={() => setWizardOpen(true)} style={{ width: "100%", background: "#f4f6ff", border: "none", borderRadius: 16, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}>
+                            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2653d418", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            </div>
+                            <div style={{ textAlign: "left" }}><p style={{ fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Wizard</p><p style={{ fontSize: 13, color: "#8a9096", margin: 0 }}>Step-by-step logging</p></div>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 {/* Slide 1: Do This Now */}
                 <div style={{ flex: "0 0 100%", height: "100%" }}>
                   <button
@@ -357,11 +457,13 @@ export default function Home4() {
                     className="bg-white flex flex-col items-center justify-between active:opacity-60 transition-opacity"
                     style={{ width: "100%", height: "100%", borderRadius: 24, padding: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "2px solid #f59e0b", overflowY: "auto" }}
                   >
-                    <p className="text-[15px] font-bold tracking-widest uppercase text-[#5a7055] w-full text-center">Do this now</p>
-                    <div className="w-28 h-28 rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
+                    <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] w-full text-center">Do this now</p>
+                    <div className="w-28 h-28 rounded-full flex items-center justify-center" style={{ background: "#f59e0b18" }}>
+                      <div className="w-10 h-10 rounded-full animate-breathe" style={{ background: "#f59e0b", ["--glow" as string]: "#f59e0b" }} />
+                    </div>
                     <div className="w-full text-center">
-                      <p className="text-[20px] font-bold text-[#1a1c1c] leading-tight">{item.title}</p>
-                      {item.subtitle && <p className="text-[15px] text-[#4a5050] mt-1 leading-snug">{item.subtitle}</p>}
+                      <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">Drink 500ml water</p>
+                      <p className="text-[13px] text-[#6b7480] mt-1 leading-snug">Before anything else this morning</p>
                       <div className="flex justify-center mt-3">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M6 9l6 6 6-6"/>
@@ -377,9 +479,13 @@ export default function Home4() {
                     className="bg-white flex flex-col"
                     style={{ width: "100%", height: "100%", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflowY: "auto" }}
                   >
-                    <div className="px-5 pt-4 pb-1 flex items-center justify-between flex-shrink-0">
-                      <p className="text-[15px] font-bold tracking-widest uppercase text-[#5a7055]">Today&apos;s Schedule</p>
-                      <span className="text-[13px] font-bold px-2.5 py-1 rounded-full" style={{ background: meta.bg, color: meta.color }}>{meta.label}</span>
+                    <div className="px-5 pt-4 pb-2 flex-shrink-0">
+                      <p style={{ ...S, fontSize: 20, fontWeight: 700, color: "#111", margin: "0 0 4px", lineHeight: 1.2 }}>{greeting()} Eddie</p>
+                      <p style={{ ...S, fontSize: 15, color: "#888", margin: "0 0 12px", lineHeight: 1.5 }}>{getDayMsg(match, now)}</p>
+                      <div className="flex items-center justify-between">
+                        <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055]">Today&apos;s Schedule</p>
+                        <span className="text-[12px] font-semibold px-2.5 py-1 rounded-full" style={{ background: meta.bg, color: meta.color }}>{meta.label}</span>
+                      </div>
                     </div>
                     <div className="px-5 pb-4">
                       {schedule.map((s, i) => {
@@ -389,34 +495,36 @@ export default function Home4() {
                         return (
                           <div
                             key={i}
-                            className="flex gap-4 py-2.5 active:opacity-60 transition-opacity"
-                            style={{ borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f4" : "none", cursor: detail ? "pointer" : "default" }}
+                            ref={isCur ? curItemRef : undefined}
+                            className="flex items-center gap-3 active:opacity-60 transition-opacity"
+                            style={{
+                              borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f4" : "none",
+                              padding: "8px 0",
+                              cursor: detail ? "pointer" : "default",
+                              ...(isCur ? { border: `1px solid ${s.color}`, borderRadius: 14, padding: "8px 8px 8px 0", marginBottom: i < schedule.length - 1 ? 4 : 0 } : {}),
+                            }}
                             onClick={() => detail && setSchedItemModal({ title: s.title, subtitle: s.subtitle, detail, color: s.color })}
                           >
-                            <div className="flex flex-col items-center flex-shrink-0" style={{ width: 28 }}>
-                              <div
-                                className="w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0"
-                                style={{ background: isPast ? "#d0d3d6" : s.color, boxShadow: isCur ? `0 0 0 3px ${s.color}28` : "none" }}
-                              />
-                              {i < schedule.length - 1 && (
-                                <div className="w-0.5 mt-1 flex-1" style={{ background: isPast ? "#e2e2e2" : "#ebebeb", minHeight: 20 }} />
+                            <div
+                              className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                              style={{ background: isPast ? "#f0f0f0" : `${s.color}18` }}
+                            >
+                              {isCur ? (
+                                <div className="w-3 h-3 rounded-full animate-breathe" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
+                              ) : (
+                                <div className="w-3 h-3 rounded-full" style={{ background: isPast ? "#d0d3d6" : s.color }} />
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-[11px] font-bold tracking-widest uppercase mb-0.5" style={{ color: isPast ? "#c4c7c7" : s.color }}>{s.time}</p>
-                              <p className="text-[15px] font-semibold leading-snug" style={{ color: isPast ? "#a0a5aa" : "#1a1c1c" }}>{s.title}</p>
-                              {s.subtitle && <p className="text-[12px] mt-0.5 leading-snug" style={{ color: isPast ? "#c4c7c7" : "#4a5050" }}>{s.subtitle}</p>}
+                              <p className="text-[10px] font-bold tracking-widest uppercase mb-0.5" style={{ color: isPast ? "#c4c7c7" : s.color }}>{s.time}</p>
+                              <p className="text-[13px] font-semibold leading-snug" style={{ color: isPast ? "#a0a5aa" : "#1a1c1c" }}>{s.title}</p>
+                              {s.subtitle && <p className="text-[11px] mt-0.5 leading-snug" style={{ color: isPast ? "#c4c7c7" : "#6b7480" }}>{s.subtitle}</p>}
                             </div>
-                            <div className="flex-shrink-0 self-center flex items-center gap-1.5">
-                              {isCur && (
-                                <div className="w-2.5 h-2.5 rounded-full animate-breathe" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
-                              )}
-                              {detail && (
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d0d3d6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                  <path d="M9 18l6-6-6-6"/>
-                                </svg>
-                              )}
-                            </div>
+                            {detail && (
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                                <path d="M9 18l6-6-6-6"/>
+                              </svg>
+                            )}
                           </div>
                         );
                       })}
@@ -424,136 +532,6 @@ export default function Home4() {
                   </div>
                 </div>
 
-                {/* Slide 3: Log anything */}
-                <div style={{ flex: "0 0 100%", height: "100%" }}>
-                  <div
-                    className="bg-white flex flex-col"
-                    style={{ width: "100%", height: "100%", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflow: "hidden" }}
-                  >
-                    {logSuccess ? (
-                      /* Success state */
-                      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24, textAlign: "center" }}>
-                        <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#22c55e18", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-                          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="20 6 9 17 4 12"/>
-                          </svg>
-                        </div>
-                        <p style={{ fontSize: 20, fontWeight: 700, color: "#1a1c1c", margin: "0 0 6px" }}>Great!</p>
-                        <p style={{ fontSize: 16, color: "#6b7480", margin: 0, lineHeight: 1.5 }}>We&apos;ll add it to your log</p>
-                      </div>
-                    ) : logThumb ? (
-                      /* Categorise view — inner div scrolls */
-                      <div style={{ flex: 1, overflowY: "auto", padding: 24 }}>
-                        <div className="flex items-center gap-2" style={{ marginBottom: 16 }}>
-                          <button onClick={() => { setLogThumb(null); setNewCatActive(false); setNewCatValue(""); }} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center" }}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                          </button>
-                          <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "#5a7055", margin: 0 }}>Categorise</p>
-                        </div>
-                        <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
-                          <img src={logThumb} alt="upload" style={{ width: 72, height: 72, borderRadius: 14, objectFit: "cover", flexShrink: 0 }} />
-                          <p style={{ fontSize: 15, color: "#6b7480", lineHeight: 1.5, margin: 0, alignSelf: "center" }}>What is this?<br/><span style={{ color: "#a0a5aa", fontSize: 13 }}>Pick a category below</span></p>
-                        </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                          {["Food pic", "Hydration", "Racket grip"].map(cat => (
-                            <button
-                              key={cat}
-                              onClick={confirmCategory}
-                              style={{ background: "#f4f6ff", border: "none", borderRadius: 14, padding: "13px 16px", fontSize: 16, fontWeight: 600, color: "#2653d4", cursor: "pointer", textAlign: "left" }}
-                            >
-                              {cat}
-                            </button>
-                          ))}
-                          {newCatActive ? (
-                            <div style={{ display: "flex", gap: 8 }}>
-                              <input
-                                autoFocus
-                                value={newCatValue}
-                                onChange={e => setNewCatValue(e.target.value)}
-                                placeholder="Category name"
-                                style={{ flex: 1, border: "1.5px solid #2653d4", borderRadius: 14, padding: "10px 14px", fontSize: 15, outline: "none", background: "#fff" }}
-                              />
-                              <button
-                                onClick={() => { if (newCatValue.trim()) confirmCategory(); }}
-                                style={{ background: "#2653d4", border: "none", borderRadius: 14, padding: "0 16px", color: "#fff", fontSize: 15, fontWeight: 600, cursor: "pointer" }}
-                              >
-                                Save
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => setNewCatActive(true)}
-                              style={{ background: "none", border: "1.5px dashed #d0d3d6", borderRadius: 14, padding: "10px 16px", fontSize: 15, fontWeight: 600, color: "#8a9096", cursor: "pointer", textAlign: "left" }}
-                            >
-                              + New category
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    ) : (
-                      /* Default view — inner div is the flex column that scrolls */
-                      <div style={{ flex: 1, overflowY: "auto", padding: 24, display: "flex", flexDirection: "column" }}>
-                        <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "#5a7055", margin: 0, textAlign: "center" }}>Log anything</p>
-                        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 12 }}>
-                          <button
-                            onClick={() => {
-                              const input = document.createElement("input");
-                              input.type = "file";
-                              input.accept = "image/*";
-                              input.setAttribute("capture", "environment");
-                              input.onchange = (ev) => {
-                                const file = (ev.target as HTMLInputElement).files?.[0];
-                                if (!file) return;
-                                const url = URL.createObjectURL(file);
-                                setLogThumb(url);
-                              };
-                              input.click();
-                            }}
-                            style={{ width: "100%", background: "#f4f6ff", border: "none", borderRadius: 16, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}
-                          >
-                            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2653d418", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
-                              </svg>
-                            </div>
-                            <div style={{ textAlign: "left" }}>
-                              <p style={{ fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Camera</p>
-                              <p style={{ fontSize: 13, color: "#8a9096", margin: 0 }}>Take a photo now</p>
-                            </div>
-                          </button>
-                          <button
-                            onClick={() => logUploadRef.current?.click()}
-                            style={{ width: "100%", background: "#f4f6ff", border: "none", borderRadius: 16, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}
-                          >
-                            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2653d418", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-                              </svg>
-                            </div>
-                            <div style={{ textAlign: "left" }}>
-                              <p style={{ fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Upload</p>
-                              <p style={{ fontSize: 13, color: "#8a9096", margin: 0 }}>Choose from library</p>
-                            </div>
-                          </button>
-                          <button
-                            onClick={() => setWizardOpen(true)}
-                            style={{ width: "100%", background: "#f4f6ff", border: "none", borderRadius: 16, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}
-                          >
-                            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2653d418", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                              </svg>
-                            </div>
-                            <div style={{ textAlign: "left" }}>
-                              <p style={{ fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Wizard</p>
-                              <p style={{ fontSize: 13, color: "#8a9096", margin: 0 }}>Step-by-step logging</p>
-                            </div>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -580,14 +558,14 @@ export default function Home4() {
                   style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.15)" }}
                   onClick={e => e.stopPropagation()}
                 >
-                  <p className="text-[18px] font-bold text-[#1a1c1c] mb-1">Wizard</p>
+                  <p className="text-[22px] font-bold text-[#1a1c1c] mb-1">Wizard</p>
                   <p className="text-[15px] text-[#8a9096] mb-5">What would you like to log?</p>
                   <div className="flex flex-col gap-2">
                     {["Check-in", "Hydration", "Nutrition", "Match Review"].map(cat => (
                       <button
                         key={cat}
                         onClick={() => setWizardOpen(false)}
-                        className="w-full text-left px-4 py-3.5 rounded-2xl text-[15px] font-semibold text-[#1a1c1c] active:opacity-60 transition-opacity"
+                        className="w-full text-left px-4 py-3.5 rounded-2xl text-[17px] font-medium text-[#1a1c1c] active:opacity-60 transition-opacity"
                         style={{ background: "#f4f6ff" }}
                       >
                         {cat}
@@ -609,13 +587,13 @@ export default function Home4() {
                   <div className="px-6 pt-5 pb-4" style={{ background: `${schedItemModal.color}18` }}>
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-2.5 h-2.5 rounded-full" style={{ background: schedItemModal.color }} />
-                      <p className="text-[13px] font-bold tracking-wide uppercase" style={{ color: schedItemModal.color }}>Today&apos;s Schedule</p>
+                      <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: schedItemModal.color }}>Today&apos;s Schedule</p>
                     </div>
                     <h3 className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{schedItemModal.title}</h3>
-                    {schedItemModal.subtitle && <p className="text-[14px] text-[#2c3235] mt-1">{schedItemModal.subtitle}</p>}
+                    {schedItemModal.subtitle && <p className="text-[15px] text-[#6b7480] mt-1">{schedItemModal.subtitle}</p>}
                   </div>
                   <div className="px-6 py-5">
-                    <p className="text-[15px] text-[#2c3235] leading-relaxed">{schedItemModal.detail}</p>
+                    <p className="text-[17px] text-[#2c3235] leading-relaxed">{schedItemModal.detail}</p>
                   </div>
                 </div>
               </div>
@@ -632,14 +610,14 @@ export default function Home4() {
                   <div className="px-6 pt-5 pb-4" style={{ background: "#f59e0b18" }}>
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#f59e0b" }} />
-                      <p className="text-[14px] font-bold tracking-wide" style={{ color: "#f59e0b" }}>Today&apos;s Schedule</p>
+                      <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: "#f59e0b" }}>Today&apos;s Schedule</p>
                     </div>
                     <h3 className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{item.title}</h3>
-                    {item.subtitle && <p className="text-[13px] text-[#2c3235] mt-0.5">{item.subtitle}</p>}
+                    {item.subtitle && <p className="text-[15px] text-[#6b7480] mt-0.5">{item.subtitle}</p>}
                   </div>
                   {SCHEDULE_DETAILS[item.title] && (
                     <div className="px-6 py-5">
-                      <p className="text-[15px] text-[#2c3235] leading-relaxed">{SCHEDULE_DETAILS[item.title]}</p>
+                      <p className="text-[17px] text-[#2c3235] leading-relaxed">{SCHEDULE_DETAILS[item.title]}</p>
                     </div>
                   )}
                 </div>
@@ -649,12 +627,12 @@ export default function Home4() {
         );
       })()}
 
-      <hr style={{ width: 160, margin: "0 0 24px", border: "none", borderTop: "1.5px solid #111" }} />
+      <hr style={{ width: 80, margin: "0 auto 24px", border: "none", borderTop: "1.5px solid #ccc" }} />
 
       {match ? (
         <button
           onClick={() => setMatchModalOpen(true)}
-          style={{ ...S, background: "none", border: "none", padding: 0, margin: "0 0 32px", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, textAlign: "left" }}
+          style={{ ...S, background: "none", border: "none", padding: 0, margin: "0 0 32px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, textAlign: "center", width: "100%" }}
         >
           {matchLabel(match.date, match.time)}
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -662,20 +640,26 @@ export default function Home4() {
           </svg>
         </button>
       ) : (
-        <div style={{ margin: "0 0 32px", display: "flex", alignItems: "baseline", gap: 8 }}>
-          <p style={{ margin: 0 }}>Next Match:</p>
-          <button onClick={() => setAddOpen(true)} style={{ ...S, background: "none", border: "none", padding: 0, cursor: "pointer" }}>
-            + Add a match
-          </button>
-        </div>
+        <button onClick={() => setAddOpen(true)} style={{ ...S, background: "none", border: "none", padding: 0, margin: "0 0 32px", cursor: "pointer", display: "block", width: "100%", textAlign: "center" }}>
+          + Add a match
+        </button>
       )}
 
-      <hr style={{ width: 160, margin: "0 0 32px", border: "none", borderTop: "1.5px solid #111" }} />
+      <hr style={{ width: 80, margin: "0 auto 32px", border: "none", borderTop: "1.5px solid #ccc" }} />
 
       <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-        <Link href="/insights2a" style={{ ...S, textDecoration: "none", display: "block", marginBottom: 4 }}>View Insights</Link>
-        <Link href="/track2a" style={{ ...S, textDecoration: "none", display: "block", marginBottom: 4 }}>Track Something</Link>
-        <Link href="/matches2a" style={{ ...S, textDecoration: "none", display: "block" }}>Upcoming Matches</Link>
+        {[
+          { href: "/insights2a", label: "View Insights" },
+          { href: "/track2a", label: "Track Something" },
+          { href: "/matches2a", label: "Upcoming Matches" },
+        ].map(({ href, label }, i, arr) => (
+          <Link key={href} href={href} style={{ ...S, textDecoration: "none", display: "flex", alignItems: "center", gap: 4, paddingBottom: i < arr.length - 1 ? 4 : 0 }}>
+            {label}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </Link>
+        ))}
       </div>
 
       {/* Match detail modal */}
@@ -690,10 +674,10 @@ export default function Home4() {
             <div className="px-6 pt-5 pb-4" style={{ background: "#2653d418" }}>
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#2653d4" }} />
-                <p className="text-[13px] font-bold tracking-wide uppercase" style={{ color: "#2653d4" }}>Next Match</p>
+                <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: "#2653d4" }}>Next Match</p>
               </div>
               <h3 className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{matchLabel(match.date, match.time).replace("Next Match: ", "")}</h3>
-              {match.club && <p className="text-[14px] text-[#4a5050] mt-1">{match.club}</p>}
+              {match.club && <p className="text-[15px] text-[#6b7480] mt-1">{match.club}</p>}
             </div>
             {match.players && match.players.length > 0 && (
               <div className="px-6 py-5">
@@ -704,7 +688,7 @@ export default function Home4() {
                       <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-[12px] font-bold text-white" style={{ background: "#2653d4" }}>
                         {p.trim()[0]?.toUpperCase()}
                       </div>
-                      <p className="text-[15px] text-[#1a1c1c]" style={{ fontFamily: "Menlo, Monaco, 'Courier New', monospace" }}>{p}</p>
+                      <p className="text-[17px] text-[#1a1c1c]" style={{ fontFamily: "Inter, sans-serif" }}>{p}</p>
                     </div>
                   ))}
                 </div>
@@ -713,14 +697,14 @@ export default function Home4() {
             <div className="px-6 pb-5 flex gap-3">
               <button
                 onClick={() => { setMatchModalOpen(false); setAddOpen(true); }}
-                className="flex-1 text-[14px] font-semibold py-2.5 rounded-2xl active:opacity-60 transition-opacity"
+                className="flex-1 text-[15px] font-semibold py-2.5 rounded-2xl active:opacity-60 transition-opacity"
                 style={{ background: "#f4f4f4", border: "none", cursor: "pointer", color: "#1a1c1c" }}
               >
                 Edit
               </button>
               <button
                 onClick={() => setMatchModalOpen(false)}
-                className="flex-1 text-[14px] font-semibold py-2.5 rounded-2xl active:opacity-60 transition-opacity"
+                className="flex-1 text-[15px] font-semibold py-2.5 rounded-2xl active:opacity-60 transition-opacity"
                 style={{ background: "#2653d4", border: "none", cursor: "pointer", color: "#fff" }}
               >
                 Done
@@ -737,7 +721,7 @@ export default function Home4() {
 
             {/* Header */}
             <div style={{ padding: "22px 22px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <p style={{ ...S, fontSize: 17 }}>Add a match</p>
+              <p style={{ ...S, fontSize: 20, fontWeight: 700 }}>Add a match</p>
               <button onClick={closeModal} style={{ background: "none", border: "none", cursor: "pointer", padding: 4 }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
@@ -750,22 +734,22 @@ export default function Home4() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   <button
                     onClick={() => setStep("upload")}
-                    style={{ ...S, fontSize: 14, background: "#f4f4f4", border: "none", borderRadius: 12, padding: "14px 16px", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 12 }}
+                    style={{ ...S, fontSize: 15, background: "#f4f4f4", border: "none", borderRadius: 12, padding: "14px 16px", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 12 }}
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
                     <div>
-                      <div style={{ fontWeight: 400 }}>Upload screenshot</div>
-                      <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>Booking confirmation or chat — autofilled</div>
+                      <div>Upload screenshot</div>
+                      <div style={{ fontSize: 13, color: "#888", marginTop: 2 }}>Booking confirmation or chat — autofilled</div>
                     </div>
                   </button>
                   <button
                     onClick={() => setStep("form")}
-                    style={{ ...S, fontSize: 14, background: "#f4f4f4", border: "none", borderRadius: 12, padding: "14px 16px", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 12 }}
+                    style={{ ...S, fontSize: 15, background: "#f4f4f4", border: "none", borderRadius: 12, padding: "14px 16px", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 12 }}
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
                     <div>
-                      <div style={{ fontWeight: 400 }}>Enter manually</div>
-                      <div style={{ fontSize: 12, color: "#888", marginTop: 2 }}>Date, time, venue, players</div>
+                      <div>Enter manually</div>
+                      <div style={{ fontSize: 13, color: "#888", marginTop: 2 }}>Date, time, venue, players</div>
                     </div>
                   </button>
                 </div>
@@ -776,15 +760,15 @@ export default function Home4() {
                 <div>
                   {uploading ? (
                     <div style={{ textAlign: "center", padding: "40px 0" }}>
-                      <p style={{ ...S, fontSize: 14, color: "#888" }}>Analysing screenshot…</p>
+                      <p style={{ ...S, color: "#888" }}>Analysing screenshot…</p>
                     </div>
                   ) : (
                     <>
                       <label style={{ display: "block", border: "2px dashed #ddd", borderRadius: 14, padding: "36px 20px", textAlign: "center", cursor: "pointer" }}>
                         <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: "none" }} onChange={handleFile} />
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: "0 auto 10px" }}><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
-                        <p style={{ ...S, fontSize: 14, color: "#555" }}>Choose screenshot</p>
-                        <p style={{ ...S, fontSize: 12, color: "#aaa", marginTop: 4 }}>Booking confirmation or WhatsApp</p>
+                        <p style={{ ...S, color: "#555" }}>Choose screenshot</p>
+                        <p style={{ ...S, fontSize: 13, color: "#aaa", marginTop: 4 }}>Booking confirmation or WhatsApp</p>
                       </label>
                       {uploadError && <p style={{ ...S, fontSize: 13, color: "#dc2626", marginTop: 10 }}>{uploadError}</p>}
                       <button onClick={() => setStep("pick")} style={{ ...S, fontSize: 13, color: "#888", background: "none", border: "none", cursor: "pointer", marginTop: 14, padding: 0 }}>← Back</button>
@@ -819,8 +803,8 @@ export default function Home4() {
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-                    <button onClick={() => setStep("pick")} style={{ ...S, flex: 1, fontSize: 14, padding: "10px 0", border: "1px solid #ddd", borderRadius: 10, cursor: "pointer", background: "#fff" }}>Back</button>
-                    <button onClick={saveMatch} style={{ ...S, flex: 2, fontSize: 14, padding: "10px 0", border: "none", borderRadius: 10, cursor: "pointer", background: "#111", color: "#fff" }}>Save match</button>
+                    <button onClick={() => setStep("pick")} style={{ ...S, flex: 1, padding: "10px 0", border: "1px solid #ddd", borderRadius: 10, cursor: "pointer", background: "#fff" }}>Back</button>
+                    <button onClick={saveMatch} style={{ ...S, flex: 2, padding: "10px 0", border: "none", borderRadius: 10, cursor: "pointer", background: "#111", color: "#fff" }}>Save match</button>
                   </div>
                 </div>
               )}
