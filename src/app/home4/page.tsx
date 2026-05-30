@@ -145,6 +145,7 @@ const S: React.CSSProperties = {
 export default function Home4() {
   const [doModalOpen, setDoModalOpen] = useState(false);
   const [logSheetOpen, setLogSheetOpen] = useState(false);
+  const [schedOpen, setSchedOpen] = useState(false);
   const [schedItemModal, setSchedItemModal] = useState<{ title: string; subtitle?: string; color: string; detail: string } | null>(null);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
   const [now, setNow] = useState(new Date());
@@ -238,11 +239,21 @@ export default function Home4() {
                 <p style={{ ...S, fontSize: 22, fontWeight: 700, color: "#111", margin: "0 0 4px" }}>{greeting()} Eddie</p>
                 <p style={{ ...S, fontSize: 15, color: "#888", margin: 0 }}>{getDayMsg(match, now)}</p>
               </div>
-              <div className="px-5 pt-3 pb-2 flex items-center justify-between flex-shrink-0">
+              <button
+                onClick={() => setSchedOpen(o => !o)}
+                className="px-5 pt-3 pb-4 flex items-center justify-between flex-shrink-0 w-full active:opacity-60 transition-opacity"
+                style={{ background: "none", border: "none", cursor: "pointer" }}
+              >
+                <span style={{ ...S, fontSize: 15, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>See today&apos;s schedule</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: schedOpen ? "rotate(90deg)" : "rotate(0deg)" }}>
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
+              </button>
+              {schedOpen && <div className="px-5 pb-2 flex items-center justify-between flex-shrink-0">
                 <p style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>Today&apos;s Schedule</p>
                 <span style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "4px 10px", borderRadius: 999, background: meta.bg, color: meta.color }}>{meta.label}</span>
-              </div>
-              <div className="px-4 pb-6">
+              </div>}
+              {schedOpen && <div className="px-4 pb-6">
                 {schedule.map((s, i) => {
                   const isCur = i === currentIdx;
                   const isPast = !isCur && curMins > toMins(s.time);
@@ -281,7 +292,7 @@ export default function Home4() {
                     </div>
                   );
                 })}
-              </div>
+              </div>}
             </div>
 
             {/* Quick links */}
