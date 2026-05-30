@@ -12,13 +12,13 @@ const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const hanken = Hanken_Grotesk({ variable: "--font-hanken", subsets: ["latin"], weight: ["400", "500", "600", "700"] });
 
 export const metadata: Metadata = {
-  title: "Padelop",
+  title: "padla",
   description: "Padel performance tracker — fitness, match prep, and growth",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Padelop",
+    title: "padla",
   },
   other: {
     "mobile-web-app-capable": "yes",

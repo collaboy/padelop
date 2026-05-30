@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { computeScores, loadScoringData, saveCheckIn, computeAllTimeScores, type Scores } from "@/lib/scoring";
 
-export default function ReadinessWidget({ hideCard = false, showImprove = false }: { hideCard?: boolean; showImprove?: boolean }) {
+export default function ReadinessWidget({ hideCard = false, showImprove = false, hideRing = false }: { hideCard?: boolean; showImprove?: boolean; hideRing?: boolean }) {
   const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 60, hydration: 52, energy: 58, mobility: 58 });
   const [allTimeScores, setAllTimeScores] = useState<Scores>({ overall: 65, recovery: 60, hydration: 52, energy: 58, mobility: 58 });
   const [scoreView, setScoreView] = useState<"today" | "alltime">("today");
@@ -111,7 +111,7 @@ export default function ReadinessWidget({ hideCard = false, showImprove = false 
   return (
     <>
       {/* Daily Readiness ring */}
-      <section className="flex flex-col items-center text-center mb-8 mt-4">
+      <section className="flex flex-col items-center text-center mb-8 mt-4" style={{ display: hideRing ? "none" : undefined }}>
         <p className="text-[11px] font-bold tracking-widest uppercase text-[#8a9096] mb-3">Padel Match Readiness</p>
         <div className="relative mb-3" style={{ width: 210, height: 210 }}>
           <svg className="w-full h-full" viewBox="0 0 100 100">

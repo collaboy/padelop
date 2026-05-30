@@ -1,11 +1,32 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import CategoryScoresCard from "@/components/category-scores-card";
 import OptimizationScoreCard from "@/components/optimization-score-card";
 import ReadinessWidget from "@/components/readiness-widget";
+import Recommendations, { getRecommendations, RecCard } from "@/components/recommendations";
+import LogSheet from "@/components/log-sheet";
+
+const STORAGE_KEY = "padelop:game-days";
+const REVIEWS_KEY = "padelop:match-reviews";
+
+type ReviewEntry = {
+  ts: string;
+  feeling: string; result: string; opponent: string; energy: string; injury: string;
+  wellDone: string[]; improved: string[];
+  mentalBefore: string; mentalDuring: string; mentalAfter: string;
+};
+
+function ThumbsUpIcon({ size = 28, color = "currentColor" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z" />
+      <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
+    </svg>
+  );
+}
 
 const pct = 71;
-
 const sections = [
   {
     title: "Performance",
@@ -206,12 +227,103 @@ const sections = [
 const tip = { title: "Sleep 8h tonight", gain: 7 };
 
 export default function OptimizerPage() {
+  const todayYMD = new Date().toISOString().slice(0, 10);
+  const [gameDays, setGameDays] = useState<string[]>([]);
+  const [lastReview, setLastReview] = useState<ReviewEntry | null>(null);
+  const [doneRecs, setDoneRecs] = useState<Set<number>>(new Set());
+  const [logOpen, setLogOpen] = useState(false);
+
+  function toggleRec(i: number) {
+    setDoneRecs((prev) => { const next = new Set(prev); next.has(i) ? next.delete(i) : next.add(i); return next; });
+  }
+
+  useEffect(() => {
+    try {
+      const s = localStorage.getItem(STORAGE_KEY);
+      if (s) setGameDays(JSON.parse(s));
+    } catch {}
+    try {
+      const r = localStorage.getItem(REVIEWS_KEY);
+      if (r) {
+        const reviews: ReviewEntry[] = JSON.parse(r);
+        if (reviews.length > 0) setLastReview(reviews[reviews.length - 1]);
+      }
+    } catch {}
+
+    const onStorage = () => {
+      try {
+        const s = localStorage.getItem(STORAGE_KEY);
+        if (s) setGameDays(JSON.parse(s));
+      } catch {}
+      try {
+        const r = localStorage.getItem(REVIEWS_KEY);
+        if (r) {
+          const reviews: ReviewEntry[] = JSON.parse(r);
+          if (reviews.length > 0) setLastReview(reviews[reviews.length - 1]);
+        }
+      } catch {}
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
+  const reviewedToday = lastReview?.ts.slice(0, 10) === todayYMD;
+  const recs = getRecommendations(todayYMD, gameDays);
+  const doneRecsList = recs.map((rec, i) => ({ rec, i })).filter(({ i }) => doneRecs.has(i));
+  const hasDone = reviewedToday || doneRecsList.length > 0;
+  const allDone = reviewedToday && doneRecs.size >= recs.length;
+
+  const reviewCard = (done: boolean) => (
+    <button key="review" onClick={() => setLogOpen(true)} className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-2xl px-4 py-4 flex items-center gap-4 active:opacity-70 transition-opacity text-left" style={{ opacity: done ? 0.55 : 1 }}>
+      <div className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: done ? "#16a34a" : "#2653d4" }}>
+        {done
+          ? <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20,6 9,17 4,12" /></svg>
+          : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><line x1="10" y1="9" x2="8" y2="9" /></svg>
+        }
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-bold leading-snug" style={{ color: done ? "var(--muted)" : "var(--text)", textDecoration: done ? "line-through" : "none" }}>Review Your Last Match</p>
+        <p className="text-xs text-[var(--muted)] leading-snug mt-0.5">{done ? "Tap to update" : "Rate performance while it's still fresh"}</p>
+      </div>
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0"><polyline points="3,1 8,5 3,9" /></svg>
+    </button>
+  );
+
   return (
     <div className="pt-3 pb-24 px-5 md:px-12">
 
       <ReadinessWidget />
 
       <OptimizationScoreCard pct={pct} tip={tip} />
+
+      {/* Action Plan */}
+      <div className="mb-6">
+        <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-3">Action Plan</p>
+        <div className="flex flex-col gap-3">
+          {allDone ? (
+            <div className="bg-[var(--bg)] border border-[var(--border)] rounded-2xl px-4 py-8 flex flex-col items-center justify-center gap-2">
+              <ThumbsUpIcon size={40} color="var(--text)" />
+              <p className="text-base font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>All done for today</p>
+              <p className="text-xs text-[var(--muted)]">Great work — rest up and come back tomorrow</p>
+              <button onClick={() => setDoneRecs(new Set())} className="mt-2 px-4 py-1.5 rounded-full border border-[var(--border)] text-[10px] font-bold tracking-widest uppercase text-[var(--muted)] bg-[var(--surface)] active:scale-95 transition-transform">Edit</button>
+            </div>
+          ) : (
+            <>
+              {!reviewedToday && reviewCard(false)}
+              <Recommendations selectedYMD={todayYMD} gameDays={gameDays} doneItems={doneRecs} onToggle={toggleRec} cardTaps={{ "Protein Recovery": () => setLogOpen(true) }} />
+            </>
+          )}
+          {hasDone && !allDone && (
+            <div className="mt-1">
+              <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-2">Done</p>
+              <div className="flex flex-col gap-3">
+                {doneRecsList.map(({ rec, i }) => <RecCard key={i} rec={rec} isDone onToggle={() => toggleRec(i)} />)}
+                {reviewedToday && reviewCard(true)}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
 
       <CategoryScoresCard />
 
@@ -258,43 +370,7 @@ export default function OptimizerPage() {
         </div>
       ))}
 
-      {/* === MATCH CARD CELLS (removed from home page, kept here for future use) ===
-
-      Countdown row (top two cells):
-      <div className="border-t border-[#e2e2e2]" />
-      <div className="flex divide-x divide-[#e2e2e2]">
-        <div className="flex-1 px-4 py-3 flex flex-col items-center justify-center">
-          <p className="text-[10px] font-bold tracking-widest uppercase text-[#9aab96]">Next Match Starts In</p>
-        </div>
-        <div className="flex-1 px-4 py-3 flex flex-col items-center justify-center">
-          <p className="text-[22px] font-bold text-[#1a1c1c] tabular-nums">{countdown.h}h {countdown.m}m</p>
-        </div>
-      </div>
-
-      Bottom buttons row (bottom two cells):
-      <div className="border-t border-[#e2e2e2]" />
-      <div className="flex divide-x divide-[#e2e2e2]">
-        <button
-          onClick={() => window.dispatchEvent(new CustomEvent("open-week-plan"))}
-          className="flex-1 px-4 py-3 flex items-center justify-center gap-2 active:opacity-60 transition-opacity"
-        >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aab96" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-          </svg>
-          <span className="text-[12px] font-medium text-[#9aab96]">See week</span>
-        </button>
-        <button
-          onClick={() => { setExtractedData(null); setUploadError(null); setMatchInfoOpen(true); }}
-          className="flex-1 px-4 py-3 flex items-center justify-center gap-2 active:opacity-60 transition-opacity"
-        >
-          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="#9aab96" strokeWidth="1.8" strokeLinecap="round">
-            <line x1="5.5" y1="1" x2="5.5" y2="10" /><line x1="1" y1="5.5" x2="10" y2="5.5" />
-          </svg>
-          <span className="text-[12px] font-medium text-[#9aab96]">Add a match</span>
-        </button>
-      </div>
-
-      === END MATCH CARD CELLS === */}
+      <LogSheet open={logOpen} onClose={() => setLogOpen(false)} />
     </div>
   );
 }

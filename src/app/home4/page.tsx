@@ -366,7 +366,7 @@ export default function Home4() {
             <div
               ref={carouselRef}
               className="w-full overflow-hidden"
-              style={{ borderRadius: 24, marginBottom: 10, position: "relative", zIndex: 6, aspectRatio: "2.69" }}
+              style={{ borderRadius: 24, marginBottom: 10, position: "relative", zIndex: 6, aspectRatio: "1" }}
               onTouchStart={e => {
                 touchStartX.current = e.touches[0].clientX;
                 touchStartY.current = e.touches[0].clientY;
@@ -477,17 +477,76 @@ export default function Home4() {
                       <div key={i} style={{ flex: "0 0 100%", height: "100%", flexShrink: 0 }}>
                         <button
                           onClick={() => setDoModalOpen(true)}
-                          className="bg-white rounded-[24px] px-6 py-6 flex items-center gap-5 active:opacity-60 transition-opacity text-left w-full h-full"
+                          className="bg-white rounded-[24px] px-6 py-6 flex flex-col justify-end gap-3 active:opacity-60 transition-opacity text-left w-full h-full relative overflow-hidden"
                           style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${s.color}` }}
                         >
-                          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: `${s.color}18` }}>
+                          {/* Organic blob drawings */}
+                          <svg
+                            aria-hidden="true"
+                            className="absolute inset-0 w-full h-full pointer-events-none"
+                            viewBox="0 0 200 200"
+                            fill="none"
+                            stroke={s.color}
+                            strokeWidth="1"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            style={{ opacity: 0.28 }}
+                          >
+                            {(i % 6 === 0) && <>
+                              {/* Large off-centre blob */}
+                              <path d="M118,32 C148,28 168,52 165,82 C162,112 142,135 112,133 C82,131 60,112 60,84 C60,56 78,36 118,32 Z" />
+                              {/* Small companion lower-left */}
+                              <path d="M52,148 C62,138 78,142 80,155 C82,168 68,176 55,172 C42,168 35,157 42,148 C46,142 46,155 52,148 Z" />
+                              {/* Tiny accent upper-left */}
+                              <path d="M38,52 C44,44 55,46 56,56 C57,66 48,72 40,68 C32,64 30,58 38,52 Z" />
+                            </>}
+                            {(i % 6 === 1) && <>
+                              {/* Tall narrow blob, left of centre */}
+                              <path d="M72,30 C92,22 115,32 118,58 C121,84 108,118 88,128 C68,138 45,122 42,96 C39,70 45,42 72,30 Z" />
+                              {/* Wide flat blob, lower-right */}
+                              <path d="M118,142 C132,130 158,132 162,148 C166,164 150,175 132,174 C114,173 100,162 102,148 C104,136 108,152 118,142 Z" />
+                              {/* Tiny circle-blob, upper-right */}
+                              <path d="M152,42 C160,34 172,38 173,50 C174,62 164,68 154,65 C144,62 138,52 145,44 C148,39 148,48 152,42 Z" />
+                            </>}
+                            {(i % 6 === 2) && <>
+                              {/* Single large centred blob */}
+                              <path d="M100,28 C132,22 162,48 162,85 C162,122 138,158 102,158 C66,158 38,130 38,92 C38,54 58,36 100,28 Z" />
+                              {/* Small bean lower-right */}
+                              <path d="M148,152 C158,144 172,150 170,163 C168,176 154,180 144,174 C134,168 132,158 140,150 C144,145 144,158 148,152 Z" />
+                            </>}
+                            {(i % 6 === 3) && <>
+                              {/* Left organic oval, tilted */}
+                              <path d="M58,38 C78,25 105,35 108,62 C111,89 95,118 72,122 C49,126 28,108 30,82 C32,56 38,51 58,38 Z" />
+                              {/* Right smaller blob */}
+                              <path d="M148,98 C164,88 180,98 178,118 C176,138 160,150 144,146 C128,142 118,128 124,112 C128,100 136,106 148,98 Z" />
+                              {/* Tiny upper-right */}
+                              <path d="M158,38 C166,30 178,35 176,47 C174,59 162,62 154,56 C146,50 144,42 152,36 C155,33 155,42 158,38 Z" />
+                            </>}
+                            {(i % 6 === 4) && <>
+                              {/* Large lower-left blob */}
+                              <path d="M65,72 C82,55 112,58 118,82 C124,106 108,138 85,142 C62,146 38,128 38,104 C38,80 45,88 65,72 Z" />
+                              {/* Medium upper-right */}
+                              <path d="M140,32 C158,25 175,40 172,62 C169,84 152,95 136,90 C120,85 110,68 118,50 C123,38 128,38 140,32 Z" />
+                              {/* Small lower-right accent */}
+                              <path d="M155,152 C164,144 176,150 174,163 C172,176 160,180 150,174 C140,168 138,156 146,149 C150,144 150,158 155,152 Z" />
+                            </>}
+                            {(i % 6 === 5) && <>
+                              {/* Wide landscape blob, upper area */}
+                              <path d="M55,42 C72,28 115,25 140,42 C165,59 168,88 148,108 C128,128 92,132 68,115 C44,98 32,72 42,54 C47,44 42,54 55,42 Z" />
+                              {/* Small round blob, lower-right */}
+                              <path d="M148,148 C160,138 176,144 175,158 C174,172 160,178 148,172 C136,166 128,154 136,144 C140,138 140,156 148,148 Z" />
+                              {/* Tiny lower-left */}
+                              <path d="M45,158 C53,150 65,154 64,164 C63,174 52,178 44,172 C36,166 34,158 40,152 C43,148 42,162 45,158 Z" />
+                            </>}
+                          </svg>
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 relative" style={{ background: `${s.color}18` }}>
                             {i === currentIdx ? (
                               <div className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
                             ) : (
                               <div className="w-3.5 h-3.5 rounded-full" style={{ background: s.color }} />
                             )}
                           </div>
-                          <div className="flex-1 min-w-0">
+                          <div className="min-w-0">
                             <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">{i === currentIdx ? "Do this now" : s.time}</p>
                             <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{s.title}</p>
                             {s.subtitle && (

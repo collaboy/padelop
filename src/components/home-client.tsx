@@ -5,6 +5,7 @@ import Link from "next/link";
 import WeekStrip from "./week-strip";
 import Recommendations, { getRecommendations, RecCard } from "./recommendations";
 import LogSheet from "./log-sheet";
+import ReadinessWidget from "./readiness-widget";
 
 const STORAGE_KEY = "padelop:game-days";
 const GAME_TIMES_KEY = "padelop:game-times";
@@ -863,9 +864,13 @@ export default function HomeClient() {
           <div className="flex flex-col items-center">
             <p className="text-2xl font-extrabold text-[var(--text)] leading-tight mb-1" style={{ fontFamily: "var(--font-hanken)" }}>{matchReadyHeading}</p>
             <p className="text-xs text-[var(--muted)] leading-snug mb-4">{matchReadySubtitle}</p>
-            <Link href="/optimizer" className="flex items-center gap-1 px-3 py-1 mb-6 rounded-full border border-[var(--border)] text-[9px] font-bold tracking-widest uppercase active:scale-95 transition-transform" style={{ background: "var(--bg)", color: "var(--muted)" }}>
+            <Link href="/optimizer" className="flex items-center gap-2 px-5 py-2.5 mb-6 rounded-full border border-[var(--border)] text-[12px] font-bold tracking-widest uppercase active:scale-95 transition-transform" style={{ background: "var(--bg)", color: "var(--muted)" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                <polyline points="17 6 23 6 23 12" />
+              </svg>
               Improve Score
-              <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="3,1 8,5 3,9" />
               </svg>
             </Link>
@@ -887,7 +892,7 @@ export default function HomeClient() {
         return (
           <div className="px-5 md:px-12 pb-4 bg-[var(--bg)]">
             <div className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden">
-            <Link href="/matches" className="w-full px-4 py-5 flex items-center gap-4 relative overflow-hidden active:opacity-70 transition-opacity">
+            <Link href="/matches" className="w-full px-4 py-6 flex items-center gap-4 relative overflow-hidden active:opacity-70 transition-opacity">
               {/* Greyscale racket + ball background, fading left */}
               <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
                 <svg className="absolute right-0 top-0 h-full" style={{ width: "72%" }} viewBox="0 0 200 90" fill="none" preserveAspectRatio="xMaxYMid meet" opacity="0.13">
@@ -926,15 +931,15 @@ export default function HomeClient() {
                 </svg>
               </div>
               <div className="flex-1 min-w-0 relative">
-                <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)] mb-0.5">Next Match</p>
-                <p className="text-sm font-extrabold text-[var(--text)] leading-tight" style={{ fontFamily: "var(--font-hanken)" }}>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[var(--muted)] mb-1">Next Match</p>
+                <p className="text-[19px] font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)", lineHeight: 1.1 }}>
                   {dateLabel}{gameDetails.time ? ` · ${gameDetails.time}` : ""}
                 </p>
-                <div className="flex items-center gap-1 mt-1">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--muted)] flex-shrink-0">
+                <div className="flex items-center gap-1 mt-1.5">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--muted)] flex-shrink-0">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
                   </svg>
-                  <p className="text-xs text-[var(--muted)] truncate">{gameDetails.location || "—"}</p>
+                  <p className="text-[13px] text-[var(--muted)] truncate">{gameDetails.location || "—"}</p>
                 </div>
               </div>
               <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 relative text-[var(--muted)]">
@@ -975,6 +980,11 @@ export default function HomeClient() {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
           </button>
         )}
+      </div>
+
+      {/* Readiness widget card */}
+      <div className="px-5 md:px-12 pb-4 bg-[var(--bg)]">
+        <ReadinessWidget hideRing />
       </div>
 
       {/* Category bars card */}
@@ -1044,20 +1054,6 @@ export default function HomeClient() {
           </div>
         );
       })()}
-
-      {/* Improve card */}
-      <div className="px-5 md:px-12 pb-4 bg-[var(--bg)]">
-        <Link href="/recovery" className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm px-4 py-4 flex items-center justify-center gap-3 relative active:scale-[0.98] transition-transform">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-            <polyline points="17 6 23 6 23 12" />
-          </svg>
-          <span className="text-sm font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>Improve</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="absolute right-4">
-            <path d="M9 18l6-6-6-6" />
-          </svg>
-        </Link>
-      </div>
 
       {/* Today / This Month toggle card */}
       <div className="px-5 md:px-12 pb-3 bg-[var(--bg)]">
@@ -1155,55 +1151,6 @@ export default function HomeClient() {
                       </div>
                     </div>
 
-                    {/* Action cards */}
-                    <div className="flex flex-col gap-3 mt-2 pt-4 border-t border-[var(--border)]">
-                      {(() => {
-                        const reviewedToday = lastReview?.ts.slice(0, 10) === todayYMD;
-                        const recs = getRecommendations(selectedYMD, gameDays);
-                        const doneRecsList = recs.map((rec, i) => ({ rec, i })).filter(({ i }) => doneRecs.has(i));
-                        const hasDone = reviewedToday || doneRecsList.length > 0;
-                        const reviewCard = (done: boolean) => (
-                          <button key="review" onClick={() => setMatchReviewOpen(true)} className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-2xl px-4 py-4 flex items-center gap-4 active:opacity-70 transition-opacity text-left" style={{ opacity: done ? 0.55 : 1 }}>
-                            <div className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: done ? "#16a34a" : "#2653d4" }}>
-                              {done ? <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20,6 9,17 4,12" /></svg>
-                                : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><line x1="10" y1="9" x2="8" y2="9" /></svg>}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-bold leading-snug" style={{ color: done ? "var(--muted)" : "var(--text)", textDecoration: done ? "line-through" : "none" }}>Review Your Last Match</p>
-                              <p className="text-xs text-[var(--muted)] leading-snug mt-0.5">{done ? "Tap to update" : "Rate performance while it's still fresh"}</p>
-                            </div>
-                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0"><polyline points="3,1 8,5 3,9" /></svg>
-                          </button>
-                        );
-                        const allDone = reviewedToday && doneRecs.size >= recs.length;
-                        return (
-                          <>
-                            {allDone ? (
-                              <div className="bg-[var(--bg)] border border-[var(--border)] rounded-2xl px-4 py-8 flex flex-col items-center justify-center gap-2">
-                                <ThumbsUpIcon size={40} color="var(--text)" />
-                                <p className="text-base font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>All done for today</p>
-                                <p className="text-xs text-[var(--muted)]">Great work — rest up and come back tomorrow</p>
-                                <button onClick={() => setDoneRecs(new Set())} className="mt-2 px-4 py-1.5 rounded-full border border-[var(--border)] text-[10px] font-bold tracking-widest uppercase text-[var(--muted)] bg-[var(--surface)] active:scale-95 transition-transform">Edit</button>
-                              </div>
-                            ) : (
-                              <>
-                                {!reviewedToday && reviewCard(false)}
-                                <Recommendations selectedYMD={selectedYMD} gameDays={gameDays} doneItems={doneRecs} onToggle={toggleRec} cardTaps={{ "Protein Recovery": () => setNutritionOpen(true) }} />
-                              </>
-                            )}
-                            {hasDone && !allDone && (
-                              <div className="mt-1">
-                                <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-2">Done</p>
-                                <div className="flex flex-col gap-3">
-                                  {doneRecsList.map(({ rec, i }) => <RecCard key={i} rec={rec} isDone onToggle={() => toggleRec(i)} />)}
-                                  {reviewedToday && reviewCard(true)}
-                                </div>
-                              </div>
-                            )}
-                          </>
-                        );
-                      })()}
-                    </div>
                   </div>
                 );})()}
               </>
