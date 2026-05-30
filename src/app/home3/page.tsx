@@ -46,11 +46,14 @@ function getDayMsg(match: { date: string; time: string } | null, now: Date): str
 
 const WIZARD_CATEGORIES = ["Check-in", "Hydration", "Nutrition", "Match Review"];
 
+const READINESS = 85;
+
 export default function Home3() {
   const [matchTime, setMatchTime] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [fabOpen, setFabOpen] = useState(false);
   const [logMethod, setLogMethod] = useState<"camera" | "upload" | "wizard" | null>(null);
+  const [readinessOpen, setReadinessOpen] = useState(false);
   const uploadRef = useRef<HTMLInputElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
   const flyRef = useRef<HTMLDivElement>(null);
@@ -158,6 +161,88 @@ export default function Home3() {
           <path d="M9 18l6-6-6-6"/>
         </svg>
       </button>
+
+      {/* Next Match + Readiness two-cell card */}
+      {(() => {
+        const r = 44;
+        const stroke = 6;
+        const norm = r - stroke / 2;
+        const circ = 2 * Math.PI * norm;
+        const fill = ((READINESS - 65) / 35) * circ;
+        const datePart = matchTime?.split("T")[0] ?? null;
+        const timePart = matchTime?.split("T")[1] ?? null;
+        const dateLabel = (() => {
+          if (!datePart) return null;
+          const today = new Date().toISOString().slice(0, 10);
+          const tomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
+          const d = new Date(datePart + "T12:00");
+          if (datePart === today) return "Today";
+          if (datePart === tomorrow) return "Tomorrow";
+          return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+        })();
+        return (
+          <div className="bg-white rounded-[24px]" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", display: "flex", overflow: "hidden" }}>
+            {/* Left: Next Match */}
+            <button
+              onClick={() => setFabOpen(true)}
+              style={{ flex: 1, padding: "18px 16px", textAlign: "left", background: "none", border: "none", cursor: "pointer", borderRight: "1px solid #f0f0f0" }}
+            >
+              <p style={{ fontFamily: "Inter, sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 6px" }}>Next Match</p>
+              {dateLabel ? (
+                <>
+                  <p style={{ fontFamily: "Inter, sans-serif", fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: "0 0 2px", lineHeight: 1.2 }}>{dateLabel}</p>
+                  <p style={{ fontFamily: "Inter, sans-serif", fontSize: 14, fontWeight: 600, color: "#2653d4", margin: 0 }}>{timePart}</p>
+                </>
+              ) : (
+                <p style={{ fontFamily: "Inter, sans-serif", fontSize: 14, fontWeight: 600, color: "#2653d4", margin: 0 }}>+ Add a match</p>
+              )}
+            </button>
+            {/* Right: Match Readiness ring */}
+            <button onClick={() => setReadinessOpen(true)} style={{ width: 110, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "18px 12px", background: "none", border: "none", cursor: "pointer" }}>
+              <div style={{ position: "relative", width: r * 2, height: r * 2 }}>
+                <svg width={r * 2} height={r * 2} style={{ transform: "rotate(-90deg)" }}>
+                  <circle cx={r} cy={r} r={norm} fill="none" stroke="#e8eaed" strokeWidth={stroke} />
+                  <circle cx={r} cy={r} r={norm} fill="none" stroke="#2653d4" strokeWidth={stroke}
+                    strokeDasharray={`${fill} ${circ}`} strokeLinecap="round" />
+                </svg>
+                <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                  <span style={{ fontFamily: "Inter, sans-serif", fontSize: 18, fontWeight: 700, color: "#2653d4", lineHeight: 1 }}>{READINESS}</span>
+                  <span style={{ fontFamily: "Inter, sans-serif", fontSize: 9, fontWeight: 600, color: "#8a9096" }}>/ 100</span>
+                </div>
+              </div>
+              <p style={{ fontFamily: "Inter, sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "5px 0 0", textAlign: "center" }}>Readiness</p>
+            </button>
+          </div>
+        );
+      })()}
+
+      {/* Readiness modal */}
+      {readinessOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => setReadinessOpen(false)}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="relative w-full max-w-sm bg-white rounded-[28px] px-6 py-7" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.15)" }} onClick={e => e.stopPropagation()}>
+            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 22, fontWeight: 700, color: "#1a1c1c", margin: "0 0 4px" }}>Log something</p>
+            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#6b7480", margin: "0 0 20px" }}>to update your score</p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+              <button onClick={handleCamera} className="flex flex-col items-center gap-2 py-5 rounded-2xl active:opacity-60 transition-opacity" style={{ background: "#f4f6ff", border: "none", cursor: "pointer" }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#2653d4" }}>Camera</span>
+              </button>
+              <button onClick={handleUpload} className="flex flex-col items-center gap-2 py-5 rounded-2xl active:opacity-60 transition-opacity" style={{ background: "#f4f6ff", border: "none", cursor: "pointer" }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#2653d4" }}>Upload</span>
+              </button>
+            </div>
+            <div className="flex flex-col gap-2">
+              {["Check-in", "Hydration", "Nutrition", "Match Review"].map(cat => (
+                <button key={cat} onClick={() => setReadinessOpen(false)} className="w-full text-left px-4 py-3.5 rounded-2xl active:opacity-60 transition-opacity" style={{ fontFamily: "Inter, sans-serif", fontSize: 17, fontWeight: 500, color: "#1a1c1c", background: "#f4f6ff", border: "none", cursor: "pointer" }}>
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Do This Now modal — homepage schedule style */}
       {modalOpen && (
