@@ -187,14 +187,14 @@ export default function Home3() {
               onClick={() => setFabOpen(true)}
               style={{ flex: 1, padding: "18px 16px", textAlign: "left", background: "none", border: "none", cursor: "pointer", borderRight: "1px solid #e2e2e2" }}
             >
-              <p style={{ fontFamily: "Inter, sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 6px" }}>Next Match</p>
+              <p style={{ fontFamily: "Inter, sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 8px" }}>Next Match</p>
               {dateLabel ? (
                 <>
-                  <p style={{ fontFamily: "Inter, sans-serif", fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: "0 0 2px", lineHeight: 1.2 }}>{dateLabel}</p>
-                  <p style={{ fontFamily: "Inter, sans-serif", fontSize: 14, fontWeight: 600, color: "#2653d4", margin: 0 }}>{timePart}</p>
+                  <p style={{ fontFamily: "Inter, sans-serif", fontSize: 20, fontWeight: 700, color: "#1a1c1c", margin: "0 0 3px", lineHeight: 1.2 }}>{dateLabel}</p>
+                  <p style={{ fontFamily: "Inter, sans-serif", fontSize: 17, fontWeight: 600, color: "#2653d4", margin: 0 }}>{timePart}</p>
                 </>
               ) : (
-                <p style={{ fontFamily: "Inter, sans-serif", fontSize: 14, fontWeight: 600, color: "#2653d4", margin: 0 }}>+ Add a match</p>
+                <p style={{ fontFamily: "Inter, sans-serif", fontSize: 17, fontWeight: 600, color: "#2653d4", margin: 0 }}>+ Add a match</p>
               )}
             </button>
             {/* Right: Match Readiness ring */}
