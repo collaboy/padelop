@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { computeScores, loadScoringData, saveCheckIn, computeAllTimeScores, type Scores } from "@/lib/scoring";
 
-export default function ReadinessWidget({ hideCard = false }: { hideCard?: boolean }) {
+export default function ReadinessWidget({ hideCard = false, showImprove = false }: { hideCard?: boolean; showImprove?: boolean }) {
   const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 60, hydration: 52, energy: 58, mobility: 58 });
   const [allTimeScores, setAllTimeScores] = useState<Scores>({ overall: 65, recovery: 60, hydration: 52, energy: 58, mobility: 58 });
   const [scoreView, setScoreView] = useState<"today" | "alltime">("today");
@@ -122,6 +122,18 @@ export default function ReadinessWidget({ hideCard = false }: { hideCard?: boole
             <span style={{ fontSize: 68, lineHeight: 1, fontWeight: 700, letterSpacing: "-0.02em", color: "#1a1c1c" }}>{Math.round(activeMetricValue)}</span>
           </div>
         </div>
+        {showImprove && (
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent("open-log-sheet"))}
+            className="flex items-center gap-1.5 mb-1 px-4 py-2 rounded-full active:opacity-70 transition-opacity"
+            style={{ background: "#f4f4f6", border: "none", cursor: "pointer" }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+            </svg>
+            <span className="text-[13px] font-semibold text-[#1a1c1c]">Improve</span>
+          </button>
+        )}
         <div className="flex gap-1 mt-2 mb-2 justify-center rounded-full px-1 py-1 w-full max-w-xs" style={{ background: "rgb(244, 244, 246)" }}>
           {([
             { key: "overall",   label: "All",   color: "#2653d4" },

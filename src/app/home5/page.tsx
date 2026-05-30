@@ -340,7 +340,7 @@ export default function HomePage() {
       <div className="h1-font bg-[#f9f9f9] text-[#1a1c1c] min-h-screen">
         <main className="pt-3 pb-8 px-5 max-w-lg mx-auto">
 
-          <ReadinessWidget hideCard />
+          <ReadinessWidget hideCard showImprove />
 
           <p className="text-[15px] font-bold tracking-widest uppercase text-[#1a1c1c] text-center leading-snug mb-2" style={{ fontFamily: "var(--font-hanken)" }}>Coach Says...</p>
 
@@ -628,16 +628,6 @@ export default function HomePage() {
                   )}
                   <p className="text-[11px] font-bold tracking-widest uppercase text-[#8a9096] mb-2">Your Match Readiness</p>
                   <ScoreRing metric={selectedMetric} />
-                  <button
-                    onClick={() => window.dispatchEvent(new CustomEvent("open-log-sheet"))}
-                    className="flex items-center gap-1.5 mt-3 mb-1 px-4 py-2 rounded-full active:opacity-70 transition-opacity"
-                    style={{ background: "#f4f4f6", border: "none", cursor: "pointer" }}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
-                    </svg>
-                    <span className="text-[13px] font-semibold text-[#1a1c1c]">Improve</span>
-                  </button>
                   <div className="flex gap-1 mt-4 justify-center rounded-full px-1 py-1 w-full max-w-xs" style={{ background: "#f4f4f6" }}>
                     {[
                       { key: "overall",   label: "Overall",   color: "#2653d4" },
