@@ -339,11 +339,17 @@ export default function Home4() {
               style={{ background: "rgba(0,0,0,0.45)", opacity: slideIdx === 0 ? 1 : 0, transition: "opacity 0.35s ease", zIndex: 5 }}
             />
 
+            {/* Greeting */}
+            <div style={{ padding: "0 4px", marginBottom: 10, textAlign: "center" }}>
+              <p style={{ ...S, fontSize: "clamp(16px, 5.5vw, 22px)", fontWeight: 700, color: "#111", margin: "0 0 2px", lineHeight: 1.2 }}>{greeting()} Eddie</p>
+              <p style={{ ...S, fontSize: "clamp(12px, 3.8vw, 15px)", color: "#888", margin: 0, lineHeight: 1.5 }}>{getDayMsg(match, now)}</p>
+            </div>
+
             {/* Swipeable carousel */}
             <div
               ref={carouselRef}
-              className="overflow-hidden"
-              style={{ width: "calc(100% + 40px)", marginLeft: -20, marginBottom: 10, position: "relative", zIndex: 6, aspectRatio: "2.69" }}
+              className="w-full overflow-hidden"
+              style={{ borderRadius: 24, marginBottom: 10, position: "relative", zIndex: 6, aspectRatio: "2.69" }}
               onTouchStart={e => {
                 touchStartX.current = e.touches[0].clientX;
                 touchStartY.current = e.touches[0].clientY;
@@ -433,7 +439,7 @@ export default function Home4() {
                   </div>
                 </div>
 
-                {/* Slide 1: Do This Now — inner peeking carousel */}
+                {/* Slide 1: Do This Now — inner carousel */}
                 <div style={{ flex: "0 0 100%", height: "100%", overflow: "hidden" }}
                   onTouchStart={e => { doTouchStartX.current = e.touches[0].clientX; e.stopPropagation(); }}
                   onTouchMove={e => e.stopPropagation()}
@@ -447,12 +453,11 @@ export default function Home4() {
                   <div style={{
                     display: "flex",
                     height: "100%",
-                    gap: 8,
-                    transform: `translateX(calc(9% - ${safeDoIdx} * (82% + 8px)))`,
+                    transform: `translateX(calc(-${safeDoIdx} * 100%))`,
                     transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
                   }}>
                     {schedule.map((s, i) => (
-                      <div key={i} style={{ flex: "0 0 82%", height: "100%", flexShrink: 0 }}>
+                      <div key={i} style={{ flex: "0 0 100%", height: "100%", flexShrink: 0 }}>
                         <button
                           onClick={() => setDoModalOpen(true)}
                           className="bg-white rounded-[24px] px-6 py-6 flex items-center gap-5 active:opacity-60 transition-opacity text-left w-full h-full"
@@ -487,15 +492,7 @@ export default function Home4() {
             {/* Hidden upload input */}
             <input ref={logUploadRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleLogFile} />
 
-            {/* Current day info */}
-            <div className="rounded-[24px] px-5 py-4 mb-2">
-              <p style={{ ...S, fontSize: 22, fontWeight: 700, color: "#111", margin: "0 0 4px", lineHeight: 1.2 }}>{greeting()} Eddie</p>
-              <div className="flex items-center gap-2 mb-1">
-                <p style={{ ...S, fontSize: 14, color: "#8a9096", margin: 0 }}>{now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</p>
-                <span className="text-[11px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full" style={{ background: meta.bg, color: meta.color }}>{meta.label}</span>
-              </div>
-              <p style={{ ...S, fontSize: 15, color: "#888", margin: 0, lineHeight: 1.5 }}>{getDayMsg(match, now)}</p>
-            </div>
+
 
             {/* Wizard modal */}
             {wizardOpen && (
