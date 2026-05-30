@@ -212,19 +212,6 @@ export default function Home3() {
         </div>
       )}
 
-      {/* Greeting */}
-      <div className="bg-white rounded-[24px] px-6 py-6" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-        <p className="text-[26px] font-bold text-[#1a1c1c] leading-tight tracking-tight">
-          {greeting()} Eddie
-        </p>
-        <p className="text-[15px] text-[#888] mt-2 leading-snug">
-          {getDayMsg(
-            matchTime ? { date: matchTime.split("T")[0], time: matchTime.split("T")[1] } : null,
-            new Date()
-          )}
-        </p>
-      </div>
-
       {/* Do This Now */}
       <button
         onClick={() => setModalOpen(true)}
@@ -243,6 +230,19 @@ export default function Home3() {
           <path d="M9 18l6-6-6-6"/>
         </svg>
       </button>
+
+      {/* Greeting */}
+      <div className="bg-white rounded-[24px] px-6 py-6" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+        <p className="text-[26px] font-bold text-[#1a1c1c] leading-tight tracking-tight">
+          {greeting()} Eddie
+        </p>
+        <p className="text-[15px] text-[#888] mt-2 leading-snug">
+          {getDayMsg(
+            matchTime ? { date: matchTime.split("T")[0], time: matchTime.split("T")[1] } : null,
+            new Date()
+          )}
+        </p>
+      </div>
 
       {/* Do This Now modal — homepage schedule style */}
       {modalOpen && (
