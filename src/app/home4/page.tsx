@@ -480,7 +480,7 @@ export default function Home4() {
                           className="bg-white rounded-[24px] px-6 py-6 flex flex-col justify-end gap-3 active:opacity-60 transition-opacity text-left w-full h-full relative overflow-hidden"
                           style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${s.color}` }}
                         >
-                          {/* Organic blob drawings */}
+                          {/* Organic blob drawings — all paths use collinear handles at anchors for zero angles */}
                           <svg
                             aria-hidden="true"
                             className="absolute inset-0 w-full h-full pointer-events-none"
@@ -490,56 +490,57 @@ export default function Home4() {
                             strokeWidth="1"
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            style={{ opacity: 0.28 }}
+                            style={{ opacity: 0.3 }}
                           >
                             {(i % 6 === 0) && <>
-                              {/* Large off-centre blob */}
-                              <path d="M118,32 C148,28 168,52 165,82 C162,112 142,135 112,133 C82,131 60,112 60,84 C60,56 78,36 118,32 Z" />
-                              {/* Small companion lower-left */}
-                              <path d="M52,148 C62,138 78,142 80,155 C82,168 68,176 55,172 C42,168 35,157 42,148 C46,142 46,155 52,148 Z" />
-                              {/* Tiny accent upper-left */}
-                              <path d="M38,52 C44,44 55,46 56,56 C57,66 48,72 40,68 C32,64 30,58 38,52 Z" />
+                              {/* Large blob: anchors at T(98,32) R(165,72) B(112,145) L(52,100), handles tangent at each */}
+                              <path d="M 98,32 C 122,32 165,50 165,72 C 165,95 138,145 112,145 C 85,145 52,125 52,100 C 52,75 74,32 98,32 Z" />
+                              {/* Small blob lower-left: anchors T(48,142) R(62,158) B(48,174) L(34,158) */}
+                              <path d="M 48,142 C 56,142 62,150 62,158 C 62,166 56,174 48,174 C 40,174 34,166 34,158 C 34,150 40,142 48,142 Z" />
+                              {/* Tiny blob upper-left: anchors T(38,30) R(54,46) B(38,62) L(22,46) */}
+                              <path d="M 38,30 C 47,30 54,38 54,46 C 54,54 47,62 38,62 C 29,62 22,54 22,46 C 22,38 29,30 38,30 Z" />
                             </>}
                             {(i % 6 === 1) && <>
-                              {/* Tall narrow blob, left of centre */}
-                              <path d="M72,30 C92,22 115,32 118,58 C121,84 108,118 88,128 C68,138 45,122 42,96 C39,70 45,42 72,30 Z" />
-                              {/* Wide flat blob, lower-right */}
-                              <path d="M118,142 C132,130 158,132 162,148 C166,164 150,175 132,174 C114,173 100,162 102,148 C104,136 108,152 118,142 Z" />
-                              {/* Tiny circle-blob, upper-right */}
-                              <path d="M152,42 C160,34 172,38 173,50 C174,62 164,68 154,65 C144,62 138,52 145,44 C148,39 148,48 152,42 Z" />
+                              {/* Tall narrow blob: anchors T(75,30) R(118,82) B(78,158) L(40,95) */}
+                              <path d="M 75,30 C 98,30 118,58 118,82 C 118,108 100,158 78,158 C 56,158 40,122 40,95 C 40,68 52,30 75,30 Z" />
+                              {/* Medium blob lower-right: anchors T(145,90) R(168,112) B(148,132) L(126,112) */}
+                              <path d="M 145,90 C 158,90 168,100 168,112 C 168,124 160,132 148,132 C 136,132 126,122 126,112 C 126,102 132,90 145,90 Z" />
+                              {/* Tiny blob upper-right: anchors T(155,30) R(170,46) B(155,62) L(140,46) */}
+                              <path d="M 155,30 C 163,30 170,38 170,46 C 170,54 163,62 155,62 C 147,62 140,54 140,46 C 140,38 147,30 155,30 Z" />
                             </>}
                             {(i % 6 === 2) && <>
-                              {/* Single large centred blob */}
-                              <path d="M100,28 C132,22 162,48 162,85 C162,122 138,158 102,158 C66,158 38,130 38,92 C38,54 58,36 100,28 Z" />
-                              {/* Small bean lower-right */}
-                              <path d="M148,152 C158,144 172,150 170,163 C168,176 154,180 144,174 C134,168 132,158 140,150 C144,145 144,158 148,152 Z" />
+                              {/* Large centred blob: anchors T(95,28) R(168,90) B(105,168) L(32,100) */}
+                              <path d="M 95,28 C 130,28 168,58 168,90 C 168,122 142,168 105,168 C 68,168 32,132 32,100 C 32,68 60,28 95,28 Z" />
+                              {/* Small blob lower-right: anchors T(155,148) R(172,162) B(155,176) L(138,162) */}
+                              <path d="M 155,148 C 164,148 172,155 172,162 C 172,169 164,176 155,176 C 146,176 138,169 138,162 C 138,155 146,148 155,148 Z" />
                             </>}
                             {(i % 6 === 3) && <>
-                              {/* Left organic oval, tilted */}
-                              <path d="M58,38 C78,25 105,35 108,62 C111,89 95,118 72,122 C49,126 28,108 30,82 C32,56 38,51 58,38 Z" />
-                              {/* Right smaller blob */}
-                              <path d="M148,98 C164,88 180,98 178,118 C176,138 160,150 144,146 C128,142 118,128 124,112 C128,100 136,106 148,98 Z" />
-                              {/* Tiny upper-right */}
-                              <path d="M158,38 C166,30 178,35 176,47 C174,59 162,62 154,56 C146,50 144,42 152,36 C155,33 155,42 158,38 Z" />
+                              {/* Left oval, slightly tilted: anchors T(62,35) R(108,78) B(70,128) L(30,82) */}
+                              <path d="M 62,35 C 86,35 108,55 108,78 C 108,102 92,128 70,128 C 48,128 30,105 30,82 C 30,59 38,35 62,35 Z" />
+                              {/* Right blob: anchors T(148,92) R(170,115) B(150,138) L(128,115) */}
+                              <path d="M 148,92 C 160,92 170,102 170,115 C 170,128 162,138 150,138 C 138,138 128,128 128,115 C 128,102 136,92 148,92 Z" />
+                              {/* Tiny upper-right: anchors T(158,32) R(172,46) B(158,60) L(144,46) */}
+                              <path d="M 158,32 C 166,32 172,39 172,46 C 172,53 166,60 158,60 C 150,60 144,53 144,46 C 144,39 150,32 158,32 Z" />
                             </>}
                             {(i % 6 === 4) && <>
-                              {/* Large lower-left blob */}
-                              <path d="M65,72 C82,55 112,58 118,82 C124,106 108,138 85,142 C62,146 38,128 38,104 C38,80 45,88 65,72 Z" />
-                              {/* Medium upper-right */}
-                              <path d="M140,32 C158,25 175,40 172,62 C169,84 152,95 136,90 C120,85 110,68 118,50 C123,38 128,38 140,32 Z" />
-                              {/* Small lower-right accent */}
-                              <path d="M155,152 C164,144 176,150 174,163 C172,176 160,180 150,174 C140,168 138,156 146,149 C150,144 150,158 155,152 Z" />
+                              {/* Large blob offset lower-left: anchors T(100,35) R(160,88) B(108,152) L(48,100) */}
+                              <path d="M 100,35 C 130,35 160,60 160,88 C 160,116 138,152 108,152 C 78,152 48,128 48,100 C 48,72 70,35 100,35 Z" />
+                              {/* Small blob upper-left: anchors T(42,32) R(58,50) B(42,68) L(26,50) */}
+                              <path d="M 42,32 C 51,32 58,40 58,50 C 58,60 51,68 42,68 C 33,68 26,60 26,50 C 26,40 33,32 42,32 Z" />
+                              {/* Tiny lower-right: anchors T(158,152) R(172,165) B(158,178) L(144,165) */}
+                              <path d="M 158,152 C 166,152 172,158 172,165 C 172,172 166,178 158,178 C 150,178 144,172 144,165 C 144,158 150,152 158,152 Z" />
                             </>}
                             {(i % 6 === 5) && <>
-                              {/* Wide landscape blob, upper area */}
-                              <path d="M55,42 C72,28 115,25 140,42 C165,59 168,88 148,108 C128,128 92,132 68,115 C44,98 32,72 42,54 C47,44 42,54 55,42 Z" />
-                              {/* Small round blob, lower-right */}
-                              <path d="M148,148 C160,138 176,144 175,158 C174,172 160,178 148,172 C136,166 128,154 136,144 C140,138 140,156 148,148 Z" />
-                              {/* Tiny lower-left */}
-                              <path d="M45,158 C53,150 65,154 64,164 C63,174 52,178 44,172 C36,166 34,158 40,152 C43,148 42,162 45,158 Z" />
+                              {/* Wide landscape blob: anchors T(95,40) R(165,82) B(108,132) L(36,88) */}
+                              <path d="M 95,40 C 132,40 165,60 165,82 C 165,104 142,132 108,132 C 74,132 36,110 36,88 C 36,66 58,40 95,40 Z" />
+                              {/* Small blob upper-right: anchors T(158,30) R(174,46) B(158,62) L(142,46) */}
+                              <path d="M 158,30 C 167,30 174,38 174,46 C 174,54 167,62 158,62 C 149,62 142,54 142,46 C 142,38 149,30 158,30 Z" />
+                              {/* Small blob lower-left: anchors T(42,148) R(58,162) B(42,176) L(26,162) */}
+                              <path d="M 42,148 C 51,148 58,155 58,162 C 58,169 51,176 42,176 C 33,176 26,169 26,162 C 26,155 33,148 42,148 Z" />
                             </>}
                           </svg>
-                          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 relative" style={{ background: `${s.color}18` }}>
+                          {/* Dot — floated top-left */}
+                          <div className="absolute top-5 left-6 w-10 h-10 rounded-full flex items-center justify-center" style={{ background: `${s.color}18` }}>
                             {i === currentIdx ? (
                               <div className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
                             ) : (

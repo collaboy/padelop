@@ -175,6 +175,7 @@ export default function Home6() {
   const [gameDays, setGameDays] = useState<string[]>([]);
   const [gameTimes, setGameTimes] = useState<Record<string, string>>({});
   const [scheduleModal, setScheduleModal] = useState<{ title: string; subtitle?: string; category: ScheduleBlock["category"]; detail: string } | null>(null);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
 
   function refreshScore() {
     const data = loadScoringData();
@@ -263,6 +264,91 @@ export default function Home6() {
         <p style={S.sub}>Before anything else this morning</p>
       </button>
 
+      {/* Today */}
+      {(() => {
+        const isGameToday = gameDays.includes(todayYMD);
+        const isRecoveryDay = !isGameToday && gameDays.includes(offsetYMD(todayYMD, -1));
+        const dayType = isGameToday ? "Game Day" : isRecoveryDay ? "Recovery Day" : "Training Day";
+        const dayTypeColor = isGameToday ? "#16a34a" : isRecoveryDay ? "#7c3aed" : "#2653d4";
+        const d = new Date(todayYMD + "T12:00");
+        const dateStr = d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+        return (
+          <div style={{ ...S.card, marginBottom: 12, padding: 0 }}>
+            {/* Header row */}
+            <button
+              onClick={() => setScheduleOpen(o => !o)}
+              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "20px 20px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+              className="active:opacity-60 transition-opacity"
+            >
+              <div>
+                <p style={{ ...S.label, color: "#8a9096" }}>Today</p>
+                <p style={S.h2}>{dateStr}</p>
+                <span style={{ display: "inline-block", fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: dayTypeColor, background: dayTypeColor + "14", padding: "4px 10px", borderRadius: 99, marginTop: 4 }}>{dayType}</span>
+              </div>
+              <svg
+                width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                style={{ flexShrink: 0, marginLeft: 12, transform: scheduleOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }}
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+            {/* Dropdown schedule */}
+            {scheduleOpen && (
+              <div style={{ borderTop: "1.5px solid #1a1c1c", padding: "16px 20px 20px" }}>
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  {schedule.map((block, idx, arr) => {
+                    const color = SCHEDULE_COLORS[block.category];
+                    const isLast = idx === arr.length - 1;
+                    const blockMins = parseMins(block.time);
+                    const nextMins = !isLast ? parseMins(arr[idx + 1].time) : 24 * 60;
+                    const isCurrentSegment = !isLast && currentMins >= blockMins && currentMins < nextMins;
+                    const segmentPct = isCurrentSegment ? ((currentMins - blockMins) / (nextMins - blockMins)) * 100 : 0;
+                    const detail = SCHEDULE_DETAILS[block.title];
+                    return (
+                      <div key={idx} style={{ display: "flex", gap: 12 }}>
+                        <div style={{ width: 40, flexShrink: 0, paddingTop: 2 }}>
+                          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 11, fontWeight: 700, color: "#8a9096", textAlign: "right", lineHeight: 1 }}>{block.time}</p>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
+                          <div style={{ width: 8, height: 8, borderRadius: "50%", background: color, marginTop: 2, flexShrink: 0 }} />
+                          {!isLast && (
+                            <div style={{ position: "relative", width: 1, flex: 1, background: "#e2e2e0", minHeight: 28, overflow: "visible", marginTop: 4 }}>
+                              {isCurrentSegment && (
+                                <div style={{ position: "absolute", display: "flex", alignItems: "center", top: `${segmentPct}%`, right: 0, transform: "translateY(-50%)" }}>
+                                  <span style={{ fontFamily: "Inter, sans-serif", fontSize: 11, fontWeight: 700, color: "white", background: "#2653d4", padding: "3px 7px", whiteSpace: "nowrap", marginRight: 2 }}>
+                                    {String(now.getHours()).padStart(2, "0")}<span style={{ animation: "colonBlink 1s step-start infinite" }}>:</span>{String(now.getMinutes()).padStart(2, "0")}
+                                  </span>
+                                  <svg width="6" height="8" viewBox="0 0 6 8"><polygon points="0,0 6,4 0,8" fill="#171c1f" /></svg>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => detail && setScheduleModal({ title: block.title, subtitle: block.subtitle, category: block.category, detail })}
+                          style={{ paddingBottom: 16, flex: 1, minWidth: 0, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, textAlign: "left", background: "none", border: "none", cursor: detail ? "pointer" : "default" }}
+                          className={detail ? "active:opacity-60 transition-opacity" : ""}
+                        >
+                          <div style={{ minWidth: 0 }}>
+                            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 15, fontWeight: 700, color: "#1a1c1c", lineHeight: 1.2, margin: 0 }}>{block.title}</p>
+                            {block.subtitle && <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#6b7480", marginTop: 2, lineHeight: 1.4 }}>{block.subtitle}</p>}
+                          </div>
+                          {detail && (
+                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#d0d0d0" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 3 }}>
+                              <line x1="5" y1="1" x2="5" y2="9" /><line x1="1" y1="5" x2="9" y2="5" />
+                            </svg>
+                          )}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
       {/* Next Match */}
       <button onClick={() => setMatchOpen(true)} style={{ ...S.card, cursor: "pointer" }} className="active:opacity-60 transition-opacity">
         <p style={{ ...S.label, color: "#8a9096" }}>Next Match</p>
@@ -298,62 +384,6 @@ export default function Home6() {
           <span style={{ fontFamily: "Inter, sans-serif", fontSize: 14, color: "#2653d4", fontWeight: 600 }} onClick={e => { e.stopPropagation(); window.dispatchEvent(new CustomEvent("open-log-sheet")); }}>Add data</span>
         </div>
       </button>
-
-      {/* Today's Schedule */}
-      <div style={{ ...S.card, marginBottom: 0 }}>
-        <p style={{ ...S.label, color: "#8a9096" }}>Today&apos;s Schedule</p>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          {schedule.map((block, idx, arr) => {
-            const color = SCHEDULE_COLORS[block.category];
-            const isLast = idx === arr.length - 1;
-            const blockMins = parseMins(block.time);
-            const nextMins = !isLast ? parseMins(arr[idx + 1].time) : 24 * 60;
-            const isCurrentSegment = !isLast && currentMins >= blockMins && currentMins < nextMins;
-            const segmentPct = isCurrentSegment ? ((currentMins - blockMins) / (nextMins - blockMins)) * 100 : 0;
-            const detail = SCHEDULE_DETAILS[block.title];
-            return (
-              <div key={idx} style={{ display: "flex", gap: 12 }}>
-                {/* Time */}
-                <div style={{ width: 40, flexShrink: 0, paddingTop: 2 }}>
-                  <p style={{ fontFamily: "Inter, sans-serif", fontSize: 11, fontWeight: 700, color: "#8a9096", textAlign: "right", lineHeight: 1 }}>{block.time}</p>
-                </div>
-                {/* Dot + line */}
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: color, marginTop: 2, flexShrink: 0 }} />
-                  {!isLast && (
-                    <div style={{ position: "relative", width: 1, flex: 1, background: "#e2e2e0", minHeight: 28, overflow: "visible", marginTop: 4 }}>
-                      {isCurrentSegment && (
-                        <div style={{ position: "absolute", display: "flex", alignItems: "center", top: `${segmentPct}%`, right: 0, transform: "translateY(-50%)" }}>
-                          <span style={{ fontFamily: "Inter, sans-serif", fontSize: 11, fontWeight: 700, color: "white", background: "#2653d4", padding: "3px 7px", whiteSpace: "nowrap", marginRight: 2 }}>
-                            {String(now.getHours()).padStart(2, "0")}<span style={{ animation: "colonBlink 1s step-start infinite" }}>:</span>{String(now.getMinutes()).padStart(2, "0")}
-                          </span>
-                          <svg width="6" height="8" viewBox="0 0 6 8"><polygon points="0,0 6,4 0,8" fill="#171c1f" /></svg>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-                {/* Content */}
-                <button
-                  onClick={() => detail && setScheduleModal({ title: block.title, subtitle: block.subtitle, category: block.category, detail })}
-                  style={{ paddingBottom: 16, flex: 1, minWidth: 0, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, textAlign: "left", background: "none", border: "none", cursor: detail ? "pointer" : "default" }}
-                  className={detail ? "active:opacity-60 transition-opacity" : ""}
-                >
-                  <div style={{ minWidth: 0 }}>
-                    <p style={{ fontFamily: "Inter, sans-serif", fontSize: 15, fontWeight: 700, color: "#1a1c1c", lineHeight: 1.2, margin: 0 }}>{block.title}</p>
-                    {block.subtitle && <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#6b7480", marginTop: 2, lineHeight: 1.4 }}>{block.subtitle}</p>}
-                  </div>
-                  {detail && (
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#d0d0d0" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 3 }}>
-                      <line x1="5" y1="1" x2="5" y2="9" /><line x1="1" y1="5" x2="9" y2="5" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      </div>
 
       <Nav2a />
 
