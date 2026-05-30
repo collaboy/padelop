@@ -185,7 +185,7 @@ export default function Home3() {
             {/* Left: Next Match */}
             <button
               onClick={() => setFabOpen(true)}
-              style={{ flex: 1, padding: "18px 16px", textAlign: "left", background: "none", border: "none", cursor: "pointer", borderRight: "1px solid #f0f0f0" }}
+              style={{ flex: 1, padding: "18px 16px", textAlign: "left", background: "none", border: "none", cursor: "pointer", borderRight: "1px solid #e2e2e2" }}
             >
               <p style={{ fontFamily: "Inter, sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 6px" }}>Next Match</p>
               {dateLabel ? (
@@ -270,29 +270,6 @@ export default function Home3() {
         </div>
       )}
 
-      {/* Next Match card */}
-      {matchTime ? (() => {
-        const [datePart, timePart] = matchTime.split("T");
-        const d = new Date(datePart + "T12:00");
-        const today = new Date().toISOString().slice(0, 10);
-        const tomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
-        const weekday = d.toLocaleDateString("en-GB", { weekday: "short" });
-        const day = d.getDate();
-        const month = d.toLocaleDateString("en-GB", { month: "short" });
-        const dateStr = datePart === today ? "Today" : datePart === tomorrow ? "Tomorrow" : `${weekday} ${day} ${month}`;
-        return (
-          <div className="bg-white rounded-[24px] px-6 py-5" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)", border: "1px solid #e8eaed" }}>
-            <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Next Match</p>
-            <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{dateStr} · {timePart}</p>
-            {countdown && <p className="text-[13px] text-[#6b7480] mt-1">{countdown}</p>}
-          </div>
-        );
-      })() : (
-        <div className="bg-white rounded-[24px] px-6 py-5" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)", border: "1px solid #e8eaed" }}>
-          <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Next Match</p>
-          <p className="text-[15px] text-[#6b7480]">No match scheduled</p>
-        </div>
-      )}
 
       <div className="flex flex-col">
         {[
