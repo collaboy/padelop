@@ -509,59 +509,6 @@ export default function Home4() {
             {/* Hidden upload input */}
             <input ref={logUploadRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleLogFile} />
 
-            {/* Match + Readiness card */}
-            {(() => {
-              const r = 44;
-              const stroke = 6;
-              const norm = r - stroke / 2;
-              const circ = 2 * Math.PI * norm;
-              const fill = ((READINESS - 65) / 35) * circ;
-              return (
-                <div className="bg-white rounded-[24px] mb-3" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", display: "flex", overflow: "hidden" }}>
-                  {/* Left: Next Match */}
-                  <button
-                    onClick={() => match ? setMatchModalOpen(true) : setAddOpen(true)}
-                    style={{ flex: 1, padding: "18px 16px", textAlign: "left", background: "none", border: "none", cursor: "pointer", borderRight: "1px solid #f0f0f0" }}
-                  >
-                    <p style={{ ...S, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 6px" }}>Next Match</p>
-                    {match ? (
-                      <>
-                        <p style={{ ...S, fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: "0 0 2px", lineHeight: 1.2 }}>
-                          {(() => {
-                            const today = new Date().toISOString().slice(0, 10);
-                            const tomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
-                            const d = new Date(match.date + "T12:00");
-                            if (match.date === today) return "Today";
-                            if (match.date === tomorrow) return "Tomorrow";
-                            return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
-                          })()}
-                        </p>
-                        <p style={{ ...S, fontSize: 14, fontWeight: 600, color: "#2653d4", margin: "0 0 2px" }}>{match.time}</p>
-                        {match.club && <p style={{ ...S, fontSize: 12, color: "#8a9096", margin: 0 }}>{match.club}</p>}
-                      </>
-                    ) : (
-                      <p style={{ ...S, fontSize: 14, fontWeight: 600, color: "#2653d4", margin: 0 }}>+ Add a match</p>
-                    )}
-                  </button>
-                  {/* Right: Match Readiness */}
-                  <button onClick={() => setReadinessOpen(true)} style={{ width: 110, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "18px 12px", background: "none", border: "none", cursor: "pointer" }}>
-                    <div style={{ position: "relative", width: r * 2, height: r * 2 }}>
-                      <svg width={r * 2} height={r * 2} style={{ transform: "rotate(-90deg)" }}>
-                        <circle cx={r} cy={r} r={norm} fill="none" stroke="#e8eaed" strokeWidth={stroke} />
-                        <circle cx={r} cy={r} r={norm} fill="none" stroke="#2653d4" strokeWidth={stroke}
-                          strokeDasharray={`${fill} ${circ}`} strokeLinecap="round" />
-                      </svg>
-                      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                        <span style={{ ...S, fontSize: 18, fontWeight: 700, color: "#2653d4", lineHeight: 1 }}>{READINESS}</span>
-                        <span style={{ ...S, fontSize: 9, fontWeight: 600, color: "#8a9096" }}>/ 100</span>
-                      </div>
-                    </div>
-                    <p style={{ ...S, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "5px 0 0", textAlign: "center" }}>Readiness</p>
-                  </button>
-                </div>
-              );
-            })()}
-
             {/* Today + Readiness hero card */}
             {(() => {
               const weekday = now.toLocaleDateString(undefined, { weekday: "long" });
@@ -842,6 +789,59 @@ export default function Home4() {
           </Link>
         ))}
       </div>
+
+      {/* Match + Readiness card */}
+      {(() => {
+        const r = 44;
+        const stroke = 6;
+        const norm = r - stroke / 2;
+        const circ = 2 * Math.PI * norm;
+        const fill = ((READINESS - 65) / 35) * circ;
+        return (
+          <div className="bg-white rounded-[24px] mt-6" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", display: "flex", overflow: "hidden" }}>
+            {/* Left: Next Match */}
+            <button
+              onClick={() => match ? setMatchModalOpen(true) : setAddOpen(true)}
+              style={{ flex: 1, padding: "18px 16px", textAlign: "left", background: "none", border: "none", cursor: "pointer", borderRight: "1px solid #f0f0f0" }}
+            >
+              <p style={{ ...S, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 6px" }}>Next Match</p>
+              {match ? (
+                <>
+                  <p style={{ ...S, fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: "0 0 2px", lineHeight: 1.2 }}>
+                    {(() => {
+                      const today = new Date().toISOString().slice(0, 10);
+                      const tomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
+                      const d = new Date(match.date + "T12:00");
+                      if (match.date === today) return "Today";
+                      if (match.date === tomorrow) return "Tomorrow";
+                      return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+                    })()}
+                  </p>
+                  <p style={{ ...S, fontSize: 14, fontWeight: 600, color: "#2653d4", margin: "0 0 2px" }}>{match.time}</p>
+                  {match.club && <p style={{ ...S, fontSize: 12, color: "#8a9096", margin: 0 }}>{match.club}</p>}
+                </>
+              ) : (
+                <p style={{ ...S, fontSize: 14, fontWeight: 600, color: "#2653d4", margin: 0 }}>+ Add a match</p>
+              )}
+            </button>
+            {/* Right: Match Readiness */}
+            <button onClick={() => setReadinessOpen(true)} style={{ width: 110, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "18px 12px", background: "none", border: "none", cursor: "pointer" }}>
+              <div style={{ position: "relative", width: r * 2, height: r * 2 }}>
+                <svg width={r * 2} height={r * 2} style={{ transform: "rotate(-90deg)" }}>
+                  <circle cx={r} cy={r} r={norm} fill="none" stroke="#e8eaed" strokeWidth={stroke} />
+                  <circle cx={r} cy={r} r={norm} fill="none" stroke="#2653d4" strokeWidth={stroke}
+                    strokeDasharray={`${fill} ${circ}`} strokeLinecap="round" />
+                </svg>
+                <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                  <span style={{ ...S, fontSize: 18, fontWeight: 700, color: "#2653d4", lineHeight: 1 }}>{READINESS}</span>
+                  <span style={{ ...S, fontSize: 9, fontWeight: 600, color: "#8a9096" }}>/ 100</span>
+                </div>
+              </div>
+              <p style={{ ...S, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "5px 0 0", textAlign: "center" }}>Readiness</p>
+            </button>
+          </div>
+        );
+      })()}
 
       {/* Match detail modal */}
       {matchModalOpen && match && (
