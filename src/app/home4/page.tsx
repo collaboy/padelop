@@ -126,6 +126,8 @@ function getCurrentItem(matchDate: string | null, matchTime: string | null) {
   return schedule[currentIdx];
 }
 
+const READINESS = 85;
+
 const S: React.CSSProperties = {
   fontFamily: "Inter, sans-serif",
   fontSize: 17,
@@ -209,6 +211,8 @@ export default function Home4() {
   const swipeAxis = useRef<"h" | "v" | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const curItemRef = useRef<HTMLDivElement>(null);
+  const [doSlideIdx, setDoSlideIdx] = useState(0);
+  const doTouchStartX = useRef(0);
 
   useEffect(() => {
     try {
@@ -217,11 +221,14 @@ export default function Home4() {
         const m = JSON.parse(raw);
         if (m.date && m.time) {
           const matchMs = new Date(`${m.date}T${m.time}`).getTime();
-          if (matchMs > Date.now()) setMatch({
-            date: m.date, time: m.time,
-            club: m.club || undefined,
-            players: [m.player_1, m.player_2, m.player_3, m.player_4].filter(Boolean),
-          });
+          if (matchMs > Date.now()) {
+            setMatch({
+              date: m.date, time: m.time,
+              club: m.club || undefined,
+              players: [m.player_1, m.player_2, m.player_3, m.player_4].filter(Boolean),
+            });
+            setDoSlideIdx(getScheduleData(m.date, m.time).currentIdx);
+          }
         }
       }
     } catch {}
@@ -242,13 +249,6 @@ export default function Home4() {
     return () => el.removeEventListener("touchmove", onTouchMove);
   }, []);
 
-  useEffect(() => {
-    if (slideIdx !== 2) return;
-    const t = setTimeout(() => {
-      curItemRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 380);
-    return () => clearTimeout(t);
-  }, [slideIdx]);
 
   function saveMatch() {
     if (!form.date || !form.time) return;
@@ -325,10 +325,11 @@ export default function Home4() {
     <main style={{ ...S, padding: "24px 20px 160px", minHeight: "100vh", background: "#f9f9f9" }}>
 
       {(() => {
-        const item = getCurrentItem(match?.date ?? null, match?.time ?? null);
         const { schedule, currentIdx, dayType } = getScheduleData(match?.date ?? null, match?.time ?? null);
         const meta = DAY_TYPE_META[dayType];
         const curMins = now.getHours() * 60 + now.getMinutes();
+        const safeDoIdx = Math.min(doSlideIdx, schedule.length - 1);
+        const doItem = schedule[safeDoIdx];
         void now;
         return (
           <>
@@ -341,8 +342,8 @@ export default function Home4() {
             {/* Swipeable carousel */}
             <div
               ref={carouselRef}
-              className="w-full aspect-square overflow-hidden"
-              style={{ borderRadius: 24, marginBottom: 10, position: "relative", zIndex: 6 }}
+              className="overflow-hidden"
+              style={{ width: "calc(100% + 40px)", marginLeft: -20, marginBottom: 10, position: "relative", zIndex: 6, aspectRatio: "2.69" }}
               onTouchStart={e => {
                 touchStartX.current = e.touches[0].clientX;
                 touchStartY.current = e.touches[0].clientY;
@@ -351,7 +352,7 @@ export default function Home4() {
               onTouchEnd={e => {
                 const dx = e.changedTouches[0].clientX - touchStartX.current;
                 if (swipeAxis.current === "h" && Math.abs(dx) > 40)
-                  setSlideIdx(prev => dx < 0 ? Math.min(prev + 1, 2) : Math.max(prev - 1, 0));
+                  setSlideIdx(prev => dx < 0 ? Math.min(prev + 1, 1) : Math.max(prev - 1, 0));
               }}
             >
               <div
@@ -405,26 +406,26 @@ export default function Home4() {
                         </div>
                       </div>
                     ) : (
-                      <div style={{ flex: 1, overflowY: "auto", padding: 24, display: "flex", flexDirection: "column" }}>
-                        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "#5a7055", margin: 0, textAlign: "center" }}>Log anything</p>
-                        <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 12 }}>
-                          <button onClick={() => { const input = document.createElement("input"); input.type = "file"; input.accept = "image/*"; input.setAttribute("capture", "environment"); input.onchange = (ev) => { const file = (ev.target as HTMLInputElement).files?.[0]; if (!file) return; const url = URL.createObjectURL(file); setLogThumb(url); }; input.click(); }} style={{ width: "100%", background: "#f4f6ff", border: "none", borderRadius: 16, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}>
-                            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2653d418", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: 24, gap: 20 }}>
+                        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "#5a7055", margin: 0, textAlign: "center" }}>Log something</p>
+                        <div style={{ display: "flex", gap: 10 }}>
+                          <button onClick={() => { const input = document.createElement("input"); input.type = "file"; input.accept = "image/*"; input.setAttribute("capture", "environment"); input.onchange = (ev) => { const file = (ev.target as HTMLInputElement).files?.[0]; if (!file) return; const url = URL.createObjectURL(file); setLogThumb(url); }; input.click(); }} style={{ flex: 1, background: "#f4f6ff", border: "none", borderRadius: 16, padding: "16px 8px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, cursor: "pointer" }}>
+                            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2653d418", display: "flex", alignItems: "center", justifyContent: "center" }}>
                               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                             </div>
-                            <div style={{ textAlign: "left" }}><p style={{ fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Camera</p><p style={{ fontSize: 13, color: "#8a9096", margin: 0 }}>Take a photo now</p></div>
+                            <p style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Camera</p>
                           </button>
-                          <button onClick={() => logUploadRef.current?.click()} style={{ width: "100%", background: "#f4f6ff", border: "none", borderRadius: 16, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}>
-                            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2653d418", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <button onClick={() => logUploadRef.current?.click()} style={{ flex: 1, background: "#f4f6ff", border: "none", borderRadius: 16, padding: "16px 8px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, cursor: "pointer" }}>
+                            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2653d418", display: "flex", alignItems: "center", justifyContent: "center" }}>
                               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                             </div>
-                            <div style={{ textAlign: "left" }}><p style={{ fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Upload</p><p style={{ fontSize: 13, color: "#8a9096", margin: 0 }}>Choose from library</p></div>
+                            <p style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Upload</p>
                           </button>
-                          <button onClick={() => setWizardOpen(true)} style={{ width: "100%", background: "#f4f6ff", border: "none", borderRadius: 16, padding: "16px 20px", display: "flex", alignItems: "center", gap: 14, cursor: "pointer" }}>
-                            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2653d418", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <button onClick={() => setWizardOpen(true)} style={{ flex: 1, background: "#f4f6ff", border: "none", borderRadius: 16, padding: "16px 8px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, cursor: "pointer" }}>
+                            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2653d418", display: "flex", alignItems: "center", justifyContent: "center" }}>
                               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                             </div>
-                            <div style={{ textAlign: "left" }}><p style={{ fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Wizard</p><p style={{ fontSize: 13, color: "#8a9096", margin: 0 }}>Step-by-step logging</p></div>
+                            <p style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Wizard</p>
                           </button>
                         </div>
                       </div>
@@ -432,88 +433,53 @@ export default function Home4() {
                   </div>
                 </div>
 
-                {/* Slide 1: Do This Now */}
-                <div style={{ flex: "0 0 100%", height: "100%" }}>
-                  <button
-                    onClick={() => setDoModalOpen(true)}
-                    className="bg-white rounded-[24px] px-6 py-6 flex items-center gap-5 active:opacity-60 transition-opacity text-left w-full h-full"
-                    style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${item.color}` }}
-                  >
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: `${item.color}18` }}>
-                      <div className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: item.color, ["--glow" as string]: item.color }} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Do this now</p>
-                      <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{item.title}</p>
-                      {item.subtitle && (
-                        <span className="inline-flex items-center gap-1 mt-1">
-                          <span className="text-[13px] text-[#6b7480] leading-snug">{item.subtitle}</span>
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                            <path d="M9 18l6-6-6-6"/>
-                          </svg>
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                </div>
-
-                {/* Slide 2: Today's Schedule */}
-                <div style={{ flex: "0 0 100%", height: "100%", overflow: "hidden" }}>
-                  <div
-                    className="bg-white flex flex-col"
-                    style={{ width: "100%", height: "100%", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflowY: "auto" }}
-                  >
-                    <div className="px-5 pt-4 pb-2 flex-shrink-0">
-                      <p style={{ ...S, fontSize: 22, fontWeight: 700, color: "#111", margin: "0 0 4px", lineHeight: 1.2 }}>{greeting()} Eddie</p>
-                      <p style={{ ...S, fontSize: 15, color: "#888", margin: "0 0 14px", lineHeight: 1.5 }}>{getDayMsg(match, now)}</p>
-                      <div className="flex items-center justify-between">
-                        <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055]">Today&apos;s Schedule</p>
-                        <span className="text-[12px] font-semibold px-2.5 py-1 rounded-full" style={{ background: meta.bg, color: meta.color }}>{meta.label}</span>
-                      </div>
-                    </div>
-                    <div className="px-4 pb-6">
-                      {schedule.map((s, i) => {
-                        const isCur = i === currentIdx;
-                        const isPast = !isCur && curMins > toMins(s.time);
-                        const detail = SCHEDULE_DETAILS[s.title];
-                        return (
-                          <div
-                            key={i}
-                            ref={isCur ? curItemRef : undefined}
-                            className="flex items-center gap-3 active:opacity-60 transition-opacity"
-                            style={{
-                              borderBottom: isCur ? "none" : i < schedule.length - 1 ? "1px solid #f4f4f4" : "none",
-                              cursor: detail ? "pointer" : "default",
-                              ...(isCur ? { boxShadow: `0 0 0 1px ${s.color}`, borderRadius: 14, padding: "8px 8px 8px 8px", marginBottom: i < schedule.length - 1 ? 4 : 0 } : { padding: "8px 0", paddingLeft: 8 }),
-                            }}
-                            onClick={() => detail && setSchedItemModal({ title: s.title, subtitle: s.subtitle, detail, color: s.color })}
-                          >
-                            <div
-                              className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                              style={{ background: isPast ? "#f0f0f0" : `${s.color}18` }}
-                            >
-                              {isCur ? (
-                                <div className="w-3 h-3 rounded-full animate-breathe" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
-                              ) : (
-                                <div className="w-3 h-3 rounded-full" style={{ background: isPast ? "#d0d3d6" : s.color }} />
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[12px] font-bold tracking-widest uppercase mb-0.5" style={{ color: isPast ? "#c4c7c7" : s.color }}>{s.time}</p>
-                              <p className="text-[16px] font-semibold leading-snug" style={{ color: isPast ? "#a0a5aa" : "#1a1c1c" }}>{s.title}</p>
-                              {s.subtitle && <p className="text-[13px] mt-0.5 leading-snug" style={{ color: isPast ? "#c4c7c7" : "#6b7480" }}>{s.subtitle}</p>}
-                            </div>
-                            {detail && (
-                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-                                <path d="M9 18l6-6-6-6"/>
-                              </svg>
+                {/* Slide 1: Do This Now — inner peeking carousel */}
+                <div style={{ flex: "0 0 100%", height: "100%", overflow: "hidden" }}
+                  onTouchStart={e => { doTouchStartX.current = e.touches[0].clientX; e.stopPropagation(); }}
+                  onTouchMove={e => e.stopPropagation()}
+                  onTouchEnd={e => {
+                    const dx = e.changedTouches[0].clientX - doTouchStartX.current;
+                    if (Math.abs(dx) > 40)
+                      setDoSlideIdx(prev => dx < 0 ? Math.min(prev + 1, schedule.length - 1) : Math.max(prev - 1, 0));
+                    e.stopPropagation();
+                  }}
+                >
+                  <div style={{
+                    display: "flex",
+                    height: "100%",
+                    gap: 8,
+                    transform: `translateX(calc(9% - ${safeDoIdx} * (82% + 8px)))`,
+                    transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
+                  }}>
+                    {schedule.map((s, i) => (
+                      <div key={i} style={{ flex: "0 0 82%", height: "100%", flexShrink: 0 }}>
+                        <button
+                          onClick={() => setDoModalOpen(true)}
+                          className="bg-white rounded-[24px] px-6 py-6 flex items-center gap-5 active:opacity-60 transition-opacity text-left w-full h-full"
+                          style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${s.color}` }}
+                        >
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: `${s.color}18` }}>
+                            {i === currentIdx ? (
+                              <div className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
+                            ) : (
+                              <div className="w-3.5 h-3.5 rounded-full" style={{ background: s.color }} />
                             )}
                           </div>
-                        );
-                      })}
-                    </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">{i === currentIdx ? "Do this now" : s.time}</p>
+                            <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{s.title}</p>
+                            {s.subtitle && (
+                              <span className="inline-flex items-center gap-1 mt-1">
+                                <span className="text-[13px] text-[#6b7480] leading-snug">{s.subtitle}</span>
+                              </span>
+                            )}
+                          </div>
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 </div>
+
 
               </div>
             </div>
@@ -521,15 +487,14 @@ export default function Home4() {
             {/* Hidden upload input */}
             <input ref={logUploadRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleLogFile} />
 
-            {/* Dot navigation */}
-            <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 32 }}>
-              {[0, 1, 2].map(i => (
-                <button
-                  key={i}
-                  onClick={() => setSlideIdx(i)}
-                  style={{ width: 6, height: 6, borderRadius: "50%", background: i === slideIdx ? "#1a1c1c" : "#d0d3d6", border: "none", padding: 0, cursor: "pointer", transition: "background 0.2s" }}
-                />
-              ))}
+            {/* Current day info */}
+            <div className="rounded-[24px] px-5 py-4 mb-2">
+              <p style={{ ...S, fontSize: 22, fontWeight: 700, color: "#111", margin: "0 0 4px", lineHeight: 1.2 }}>{greeting()} Eddie</p>
+              <div className="flex items-center gap-2 mb-1">
+                <p style={{ ...S, fontSize: 14, color: "#8a9096", margin: 0 }}>{now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</p>
+                <span className="text-[11px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full" style={{ background: meta.bg, color: meta.color }}>{meta.label}</span>
+              </div>
+              <p style={{ ...S, fontSize: 15, color: "#888", margin: 0, lineHeight: 1.5 }}>{getDayMsg(match, now)}</p>
             </div>
 
             {/* Wizard modal */}
@@ -590,17 +555,17 @@ export default function Home4() {
                   style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.15)" }}
                   onClick={e => e.stopPropagation()}
                 >
-                  <div className="px-6 pt-5 pb-4" style={{ background: "#f59e0b18" }}>
+                  <div className="px-6 pt-5 pb-4" style={{ background: `${doItem.color}18` }}>
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#f59e0b" }} />
-                      <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: "#f59e0b" }}>Today&apos;s Schedule</p>
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: doItem.color }} />
+                      <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: doItem.color }}>Today&apos;s Schedule</p>
                     </div>
-                    <h3 className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{item.title}</h3>
-                    {item.subtitle && <p className="text-[15px] text-[#6b7480] mt-0.5">{item.subtitle}</p>}
+                    <h3 className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{doItem.title}</h3>
+                    {doItem.subtitle && <p className="text-[15px] text-[#6b7480] mt-0.5">{doItem.subtitle}</p>}
                   </div>
-                  {SCHEDULE_DETAILS[item.title] && (
+                  {SCHEDULE_DETAILS[doItem.title] && (
                     <div className="px-6 py-5">
-                      <p className="text-[17px] text-[#2c3235] leading-relaxed">{SCHEDULE_DETAILS[item.title]}</p>
+                      <p className="text-[17px] text-[#2c3235] leading-relaxed">{SCHEDULE_DETAILS[doItem.title]}</p>
                     </div>
                   )}
                 </div>
@@ -615,7 +580,7 @@ export default function Home4() {
       {match ? (
         <button
           onClick={() => setMatchModalOpen(true)}
-          style={{ ...S, background: "none", border: "none", padding: 0, margin: "0 0 32px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, textAlign: "center", width: "100%" }}
+          style={{ ...S, background: "none", border: "none", padding: 0, margin: "0 0 32px", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, width: "100%" }}
         >
           {matchLabel(match.date, match.time)}
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -623,7 +588,7 @@ export default function Home4() {
           </svg>
         </button>
       ) : (
-        <button onClick={() => setAddOpen(true)} style={{ ...S, background: "none", border: "none", padding: 0, margin: "0 0 32px", cursor: "pointer", display: "block", width: "100%", textAlign: "center" }}>
+        <button onClick={() => setAddOpen(true)} style={{ ...S, background: "none", border: "none", padding: 0, margin: "0 0 32px", cursor: "pointer", display: "block", width: "100%", textAlign: "left" }}>
           + Add a match
         </button>
       )}
@@ -661,6 +626,7 @@ export default function Home4() {
               </div>
               <h3 className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{matchLabel(match.date, match.time).replace("Next Match: ", "")}</h3>
               {match.club && <p className="text-[15px] text-[#6b7480] mt-1">{match.club}</p>}
+              <p className="text-[13px] mt-2" style={{ color: "#4a5a70" }}>Match Readiness <span className="font-bold" style={{ color: "#2653d4" }}>{READINESS}%</span></p>
             </div>
             {match.players && match.players.length > 0 && (
               <div className="px-6 py-5">
