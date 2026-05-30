@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import WeekStrip from "./week-strip";
 import Recommendations, { getRecommendations, RecCard } from "./recommendations";
+import LogSheet from "./log-sheet";
 
 const STORAGE_KEY = "padelop:game-days";
 const GAME_TIMES_KEY = "padelop:game-times";
@@ -422,10 +423,11 @@ export default function HomeClient() {
     return { time: "21:00", location: "Di Cagno Sports Club", court: "6", partner: "Bobby M" };
   });
   const [gameDetailsOpen, setGameDetailsOpen] = useState(false);
+  const [logOpen, setLogOpen] = useState(false);
   const cardTouchX = useRef(0);
   const notifTimeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  // Daily Optimizer
+  // Daily Check-in
   const [checkInOpen, setCheckInOpen] = useState(false);
   const [checkInDone, setCheckInDone] = useState(false);
   const [checkIn, setCheckIn] = useState({ sleep: 3, energy: 3, soreness: 3, hydration: 3 });
@@ -450,6 +452,9 @@ export default function HomeClient() {
         setHomeMatchDone(true);
       } catch {}
     }
+    const openLog = () => setLogOpen(true);
+    window.addEventListener("open-log-sheet", openLog);
+    return () => window.removeEventListener("open-log-sheet", openLog);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -795,8 +800,45 @@ export default function HomeClient() {
     <div className="pb-8">
       <style>{`@keyframes colonBlink{0%,49%{opacity:1}50%,100%{opacity:0}}`}</style>
 
+      {/* Do This Now */}
+      {(() => {
+        const schedule = getDaySchedule();
+        const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+        const now = new Date();
+        const curMins = now.getHours() * 60 + now.getMinutes();
+        let autoIdx = 0;
+        if (curMins >= toMins(schedule[schedule.length - 1].time)) { autoIdx = schedule.length - 1; }
+        else { for (let i = 0; i < schedule.length - 1; i++) { if (curMins >= toMins(schedule[i].time) && curMins < toMins(schedule[i + 1].time)) { autoIdx = i; break; } } }
+        const item = schedule[autoIdx];
+        const color = SCHEDULE_COLORS[item.category];
+        const detail = SCHEDULE_DETAILS[item.title];
+        return (
+          <div className="pt-5 px-5 md:px-12 pb-0">
+            <button
+              className="w-full bg-white rounded-[24px] px-5 py-5 flex items-center gap-4 active:opacity-60 transition-opacity text-left"
+              style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${color}` }}
+              onClick={() => detail && setScheduleModal({ title: item.title, subtitle: item.subtitle, category: item.category, detail })}
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: color + "18" }}>
+                <div className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: color, "--glow": color } as React.CSSProperties} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Do this now</p>
+                <p className="text-[20px] font-bold text-[#1a1c1c] leading-tight">{item.title}</p>
+                {item.subtitle && <p className="text-[13px] text-[#4a5050] mt-1 leading-snug">{item.subtitle}</p>}
+              </div>
+              {detail && (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
+              )}
+            </button>
+          </div>
+        );
+      })()}
+
       {/* Match Ready hero card */}
-      <div className="pt-[80px] px-5 md:px-12 pb-4 bg-[var(--bg)]">
+      <div className="pt-4 px-5 md:px-12 pb-4 bg-[var(--bg)]">
         <div className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm px-4 py-1 flex flex-col items-center text-center gap-2">
           {/* Ring */}
           <div className="relative w-full" style={{ maxWidth: 260, aspectRatio: "1/1", marginTop: "-20px", marginBottom: "-28px" }}>
@@ -914,20 +956,20 @@ export default function HomeClient() {
         );
       })()}
 
-      {/* Daily Optimizer card */}
+      {/* Daily Check-in card */}
       <div className="px-5 md:px-12 pb-4 bg-[var(--bg)]">
         {checkInDone ? (
           <button onClick={() => setCheckInOpen(true)} className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm px-4 py-3 flex items-center justify-between active:scale-[0.98] transition-all">
             <div className="flex items-center gap-3">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="8,12 11,15 16,9"/></svg>
-              <span className="text-sm font-bold text-[var(--text)]">Daily Optimizer</span>
+              <span className="text-sm font-bold text-[var(--text)]">Daily Check-in</span>
             </div>
             <span className="text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full bg-green-50 text-green-700 border border-green-200">Done</span>
           </button>
         ) : (
           <button onClick={() => setCheckInOpen(true)} className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm px-4 py-5 flex items-center justify-between active:scale-[0.98] transition-transform">
             <div className="text-left">
-              <p className="text-lg font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>Daily Optimizer</p>
+              <p className="text-lg font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>Daily Check-in</p>
               <p className="text-sm text-[var(--muted)] mt-0.5">Rate how you&apos;re feeling today</p>
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
@@ -1017,22 +1059,28 @@ export default function HomeClient() {
         </Link>
       </div>
 
-      {/* Today / This Week toggle card */}
+      {/* Today / This Month toggle card */}
       <div className="px-5 md:px-12 pb-3 bg-[var(--bg)]">
         <div className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden">
           <div className="px-4 pt-3 pb-2 flex flex-col items-center">
             <div className="w-full overflow-hidden flex justify-center">
               <span className="relative flex-shrink-0">
                 <span className="text-2xl font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>
-                  {activeTab === "today" ? "Today" : "This Week"}
+                  {activeTab === "today" ? "Today" : "This Month"}
                 </span>
-                <button
-                  className="absolute top-0 left-full pl-3 text-2xl font-extrabold whitespace-nowrap"
-                  style={{ fontFamily: "var(--font-hanken)", color: "var(--text)", opacity: 0.18, WebkitMaskImage: "linear-gradient(to right, black 0%, transparent 65%)", maskImage: "linear-gradient(to right, black 0%, transparent 65%)" }}
-                  onClick={() => { if (activeTab === "today") { setActiveTab("week"); } else { setActiveTab("today"); } }}
-                >
-                  {activeTab === "today" ? "This Week" : "Today"}
-                </button>
+                {activeTab === "today" ? (
+                  <button
+                    className="absolute top-0 left-full pl-3 text-2xl font-extrabold whitespace-nowrap"
+                    style={{ fontFamily: "var(--font-hanken)", color: "var(--text)", opacity: 0.18, WebkitMaskImage: "linear-gradient(to right, black 0%, transparent 65%)", maskImage: "linear-gradient(to right, black 0%, transparent 65%)" }}
+                    onClick={() => setActiveTab("week")}
+                  >This Month</button>
+                ) : (
+                  <button
+                    className="absolute top-0 right-full pr-3 text-2xl font-extrabold whitespace-nowrap"
+                    style={{ fontFamily: "var(--font-hanken)", color: "var(--text)", opacity: 0.18, WebkitMaskImage: "linear-gradient(to left, black 0%, transparent 65%)", maskImage: "linear-gradient(to left, black 0%, transparent 65%)" }}
+                    onClick={() => setActiveTab("today")}
+                  >Today</button>
+                )}
               </span>
             </div>
             <div className="flex gap-1.5 mt-1.5">
@@ -1726,13 +1774,13 @@ export default function HomeClient() {
         </div>
       )}
 
-      {/* Daily Optimizer modal */}
+      {/* Daily Check-in modal */}
       {checkInOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-6" onClick={() => setCheckInOpen(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div className="relative w-full max-w-sm bg-[var(--surface)] rounded-3xl overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="px-6 pt-6 pb-2 bg-green-50">
-              <p className="text-base font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>Daily Optimizer</p>
+              <p className="text-base font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>Daily Check-in</p>
               <p className="text-xs text-[var(--muted)] mt-0.5 mb-4">How are you feeling today?</p>
             </div>
             <div className="px-6 py-5 space-y-6">
@@ -1808,6 +1856,28 @@ export default function HomeClient() {
           </div>
         </div>
       )}
+
+      {/* FAB */}
+      <button
+        onClick={() => setLogOpen(true)}
+        className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
+        style={{
+          bottom: "calc(5rem + env(safe-area-inset-bottom))",
+          right: "1.25rem",
+          width: 56,
+          height: 56,
+          borderRadius: 28,
+          background: "#2653d4",
+          boxShadow: "0 4px 16px rgba(38,83,212,0.35)",
+        }}
+        aria-label="Log activity"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
+
+      <LogSheet open={logOpen} onClose={() => setLogOpen(false)} />
 
     </div>
   );

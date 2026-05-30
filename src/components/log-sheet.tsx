@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { saveCheckIn } from "@/lib/scoring";
+import { saveCheckIn, computeScores, loadScoringData } from "@/lib/scoring";
 
 interface Props {
   open: boolean;
@@ -462,6 +462,9 @@ export default function LogSheet({ open, onClose }: Props) {
 
   // ── Main picker ──────────────────────────────────────────────────────────
 
+  const scoringData = loadScoringData();
+  const overallScore = Math.round(computeScores(scoringData.checkIn, scoringData.hydration, scoringData.review, scoringData.nutrition, scoringData.gameDaysThisWeek, scoringData.habits).overall);
+
   const todayStr = todayYMD;
   let ciDone = false;
   try { const ci = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null"); ciDone = ci?.date === todayStr; } catch {}
@@ -494,6 +497,12 @@ export default function LogSheet({ open, onClose }: Props) {
         style={{ animation: "speedDialUp 0.25s cubic-bezier(0.22,1,0.36,1)", maxHeight: "85vh" }}
         onClick={e => e.stopPropagation()}>
         <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4 mb-2 flex-shrink-0"/>
+        <div className="px-6 pt-2 pb-3" style={{ borderBottom: "1px solid #f0f0f0" }}>
+          <div className="flex items-baseline gap-2.5">
+            <span className="text-[32px] font-bold leading-none text-[#1a1c1c]">{overallScore}</span>
+            <span className="text-[13px] font-semibold text-[#4a5050]">Match Readiness</span>
+          </div>
+        </div>
         <div className="overflow-y-auto flex-1 overscroll-contain">
           {/* Method picker */}
           {!logMethod && (
