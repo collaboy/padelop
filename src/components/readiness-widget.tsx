@@ -126,7 +126,7 @@ export default function ReadinessWidget({ hideCard = false, showImprove = false 
           <button
             onClick={() => window.dispatchEvent(new CustomEvent("open-log-sheet"))}
             className="flex items-center gap-1.5 px-4 py-2 rounded-full active:opacity-70 transition-opacity"
-            style={{ background: "#fff", border: "1px solid #e8e8e8", cursor: "pointer", marginTop: -8 }}
+            style={{ background: "#fff", border: "1px solid #e8e8e8", cursor: "pointer", marginTop: -8, marginBottom: 12 }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
