@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Nav2a from "@/components/nav2a";
 
 function greeting() {
   const h = new Date().getHours();
@@ -321,7 +322,7 @@ export default function Home4() {
   }
 
   return (
-    <main style={{ ...S, padding: "24px 20px", minHeight: "100vh", background: "#f9f9f9" }}>
+    <main style={{ ...S, padding: "24px 20px 160px", minHeight: "100vh", background: "#f9f9f9" }}>
 
       {(() => {
         const item = getCurrentItem(match?.date ?? null, match?.time ?? null);
@@ -461,14 +462,14 @@ export default function Home4() {
                     style={{ width: "100%", height: "100%", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflowY: "auto" }}
                   >
                     <div className="px-5 pt-4 pb-2 flex-shrink-0">
-                      <p style={{ ...S, fontSize: 20, fontWeight: 700, color: "#111", margin: "0 0 4px", lineHeight: 1.2 }}>{greeting()} Eddie</p>
-                      <p style={{ ...S, fontSize: 15, color: "#888", margin: "0 0 12px", lineHeight: 1.5 }}>{getDayMsg(match, now)}</p>
+                      <p style={{ ...S, fontSize: 22, fontWeight: 700, color: "#111", margin: "0 0 4px", lineHeight: 1.2 }}>{greeting()} Eddie</p>
+                      <p style={{ ...S, fontSize: 15, color: "#888", margin: "0 0 14px", lineHeight: 1.5 }}>{getDayMsg(match, now)}</p>
                       <div className="flex items-center justify-between">
                         <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055]">Today&apos;s Schedule</p>
                         <span className="text-[12px] font-semibold px-2.5 py-1 rounded-full" style={{ background: meta.bg, color: meta.color }}>{meta.label}</span>
                       </div>
                     </div>
-                    <div className="px-5 pb-4">
+                    <div className="px-4 pb-6">
                       {schedule.map((s, i) => {
                         const isCur = i === currentIdx;
                         const isPast = !isCur && curMins > toMins(s.time);
@@ -481,7 +482,7 @@ export default function Home4() {
                             style={{
                               borderBottom: isCur ? "none" : i < schedule.length - 1 ? "1px solid #f4f4f4" : "none",
                               cursor: detail ? "pointer" : "default",
-                              ...(isCur ? { border: `1px solid ${s.color}`, borderRadius: 14, padding: "8px 8px 8px 8px", marginBottom: i < schedule.length - 1 ? 4 : 0 } : { padding: "8px 0", paddingLeft: 8 }),
+                              ...(isCur ? { boxShadow: `0 0 0 1px ${s.color}`, borderRadius: 14, padding: "8px 8px 8px 8px", marginBottom: i < schedule.length - 1 ? 4 : 0 } : { padding: "8px 0", paddingLeft: 8 }),
                             }}
                             onClick={() => detail && setSchedItemModal({ title: s.title, subtitle: s.subtitle, detail, color: s.color })}
                           >
@@ -496,9 +497,9 @@ export default function Home4() {
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-[10px] font-bold tracking-widest uppercase mb-0.5" style={{ color: isPast ? "#c4c7c7" : s.color }}>{s.time}</p>
-                              <p className="text-[13px] font-semibold leading-snug" style={{ color: isPast ? "#a0a5aa" : "#1a1c1c" }}>{s.title}</p>
-                              {s.subtitle && <p className="text-[11px] mt-0.5 leading-snug" style={{ color: isPast ? "#c4c7c7" : "#6b7480" }}>{s.subtitle}</p>}
+                              <p className="text-[12px] font-bold tracking-widest uppercase mb-0.5" style={{ color: isPast ? "#c4c7c7" : s.color }}>{s.time}</p>
+                              <p className="text-[16px] font-semibold leading-snug" style={{ color: isPast ? "#a0a5aa" : "#1a1c1c" }}>{s.title}</p>
+                              {s.subtitle && <p className="text-[13px] mt-0.5 leading-snug" style={{ color: isPast ? "#c4c7c7" : "#6b7480" }}>{s.subtitle}</p>}
                             </div>
                             {detail && (
                               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
@@ -794,6 +795,7 @@ export default function Home4() {
         </div>
       )}
 
+      <Nav2a />
     </main>
   );
 }
