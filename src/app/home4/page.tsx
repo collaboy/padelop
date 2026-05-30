@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import Nav4 from "@/components/nav4";
+import LogSheet from "@/components/log-sheet";
 
 function greeting() {
   const h = new Date().getHours();
@@ -100,8 +102,14 @@ function getScheduleData(matchDate: string | null, matchTime: string | null) {
       if (curMins >= toMins(schedule[i].time) && curMins < toMins(schedule[i + 1].time)) { idx = i; break; }
     }
   }
-  return { schedule, currentIdx: idx };
+  return { schedule, currentIdx: idx, dayType };
 }
+
+const DAY_TYPE_META = {
+  match:    { label: "Game Day",     bg: "#1e3a1e18", color: "#1e3a1e" },
+  recovery: { label: "Recovery Day", bg: "#7c3aed18", color: "#7c3aed" },
+  rest:     { label: "Rest Day",     bg: "#94a3b818", color: "#64748b" },
+};
 
 const SCHEDULE_DETAILS: Record<string, string> = {
   "Wake up & hydrate": "Starting your day with 500 ml of water re-hydrates you after 7–8 hours without fluids. Do this before coffee — caffeine is a mild diuretic and amplifies morning dehydration.",
@@ -136,10 +144,13 @@ const S: React.CSSProperties = {
 
 export default function Home4() {
   const [doModalOpen, setDoModalOpen] = useState(false);
+  const [logSheetOpen, setLogSheetOpen] = useState(false);
+  const [schedItemModal, setSchedItemModal] = useState<{ title: string; subtitle?: string; color: string; detail: string } | null>(null);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
   const [now, setNow] = useState(new Date());
   const [doSlideIdx, setDoSlideIdx] = useState(0);
   const doTouchStartX = useRef(0);
+  const curItemRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     try {
@@ -168,10 +179,11 @@ export default function Home4() {
     <main style={{ ...S, padding: "24px 20px 120px", minHeight: "100vh", background: "#f9f9f9" }}>
 
       {(() => {
-        const { schedule, currentIdx } = getScheduleData(match?.date ?? null, match?.time ?? null);
+        const { schedule, currentIdx, dayType } = getScheduleData(match?.date ?? null, match?.time ?? null);
+        const meta = DAY_TYPE_META[dayType];
         const safeDoIdx = Math.min(doSlideIdx, schedule.length - 1);
         const doItem = schedule[safeDoIdx];
-        void now;
+        const curMins = now.getHours() * 60 + now.getMinutes();
         return (
           <>
             {/* Do This Now — swipeable through schedule items */}
@@ -220,6 +232,86 @@ export default function Home4() {
               </div>
             </div>
 
+            {/* Today's Schedule */}
+            <div className="bg-white flex flex-col" style={{ borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflow: "hidden", marginBottom: 12 }}>
+              <div className="px-5 pt-4 pb-2 flex-shrink-0">
+                <p style={{ ...S, fontSize: 22, fontWeight: 700, color: "#111", margin: "0 0 4px" }}>{greeting()} Eddie</p>
+                <p style={{ ...S, fontSize: 15, color: "#888", margin: 0 }}>{getDayMsg(match, now)}</p>
+              </div>
+              <div className="px-5 pt-3 pb-2 flex items-center justify-between flex-shrink-0">
+                <p style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>Today&apos;s Schedule</p>
+                <span style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "4px 10px", borderRadius: 999, background: meta.bg, color: meta.color }}>{meta.label}</span>
+              </div>
+              <div className="px-4 pb-6">
+                {schedule.map((s, i) => {
+                  const isCur = i === currentIdx;
+                  const isPast = !isCur && curMins > toMins(s.time);
+                  const detail = SCHEDULE_DETAILS[s.title];
+                  return (
+                    <div
+                      key={i}
+                      ref={isCur ? curItemRef : undefined}
+                      className="flex items-center gap-3 active:opacity-60 transition-opacity"
+                      style={{
+                        borderBottom: isCur ? "none" : i < schedule.length - 1 ? "1px solid #f4f4f4" : "none",
+                        cursor: detail ? "pointer" : "default",
+                        ...(isCur
+                          ? { boxShadow: `0 0 0 1px ${s.color}`, borderRadius: 14, padding: "8px", marginBottom: i < schedule.length - 1 ? 4 : 0 }
+                          : { padding: "8px 0", paddingLeft: 8 }),
+                      }}
+                      onClick={() => detail && setSchedItemModal({ title: s.title, subtitle: s.subtitle, color: s.color, detail })}
+                    >
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: isPast ? "#f0f0f0" : `${s.color}18` }}>
+                        {isCur ? (
+                          <div className="w-3 h-3 rounded-full animate-breathe" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
+                        ) : (
+                          <div className="w-3 h-3 rounded-full" style={{ background: isPast ? "#d0d3d6" : s.color }} />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12px] font-bold tracking-widest uppercase mb-0.5" style={{ color: isPast ? "#c4c7c7" : s.color }}>{s.time}</p>
+                        <p className="text-[16px] font-semibold leading-snug" style={{ color: isPast ? "#a0a5aa" : "#1a1c1c" }}>{s.title}</p>
+                        {s.subtitle && <p className="text-[13px] mt-0.5 leading-snug" style={{ color: isPast ? "#c4c7c7" : "#6b7480" }}>{s.subtitle}</p>}
+                      </div>
+                      {detail && (
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                          <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Quick links */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 0, padding: "4px 4px 8px" }}>
+              <button onClick={() => setLogSheetOpen(true)} style={{ ...S, background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, paddingBottom: 10, color: "#2653d4", fontSize: 15, fontWeight: 600 }}>
+                + Add Data
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
+              </button>
+              {[
+                { href: "/insights4", label: "Improve Readiness", icon: "riser" },
+                { href: "/insights2a", label: "View Insights" },
+                { href: "/track2a", label: "Track Something" },
+                { href: "/matches2a", label: "Upcoming Matches" },
+              ].map(({ href, label, icon }, i, arr) => (
+                <Link key={href} href={href} style={{ ...S, textDecoration: "none", display: "flex", alignItems: "center", gap: 4, paddingBottom: i < arr.length - 1 ? 10 : 0, color: "#2653d4", fontSize: 15, fontWeight: 600 }}>
+                  {label}
+                  {icon === "riser" && (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+                    </svg>
+                  )}
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 18l6-6-6-6"/>
+                  </svg>
+                </Link>
+              ))}
+            </div>
+
             {doModalOpen && (
               <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => setDoModalOpen(false)}>
                 <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
@@ -244,10 +336,22 @@ export default function Home4() {
                 </div>
               </div>
             )}
+            {schedItemModal && (
+              <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => setSchedItemModal(null)}>
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+                <div className="relative bg-white rounded-[28px] px-7 py-8 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+                  <p className="text-[11px] font-bold tracking-widest uppercase mb-2" style={{ color: schedItemModal.color }}>{schedItemModal.title}</p>
+                  {schedItemModal.subtitle && <p className="text-[15px] text-[#6b7480] mb-3">{schedItemModal.subtitle}</p>}
+                  <p className="text-[17px] text-[#2c3235] leading-relaxed">{schedItemModal.detail}</p>
+                  <button onClick={() => setSchedItemModal(null)} className="mt-6 w-full py-3 rounded-2xl text-[15px] font-bold" style={{ background: schedItemModal.color + "18", color: schedItemModal.color }}>Got it</button>
+                </div>
+              </div>
+            )}
           </>
         );
       })()}
 
+      <LogSheet open={logSheetOpen} onClose={() => setLogSheetOpen(false)} />
       <Nav4 />
     </main>
   );
