@@ -177,7 +177,7 @@ export default function Home4() {
 
 
   return (
-    <main style={{ ...S, padding: "24px 20px 120px", minHeight: "100vh", background: "#f9f9f9" }}>
+    <main style={{ ...S, padding: "24px 20px 120px", background: "#f9f9f9" }}>
 
       {(() => {
         const { schedule, currentIdx, dayType } = getScheduleData(match?.date ?? null, match?.time ?? null);
@@ -187,10 +187,10 @@ export default function Home4() {
         const curMins = now.getHours() * 60 + now.getMinutes();
         return (
           <>
-            {/* Do This Now — swipeable through schedule items */}
+            {/* Do This Now — vertically centered on screen */}
             <div
               className="w-full overflow-hidden"
-              style={{ borderRadius: 24, marginBottom: 10, aspectRatio: "1" }}
+              style={{ borderRadius: 24, aspectRatio: "1", marginBottom: 20 }}
               onTouchStart={e => { doTouchStartX.current = e.touches[0].clientX; }}
               onTouchEnd={e => {
                 const dx = e.changedTouches[0].clientX - doTouchStartX.current;
@@ -211,8 +211,8 @@ export default function Home4() {
                       className="bg-white rounded-[24px] px-6 py-6 flex flex-col justify-end active:opacity-60 transition-opacity text-left w-full h-full relative overflow-hidden"
                       style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${s.color}` }}
                     >
-                      {/* Dot — centered in card */}
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      {/* Dot — upper third */}
+                      <div className="absolute inset-0 flex items-start justify-center pointer-events-none" style={{ paddingTop: "18%" }}>
                         <div className="w-36 h-36 rounded-full flex items-center justify-center" style={{ background: `${s.color}12` }}>
                           {i === currentIdx ? (
                             <div className="w-16 h-16 rounded-full breathe-strong" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
@@ -223,9 +223,9 @@ export default function Home4() {
                       </div>
                       {/* Text — bottom */}
                       <div className="min-w-0">
-                        <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">{i === currentIdx ? "Do this now" : s.time}</p>
-                        <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{s.title}</p>
-                        {s.subtitle && <span className="inline-flex items-center gap-1 mt-1"><span className="text-[13px] text-[#6b7480] leading-snug">{s.subtitle}</span></span>}
+                        <p className="text-[13px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">{i === currentIdx ? "Do this now" : s.time}</p>
+                        <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">{s.title}</p>
+                        {s.subtitle && <span className="inline-flex items-center gap-1 mt-1"><span className="text-[16px] text-[#6b7480] leading-none">{s.subtitle}</span></span>}
                       </div>
                     </button>
                   </div>
@@ -233,12 +233,35 @@ export default function Home4() {
               </div>
             </div>
 
+            {/* Do This Now — horizontal card */}
+            <button
+              className="w-full bg-white rounded-[24px] px-5 py-5 flex items-center gap-4 active:opacity-60 transition-opacity text-left"
+              style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${doItem.color}`, marginBottom: 10 }}
+              onClick={() => setDoModalOpen(true)}
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: doItem.color + "18" }}>
+                <div className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: doItem.color, ["--glow" as string]: doItem.color } as React.CSSProperties} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Do this now</p>
+                <p className="text-[20px] font-bold text-[#1a1c1c] leading-tight">{doItem.title}</p>
+                {doItem.subtitle && <p className="text-[13px] text-[#4a5050] mt-1 leading-snug">{doItem.subtitle}</p>}
+              </div>
+              {SCHEDULE_DETAILS[doItem.title] && (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 18l6-6-6-6" />
+                </svg>
+              )}
+            </button>
+
+            {/* Greeting */}
+            <div style={{ marginBottom: 16 }}>
+              <p style={{ ...S, fontSize: 22, fontWeight: 700, color: "#111", margin: "0 0 4px" }}>{greeting()} Eddie</p>
+              <p style={{ ...S, fontSize: 15, color: "#888", margin: 0 }}>{getDayMsg(match, now)}</p>
+            </div>
+
             {/* Today's Schedule */}
             <div className="bg-white flex flex-col" style={{ borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflow: "hidden", marginBottom: 12 }}>
-              <div className="px-5 pt-4 pb-2 flex-shrink-0">
-                <p style={{ ...S, fontSize: 22, fontWeight: 700, color: "#111", margin: "0 0 4px" }}>{greeting()} Eddie</p>
-                <p style={{ ...S, fontSize: 15, color: "#888", margin: 0 }}>{getDayMsg(match, now)}</p>
-              </div>
               <button
                 onClick={() => setSchedOpen(o => !o)}
                 className="px-5 pt-3 pb-4 flex items-center justify-between flex-shrink-0 w-full active:opacity-60 transition-opacity"

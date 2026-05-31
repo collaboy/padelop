@@ -57,7 +57,7 @@ body {
 @keyframes breathe { 0%, 100% { box-shadow: 0 0 5px 0px var(--glow, #16a34a); } 50% { box-shadow: 0 0 20px 5px var(--glow, #16a34a); } }
 .animate-breathe { animation: breathe 2.5s ease-in-out infinite; }
 @keyframes breathe-strong { 0%, 100% { box-shadow: 0 0 10px 4px color-mix(in srgb, var(--glow, #2653d4) 50%, transparent); } 50% { box-shadow: 0 0 36px 14px color-mix(in srgb, var(--glow, #2653d4) 35%, transparent); } }
-.breathe-strong { animation: breathe-strong 2.4s ease-in-out infinite; }
+.breathe-strong { animation: breathe-strong 1.6s ease-in-out infinite; }
 
 @keyframes nav-slide-out-left  { to   { transform: translateX(-28%); opacity: 0; } }
 @keyframes nav-slide-out-right { to   { transform: translateX(28%);  opacity: 0; } }
