@@ -168,6 +168,8 @@ function getDayMsg(match: { date: string; time: string } | null, now: Date): str
 
 export default function Home6() {
   const [matchTime, setMatchTime] = useState<string | null>(null);
+  const [matchLocation, setMatchLocation] = useState<string>("");
+  const [matchCourt, setMatchCourt] = useState<string>("");
   const [doNowOpen, setDoNowOpen] = useState(false);
   const [matchOpen, setMatchOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
@@ -186,7 +188,7 @@ export default function Home6() {
   useEffect(() => {
     try {
       const raw = localStorage.getItem("padelop:next-match");
-      if (raw) { const m = JSON.parse(raw); if (m.date && m.time) setMatchTime(`${m.date}T${m.time}`); }
+      if (raw) { const m = JSON.parse(raw); if (m.date && m.time) { setMatchTime(`${m.date}T${m.time}`); if (m.location) setMatchLocation(m.location); if (m.court) setMatchCourt(m.court); } }
     } catch {}
     try {
       const s = localStorage.getItem("padelop:game-days");
@@ -228,7 +230,7 @@ export default function Home6() {
   const S = {
     label: { fontFamily: "Inter, sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" as const, margin: "0 0 8px" },
     h2: { fontFamily: "Inter, sans-serif", fontSize: 24, fontWeight: 700, color: "#1a1c1c", margin: "0 0 6px", letterSpacing: "-0.01em" },
-    sub: { fontFamily: "Inter, sans-serif", fontSize: 15, color: "#6b7480", lineHeight: 1.5, margin: 0 },
+    sub: { fontFamily: "Inter, sans-serif", fontSize: 15, color: "#6b7480", lineHeight: 1.25, margin: 0 },
     divider: { height: 1, background: "#e2e2e0" },
     card: { background: "white", border: "1.5px solid #1a1c1c", borderRadius: 0, textAlign: "left" as const, padding: "20px 20px", display: "block", width: "100%", marginBottom: 12 },
   };
@@ -249,30 +251,10 @@ export default function Home6() {
 
   return (
     <main
-      className="h1-font min-h-screen flex flex-col px-6 pt-16 pb-44"
+      className="h1-font min-h-screen flex flex-col px-6 pt-6 pb-44"
       style={{ background: "#f9f9f9" }}
     >
       <style>{`@keyframes colonBlink{0%,49%{opacity:1}50%,100%{opacity:0}}`}</style>
-
-      {/* Greeting */}
-      <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 6px" }}>
-        {greeting()}
-      </p>
-      <p style={{ fontFamily: "Inter, sans-serif", fontSize: 32, fontWeight: 800, color: "#1a1c1c", lineHeight: 1.15, margin: "0 0 8px", letterSpacing: "-0.02em" }}>
-        Eddie
-      </p>
-      <p style={{ fontFamily: "Inter, sans-serif", fontSize: 16, color: "#6b7480", lineHeight: 1.6, margin: "0 0 20px" }}>
-        {getDayMsg(matchObj, new Date())}
-      </p>
-
-      <div style={{ ...S.divider, margin: "0 0 20px" }} />
-
-      {/* Do This Now */}
-      <button onClick={() => setDoNowOpen(true)} style={{ ...S.card, cursor: "pointer", border: `1.5px solid ${currentColor}` }} className="active:opacity-60 transition-opacity">
-        <p style={{ ...S.label, color: currentColor }}>Do This Now</p>
-        <p style={S.h2}>{currentItem.title}</p>
-        {currentItem.subtitle && <p style={S.sub}>{currentItem.subtitle}</p>}
-      </button>
 
       {/* Today */}
       {(() => {
@@ -291,11 +273,11 @@ export default function Home6() {
               className="active:opacity-60 transition-opacity"
             >
               <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <p style={{ ...S.h2, margin: "0 0 6px" }}>{dateStr}</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <p style={{ ...S.label, color: "#8a9096", margin: 0 }}>Today</p>
                   <span style={{ fontFamily: "Inter, sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: dayTypeColor, background: dayTypeColor + "14", padding: "3px 8px", borderRadius: 99 }}>{dayType}</span>
                 </div>
-                <p style={{ ...S.h2, margin: 0 }}>{dateStr}</p>
               </div>
               <svg
                 width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
@@ -344,7 +326,7 @@ export default function Home6() {
                         >
                           <div style={{ minWidth: 0 }}>
                             <p style={{ fontFamily: "Inter, sans-serif", fontSize: 15, fontWeight: 700, color: "#1a1c1c", lineHeight: 1.2, margin: 0 }}>{block.title}</p>
-                            {block.subtitle && <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#6b7480", marginTop: 2, lineHeight: 1.4 }}>{block.subtitle}</p>}
+                            {block.subtitle && <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#6b7480", marginTop: 2, lineHeight: 1.2 }}>{block.subtitle}</p>}
                           </div>
                           {detail && (
                             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#d0d0d0" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 3 }}>
@@ -362,16 +344,41 @@ export default function Home6() {
         );
       })()}
 
+      {/* Greeting */}
+      <div style={{ ...S.card, marginBottom: 12 }}>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 6px" }}>
+          {greeting()}
+        </p>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 32, fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, margin: "0 0 6px", letterSpacing: "-0.02em" }}>
+          Eddie
+        </p>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 16, color: "#6b7480", lineHeight: 1.3, margin: 0 }}>
+          {getDayMsg(matchObj, new Date())}
+        </p>
+      </div>
+
+      {/* Do This Now */}
+      <button onClick={() => setDoNowOpen(true)} style={{ ...S.card, cursor: "pointer", border: `1.5px solid ${currentColor}` }} className="active:opacity-60 transition-opacity">
+        <p style={{ ...S.label, color: currentColor }}>Do This Now</p>
+        <p style={S.h2}>{currentItem.title}</p>
+        {currentItem.subtitle && <p style={S.sub}>{currentItem.subtitle}</p>}
+      </button>
+
       {/* Next Match */}
       <button onClick={() => setMatchOpen(true)} style={{ ...S.card, cursor: "pointer" }} className="active:opacity-60 transition-opacity">
         <p style={{ ...S.label, color: "#8a9096" }}>Next Match</p>
         {dateLabel ? (
           <>
-            <p style={S.h2}>{dateLabel}</p>
-            <p style={{ ...S.sub, fontWeight: 600, color: "#2653d4" }}>{timePart}</p>
+            <p style={{ ...S.h2, margin: "4px 0 2px" }}>{dateLabel}</p>
+            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, fontWeight: 600, color: "#2653d4", margin: "0 0 8px" }}>{timePart}</p>
+            {(matchLocation || matchCourt) && (
+              <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#6b7480", margin: 0 }}>
+                {[matchLocation, matchCourt && `Court ${matchCourt}`].filter(Boolean).join(" · ")}
+              </p>
+            )}
           </>
         ) : (
-          <p style={{ ...S.sub, fontWeight: 600, color: "#2653d4" }}>+ Add a match</p>
+          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, fontWeight: 600, color: "#2653d4", margin: "4px 0 0" }}>+ Add a match</p>
         )}
       </button>
 
@@ -382,19 +389,19 @@ export default function Home6() {
         className="active:opacity-60 transition-opacity"
       >
         <p style={{ ...S.label, color: "#8a9096" }}>Readiness</p>
-        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 48, fontWeight: 800, color: "#2653d4", margin: "0 0 12px", lineHeight: 1, letterSpacing: "-0.03em" }}>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 28, fontWeight: 800, color: "#2653d4", margin: "4px 0 8px", lineHeight: 1, letterSpacing: "-0.03em" }}>
           {readiness}
-          <span style={{ fontSize: 18, fontWeight: 600, color: "#8a9096", marginLeft: 4 }}>/100</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: "#8a9096", marginLeft: 3 }}>/100</span>
         </p>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e05c3a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 2h6M12 2v4M5 8l2 2M19 8l-2 2M3 13h3M18 13h3M5 20l2-2M19 20l-2-2M8 6a4 4 0 0 0-4 4v3a8 8 0 0 0 16 0v-3a4 4 0 0 0-4-4H8z"/>
           </svg>
-          <span style={{ fontFamily: "Inter, sans-serif", fontSize: 14, color: "#e05c3a", fontWeight: 600 }}>Sleep data missing — score may be lower</span>
+          <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#e05c3a", fontWeight: 600 }}>Sleep data missing</span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <span style={{ fontFamily: "Inter, sans-serif", fontSize: 14, color: "#2653d4", fontWeight: 600 }} onClick={e => { e.stopPropagation(); window.dispatchEvent(new CustomEvent("open-log-sheet")); }}>Add data</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#2653d4", fontWeight: 600 }}>Add data</span>
         </div>
       </button>
 
@@ -429,13 +436,49 @@ export default function Home6() {
           <div className="relative w-full max-w-sm bg-white rounded-[28px] px-6 py-7" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.15)" }} onClick={e => e.stopPropagation()}>
             <p style={{ fontFamily: "Inter, sans-serif", fontSize: 22, fontWeight: 700, color: "#1a1c1c", margin: "0 0 16px" }}>Next Match</p>
             {dateLabel ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 20 }}>
                 <p style={{ fontFamily: "Inter, sans-serif", fontSize: 28, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>{dateLabel}</p>
                 <p style={{ fontFamily: "Inter, sans-serif", fontSize: 20, fontWeight: 600, color: "#2653d4", margin: 0 }}>{timePart}</p>
               </div>
             ) : (
-              <p style={{ fontFamily: "Inter, sans-serif", fontSize: 17, color: "#6b7480", margin: 0 }}>No match scheduled yet.</p>
+              <p style={{ fontFamily: "Inter, sans-serif", fontSize: 17, color: "#6b7480", margin: "0 0 20px" }}>No match scheduled yet.</p>
             )}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div>
+                <p style={{ fontFamily: "Inter, sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 4px" }}>Location</p>
+                <input
+                  type="text"
+                  placeholder="e.g. Padel Club Amsterdam"
+                  value={matchLocation}
+                  onChange={e => setMatchLocation(e.target.value)}
+                  onBlur={() => {
+                    try {
+                      const raw = localStorage.getItem("padelop:next-match");
+                      const m = raw ? JSON.parse(raw) : {};
+                      localStorage.setItem("padelop:next-match", JSON.stringify({ ...m, location: matchLocation }));
+                    } catch {}
+                  }}
+                  style={{ fontFamily: "Inter, sans-serif", fontSize: 15, width: "100%", border: "1.5px solid #dfe3e7", borderRadius: 8, padding: "8px 12px", outline: "none", color: "#1a1c1c" }}
+                />
+              </div>
+              <div>
+                <p style={{ fontFamily: "Inter, sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 4px" }}>Court</p>
+                <input
+                  type="text"
+                  placeholder="e.g. 3"
+                  value={matchCourt}
+                  onChange={e => setMatchCourt(e.target.value)}
+                  onBlur={() => {
+                    try {
+                      const raw = localStorage.getItem("padelop:next-match");
+                      const m = raw ? JSON.parse(raw) : {};
+                      localStorage.setItem("padelop:next-match", JSON.stringify({ ...m, court: matchCourt }));
+                    } catch {}
+                  }}
+                  style={{ fontFamily: "Inter, sans-serif", fontSize: 15, width: "100%", border: "1.5px solid #dfe3e7", borderRadius: 8, padding: "8px 12px", outline: "none", color: "#1a1c1c" }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       )}
