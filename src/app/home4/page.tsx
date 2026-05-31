@@ -149,7 +149,7 @@ export default function Home4() {
   const [schedItemModal, setSchedItemModal] = useState<{ title: string; subtitle?: string; color: string; detail: string } | null>(null);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
   const [now, setNow] = useState(new Date());
-  const [doSlideIdx, setDoSlideIdx] = useState(() => getScheduleData(null, null).currentIdx);
+  const [doSlideIdx, setDoSlideIdx] = useState(() => getScheduleData(null, null).currentIdx + 1);
   const [completed, setCompleted] = useState<Set<number>>(new Set());
   const [readiness, setReadiness] = useState(65);
   const doTouchStartX = useRef(0);
@@ -175,7 +175,7 @@ export default function Home4() {
               club: m.club || undefined,
               players: [m.player_1, m.player_2, m.player_3, m.player_4].filter(Boolean),
             });
-            setDoSlideIdx(getScheduleData(m.date, m.time).currentIdx);
+            setDoSlideIdx(getScheduleData(m.date, m.time).currentIdx + 1);
           }
         }
       }
@@ -185,39 +185,59 @@ export default function Home4() {
   }, []);
 
 
+  const { schedule: _s } = getScheduleData(match?.date ?? null, match?.time ?? null);
+  const isSleepytime = doSlideIdx === 0 || doSlideIdx >= _s.length + 1;
+
   return (
-    <main style={{ ...S, padding: "24px 20px", paddingBottom: "calc(100px + env(safe-area-inset-bottom))", background: "#f9f9f9", minHeight: "100vh" }}>
+    <>
+      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.82)", zIndex: 55, pointerEvents: "none", opacity: isSleepytime ? 1 : 0, transition: "opacity 0.35s ease" }} />
+    <main style={{ ...S, position: "fixed", inset: 0, paddingTop: "4rem", paddingLeft: 20, paddingRight: 20, paddingBottom: 0, overflow: "hidden", background: "#f9f9f9", zIndex: 60 }}>
 
       {(() => {
         const { schedule, currentIdx, dayType } = getScheduleData(match?.date ?? null, match?.time ?? null);
         const meta = DAY_TYPE_META[dayType];
-        const safeDoIdx = Math.min(doSlideIdx, schedule.length - 1);
-        const doItem = schedule[safeDoIdx];
+        const safeDoIdx = Math.min(doSlideIdx, schedule.length + 1);
+        const doItem = schedule[safeDoIdx - 1];
         const curMins = now.getHours() * 60 + now.getMinutes();
         return (
           <>
             {/* Do This Now — square carousel */}
             <div
               className="w-full overflow-hidden"
-              style={{ borderRadius: 24, aspectRatio: "1", marginBottom: 12 }}
-              onTouchStart={e => { doTouchStartX.current = e.touches[0].clientX; }}
+              style={{ height: "calc(100vw - 40px + 260px)", marginBottom: 12, touchAction: "none" }}
+              onTouchStart={e => { doTouchStartX.current = e.touches[0].clientY; }}
               onTouchEnd={e => {
-                const dx = e.changedTouches[0].clientX - doTouchStartX.current;
-                if (Math.abs(dx) > 40)
-                  setDoSlideIdx(prev => dx < 0 ? Math.min(prev + 1, schedule.length - 1) : Math.max(prev - 1, 0));
+                const dy = e.changedTouches[0].clientY - doTouchStartX.current;
+                if (Math.abs(dy) > 40)
+                  setDoSlideIdx(prev => dy < 0 ? Math.min(prev + 1, schedule.length + 1) : Math.max(prev - 1, 0));
               }}
             >
+              {(() => {
+                const totalSlides = schedule.length + 2;
+                const peek = safeDoIdx === 0 ? 20 : safeDoIdx === totalSlides - 1 ? 240 : 130;
+                return (
               <div style={{
                 display: "flex",
-                height: "100%",
-                transform: `translateX(calc(-${safeDoIdx} * 100%))`,
+                flexDirection: "column",
+                gap: 16,
+                transform: `translateY(calc(-${safeDoIdx} * (100vw - 24px) + ${peek}px))`,
                 transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
               }}>
-                {schedule.map((s, i) => (
-                  <div key={i} style={{ flex: "0 0 100%", height: "100%", flexShrink: 0 }}>
-                    {(() => {
-                      const isDone = completed.has(i);
-                      const nextSlide = schedule[i + 1];
+                {([null, ...schedule, null] as (typeof schedule[0] | null)[]).map((s, i) => (
+                  <div key={i} style={{ height: "calc(100vw - 40px)", width: "100%", flexShrink: 0 }}>
+                    {s === null ? (
+                      <div
+                        className="bg-white rounded-[24px] flex flex-col items-center justify-center w-full h-full gap-3"
+                        style={{ border: "2px solid #7c3aed22" }}>
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                        </svg>
+                        <p className="text-[22px] font-bold text-[#1a1c1c] leading-none">Sleepytime</p>
+                      </div>
+                    ) : (() => {
+                      const schedIdx = i - 1;
+                      const isDone = completed.has(schedIdx);
+                      const nextSlide = schedule[schedIdx + 1];
                       const minsUntilNext = nextSlide ? toMins(nextSlide.time) - curMins : 0;
                       const fmtMins = (m: number) => {
                         if (m <= 0) return "a moment";
@@ -254,13 +274,13 @@ export default function Home4() {
                             /* Normal state */
                             <>
                               {/* Label — top center */}
-                              <p className="text-[13px] font-bold tracking-widest uppercase mb-0" style={{ color: i === currentIdx ? "#5a7055" : "#9aa5b0" }}>
-                                {i === currentIdx ? "Do this now" : i > currentIdx ? `Up Next · ${s.time}` : s.time}
+                              <p className="text-[13px] font-bold tracking-widest uppercase mb-0" style={{ color: schedIdx === currentIdx ? "#5a7055" : "#9aa5b0" }}>
+                                {schedIdx === currentIdx ? "Do this now" : schedIdx > currentIdx ? `Up Next · ${s.time}` : s.time}
                               </p>
                               {/* Dot — center */}
                               <div className="flex-1 flex items-center justify-center w-full pointer-events-none">
                                 <div className="w-36 h-36 rounded-full flex items-center justify-center" style={{ background: `${s.color}12` }}>
-                                  {i === currentIdx ? (
+                                  {schedIdx === currentIdx ? (
                                     <div className="w-16 h-16 rounded-full breathe-strong" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
                                   ) : (
                                     <div className="w-16 h-16 rounded-full" style={{ background: s.color }} />
@@ -288,9 +308,11 @@ export default function Home4() {
                   </div>
                 ))}
               </div>
+                );
+              })()}
             </div>
 
-            {completed.has(safeDoIdx) && (
+            {completed.has(safeDoIdx - 1) && (
               <>
                 {/* Mean time prompt */}
                 <p style={{ ...S, fontSize: 13, color: "#9aa5b0", textAlign: "center", margin: "0" }}>
@@ -392,7 +414,7 @@ export default function Home4() {
                     <button
                       onClick={() => {
                         setDoModalOpen(false);
-                        setCompleted(prev => new Set(prev).add(doSlideIdx));
+                        setCompleted(prev => new Set(prev).add(doSlideIdx - 1));
                       }}
                       className="w-full py-3.5 rounded-2xl text-white text-[15px] font-bold active:scale-[0.98] transition-transform"
                       style={{ background: doItem.color }}
@@ -421,9 +443,9 @@ export default function Home4() {
       {/* FAB */}
       {(() => {
         const { schedule } = getScheduleData(match?.date ?? null, match?.time ?? null);
-        const safeIdx = Math.min(doSlideIdx, schedule.length - 1);
+        const schedIdx = doSlideIdx - 1;
         const TENNIS_GREEN = "#c5e840";
-        const fabColor = schedule[safeIdx]?.color ?? TENNIS_GREEN;
+        const fabColor = (schedIdx >= 0 && schedIdx < schedule.length) ? schedule[schedIdx].color : TENNIS_GREEN;
         return (
       <button
         onClick={() => setLogSheetOpen(true)}
@@ -448,5 +470,6 @@ export default function Home4() {
 
       <LogSheet open={logSheetOpen} onClose={() => setLogSheetOpen(false)} />
     </main>
+    </>
   );
 }
