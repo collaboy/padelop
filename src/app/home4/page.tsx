@@ -186,7 +186,7 @@ export default function Home4() {
 
 
   return (
-    <main style={{ ...S, padding: "0", background: "#f9f9f9", height: "100dvh", display: "flex", flexDirection: "column" }}>
+    <main style={{ ...S, padding: "24px 20px", paddingBottom: "calc(100px + env(safe-area-inset-bottom))", background: "#f9f9f9" }}>
 
       {(() => {
         const { schedule, currentIdx, dayType } = getScheduleData(match?.date ?? null, match?.time ?? null);
@@ -197,66 +197,65 @@ export default function Home4() {
         return (
           <>
             {/* Greeting */}
-            <div style={{ padding: "24px 20px 0", textAlign: "center", flexShrink: 0 }}>
+            <div style={{ marginBottom: 16, textAlign: "center" }}>
               <p style={{ ...S, fontSize: 22, fontWeight: 700, color: "#111", margin: "0 0 4px" }}>{greeting()} Eddie</p>
               <p style={{ ...S, fontSize: 15, color: "#888", margin: 0 }}>{getDayMsg(match, now)}</p>
             </div>
 
-            {/* Do This Now — square carousel, vertically centered in remaining space above schedule */}
-            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px 20px", minHeight: 0 }}>
-              <div
-                style={{ width: "100%", aspectRatio: "1", borderRadius: 24, overflow: "hidden", maxHeight: "100%" }}
-                onTouchStart={e => { doTouchStartX.current = e.touches[0].clientX; }}
-                onTouchEnd={e => {
-                  const dx = e.changedTouches[0].clientX - doTouchStartX.current;
-                  if (Math.abs(dx) > 40)
-                    setDoSlideIdx(prev => dx < 0 ? Math.min(prev + 1, schedule.length - 1) : Math.max(prev - 1, 0));
-                }}
-              >
-                <div style={{
-                  display: "flex",
-                  height: "100%",
-                  transform: `translateX(calc(-${safeDoIdx} * 100%))`,
-                  transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
-                }}>
-                  {schedule.map((s, i) => (
-                    <div key={i} style={{ flex: "0 0 100%", height: "100%", flexShrink: 0 }}>
-                      <button
-                        onClick={() => setDoModalOpen(true)}
-                        className="bg-white rounded-[24px] px-6 py-6 flex flex-col items-center active:opacity-60 transition-opacity w-full h-full relative overflow-hidden"
-                        style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${s.color}` }}
-                      >
-                        {/* Do this now — top center */}
-                        <p className="text-[13px] font-bold tracking-widest uppercase text-[#5a7055] mb-0">{i === currentIdx ? "Do this now" : s.time}</p>
-                        {/* Dot — center */}
-                        <div className="flex-1 flex items-center justify-center w-full pointer-events-none">
-                          <div className="w-36 h-36 rounded-full flex items-center justify-center" style={{ background: `${s.color}12` }}>
-                            {i === currentIdx ? (
-                              <div className="w-16 h-16 rounded-full breathe-strong" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
-                            ) : (
-                              <div className="w-16 h-16 rounded-full" style={{ background: s.color }} />
-                            )}
-                          </div>
+            {/* Do This Now — square carousel */}
+            <div
+              className="w-full overflow-hidden"
+              style={{ borderRadius: 24, aspectRatio: "1", marginBottom: 12 }}
+              onTouchStart={e => { doTouchStartX.current = e.touches[0].clientX; }}
+              onTouchEnd={e => {
+                const dx = e.changedTouches[0].clientX - doTouchStartX.current;
+                if (Math.abs(dx) > 40)
+                  setDoSlideIdx(prev => dx < 0 ? Math.min(prev + 1, schedule.length - 1) : Math.max(prev - 1, 0));
+              }}
+            >
+              <div style={{
+                display: "flex",
+                height: "100%",
+                transform: `translateX(calc(-${safeDoIdx} * 100%))`,
+                transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
+              }}>
+                {schedule.map((s, i) => (
+                  <div key={i} style={{ flex: "0 0 100%", height: "100%", flexShrink: 0 }}>
+                    <button
+                      onClick={() => setDoModalOpen(true)}
+                      className="bg-white rounded-[24px] px-6 py-6 flex flex-col items-center active:opacity-60 transition-opacity w-full h-full relative overflow-hidden"
+                      style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${s.color}` }}
+                    >
+                      {/* Do this now — top center */}
+                      <p className="text-[13px] font-bold tracking-widest uppercase text-[#5a7055] mb-0">{i === currentIdx ? "Do this now" : s.time}</p>
+                      {/* Dot — center */}
+                      <div className="flex-1 flex items-center justify-center w-full pointer-events-none">
+                        <div className="w-36 h-36 rounded-full flex items-center justify-center" style={{ background: `${s.color}12` }}>
+                          {i === currentIdx ? (
+                            <div className="w-16 h-16 rounded-full breathe-strong" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
+                          ) : (
+                            <div className="w-16 h-16 rounded-full" style={{ background: s.color }} />
+                          )}
                         </div>
-                        {/* Text — center bottom */}
-                        <div className="text-center">
-                          <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">{s.title}</p>
-                          {s.subtitle && <p className="text-[16px] text-[#6b7480] leading-none mt-1">{s.subtitle}</p>}
-                          <div className="flex justify-center mt-4">
-                            <span className="text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: `${s.color}18`, color: s.color }}>
-                              Complete
-                            </span>
-                          </div>
+                      </div>
+                      {/* Text — center bottom */}
+                      <div className="text-center">
+                        <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">{s.title}</p>
+                        {s.subtitle && <p className="text-[16px] text-[#6b7480] leading-none mt-1">{s.subtitle}</p>}
+                        <div className="flex justify-center mt-4">
+                          <span className="text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: `${s.color}18`, color: s.color }}>
+                            Complete
+                          </span>
                         </div>
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                      </div>
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Today's Schedule — pinned above nav */}
-            <div className="bg-white flex flex-col" style={{ borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflow: "hidden", flexShrink: 0, margin: "0 20px", marginBottom: "calc(88px + env(safe-area-inset-bottom))" }}>
+            {/* Today's Schedule */}
+            <div className="bg-white flex flex-col" style={{ borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflow: "hidden" }}>
               <button
                 onClick={() => setSchedOpen(o => !o)}
                 className="px-5 pt-3 pb-4 flex items-center justify-center flex-shrink-0 w-full active:opacity-60 transition-opacity"
