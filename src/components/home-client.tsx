@@ -809,184 +809,6 @@ export default function HomeClient() {
     <div className="pb-8">
       <style>{`@keyframes colonBlink{0%,49%{opacity:1}50%,100%{opacity:0}}`}</style>
 
-      {/* Today + Readiness hero card */}
-      {(() => {
-        const now = new Date();
-        const isGameToday = gameDays.includes(todayYMD);
-        const isRecoveryToday = !isGameToday && gameDays.includes(offsetYMD(todayYMD, -1));
-        const dayType: "match" | "recovery" | "training" | "rest" = isGameToday ? "match" : isRecoveryToday ? "recovery" : "training";
-        const dayTypeMeta: Record<string, { label: string; color: string; bg: string; border: string }> = {
-          match:    { label: "Game Day",     color: "#fff", bg: "#16a34a", border: "#16a34a" },
-          recovery: { label: "Recovery Day", color: "#fff", bg: "#7c3aed", border: "#7c3aed" },
-          training: { label: "Training Day", color: "#fff", bg: "#2563eb", border: "#2563eb" },
-          rest:     { label: "Rest Day",     color: "#fff", bg: "#64748b", border: "#64748b" },
-        };
-        const meta = dayTypeMeta[dayType];
-        const weekday = now.toLocaleDateString(undefined, { weekday: "long" });
-        const dateShort = now.toLocaleDateString(undefined, { month: "long", day: "numeric" });
-        const todayStr = todayYMD;
-        const { logsToday, logLabel } = (() => {
-          try {
-            let count = 0;
-            const ci = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null");
-            if (ci?.date === todayStr) count++;
-            const hyd = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]")[0];
-            if (hyd?.ts?.slice(0, 10) === todayStr) count++;
-            const nut = JSON.parse(localStorage.getItem("padelop:nutrition-logs") || "[]")[0];
-            if (nut?.ts?.slice(0, 10) === todayStr) count++;
-            const rev = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]")[0];
-            if (rev?.ts?.slice(0, 10) === todayStr) count++;
-            const label = count === 0 ? "How are you feeling today?" : count >= 4 ? "All caught up — great work" : "Add more info!";
-            return { logsToday: count, logLabel: label };
-          } catch { return { logsToday: 0, logLabel: "How are you feeling today?" }; }
-        })();
-        const allLogged = logsToday >= 4;
-        const venue = [gameDetails.location, gameDetails.court ? `Court ${gameDetails.court}` : ""].filter(Boolean).join(" · ");
-        let ctxMsg = "";
-        if (dayType === "match") {
-          const [mH, mM] = (gameDetails.time || "18:30").split(":").map(Number);
-          const diffMins = mH * 60 + mM - now.getHours() * 60 - now.getMinutes();
-          if (diffMins > 180) { const hrs = Math.floor(diffMins / 60); ctxMsg = `Match in ${hrs}h. Stay light, hydrate steadily, and eat your pre-game meal ${hrs > 4 ? "a few hours before" : "soon"}.`; }
-          else if (diffMins > 60) ctxMsg = "Time to warm up. Dynamic activation, no heavy food — just sip water and focus.";
-          else if (diffMins > 0) ctxMsg = "Almost game time. Breathe, visualise, and trust your prep.";
-          else ctxMsg = "Great match today. Prioritise recovery — stretch, eat protein, and rest up.";
-        } else if (dayType === "recovery") { ctxMsg = "Recovery day. Keep moving gently, drink plenty of water, and get your protein in.";
-        } else { ctxMsg = "Training day. Make sure you're fuelled, warmed up, and ready to work on your patterns."; }
-        return (
-          <div className="px-5 md:px-12 pt-5 pb-0">
-            <div className="rounded-[28px] mb-2 overflow-hidden" style={{ background: "#fff", boxShadow: "0 2px 24px rgba(38,83,212,0.08)", border: "1px solid #e8e8e8" }}>
-              {/* Header row */}
-              <div className="flex items-center justify-between px-5 pt-5 pb-3">
-                <div className="flex items-baseline gap-2">
-                  <p className="text-[18px] font-bold leading-none text-[#1a1c1c]" style={{ fontFamily: "var(--font-hanken)" }}>{weekday}</p>
-                  <p className="text-[13px] text-[#8a9096] font-medium">{dateShort}</p>
-                </div>
-                {dayType === "match" && gameDetails.time ? (
-                  <button
-                    className="flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full tracking-wide active:opacity-70 transition-opacity"
-                    style={{ background: meta.bg, color: meta.color, border: `1px solid ${meta.border}` }}
-                    onClick={() => setHeroCardExpanded(e => !e)}
-                  >
-                    {meta.label}
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"
-                      style={{ transform: heroCardExpanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
-                      <path d="M6 9l6 6 6-6" />
-                    </svg>
-                  </button>
-                ) : (
-                  <span className="text-[11px] font-bold px-3 py-1.5 rounded-full tracking-wide" style={{ background: meta.bg, color: meta.color, border: `1px solid ${meta.border}` }}>{meta.label}</span>
-                )}
-              </div>
-
-              {/* Match strip — expands when pill is clicked */}
-              {dayType === "match" && gameDetails.time && heroCardExpanded && (
-                <button className="mx-4 mb-3 px-4 py-3 rounded-2xl flex items-center gap-3 w-[calc(100%-2rem)] active:opacity-60 transition-opacity text-left" style={{ background: "#f4f4f6", border: "1px solid #e8e8e8" }} onClick={() => { setHomeExtracted(null); setHomeUploadError(null); setHomeMatchOpen(true); }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4b5563" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                  </svg>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-bold text-[#1a1c1c]">{gameDetails.time}</p>
-                    {venue && <p className="text-[11px] text-[#6b7480] mt-0.5 truncate">{venue}</p>}
-                  </div>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 18l6-6-6-6" />
-                  </svg>
-                </button>
-              )}
-
-              {/* Divider */}
-              <div style={{ height: 1, background: "#f0f0f0" }} />
-
-              {/* Ring section */}
-              <div className="flex flex-col items-center pt-4 pb-4 px-5">
-                <div className="w-full pb-4 mb-4" style={{ borderBottom: "1px solid #f0f0f0" }}>
-                  <p className="text-[13px] text-[#4a5050] leading-snug text-center">{ctxMsg}</p>
-                </div>
-                {!gameDetails.time && (
-                  <button onClick={() => { setHomeExtracted(null); setHomeUploadError(null); setHomeMatchOpen(true); }} className="text-[12px] font-semibold text-[#2653d4] mb-3 active:opacity-60 px-3 py-1.5 rounded-full" style={{ background: "#eef2ff", border: "1px solid #c5d0ff" }}>
-                    + Add next match
-                  </button>
-                )}
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#8a9096] mb-2">Your Match Readiness</p>
-                <ScoreRing metric={heroMetric} />
-                <div className="flex gap-1 mt-4 justify-center rounded-full px-1 py-1 w-full max-w-xs" style={{ background: "#f4f4f6" }}>
-                  {[
-                    { key: "overall",   label: "Overall",   color: "#2653d4" },
-                    { key: "recovery",  label: "Recovery",  color: "#7c3aed" },
-                    { key: "hydration", label: "Hydration", color: "#0891b2" },
-                    { key: "energy",    label: "Energy",    color: "#f59e0b" },
-                    { key: "mobility",  label: "Mobility",  color: "#16a34a" },
-                  ].map(m => (
-                    <button
-                      key={m.key}
-                      onClick={() => setHeroMetric(m.key)}
-                      className="flex-1 rounded-full font-semibold transition-all whitespace-nowrap"
-                      style={{ fontSize: 10, padding: "5px 2px", ...(heroMetric === m.key ? { background: m.color, color: "#fff" } : { background: "transparent", color: "#6b7480" }) }}
-                    >
-                      {m.label}
-                    </button>
-                  ))}
-                </div>
-                {heroMetric !== "overall" && (() => {
-                  const details: Record<string, { color: string; desc: string; drivers: string[]; tip: string }> = {
-                    recovery:  { color: "#7c3aed", desc: "How well your body has bounced back.", drivers: ["Sleep quality & duration", "Muscle soreness level", "Hydration & injury status", "Recovery habits (foam roll, cold shower, walk)"], tip: "Sleep and foam rolling have the biggest impact here." },
-                    hydration: { color: "#0891b2", desc: "Your fluid balance and hydration status.", drivers: ["Litres of water logged today", "Urine colour (clear = good)", "Subjective hydration quality", "Check-in self-rating"], tip: "Log your water intake to get an accurate score." },
-                    energy:    { color: "#f59e0b", desc: "Your fuel and readiness to perform.", drivers: ["Check-in energy level", "Sleep quality (sleep debt tanks energy)", "Nutrition quality & protein intake", "Post-match energy logged in review"], tip: "Protein-rich meals and good sleep move this the most." },
-                    mobility:  { color: "#16a34a", desc: "Joint freedom and movement quality.", drivers: ["Soreness level (primary driver)", "Injury status", "Game activity this week", "Mobility habits (dynamic warm-up, foam roll, walk)"], tip: "10 min of daily mobility adds up fast over a week." },
-                  };
-                  const d = details[heroMetric];
-                  if (!d) return null;
-                  const score = heroScores[heroMetric as keyof Scores] ?? 65;
-                  return (
-                    <div className="mt-3 w-full rounded-2xl overflow-hidden" style={{ background: d.color + "0d", border: `1px solid ${d.color}22` }}>
-                      <div className="px-4 pt-3 pb-1 flex items-center justify-between">
-                        <p className="text-[12px] font-bold" style={{ color: d.color }}>{d.desc}</p>
-                        <span className="text-[18px] font-bold" style={{ color: d.color }}>{Math.round(score)}</span>
-                      </div>
-                      <div className="px-4 pb-1">
-                        <div className="h-1 rounded-full overflow-hidden" style={{ background: d.color + "22" }}>
-                          <div className="h-full rounded-full" style={{ width: `${score}%`, background: d.color }} />
-                        </div>
-                      </div>
-                      <div className="px-4 pt-2 pb-3">
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#8a9096] mb-1.5">What drives it</p>
-                        {d.drivers.map((dr, i) => (
-                          <div key={i} className="flex items-start gap-1.5 mb-1">
-                            <span className="text-[10px] mt-0.5 flex-shrink-0" style={{ color: d.color }}>·</span>
-                            <span className="text-[12px] text-[#4a5050] leading-snug">{dr}</span>
-                          </div>
-                        ))}
-                        <p className="text-[11px] font-semibold mt-2" style={{ color: d.color }}>💡 {d.tip}</p>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-
-              {/* Check-in footer */}
-              <div style={{ borderTop: "1px solid #f0f0f0" }}>
-                <button
-                  onClick={() => setLogOpen(true)}
-                  className="w-full flex items-center justify-between px-5 py-4 active:opacity-60 transition-opacity"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: allLogged ? "#eef2ff" : "#f4f4f6" }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={allLogged ? "#2653d4" : "#8a9096"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" />
-                      </svg>
-                    </div>
-                    <span className="text-[14px] font-semibold" style={{ color: allLogged ? "#2653d4" : "#4a5050" }}>{logLabel}</span>
-                  </div>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 18l6-6-6-6" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
       {/* Do This Now */}
       {(() => {
         const schedule = getDaySchedule();
@@ -1024,45 +846,196 @@ export default function HomeClient() {
         );
       })()}
 
-      {/* Match Ready hero card */}
-      <div className="pt-4 px-5 md:px-12 pb-4 bg-[var(--bg)]">
-        <div className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm px-4 py-1 flex flex-col items-center text-center gap-2">
-          {/* Ring */}
-          <div className="relative w-full" style={{ maxWidth: 260, aspectRatio: "1/1", marginTop: "-20px", marginBottom: "-28px" }}>
-            <svg width="100%" height="100%" viewBox="0 0 160 160">
-              <circle cx="80" cy="80" r={ringR} fill="none" stroke="var(--border)" strokeWidth="8" />
-              <circle
-                cx="80" cy="80" r={ringR} fill="none"
-                stroke="#2653d4" strokeWidth="8" strokeLinecap="round"
-                strokeDasharray={ringC}
-                strokeDashoffset={ringC * (1 - pct / 100)}
-                style={{ transform: "rotate(-90deg)", transformOrigin: "80px 80px", transition: "stroke-dashoffset 0.6s ease" }}
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-0.5">
-              <p className="text-[8px] font-bold tracking-wide uppercase text-[var(--muted)] leading-none">MATCH READY</p>
-              <p className="text-4xl font-extrabold leading-none text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>{pct}<span className="text-lg">%</span></p>
-              <p className="text-[8px] font-bold tracking-wide uppercase text-[var(--muted)] leading-none">Optimizer Score</p>
+      {/* Today + Readiness hero card */}
+      {(() => {
+        const now = new Date();
+        const isGameToday = gameDays.includes(todayYMD);
+        const isRecoveryToday = !isGameToday && gameDays.includes(offsetYMD(todayYMD, -1));
+        const dayType: "match" | "recovery" | "training" | "rest" = isGameToday ? "match" : isRecoveryToday ? "recovery" : "training";
+        const dayTypeMeta: Record<string, { label: string; color: string; bg: string; border: string }> = {
+          match:    { label: "Game Day",     color: "#fff", bg: "#16a34a", border: "#16a34a" },
+          recovery: { label: "Recovery Day", color: "#fff", bg: "#7c3aed", border: "#7c3aed" },
+          training: { label: "Training Day", color: "#fff", bg: "#2563eb", border: "#2563eb" },
+          rest:     { label: "Rest Day",     color: "#fff", bg: "#64748b", border: "#64748b" },
+        };
+        const meta = dayTypeMeta[dayType];
+        const weekday = now.toLocaleDateString(undefined, { weekday: "long" });
+        const dateShort = now.toLocaleDateString(undefined, { month: "long", day: "numeric" });
+        const todayStr = todayYMD;
+        const { logsToday, logLabel } = (() => {
+          try {
+            let count = 0;
+            const ci = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null");
+            if (ci?.date === todayStr) count++;
+            const hyd = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]")[0];
+            if (hyd?.ts?.slice(0, 10) === todayStr) count++;
+            const nut = JSON.parse(localStorage.getItem("padelop:nutrition-logs") || "[]")[0];
+            if (nut?.ts?.slice(0, 10) === todayStr) count++;
+            const rev = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]")[0];
+            if (rev?.ts?.slice(0, 10) === todayStr) count++;
+            const label = count >= 4 ? "All caught up — great work" : "Improve score";
+            return { logsToday: count, logLabel: label };
+          } catch { return { logsToday: 0, logLabel: "Improve score" }; }
+        })();
+        const allLogged = logsToday >= 4;
+        const venue = [gameDetails.location, gameDetails.court ? `Court ${gameDetails.court}` : ""].filter(Boolean).join(" · ");
+        let ctxMsg = "";
+        if (dayType === "match") {
+          const [mH, mM] = (gameDetails.time || "18:30").split(":").map(Number);
+          const diffMins = mH * 60 + mM - now.getHours() * 60 - now.getMinutes();
+          if (diffMins > 180) { const hrs = Math.floor(diffMins / 60); ctxMsg = `Match in ${hrs}h. Stay light, hydrate steadily, and eat your pre-game meal ${hrs > 4 ? "a few hours before" : "soon"}.`; }
+          else if (diffMins > 60) ctxMsg = "Time to warm up. Dynamic activation, no heavy food — just sip water and focus.";
+          else if (diffMins > 0) ctxMsg = "Almost game time. Breathe, visualise, and trust your prep.";
+          else ctxMsg = "Great match today. Prioritise recovery — stretch, eat protein, and rest up.";
+        } else if (dayType === "recovery") { ctxMsg = "Recovery day. Keep moving gently, drink plenty of water, and get your protein in.";
+        } else { ctxMsg = "Training day. Make sure you're fuelled, warmed up, and ready to work on your patterns."; }
+        return (
+          <div className="px-5 md:px-12 pt-5 pb-4">
+            <div className="rounded-[28px] mb-2 overflow-hidden" style={{ background: "#fff", boxShadow: "0 2px 24px rgba(38,83,212,0.08)", border: "1px solid #e8e8e8" }}>
+              {/* Header row */}
+              <div className="flex items-center justify-between px-5 pt-5 pb-3">
+                <div className="flex items-baseline gap-2">
+                  <p className="text-[17px] sm:text-[22px] font-bold leading-none text-[#1a1c1c]" style={{ fontFamily: "var(--font-hanken)" }}>{weekday}</p>
+                  <p className="text-[12px] sm:text-[15px] text-[#8a9096] font-medium">{dateShort}</p>
+                </div>
+                {dayType === "match" && gameDetails.time ? (
+                  <button
+                    className="flex items-center gap-1.5 text-[11px] sm:text-[13px] font-bold px-3 py-1.5 rounded-full tracking-wide active:opacity-70 transition-opacity"
+                    style={{ background: meta.bg, color: meta.color, border: `1px solid ${meta.border}` }}
+                    onClick={() => setHeroCardExpanded(e => !e)}
+                  >
+                    {meta.label}
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"
+                      style={{ transform: heroCardExpanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </button>
+                ) : (
+                  <span className="text-[11px] sm:text-[13px] font-bold px-3 py-1.5 rounded-full tracking-wide" style={{ background: meta.bg, color: meta.color, border: `1px solid ${meta.border}` }}>{meta.label}</span>
+                )}
+              </div>
+
+              {/* Match strip — expands when pill is clicked */}
+              {dayType === "match" && gameDetails.time && heroCardExpanded && (
+                <button className="mx-4 mb-3 px-4 py-3 rounded-2xl flex items-center gap-3 w-[calc(100%-2rem)] active:opacity-60 transition-opacity text-left" style={{ background: "#f4f4f6", border: "1px solid #e8e8e8" }} onClick={() => { setHomeExtracted(null); setHomeUploadError(null); setHomeMatchOpen(true); }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4b5563" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] sm:text-[15px] font-bold text-[#1a1c1c]">{gameDetails.time}</p>
+                    {venue && <p className="text-[11px] sm:text-[13px] text-[#6b7480] mt-0.5 truncate">{venue}</p>}
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
+              )}
+
+              {/* Divider */}
+              <div style={{ height: 1, background: "#f0f0f0" }} />
+
+              {/* Ring section */}
+              <div className="flex flex-col items-center pt-4 pb-4 px-5">
+                {(() => {
+                  let nextYMD: string | null = null;
+                  for (let i = 0; i < 60; i++) {
+                    const d = new Date(); d.setDate(d.getDate() + i);
+                    const ymd = d.toISOString().slice(0, 10);
+                    if (gameDays.includes(ymd)) { nextYMD = ymd; break; }
+                  }
+                  if (!nextYMD) return (
+                    <button onClick={() => { setHomeExtracted(null); setHomeUploadError(null); setHomeMatchOpen(true); }} className="text-[12px] sm:text-[14px] font-semibold text-[#2653d4] mb-3 active:opacity-60 px-3 py-1.5 rounded-full" style={{ background: "#eef2ff", border: "1px solid #c5d0ff" }}>
+                      + Add next match
+                    </button>
+                  );
+                  const isToday = nextYMD === todayYMD;
+                  const d = new Date(nextYMD + "T12:00");
+                  const dateLabel = isToday ? "Today" : d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+                  return (
+                    <button onClick={() => { setHomeExtracted(null); setHomeUploadError(null); setHomeMatchOpen(true); }} className="w-full mb-3 px-4 py-2.5 rounded-2xl flex items-center gap-3 active:opacity-60 transition-opacity text-left" style={{ background: "#f4f4f6" }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4b5563" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                      </svg>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-bold text-[#1a1c1c]">Next Match · {dateLabel}{gameDetails.time ? ` · ${gameDetails.time}` : ""}</p>
+                        {venue && <p className="text-[11px] text-[#6b7480] mt-0.5 truncate">{venue}</p>}
+                      </div>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 18l6-6-6-6" />
+                      </svg>
+                    </button>
+                  );
+                })()}
+                <ScoreRing metric={heroMetric} />
+                <div className="flex gap-1 mt-4 justify-center rounded-full px-1 py-1 w-full max-w-xs" style={{ background: "#f4f4f6" }}>
+                  {[
+                    { key: "overall",   label: "All",   color: "#2653d4" },
+                    { key: "recovery",  label: "Rec",   color: "#7c3aed" },
+                    { key: "hydration", label: "Hyd",   color: "#0891b2" },
+                    { key: "energy",    label: "Nrg",   color: "#f59e0b" },
+                    { key: "mobility",  label: "Mob",   color: "#16a34a" },
+                  ].map(m => (
+                    <button
+                      key={m.key}
+                      onClick={() => setHeroMetric(m.key)}
+                      className="flex-1 rounded-full font-semibold transition-all whitespace-nowrap text-[13px]"
+                      style={{ padding: "6px 2px", ...(heroMetric === m.key ? { background: m.color, color: "#fff" } : { background: "transparent", color: "#6b7480" }) }}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+                {heroMetric !== "overall" && (() => {
+                  const details: Record<string, { color: string; desc: string; drivers: string[]; tip: string }> = {
+                    recovery:  { color: "#7c3aed", desc: "How well your body has bounced back.", drivers: ["Sleep quality & duration", "Muscle soreness level", "Hydration & injury status", "Recovery habits (foam roll, cold shower, walk)"], tip: "Sleep and foam rolling have the biggest impact here." },
+                    hydration: { color: "#0891b2", desc: "Your fluid balance and hydration status.", drivers: ["Litres of water logged today", "Urine colour (clear = good)", "Subjective hydration quality", "Check-in self-rating"], tip: "Log your water intake to get an accurate score." },
+                    energy:    { color: "#f59e0b", desc: "Your fuel and readiness to perform.", drivers: ["Check-in energy level", "Sleep quality (sleep debt tanks energy)", "Nutrition quality & protein intake", "Post-match energy logged in review"], tip: "Protein-rich meals and good sleep move this the most." },
+                    mobility:  { color: "#16a34a", desc: "Joint freedom and movement quality.", drivers: ["Soreness level (primary driver)", "Injury status", "Game activity this week", "Mobility habits (dynamic warm-up, foam roll, walk)"], tip: "10 min of daily mobility adds up fast over a week." },
+                  };
+                  const d = details[heroMetric];
+                  if (!d) return null;
+                  const score = heroScores[heroMetric as keyof Scores] ?? 65;
+                  return (
+                    <div className="mt-3 w-full rounded-2xl overflow-hidden" style={{ background: d.color + "0d", border: `1px solid ${d.color}22` }}>
+                      <div className="px-4 pt-3 pb-1 flex items-center justify-between">
+                        <p className="text-[12px] sm:text-[14px] font-bold" style={{ color: d.color }}>{d.desc}</p>
+                        <span className="text-[18px] sm:text-[20px] font-bold" style={{ color: d.color }}>{Math.round(score)}</span>
+                      </div>
+                      <div className="px-4 pb-1">
+                        <div className="h-1 rounded-full overflow-hidden" style={{ background: d.color + "22" }}>
+                          <div className="h-full rounded-full" style={{ width: `${score}%`, background: d.color }} />
+                        </div>
+                      </div>
+                      <div className="px-4 pt-2 pb-3">
+                        <p className="text-[10px] sm:text-[12px] font-bold uppercase tracking-widest text-[#8a9096] mb-1.5">What drives it</p>
+                        {d.drivers.map((dr, i) => (
+                          <div key={i} className="flex items-start gap-1.5 mb-1">
+                            <span className="text-[10px] sm:text-[12px] mt-0.5 flex-shrink-0" style={{ color: d.color }}>·</span>
+                            <span className="text-[12px] sm:text-[14px] text-[#4a5050] leading-snug">{dr}</span>
+                          </div>
+                        ))}
+                        <p className="text-[11px] sm:text-[13px] font-semibold mt-2" style={{ color: d.color }}>💡 {d.tip}</p>
+                      </div>
+                    </div>
+                  );
+                })()}
+                <p className="text-[22px] font-bold text-[#1a1c1c] text-center mt-4 mb-0.5">{matchReadyHeading}</p>
+                <p className="text-[14px] leading-tight text-[#6b7480] text-center mb-3 px-2">{matchReadySubtitle}</p>
+                <button onClick={() => setLogOpen(true)} className="flex items-center gap-1.5 px-5 py-2 rounded-full active:opacity-70 transition-opacity mt-2 mb-2" style={{ background: "#f4f4f6" }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" />
+                  </svg>
+                  <span className="text-[13px] font-semibold text-[#4a5050]">Improve score</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </button>
+              </div>
+
             </div>
           </div>
-
-          {/* Message */}
-          <div className="flex flex-col items-center">
-            <p className="text-2xl font-extrabold text-[var(--text)] leading-tight mb-1" style={{ fontFamily: "var(--font-hanken)" }}>{matchReadyHeading}</p>
-            <p className="text-xs text-[var(--muted)] leading-snug mb-4">{matchReadySubtitle}</p>
-            <Link href="/optimizer" className="flex items-center gap-2 px-5 py-2.5 mb-6 rounded-full border border-[var(--border)] text-[12px] font-bold tracking-widest uppercase active:scale-95 transition-transform" style={{ background: "var(--bg)", color: "var(--muted)" }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-                <polyline points="17 6 23 6 23 12" />
-              </svg>
-              Improve Score
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="3,1 8,5 3,9" />
-              </svg>
-            </Link>
-          </div>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* Next Match card */}
       {(() => {
@@ -1172,74 +1145,6 @@ export default function HomeClient() {
       <div className="px-5 md:px-12 pb-4 bg-[var(--bg)]">
         <ReadinessWidget hideRing />
       </div>
-
-      {/* Category bars card */}
-      {(() => {
-        const hydrationPct = lastHydration
-          ? ({ "<1L": 20, "1–1.5L": 35, "1.5–2L": 50, "2–2.5L": 65, "2.5–3L": 80, "3L+": 100 } as Record<string, number>)[lastHydration.litres] ?? 50
-          : 50;
-        const energyPct = lastReview
-          ? (lastReview.energy === "high" ? 85 : lastReview.energy === "low" ? 35 : 60)
-          : 60;
-        const bars = [
-          {
-            label: "Recovery", pct: scores.recovery, color: "#7c3aed",
-            subtitle: "Post-session repair & rest",
-            detail: "Recovery reflects how well your body is bouncing back between sessions. It's shaped by your rest days, recent match load, and how you rated your physical feeling after games.\n\nAim for at least one full rest day between intense sessions and prioritise 7–9 hours of sleep. Logging your match reviews regularly helps keep this score accurate.",
-            icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>,
-          },
-          {
-            label: "Hydration", pct: hydrationPct, color: "#2653d4",
-            subtitle: "Daily water intake",
-            detail: "Hydration is based on your most recent intake log. The target is 3.5L on training and match days — more if conditions are hot or sessions are long.\n\nEven mild dehydration (1–2%) measurably reduces reaction time and coordination. Log your intake daily so this score stays current.",
-            icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C12 2 5 10 5 15a7 7 0 0 0 14 0c0-5-7-13-7-13z" /></svg>,
-          },
-          {
-            label: "Energy", pct: energyPct, color: "#ea580c",
-            subtitle: "Training & match readiness",
-            detail: "Energy is derived from how you've rated your energy levels in recent match reviews and your nutrition quality. High energy scores reflect consistent fuelling, good sleep, and manageable training loads.\n\nIf your score is low, check your pre-match meal timing, carbohydrate intake, and whether you're accumulating fatigue across the week.",
-            icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="13,2 13,10 19,10 11,22 11,14 5,14 13,2" /></svg>,
-          },
-          {
-            label: "Mobility", pct: 70, color: "#16a34a",
-            subtitle: "Flexibility & movement quality",
-            detail: "Mobility covers how freely and efficiently you move on court — hip rotation, shoulder range, and ankle stability all feed into padel performance.\n\nSpend 10 minutes after each session on dynamic stretching: hip flexors, thoracic rotation, and calf raises. Regular mobility work reduces injury risk and improves your ability to reach wide balls and change direction quickly.",
-            icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="5" r="2" /><path d="M12 7v6" /><path d="M9 10l-3 5h12l-3-5" /><path d="M9 22v-4" /><path d="M15 22v-4" /></svg>,
-          },
-        ];
-        return (
-          <div className="px-5 md:px-12 pb-4 bg-[var(--bg)]">
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden">
-              <div className="flex">
-                {bars.map(({ label, pct: p, color, icon, subtitle, detail }, i) => {
-                  const rating = p >= 85 ? "Optimal" : p >= 65 ? "Good" : p >= 45 ? "Improve" : "Low";
-                  const ratingColor = p >= 85 ? "#16a34a" : p >= 65 ? "#16a34a" : p >= 45 ? "#ea580c" : "#dc2626";
-                  const r = 24, sz = 56, cx = 28;
-                  const fillH = 2 * r * p / 100;
-                  const fillY = cx + r - fillH;
-                  return (
-                    <button key={label} onClick={() => setCategoryModal({ label, pct: p, color, subtitle, detail })} className="flex-1 min-w-0 px-2 py-3 sm:px-4 sm:py-4 flex flex-col items-center gap-1 bg-white active:opacity-70 transition-opacity" style={{ borderLeft: i > 0 ? "1px solid #eef0f2" : "none" }}>
-                      <div style={{ color }} className="[&>svg]:w-3.5 [&>svg]:h-3.5 sm:[&>svg]:w-5 sm:[&>svg]:h-5">{icon}</div>
-                      <svg width={sz} height={sz} viewBox={`0 0 ${sz} ${sz}`}>
-                        <defs>
-                          <clipPath id={`fc-${label}`}>
-                            <circle cx={cx} cy={cx} r={r} />
-                          </clipPath>
-                        </defs>
-                        <circle cx={cx} cy={cx} r={r} fill="#e8ebee" />
-                        <rect x="0" y={fillY} width={sz} height={fillH} fill={color} clipPath={`url(#fc-${label})`} />
-                      </svg>
-                      <p className="text-[9px] sm:text-[11px] font-bold text-[var(--text)] leading-tight text-center truncate w-full">{label}</p>
-                      <p className="text-xs font-extrabold leading-none text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>{p}%</p>
-                      <p className="text-[8px] sm:text-[10px] font-bold tracking-wide uppercase leading-none" style={{ color: ratingColor }}>{rating}</p>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        );
-      })()}
 
       {/* Today / This Month toggle card */}
       <div className="px-5 md:px-12 pb-3 bg-[var(--bg)]">

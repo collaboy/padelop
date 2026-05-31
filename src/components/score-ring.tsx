@@ -64,7 +64,8 @@ export default function ScoreRing({ metric = "overall" }: { metric?: string }) {
           {arcs}
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span style={{ fontSize: 68, lineHeight: 1, fontWeight: 700, letterSpacing: "-0.02em", color: meta.color }}>{Math.round(value)}</span>
+          <span style={{ fontSize: 56, lineHeight: 1, fontWeight: 700, letterSpacing: "-0.02em", color: meta.color }}>{Math.round(value)}</span>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: meta.color, opacity: 0.7, marginTop: 2 }}>{meta.sublabel}</span>
         </div>
       </div>
     </div>
