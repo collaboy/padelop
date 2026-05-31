@@ -204,7 +204,7 @@ export default function Home4() {
             {/* Do This Now — square carousel */}
             <div
               className="w-full overflow-hidden"
-              style={{ height: "calc(100vw - 40px + 260px)", marginBottom: 12, touchAction: "none" }}
+              style={{ height: "calc(100dvh - 4rem)", touchAction: "none" }}
               onTouchStart={e => { doTouchStartX.current = e.touches[0].clientY; }}
               onTouchEnd={e => {
                 const dy = e.changedTouches[0].clientY - doTouchStartX.current;
@@ -212,15 +212,11 @@ export default function Home4() {
                   setDoSlideIdx(prev => dy < 0 ? Math.min(prev + 1, schedule.length + 1) : Math.max(prev - 1, 0));
               }}
             >
-              {(() => {
-                const totalSlides = schedule.length + 2;
-                const peek = safeDoIdx === 0 ? 20 : safeDoIdx === totalSlides - 1 ? 240 : 130;
-                return (
               <div style={{
                 display: "flex",
                 flexDirection: "column",
                 gap: 16,
-                transform: `translateY(calc(-${safeDoIdx} * (100vw - 24px) + ${peek}px))`,
+                transform: `translateY(calc((100dvh - 4rem - (100vw - 40px)) / 2 - ${safeDoIdx} * (100vw - 24px)))`,
                 transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
               }}>
                 {([null, ...schedule, null] as (typeof schedule[0] | null)[]).map((s, i) => (
@@ -308,8 +304,6 @@ export default function Home4() {
                   </div>
                 ))}
               </div>
-                );
-              })()}
             </div>
 
             {completed.has(safeDoIdx - 1) && (
