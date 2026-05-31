@@ -429,6 +429,7 @@ export default function HomeClient() {
   const [logOpen, setLogOpen] = useState(false);
   const [heroMetric, setHeroMetric] = useState<string>("overall");
   const [heroCardExpanded, setHeroCardExpanded] = useState(false);
+  const [improveScoreOpen, setImproveScoreOpen] = useState(false);
   const [heroScores, setHeroScores] = useState<Scores>({ overall: 65, recovery: 60, hydration: 52, energy: 58, mobility: 58 });
   const cardTouchX = useRef(0);
   const notifTimeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -967,61 +968,9 @@ export default function HomeClient() {
                   );
                 })()}
                 <ScoreRing metric={heroMetric} />
-                <div className="flex gap-1 mt-4 justify-center rounded-full px-1 py-1 w-full max-w-xs" style={{ background: "#f4f4f6" }}>
-                  {[
-                    { key: "overall",   label: "All",   color: "#2653d4" },
-                    { key: "recovery",  label: "Rec",   color: "#7c3aed" },
-                    { key: "hydration", label: "Hyd",   color: "#0891b2" },
-                    { key: "energy",    label: "Nrg",   color: "#f59e0b" },
-                    { key: "mobility",  label: "Mob",   color: "#16a34a" },
-                  ].map(m => (
-                    <button
-                      key={m.key}
-                      onClick={() => setHeroMetric(m.key)}
-                      className="flex-1 rounded-full font-semibold transition-all whitespace-nowrap text-[13px]"
-                      style={{ padding: "6px 2px", ...(heroMetric === m.key ? { background: m.color, color: "#fff" } : { background: "transparent", color: "#6b7480" }) }}
-                    >
-                      {m.label}
-                    </button>
-                  ))}
-                </div>
-                {heroMetric !== "overall" && (() => {
-                  const details: Record<string, { color: string; desc: string; drivers: string[]; tip: string }> = {
-                    recovery:  { color: "#7c3aed", desc: "How well your body has bounced back.", drivers: ["Sleep quality & duration", "Muscle soreness level", "Hydration & injury status", "Recovery habits (foam roll, cold shower, walk)"], tip: "Sleep and foam rolling have the biggest impact here." },
-                    hydration: { color: "#0891b2", desc: "Your fluid balance and hydration status.", drivers: ["Litres of water logged today", "Urine colour (clear = good)", "Subjective hydration quality", "Check-in self-rating"], tip: "Log your water intake to get an accurate score." },
-                    energy:    { color: "#f59e0b", desc: "Your fuel and readiness to perform.", drivers: ["Check-in energy level", "Sleep quality (sleep debt tanks energy)", "Nutrition quality & protein intake", "Post-match energy logged in review"], tip: "Protein-rich meals and good sleep move this the most." },
-                    mobility:  { color: "#16a34a", desc: "Joint freedom and movement quality.", drivers: ["Soreness level (primary driver)", "Injury status", "Game activity this week", "Mobility habits (dynamic warm-up, foam roll, walk)"], tip: "10 min of daily mobility adds up fast over a week." },
-                  };
-                  const d = details[heroMetric];
-                  if (!d) return null;
-                  const score = heroScores[heroMetric as keyof Scores] ?? 65;
-                  return (
-                    <div className="mt-3 w-full rounded-2xl overflow-hidden" style={{ background: d.color + "0d", border: `1px solid ${d.color}22` }}>
-                      <div className="px-4 pt-3 pb-1 flex items-center justify-between">
-                        <p className="text-[12px] sm:text-[14px] font-bold" style={{ color: d.color }}>{d.desc}</p>
-                        <span className="text-[18px] sm:text-[20px] font-bold" style={{ color: d.color }}>{Math.round(score)}</span>
-                      </div>
-                      <div className="px-4 pb-1">
-                        <div className="h-1 rounded-full overflow-hidden" style={{ background: d.color + "22" }}>
-                          <div className="h-full rounded-full" style={{ width: `${score}%`, background: d.color }} />
-                        </div>
-                      </div>
-                      <div className="px-4 pt-2 pb-3">
-                        <p className="text-[10px] sm:text-[12px] font-bold uppercase tracking-widest text-[#8a9096] mb-1.5">What drives it</p>
-                        {d.drivers.map((dr, i) => (
-                          <div key={i} className="flex items-start gap-1.5 mb-1">
-                            <span className="text-[10px] sm:text-[12px] mt-0.5 flex-shrink-0" style={{ color: d.color }}>·</span>
-                            <span className="text-[12px] sm:text-[14px] text-[#4a5050] leading-snug">{dr}</span>
-                          </div>
-                        ))}
-                        <p className="text-[11px] sm:text-[13px] font-semibold mt-2" style={{ color: d.color }}>💡 {d.tip}</p>
-                      </div>
-                    </div>
-                  );
-                })()}
                 <p className="text-[22px] font-bold text-[#1a1c1c] text-center mt-4 mb-0.5">{matchReadyHeading}</p>
                 <p className="text-[14px] leading-tight text-[#6b7480] text-center mb-3 px-2">{matchReadySubtitle}</p>
-                <button onClick={() => setLogOpen(true)} className="flex items-center gap-1.5 px-5 py-2 rounded-full active:opacity-70 transition-opacity mt-2 mb-2" style={{ background: "#f4f4f6" }}>
+                <button onClick={() => setImproveScoreOpen(true)} className="flex items-center gap-1.5 px-5 py-2 rounded-full active:opacity-70 transition-opacity mt-2 mb-2" style={{ background: "#f4f4f6" }}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" />
                   </svg>
@@ -1372,6 +1321,73 @@ export default function HomeClient() {
           </div>
         </div>
       </div>
+
+      {/* Improve Score modal */}
+      {improveScoreOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: "rgba(0,0,0,0.5)" }} onClick={() => setImproveScoreOpen(false)}>
+          <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="px-6 pt-6 pb-4">
+              <p className="text-[18px] font-bold text-[#1a1c1c] mb-1">Improve Score</p>
+              <p className="text-[13px] text-[#6b7480] mb-4">Select a metric to see what drives it and how to improve.</p>
+              <div className="flex gap-1 justify-center rounded-full px-1 py-1 w-full mb-4" style={{ background: "#f4f4f6" }}>
+                {[
+                  { key: "overall",   label: "All",   color: "#2653d4" },
+                  { key: "recovery",  label: "Rec",   color: "#7c3aed" },
+                  { key: "hydration", label: "Hyd",   color: "#0891b2" },
+                  { key: "energy",    label: "Nrg",   color: "#f59e0b" },
+                  { key: "mobility",  label: "Mob",   color: "#16a34a" },
+                ].map(m => (
+                  <button
+                    key={m.key}
+                    onClick={() => setHeroMetric(m.key)}
+                    className="flex-1 rounded-full font-semibold transition-all whitespace-nowrap text-[13px]"
+                    style={{ padding: "6px 2px", ...(heroMetric === m.key ? { background: m.color, color: "#fff" } : { background: "transparent", color: "#6b7480" }) }}
+                  >
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+              {heroMetric !== "overall" && (() => {
+                const details: Record<string, { color: string; desc: string; drivers: string[]; tip: string }> = {
+                  recovery:  { color: "#7c3aed", desc: "How well your body has bounced back.", drivers: ["Sleep quality & duration", "Muscle soreness level", "Hydration & injury status", "Recovery habits (foam roll, cold shower, walk)"], tip: "Sleep and foam rolling have the biggest impact here." },
+                  hydration: { color: "#0891b2", desc: "Your fluid balance and hydration status.", drivers: ["Litres of water logged today", "Urine colour (clear = good)", "Subjective hydration quality", "Check-in self-rating"], tip: "Log your water intake to get an accurate score." },
+                  energy:    { color: "#f59e0b", desc: "Your fuel and readiness to perform.", drivers: ["Check-in energy level", "Sleep quality (sleep debt tanks energy)", "Nutrition quality & protein intake", "Post-match energy logged in review"], tip: "Protein-rich meals and good sleep move this the most." },
+                  mobility:  { color: "#16a34a", desc: "Joint freedom and movement quality.", drivers: ["Soreness level (primary driver)", "Injury status", "Game activity this week", "Mobility habits (dynamic warm-up, foam roll, walk)"], tip: "10 min of daily mobility adds up fast over a week." },
+                };
+                const d = details[heroMetric];
+                if (!d) return null;
+                const score = heroScores[heroMetric as keyof Scores] ?? 65;
+                return (
+                  <div className="rounded-2xl overflow-hidden mb-4" style={{ background: d.color + "0d", border: `1px solid ${d.color}22` }}>
+                    <div className="px-4 pt-3 pb-1 flex items-center justify-between">
+                      <p className="text-[13px] font-bold" style={{ color: d.color }}>{d.desc}</p>
+                      <span className="text-[18px] font-bold" style={{ color: d.color }}>{Math.round(score)}</span>
+                    </div>
+                    <div className="px-4 pb-1">
+                      <div className="h-1 rounded-full overflow-hidden" style={{ background: d.color + "22" }}>
+                        <div className="h-full rounded-full" style={{ width: `${score}%`, background: d.color }} />
+                      </div>
+                    </div>
+                    <div className="px-4 pt-2 pb-3">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-[#8a9096] mb-1.5">What drives it</p>
+                      {d.drivers.map((dr, i) => (
+                        <div key={i} className="flex items-start gap-1.5 mb-1">
+                          <span className="text-[10px] mt-0.5 flex-shrink-0" style={{ color: d.color }}>·</span>
+                          <span className="text-[13px] text-[#4a5050] leading-snug">{dr}</span>
+                        </div>
+                      ))}
+                      <p className="text-[12px] font-semibold mt-2" style={{ color: d.color }}>💡 {d.tip}</p>
+                    </div>
+                  </div>
+                );
+              })()}
+              <button onClick={() => { setImproveScoreOpen(false); setLogOpen(true); }} className="w-full py-3 rounded-2xl text-[14px] font-semibold text-white active:opacity-70 transition-opacity" style={{ background: "#2653d4" }}>
+                Log data to improve
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Game details modal */}
       {gameDetailsOpen && (

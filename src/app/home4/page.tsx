@@ -187,7 +187,13 @@ export default function Home4() {
         const curMins = now.getHours() * 60 + now.getMinutes();
         return (
           <>
-            {/* Do This Now — vertically centered on screen */}
+            {/* Greeting */}
+            <div style={{ marginBottom: 16, textAlign: "center" }}>
+              <p style={{ ...S, fontSize: 22, fontWeight: 700, color: "#111", margin: "0 0 4px" }}>{greeting()} Eddie</p>
+              <p style={{ ...S, fontSize: 15, color: "#888", margin: 0 }}>{getDayMsg(match, now)}</p>
+            </div>
+
+            {/* Do This Now — square carousel */}
             <div
               className="w-full overflow-hidden"
               style={{ borderRadius: 24, aspectRatio: "1", marginBottom: 20 }}
@@ -208,11 +214,13 @@ export default function Home4() {
                   <div key={i} style={{ flex: "0 0 100%", height: "100%", flexShrink: 0 }}>
                     <button
                       onClick={() => setDoModalOpen(true)}
-                      className="bg-white rounded-[24px] px-6 py-6 flex flex-col justify-end active:opacity-60 transition-opacity text-left w-full h-full relative overflow-hidden"
+                      className="bg-white rounded-[24px] px-6 py-6 flex flex-col items-center active:opacity-60 transition-opacity w-full h-full relative overflow-hidden"
                       style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${s.color}` }}
                     >
-                      {/* Dot — upper third */}
-                      <div className="absolute inset-0 flex items-start justify-center pointer-events-none" style={{ paddingTop: "18%" }}>
+                      {/* Do this now — top center */}
+                      <p className="text-[13px] font-bold tracking-widest uppercase text-[#5a7055] mb-0">{i === currentIdx ? "Do this now" : s.time}</p>
+                      {/* Dot — center */}
+                      <div className="flex-1 flex items-center justify-center w-full pointer-events-none">
                         <div className="w-36 h-36 rounded-full flex items-center justify-center" style={{ background: `${s.color}12` }}>
                           {i === currentIdx ? (
                             <div className="w-16 h-16 rounded-full breathe-strong" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
@@ -221,11 +229,15 @@ export default function Home4() {
                           )}
                         </div>
                       </div>
-                      {/* Text — bottom */}
-                      <div className="min-w-0">
-                        <p className="text-[13px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">{i === currentIdx ? "Do this now" : s.time}</p>
+                      {/* Text — center bottom */}
+                      <div className="text-center">
                         <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">{s.title}</p>
-                        {s.subtitle && <span className="inline-flex items-center gap-1 mt-1"><span className="text-[16px] text-[#6b7480] leading-none">{s.subtitle}</span></span>}
+                        {s.subtitle && <p className="text-[16px] text-[#6b7480] leading-none mt-1">{s.subtitle}</p>}
+                        <div className="flex justify-center mt-4">
+                          <span className="text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: `${s.color}18`, color: s.color }}>
+                            Complete
+                          </span>
+                        </div>
                       </div>
                     </button>
                   </div>
@@ -233,48 +245,22 @@ export default function Home4() {
               </div>
             </div>
 
-            {/* Do This Now — horizontal card */}
-            <button
-              className="w-full bg-white rounded-[24px] px-5 py-5 flex items-center gap-4 active:opacity-60 transition-opacity text-left"
-              style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${doItem.color}`, marginBottom: 10 }}
-              onClick={() => setDoModalOpen(true)}
-            >
-              <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: doItem.color + "18" }}>
-                <div className="w-3.5 h-3.5 rounded-full animate-breathe" style={{ background: doItem.color, ["--glow" as string]: doItem.color } as React.CSSProperties} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[#5a7055] mb-1">Do this now</p>
-                <p className="text-[20px] font-bold text-[#1a1c1c] leading-tight">{doItem.title}</p>
-                {doItem.subtitle && <p className="text-[13px] text-[#4a5050] mt-1 leading-snug">{doItem.subtitle}</p>}
-              </div>
-              {SCHEDULE_DETAILS[doItem.title] && (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 18l6-6-6-6" />
-                </svg>
-              )}
-            </button>
-
-            {/* Greeting */}
-            <div style={{ marginBottom: 16 }}>
-              <p style={{ ...S, fontSize: 22, fontWeight: 700, color: "#111", margin: "0 0 4px" }}>{greeting()} Eddie</p>
-              <p style={{ ...S, fontSize: 15, color: "#888", margin: 0 }}>{getDayMsg(match, now)}</p>
-            </div>
-
             {/* Today's Schedule */}
             <div className="bg-white flex flex-col" style={{ borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflow: "hidden", marginBottom: 12 }}>
               <button
                 onClick={() => setSchedOpen(o => !o)}
-                className="px-5 pt-3 pb-4 flex items-center justify-between flex-shrink-0 w-full active:opacity-60 transition-opacity"
+                className="px-5 pt-3 pb-4 flex items-center justify-center flex-shrink-0 w-full active:opacity-60 transition-opacity"
                 style={{ background: "none", border: "none", cursor: "pointer" }}
               >
-                <span style={{ ...S, fontSize: 15, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>See today&apos;s schedule</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: schedOpen ? "rotate(90deg)" : "rotate(0deg)" }}>
-                  <path d="M9 18l6-6-6-6"/>
-                </svg>
+                <span style={{ ...S, fontSize: 15, fontWeight: 600, color: "#1a1c1c", margin: 0, display: "flex", alignItems: "center", gap: 6 }}>
+                  Today&apos;s schedule
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: schedOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </span>
               </button>
-              {schedOpen && <div className="px-5 pb-2 flex items-center justify-between flex-shrink-0">
-                <p style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>Today&apos;s Schedule</p>
-                <span style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "4px 10px", borderRadius: 999, background: meta.bg, color: meta.color }}>{meta.label}</span>
+              {schedOpen && <div className="px-5 pb-2 flex items-center justify-center gap-2">
+                <span style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "3px 8px", borderRadius: 999, background: meta.bg, color: meta.color, margin: 0 }}>{meta.label}</span>
               </div>}
               {schedOpen && <div className="px-4 pb-6">
                 {schedule.map((s, i) => {
@@ -316,34 +302,6 @@ export default function Home4() {
                   );
                 })}
               </div>}
-            </div>
-
-            {/* Quick links */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 0, padding: "4px 4px 8px" }}>
-              <button onClick={() => setLogSheetOpen(true)} style={{ ...S, background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, paddingBottom: 10, color: "#2653d4", fontSize: 15, fontWeight: 600 }}>
-                + Add Data
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 18l6-6-6-6"/>
-                </svg>
-              </button>
-              {[
-                { href: "/insights4", label: "Improve Readiness", icon: "riser" },
-                { href: "/insights2a", label: "View Insights" },
-                { href: "/track2a", label: "Track Something" },
-                { href: "/matches2a", label: "Upcoming Matches" },
-              ].map(({ href, label, icon }, i, arr) => (
-                <Link key={href} href={href} style={{ ...S, textDecoration: "none", display: "flex", alignItems: "center", gap: 4, paddingBottom: i < arr.length - 1 ? 10 : 0, color: "#2653d4", fontSize: 15, fontWeight: 600 }}>
-                  {label}
-                  {icon === "riser" && (
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
-                    </svg>
-                  )}
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M9 18l6-6-6-6"/>
-                  </svg>
-                </Link>
-              ))}
             </div>
 
             {doModalOpen && (
