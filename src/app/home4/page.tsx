@@ -201,10 +201,6 @@ export default function Home4() {
         const curMins = now.getHours() * 60 + now.getMinutes();
         return (
           <>
-            {/* Peek overlays — darken slides above and below the centered card */}
-            <div style={{ position: "fixed", top: "4rem", left: 0, right: 0, height: "calc((100dvh - 4rem - 56px - (100vw - 40px)) / 2)", background: "rgba(0,0,0,0.55)", pointerEvents: "none", zIndex: 10 }} />
-            <div style={{ position: "fixed", top: "calc(4rem + (100dvh - 4rem - 56px + (100vw - 40px)) / 2)", left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.55)", pointerEvents: "none", zIndex: 10 }} />
-
             {/* Do This Now — square carousel */}
             <div
               className="w-full overflow-hidden"
