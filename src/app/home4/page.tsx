@@ -216,7 +216,7 @@ export default function Home4() {
                 display: "flex",
                 flexDirection: "column",
                 gap: 16,
-                transform: `translateY(calc((100dvh - 4rem - (100vw - 40px)) / 2 - ${safeDoIdx} * (100vw - 24px)))`,
+                transform: `translateY(calc((100dvh - 4rem - 56px - (100vw - 40px)) / 2 - ${safeDoIdx} * (100vw - 24px)))`,
                 transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
               }}>
                 {([null, ...schedule, null] as (typeof schedule[0] | null)[]).map((s, i) => (
