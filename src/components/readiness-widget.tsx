@@ -106,7 +106,7 @@ export default function ReadinessWidget({ hideCard = false, showImprove = false,
       icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="5" r="2" /><path d="M12 7v6" /><path d="M9 10l-3 5h12l-3-5" /><path d="M9 22v-4" /><path d="M15 22v-4" /></svg>,
     },
   ];
-  const circR = 24, sz = 56, circCx = 28;
+  const circR = 32, sz = 72, circCx = 36;
 
   return (
     <>
@@ -246,18 +246,20 @@ export default function ReadinessWidget({ hideCard = false, showImprove = false,
         )}
         <div className="border-t border-[#e2e2e2]" />
         {/* Metrics */}
-        <div className="flex">
+        <div className="grid grid-cols-2">
           {cols.map(({ label, pct, color, icon, subtitle, detail }, i) => {
             const fillH = 2 * circR * pct / 100;
             const fillY = circCx + circR - fillH;
             const rating = pct >= 85 ? "Optimal" : pct >= 65 ? "Good" : pct >= 45 ? "Fair" : "Low";
             const ratingColor = pct >= 85 ? "#16a34a" : pct >= 65 ? "#16a34a" : pct >= 45 ? "#ea580c" : "#dc2626";
+            const borderTop = i >= 2 ? "1px solid #e2e2e2" : "none";
+            const borderLeft = i % 2 === 1 ? "1px solid #e2e2e2" : "none";
             return (
               <button
                 key={label}
                 onClick={() => setCategoryModal({ label, pct, color, subtitle, detail })}
-                className="flex-1 min-w-0 px-2 py-3 flex flex-col items-center gap-1 active:opacity-70 transition-opacity"
-                style={{ borderLeft: i > 0 ? "1px solid #e2e2e2" : "none" }}
+                className="px-4 py-5 flex flex-col items-center gap-1.5 active:opacity-70 transition-opacity"
+                style={{ borderTop, borderLeft }}
               >
                 <span style={{ color }}>{icon}</span>
                 <svg width={sz} height={sz} viewBox={`0 0 ${sz} ${sz}`}>
@@ -269,9 +271,9 @@ export default function ReadinessWidget({ hideCard = false, showImprove = false,
                   <circle cx={circCx} cy={circCx} r={circR} fill="#e8ebee" />
                   <rect x="0" y={fillY} width={sz} height={fillH} fill={color} clipPath={`url(#rw-${label})`} />
                 </svg>
-                <p className="text-[10px] font-semibold text-[#1a1c1c] leading-tight text-center truncate w-full">{label}</p>
-                <p className="text-[13px] font-bold leading-none text-[#1a1c1c]">{pct}%</p>
-                <p className="text-[9px] font-semibold tracking-wide uppercase leading-none" style={{ color: ratingColor }}>{rating}</p>
+                <p className="text-[13px] font-bold text-[#1a1c1c] leading-tight text-center">{label}</p>
+                <p className="text-[18px] font-extrabold leading-none text-[#1a1c1c]">{pct}%</p>
+                <p className="text-[11px] font-bold tracking-wide uppercase leading-none" style={{ color: ratingColor }}>{rating}</p>
               </button>
             );
           })}

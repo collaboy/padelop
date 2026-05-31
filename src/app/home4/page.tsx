@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Nav4 from "@/components/nav4";
 import LogSheet from "@/components/log-sheet";
+import { computeScores, loadScoringData } from "@/lib/scoring";
 
 function greeting() {
   const h = new Date().getHours();
@@ -150,10 +151,18 @@ export default function Home4() {
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
   const [now, setNow] = useState(new Date());
   const [doSlideIdx, setDoSlideIdx] = useState(0);
+  const [readiness, setReadiness] = useState(65);
   const doTouchStartX = useRef(0);
   const curItemRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    function loadReadiness() {
+      const d = loadScoringData();
+      setReadiness(computeScores(d.checkIn, d.hydration, d.review, d.nutrition, d.gameDaysThisWeek).overall);
+    }
+    loadReadiness();
+    window.addEventListener("storage", loadReadiness);
+
     try {
       const raw = localStorage.getItem("padelop:next-match");
       if (raw) {
@@ -172,12 +181,12 @@ export default function Home4() {
       }
     } catch {}
     const id = setInterval(() => setNow(new Date()), 60_000);
-    return () => clearInterval(id);
+    return () => { clearInterval(id); window.removeEventListener("storage", loadReadiness); };
   }, []);
 
 
   return (
-    <main style={{ ...S, padding: "24px 20px 120px", background: "#f9f9f9" }}>
+    <main style={{ ...S, padding: "0", background: "#f9f9f9", minHeight: "100dvh", display: "flex", flexDirection: "column" }}>
 
       {(() => {
         const { schedule, currentIdx, dayType } = getScheduleData(match?.date ?? null, match?.time ?? null);
@@ -188,7 +197,7 @@ export default function Home4() {
         return (
           <>
             {/* Greeting */}
-            <div style={{ marginBottom: 16, textAlign: "center" }}>
+            <div style={{ padding: "24px 20px 0", textAlign: "center" }}>
               <p style={{ ...S, fontSize: 22, fontWeight: 700, color: "#111", margin: "0 0 4px" }}>{greeting()} Eddie</p>
               <p style={{ ...S, fontSize: 15, color: "#888", margin: 0 }}>{getDayMsg(match, now)}</p>
             </div>
@@ -196,7 +205,7 @@ export default function Home4() {
             {/* Do This Now — square carousel */}
             <div
               className="w-full overflow-hidden"
-              style={{ borderRadius: 24, aspectRatio: "1", marginBottom: 20 }}
+              style={{ flex: 1, borderRadius: 24, margin: "20px 20px", width: "calc(100% - 40px)", aspectRatio: "1", maxHeight: "calc(100dvh - 300px)" }}
               onTouchStart={e => { doTouchStartX.current = e.touches[0].clientX; }}
               onTouchEnd={e => {
                 const dx = e.changedTouches[0].clientX - doTouchStartX.current;
@@ -204,6 +213,7 @@ export default function Home4() {
                   setDoSlideIdx(prev => dx < 0 ? Math.min(prev + 1, schedule.length - 1) : Math.max(prev - 1, 0));
               }}
             >
+
               <div style={{
                 display: "flex",
                 height: "100%",
@@ -246,7 +256,7 @@ export default function Home4() {
             </div>
 
             {/* Today's Schedule */}
-            <div className="bg-white flex flex-col" style={{ borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflow: "hidden", marginBottom: 12 }}>
+            <div className="bg-white flex flex-col" style={{ borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflow: "hidden", margin: "0 20px 100px" }}>
               <button
                 onClick={() => setSchedOpen(o => !o)}
                 className="px-5 pt-3 pb-4 flex items-center justify-center flex-shrink-0 w-full active:opacity-60 transition-opacity"
