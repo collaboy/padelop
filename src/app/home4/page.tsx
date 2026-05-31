@@ -151,6 +151,7 @@ export default function Home4() {
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
   const [now, setNow] = useState(new Date());
   const [doSlideIdx, setDoSlideIdx] = useState(0);
+  const [completed, setCompleted] = useState<Set<number>>(new Set());
   const [readiness, setReadiness] = useState(65);
   const doTouchStartX = useRef(0);
   const curItemRef = useRef<HTMLDivElement>(null);
@@ -186,7 +187,7 @@ export default function Home4() {
 
 
   return (
-    <main style={{ ...S, padding: "24px 20px", paddingBottom: "calc(100px + env(safe-area-inset-bottom))", background: "#f9f9f9" }}>
+    <main style={{ ...S, padding: "24px 20px", paddingBottom: "calc(100px + env(safe-area-inset-bottom))", background: "#f9f9f9", minHeight: "100vh" }}>
 
       {(() => {
         const { schedule, currentIdx, dayType } = getScheduleData(match?.date ?? null, match?.time ?? null);
@@ -196,12 +197,6 @@ export default function Home4() {
         const curMins = now.getHours() * 60 + now.getMinutes();
         return (
           <>
-            {/* Greeting */}
-            <div style={{ marginBottom: 16, textAlign: "center" }}>
-              <p style={{ ...S, fontSize: 22, fontWeight: 700, color: "#111", margin: "0 0 4px" }}>{greeting()} Eddie</p>
-              <p style={{ ...S, fontSize: 15, color: "#888", margin: 0 }}>{getDayMsg(match, now)}</p>
-            </div>
-
             {/* Do This Now — square carousel */}
             <div
               className="w-full overflow-hidden"
@@ -221,34 +216,76 @@ export default function Home4() {
               }}>
                 {schedule.map((s, i) => (
                   <div key={i} style={{ flex: "0 0 100%", height: "100%", flexShrink: 0 }}>
-                    <button
-                      onClick={() => setDoModalOpen(true)}
-                      className="bg-white rounded-[24px] px-6 py-6 flex flex-col items-center active:opacity-60 transition-opacity w-full h-full relative overflow-hidden"
-                      style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${s.color}` }}
-                    >
-                      {/* Do this now — top center */}
-                      <p className="text-[13px] font-bold tracking-widest uppercase text-[#5a7055] mb-0">{i === currentIdx ? "Do this now" : s.time}</p>
-                      {/* Dot — center */}
-                      <div className="flex-1 flex items-center justify-center w-full pointer-events-none">
-                        <div className="w-36 h-36 rounded-full flex items-center justify-center" style={{ background: `${s.color}12` }}>
-                          {i === currentIdx ? (
-                            <div className="w-16 h-16 rounded-full breathe-strong" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
+                    {(() => {
+                      const isDone = completed.has(i);
+                      const nextSlide = schedule[i + 1];
+                      const minsUntilNext = nextSlide ? toMins(nextSlide.time) - curMins : 0;
+                      const fmtMins = (m: number) => {
+                        if (m <= 0) return "a moment";
+                        const h = Math.floor(m / 60), rem = m % 60;
+                        if (h > 0 && rem > 0) return `${h}h ${rem}m`;
+                        if (h > 0) return `${h}h`;
+                        return `${rem}m`;
+                      };
+                      const isReady = curMins >= toMins(s.time);
+                      return (
+                        <button
+                          onClick={() => setDoModalOpen(true)}
+                          className="bg-white rounded-[24px] px-6 py-6 flex flex-col items-center transition-opacity w-full h-full relative overflow-hidden"
+                          style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${s.color}` }}
+                        >
+                          {isDone ? (
+                            /* Completion state — replace all content */
+                            <div className="flex flex-col items-center justify-center w-full h-full text-center px-6">
+                              <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: `${s.color}18` }}>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                              </div>
+                              <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">Good Job!</p>
+                              <p className="text-[15px] font-semibold text-[#4a5050] mt-1 leading-none">{s.title} complete</p>
+                              {nextSlide && (
+                                <div className="mt-4">
+                                  <p className="text-[13px] text-[#8a9096] leading-none">See you in <span className="font-semibold text-[#4a5050]">{fmtMins(minsUntilNext)}</span> for:</p>
+                                  <p className="text-[14px] font-bold text-[#1a1c1c] mt-1 leading-none">{nextSlide.title}</p>
+                                </div>
+                              )}
+                            </div>
                           ) : (
-                            <div className="w-16 h-16 rounded-full" style={{ background: s.color }} />
+                            /* Normal state */
+                            <>
+                              {/* Label — top center */}
+                              <p className="text-[13px] font-bold tracking-widest uppercase mb-0" style={{ color: i === currentIdx ? "#5a7055" : "#9aa5b0" }}>
+                                {i === currentIdx ? "Do this now" : i > currentIdx ? `Up Next · ${s.time}` : s.time}
+                              </p>
+                              {/* Dot — center */}
+                              <div className="flex-1 flex items-center justify-center w-full pointer-events-none">
+                                <div className="w-36 h-36 rounded-full flex items-center justify-center" style={{ background: `${s.color}12` }}>
+                                  {i === currentIdx ? (
+                                    <div className="w-16 h-16 rounded-full breathe-strong" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
+                                  ) : (
+                                    <div className="w-16 h-16 rounded-full" style={{ background: s.color }} />
+                                  )}
+                                </div>
+                              </div>
+                              {/* Text — center bottom */}
+                              <div className="text-center">
+                                <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">{s.title}</p>
+                                {s.subtitle && <p className="text-[16px] text-[#6b7480] leading-none mt-1">{s.subtitle}</p>}
+                                <div className="flex justify-center mt-4">
+                                  <span className="text-[13px] font-semibold px-5 py-2 rounded-full" style={{
+                                    background: isReady ? `${s.color}18` : "#f0f0f0",
+                                    color: isReady ? s.color : "#b0b5ba",
+                                  }}>
+                                    Complete
+                                  </span>
+                                </div>
+                              </div>
+                            </>
                           )}
-                        </div>
-                      </div>
-                      {/* Text — center bottom */}
-                      <div className="text-center">
-                        <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">{s.title}</p>
-                        {s.subtitle && <p className="text-[16px] text-[#6b7480] leading-none mt-1">{s.subtitle}</p>}
-                        <div className="flex justify-center mt-4">
-                          <span className="text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: `${s.color}18`, color: s.color }}>
-                            Complete
-                          </span>
-                        </div>
-                      </div>
-                    </button>
+                        </button>
+                      );
+                    })()}
                   </div>
                 ))}
               </div>
@@ -334,6 +371,18 @@ export default function Home4() {
                       <p className="text-[17px] text-[#2c3235] leading-relaxed">{SCHEDULE_DETAILS[doItem.title]}</p>
                     </div>
                   )}
+                  <div className="px-6 pb-6">
+                    <button
+                      onClick={() => {
+                        setDoModalOpen(false);
+                        setCompleted(prev => new Set(prev).add(doSlideIdx));
+                      }}
+                      className="w-full py-3.5 rounded-2xl text-white text-[15px] font-bold active:scale-[0.98] transition-transform"
+                      style={{ background: doItem.color }}
+                    >
+                      Mark as complete
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -351,6 +400,26 @@ export default function Home4() {
           </>
         );
       })()}
+
+      {/* FAB */}
+      <button
+        onClick={() => setLogSheetOpen(true)}
+        className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
+        style={{
+          bottom: "calc(5rem + env(safe-area-inset-bottom))",
+          right: "1.25rem",
+          width: 56,
+          height: 56,
+          borderRadius: 28,
+          background: "#2653d4",
+          boxShadow: "0 4px 16px rgba(38,83,212,0.35)",
+        }}
+        aria-label="Log activity"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
 
       <LogSheet open={logSheetOpen} onClose={() => setLogSheetOpen(false)} />
       <Nav4 />

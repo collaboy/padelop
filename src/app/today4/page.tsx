@@ -190,6 +190,12 @@ export default function Today4() {
   return (
     <main style={{ ...S, background: "#e2e5e9", minHeight: "100vh", display: "flex", flexDirection: "column", gap: 16, padding: "16px 16px 176px" }}>
 
+      {/* Greeting */}
+      <div style={{ padding: "8px 4px 0", textAlign: "center" }}>
+        <p style={{ ...S, fontSize: 22, fontWeight: 700, color: "#111", margin: "0 0 4px" }}>{greeting()} Eddie</p>
+        <p style={{ ...S, fontSize: 15, color: "#888", margin: 0 }}>{getDayMsg(match, now)}</p>
+      </div>
+
       {/* Header */}
       <div style={{ background: "#fff", borderRadius: 24, padding: "20px 24px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -208,10 +214,6 @@ export default function Today4() {
         className="bg-white flex flex-col"
         style={{ borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflow: "hidden" }}
       >
-        <div className="px-5 pt-4 pb-2 flex-shrink-0">
-          <p style={{ ...S, fontSize: 22, fontWeight: 700, color: "#111", margin: "0 0 4px", lineHeight: 1.2 }}>{greeting()} Eddie</p>
-          <p style={{ ...S, fontSize: 15, color: "#888", margin: 0, lineHeight: 1.5 }}>{getDayMsg(match, now)}</p>
-        </div>
         <div className="px-4 pb-6">
           {schedule.map((s, i) => {
             const isCur = i === currentIdx;

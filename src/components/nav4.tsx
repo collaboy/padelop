@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
+import { computeScores, loadScoringData } from "@/lib/scoring";
 
 const items = [
   {
@@ -28,6 +30,7 @@ const items = [
       </svg>
     ),
   },
+  { href: "/home-v1", label: "Readiness", icon: null },
   {
     href: "/track4",
     label: "Track",
@@ -65,6 +68,16 @@ const items = [
 
 export default function Nav4() {
   const pathname = usePathname();
+  const [readiness, setReadiness] = useState(65);
+  useEffect(() => {
+    function load() {
+      const d = loadScoringData();
+      setReadiness(Math.round(computeScores(d.checkIn, d.hydration, d.review, d.nutrition, d.gameDaysThisWeek).overall));
+    }
+    load();
+    window.addEventListener("storage", load);
+    return () => window.removeEventListener("storage", load);
+  }, []);
   return (
     <nav
       className="fixed inset-x-0 z-[100]"
@@ -85,7 +98,9 @@ export default function Nav4() {
               className="flex flex-col items-center gap-1 px-3 py-1"
               style={{ color: active ? "#2653d4" : "#8a9096" }}
             >
-              {item.icon}
+              {item.icon ?? (
+                <span style={{ fontSize: 22, fontWeight: 700, lineHeight: "22px", letterSpacing: "-0.02em", display: "block", width: 22, textAlign: "center" }}>{readiness}</span>
+              )}
               <span className="text-[11px] font-semibold">{item.label}</span>
             </Link>
           );
