@@ -150,7 +150,7 @@ export default function Home4() {
   const [schedItemModal, setSchedItemModal] = useState<{ title: string; subtitle?: string; color: string; detail: string } | null>(null);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
   const [now, setNow] = useState(new Date());
-  const [doSlideIdx, setDoSlideIdx] = useState(0);
+  const [doSlideIdx, setDoSlideIdx] = useState(() => getScheduleData(null, null).currentIdx);
   const [completed, setCompleted] = useState<Set<number>>(new Set());
   const [readiness, setReadiness] = useState(65);
   const doTouchStartX = useRef(0);

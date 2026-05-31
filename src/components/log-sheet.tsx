@@ -503,10 +503,11 @@ export default function LogSheet({ open, onClose }: Props) {
   ];
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center px-4 py-8" onClick={handleClose}>
+    <div className="fixed inset-0 z-[60] flex items-end justify-center" onClick={handleClose}>
+      <style>{`@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
-      <div className="h1-font relative w-full max-w-lg bg-white rounded-[28px] flex flex-col overflow-hidden"
-        style={{ animation: "speedDialUp 0.25s cubic-bezier(0.22,1,0.36,1)", maxHeight: "85vh" }}
+      <div className="h1-font relative w-full max-w-lg bg-white rounded-t-[28px] flex flex-col overflow-hidden"
+        style={{ animation: "slideUp 0.3s cubic-bezier(0.22,1,0.36,1)", maxHeight: "85vh" }}
         onClick={e => e.stopPropagation()}>
         <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4 mb-2 flex-shrink-0"/>
         {/* Nav row */}
@@ -524,12 +525,6 @@ export default function LogSheet({ open, onClose }: Props) {
               </Link>
             );
           })}
-        </div>
-        <div className="px-6 pt-3 pb-3" style={{ borderBottom: "1px solid #f0f0f0" }}>
-          <div className="flex items-baseline gap-2.5">
-            <span className="text-[32px] font-bold leading-none text-[#1a1c1c]">{overallScore}</span>
-            <span className="text-[13px] font-semibold text-[#4a5050]">Match Readiness</span>
-          </div>
         </div>
         <div className="overflow-y-auto flex-1 overscroll-contain">
           {/* Method picker */}

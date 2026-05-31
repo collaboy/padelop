@@ -256,6 +256,19 @@ export default function Home6() {
     >
       <style>{`@keyframes colonBlink{0%,49%{opacity:1}50%,100%{opacity:0}}`}</style>
 
+      {/* Greeting */}
+      <div style={{ marginBottom: 16 }}>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 4px" }}>
+          {greeting()}
+        </p>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 32, fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, margin: "0 0 4px", letterSpacing: "-0.02em" }}>
+          Eddie
+        </p>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 16, color: "#6b7480", lineHeight: 1.3, margin: 0 }}>
+          {getDayMsg(matchObj, new Date())}
+        </p>
+      </div>
+
       {/* Today */}
       {(() => {
         const isGameToday = gameDays.includes(todayYMD);
@@ -343,19 +356,6 @@ export default function Home6() {
           </div>
         );
       })()}
-
-      {/* Greeting */}
-      <div style={{ ...S.card, marginBottom: 12 }}>
-        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 6px" }}>
-          {greeting()}
-        </p>
-        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 32, fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, margin: "0 0 6px", letterSpacing: "-0.02em" }}>
-          Eddie
-        </p>
-        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 16, color: "#6b7480", lineHeight: 1.3, margin: 0 }}>
-          {getDayMsg(matchObj, new Date())}
-        </p>
-      </div>
 
       {/* Do This Now */}
       <button onClick={() => setDoNowOpen(true)} style={{ ...S.card, cursor: "pointer", border: `1.5px solid ${currentColor}` }} className="active:opacity-60 transition-opacity">
