@@ -291,23 +291,30 @@ export default function Home4() {
               </div>
             </div>
 
-            {/* Today's Schedule */}
-            <div className="bg-white flex flex-col" style={{ borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflow: "hidden" }}>
-              <button
-                onClick={() => setSchedOpen(o => !o)}
-                className="px-5 pt-3 pb-4 flex items-center justify-center flex-shrink-0 w-full active:opacity-60 transition-opacity"
-                style={{ background: "none", border: "none", cursor: "pointer" }}
-              >
-                <span style={{ ...S, fontSize: 15, fontWeight: 600, color: "#1a1c1c", margin: 0, display: "flex", alignItems: "center", gap: 6 }}>
-                  Today&apos;s schedule
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: schedOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
-                </span>
-              </button>
-              {schedOpen && <div className="px-5 pb-2 flex items-center justify-center gap-2">
-                <span style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "3px 8px", borderRadius: 999, background: meta.bg, color: meta.color, margin: 0 }}>{meta.label}</span>
-              </div>}
+            {completed.has(safeDoIdx) && (
+              <>
+                {/* Mean time prompt */}
+                <p style={{ ...S, fontSize: 13, color: "#9aa5b0", textAlign: "center", margin: "0" }}>
+                  or in the mean time check out...
+                </p>
+
+                {/* Today's Schedule */}
+                <div className="bg-white flex flex-col" style={{ borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", overflow: "hidden" }}>
+                  <button
+                    onClick={() => setSchedOpen(o => !o)}
+                    className="px-5 pt-3 pb-4 flex items-center justify-center flex-shrink-0 w-full active:opacity-60 transition-opacity"
+                    style={{ background: "none", border: "none", cursor: "pointer" }}
+                  >
+                    <span style={{ ...S, fontSize: 15, fontWeight: 600, color: "#1a1c1c", margin: 0, display: "flex", alignItems: "center", gap: 6 }}>
+                      Today&apos;s schedule
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: schedOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </span>
+                  </button>
+                  {schedOpen && <div className="px-5 pb-2 flex items-center justify-center gap-2">
+                    <span style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", padding: "3px 8px", borderRadius: 999, background: meta.bg, color: meta.color, margin: 0 }}>{meta.label}</span>
+                  </div>}
               {schedOpen && <div className="px-4 pb-6">
                 {schedule.map((s, i) => {
                   const isCur = i === currentIdx;
@@ -347,8 +354,19 @@ export default function Home4() {
                     </div>
                   );
                 })}
-              </div>}
-            </div>
+                  </div>}
+                </div>
+
+                {/* +Track something */}
+                <button
+                  onClick={() => setLogSheetOpen(true)}
+                  className="w-full bg-white flex items-center justify-center active:opacity-60 transition-opacity"
+                  style={{ borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid #e8e8e8", padding: "14px 20px", cursor: "pointer", marginTop: 12 }}
+                >
+                  <span style={{ ...S, fontSize: 15, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>+Track something</span>
+                </button>
+              </>
+            )}
 
             {doModalOpen && (
               <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => setDoModalOpen(false)}>
