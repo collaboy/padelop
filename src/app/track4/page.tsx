@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Nav4 from "@/components/nav4";
+import LogSheet from "@/components/log-sheet";
 
 const S = { fontFamily: "Inter, sans-serif" };
 
@@ -13,6 +14,7 @@ const ITEMS = [
 ];
 
 export default function Track4() {
+  const [logSheetOpen, setLogSheetOpen] = useState(false);
   return (
     <main style={{ ...S, background: "#e2e5e9", minHeight: "100vh", display: "flex", flexDirection: "column", paddingBottom: 176 }}>
       <p style={{ ...S, fontSize: 26, fontWeight: 700, color: "#1a1c1c", padding: "40px 16px 16px", margin: 0, letterSpacing: "-0.01em", lineHeight: 1.2 }}>
@@ -41,7 +43,26 @@ export default function Track4() {
         ))}
       </div>
 
+      {/* FAB */}
+      <button
+        onClick={() => setLogSheetOpen(true)}
+        className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
+        style={{
+          bottom: "calc(1.5rem + env(safe-area-inset-bottom))",
+          right: "1.25rem",
+          width: 56, height: 56, borderRadius: 28,
+          background: "#c5e840",
+          boxShadow: "0 4px 16px #c5e84055",
+        }}
+        aria-label="Log activity"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
+
       <Nav4 />
+      <LogSheet open={logSheetOpen} onClose={() => setLogSheetOpen(false)} />
     </main>
   );
 }

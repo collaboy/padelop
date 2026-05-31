@@ -507,7 +507,7 @@ export default function LogSheet({ open, onClose }: Props) {
       <style>{`@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
       <div className="h1-font relative w-full max-w-lg bg-white rounded-t-[28px] flex flex-col overflow-hidden"
-        style={{ animation: "slideUp 0.3s cubic-bezier(0.22,1,0.36,1)", maxHeight: "85vh", paddingBottom: "env(safe-area-inset-bottom)" }}
+        style={{ animation: "slideUp 0.3s cubic-bezier(0.22,1,0.36,1)", minHeight: "50vh", maxHeight: "85vh", paddingBottom: "env(safe-area-inset-bottom)" }}
         onClick={e => e.stopPropagation()}>
         <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4 mb-2 flex-shrink-0"/>
         {/* Nav row */}
@@ -529,8 +529,8 @@ export default function LogSheet({ open, onClose }: Props) {
         <div className="overflow-y-auto flex-1 overscroll-contain">
           {/* Method picker */}
           {!logMethod && (
-            <div className="px-5 pt-4 pb-3">
-              <p className="text-[10px] font-bold tracking-widest uppercase text-[#8a9096] mb-3">Log something to update your score</p>
+            <div className="px-5 pt-4 pb-8">
+              <p className="text-[10px] font-bold tracking-widest uppercase text-[#8a9096] mb-3 text-center">Log something to update your score</p>
               <div className="grid grid-cols-3 gap-2.5">
                 <button onClick={handleCamera} className="flex flex-col items-center gap-2 py-4 rounded-2xl active:scale-95 transition-transform" style={{ background: "#f4f6ff" }}>
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: BLUE }}>
@@ -563,7 +563,7 @@ export default function LogSheet({ open, onClose }: Props) {
 
           {/* Wizard category list */}
           {logMethod === "wizard" && (
-            <div className="px-5 pt-4 pb-5">
+            <div className="px-5 pt-4 pb-8">
               <div className="flex items-center gap-3 mb-4">
                 <button onClick={() => setLogMethod(null)} className="w-7 h-7 rounded-full flex items-center justify-center active:bg-[#f0f0f0]" style={{ background: "#f4f4f6" }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>

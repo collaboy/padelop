@@ -419,6 +419,12 @@ export default function Home4() {
       })()}
 
       {/* FAB */}
+      {(() => {
+        const { schedule } = getScheduleData(match?.date ?? null, match?.time ?? null);
+        const safeIdx = Math.min(doSlideIdx, schedule.length - 1);
+        const TENNIS_GREEN = "#c5e840";
+        const fabColor = schedule[safeIdx]?.color ?? TENNIS_GREEN;
+        return (
       <button
         onClick={() => setLogSheetOpen(true)}
         className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
@@ -428,8 +434,8 @@ export default function Home4() {
           width: 56,
           height: 56,
           borderRadius: 28,
-          background: "#2653d4",
-          boxShadow: "0 4px 16px rgba(38,83,212,0.35)",
+          background: fabColor,
+          boxShadow: `0 4px 16px ${fabColor}55`,
         }}
         aria-label="Log activity"
       >
@@ -437,6 +443,8 @@ export default function Home4() {
           <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
       </button>
+        );
+      })()}
 
       <LogSheet open={logSheetOpen} onClose={() => setLogSheetOpen(false)} />
     </main>

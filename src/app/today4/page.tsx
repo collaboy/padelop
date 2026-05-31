@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Nav4 from "@/components/nav4";
+import LogSheet from "@/components/log-sheet";
 
 const S = { fontFamily: "Inter, sans-serif" };
 
@@ -149,6 +150,7 @@ const MONTH_NAMES = ["January","February","March","April","May","June","July","A
 const DOW = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 
 export default function Today4() {
+  const [logSheetOpen, setLogSheetOpen] = useState(false);
   const [match, setMatch] = useState<{ date: string; time: string } | null>(null);
   const [now, setNow] = useState(new Date());
   const [schedItemModal, setSchedItemModal] = useState<{ title: string; subtitle?: string; detail: string; color: string } | null>(null);
@@ -312,7 +314,26 @@ export default function Today4() {
         </div>
       )}
 
+      {/* FAB */}
+      <button
+        onClick={() => setLogSheetOpen(true)}
+        className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
+        style={{
+          bottom: "calc(1.5rem + env(safe-area-inset-bottom))",
+          right: "1.25rem",
+          width: 56, height: 56, borderRadius: 28,
+          background: "#c5e840",
+          boxShadow: "0 4px 16px #c5e84055",
+        }}
+        aria-label="Log activity"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
+
       <Nav4 />
+      <LogSheet open={logSheetOpen} onClose={() => setLogSheetOpen(false)} />
     </main>
   );
 }
