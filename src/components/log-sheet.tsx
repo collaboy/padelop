@@ -507,7 +507,7 @@ export default function LogSheet({ open, onClose }: Props) {
       <style>{`@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
       <div className="h1-font relative w-full max-w-lg bg-white rounded-t-[28px] flex flex-col overflow-hidden"
-        style={{ animation: "slideUp 0.3s cubic-bezier(0.22,1,0.36,1)", maxHeight: "85vh" }}
+        style={{ animation: "slideUp 0.3s cubic-bezier(0.22,1,0.36,1)", maxHeight: "85vh", paddingBottom: "env(safe-area-inset-bottom)" }}
         onClick={e => e.stopPropagation()}>
         <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4 mb-2 flex-shrink-0"/>
         {/* Nav row */}

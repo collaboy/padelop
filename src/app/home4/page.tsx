@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import Nav4 from "@/components/nav4";
 import LogSheet from "@/components/log-sheet";
 import { computeScores, loadScoringData } from "@/lib/scoring";
 
@@ -424,7 +423,7 @@ export default function Home4() {
         onClick={() => setLogSheetOpen(true)}
         className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
         style={{
-          bottom: "calc(5rem + env(safe-area-inset-bottom))",
+          bottom: "calc(1.5rem + env(safe-area-inset-bottom))",
           right: "1.25rem",
           width: 56,
           height: 56,
@@ -440,7 +439,6 @@ export default function Home4() {
       </button>
 
       <LogSheet open={logSheetOpen} onClose={() => setLogSheetOpen(false)} />
-      <Nav4 />
     </main>
   );
 }
