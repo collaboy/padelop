@@ -210,7 +210,7 @@ export default function Home8() {
           <div className="overflow-hidden" style={{ width: "33.333%", flexShrink: 0, height: "100%" }}>
             <div style={{
               display: "flex", flexDirection: "column", gap: 16,
-              transform: `translateY(calc(50dvh - 2rem - (100vw - 40px) / 2 - ${doIdx + 1} * (100vw - 24px)))`,
+              transform: `translateY(calc(50dvh - 4rem - (100vw - 40px) / 2 - ${doIdx + 1} * (100vw - 24px)))`,
               transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
             }}>
               {/* Card 0: next match */}
