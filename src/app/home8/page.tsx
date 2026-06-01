@@ -120,7 +120,6 @@ export default function Home8() {
   const swipeDirRef = useRef<'h' | 'v' | null>(null);
   const [cardSnap, setCardSnap] = useState<'none' | 'left' | 'right'>('none');
   const [liveX, setLiveX] = useState(0);
-  const [liveY, setLiveY] = useState(0);
 
   useEffect(() => {
     function loadReadiness() {
@@ -174,12 +173,10 @@ export default function Home8() {
             if (!swipeDirRef.current && (Math.abs(dx) > 8 || Math.abs(dy) > 8))
               swipeDirRef.current = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
             if (swipeDirRef.current === 'h' && cardSnap === 'none') setLiveX(dx);
-            if (swipeDirRef.current === 'v' && cardSnap === 'none') setLiveY(dy);
           }}
           onTouchEnd={e => {
             const dx = e.changedTouches[0].clientX - touchStartXRef.current;
             const dy = e.changedTouches[0].clientY - touchStartYRef.current;
-            setLiveY(0);
             if (swipeDirRef.current === 'h') {
               setLiveX(0);
               if (cardSnap === 'none') {
@@ -258,34 +255,28 @@ export default function Home8() {
                 const nextSlide = schedule[currentIdx + 1];
                 const minsUntilNext = nextSlide ? toMins(nextSlide.time) - curMins : 0;
                 const fmtMins = (m: number) => { if (m <= 0) return "a moment"; const h = Math.floor(m / 60), rem = m % 60; if (h > 0 && rem > 0) return `${h}h ${rem}m`; return h > 0 ? `${h}h` : `${rem}m`; };
-                const swipeFade = doIdx === 0 ? Math.max(0, 1 - Math.abs(liveY) / 80) : 0;
-                const wrapStyle: React.CSSProperties = { position: "relative", width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", opacity: swipeFade, transition: liveY !== 0 ? "none" : "opacity 0.35s cubic-bezier(0.4,0,0.2,1)" };
-                const circleStyle: React.CSSProperties = { position: "absolute", top: 28, bottom: 28, left: 28, right: 28, borderRadius: "50%", overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 20px" };
+                const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px" };
                 if (isDone) return (
-                  <div key="active" style={wrapStyle}>
-                    <div style={circleStyle} onClick={() => setDoModalOpen(true)}>
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: `${s.color}18` }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                      </div>
-                      <p className="text-[26px] font-bold text-[#1a1c1c] leading-none text-center">Good Job!</p>
-                      <p className="text-[15px] font-semibold text-[#4a5050] mt-1 leading-none text-center">{s.title} complete</p>
-                      {nextSlide && <div className="mt-4 text-center"><p className="text-[13px] text-[#8a9096] leading-none">See you in <span className="font-semibold text-[#4a5050]">{fmtMins(minsUntilNext)}</span> for:</p><p className="text-[14px] font-bold text-[#1a1c1c] mt-1 leading-none">{nextSlide.title}</p></div>}
+                  <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: `${s.color}18` }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
+                    <p className="text-[26px] font-bold text-[#1a1c1c] leading-none text-center">Good Job!</p>
+                    <p className="text-[15px] font-semibold text-[#4a5050] mt-1 leading-none text-center">{s.title} complete</p>
+                    {nextSlide && <div className="mt-4 text-center"><p className="text-[13px] text-[#8a9096] leading-none">See you in <span className="font-semibold text-[#4a5050]">{fmtMins(minsUntilNext)}</span> for:</p><p className="text-[14px] font-bold text-[#1a1c1c] mt-1 leading-none">{nextSlide.title}</p></div>}
                   </div>
                 );
                 return (
-                  <div key="active" style={wrapStyle}>
-                    <div style={circleStyle} onClick={() => setDoModalOpen(true)}>
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: `${s.color}18` }}>
-                          <div className="w-2.5 h-2.5 rounded-full breathe-strong" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
-                        </div>
-                        <p className="text-[12px] font-bold tracking-widest uppercase leading-none" style={{ color: "#5a7055" }}>Do this now</p>
+                  <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: `${s.color}18` }}>
+                        <div className="w-2.5 h-2.5 rounded-full breathe-strong" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
                       </div>
-                      <p className="text-[24px] font-bold text-[#1a1c1c] leading-tight text-center">{s.title}</p>
-                      {s.subtitle && <p className="text-[15px] text-[#6b7480] leading-none text-center mt-0.5">{s.subtitle}</p>}
-                      <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: isReady ? `${s.color}18` : "#f0f0f0", color: isReady ? s.color : "#b0b5ba" }}>Complete</button>
+                      <p className="text-[12px] font-bold tracking-widest uppercase leading-none" style={{ color: "#5a7055" }}>Do this now</p>
                     </div>
+                    <p className="text-[24px] font-bold text-[#1a1c1c] leading-tight text-center">{s.title}</p>
+                    {s.subtitle && <p className="text-[15px] text-[#6b7480] leading-none text-center mt-0.5">{s.subtitle}</p>}
+                    <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: isReady ? `${s.color}18` : "#f0f0f0", color: isReady ? s.color : "#b0b5ba" }}>Complete</button>
                   </div>
                 );
               })()}
