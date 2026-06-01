@@ -185,8 +185,8 @@ export default function Home7() {
 
 
   const { schedule: _s } = getScheduleData(match?.date ?? null, match?.time ?? null);
-  const isSleepytime = doSlideIdx === 0 || doSlideIdx >= _s.length + 1;
-  const _safeDoIdx = Math.min(doSlideIdx, _s.length + 1);
+  const isSleepytime = doSlideIdx === 0 || doSlideIdx >= _s.length + 2;
+  const _safeDoIdx = Math.min(doSlideIdx, _s.length + 3);
   const accentColor = (_safeDoIdx >= 1 && _safeDoIdx <= _s.length) ? _s[_safeDoIdx - 1].color : "#64748b";
 
   return (
@@ -197,8 +197,8 @@ export default function Home7() {
       {(() => {
         const { schedule, currentIdx, dayType } = getScheduleData(match?.date ?? null, match?.time ?? null);
         const meta = DAY_TYPE_META[dayType];
-        const safeDoIdx = Math.min(doSlideIdx, schedule.length + 1);
-        const doItem = schedule[safeDoIdx - 1];
+        const safeDoIdx = Math.min(doSlideIdx, schedule.length + 3);
+        const doItem = schedule[Math.min(safeDoIdx - 1, schedule.length - 1)];
         const curMins = now.getHours() * 60 + now.getMinutes();
         return (
           <>
@@ -211,7 +211,7 @@ export default function Home7() {
               onTouchEnd={e => {
                 const dy = e.changedTouches[0].clientY - doTouchStartX.current;
                 if (dy < -40)
-                  setDoSlideIdx(prev => Math.min(prev + 1, schedule.length + 1));
+                  setDoSlideIdx(prev => Math.min(prev + 1, schedule.length + 3));
                 else if (dy > 40)
                   setDoSlideIdx(prev => Math.max(prev - 1, currentIdx + 1));
               }}
@@ -223,10 +223,41 @@ export default function Home7() {
                 transform: `translateY(calc((100dvh - 4rem - 56px - (100vw - 40px)) / 2 - 24px - ${safeDoIdx + 1} * (100vw - 24px)))`,
                 transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
               }}>
-                {([null, null, ...schedule, null, null] as (typeof schedule[0] | null)[]).map((s, i) => (
+                {([null, null, ...schedule.slice(0, currentIdx + 1), 'SCHED' as const, ...schedule.slice(currentIdx + 1), null, null] as (typeof schedule[0] | null | 'SCHED')[]).map((s, i) => (
                   <div key={i} style={{ height: "calc(100vw - 40px)", width: "100%", flexShrink: 0, opacity: i === safeDoIdx + 1 ? 1 : 0.35, filter: i === safeDoIdx + 1 ? "none" : "grayscale(1)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-                    {s === null ? (
-                      i === schedule.length + 3 ? (
+                    {s === 'SCHED' ? (
+                      /* Today's Schedule card */
+                      <div className="bg-white rounded-[24px] w-full h-full overflow-hidden flex flex-col" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)" }}>
+                        <div className="px-6 pt-5 pb-3 flex-shrink-0">
+                          <p className="text-[11px] font-bold tracking-widest uppercase text-[#8a9096]">Today&apos;s Schedule</p>
+                          <p className="text-[13px] font-semibold text-[#8a9096] mt-0.5">{meta.label}</p>
+                        </div>
+                        <div className="flex-1 overflow-y-auto px-4 pb-4" style={{ overscrollBehavior: "contain" }}>
+                          {schedule.map((item, si) => {
+                            const isCur = si === currentIdx;
+                            const isPast = !isCur && curMins > toMins(item.time);
+                            return (
+                              <div key={si} className="flex items-center gap-3" style={{
+                                padding: "8px",
+                                borderRadius: isCur ? 12 : 0,
+                                borderBottom: !isCur && si < schedule.length - 1 ? "1px solid #f4f4f4" : "none",
+                                boxShadow: isCur ? `0 0 0 1px ${item.color}` : "none",
+                                marginBottom: isCur && si < schedule.length - 1 ? 4 : 0,
+                              }}>
+                                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: isPast ? "#f0f0f0" : `${item.color}18` }}>
+                                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: isPast ? "#d0d3d6" : item.color }} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: isPast ? "#c4c7c7" : item.color }}>{item.time}</p>
+                                  <p className="text-[14px] font-semibold leading-snug" style={{ color: isPast ? "#a0a5aa" : "#1a1c1c" }}>{item.title}</p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : s === null ? (
+                      i === schedule.length + 4 ? (
                         /* Last phantom — brand watermark */
                         <div className="rounded-[24px] w-full h-full relative overflow-hidden" style={{ background: "#e2e5e9", border: "2px solid #1a1c1c" }}>
                           <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.08 }}>
@@ -251,7 +282,7 @@ export default function Home7() {
                         </div>
                       )
                     ) : (() => {
-                      const schedIdx = i - 2;
+                      const schedIdx = i <= currentIdx + 2 ? i - 2 : i - 3;
                       const isDone = completed.has(schedIdx);
                       const nextSlide = schedule[schedIdx + 1];
                       const minsUntilNext = nextSlide ? toMins(nextSlide.time) - curMins : 0;
