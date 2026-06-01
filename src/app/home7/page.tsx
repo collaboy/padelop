@@ -193,7 +193,7 @@ export default function Home7() {
   return (
     <>
       <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.82)", zIndex: 55, pointerEvents: "none", opacity: isSleepytime ? 1 : 0, transition: "opacity 0.35s ease" }} />
-    <main style={{ ...S, position: "fixed", inset: 0, paddingTop: "4rem", paddingLeft: 20, paddingRight: 20, paddingBottom: 0, overflow: "hidden", background: "#f9f9f9", zIndex: 60 }}>
+    <main style={{ ...S, position: "fixed", inset: 0, paddingTop: "4rem", paddingLeft: 20, paddingRight: 20, paddingBottom: 0, overflow: "hidden", background: "#e2e5e9", zIndex: 60 }}>
 
       {(() => {
         const { schedule, currentIdx, dayType } = getScheduleData(match?.date ?? null, match?.time ?? null);
