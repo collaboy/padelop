@@ -187,11 +187,13 @@ export default function Home4() {
 
   const { schedule: _s } = getScheduleData(match?.date ?? null, match?.time ?? null);
   const isSleepytime = doSlideIdx === 0 || doSlideIdx >= _s.length + 1;
+  const _safeDoIdx = Math.min(doSlideIdx, _s.length + 1);
+  const accentColor = (_safeDoIdx >= 1 && _safeDoIdx <= _s.length) ? _s[_safeDoIdx - 1].color : "#7c3aed";
 
   return (
     <>
       <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.82)", zIndex: 55, pointerEvents: "none", opacity: isSleepytime ? 1 : 0, transition: "opacity 0.35s ease" }} />
-    <main style={{ ...S, position: "fixed", inset: 0, paddingTop: "4rem", paddingLeft: 20, paddingRight: 20, paddingBottom: 0, overflow: "hidden", background: "#f9f9f9", zIndex: 60 }}>
+    <main style={{ ...S, position: "fixed", inset: 0, paddingTop: "4rem", paddingLeft: 20, paddingRight: 20, paddingBottom: 0, overflow: "hidden", background: `${accentColor}2e`, transition: "background 0.35s cubic-bezier(0.4,0,0.2,1)", zIndex: 60 }}>
 
       {(() => {
         const { schedule, currentIdx, dayType } = getScheduleData(match?.date ?? null, match?.time ?? null);
@@ -199,23 +201,8 @@ export default function Home4() {
         const safeDoIdx = Math.min(doSlideIdx, schedule.length + 1);
         const doItem = schedule[safeDoIdx - 1];
         const curMins = now.getHours() * 60 + now.getMinutes();
-        const accentColor = (safeDoIdx >= 1 && safeDoIdx <= schedule.length) ? schedule[safeDoIdx - 1].color : "#7c3aed";
         return (
           <>
-            {/* Single accent overlay — box-shadow bleeds outward from card footprint */}
-            <div style={{
-              position: "fixed",
-              left: 20,
-              width: "calc(100vw - 40px)",
-              top: "calc(4rem + (100dvh - 4rem - 56px - (100vw - 40px)) / 2 - 24px)",
-              height: "calc(100vw - 40px)",
-              borderRadius: 24,
-              boxShadow: `0 0 0 100vmax ${accentColor}`,
-              opacity: 0.18,
-              pointerEvents: "none",
-              zIndex: 10,
-              transition: "box-shadow 0.35s cubic-bezier(0.4,0,0.2,1)",
-            }} />
 
             {/* Do This Now — square carousel */}
             <div
@@ -232,9 +219,8 @@ export default function Home4() {
                 display: "flex",
                 flexDirection: "column",
                 gap: 16,
-                background: `${accentColor}2e`,
                 transform: `translateY(calc((100dvh - 4rem - 56px - (100vw - 40px)) / 2 - 24px - ${safeDoIdx + 1} * (100vw - 24px)))`,
-                transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1), background 0.35s cubic-bezier(0.4,0,0.2,1)",
+                transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
               }}>
                 {([null, null, ...schedule, null, null] as (typeof schedule[0] | null)[]).map((s, i) => (
                   <div key={i} style={{ height: "calc(100vw - 40px)", width: "100%", flexShrink: 0, opacity: i === safeDoIdx + 1 ? 1 : 0.35, filter: i === safeDoIdx + 1 ? "none" : "grayscale(1)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
