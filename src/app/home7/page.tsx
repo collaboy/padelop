@@ -228,9 +228,9 @@ export default function Home7() {
                     {s === 'SCHED' ? (
                       /* Today's Schedule card */
                       <div className="bg-white rounded-[24px] w-full h-full overflow-hidden flex flex-col" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)" }}>
-                        <div className="px-6 pt-5 pb-3 flex-shrink-0">
-                          <p className="text-[11px] font-bold tracking-widest uppercase text-[#8a9096]">Today&apos;s Schedule</p>
-                          <p className="text-[13px] font-semibold text-[#8a9096] mt-0.5">{meta.label}</p>
+                        <div className="px-6 pt-5 pb-3 flex-shrink-0 flex flex-col items-center text-center">
+                          <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">Today&apos;s Schedule</p>
+                          <p className="text-[13px] font-semibold text-[#8a9096] mt-1">{meta.label}</p>
                         </div>
                         <div className="flex-1 overflow-y-auto px-4 pb-4" style={{ overscrollBehavior: "contain" }}>
                           {schedule.map((item, si) => {
