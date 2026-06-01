@@ -152,7 +152,7 @@ export default function Home8() {
 
   return (
     <>
-      <main style={{ ...S, position: "fixed", inset: 0, paddingTop: "4rem", paddingLeft: 20, paddingRight: 20, paddingBottom: 0, overflow: "hidden", background: "#e2e5e9", zIndex: 60 }}>
+      <main style={{ ...S, position: "fixed", inset: 0, paddingTop: "4rem", paddingLeft: 10, paddingRight: 10, paddingBottom: 0, overflow: "hidden", background: "#e2e5e9", zIndex: 60 }}>
 
         {/* Horizontal strip: [readiness | carousel | log] */}
         <div
@@ -207,7 +207,7 @@ export default function Home8() {
           </div>
 
           {/* Carousel center — all schedule cards, doIdx in transform */}
-          <div className="overflow-hidden" style={{ width: "33.333%", flexShrink: 0, height: "100%" }}>
+          <div className="overflow-hidden" style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingLeft: 10, paddingRight: 10 }}>
             <div style={{
               display: "flex", flexDirection: "column", gap: 20,
               transform: `translateY(calc(50dvh - 4rem - (100vw - 40px) / 2 - ${doIdx + 2} * (100vw - 20px)))`,
