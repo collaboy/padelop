@@ -201,7 +201,7 @@ export default function Home7() {
           const [mh, mm] = match.time.split(":").map(Number);
           const ampm = mh >= 12 ? "PM" : "AM";
           const timeLabel = `${mh % 12 || 12}:${String(mm).padStart(2, "0")} ${ampm}`;
-          return <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>Next Match · {dateLabel} · {timeLabel}</p>;
+          return <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, fontWeight: 600, color: "#8a9096", margin: 0 }}>Next Match · {dateLabel} · {timeLabel}</p>;
         })() : <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, fontWeight: 500, color: "#9aa5b0", margin: 0 }}>No match scheduled</p>}
       </div>
     <main style={{ ...S, position: "fixed", inset: 0, paddingTop: "4rem", paddingLeft: 20, paddingRight: 20, paddingBottom: 0, overflow: "hidden", background: `${accentColor}2e`, transition: "background 0.35s cubic-bezier(0.4,0,0.2,1)", zIndex: 60 }}>
