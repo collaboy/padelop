@@ -212,10 +212,17 @@ export default function Home7() {
         return (
           <>
 
-            {/* Do This Now — square carousel */}
+            {/* Horizontal strip: [readiness | carousel | log] */}
             <div
-              className="w-full overflow-hidden"
-              style={{ height: "calc(100dvh - 4rem)", touchAction: "none" }}
+              style={{
+                display: "flex",
+                width: "300%",
+                marginLeft: "-100%",
+                height: "calc(100dvh - 4rem)",
+                touchAction: "none",
+                transform: cardSnap === 'right' ? "translateX(33.333%)" : cardSnap === 'left' ? "translateX(-33.333%)" : `translateX(${liveX}px)`,
+                transition: liveX !== 0 ? "none" : "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
+              }}
               onTouchStart={e => {
                 doTouchStartX.current = e.touches[0].clientY;
                 touchStartXRef.current = e.touches[0].clientX;
@@ -245,6 +252,25 @@ export default function Home7() {
                 swipeDirRef.current = null;
               }}
             >
+              {/* Readiness panel */}
+              <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "center", justifyContent: "center", paddingRight: 20 }}>
+                <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: "0 24px", transform: "translateY(-52px)" }}>
+                  <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Match Readiness</p>
+                  <svg width="120" height="120" viewBox="0 0 120 120">
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="#f0f0f0" strokeWidth="8" />
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="#2653d4" strokeWidth="8" strokeLinecap="round"
+                      strokeDasharray={`${2 * Math.PI * 50}`}
+                      strokeDashoffset={`${2 * Math.PI * 50 * (1 - readiness / 100)}`}
+                      transform="rotate(-90 60 60)"
+                    />
+                    <text x="60" y="60" textAnchor="middle" dominantBaseline="central" fontSize="28" fontWeight="700" fill="#1a1c1c" fontFamily="Inter, sans-serif">{readiness}</text>
+                  </svg>
+                  <button onClick={() => router.push("/insights4")} className="text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: "#2653d418", color: "#2653d4" }}>See Breakdown</button>
+                </div>
+              </div>
+
+              {/* Carousel center */}
+              <div className="overflow-hidden" style={{ width: "33.333%", flexShrink: 0, height: "100%" }}>
               <div style={{
                 display: "flex",
                 flexDirection: "column",
@@ -357,52 +383,29 @@ export default function Home7() {
                   })();
 
                   return (
-                    <div key={i} style={{ position: "relative", height: "calc(100vw - 40px)", width: "100%", flexShrink: 0, overflow: isActive ? "hidden" : undefined, borderRadius: 24, opacity: isActive ? 1 : 0.35, filter: isActive ? "none" : "grayscale(1)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-                      {isActive ? (
-                        <>
-                          {/* Readiness panel — swipe right to reveal */}
-                          <div style={{ position: "absolute", inset: 0, borderRadius: 24, overflow: "hidden", transform: cardSnap === 'right' ? "translateX(0)" : "translateX(-100%)", transition: T }}>
-                            <div className="bg-white w-full h-full flex flex-col items-center justify-center gap-4 px-6">
-                              <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Match Readiness</p>
-                              <svg width="120" height="120" viewBox="0 0 120 120">
-                                <circle cx="60" cy="60" r="50" fill="none" stroke="#f0f0f0" strokeWidth="8" />
-                                <circle cx="60" cy="60" r="50" fill="none" stroke="#2653d4" strokeWidth="8" strokeLinecap="round"
-                                  strokeDasharray={`${2 * Math.PI * 50}`}
-                                  strokeDashoffset={`${2 * Math.PI * 50 * (1 - readiness / 100)}`}
-                                  transform="rotate(-90 60 60)"
-                                />
-                                <text x="60" y="60" textAnchor="middle" dominantBaseline="central" fontSize="28" fontWeight="700" fill="#1a1c1c" fontFamily="Inter, sans-serif">{readiness}</text>
-                              </svg>
-                              <button onClick={() => router.push("/insights4")} className="text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: "#2653d418", color: "#2653d4" }}>See Breakdown</button>
-                            </div>
-                          </div>
-
-                          {/* Card — slides left or right */}
-                          <div style={{ position: "absolute", inset: 0, borderRadius: 24, overflow: "hidden", transform: cardSnap === 'left' ? "translateX(-100%)" : cardSnap === 'right' ? "translateX(100%)" : `translateX(${liveX}px)`, transition: liveX !== 0 ? "none" : T }}>
-                            {cardContent}
-                          </div>
-
-                          {/* Log panel — swipe left to reveal */}
-                          <div style={{ position: "absolute", inset: 0, borderRadius: 24, overflow: "hidden", transform: cardSnap === 'left' ? "translateX(0)" : "translateX(100%)", transition: T }}>
-                            <div className="bg-white w-full h-full flex flex-col items-center justify-center gap-3 px-6">
-                              <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Log Data</p>
-                              {([
-                                { label: "Hydration", color: "#0891b2" },
-                                { label: "Check-in", color: "#2653d4" },
-                                { label: "Nutrition", color: "#16a34a" },
-                                { label: "Recovery", color: "#64748b" },
-                              ] as const).map(item => (
-                                <button key={item.label} onClick={() => { setCardSnap('none'); setLogSheetOpen(true); }} className="w-full py-3 rounded-2xl text-[15px] font-semibold" style={{ background: `${item.color}18`, color: item.color }}>{item.label}</button>
-                              ))}
-                            </div>
-                          </div>
-                        </>
-                      ) : cardContent}
+                    <div key={i} style={{ position: "relative", height: "calc(100vw - 40px)", width: "100%", flexShrink: 0, overflow: i === currentIdx + 3 ? "hidden" : undefined, borderRadius: i === currentIdx + 3 ? "50%" : 24, opacity: isActive ? 1 : 0.35, filter: isActive ? "none" : "grayscale(1)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+                      {cardContent}
                     </div>
                   );
                 })}
               </div>
-            </div>
+              </div>{/* end carousel center */}
+
+              {/* Log panel */}
+              <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "center", justifyContent: "center", paddingLeft: 20 }}>
+                <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "0 24px", transform: "translateY(-52px)" }}>
+                  <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Log Data</p>
+                  {([
+                    { label: "Hydration", color: "#0891b2" },
+                    { label: "Check-in", color: "#2653d4" },
+                    { label: "Nutrition", color: "#16a34a" },
+                    { label: "Recovery", color: "#64748b" },
+                  ] as const).map(item => (
+                    <button key={item.label} onClick={() => { setCardSnap('none'); setLogSheetOpen(true); }} className="w-full py-3 rounded-2xl text-[15px] font-semibold" style={{ background: `${item.color}18`, color: item.color }}>{item.label}</button>
+                  ))}
+                </div>
+              </div>
+            </div>{/* end horizontal strip */}
 
             {completed.has(doItemIdx) && (
               <>
