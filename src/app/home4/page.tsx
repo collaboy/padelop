@@ -199,8 +199,13 @@ export default function Home4() {
         const safeDoIdx = Math.min(doSlideIdx, schedule.length + 1);
         const doItem = schedule[safeDoIdx - 1];
         const curMins = now.getHours() * 60 + now.getMinutes();
+        const accentColor = (safeDoIdx >= 1 && safeDoIdx <= schedule.length) ? schedule[safeDoIdx - 1].color : "#7c3aed";
         return (
           <>
+            {/* Accent-tinted strips above and below the centered card */}
+            <div style={{ position: "fixed", top: "4rem", left: 0, right: 0, height: "calc((100dvh - 4rem - 56px - (100vw - 40px)) / 2 - 24px)", background: accentColor, opacity: 0.18, pointerEvents: "none", zIndex: 10, transition: "background 0.35s cubic-bezier(0.4,0,0.2,1)" }} />
+            <div style={{ position: "fixed", top: "calc(4rem + (100dvh - 4rem - 56px + (100vw - 40px)) / 2 - 24px)", left: 0, right: 0, bottom: 0, background: accentColor, opacity: 0.18, pointerEvents: "none", zIndex: 10, transition: "background 0.35s cubic-bezier(0.4,0,0.2,1)" }} />
+
             {/* Do This Now — square carousel */}
             <div
               className="w-full overflow-hidden"
