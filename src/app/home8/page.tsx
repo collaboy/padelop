@@ -193,7 +193,7 @@ export default function Home8() {
         >
           {/* Log panel */}
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingRight: 20, paddingTop: "calc(50dvh - 4rem - (100vw - 40px) / 2)" }}>
-            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "0 24px", marginRight: cardSnap === 'right' ? 0 : -40, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "0 24px", marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0.35, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
               <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Log Data</p>
               {([
                 { label: "Hydration", color: "#0891b2" },
@@ -224,7 +224,7 @@ export default function Home8() {
               </div>
 
               {/* Card 0: next match */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", gap: 8 }}>
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", gap: 8, opacity: cardSnap === 'none' && doIdx === -1 ? 1 : 0.35, transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
                 <p className="text-[13px] font-bold tracking-widest uppercase text-center" style={{ color: "#9aa5b0" }}>Next Match</p>
                 {match ? (() => {
                   const [y, mo, d] = match.date.split('-').map(Number);
@@ -255,7 +255,7 @@ export default function Home8() {
                 const nextSlide = schedule[currentIdx + 1];
                 const minsUntilNext = nextSlide ? toMins(nextSlide.time) - curMins : 0;
                 const fmtMins = (m: number) => { if (m <= 0) return "a moment"; const h = Math.floor(m / 60), rem = m % 60; if (h > 0 && rem > 0) return `${h}h ${rem}m`; return h > 0 ? `${h}h` : `${rem}m`; };
-                const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px" };
+                const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: cardSnap === 'none' && doIdx === 0 ? 1 : 0.35, transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1)" };
                 if (isDone) return (
                   <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
                     <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: `${s.color}18` }}>
@@ -282,7 +282,7 @@ export default function Home8() {
               })()}
 
               {/* Card 2: today's schedule */}
-              <div key="sched" style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", padding: "20px 0 0" }}>
+              <div key="sched" style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", padding: "20px 0 0", opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0.35, transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
                 <p className="text-[13px] font-bold tracking-widest uppercase text-center mb-3" style={{ color: "#9aa5b0", flexShrink: 0 }}>Today&apos;s Schedule</p>
                 <div style={{ flex: 1, overflowY: "auto", padding: "0 20px 20px" }}>
                   {schedule.map((s, i) => {
@@ -308,7 +308,7 @@ export default function Home8() {
 
           {/* Readiness panel */}
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 20, paddingTop: "calc(50dvh - 4rem - (100vw - 40px) / 2)" }}>
-            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: "0 24px", marginLeft: cardSnap === 'left' ? 0 : -40, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: "0 24px", marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0.35, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
               <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Match Readiness</p>
               <svg width="120" height="120" viewBox="0 0 120 120">
                 <circle cx="60" cy="60" r="50" fill="none" stroke="#f0f0f0" strokeWidth="8" />
@@ -360,28 +360,12 @@ export default function Home8() {
           </div>
         )}
 
-        {/* Dim overlay around active card */}
-        {!doModalOpen && !logSheetOpen && (() => {
-          const leftW = cardSnap === 'right' ? 10 : cardSnap === 'left' ? 30 : 20;
-          const rightW = cardSnap === 'right' ? 30 : cardSnap === 'left' ? 10 : 20;
-          const bg = "rgba(0,0,0,0.35)";
-          const tr = "all 0.35s cubic-bezier(0.4,0,0.2,1)";
-          const cardTopH = "calc(50dvh - (100vw - 40px) / 2)";
-          const cardH = "calc(100vw - 40px)";
-          const base: React.CSSProperties = { position: "fixed", background: bg, pointerEvents: "none", zIndex: 65 };
-          return <>
-            <div style={{ ...base, top: 0, left: 0, right: 0, height: cardTopH, transition: tr }} />
-            <div style={{ ...base, top: `calc(50dvh + (100vw - 40px) / 2)`, left: 0, right: 0, bottom: 0, transition: tr }} />
-            <div style={{ ...base, top: cardTopH, left: 0, width: leftW, height: cardH, transition: tr }} />
-            <div style={{ ...base, top: cardTopH, right: 0, width: rightW, height: cardH, transition: tr }} />
-          </>;
-        })()}
 
         {/* FAB */}
         <button
           onClick={() => setLogSheetOpen(true)}
-          className="fixed flex items-center justify-center active:scale-95 transition-transform"
-          style={{ zIndex: 80, bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.25rem", width: 56, height: 56, borderRadius: 28, background: doItem?.color ?? "#2653d4", boxShadow: `0 4px 16px ${doItem?.color ?? "#2653d4"}55` }}
+          className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
+          style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.25rem", width: 56, height: 56, borderRadius: 28, background: doItem?.color ?? "#2653d4", boxShadow: `0 4px 16px ${doItem?.color ?? "#2653d4"}55` }}
           aria-label="Log activity"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
