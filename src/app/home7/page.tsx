@@ -194,7 +194,7 @@ export default function Home7() {
     <>
       <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.82)", zIndex: 55, pointerEvents: "none", opacity: isSleepytime ? 1 : 0, transition: "opacity 0.35s ease" }} />
       {/* Next match strip */}
-      <div style={{ position: "fixed", top: "4rem", left: 0, right: 0, height: 44, zIndex: 65, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+      <div style={{ position: "fixed", top: "calc(4rem - 1px)", left: 0, right: 0, height: 44, zIndex: 65, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
         {match ? (() => {
           const d = new Date(match.date + "T00:00:00");
           const dateLabel = d.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
