@@ -305,8 +305,8 @@ export default function Home7() {
                                 <p className="text-[13px] font-bold tracking-widest uppercase leading-none" style={{ color: schedIdx === currentIdx ? "#5a7055" : "#9aa5b0" }}>
                                   {schedIdx === currentIdx ? "Do this now" : schedIdx > currentIdx ? `Up Next · ${s.time}` : s.time}
                                 </p>
-                                <p className="text-[26px] font-bold text-[#1a1c1c] leading-tight">{s.title}</p>
-                                {s.subtitle && <p className="text-[16px] text-[#6b7480] leading-snug">{s.subtitle}</p>}
+                                <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">{s.title}</p>
+                                {s.subtitle && <p className="text-[16px] text-[#6b7480] leading-none">{s.subtitle}</p>}
                                 <span className="text-[13px] font-semibold px-5 py-2 rounded-full mt-1" style={{
                                   background: isReady ? `${s.color}18` : "#f0f0f0",
                                   color: isReady ? s.color : "#b0b5ba",
