@@ -224,15 +224,15 @@ export default function Home7() {
                 transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
               }}>
                 {([null, null, ...schedule.slice(0, currentIdx + 1), 'SCHED' as const, ...schedule.slice(currentIdx + 1), null, null] as (typeof schedule[0] | null | 'SCHED')[]).map((s, i) => (
-                  <div key={i} style={{ height: "calc(100vw - 40px)", width: "100%", flexShrink: 0, opacity: i === safeDoIdx + 1 ? 1 : 0.35, filter: i === safeDoIdx + 1 ? "none" : "grayscale(1)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+                  <div key={i} style={{ height: s === 'SCHED' ? "auto" : "calc(100vw - 40px)", width: "100%", flexShrink: 0, opacity: i === safeDoIdx + 1 ? 1 : 0.35, filter: i === safeDoIdx + 1 ? "none" : "grayscale(1)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
                     {s === 'SCHED' ? (
                       /* Today's Schedule card */
-                      <div className="bg-white rounded-[24px] w-full h-full overflow-hidden flex flex-col" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)" }}>
-                        <div className="px-6 pt-5 pb-3 flex-shrink-0 flex flex-col items-center text-center">
+                      <div className="bg-white rounded-[24px] w-full overflow-hidden" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)" }}>
+                        <div className="px-6 pt-5 pb-3 flex flex-col items-center text-center">
                           <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">Today&apos;s Schedule</p>
                           <p className="text-[13px] font-semibold text-[#8a9096] mt-1">{meta.label}</p>
                         </div>
-                        <div className="flex-1 overflow-y-auto px-4 pb-4" style={{ overscrollBehavior: "contain" }}>
+                        <div className="px-4 pb-6">
                           {schedule.map((item, si) => {
                             const isCur = si === currentIdx;
                             const isPast = !isCur && curMins > toMins(item.time);
