@@ -288,19 +288,10 @@ export default function Home7() {
                           ) : (
                             /* Normal state */
                             <>
-                              {/* Label row with inline dot */}
-                              <div className="flex items-center gap-2">
-                                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 pointer-events-none" style={{ background: `${s.color}18` }}>
-                                  {schedIdx === currentIdx ? (
-                                    <div className="w-3 h-3 rounded-full breathe-strong" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
-                                  ) : (
-                                    <div className="w-3 h-3 rounded-full" style={{ background: s.color }} />
-                                  )}
-                                </div>
-                                <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: schedIdx === currentIdx ? "#5a7055" : "#9aa5b0" }}>
-                                  {schedIdx === currentIdx ? "Do this now" : schedIdx > currentIdx ? `Up Next · ${s.time}` : s.time}
-                                </p>
-                              </div>
+                              {/* Label */}
+                              <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: schedIdx === currentIdx ? "#5a7055" : "#9aa5b0" }}>
+                                {schedIdx === currentIdx ? "Do this now" : schedIdx > currentIdx ? `Up Next · ${s.time}` : s.time}
+                              </p>
                               <p className="text-[26px] font-bold text-[#1a1c1c] leading-none text-center mt-2">{s.title}</p>
                               {s.subtitle && <p className="text-[16px] text-[#6b7480] leading-none text-center mt-1">{s.subtitle}</p>}
                               <div className="flex justify-center mt-4">
