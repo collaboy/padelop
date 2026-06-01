@@ -360,11 +360,28 @@ export default function Home8() {
           </div>
         )}
 
+        {/* Dim overlay around active card */}
+        {!doModalOpen && !logSheetOpen && (() => {
+          const leftW = cardSnap === 'right' ? 10 : cardSnap === 'left' ? 30 : 20;
+          const rightW = cardSnap === 'right' ? 30 : cardSnap === 'left' ? 10 : 20;
+          const bg = "rgba(0,0,0,0.35)";
+          const tr = "all 0.35s cubic-bezier(0.4,0,0.2,1)";
+          const cardTopH = "calc(50dvh - (100vw - 40px) / 2)";
+          const cardH = "calc(100vw - 40px)";
+          const base: React.CSSProperties = { position: "fixed", background: bg, pointerEvents: "none", zIndex: 65 };
+          return <>
+            <div style={{ ...base, top: 0, left: 0, right: 0, height: cardTopH, transition: tr }} />
+            <div style={{ ...base, top: `calc(50dvh + (100vw - 40px) / 2)`, left: 0, right: 0, bottom: 0, transition: tr }} />
+            <div style={{ ...base, top: cardTopH, left: 0, width: leftW, height: cardH, transition: tr }} />
+            <div style={{ ...base, top: cardTopH, right: 0, width: rightW, height: cardH, transition: tr }} />
+          </>;
+        })()}
+
         {/* FAB */}
         <button
           onClick={() => setLogSheetOpen(true)}
-          className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
-          style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.25rem", width: 56, height: 56, borderRadius: 28, background: doItem?.color ?? "#2653d4", boxShadow: `0 4px 16px ${doItem?.color ?? "#2653d4"}55` }}
+          className="fixed flex items-center justify-center active:scale-95 transition-transform"
+          style={{ zIndex: 80, bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.25rem", width: 56, height: 56, borderRadius: 28, background: doItem?.color ?? "#2653d4", boxShadow: `0 4px 16px ${doItem?.color ?? "#2653d4"}55` }}
           aria-label="Log activity"
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
