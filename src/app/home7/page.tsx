@@ -201,10 +201,10 @@ export default function Home7() {
           const [mh, mm] = match.time.split(":").map(Number);
           const ampm = mh >= 12 ? "PM" : "AM";
           const timeLabel = `${mh % 12 || 12}:${String(mm).padStart(2, "0")} ${ampm}`;
-          return <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>Next Match · {dateLabel} at {timeLabel}{match.club ? ` · ${match.club}` : ""}</p>;
+          return <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>Next Match · {dateLabel} at {timeLabel}</p>;
         })() : <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, fontWeight: 500, color: "#9aa5b0", margin: 0 }}>No match scheduled</p>}
       </div>
-    <main style={{ ...S, position: "fixed", inset: 0, paddingTop: "calc(4rem + 44px)", paddingLeft: 20, paddingRight: 20, paddingBottom: 0, overflow: "hidden", background: `${accentColor}2e`, transition: "background 0.35s cubic-bezier(0.4,0,0.2,1)", zIndex: 60 }}>
+    <main style={{ ...S, position: "fixed", inset: 0, paddingTop: "4rem", paddingLeft: 20, paddingRight: 20, paddingBottom: 0, overflow: "hidden", background: `${accentColor}2e`, transition: "background 0.35s cubic-bezier(0.4,0,0.2,1)", zIndex: 60 }}>
 
       {(() => {
         const { schedule, currentIdx, dayType } = getScheduleData(match?.date ?? null, match?.time ?? null);
@@ -218,7 +218,7 @@ export default function Home7() {
             {/* Do This Now — square carousel */}
             <div
               className="w-full overflow-hidden"
-              style={{ height: "calc(100dvh - 4rem - 44px)", touchAction: "none" }}
+              style={{ height: "calc(100dvh - 4rem)", touchAction: "none" }}
               onTouchStart={e => { doTouchStartX.current = e.touches[0].clientY; }}
               onTouchEnd={e => {
                 const dy = e.changedTouches[0].clientY - doTouchStartX.current;
@@ -230,7 +230,7 @@ export default function Home7() {
                 display: "flex",
                 flexDirection: "column",
                 gap: 16,
-                transform: `translateY(calc((100dvh - 4rem - 44px - 56px - (100vw - 40px)) / 2 - 24px - ${safeDoIdx + 1} * (100vw - 24px)))`,
+                transform: `translateY(calc((100dvh - 4rem - 56px - (100vw - 40px)) / 2 - 24px - ${safeDoIdx + 1} * (100vw - 24px)))`,
                 transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
               }}>
                 {([null, null, ...schedule, null, null] as (typeof schedule[0] | null)[]).map((s, i) => (
