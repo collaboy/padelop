@@ -288,17 +288,6 @@ export default function Home7() {
                           ) : (
                             /* Normal state */
                             <>
-                              {/* Top: next match info */}
-                              {(() => {
-                                const d = match ? new Date(match.date + "T00:00:00") : null;
-                                const dateLabel = d ? d.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" }) : null;
-                                const timeLabel = match ? (() => { const [mh, mm] = match.time.split(":").map(Number); return `${mh % 12 || 12}:${String(mm).padStart(2, "0")} ${mh >= 12 ? "PM" : "AM"}`; })() : null;
-                                return (
-                                  <Link href="/matches4" style={{ fontSize: 12, fontWeight: 600, color: "#8a9096", textDecoration: "none", letterSpacing: "0.02em" }}>
-                                    {match ? `Next Match · ${dateLabel} · ${timeLabel}` : "No match scheduled"}
-                                  </Link>
-                                );
-                              })()}
                               {/* Centered block: label + title + subtitle + complete */}
                               <div className="flex-1" />
                               <div className="flex flex-col items-center text-center gap-2">
