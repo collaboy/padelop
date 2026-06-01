@@ -265,7 +265,7 @@ export default function Home7() {
                       return (
                         <button
                           onClick={() => setDoModalOpen(true)}
-                          className="bg-white rounded-[24px] px-6 py-6 flex flex-col items-center justify-center transition-opacity w-full h-full relative overflow-hidden"
+                          className="bg-white rounded-[24px] px-6 py-6 flex flex-col items-center transition-opacity w-full h-full relative overflow-hidden"
                           style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)" }}
                         >
                           {isDone ? (
@@ -288,13 +288,17 @@ export default function Home7() {
                           ) : (
                             /* Normal state */
                             <>
-                              {/* Label */}
+                              {/* Top: label */}
                               <p className="text-[17px] font-bold tracking-widest uppercase" style={{ color: schedIdx === currentIdx ? "#5a7055" : "#9aa5b0" }}>
                                 {schedIdx === currentIdx ? "Do this now" : schedIdx > currentIdx ? `Up Next · ${s.time}` : s.time}
                               </p>
-                              <p className="text-[26px] font-bold text-[#1a1c1c] leading-snug text-center mt-3">{s.title}</p>
-                              {s.subtitle && <p className="text-[16px] text-[#6b7480] leading-snug text-center mt-2">{s.subtitle}</p>}
-                              <div className="flex justify-center mt-4">
+                              {/* Middle: title + subtitle */}
+                              <div className="flex-1 flex flex-col items-center justify-center text-center">
+                                <p className="text-[26px] font-bold text-[#1a1c1c] leading-snug">{s.title}</p>
+                                {s.subtitle && <p className="text-[16px] text-[#6b7480] leading-snug mt-2">{s.subtitle}</p>}
+                              </div>
+                              {/* Bottom: complete button */}
+                              <div className="flex justify-center">
                                 <span className="text-[13px] font-semibold px-5 py-2 rounded-full" style={{
                                   background: isReady ? `${s.color}18` : "#f0f0f0",
                                   color: isReady ? s.color : "#b0b5ba",
