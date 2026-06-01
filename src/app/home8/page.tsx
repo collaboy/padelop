@@ -120,6 +120,7 @@ export default function Home8() {
   const swipeDirRef = useRef<'h' | 'v' | null>(null);
   const [cardSnap, setCardSnap] = useState<'none' | 'left' | 'right'>('none');
   const [liveX, setLiveX] = useState(0);
+  const [liveY, setLiveY] = useState(0);
 
   useEffect(() => {
     function loadReadiness() {
@@ -173,10 +174,12 @@ export default function Home8() {
             if (!swipeDirRef.current && (Math.abs(dx) > 8 || Math.abs(dy) > 8))
               swipeDirRef.current = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
             if (swipeDirRef.current === 'h' && cardSnap === 'none') setLiveX(dx);
+            if (swipeDirRef.current === 'v' && cardSnap === 'none') setLiveY(dy);
           }}
           onTouchEnd={e => {
             const dx = e.changedTouches[0].clientX - touchStartXRef.current;
             const dy = e.changedTouches[0].clientY - touchStartYRef.current;
+            setLiveY(0);
             if (swipeDirRef.current === 'h') {
               setLiveX(0);
               if (cardSnap === 'none') {
@@ -192,7 +195,7 @@ export default function Home8() {
           }}
         >
           {/* Log panel */}
-          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "center", justifyContent: "center", paddingRight: 20 }}>
+          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingRight: 20, paddingTop: "calc(50dvh - 4rem - (100vw - 40px) / 2)" }}>
             <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "0 24px" }}>
               <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Log Data</p>
               {([
@@ -209,12 +212,22 @@ export default function Home8() {
           {/* Carousel center — all schedule cards, doIdx in transform */}
           <div className="overflow-hidden" style={{ width: "33.333%", flexShrink: 0, height: "100%" }}>
             <div style={{
-              display: "flex", flexDirection: "column", gap: 16,
-              transform: `translateY(calc(50dvh - 4rem - (100vw - 40px) / 2 - ${doIdx + 1} * (100vw - 24px)))`,
+              display: "flex", flexDirection: "column", gap: 4,
+              transform: `translateY(calc(50dvh - 4rem - (100vw - 40px) / 2 - ${doIdx + 2} * (100vw - 36px)))`,
               transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
             }}>
+              {/* Logo above top card */}
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none", opacity: 0.12 }}>
+                <span style={{ fontFamily: "Inter, sans-serif", fontSize: 56, fontWeight: 700, letterSpacing: "-0.02em", color: "#1a1c1c", display: "flex", alignItems: "flex-end", gap: 1 }}>
+                  {["p","a","d","l","a"].map((ch, i) => (
+                    <span key={i} style={{ display: "inline-block", transform: `translateY(${(5 - i) * 1.5}px)` }}>{ch}</span>
+                  ))}
+                  <span style={{ display: "inline-block", width: "0.45em", height: "0.45em", borderRadius: "50%", background: "#22c55e", marginLeft: 3, marginBottom: 8 }} />
+                </span>
+              </div>
+
               {/* Card 0: next match */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", gap: 8, opacity: doIdx === -1 ? 1 : 0.4, filter: doIdx === -1 ? "none" : "grayscale(0.5)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", gap: 8, opacity: doIdx === -1 ? 1 : 0, transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
                 <p className="text-[13px] font-bold tracking-widest uppercase text-center" style={{ color: "#9aa5b0" }}>Next Match</p>
                 {match ? (() => {
                   const [y, mo, d] = match.date.split('-').map(Number);
@@ -245,34 +258,53 @@ export default function Home8() {
                 const nextSlide = schedule[currentIdx + 1];
                 const minsUntilNext = nextSlide ? toMins(nextSlide.time) - curMins : 0;
                 const fmtMins = (m: number) => { if (m <= 0) return "a moment"; const h = Math.floor(m / 60), rem = m % 60; if (h > 0 && rem > 0) return `${h}h ${rem}m`; return h > 0 ? `${h}h` : `${rem}m`; };
-                const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: doIdx === 0 ? 1 : 0.4, filter: doIdx === 0 ? "none" : "grayscale(0.5)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" };
+                const swipeFade = doIdx === 0 ? Math.max(0, 1 - Math.abs(liveY) / 80) : 0;
+                const wrapStyle: React.CSSProperties = { position: "relative", width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", opacity: swipeFade, transition: liveY !== 0 ? "none" : "opacity 0.35s cubic-bezier(0.4,0,0.2,1)" };
+                const circleStyle: React.CSSProperties = { position: "absolute", top: 28, bottom: 28, left: 28, right: 28, borderRadius: "50%", overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 20px" };
+                const ch = (d: string, style: React.CSSProperties) => (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.35)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ position: "absolute", pointerEvents: "none", ...style }}>
+                    <path d={d}/>
+                  </svg>
+                );
+                const chevrons = <>
+                  {ch("M18 15l-6-6-6 6", { top: 4,    left: "50%", transform: "translateX(-50%)" })}
+                  {ch("M6 9l6 6 6-6",    { bottom: 4, left: "50%", transform: "translateX(-50%)" })}
+                  {ch("M15 18l-6-6 6-6", { left: 4,   top: "50%",  transform: "translateY(-50%)" })}
+                  {ch("M9 18l6-6-6-6",   { right: 4,  top: "50%",  transform: "translateY(-50%)" })}
+                </>;
                 if (isDone) return (
-                  <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: `${s.color}18` }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <div key="active" style={wrapStyle}>
+                    {chevrons}
+                    <div style={circleStyle} onClick={() => setDoModalOpen(true)}>
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: `${s.color}18` }}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                      <p className="text-[26px] font-bold text-[#1a1c1c] leading-none text-center">Good Job!</p>
+                      <p className="text-[15px] font-semibold text-[#4a5050] mt-1 leading-none text-center">{s.title} complete</p>
+                      {nextSlide && <div className="mt-4 text-center"><p className="text-[13px] text-[#8a9096] leading-none">See you in <span className="font-semibold text-[#4a5050]">{fmtMins(minsUntilNext)}</span> for:</p><p className="text-[14px] font-bold text-[#1a1c1c] mt-1 leading-none">{nextSlide.title}</p></div>}
                     </div>
-                    <p className="text-[26px] font-bold text-[#1a1c1c] leading-none text-center">Good Job!</p>
-                    <p className="text-[15px] font-semibold text-[#4a5050] mt-1 leading-none text-center">{s.title} complete</p>
-                    {nextSlide && <div className="mt-4 text-center"><p className="text-[13px] text-[#8a9096] leading-none">See you in <span className="font-semibold text-[#4a5050]">{fmtMins(minsUntilNext)}</span> for:</p><p className="text-[14px] font-bold text-[#1a1c1c] mt-1 leading-none">{nextSlide.title}</p></div>}
                   </div>
                 );
                 return (
-                  <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: `${s.color}18` }}>
-                        <div className="w-2.5 h-2.5 rounded-full breathe-strong" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
+                  <div key="active" style={wrapStyle}>
+                    {chevrons}
+                    <div style={circleStyle} onClick={() => setDoModalOpen(true)}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: `${s.color}18` }}>
+                          <div className="w-2.5 h-2.5 rounded-full breathe-strong" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
+                        </div>
+                        <p className="text-[12px] font-bold tracking-widest uppercase leading-none" style={{ color: "#5a7055" }}>Do this now</p>
                       </div>
-                      <p className="text-[12px] font-bold tracking-widest uppercase leading-none" style={{ color: "#5a7055" }}>Do this now</p>
+                      <p className="text-[24px] font-bold text-[#1a1c1c] leading-tight text-center">{s.title}</p>
+                      {s.subtitle && <p className="text-[15px] text-[#6b7480] leading-none text-center mt-0.5">{s.subtitle}</p>}
+                      <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: isReady ? `${s.color}18` : "#f0f0f0", color: isReady ? s.color : "#b0b5ba" }}>Complete</button>
                     </div>
-                    <p className="text-[24px] font-bold text-[#1a1c1c] leading-tight text-center">{s.title}</p>
-                    {s.subtitle && <p className="text-[15px] text-[#6b7480] leading-none text-center mt-0.5">{s.subtitle}</p>}
-                    <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: isReady ? `${s.color}18` : "#f0f0f0", color: isReady ? s.color : "#b0b5ba" }}>Complete</button>
                   </div>
                 );
               })()}
 
               {/* Card 2: today's schedule */}
-              <div key="sched" style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", padding: "20px 0 0", opacity: doIdx === 1 ? 1 : 0.4, filter: doIdx === 1 ? "none" : "grayscale(0.5)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+              <div key="sched" style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", padding: "20px 0 0", opacity: doIdx === 1 ? 1 : 0, transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
                 <p className="text-[13px] font-bold tracking-widest uppercase text-center mb-3" style={{ color: "#9aa5b0", flexShrink: 0 }}>Today&apos;s Schedule</p>
                 <div style={{ flex: 1, overflowY: "auto", padding: "0 20px 20px" }}>
                   {schedule.map((s, i) => {
@@ -297,7 +329,7 @@ export default function Home8() {
           </div>
 
           {/* Readiness panel */}
-          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "center", justifyContent: "center", paddingLeft: 20 }}>
+          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 20, paddingTop: "calc(50dvh - 4rem - (100vw - 40px) / 2)" }}>
             <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: "0 24px" }}>
               <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Match Readiness</p>
               <svg width="120" height="120" viewBox="0 0 120 120">
