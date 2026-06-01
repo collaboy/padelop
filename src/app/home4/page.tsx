@@ -292,6 +292,8 @@ export default function Home4() {
                               <p className="text-[13px] font-bold tracking-widest uppercase mb-0" style={{ color: schedIdx === currentIdx ? "#5a7055" : "#9aa5b0" }}>
                                 {schedIdx === currentIdx ? "Do this now" : schedIdx > currentIdx ? `Up Next · ${s.time}` : s.time}
                               </p>
+                              {/* Title — above dot */}
+                              <p className="text-[26px] font-bold text-[#1a1c1c] leading-none text-center mt-2">{s.title}</p>
                               {/* Dot — center */}
                               <div className="flex-1 flex items-center justify-center w-full pointer-events-none">
                                 <div className="w-36 h-36 rounded-full flex items-center justify-center" style={{ background: `${s.color}12` }}>
@@ -302,10 +304,9 @@ export default function Home4() {
                                   )}
                                 </div>
                               </div>
-                              {/* Text — center bottom */}
+                              {/* Subtitle + complete button — below dot */}
                               <div className="text-center">
-                                <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">{s.title}</p>
-                                {s.subtitle && <p className="text-[16px] text-[#6b7480] leading-none mt-1">{s.subtitle}</p>}
+                                {s.subtitle && <p className="text-[16px] text-[#6b7480] leading-none">{s.subtitle}</p>}
                                 <div className="flex justify-center mt-4">
                                   <span className="text-[13px] font-semibold px-5 py-2 rounded-full" style={{
                                     background: isReady ? `${s.color}18` : "#f0f0f0",
