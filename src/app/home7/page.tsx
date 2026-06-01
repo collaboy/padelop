@@ -254,7 +254,7 @@ export default function Home7() {
             >
               {/* Readiness panel */}
               <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "center", justifyContent: "center", paddingRight: 20 }}>
-                <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: "0 24px", transform: "translateY(-52px)" }}>
+                <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: "0 24px" }}>
                   <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Match Readiness</p>
                   <svg width="120" height="120" viewBox="0 0 120 120">
                     <circle cx="60" cy="60" r="50" fill="none" stroke="#f0f0f0" strokeWidth="8" />
@@ -275,7 +275,7 @@ export default function Home7() {
                 display: "flex",
                 flexDirection: "column",
                 gap: 16,
-                transform: `translateY(calc((100dvh - 4rem - 56px - (100vw - 40px)) / 2 - 24px - ${safeDoIdx + 1} * (100vw - 24px)))`,
+                transform: `translateY(calc((100dvh - 4rem) / 2 - (100vw - 40px) / 2 - ${safeDoIdx + 1} * (100vw - 24px)))`,
                 transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
               }}>
                 {([null, null, ...schedule.slice(0, currentIdx), 'NEXT_MATCH' as const, schedule[currentIdx], 'GOTO_SCHED' as const, ...schedule.slice(currentIdx + 1), null] as (typeof schedule[0] | null | 'NEXT_MATCH' | 'GOTO_SCHED')[]).map((s, i) => {
@@ -393,7 +393,7 @@ export default function Home7() {
 
               {/* Log panel */}
               <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "center", justifyContent: "center", paddingLeft: 20 }}>
-                <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "0 24px", transform: "translateY(-52px)" }}>
+                <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "0 24px" }}>
                   <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Log Data</p>
                   {([
                     { label: "Hydration", color: "#0891b2" },
