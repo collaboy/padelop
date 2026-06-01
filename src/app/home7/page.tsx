@@ -290,9 +290,18 @@ export default function Home7() {
                               {/* Centered block: label + title + subtitle + complete */}
                               <div className="flex-1" />
                               <div className="flex flex-col items-center text-center gap-2">
-                                <p className="text-[13px] font-bold tracking-widest uppercase leading-none" style={{ color: schedIdx === currentIdx ? "#5a7055" : "#9aa5b0" }}>
-                                  {schedIdx === currentIdx ? "Do this now" : schedIdx > currentIdx ? `Up Next · ${s.time}` : s.time}
-                                </p>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 pointer-events-none" style={{ background: `${s.color}18` }}>
+                                    {schedIdx === currentIdx ? (
+                                      <div className="w-3 h-3 rounded-full breathe-strong" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
+                                    ) : (
+                                      <div className="w-3 h-3 rounded-full" style={{ background: s.color }} />
+                                    )}
+                                  </div>
+                                  <p className="text-[13px] font-bold tracking-widest uppercase leading-none" style={{ color: schedIdx === currentIdx ? "#5a7055" : "#9aa5b0" }}>
+                                    {schedIdx === currentIdx ? "Do this now" : schedIdx > currentIdx ? `Up Next · ${s.time}` : s.time}
+                                  </p>
+                                </div>
                                 <div className="flex flex-col items-center gap-0">
                                   <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">{s.title}</p>
                                   {s.subtitle && <p className="text-[16px] text-[#6b7480] leading-none">{s.subtitle}</p>}
