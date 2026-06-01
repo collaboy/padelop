@@ -216,11 +216,11 @@ export default function Home4() {
                 display: "flex",
                 flexDirection: "column",
                 gap: 16,
-                transform: `translateY(calc((100dvh - 4rem - 56px - (100vw - 40px)) / 2 - 24px - ${safeDoIdx} * (100vw - 24px)))`,
+                transform: `translateY(calc((100dvh - 4rem - 56px - (100vw - 40px)) / 2 - 24px - ${safeDoIdx + 1} * (100vw - 24px)))`,
                 transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
               }}>
-                {([null, ...schedule, null] as (typeof schedule[0] | null)[]).map((s, i) => (
-                  <div key={i} style={{ height: "calc(100vw - 40px)", width: "100%", flexShrink: 0, opacity: i === safeDoIdx ? 1 : 0.35, filter: i === safeDoIdx ? "none" : "grayscale(1)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+                {([null, null, ...schedule, null, null] as (typeof schedule[0] | null)[]).map((s, i) => (
+                  <div key={i} style={{ height: "calc(100vw - 40px)", width: "100%", flexShrink: 0, opacity: i === safeDoIdx + 1 ? 1 : 0.35, filter: i === safeDoIdx + 1 ? "none" : "grayscale(1)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
                     {s === null ? (
                       <div
                         className="rounded-[24px] flex flex-col items-center justify-center w-full h-full gap-3"
@@ -231,7 +231,7 @@ export default function Home4() {
                         <p className="text-[22px] font-bold text-[#1a1c1c] leading-none">Sleepytime</p>
                       </div>
                     ) : (() => {
-                      const schedIdx = i - 1;
+                      const schedIdx = i - 2;
                       const isDone = completed.has(schedIdx);
                       const nextSlide = schedule[schedIdx + 1];
                       const minsUntilNext = nextSlide ? toMins(nextSlide.time) - curMins : 0;
