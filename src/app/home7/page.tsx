@@ -299,23 +299,22 @@ export default function Home7() {
                                   </Link>
                                 );
                               })()}
-                              {/* Middle: label + title + subtitle */}
-                              <div className="flex-1 flex flex-col items-center justify-center text-center">
-                                <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: schedIdx === currentIdx ? "#5a7055" : "#9aa5b0" }}>
+                              {/* Centered block: label + title + subtitle + complete */}
+                              <div className="flex-1" />
+                              <div className="flex flex-col items-center text-center gap-2">
+                                <p className="text-[13px] font-bold tracking-widest uppercase leading-none" style={{ color: schedIdx === currentIdx ? "#5a7055" : "#9aa5b0" }}>
                                   {schedIdx === currentIdx ? "Do this now" : schedIdx > currentIdx ? `Up Next · ${s.time}` : s.time}
                                 </p>
-                                <p className="text-[26px] font-bold text-[#1a1c1c] leading-snug mt-2">{s.title}</p>
-                                {s.subtitle && <p className="text-[16px] text-[#6b7480] leading-snug mt-2">{s.subtitle}</p>}
-                              </div>
-                              {/* Bottom: complete button */}
-                              <div className="flex justify-center">
-                                <span className="text-[13px] font-semibold px-5 py-2 rounded-full" style={{
+                                <p className="text-[26px] font-bold text-[#1a1c1c] leading-tight">{s.title}</p>
+                                {s.subtitle && <p className="text-[15px] text-[#6b7480] leading-snug">{s.subtitle}</p>}
+                                <span className="text-[13px] font-semibold px-5 py-2 rounded-full mt-1" style={{
                                   background: isReady ? `${s.color}18` : "#f0f0f0",
                                   color: isReady ? s.color : "#b0b5ba",
                                 }}>
                                   Complete
                                 </span>
                               </div>
+                              <div className="flex-1" />
                             </>
                           )}
                         </button>
