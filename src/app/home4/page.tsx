@@ -437,16 +437,25 @@ export default function Home4() {
                     </div>
                   )}
                   <div className="px-6 pb-6">
+                    {(() => {
+                      const isComplete = completed.has(doSlideIdx - 1);
+                      return (
                     <button
                       onClick={() => {
                         setDoModalOpen(false);
-                        setCompleted(prev => new Set(prev).add(doSlideIdx - 1));
+                        setCompleted(prev => {
+                          const next = new Set(prev);
+                          isComplete ? next.delete(doSlideIdx - 1) : next.add(doSlideIdx - 1);
+                          return next;
+                        });
                       }}
-                      className="w-full py-3.5 rounded-2xl text-white text-[15px] font-bold active:scale-[0.98] transition-transform"
-                      style={{ background: doItem.color }}
+                      className="w-full py-3.5 rounded-2xl text-[15px] font-bold active:scale-[0.98] transition-transform"
+                      style={isComplete ? { background: `${doItem.color}18`, color: doItem.color } : { background: doItem.color, color: "#fff" }}
                     >
-                      Mark as complete
+                      {isComplete ? "Mark as incomplete" : "Mark as complete"}
                     </button>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
