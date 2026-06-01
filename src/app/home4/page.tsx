@@ -223,8 +223,8 @@ export default function Home4() {
                   <div key={i} style={{ height: "calc(100vw - 40px)", width: "100%", flexShrink: 0, opacity: i === safeDoIdx ? 1 : 0.35, filter: i === safeDoIdx ? "none" : "grayscale(1)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
                     {s === null ? (
                       <div
-                        className="bg-white rounded-[24px] flex flex-col items-center justify-center w-full h-full gap-3"
-                        style={{ border: "2px solid #7c3aed22" }}>
+                        className="rounded-[24px] flex flex-col items-center justify-center w-full h-full gap-3"
+                        style={{ background: "#e2e5e9", border: "2px solid #1a1c1c" }}>
                         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
                         </svg>
