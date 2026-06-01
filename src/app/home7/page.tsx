@@ -275,7 +275,7 @@ export default function Home7() {
                 display: "flex",
                 flexDirection: "column",
                 gap: 16,
-                transform: `translateY(calc((100dvh - 4rem) / 2 - (100vw - 40px) / 2 - ${safeDoIdx + 1} * (100vw - 24px)))`,
+                transform: `translateY(calc(50dvh - 4rem - (100vw - 40px) / 2 - ${safeDoIdx + 1} * (100vw - 24px)))`,
                 transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
               }}>
                 {([null, null, ...schedule.slice(0, currentIdx), 'NEXT_MATCH' as const, schedule[currentIdx], 'GOTO_SCHED' as const, ...schedule.slice(currentIdx + 1), null] as (typeof schedule[0] | null | 'NEXT_MATCH' | 'GOTO_SCHED')[]).map((s, i) => {
