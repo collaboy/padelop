@@ -154,6 +154,10 @@ export default function Home7() {
   const [completed, setCompleted] = useState<Set<number>>(new Set());
   const [readiness, setReadiness] = useState(65);
   const doTouchStartX = useRef(0);
+  const touchStartXRef = useRef(0);
+  const swipeDirRef = useRef<'h' | 'v' | null>(null);
+  const [cardSnap, setCardSnap] = useState<'none' | 'left' | 'right'>('none');
+  const [liveX, setLiveX] = useState(0);
   const curItemRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -185,6 +189,8 @@ export default function Home7() {
     return () => { clearInterval(id); window.removeEventListener("storage", loadReadiness); };
   }, []);
 
+  useEffect(() => { setCardSnap('none'); setLiveX(0); }, [doSlideIdx]);
+
 
   const { schedule: _s } = getScheduleData(match?.date ?? null, match?.time ?? null);
   const isSleepytime = doSlideIdx === 0 || doSlideIdx >= _s.length + 3;
@@ -210,13 +216,33 @@ export default function Home7() {
             <div
               className="w-full overflow-hidden"
               style={{ height: "calc(100dvh - 4rem)", touchAction: "none" }}
-              onTouchStart={e => { doTouchStartX.current = e.touches[0].clientY; }}
+              onTouchStart={e => {
+                doTouchStartX.current = e.touches[0].clientY;
+                touchStartXRef.current = e.touches[0].clientX;
+                swipeDirRef.current = null;
+              }}
+              onTouchMove={e => {
+                const dx = e.touches[0].clientX - touchStartXRef.current;
+                const dy = e.touches[0].clientY - doTouchStartX.current;
+                if (!swipeDirRef.current && (Math.abs(dx) > 8 || Math.abs(dy) > 8))
+                  swipeDirRef.current = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
+                if (swipeDirRef.current === 'h' && cardSnap === 'none') setLiveX(dx);
+              }}
               onTouchEnd={e => {
+                const dx = e.changedTouches[0].clientX - touchStartXRef.current;
                 const dy = e.changedTouches[0].clientY - doTouchStartX.current;
-                if (dy < -40)
-                  setDoSlideIdx(prev => Math.min(prev + 1, schedule.length + 3));
-                else if (dy > 40)
-                  setDoSlideIdx(prev => Math.max(prev - 1, currentIdx + 1));
+                setLiveX(0);
+                if (swipeDirRef.current === 'h') {
+                  if (cardSnap === 'none') {
+                    if (dx < -60) setCardSnap('left');
+                    else if (dx > 60) setCardSnap('right');
+                  } else if (cardSnap === 'left' && dx > 60) setCardSnap('none');
+                  else if (cardSnap === 'right' && dx < -60) setCardSnap('none');
+                } else if (swipeDirRef.current === 'v' && cardSnap === 'none') {
+                  if (dy < -40) setDoSlideIdx(prev => Math.min(prev + 1, schedule.length + 3));
+                  else if (dy > 40) setDoSlideIdx(prev => Math.max(prev - 1, currentIdx + 1));
+                }
+                swipeDirRef.current = null;
               }}
             >
               <div style={{
@@ -226,140 +252,155 @@ export default function Home7() {
                 transform: `translateY(calc((100dvh - 4rem - 56px - (100vw - 40px)) / 2 - 24px - ${safeDoIdx + 1} * (100vw - 24px)))`,
                 transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
               }}>
-                {([null, null, ...schedule.slice(0, currentIdx), 'NEXT_MATCH' as const, schedule[currentIdx], 'GOTO_SCHED' as const, ...schedule.slice(currentIdx + 1), null] as (typeof schedule[0] | null | 'NEXT_MATCH' | 'GOTO_SCHED')[]).map((s, i) => (
-                  <div key={i} style={{ height: "calc(100vw - 40px)", width: "100%", flexShrink: 0, opacity: i === safeDoIdx + 1 ? 1 : 0.35, filter: i === safeDoIdx + 1 ? "none" : "grayscale(1)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-                    {s === 'NEXT_MATCH' ? (
-                      /* Next Match card */
-                      <div className="bg-white rounded-[24px] px-6 py-6 flex flex-col items-center w-full h-full" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)" }}>
-                        <div className="flex-1" />
-                        <div className="flex flex-col items-center text-center gap-2">
-                          <p className="text-[13px] font-bold tracking-widest uppercase leading-none" style={{ color: "#9aa5b0" }}>Next Match</p>
-                          <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">
-                            {match ? (() => { const [y,mo,d] = match.date.split('-').map(Number); const dt = new Date(y,mo-1,d); return `${dt.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})} · ${match.time}`; })() : "No match set"}
-                          </p>
-                          {match?.club && <p className="text-[16px] text-[#6b7480] leading-none">{match.club}</p>}
-                          <button onClick={() => router.push("/matches4")} className="text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: "#2653d418", color: "#2653d4" }}>See Details</button>
-                        </div>
-                        <div className="flex-1" />
+                {([null, null, ...schedule.slice(0, currentIdx), 'NEXT_MATCH' as const, schedule[currentIdx], 'GOTO_SCHED' as const, ...schedule.slice(currentIdx + 1), null] as (typeof schedule[0] | null | 'NEXT_MATCH' | 'GOTO_SCHED')[]).map((s, i) => {
+                  const isActive = i === safeDoIdx + 1;
+                  const T = "transform 0.3s cubic-bezier(0.4,0,0.2,1)";
+
+                  const cardContent = s === 'NEXT_MATCH' ? (
+                    <div className="bg-white rounded-[24px] px-6 py-6 flex flex-col items-center w-full h-full" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)" }}>
+                      <div className="flex-1" />
+                      <div className="flex flex-col items-center text-center gap-2">
+                        <p className="text-[13px] font-bold tracking-widest uppercase leading-none" style={{ color: "#9aa5b0" }}>Next Match</p>
+                        <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">
+                          {match ? (() => { const [y,mo,d] = match.date.split('-').map(Number); const dt = new Date(y,mo-1,d); return `${dt.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})} · ${match.time}`; })() : "No match set"}
+                        </p>
+                        {match?.club && <p className="text-[16px] text-[#6b7480] leading-none">{match.club}</p>}
+                        <button onClick={() => router.push("/matches4")} className="text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: "#2653d418", color: "#2653d4" }}>See Details</button>
                       </div>
-                    ) : s === 'GOTO_SCHED' ? (
-                      /* Go to Schedule card */
-                      <div className="bg-white rounded-[24px] px-6 py-6 flex flex-col items-center w-full h-full" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)" }}>
-                        <div className="flex-1" />
-                        <div className="flex flex-col items-center text-center gap-2">
-                          <p className="text-[13px] font-bold tracking-widest uppercase leading-none" style={{ color: "#9aa5b0" }}>Check out</p>
-                          <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">Today&apos;s Schedule</p>
-                          <button
-                            onClick={() => router.push("/today4")}
-                            className="text-[13px] font-semibold px-5 py-2 rounded-full"
-                            style={{ background: "#2653d418", color: "#2653d4" }}
-                          >
-                            Go to Schedule
-                          </button>
-                        </div>
-                        <div className="flex-1" />
+                      <div className="flex-1" />
+                    </div>
+                  ) : s === 'GOTO_SCHED' ? (
+                    <div className="bg-white rounded-[24px] px-6 py-6 flex flex-col items-center w-full h-full" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)" }}>
+                      <div className="flex-1" />
+                      <div className="flex flex-col items-center text-center gap-2">
+                        <p className="text-[13px] font-bold tracking-widest uppercase leading-none" style={{ color: "#9aa5b0" }}>Check out</p>
+                        <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">Today&apos;s Schedule</p>
+                        <button onClick={() => router.push("/today4")} className="text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: "#2653d418", color: "#2653d4" }}>Go to Schedule</button>
                       </div>
-                    ) : s === null ? (
-                      i === schedule.length + 4 ? (
-                        /* Last phantom — brand watermark */
-                        <div className="rounded-[24px] w-full h-full relative overflow-hidden" style={{ background: "#e2e5e9", border: "2px solid #1a1c1c" }}>
-                          <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.08 }}>
-                            <defs>
-                              <pattern id="wm-last" x="0" y="0" width="90" height="70" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)">
-                                <circle cx="16" cy="10" r="7" fill="#1a1c1c" />
-                                <text x="0" y="38" fontSize="13" fontWeight="700" fontFamily="Inter, sans-serif" fill="#1a1c1c" letterSpacing="0.06em">padla</text>
-                              </pattern>
-                            </defs>
-                            <rect width="100%" height="100%" fill="url(#wm-last)" />
-                          </svg>
-                        </div>
-                      ) : (
-                        /* Sleepytime slide (first phantom top + both sleepytime bookends) */
-                        <div
-                          className="rounded-[24px] flex flex-col items-center justify-center w-full h-full gap-3"
-                          style={{ background: "#e2e5e9", border: "2px solid #1a1c1c" }}>
-                          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                          </svg>
-                          <p className="text-[22px] font-bold text-[#1a1c1c] leading-none">Sleepytime</p>
-                        </div>
-                      )
-                    ) : (() => {
-                      const schedIdx = i <= currentIdx + 1 ? i - 2 : i <= currentIdx + 3 ? i - 3 : i - 4;
-                      const isDone = completed.has(schedIdx);
-                      const nextSlide = schedule[schedIdx + 1];
-                      const minsUntilNext = nextSlide ? toMins(nextSlide.time) - curMins : 0;
-                      const fmtMins = (m: number) => {
-                        if (m <= 0) return "a moment";
-                        const h = Math.floor(m / 60), rem = m % 60;
-                        if (h > 0 && rem > 0) return `${h}h ${rem}m`;
-                        if (h > 0) return `${h}h`;
-                        return `${rem}m`;
-                      };
-                      const isReady = curMins >= toMins(s.time);
-                      return (
-                        <div
-                          className="bg-white rounded-[24px] px-6 py-6 flex flex-col items-center transition-opacity w-full h-full relative overflow-hidden"
-                          style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)" }}
-                        >
-                          {isDone ? (
-                            /* Completion state */
-                            <div onClick={() => setDoModalOpen(true)} className="flex flex-col items-center justify-center w-full h-full text-center px-6" style={{ cursor: "pointer" }}>
-                              <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: `${s.color}18` }}>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                  <polyline points="20 6 9 17 4 12"/>
-                                </svg>
-                              </div>
-                              <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">Good Job!</p>
-                              <p className="text-[15px] font-semibold text-[#4a5050] mt-1 leading-none">{s.title} complete</p>
-                              {nextSlide && (
-                                <div className="mt-4">
-                                  <p className="text-[13px] text-[#8a9096] leading-none">See you in <span className="font-semibold text-[#4a5050]">{fmtMins(minsUntilNext)}</span> for:</p>
-                                  <p className="text-[14px] font-bold text-[#1a1c1c] mt-1 leading-none">{nextSlide.title}</p>
-                                </div>
-                              )}
+                      <div className="flex-1" />
+                    </div>
+                  ) : s === null ? (
+                    i === schedule.length + 4 ? (
+                      <div className="rounded-[24px] w-full h-full relative overflow-hidden" style={{ background: "#e2e5e9", border: "2px solid #1a1c1c" }}>
+                        <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.08 }}>
+                          <defs>
+                            <pattern id="wm-last" x="0" y="0" width="90" height="70" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)">
+                              <circle cx="16" cy="10" r="7" fill="#1a1c1c" />
+                              <text x="0" y="38" fontSize="13" fontWeight="700" fontFamily="Inter, sans-serif" fill="#1a1c1c" letterSpacing="0.06em">padla</text>
+                            </pattern>
+                          </defs>
+                          <rect width="100%" height="100%" fill="url(#wm-last)" />
+                        </svg>
+                      </div>
+                    ) : (
+                      <div className="rounded-[24px] flex flex-col items-center justify-center w-full h-full gap-3" style={{ background: "#e2e5e9", border: "2px solid #1a1c1c" }}>
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                        </svg>
+                        <p className="text-[22px] font-bold text-[#1a1c1c] leading-none">Sleepytime</p>
+                      </div>
+                    )
+                  ) : (() => {
+                    const schedIdx = i <= currentIdx + 1 ? i - 2 : i <= currentIdx + 3 ? i - 3 : i - 4;
+                    const isDone = completed.has(schedIdx);
+                    const nextSlide = schedule[schedIdx + 1];
+                    const minsUntilNext = nextSlide ? toMins(nextSlide.time) - curMins : 0;
+                    const fmtMins = (m: number) => {
+                      if (m <= 0) return "a moment";
+                      const h = Math.floor(m / 60), rem = m % 60;
+                      if (h > 0 && rem > 0) return `${h}h ${rem}m`;
+                      if (h > 0) return `${h}h`;
+                      return `${rem}m`;
+                    };
+                    const isReady = curMins >= toMins(s.time);
+                    return (
+                      <div className="bg-white rounded-[24px] px-6 py-6 flex flex-col items-center w-full h-full" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)" }}>
+                        {isDone ? (
+                          <div onClick={() => setDoModalOpen(true)} className="flex flex-col items-center justify-center w-full h-full text-center px-6" style={{ cursor: "pointer" }}>
+                            <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: `${s.color}18` }}>
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                             </div>
-                          ) : (
-                            /* Normal state */
-                            <>
-                              {/* Centered block: label + title + subtitle + complete */}
-                              <div className="flex-1" />
-                              <div className="flex flex-col items-center text-center gap-2">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 pointer-events-none" style={{ background: `${s.color}18` }}>
-                                    {schedIdx === currentIdx ? (
-                                      <div className="w-3 h-3 rounded-full breathe-strong" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
-                                    ) : (
-                                      <div className="w-3 h-3 rounded-full" style={{ background: s.color }} />
-                                    )}
-                                  </div>
-                                  <p className="text-[13px] font-bold tracking-widest uppercase leading-none" style={{ color: schedIdx === currentIdx ? "#5a7055" : "#9aa5b0" }}>
-                                    {schedIdx === currentIdx ? "Do this now" : schedIdx > currentIdx ? `Up Next · ${s.time}` : s.time}
-                                  </p>
-                                </div>
-                                <div className="flex flex-col items-center gap-0">
-                                  <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">{s.title}</p>
-                                  {s.subtitle && <p className="text-[16px] text-[#6b7480] leading-none">{s.subtitle}</p>}
-                                </div>
-                                <button
-                                  onClick={() => setDoModalOpen(true)}
-                                  className="text-[13px] font-semibold px-5 py-2 rounded-full"
-                                  style={{
-                                    background: isReady ? `${s.color}18` : "#f0f0f0",
-                                    color: isReady ? s.color : "#b0b5ba",
-                                  }}
-                                >
-                                  Complete
-                                </button>
+                            <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">Good Job!</p>
+                            <p className="text-[15px] font-semibold text-[#4a5050] mt-1 leading-none">{s.title} complete</p>
+                            {nextSlide && (
+                              <div className="mt-4">
+                                <p className="text-[13px] text-[#8a9096] leading-none">See you in <span className="font-semibold text-[#4a5050]">{fmtMins(minsUntilNext)}</span> for:</p>
+                                <p className="text-[14px] font-bold text-[#1a1c1c] mt-1 leading-none">{nextSlide.title}</p>
                               </div>
-                              <div className="flex-1" />
-                            </>
-                          )}
-                        </div>
-                      );
-                    })()}
-                  </div>
-                ))}
+                            )}
+                          </div>
+                        ) : (
+                          <>
+                            <div className="flex-1" />
+                            <div className="flex flex-col items-center text-center gap-2">
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 pointer-events-none" style={{ background: `${s.color}18` }}>
+                                  {schedIdx === currentIdx
+                                    ? <div className="w-3 h-3 rounded-full breathe-strong" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
+                                    : <div className="w-3 h-3 rounded-full" style={{ background: s.color }} />}
+                                </div>
+                                <p className="text-[13px] font-bold tracking-widest uppercase leading-none" style={{ color: schedIdx === currentIdx ? "#5a7055" : "#9aa5b0" }}>
+                                  {schedIdx === currentIdx ? "Do this now" : schedIdx > currentIdx ? `Up Next · ${s.time}` : s.time}
+                                </p>
+                              </div>
+                              <div className="flex flex-col items-center gap-0">
+                                <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">{s.title}</p>
+                                {s.subtitle && <p className="text-[16px] text-[#6b7480] leading-none">{s.subtitle}</p>}
+                              </div>
+                              <button onClick={() => setDoModalOpen(true)} className="text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: isReady ? `${s.color}18` : "#f0f0f0", color: isReady ? s.color : "#b0b5ba" }}>Complete</button>
+                            </div>
+                            <div className="flex-1" />
+                          </>
+                        )}
+                      </div>
+                    );
+                  })();
+
+                  return (
+                    <div key={i} style={{ position: "relative", height: "calc(100vw - 40px)", width: "100%", flexShrink: 0, overflow: isActive ? "hidden" : undefined, borderRadius: 24, opacity: isActive ? 1 : 0.35, filter: isActive ? "none" : "grayscale(1)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+                      {isActive ? (
+                        <>
+                          {/* Readiness panel — swipe right to reveal */}
+                          <div style={{ position: "absolute", inset: 0, borderRadius: 24, overflow: "hidden", transform: cardSnap === 'right' ? "translateX(0)" : "translateX(-100%)", transition: T }}>
+                            <div className="bg-white w-full h-full flex flex-col items-center justify-center gap-4 px-6">
+                              <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Match Readiness</p>
+                              <svg width="120" height="120" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="#f0f0f0" strokeWidth="8" />
+                                <circle cx="60" cy="60" r="50" fill="none" stroke="#2653d4" strokeWidth="8" strokeLinecap="round"
+                                  strokeDasharray={`${2 * Math.PI * 50}`}
+                                  strokeDashoffset={`${2 * Math.PI * 50 * (1 - readiness / 100)}`}
+                                  transform="rotate(-90 60 60)"
+                                />
+                                <text x="60" y="60" textAnchor="middle" dominantBaseline="central" fontSize="28" fontWeight="700" fill="#1a1c1c" fontFamily="Inter, sans-serif">{readiness}</text>
+                              </svg>
+                              <button onClick={() => router.push("/insights4")} className="text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: "#2653d418", color: "#2653d4" }}>See Breakdown</button>
+                            </div>
+                          </div>
+
+                          {/* Card — slides left or right */}
+                          <div style={{ position: "absolute", inset: 0, borderRadius: 24, overflow: "hidden", transform: cardSnap === 'left' ? "translateX(-100%)" : cardSnap === 'right' ? "translateX(100%)" : `translateX(${liveX}px)`, transition: liveX !== 0 ? "none" : T }}>
+                            {cardContent}
+                          </div>
+
+                          {/* Log panel — swipe left to reveal */}
+                          <div style={{ position: "absolute", inset: 0, borderRadius: 24, overflow: "hidden", transform: cardSnap === 'left' ? "translateX(0)" : "translateX(100%)", transition: T }}>
+                            <div className="bg-white w-full h-full flex flex-col items-center justify-center gap-3 px-6">
+                              <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Log Data</p>
+                              {([
+                                { label: "Hydration", color: "#0891b2" },
+                                { label: "Check-in", color: "#2653d4" },
+                                { label: "Nutrition", color: "#16a34a" },
+                                { label: "Recovery", color: "#64748b" },
+                              ] as const).map(item => (
+                                <button key={item.label} onClick={() => { setCardSnap('none'); setLogSheetOpen(true); }} className="w-full py-3 rounded-2xl text-[15px] font-semibold" style={{ background: `${item.color}18`, color: item.color }}>{item.label}</button>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      ) : cardContent}
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
