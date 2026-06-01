@@ -223,12 +223,17 @@ export default function Home4() {
                   <div key={i} style={{ height: "calc(100vw - 40px)", width: "100%", flexShrink: 0, opacity: i === safeDoIdx + 1 ? 1 : 0.35, filter: i === safeDoIdx + 1 ? "none" : "grayscale(1)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
                     {s === null ? (
                       <div
-                        className="rounded-[24px] flex flex-col items-center justify-center w-full h-full gap-3"
+                        className="rounded-[24px] flex flex-col items-center justify-center w-full h-full relative overflow-hidden"
                         style={{ background: "#e2e5e9", border: "2px solid #1a1c1c" }}>
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                        <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.07 }}>
+                          <defs>
+                            <pattern id={`wm-${i}`} x="0" y="0" width="110" height="56" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)">
+                              <text x="0" y="20" fontSize="13" fontWeight="700" fontFamily="Inter, sans-serif" fill="#1a1c1c" letterSpacing="0.08em">padla.</text>
+                            </pattern>
+                          </defs>
+                          <rect width="100%" height="100%" fill={`url(#wm-${i})`} />
                         </svg>
-                        <p className="text-[22px] font-bold text-[#1a1c1c] leading-none">Sleepytime</p>
+                        <p className="text-[22px] font-bold text-[#1a1c1c] leading-none relative">Sleepytime</p>
                       </div>
                     ) : (() => {
                       const schedIdx = i - 2;
