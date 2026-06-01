@@ -266,7 +266,7 @@ export default function Home7() {
                         <button
                           onClick={() => setDoModalOpen(true)}
                           className="bg-white rounded-[24px] px-6 py-6 flex flex-col items-center justify-center transition-opacity w-full h-full relative overflow-hidden"
-                          style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: `2px solid ${s.color}` }}
+                          style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)" }}
                         >
                           {isDone ? (
                             /* Completion state */
