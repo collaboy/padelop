@@ -232,8 +232,9 @@ export default function Home4() {
                 display: "flex",
                 flexDirection: "column",
                 gap: 16,
+                background: `${accentColor}2e`,
                 transform: `translateY(calc((100dvh - 4rem - 56px - (100vw - 40px)) / 2 - 24px - ${safeDoIdx + 1} * (100vw - 24px)))`,
-                transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
+                transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1), background 0.35s cubic-bezier(0.4,0,0.2,1)",
               }}>
                 {([null, null, ...schedule, null, null] as (typeof schedule[0] | null)[]).map((s, i) => (
                   <div key={i} style={{ height: "calc(100vw - 40px)", width: "100%", flexShrink: 0, opacity: i === safeDoIdx + 1 ? 1 : 0.35, filter: i === safeDoIdx + 1 ? "none" : "grayscale(1)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
