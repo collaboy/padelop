@@ -289,7 +289,7 @@ export default function Home7() {
                             /* Normal state */
                             <>
                               {/* Label */}
-                              <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: schedIdx === currentIdx ? "#5a7055" : "#9aa5b0" }}>
+                              <p className="text-[17px] font-bold tracking-widest uppercase" style={{ color: schedIdx === currentIdx ? "#5a7055" : "#9aa5b0" }}>
                                 {schedIdx === currentIdx ? "Do this now" : schedIdx > currentIdx ? `Up Next · ${s.time}` : s.time}
                               </p>
                               <p className="text-[26px] font-bold text-[#1a1c1c] leading-none text-center mt-2">{s.title}</p>
