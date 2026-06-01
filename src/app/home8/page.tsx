@@ -111,7 +111,7 @@ export default function Home8() {
   const [logSheetOpen, setLogSheetOpen] = useState(false);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
   const [now, setNow] = useState(new Date());
-  const [doIdx, setDoIdx] = useState(() => getScheduleData(null, null).currentIdx);
+  const [doIdx, setDoIdx] = useState(0); // -1 = top holder, 0 = do-this-now, 1 = see schedule
   const [completed, setCompleted] = useState<Set<number>>(new Set());
   const [readiness, setReadiness] = useState(65);
 
@@ -134,7 +134,6 @@ export default function Home8() {
         const m = JSON.parse(raw);
         if (m.date && m.time && new Date(`${m.date}T${m.time}`).getTime() > Date.now()) {
           setMatch({ date: m.date, time: m.time, club: m.club || undefined, players: [m.player_1, m.player_2, m.player_3, m.player_4].filter(Boolean) });
-          setDoIdx(getScheduleData(m.date, m.time).currentIdx);
         }
       }
     } catch {}
@@ -145,10 +144,10 @@ export default function Home8() {
   useEffect(() => { setCardSnap('none'); setLiveX(0); }, [doIdx]);
 
   const { schedule, currentIdx } = getScheduleData(match?.date ?? null, match?.time ?? null);
-  const doItem = schedule[doIdx];
+  const doItem = schedule[currentIdx];
   const curMins = now.getHours() * 60 + now.getMinutes();
 
-  const goNext = () => setDoIdx(i => Math.min(i + 1, currentIdx + 1));
+  const goNext = () => setDoIdx(i => Math.min(i + 1, 1));
   const goPrev = () => setDoIdx(i => Math.max(i - 1, -1));
 
   return (
@@ -192,8 +191,113 @@ export default function Home8() {
             swipeDirRef.current = null;
           }}
         >
-          {/* Readiness panel */}
+          {/* Log panel */}
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "center", justifyContent: "center", paddingRight: 20 }}>
+            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "0 24px" }}>
+              <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Log Data</p>
+              {([
+                { label: "Hydration", color: "#0891b2" },
+                { label: "Check-in", color: "#2653d4" },
+                { label: "Nutrition", color: "#16a34a" },
+                { label: "Recovery", color: "#64748b" },
+              ] as const).map(item => (
+                <button key={item.label} onClick={() => { setCardSnap('none'); setLogSheetOpen(true); }} className="w-full py-3 rounded-2xl text-[15px] font-semibold" style={{ background: `${item.color}18`, color: item.color }}>{item.label}</button>
+              ))}
+            </div>
+          </div>
+
+          {/* Carousel center — all schedule cards, doIdx in transform */}
+          <div className="overflow-hidden" style={{ width: "33.333%", flexShrink: 0, height: "100%" }}>
+            <div style={{
+              display: "flex", flexDirection: "column", gap: 16,
+              transform: `translateY(calc(50dvh - 2rem - (100vw - 40px) / 2 - ${doIdx + 1} * (100vw - 24px)))`,
+              transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
+            }}>
+              {/* Card 0: next match */}
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", gap: 8, opacity: doIdx === -1 ? 1 : 0.4, filter: doIdx === -1 ? "none" : "grayscale(0.5)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+                <p className="text-[13px] font-bold tracking-widest uppercase text-center" style={{ color: "#9aa5b0" }}>Next Match</p>
+                {match ? (() => {
+                  const [y, mo, d] = match.date.split('-').map(Number);
+                  const dt = new Date(y, mo - 1, d);
+                  const dateStr = dt.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+                  return (
+                    <>
+                      <p className="text-[26px] font-bold text-[#1a1c1c] leading-tight text-center">{dateStr}</p>
+                      <p className="text-[18px] font-semibold text-[#4a5050] leading-none text-center">{match.time}</p>
+                      {match.club && <p className="text-[14px] text-[#6b7480] leading-none text-center">{match.club}</p>}
+                      {match.players && match.players.length > 0 && <p className="text-[13px] text-[#9aa5b0] leading-snug text-center">{match.players.join(' · ')}</p>}
+                      <button onClick={() => router.push("/matches4")} className="mt-1 text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: "#2653d418", color: "#2653d4" }}>See Details</button>
+                    </>
+                  );
+                })() : (
+                  <>
+                    <p className="text-[18px] font-semibold text-[#9aa5b0] text-center">No match set</p>
+                    <button onClick={() => router.push("/matches4")} className="mt-1 text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: "#2653d418", color: "#2653d4" }}>Add Match</button>
+                  </>
+                )}
+              </div>
+
+              {/* Card 1: do-this-now */}
+              {(() => {
+                const s = doItem;
+                const isDone = completed.has(currentIdx);
+                const isReady = curMins >= toMins(s.time);
+                const nextSlide = schedule[currentIdx + 1];
+                const minsUntilNext = nextSlide ? toMins(nextSlide.time) - curMins : 0;
+                const fmtMins = (m: number) => { if (m <= 0) return "a moment"; const h = Math.floor(m / 60), rem = m % 60; if (h > 0 && rem > 0) return `${h}h ${rem}m`; return h > 0 ? `${h}h` : `${rem}m`; };
+                const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: doIdx === 0 ? 1 : 0.4, filter: doIdx === 0 ? "none" : "grayscale(0.5)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" };
+                if (isDone) return (
+                  <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: `${s.color}18` }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <p className="text-[26px] font-bold text-[#1a1c1c] leading-none text-center">Good Job!</p>
+                    <p className="text-[15px] font-semibold text-[#4a5050] mt-1 leading-none text-center">{s.title} complete</p>
+                    {nextSlide && <div className="mt-4 text-center"><p className="text-[13px] text-[#8a9096] leading-none">See you in <span className="font-semibold text-[#4a5050]">{fmtMins(minsUntilNext)}</span> for:</p><p className="text-[14px] font-bold text-[#1a1c1c] mt-1 leading-none">{nextSlide.title}</p></div>}
+                  </div>
+                );
+                return (
+                  <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: `${s.color}18` }}>
+                        <div className="w-2.5 h-2.5 rounded-full breathe-strong" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
+                      </div>
+                      <p className="text-[12px] font-bold tracking-widest uppercase leading-none" style={{ color: "#5a7055" }}>Do this now</p>
+                    </div>
+                    <p className="text-[24px] font-bold text-[#1a1c1c] leading-tight text-center">{s.title}</p>
+                    {s.subtitle && <p className="text-[15px] text-[#6b7480] leading-none text-center mt-0.5">{s.subtitle}</p>}
+                    <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: isReady ? `${s.color}18` : "#f0f0f0", color: isReady ? s.color : "#b0b5ba" }}>Complete</button>
+                  </div>
+                );
+              })()}
+
+              {/* Card 2: today's schedule */}
+              <div key="sched" style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", padding: "20px 0 0", opacity: doIdx === 1 ? 1 : 0.4, filter: doIdx === 1 ? "none" : "grayscale(0.5)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+                <p className="text-[13px] font-bold tracking-widest uppercase text-center mb-3" style={{ color: "#9aa5b0", flexShrink: 0 }}>Today&apos;s Schedule</p>
+                <div style={{ flex: 1, overflowY: "auto", padding: "0 20px 20px" }}>
+                  {schedule.map((s, i) => {
+                    const isCur = i === currentIdx;
+                    const isPast = !isCur && curMins > toMins(s.time);
+                    return (
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 0", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f4" : "none" }}>
+                        <div style={{ width: 28, height: 28, borderRadius: "50%", background: isPast ? "#f0f0f0" : `${s.color}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <div style={{ width: 8, height: 8, borderRadius: "50%", background: isPast ? "#d0d3d6" : s.color }} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: isPast ? "#c4c7c7" : s.color, margin: 0 }}>{s.time}</p>
+                          <p style={{ fontSize: 14, fontWeight: isCur ? 700 : 500, color: isPast ? "#a0a5aa" : "#1a1c1c", margin: 0, lineHeight: 1.3 }}>{s.title}</p>
+                        </div>
+                        {isCur && <div style={{ width: 6, height: 6, borderRadius: "50%", background: s.color, flexShrink: 0 }} />}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Readiness panel */}
+          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "center", justifyContent: "center", paddingLeft: 20 }}>
             <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: "0 24px" }}>
               <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Match Readiness</p>
               <svg width="120" height="120" viewBox="0 0 120 120">
@@ -206,107 +310,6 @@ export default function Home8() {
                 <text x="60" y="60" textAnchor="middle" dominantBaseline="central" fontSize="28" fontWeight="700" fill="#1a1c1c" fontFamily="Inter, sans-serif">{readiness}</text>
               </svg>
               <button onClick={() => router.push("/insights4")} className="text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: "#2653d418", color: "#2653d4" }}>See Breakdown</button>
-            </div>
-          </div>
-
-          {/* Carousel center — all schedule cards, doIdx in transform */}
-          <div className="overflow-hidden" style={{ width: "33.333%", flexShrink: 0, height: "100%" }}>
-            <div style={{
-              display: "flex", flexDirection: "column", gap: 16,
-              transform: `translateY(calc(50dvh - 2rem - (100vw - 40px) / 2 - ${doIdx + 1} * (100vw - 24px)))`,
-              transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
-            }}>
-              {/* Empty card above the first schedule item */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", opacity: doIdx === -1 ? 1 : 0.4, filter: doIdx === -1 ? "none" : "grayscale(0.5)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }} />
-              {schedule.map((s, i) => {
-                const isActive = i === doIdx;
-                const isDone = completed.has(i);
-                const nextSlide = schedule[i + 1];
-                const minsUntilNext = nextSlide ? toMins(nextSlide.time) - curMins : 0;
-                const fmtMins = (m: number) => {
-                  if (m <= 0) return "a moment";
-                  const h = Math.floor(m / 60), rem = m % 60;
-                  if (h > 0 && rem > 0) return `${h}h ${rem}m`;
-                  return h > 0 ? `${h}h` : `${rem}m`;
-                };
-                const isReady = curMins >= toMins(s.time);
-
-                const cardStyle: React.CSSProperties = {
-                  position: "relative",
-                  width: "100%",
-                  flexShrink: 0,
-                  height: "calc(100vw - 40px)",
-                  borderRadius: 24,
-                  overflow: "hidden",
-                  background: "white",
-                  boxShadow: "0px 4px 20px rgba(0,0,0,0.04)",
-                  border: "1px solid rgba(0,0,0,0.06)",
-                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                  padding: "0 24px",
-                  opacity: isActive ? 1 : 0.4,
-                  filter: isActive ? "none" : "grayscale(0.5)",
-                  transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)",
-                };
-
-                if (isDone) {
-                  return (
-                    <div key={i} style={cardStyle} onClick={() => isActive && setDoModalOpen(true)}>
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: `${s.color}18` }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                      </div>
-                      <p className="text-[26px] font-bold text-[#1a1c1c] leading-none text-center">Good Job!</p>
-                      <p className="text-[15px] font-semibold text-[#4a5050] mt-1 leading-none text-center">{s.title} complete</p>
-                      {isActive && nextSlide && (
-                        <div className="mt-4 text-center">
-                          <p className="text-[13px] text-[#8a9096] leading-none">See you in <span className="font-semibold text-[#4a5050]">{fmtMins(minsUntilNext)}</span> for:</p>
-                          <p className="text-[14px] font-bold text-[#1a1c1c] mt-1 leading-none">{nextSlide.title}</p>
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-
-                return (
-                  <div key={i} style={cardStyle} onClick={() => isActive && setDoModalOpen(true)}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: `${s.color}18` }}>
-                        {i === currentIdx
-                          ? <div className="w-2.5 h-2.5 rounded-full breathe-strong" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
-                          : <div className="w-2.5 h-2.5 rounded-full" style={{ background: s.color }} />}
-                      </div>
-                      <p className="text-[12px] font-bold tracking-widest uppercase leading-none" style={{ color: i === currentIdx ? "#5a7055" : "#9aa5b0" }}>
-                        {i === currentIdx ? "Do this now" : i > currentIdx ? `Up Next · ${s.time}` : s.time}
-                      </p>
-                    </div>
-                    <p className="text-[24px] font-bold text-[#1a1c1c] leading-tight text-center">{s.title}</p>
-                    {s.subtitle && <p className="text-[15px] text-[#6b7480] leading-none text-center mt-0.5">{s.subtitle}</p>}
-                    {isActive && (
-                      <button
-                        onClick={e => { e.stopPropagation(); setDoModalOpen(true); }}
-                        className="mt-3 text-[13px] font-semibold px-5 py-2 rounded-full"
-                        style={{ background: isReady ? `${s.color}18` : "#f0f0f0", color: isReady ? s.color : "#b0b5ba" }}
-                      >
-                        Complete
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Log panel */}
-          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "center", justifyContent: "center", paddingLeft: 20 }}>
-            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "0 24px" }}>
-              <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Log Data</p>
-              {([
-                { label: "Hydration", color: "#0891b2" },
-                { label: "Check-in", color: "#2653d4" },
-                { label: "Nutrition", color: "#16a34a" },
-                { label: "Recovery", color: "#64748b" },
-              ] as const).map(item => (
-                <button key={item.label} onClick={() => { setCardSnap('none'); setLogSheetOpen(true); }} className="w-full py-3 rounded-2xl text-[15px] font-semibold" style={{ background: `${item.color}18`, color: item.color }}>{item.label}</button>
-              ))}
             </div>
           </div>
         </div>
@@ -331,10 +334,10 @@ export default function Home8() {
               )}
               <div className="px-6 pb-6">
                 {(() => {
-                  const isComplete = completed.has(doIdx);
+                  const isComplete = completed.has(currentIdx);
                   return (
                     <button
-                      onClick={() => { setDoModalOpen(false); setCompleted(prev => { const n = new Set(prev); isComplete ? n.delete(doIdx) : n.add(doIdx); return n; }); }}
+                      onClick={() => { setDoModalOpen(false); setCompleted(prev => { const n = new Set(prev); isComplete ? n.delete(currentIdx) : n.add(currentIdx); return n; }); }}
                       className="w-full py-3.5 rounded-2xl text-[15px] font-bold active:scale-[0.98] transition-transform"
                       style={isComplete ? { background: `${doItem.color}18`, color: doItem.color } : { background: doItem.color, color: "#fff" }}
                     >
