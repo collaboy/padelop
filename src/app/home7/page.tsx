@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import Link from "next/link";
 import LogSheet from "@/components/log-sheet";
 import { computeScores, loadScoringData } from "@/lib/scoring";
 
