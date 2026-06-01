@@ -220,7 +220,7 @@ export default function Home4() {
                 transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
               }}>
                 {([null, ...schedule, null] as (typeof schedule[0] | null)[]).map((s, i) => (
-                  <div key={i} style={{ height: "calc(100vw - 40px)", width: "100%", flexShrink: 0, opacity: i === safeDoIdx ? 1 : 0.35, transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+                  <div key={i} style={{ height: "calc(100vw - 40px)", width: "100%", flexShrink: 0, opacity: i === safeDoIdx ? 1 : 0.35, filter: i === safeDoIdx ? "none" : "grayscale(1)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
                     {s === null ? (
                       <div
                         className="bg-white rounded-[24px] flex flex-col items-center justify-center w-full h-full gap-3"
