@@ -227,7 +227,7 @@ export default function Home8() {
               </div>
 
               {/* Card 0: next match */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", gap: 8, opacity: doIdx === -1 ? 1 : 0, transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", gap: 8 }}>
                 <p className="text-[13px] font-bold tracking-widest uppercase text-center" style={{ color: "#9aa5b0" }}>Next Match</p>
                 {match ? (() => {
                   const [y, mo, d] = match.date.split('-').map(Number);
@@ -261,20 +261,8 @@ export default function Home8() {
                 const swipeFade = doIdx === 0 ? Math.max(0, 1 - Math.abs(liveY) / 80) : 0;
                 const wrapStyle: React.CSSProperties = { position: "relative", width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", opacity: swipeFade, transition: liveY !== 0 ? "none" : "opacity 0.35s cubic-bezier(0.4,0,0.2,1)" };
                 const circleStyle: React.CSSProperties = { position: "absolute", top: 28, bottom: 28, left: 28, right: 28, borderRadius: "50%", overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 20px" };
-                const ch = (d: string, style: React.CSSProperties) => (
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.35)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ position: "absolute", pointerEvents: "none", ...style }}>
-                    <path d={d}/>
-                  </svg>
-                );
-                const chevrons = <>
-                  {ch("M18 15l-6-6-6 6", { top: 4,    left: "50%", transform: "translateX(-50%)" })}
-                  {ch("M6 9l6 6 6-6",    { bottom: 4, left: "50%", transform: "translateX(-50%)" })}
-                  {ch("M15 18l-6-6 6-6", { left: 4,   top: "50%",  transform: "translateY(-50%)" })}
-                  {ch("M9 18l6-6-6-6",   { right: 4,  top: "50%",  transform: "translateY(-50%)" })}
-                </>;
                 if (isDone) return (
                   <div key="active" style={wrapStyle}>
-                    {chevrons}
                     <div style={circleStyle} onClick={() => setDoModalOpen(true)}>
                       <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: `${s.color}18` }}>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -287,7 +275,6 @@ export default function Home8() {
                 );
                 return (
                   <div key="active" style={wrapStyle}>
-                    {chevrons}
                     <div style={circleStyle} onClick={() => setDoModalOpen(true)}>
                       <div className="flex items-center gap-2 mb-1">
                         <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: `${s.color}18` }}>
@@ -304,7 +291,7 @@ export default function Home8() {
               })()}
 
               {/* Card 2: today's schedule */}
-              <div key="sched" style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", padding: "20px 0 0", opacity: doIdx === 1 ? 1 : 0, transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+              <div key="sched" style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", padding: "20px 0 0" }}>
                 <p className="text-[13px] font-bold tracking-widest uppercase text-center mb-3" style={{ color: "#9aa5b0", flexShrink: 0 }}>Today&apos;s Schedule</p>
                 <div style={{ flex: 1, overflowY: "auto", padding: "0 20px 20px" }}>
                   {schedule.map((s, i) => {
