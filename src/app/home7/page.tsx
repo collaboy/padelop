@@ -212,6 +212,8 @@ export default function Home7() {
                 const dy = e.changedTouches[0].clientY - doTouchStartX.current;
                 if (dy < -40)
                   setDoSlideIdx(prev => Math.min(prev + 1, schedule.length + 1));
+                else if (dy > 40)
+                  setDoSlideIdx(prev => Math.max(prev - 1, currentIdx + 1));
               }}
             >
               <div style={{
