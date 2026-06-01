@@ -262,14 +262,13 @@ export default function Home7() {
                       };
                       const isReady = curMins >= toMins(s.time);
                       return (
-                        <button
-                          onClick={() => setDoModalOpen(true)}
+                        <div
                           className="bg-white rounded-[24px] px-6 py-6 flex flex-col items-center transition-opacity w-full h-full relative overflow-hidden"
                           style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)" }}
                         >
                           {isDone ? (
                             /* Completion state */
-                            <div className="flex flex-col items-center justify-center w-full h-full text-center px-6">
+                            <div onClick={() => setDoModalOpen(true)} className="flex flex-col items-center justify-center w-full h-full text-center px-6" style={{ cursor: "pointer" }}>
                               <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: `${s.color}18` }}>
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                   <polyline points="20 6 9 17 4 12"/>
@@ -306,17 +305,21 @@ export default function Home7() {
                                   <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">{s.title}</p>
                                   {s.subtitle && <p className="text-[16px] text-[#6b7480] leading-none">{s.subtitle}</p>}
                                 </div>
-                                <span className="text-[13px] font-semibold px-5 py-2 rounded-full" style={{
-                                  background: isReady ? `${s.color}18` : "#f0f0f0",
-                                  color: isReady ? s.color : "#b0b5ba",
-                                }}>
+                                <button
+                                  onClick={() => setDoModalOpen(true)}
+                                  className="text-[13px] font-semibold px-5 py-2 rounded-full"
+                                  style={{
+                                    background: isReady ? `${s.color}18` : "#f0f0f0",
+                                    color: isReady ? s.color : "#b0b5ba",
+                                  }}
+                                >
                                   Complete
-                                </span>
+                                </button>
                               </div>
                               <div className="flex-1" />
                             </>
                           )}
-                        </button>
+                        </div>
                       );
                     })()}
                   </div>
