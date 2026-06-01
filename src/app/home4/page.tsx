@@ -202,11 +202,20 @@ export default function Home4() {
         const accentColor = (safeDoIdx >= 1 && safeDoIdx <= schedule.length) ? schedule[safeDoIdx - 1].color : "#7c3aed";
         return (
           <>
-            {/* Accent-tinted strips outside the centered card */}
-            <div style={{ position: "fixed", top: "4rem", left: 0, right: 0, height: "calc((100dvh - 4rem - 56px - (100vw - 40px)) / 2 - 24px)", background: accentColor, opacity: 0.18, pointerEvents: "none", zIndex: 10, transition: "background 0.35s cubic-bezier(0.4,0,0.2,1)" }} />
-            <div style={{ position: "fixed", top: "calc(4rem + (100dvh - 4rem - 56px + (100vw - 40px)) / 2 - 24px)", left: 0, right: 0, bottom: 0, background: accentColor, opacity: 0.18, pointerEvents: "none", zIndex: 10, transition: "background 0.35s cubic-bezier(0.4,0,0.2,1)" }} />
-            <div style={{ position: "fixed", top: "4rem", left: 0, width: 20, bottom: 0, background: accentColor, opacity: 0.18, pointerEvents: "none", zIndex: 10, transition: "background 0.35s cubic-bezier(0.4,0,0.2,1)" }} />
-            <div style={{ position: "fixed", top: "4rem", right: 0, width: 20, bottom: 0, background: accentColor, opacity: 0.18, pointerEvents: "none", zIndex: 10, transition: "background 0.35s cubic-bezier(0.4,0,0.2,1)" }} />
+            {/* Single accent overlay — box-shadow bleeds outward from card footprint */}
+            <div style={{
+              position: "fixed",
+              left: 20,
+              width: "calc(100vw - 40px)",
+              top: "calc(4rem + (100dvh - 4rem - 56px - (100vw - 40px)) / 2 - 24px)",
+              height: "calc(100vw - 40px)",
+              borderRadius: 24,
+              boxShadow: `0 0 0 100vmax ${accentColor}`,
+              opacity: 0.18,
+              pointerEvents: "none",
+              zIndex: 10,
+              transition: "box-shadow 0.35s cubic-bezier(0.4,0,0.2,1)",
+            }} />
 
             {/* Do This Now — square carousel */}
             <div
