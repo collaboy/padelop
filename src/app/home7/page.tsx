@@ -193,17 +193,6 @@ export default function Home7() {
   return (
     <>
       <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.82)", zIndex: 55, pointerEvents: "none", opacity: isSleepytime ? 1 : 0, transition: "opacity 0.35s ease" }} />
-      {/* Next match strip */}
-      <div style={{ position: "fixed", top: "calc(4rem - 1px)", left: 0, right: 0, height: 44, zIndex: 65, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-        {match ? (() => {
-          const d = new Date(match.date + "T00:00:00");
-          const dateLabel = d.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
-          const [mh, mm] = match.time.split(":").map(Number);
-          const ampm = mh >= 12 ? "PM" : "AM";
-          const timeLabel = `${mh % 12 || 12}:${String(mm).padStart(2, "0")} ${ampm}`;
-          return <Link href="/matches4" style={{ fontFamily: "Inter, sans-serif", fontSize: 13, fontWeight: 600, color: "#8a9096", textDecoration: "none" }}>Next Match · {dateLabel} · {timeLabel}</Link>;
-        })() : <Link href="/matches4" style={{ fontFamily: "Inter, sans-serif", fontSize: 13, fontWeight: 500, color: "#9aa5b0", textDecoration: "none" }}>No match scheduled</Link>}
-      </div>
     <main style={{ ...S, position: "fixed", inset: 0, paddingTop: "4rem", paddingLeft: 20, paddingRight: 20, paddingBottom: 0, overflow: "hidden", background: `${accentColor}2e`, transition: "background 0.35s cubic-bezier(0.4,0,0.2,1)", zIndex: 60 }}>
 
       {(() => {
@@ -299,13 +288,23 @@ export default function Home7() {
                           ) : (
                             /* Normal state */
                             <>
-                              {/* Top: label */}
-                              <p className="text-[17px] font-bold tracking-widest uppercase" style={{ color: schedIdx === currentIdx ? "#5a7055" : "#9aa5b0" }}>
-                                {schedIdx === currentIdx ? "Do this now" : schedIdx > currentIdx ? `Up Next · ${s.time}` : s.time}
-                              </p>
-                              {/* Middle: title + subtitle */}
+                              {/* Top: next match info */}
+                              {(() => {
+                                const d = match ? new Date(match.date + "T00:00:00") : null;
+                                const dateLabel = d ? d.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" }) : null;
+                                const timeLabel = match ? (() => { const [mh, mm] = match.time.split(":").map(Number); return `${mh % 12 || 12}:${String(mm).padStart(2, "0")} ${mh >= 12 ? "PM" : "AM"}`; })() : null;
+                                return (
+                                  <Link href="/matches4" style={{ fontSize: 12, fontWeight: 600, color: "#8a9096", textDecoration: "none", letterSpacing: "0.02em" }}>
+                                    {match ? `Next Match · ${dateLabel} · ${timeLabel}` : "No match scheduled"}
+                                  </Link>
+                                );
+                              })()}
+                              {/* Middle: label + title + subtitle */}
                               <div className="flex-1 flex flex-col items-center justify-center text-center">
-                                <p className="text-[26px] font-bold text-[#1a1c1c] leading-snug">{s.title}</p>
+                                <p className="text-[17px] font-bold tracking-widest uppercase" style={{ color: schedIdx === currentIdx ? "#5a7055" : "#9aa5b0" }}>
+                                  {schedIdx === currentIdx ? "Do this now" : schedIdx > currentIdx ? `Up Next · ${s.time}` : s.time}
+                                </p>
+                                <p className="text-[26px] font-bold text-[#1a1c1c] leading-snug mt-2">{s.title}</p>
                                 {s.subtitle && <p className="text-[16px] text-[#6b7480] leading-snug mt-2">{s.subtitle}</p>}
                               </div>
                               {/* Bottom: complete button */}
