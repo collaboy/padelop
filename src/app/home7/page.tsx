@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import LogSheet from "@/components/log-sheet";
 import { computeScores, loadScoringData } from "@/lib/scoring";
 
@@ -142,6 +143,7 @@ const S: React.CSSProperties = {
 };
 
 export default function Home7() {
+  const router = useRouter();
   const [doModalOpen, setDoModalOpen] = useState(false);
   const [logSheetOpen, setLogSheetOpen] = useState(false);
   const [schedOpen, setSchedOpen] = useState(false);
@@ -186,7 +188,7 @@ export default function Home7() {
 
   const { schedule: _s } = getScheduleData(match?.date ?? null, match?.time ?? null);
   const isSleepytime = doSlideIdx === 0 || doSlideIdx >= _s.length + 2;
-  const _safeDoIdx = Math.min(doSlideIdx, _s.length + 3);
+  const _safeDoIdx = Math.min(doSlideIdx, _s.length + 2);
   const accentColor = (_safeDoIdx >= 1 && _safeDoIdx <= _s.length) ? _s[_safeDoIdx - 1].color : "#64748b";
 
   return (
@@ -197,7 +199,7 @@ export default function Home7() {
       {(() => {
         const { schedule, currentIdx, dayType } = getScheduleData(match?.date ?? null, match?.time ?? null);
         const meta = DAY_TYPE_META[dayType];
-        const safeDoIdx = Math.min(doSlideIdx, schedule.length + 3);
+        const safeDoIdx = Math.min(doSlideIdx, schedule.length + 2);
         const doItem = schedule[Math.min(safeDoIdx - 1, schedule.length - 1)];
         const curMins = now.getHours() * 60 + now.getMinutes();
         return (
@@ -211,7 +213,7 @@ export default function Home7() {
               onTouchEnd={e => {
                 const dy = e.changedTouches[0].clientY - doTouchStartX.current;
                 if (dy < -40)
-                  setDoSlideIdx(prev => Math.min(prev + 1, schedule.length + 3));
+                  setDoSlideIdx(prev => Math.min(prev + 1, schedule.length + 2));
                 else if (dy > 40)
                   setDoSlideIdx(prev => Math.max(prev - 1, currentIdx + 1));
               }}
@@ -223,41 +225,27 @@ export default function Home7() {
                 transform: `translateY(calc((100dvh - 4rem - 56px - (100vw - 40px)) / 2 - 24px - ${safeDoIdx + 1} * (100vw - 24px)))`,
                 transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
               }}>
-                {([null, null, ...schedule.slice(0, currentIdx + 1), 'SCHED' as const, ...schedule.slice(currentIdx + 1), null, null] as (typeof schedule[0] | null | 'SCHED')[]).map((s, i) => (
-                  <div key={i} style={{ height: s === 'SCHED' ? "auto" : "calc(100vw - 40px)", width: "100%", flexShrink: 0, opacity: i === safeDoIdx + 1 ? 1 : 0.35, filter: i === safeDoIdx + 1 ? "none" : "grayscale(1)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-                    {s === 'SCHED' ? (
-                      /* Today's Schedule card */
-                      <div className="bg-white rounded-[24px] w-full overflow-hidden" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)" }}>
-                        <div className="px-6 pt-5 pb-3 flex flex-col items-center text-center">
+                {([null, null, ...schedule, 'GOTO_SCHED' as const, null] as (typeof schedule[0] | null | 'GOTO_SCHED')[]).map((s, i) => (
+                  <div key={i} style={{ height: "calc(100vw - 40px)", width: "100%", flexShrink: 0, opacity: i === safeDoIdx + 1 ? 1 : 0.35, filter: i === safeDoIdx + 1 ? "none" : "grayscale(1)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+                    {s === 'GOTO_SCHED' ? (
+                      /* Go to Schedule card */
+                      <div className="bg-white rounded-[24px] px-6 py-6 flex flex-col items-center w-full h-full" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)" }}>
+                        <div className="flex-1" />
+                        <div className="flex flex-col items-center text-center gap-2">
+                          <p className="text-[13px] font-bold tracking-widest uppercase leading-none" style={{ color: "#9aa5b0" }}>Check out</p>
                           <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">Today&apos;s Schedule</p>
-                          <p className="text-[13px] font-semibold text-[#8a9096] mt-1">{meta.label}</p>
+                          <button
+                            onClick={() => router.push("/today4")}
+                            className="text-[13px] font-semibold px-5 py-2 rounded-full"
+                            style={{ background: "#2653d418", color: "#2653d4" }}
+                          >
+                            Go to Schedule
+                          </button>
                         </div>
-                        <div className="px-4 pb-6">
-                          {schedule.map((item, si) => {
-                            const isCur = si === currentIdx;
-                            const isPast = !isCur && curMins > toMins(item.time);
-                            return (
-                              <div key={si} className="flex items-center gap-3" style={{
-                                padding: "8px",
-                                borderRadius: isCur ? 12 : 0,
-                                borderBottom: !isCur && si < schedule.length - 1 ? "1px solid #f4f4f4" : "none",
-                                boxShadow: isCur ? `0 0 0 1px ${item.color}` : "none",
-                                marginBottom: isCur && si < schedule.length - 1 ? 4 : 0,
-                              }}>
-                                <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: isPast ? "#f0f0f0" : `${item.color}18` }}>
-                                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: isPast ? "#d0d3d6" : item.color }} />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: isPast ? "#c4c7c7" : item.color }}>{item.time}</p>
-                                  <p className="text-[14px] font-semibold leading-snug" style={{ color: isPast ? "#a0a5aa" : "#1a1c1c" }}>{item.title}</p>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
+                        <div className="flex-1" />
                       </div>
                     ) : s === null ? (
-                      i === schedule.length + 4 ? (
+                      i === schedule.length + 3 ? (
                         /* Last phantom — brand watermark */
                         <div className="rounded-[24px] w-full h-full relative overflow-hidden" style={{ background: "#e2e5e9", border: "2px solid #1a1c1c" }}>
                           <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.08 }}>
@@ -282,7 +270,7 @@ export default function Home7() {
                         </div>
                       )
                     ) : (() => {
-                      const schedIdx = i <= currentIdx + 2 ? i - 2 : i - 3;
+                      const schedIdx = i - 2;
                       const isDone = completed.has(schedIdx);
                       const nextSlide = schedule[schedIdx + 1];
                       const minsUntilNext = nextSlide ? toMins(nextSlide.time) - curMins : 0;
