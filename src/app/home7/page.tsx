@@ -35,15 +35,15 @@ const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return 
 
 const ITEM_COLORS: Record<string, string> = {
   "Wake up & hydrate": "#0e7490", "Light breakfast": "#16a34a", "Breakfast": "#16a34a",
-  "Morning mobility": "#334155", "Light mobility": "#334155",
+  "Morning mobility": "#64748b", "Light mobility": "#64748b",
   "Pre-game meal": "#16a34a", "Warmup & activation": "#d97706",
-  "Match": "#2653d4", "Post-match cool down": "#334155",
+  "Match": "#2653d4", "Post-match cool down": "#64748b",
   "Recovery meal": "#16a34a", "Recovery walk": "#0e7490",
-  "Foam roll & stretch": "#334155", "Protein-rich lunch": "#16a34a",
+  "Foam roll & stretch": "#64748b", "Protein-rich lunch": "#16a34a",
   "Cold shower": "#0e7490", "Dinner": "#16a34a",
-  "Early wind down": "#334155", "Balanced lunch": "#16a34a",
-  "Active recovery": "#0e7490", "Visualisation": "#334155",
-  "Wind down": "#334155",
+  "Early wind down": "#64748b", "Balanced lunch": "#16a34a",
+  "Active recovery": "#0e7490", "Visualisation": "#64748b",
+  "Wind down": "#64748b",
 };
 
 function getScheduleData(matchDate: string | null, matchTime: string | null) {
@@ -187,12 +187,12 @@ export default function Home7() {
   const { schedule: _s } = getScheduleData(match?.date ?? null, match?.time ?? null);
   const isSleepytime = doSlideIdx === 0 || doSlideIdx >= _s.length + 1;
   const _safeDoIdx = Math.min(doSlideIdx, _s.length + 1);
-  const accentColor = (_safeDoIdx >= 1 && _safeDoIdx <= _s.length) ? _s[_safeDoIdx - 1].color : "#334155";
+  const accentColor = (_safeDoIdx >= 1 && _safeDoIdx <= _s.length) ? _s[_safeDoIdx - 1].color : "#64748b";
 
   return (
     <>
       <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.82)", zIndex: 55, pointerEvents: "none", opacity: isSleepytime ? 1 : 0, transition: "opacity 0.35s ease" }} />
-    <main style={{ ...S, position: "fixed", inset: 0, paddingTop: "4rem", paddingLeft: 20, paddingRight: 20, paddingBottom: 0, overflow: "hidden", background: "#111827", transition: "background 0.35s cubic-bezier(0.4,0,0.2,1)", zIndex: 60 }}>
+    <main style={{ ...S, position: "fixed", inset: 0, paddingTop: "4rem", paddingLeft: 20, paddingRight: 20, paddingBottom: 0, overflow: "hidden", background: `${accentColor}2e`, transition: "background 0.35s cubic-bezier(0.4,0,0.2,1)", zIndex: 60 }}>
 
       {(() => {
         const { schedule, currentIdx, dayType } = getScheduleData(match?.date ?? null, match?.time ?? null);
