@@ -225,7 +225,7 @@ export default function Home7() {
                 transform: `translateY(calc((100dvh - 4rem - 56px - (100vw - 40px)) / 2 - 24px - ${safeDoIdx + 1} * (100vw - 24px)))`,
                 transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
               }}>
-                {([null, null, ...schedule, 'GOTO_SCHED' as const, null] as (typeof schedule[0] | null | 'GOTO_SCHED')[]).map((s, i) => (
+                {([null, null, ...schedule.slice(0, currentIdx + 1), 'GOTO_SCHED' as const, ...schedule.slice(currentIdx + 1), null] as (typeof schedule[0] | null | 'GOTO_SCHED')[]).map((s, i) => (
                   <div key={i} style={{ height: "calc(100vw - 40px)", width: "100%", flexShrink: 0, opacity: i === safeDoIdx + 1 ? 1 : 0.35, filter: i === safeDoIdx + 1 ? "none" : "grayscale(1)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
                     {s === 'GOTO_SCHED' ? (
                       /* Go to Schedule card */
@@ -270,7 +270,7 @@ export default function Home7() {
                         </div>
                       )
                     ) : (() => {
-                      const schedIdx = i - 2;
+                      const schedIdx = i <= currentIdx + 2 ? i - 2 : i - 3;
                       const isDone = completed.has(schedIdx);
                       const nextSlide = schedule[schedIdx + 1];
                       const minsUntilNext = nextSlide ? toMins(nextSlide.time) - curMins : 0;
