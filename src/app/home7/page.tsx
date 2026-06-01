@@ -150,7 +150,7 @@ export default function Home7() {
   const [schedItemModal, setSchedItemModal] = useState<{ title: string; subtitle?: string; color: string; detail: string } | null>(null);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
   const [now, setNow] = useState(new Date());
-  const [doSlideIdx, setDoSlideIdx] = useState(() => getScheduleData(null, null).currentIdx + 1);
+  const [doSlideIdx, setDoSlideIdx] = useState(() => getScheduleData(null, null).currentIdx + 2);
   const [completed, setCompleted] = useState<Set<number>>(new Set());
   const [readiness, setReadiness] = useState(65);
   const doTouchStartX = useRef(0);
@@ -176,7 +176,7 @@ export default function Home7() {
               club: m.club || undefined,
               players: [m.player_1, m.player_2, m.player_3, m.player_4].filter(Boolean),
             });
-            setDoSlideIdx(getScheduleData(m.date, m.time).currentIdx + 1);
+            setDoSlideIdx(getScheduleData(m.date, m.time).currentIdx + 2);
           }
         }
       }
@@ -187,8 +187,8 @@ export default function Home7() {
 
 
   const { schedule: _s } = getScheduleData(match?.date ?? null, match?.time ?? null);
-  const isSleepytime = doSlideIdx === 0 || doSlideIdx >= _s.length + 2;
-  const _safeDoIdx = Math.min(doSlideIdx, _s.length + 2);
+  const isSleepytime = doSlideIdx === 0 || doSlideIdx >= _s.length + 3;
+  const _safeDoIdx = Math.min(doSlideIdx, _s.length + 3);
   const accentColor = (_safeDoIdx >= 1 && _safeDoIdx <= _s.length) ? _s[_safeDoIdx - 1].color : "#64748b";
 
   return (
@@ -199,8 +199,9 @@ export default function Home7() {
       {(() => {
         const { schedule, currentIdx, dayType } = getScheduleData(match?.date ?? null, match?.time ?? null);
         const meta = DAY_TYPE_META[dayType];
-        const safeDoIdx = Math.min(doSlideIdx, schedule.length + 2);
-        const doItem = schedule[Math.min(safeDoIdx - 1, schedule.length - 1)];
+        const safeDoIdx = Math.min(doSlideIdx, schedule.length + 3);
+        const doItemIdx = safeDoIdx <= currentIdx + 2 ? Math.max(safeDoIdx - 2, 0) : Math.min(safeDoIdx - 3, schedule.length - 1);
+        const doItem = schedule[doItemIdx];
         const curMins = now.getHours() * 60 + now.getMinutes();
         return (
           <>
@@ -213,7 +214,7 @@ export default function Home7() {
               onTouchEnd={e => {
                 const dy = e.changedTouches[0].clientY - doTouchStartX.current;
                 if (dy < -40)
-                  setDoSlideIdx(prev => Math.min(prev + 1, schedule.length + 2));
+                  setDoSlideIdx(prev => Math.min(prev + 1, schedule.length + 3));
                 else if (dy > 40)
                   setDoSlideIdx(prev => Math.max(prev - 1, currentIdx + 1));
               }}
@@ -225,9 +226,23 @@ export default function Home7() {
                 transform: `translateY(calc((100dvh - 4rem - 56px - (100vw - 40px)) / 2 - 24px - ${safeDoIdx + 1} * (100vw - 24px)))`,
                 transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
               }}>
-                {([null, null, ...schedule.slice(0, currentIdx + 1), 'GOTO_SCHED' as const, ...schedule.slice(currentIdx + 1), null] as (typeof schedule[0] | null | 'GOTO_SCHED')[]).map((s, i) => (
+                {([null, null, ...schedule.slice(0, currentIdx), 'NEXT_MATCH' as const, schedule[currentIdx], 'GOTO_SCHED' as const, ...schedule.slice(currentIdx + 1), null] as (typeof schedule[0] | null | 'NEXT_MATCH' | 'GOTO_SCHED')[]).map((s, i) => (
                   <div key={i} style={{ height: "calc(100vw - 40px)", width: "100%", flexShrink: 0, opacity: i === safeDoIdx + 1 ? 1 : 0.35, filter: i === safeDoIdx + 1 ? "none" : "grayscale(1)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-                    {s === 'GOTO_SCHED' ? (
+                    {s === 'NEXT_MATCH' ? (
+                      /* Next Match card */
+                      <div className="bg-white rounded-[24px] px-6 py-6 flex flex-col items-center w-full h-full" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)" }}>
+                        <div className="flex-1" />
+                        <div className="flex flex-col items-center text-center gap-2">
+                          <p className="text-[13px] font-bold tracking-widest uppercase leading-none" style={{ color: "#9aa5b0" }}>Next Match</p>
+                          <p className="text-[26px] font-bold text-[#1a1c1c] leading-none">
+                            {match ? (() => { const [y,mo,d] = match.date.split('-').map(Number); const dt = new Date(y,mo-1,d); return `${dt.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})} · ${match.time}`; })() : "No match set"}
+                          </p>
+                          {match?.club && <p className="text-[16px] text-[#6b7480] leading-none">{match.club}</p>}
+                          <button onClick={() => router.push("/matches4")} className="text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: "#2653d418", color: "#2653d4" }}>See Details</button>
+                        </div>
+                        <div className="flex-1" />
+                      </div>
+                    ) : s === 'GOTO_SCHED' ? (
                       /* Go to Schedule card */
                       <div className="bg-white rounded-[24px] px-6 py-6 flex flex-col items-center w-full h-full" style={{ boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)" }}>
                         <div className="flex-1" />
@@ -245,7 +260,7 @@ export default function Home7() {
                         <div className="flex-1" />
                       </div>
                     ) : s === null ? (
-                      i === schedule.length + 3 ? (
+                      i === schedule.length + 4 ? (
                         /* Last phantom — brand watermark */
                         <div className="rounded-[24px] w-full h-full relative overflow-hidden" style={{ background: "#e2e5e9", border: "2px solid #1a1c1c" }}>
                           <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.08 }}>
@@ -270,7 +285,7 @@ export default function Home7() {
                         </div>
                       )
                     ) : (() => {
-                      const schedIdx = i <= currentIdx + 2 ? i - 2 : i - 3;
+                      const schedIdx = i <= currentIdx + 1 ? i - 2 : i <= currentIdx + 3 ? i - 3 : i - 4;
                       const isDone = completed.has(schedIdx);
                       const nextSlide = schedule[schedIdx + 1];
                       const minsUntilNext = nextSlide ? toMins(nextSlide.time) - curMins : 0;
@@ -348,7 +363,7 @@ export default function Home7() {
               </div>
             </div>
 
-            {completed.has(safeDoIdx - 1) && (
+            {completed.has(doItemIdx) && (
               <>
                 {/* Mean time prompt */}
                 <p style={{ ...S, fontSize: 13, color: "#9aa5b0", textAlign: "center", margin: "0" }}>
