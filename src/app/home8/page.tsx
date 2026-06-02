@@ -219,7 +219,9 @@ export default function Home8() {
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingLeft: 10, paddingRight: 10 }}>
             <div style={{
               display: "flex", flexDirection: "column", gap: 10,
-              transform: `translateY(calc(50dvh - 4rem - (100vw - 40px) / 2 - ${doIdx + 2} * (100vw - 30px)))`,
+              transform: doIdx >= 1
+                ? `translateY(calc(-3 * (100vw - 30px)))`
+                : `translateY(calc(50dvh - 4rem - (100vw - 40px) / 2 - ${doIdx + 2} * (100vw - 30px)))`,
               transition: "transform 0s cubic-bezier(0.4,0,0.2,1)",
             }}>
               {/* Logo above top card */}
