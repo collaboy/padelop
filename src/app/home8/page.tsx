@@ -229,10 +229,10 @@ export default function Home8() {
             <div style={{
               display: "flex", flexDirection: "column", gap: 10,
               transform: doIdx >= 1
-                ? `translateY(calc(84px + 4rem - 2 * (100vw - 30px) - 100dvh))`
+                ? `translateY(calc(84px + 4rem - 2 * (100vw - 30px) - 95dvh))`
                 : doIdx === -1
                   ? `translateY(calc(10px - (100vw - 30px) + ${liveY}px))`
-                  : `translateY(calc(-55dvh - 150vw + 100px + ${liveY}px))`,
+                  : `translateY(calc(-50dvh - 150vw + 100px + ${liveY}px))`,
               transition: liveY !== 0 ? "none" : "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
             }}>
               {/* Logo above top card */}
@@ -246,7 +246,7 @@ export default function Home8() {
               </div>
 
               {/* Card 0: next match */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100dvh - 4rem - 60px)", borderRadius: 24, overflow: "hidden", background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "28px 24px", gap: 10, opacity: cardSnap === 'none' && doIdx === -1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === -1 ? 2 : 1 }}>
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(95dvh - 4rem - 60px)", borderRadius: 24, overflow: "hidden", background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "28px 24px", gap: 10, opacity: cardSnap === 'none' && doIdx === -1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === -1 ? 2 : 1 }}>
                 <p className="text-[13px] font-bold tracking-widest uppercase text-center" style={{ color: "#9aa5b0" }}>Next Match</p>
                 {match ? (() => {
                   const [y, mo, d] = match.date.split('-').map(Number);
@@ -333,13 +333,13 @@ export default function Home8() {
                     <div style={{ padding: "20px 20px 0", display: "flex", flexDirection: "column", alignItems: "center" }}>
                       <div style={{ width: "100%", overflow: "hidden", display: "flex", justifyContent: "center" }}>
                         <span style={{ position: "relative", flexShrink: 0 }}>
-                          <span style={{ fontSize: 28, fontWeight: 800, color: "#1a1c1c", fontFamily: "var(--font-hanken, Inter, sans-serif)" }}>
+                          <span style={{ fontSize: 32, fontWeight: 800, color: "#1a1c1c", fontFamily: "var(--font-hanken, Inter, sans-serif)" }}>
                             {schedTab === "today" ? "Today" : "This Week"}
                           </span>
                           {schedTab === "today" ? (
-                            <button style={{ position: "absolute", top: 0, left: "100%", paddingLeft: 12, fontSize: 28, fontWeight: 800, whiteSpace: "nowrap", fontFamily: "var(--font-hanken, Inter, sans-serif)", color: "#1a1c1c", opacity: 0.18, WebkitMaskImage: "linear-gradient(to right, black 0%, transparent 65%)", maskImage: "linear-gradient(to right, black 0%, transparent 65%)", background: "none", border: "none", cursor: "pointer" }} onClick={() => setSchedTab("week")}>This Week</button>
+                            <button style={{ position: "absolute", top: 0, left: "100%", paddingLeft: 12, fontSize: 32, fontWeight: 800, whiteSpace: "nowrap", fontFamily: "var(--font-hanken, Inter, sans-serif)", color: "#1a1c1c", opacity: 0.18, WebkitMaskImage: "linear-gradient(to right, black 0%, transparent 65%)", maskImage: "linear-gradient(to right, black 0%, transparent 65%)", background: "none", border: "none", cursor: "pointer" }} onClick={() => setSchedTab("week")}>This Week</button>
                           ) : (
-                            <button style={{ position: "absolute", top: 0, right: "100%", paddingRight: 12, fontSize: 28, fontWeight: 800, whiteSpace: "nowrap", fontFamily: "var(--font-hanken, Inter, sans-serif)", color: "#1a1c1c", opacity: 0.18, WebkitMaskImage: "linear-gradient(to left, black 0%, transparent 65%)", maskImage: "linear-gradient(to left, black 0%, transparent 65%)", background: "none", border: "none", cursor: "pointer" }} onClick={() => setSchedTab("today")}>Today</button>
+                            <button style={{ position: "absolute", top: 0, right: "100%", paddingRight: 12, fontSize: 32, fontWeight: 800, whiteSpace: "nowrap", fontFamily: "var(--font-hanken, Inter, sans-serif)", color: "#1a1c1c", opacity: 0.18, WebkitMaskImage: "linear-gradient(to left, black 0%, transparent 65%)", maskImage: "linear-gradient(to left, black 0%, transparent 65%)", background: "none", border: "none", cursor: "pointer" }} onClick={() => setSchedTab("today")}>Today</button>
                           )}
                         </span>
                       </div>
@@ -363,17 +363,17 @@ export default function Home8() {
                           const isPast = !isCur && curMinsSched > toMins(item.time);
                           const detail = SCHEDULE_DETAILS[item.title];
                           return (
-                            <div key={idx} style={{ display: "flex", gap: 12 }}>
-                              <div style={{ width: 44, flexShrink: 0, paddingTop: 2 }}>
-                                <p style={{ fontSize: 13, fontWeight: 700, color: "#6b7480", textAlign: "right", lineHeight: 1, margin: 0 }}>{item.time}</p>
+                            <div key={idx} style={{ display: "flex", gap: 14 }}>
+                              <div style={{ width: 56, flexShrink: 0, paddingTop: 3 }}>
+                                <p style={{ fontSize: 15, fontWeight: 700, color: "#6b7480", textAlign: "right", lineHeight: 1, margin: 0 }}>{item.time}</p>
                               </div>
                               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
-                                <div style={{ width: 8, height: 8, borderRadius: "50%", marginTop: 2, flexShrink: 0, background: isPast ? "#d0d3d6" : item.color }} />
+                                <div style={{ width: 10, height: 10, borderRadius: "50%", marginTop: 4, flexShrink: 0, background: isPast ? "#d0d3d6" : item.color }} />
                                 {!isLast && (
-                                  <div style={{ position: "relative", width: 1, flex: 1, background: "#dfe3e7", minHeight: 28, overflow: "visible" }}>
+                                  <div style={{ position: "relative", width: 2, flex: 1, background: "#dfe3e7", minHeight: 36, overflow: "visible" }}>
                                     {isCurrentSegment && (
                                       <div style={{ position: "absolute", display: "flex", alignItems: "center", top: `${segmentPct}%`, right: 0, transform: "translateY(-50%)" }}>
-                                        <span style={{ fontSize: 11, fontWeight: 700, color: "#fff", padding: "3px 8px", borderRadius: 4, marginRight: 2, whiteSpace: "nowrap", background: "#2653d4" }}>
+                                        <span style={{ fontSize: 12, fontWeight: 700, color: "#fff", padding: "3px 9px", borderRadius: 4, marginRight: 2, whiteSpace: "nowrap", background: "#2653d4" }}>
                                           {pad(now.getHours())}:{pad(now.getMinutes())}
                                         </span>
                                         <svg width="6" height="8" viewBox="0 0 6 8"><polygon points="0,0 6,4 0,8" fill="#171c1f" /></svg>
@@ -383,15 +383,15 @@ export default function Home8() {
                                 )}
                               </div>
                               <button
-                                style={{ paddingBottom: 16, flex: 1, minWidth: 0, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, textAlign: "left", background: "none", border: "none", cursor: detail ? "pointer" : "default", padding: "0 0 16px" }}
+                                style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, textAlign: "left", background: "none", border: "none", cursor: detail ? "pointer" : "default", padding: "0 0 24px" }}
                                 onClick={() => detail && setSchedDetailOpen({ title: item.title, subtitle: item.subtitle, color: item.color, detail })}
                               >
                                 <div style={{ minWidth: 0 }}>
-                                  <p style={{ fontSize: 17, fontWeight: isCur ? 700 : 500, color: isPast ? "#a0a5aa" : "#1a1c1c", margin: 0, lineHeight: 1.3 }}>{item.title}</p>
-                                  {item.subtitle && <p style={{ fontSize: 14, color: "#6b7480", margin: "3px 0 0", lineHeight: 1.4 }}>{item.subtitle}</p>}
+                                  <p style={{ fontSize: 21, fontWeight: isCur ? 700 : 500, color: isPast ? "#a0a5aa" : "#1a1c1c", margin: 0, lineHeight: 1.25 }}>{item.title}</p>
+                                  {item.subtitle && <p style={{ fontSize: 16, color: "#6b7480", margin: "4px 0 0", lineHeight: 1.4 }}>{item.subtitle}</p>}
                                 </div>
                                 {detail && (
-                                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#dfe3e7" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 4 }}>
+                                  <svg width="12" height="12" viewBox="0 0 10 10" fill="none" stroke="#dfe3e7" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 5 }}>
                                     <line x1="5" y1="1" x2="5" y2="9" /><line x1="1" y1="5" x2="9" y2="5" />
                                   </svg>
                                 )}

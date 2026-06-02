@@ -5,7 +5,6 @@ import Link from "next/link";
 import WeekStrip from "./week-strip";
 import Recommendations, { getRecommendations, RecCard } from "./recommendations";
 import LogSheet from "./log-sheet";
-import ReadinessWidget from "./readiness-widget";
 import ScoreRing from "./score-ring";
 import { computeScores, loadScoringData, type Scores } from "@/lib/scoring";
 
@@ -406,6 +405,7 @@ export default function HomeClientV2() {
   const [selectedYMD, setSelectedYMD] = useState(todayYMD);
   const [planOpen, setPlanOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"today" | "week">("today");
+  const [schedSheetOpen, setSchedSheetOpen] = useState(false);
 
   const [matchReviewOpen, setMatchReviewOpen] = useState(false);
   const [matchReview, setMatchReview] = useState({ feeling: "", result: "", opponent: "", energy: "", injury: "", wellDone: [] as string[], improved: [] as string[], mentalBefore: "", mentalDuring: "", mentalAfter: "" });
@@ -847,6 +847,89 @@ export default function HomeClientV2() {
         );
       })()}
 
+      {/* Next Match card */}
+      {(() => {
+        let nextYMD: string | null = null;
+        for (let i = 0; i <= 30; i++) {
+          const ymd = offsetYMD(todayYMD, i);
+          if (gameDays.includes(ymd)) { nextYMD = ymd; break; }
+        }
+        if (!nextYMD) nextYMD = todayYMD;
+        const isToday = nextYMD === todayYMD;
+        const d = new Date(nextYMD);
+        const dateLabel = isToday ? "Today" : d.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
+        return (
+          <div className="px-5 md:px-12 pt-4 pb-2 bg-[var(--bg)]">
+            <div className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden">
+            <Link href="/matches" className="w-full px-4 py-6 flex items-center gap-4 relative overflow-hidden active:opacity-70 transition-opacity">
+              {/* Greyscale racket + ball background, fading left */}
+              <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+                <svg className="absolute right-0 top-0 h-full" style={{ width: "72%" }} viewBox="0 0 200 90" fill="none" preserveAspectRatio="xMaxYMid meet" opacity="0.13">
+                  <g transform="rotate(-22, 148, 72)">
+                    <rect x="110" y="4" width="76" height="82" rx="20" fill="#111" />
+                    <rect x="118" y="12" width="60" height="66" rx="14" fill="white" />
+                    <circle cx="131" cy="25" r="4.5" fill="#111" />
+                    <circle cx="148" cy="25" r="4.5" fill="#111" />
+                    <circle cx="165" cy="25" r="4.5" fill="#111" />
+                    <circle cx="131" cy="40" r="4.5" fill="#111" />
+                    <circle cx="148" cy="40" r="4.5" fill="#111" />
+                    <circle cx="165" cy="40" r="4.5" fill="#111" />
+                    <circle cx="131" cy="55" r="4.5" fill="#111" />
+                    <circle cx="148" cy="55" r="4.5" fill="#111" />
+                    <circle cx="165" cy="55" r="4.5" fill="#111" />
+                    <circle cx="131" cy="70" r="4.5" fill="#111" />
+                    <circle cx="148" cy="70" r="4.5" fill="#111" />
+                    <circle cx="165" cy="70" r="4.5" fill="#111" />
+                    <path d="M132 86 Q148 80 164 86 L164 88 Q148 96 132 88 Z" fill="#111" />
+                    <rect x="138" y="86" width="20" height="26" rx="5" fill="#111" />
+                    <line x1="138" y1="94" x2="158" y2="94" stroke="white" strokeWidth="1.5" />
+                    <line x1="138" y1="102" x2="158" y2="102" stroke="white" strokeWidth="1.5" />
+                  </g>
+                  <circle cx="44" cy="46" r="26" fill="#111" />
+                  <path d="M24 32 C32 22, 56 22, 64 32" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                  <path d="M24 60 C32 70, 56 70, 64 60" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                </svg>
+                <div className="absolute inset-0 rounded-2xl" style={{ background: "linear-gradient(to right, var(--surface) 28%, transparent 72%)" }} />
+              </div>
+              <div className="flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center relative" style={{ background: "#2653d4" }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="2" width="18" height="20" rx="1" />
+                  <line x1="3" y1="12" x2="21" y2="12" />
+                  <line x1="12" y1="5" x2="12" y2="12" />
+                  <line x1="12" y1="12" x2="12" y2="19" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0 relative">
+                <p className="text-[11px] font-bold tracking-widest uppercase text-[var(--muted)] mb-1">Next Match</p>
+                <p className="text-[19px] font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)", lineHeight: 1.1 }}>
+                  {dateLabel}{gameDetails.time ? ` · ${gameDetails.time}` : ""}
+                </p>
+                <div className="flex items-center gap-1 mt-1.5">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--muted)] flex-shrink-0">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
+                  </svg>
+                  <p className="text-[13px] text-[var(--muted)] truncate">{gameDetails.location || "—"}</p>
+                </div>
+              </div>
+              <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 relative text-[var(--muted)]">
+                <polyline points="1,1 6,6 1,11" />
+              </svg>
+            </Link>
+            <div className="border-t border-[var(--border)]" />
+            <button
+              onClick={() => { setHomeExtracted(null); setHomeUploadError(null); setHomeMatchOpen(true); }}
+              className="w-full px-4 py-2.5 flex items-center gap-2 active:opacity-60 transition-opacity"
+            >
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="#9aab96" strokeWidth="1.8" strokeLinecap="round">
+                <line x1="5.5" y1="1" x2="5.5" y2="10"/><line x1="1" y1="5.5" x2="10" y2="5.5"/>
+              </svg>
+              <span className="text-[12px] font-medium text-[#9aab96]">Add a match</span>
+            </button>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Today + Readiness hero card */}
       {(() => {
         const now = new Date();
@@ -891,7 +974,7 @@ export default function HomeClientV2() {
         } else if (dayType === "recovery") { ctxMsg = "Recovery day. Keep moving gently, drink plenty of water, and get your protein in.";
         } else { ctxMsg = "Training day. Make sure you're fuelled, warmed up, and ready to work on your patterns."; }
         return (
-          <div className="px-5 md:px-12 pt-5 pb-4">
+          <div className="px-5 md:px-12 pt-2 pb-4">
             <div className="rounded-[28px] mb-2 overflow-hidden" style={{ background: "#fff", boxShadow: "0 2px 24px rgba(38,83,212,0.08)", border: "1px solid #e8e8e8" }}>
               {/* Header row */}
               <div className="flex items-center justify-between px-5 pt-5 pb-3">
@@ -986,89 +1069,6 @@ export default function HomeClientV2() {
         );
       })()}
 
-      {/* Next Match card */}
-      {(() => {
-        let nextYMD: string | null = null;
-        for (let i = 0; i <= 30; i++) {
-          const ymd = offsetYMD(todayYMD, i);
-          if (gameDays.includes(ymd)) { nextYMD = ymd; break; }
-        }
-        if (!nextYMD) nextYMD = todayYMD;
-        const isToday = nextYMD === todayYMD;
-        const d = new Date(nextYMD);
-        const dateLabel = isToday ? "Today" : d.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
-        return (
-          <div className="px-5 md:px-12 pb-4 bg-[var(--bg)]">
-            <div className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden">
-            <Link href="/matches" className="w-full px-4 py-6 flex items-center gap-4 relative overflow-hidden active:opacity-70 transition-opacity">
-              {/* Greyscale racket + ball background, fading left */}
-              <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-                <svg className="absolute right-0 top-0 h-full" style={{ width: "72%" }} viewBox="0 0 200 90" fill="none" preserveAspectRatio="xMaxYMid meet" opacity="0.13">
-                  <g transform="rotate(-22, 148, 72)">
-                    <rect x="110" y="4" width="76" height="82" rx="20" fill="#111" />
-                    <rect x="118" y="12" width="60" height="66" rx="14" fill="white" />
-                    <circle cx="131" cy="25" r="4.5" fill="#111" />
-                    <circle cx="148" cy="25" r="4.5" fill="#111" />
-                    <circle cx="165" cy="25" r="4.5" fill="#111" />
-                    <circle cx="131" cy="40" r="4.5" fill="#111" />
-                    <circle cx="148" cy="40" r="4.5" fill="#111" />
-                    <circle cx="165" cy="40" r="4.5" fill="#111" />
-                    <circle cx="131" cy="55" r="4.5" fill="#111" />
-                    <circle cx="148" cy="55" r="4.5" fill="#111" />
-                    <circle cx="165" cy="55" r="4.5" fill="#111" />
-                    <circle cx="131" cy="70" r="4.5" fill="#111" />
-                    <circle cx="148" cy="70" r="4.5" fill="#111" />
-                    <circle cx="165" cy="70" r="4.5" fill="#111" />
-                    <path d="M132 86 Q148 80 164 86 L164 88 Q148 96 132 88 Z" fill="#111" />
-                    <rect x="138" y="86" width="20" height="26" rx="5" fill="#111" />
-                    <line x1="138" y1="94" x2="158" y2="94" stroke="white" strokeWidth="1.5" />
-                    <line x1="138" y1="102" x2="158" y2="102" stroke="white" strokeWidth="1.5" />
-                  </g>
-                  <circle cx="44" cy="46" r="26" fill="#111" />
-                  <path d="M24 32 C32 22, 56 22, 64 32" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                  <path d="M24 60 C32 70, 56 70, 64 60" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                </svg>
-                <div className="absolute inset-0 rounded-2xl" style={{ background: "linear-gradient(to right, var(--surface) 28%, transparent 72%)" }} />
-              </div>
-              <div className="flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center relative" style={{ background: "#2653d4" }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="2" width="18" height="20" rx="1" />
-                  <line x1="3" y1="12" x2="21" y2="12" />
-                  <line x1="12" y1="5" x2="12" y2="12" />
-                  <line x1="12" y1="12" x2="12" y2="19" />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0 relative">
-                <p className="text-[11px] font-bold tracking-widest uppercase text-[var(--muted)] mb-1">Next Match</p>
-                <p className="text-[19px] font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)", lineHeight: 1.1 }}>
-                  {dateLabel}{gameDetails.time ? ` · ${gameDetails.time}` : ""}
-                </p>
-                <div className="flex items-center gap-1 mt-1.5">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--muted)] flex-shrink-0">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
-                  </svg>
-                  <p className="text-[13px] text-[var(--muted)] truncate">{gameDetails.location || "—"}</p>
-                </div>
-              </div>
-              <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 relative text-[var(--muted)]">
-                <polyline points="1,1 6,6 1,11" />
-              </svg>
-            </Link>
-            <div className="border-t border-[var(--border)]" />
-            <button
-              onClick={() => { setHomeExtracted(null); setHomeUploadError(null); setHomeMatchOpen(true); }}
-              className="w-full px-4 py-2.5 flex items-center gap-2 active:opacity-60 transition-opacity"
-            >
-              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="#9aab96" strokeWidth="1.8" strokeLinecap="round">
-                <line x1="5.5" y1="1" x2="5.5" y2="10"/><line x1="1" y1="5.5" x2="10" y2="5.5"/>
-              </svg>
-              <span className="text-[12px] font-medium text-[#9aab96]">Add a match</span>
-            </button>
-            </div>
-          </div>
-        );
-      })()}
-
       {/* Daily Check-in card */}
       <div className="px-5 md:px-12 pb-4 bg-[var(--bg)]">
         {checkInDone ? (
@@ -1090,237 +1090,172 @@ export default function HomeClientV2() {
         )}
       </div>
 
-      {/* Readiness widget card */}
-      <div className="px-5 md:px-12 pb-4 bg-[var(--bg)]">
-        <ReadinessWidget hideRing />
+      {/* Schedule trigger row */}
+      <div className="px-5 md:px-12 pb-3 bg-[var(--bg)]">
+        <div className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden flex">
+          <button
+            className="flex-1 px-4 py-4 flex items-center justify-between active:opacity-70 transition-opacity"
+            onClick={() => { setActiveTab("today"); setSchedSheetOpen(true); }}
+          >
+            <span className="text-xl font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>Today</span>
+            <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--muted)]"><polyline points="1,1 6,6 1,11"/></svg>
+          </button>
+          <div className="w-px bg-[var(--border)]" />
+          <button
+            className="flex-1 px-4 py-4 flex items-center justify-between active:opacity-70 transition-opacity"
+            onClick={() => { setActiveTab("week"); setSchedSheetOpen(true); }}
+          >
+            <span className="text-xl font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>This Week</span>
+            <svg width="7" height="12" viewBox="0 0 7 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--muted)]"><polyline points="1,1 6,6 1,11"/></svg>
+          </button>
+        </div>
       </div>
 
-      {/* Today / This Month toggle card */}
-      <div className="px-5 md:px-12 pb-3 bg-[var(--bg)]">
-        <div className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden">
-          <div className="px-4 pt-3 pb-2 flex flex-col items-center">
-            <div className="w-full overflow-hidden flex justify-center">
-              <span className="relative flex-shrink-0">
-                <span className="text-2xl font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>
-                  {activeTab === "today" ? "Today" : "This Month"}
-                </span>
-                {activeTab === "today" ? (
-                  <button
-                    className="absolute top-0 left-full pl-3 text-2xl font-extrabold whitespace-nowrap"
-                    style={{ fontFamily: "var(--font-hanken)", color: "var(--text)", opacity: 0.18, WebkitMaskImage: "linear-gradient(to right, black 0%, transparent 65%)", maskImage: "linear-gradient(to right, black 0%, transparent 65%)" }}
-                    onClick={() => setActiveTab("week")}
-                  >This Month</button>
-                ) : (
-                  <button
-                    className="absolute top-0 right-full pr-3 text-2xl font-extrabold whitespace-nowrap"
-                    style={{ fontFamily: "var(--font-hanken)", color: "var(--text)", opacity: 0.18, WebkitMaskImage: "linear-gradient(to left, black 0%, transparent 65%)", maskImage: "linear-gradient(to left, black 0%, transparent 65%)" }}
-                    onClick={() => setActiveTab("today")}
-                  >Today</button>
-                )}
-              </span>
+      {/* Schedule bottom sheet */}
+      {schedSheetOpen && (
+        <div className="fixed inset-0 z-[200] flex flex-col justify-end" onClick={() => setSchedSheetOpen(false)}>
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="relative bg-[var(--surface)] rounded-t-[28px] max-h-[85dvh] flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+              <div className="w-10 h-1 rounded-full bg-[var(--border)]" />
             </div>
-            <div className="flex gap-1.5 mt-1.5">
-              <button onClick={() => setActiveTab("today")} className="w-1.5 h-1.5 rounded-full transition-colors duration-200" style={{ background: activeTab === "today" ? "var(--text)" : "var(--border)" }} />
-              <button onClick={() => setActiveTab("week")} className="w-1.5 h-1.5 rounded-full transition-colors duration-200" style={{ background: activeTab === "week" ? "var(--text)" : "var(--border)" }} />
+            <div className="px-5 pt-2 pb-3 flex items-center gap-5 flex-shrink-0 border-b border-[var(--border)]">
+              <button
+                onClick={() => setActiveTab("today")}
+                className="text-xl font-extrabold transition-opacity"
+                style={{ fontFamily: "var(--font-hanken)", color: activeTab === "today" ? "var(--text)" : "var(--muted)", opacity: activeTab === "today" ? 1 : 0.35 }}
+              >Today</button>
+              <button
+                onClick={() => setActiveTab("week")}
+                className="text-xl font-extrabold transition-opacity"
+                style={{ fontFamily: "var(--font-hanken)", color: activeTab === "week" ? "var(--text)" : "var(--muted)", opacity: activeTab === "week" ? 1 : 0.35 }}
+              >This Week</button>
+              <button onClick={() => setSchedSheetOpen(false)} className="ml-auto w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "var(--bg)" }}>
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="1" y1="1" x2="9" y2="9"/><line x1="9" y1="1" x2="1" y2="9"/></svg>
+              </button>
             </div>
-          </div>
-          <div className="border-t border-[var(--border)]" />
-          <div
-            className="px-4 pb-4"
-            onTouchStart={(e) => { cardTouchX.current = e.touches[0].clientX; }}
-            onTouchEnd={(e) => { const delta = e.changedTouches[0].clientX - cardTouchX.current; if (delta < -40) { setActiveTab("week"); } else if (delta > 40) setActiveTab("today"); }}
-          >
-            {activeTab === "today" && (
-              <>
-                {(() => {
-                  const schedule = getDaySchedule();
-                  const now = new Date();
-                  const currentMins = now.getHours() * 60 + now.getMinutes();
-                  const parseMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
-
-                  return (
+            <div className="overflow-y-auto flex-1 px-5 pb-10">
+              {activeTab === "today" && (() => {
+                const schedule = getDaySchedule();
+                const now = new Date();
+                const currentMins = now.getHours() * 60 + now.getMinutes();
+                const parseMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+                return (
                   <div className="mt-4">
-                    <div className="flex gap-3 items-stretch">
-                      {/* Timeline */}
-                      <div className="flex-1">
-                        {schedule.map((block, idx, arr) => {
-                          const color = SCHEDULE_COLORS[block.category];
-                          const isLast = idx === arr.length - 1;
-                          const blockMins = parseMins(block.time);
-                          const nextMins = !isLast ? parseMins(arr[idx + 1].time) : 24 * 60;
-                          const isCurrentSegment = !isLast && currentMins >= blockMins && currentMins < nextMins;
-                          const segmentPct = isCurrentSegment ? ((currentMins - blockMins) / (nextMins - blockMins)) * 100 : 0;
-                          const detail = SCHEDULE_DETAILS[block.title];
-                          return (
-                            <div key={idx} className="flex gap-3">
-                              <div className="w-10 flex-shrink-0 pt-0.5">
-                                <p className="text-xs font-bold text-[var(--muted)] text-right leading-none">{block.time}</p>
-                              </div>
-                              <div className="flex flex-col items-center flex-shrink-0">
-                                <div className="w-2 h-2 rounded-full mt-0.5 flex-shrink-0" style={{ background: color }} />
-                                {!isLast && (
-                                  <div className="relative mt-1" style={{ width: 1, flex: 1, background: "var(--border)", minHeight: 28, overflow: "visible" }}>
-                                    {isCurrentSegment && (
-                                      <div className="absolute flex items-center" style={{ top: `${segmentPct}%`, right: 0, transform: "translateY(-50%)" }}>
-                                        <span className="text-sm font-bold text-white px-2.5 py-1 rounded mr-0.5 whitespace-nowrap" style={{ background: "#2653d4" }}>
-                                          {String(now.getHours()).padStart(2, "0")}<span style={{ animation: "colonBlink 1s step-start infinite" }}>:</span>{String(now.getMinutes()).padStart(2, "0")}
-                                        </span>
-                                        <svg width="8" height="10" viewBox="0 0 8 10"><polygon points="0,0 8,5 0,10" fill="#171c1f" /></svg>
-                                      </div>
-                                    )}
+                    {schedule.map((block, idx, arr) => {
+                      const color = SCHEDULE_COLORS[block.category];
+                      const isLast = idx === arr.length - 1;
+                      const blockMins = parseMins(block.time);
+                      const nextMins = !isLast ? parseMins(arr[idx + 1].time) : 24 * 60;
+                      const isCurrentSegment = !isLast && currentMins >= blockMins && currentMins < nextMins;
+                      const segmentPct = isCurrentSegment ? ((currentMins - blockMins) / (nextMins - blockMins)) * 100 : 0;
+                      const detail = SCHEDULE_DETAILS[block.title];
+                      return (
+                        <div key={idx} className="flex gap-3">
+                          <div className="w-10 flex-shrink-0 pt-0.5">
+                            <p className="text-xs font-bold text-[var(--muted)] text-right leading-none">{block.time}</p>
+                          </div>
+                          <div className="flex flex-col items-center flex-shrink-0">
+                            <div className="w-2 h-2 rounded-full mt-0.5 flex-shrink-0" style={{ background: color }} />
+                            {!isLast && (
+                              <div className="relative mt-1" style={{ width: 1, flex: 1, background: "var(--border)", minHeight: 28, overflow: "visible" }}>
+                                {isCurrentSegment && (
+                                  <div className="absolute flex items-center" style={{ top: `${segmentPct}%`, right: 0, transform: "translateY(-50%)" }}>
+                                    <span className="text-sm font-bold text-white px-2.5 py-1 rounded mr-0.5 whitespace-nowrap" style={{ background: "#2653d4" }}>
+                                      {String(now.getHours()).padStart(2, "0")}<span style={{ animation: "colonBlink 1s step-start infinite" }}>:</span>{String(now.getMinutes()).padStart(2, "0")}
+                                    </span>
+                                    <svg width="8" height="10" viewBox="0 0 8 10"><polygon points="0,0 8,5 0,10" fill="#171c1f" /></svg>
                                   </div>
                                 )}
                               </div>
-                              <button
-                                className="pb-4 flex-1 min-w-0 flex items-start justify-between gap-2 text-left active:opacity-70 transition-opacity"
-                                onClick={() => detail && setScheduleModal({ title: block.title, subtitle: block.subtitle, category: block.category, detail })}
-                              >
-                                <div className="min-w-0">
-                                  <p className="text-base font-bold text-[var(--text)] leading-tight">{block.title}</p>
-                                  {block.subtitle && <p className="text-sm text-[var(--muted)] leading-snug mt-0.5">{block.subtitle}</p>}
-                                </div>
-                                {detail && (
-                                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--border)" strokeWidth="2" strokeLinecap="round" className="flex-shrink-0 mt-1">
-                                    <line x1="5" y1="1" x2="5" y2="9" /><line x1="1" y1="5" x2="9" y2="5" />
-                                  </svg>
-                                )}
-                              </button>
+                            )}
+                          </div>
+                          <button
+                            className="pb-4 flex-1 min-w-0 flex items-start justify-between gap-2 text-left active:opacity-70 transition-opacity"
+                            onClick={() => detail && setScheduleModal({ title: block.title, subtitle: block.subtitle, category: block.category, detail })}
+                          >
+                            <div className="min-w-0">
+                              <p className="text-base font-bold text-[var(--text)] leading-tight">{block.title}</p>
+                              {block.subtitle && <p className="text-sm text-[var(--muted)] leading-snug mt-0.5">{block.subtitle}</p>}
                             </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-
+                            {detail && (
+                              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="var(--border)" strokeWidth="2" strokeLinecap="round" className="flex-shrink-0 mt-1">
+                                <line x1="5" y1="1" x2="5" y2="9" /><line x1="1" y1="5" x2="9" y2="5" />
+                              </svg>
+                            )}
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
-                );})()}
-              </>
-            )}
-            {activeTab === "week" && (
-              <>
-                <>
-                {/* Horizontal grid */}
-                {(() => {
-                  const today = new Date();
-                  const dow = (today.getDay() + 6) % 7;
-                  const monday = new Date(today);
-                  monday.setDate(today.getDate() - dow);
-                  const days = Array.from({ length: 7 }, (_, i) => {
-                    const d = new Date(monday);
-                    d.setDate(monday.getDate() + i);
-                    const ymd = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-                    const isToday = ymd === todayYMD;
-                    const isGame = gameDays.includes(ymd);
-                    const isRecovery = !isGame && gameDays.includes(offsetYMD(ymd, -1));
-                    const isPast = ymd < todayYMD;
-                    const label = isGame ? "Game" : isRecovery ? "Rest" : "Train";
-                    const labelColor = isGame ? "#16a34a" : isRecovery ? "#7c3aed" : "#2653d4";
-                    const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-                    const dayName = dayNames[d.getDay() === 0 ? 6 : d.getDay() - 1];
-                    return { d, ymd, isToday, isGame, isRecovery, isPast, label, labelColor, dayName };
-                  });
-                  return (
+                );
+              })()}
+              {activeTab === "week" && (() => {
+                const today = new Date();
+                const dow = (today.getDay() + 6) % 7;
+                const monday = new Date(today);
+                monday.setDate(today.getDate() - dow);
+                const days = Array.from({ length: 7 }, (_, i) => {
+                  const d = new Date(monday);
+                  d.setDate(monday.getDate() + i);
+                  const ymd = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+                  const isToday = ymd === todayYMD;
+                  const isGame = gameDays.includes(ymd);
+                  const isRecovery = !isGame && gameDays.includes(offsetYMD(ymd, -1));
+                  const isPast = ymd < todayYMD;
+                  const label = isGame ? "Game" : isRecovery ? "Rest" : "Train";
+                  const labelColor = isGame ? "#16a34a" : isRecovery ? "#7c3aed" : "#2653d4";
+                  const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+                  const dayName = dayNames[d.getDay() === 0 ? 6 : d.getDay() - 1];
+                  return { d, ymd, isToday, isPast, label, labelColor, dayName };
+                });
+                return (
+                  <div className="mt-4">
                     <div className="rounded-xl overflow-hidden border border-[var(--border)]">
-                      {/* Row 1: day name + date */}
                       <div className="grid grid-cols-7">
                         {days.map(({ ymd, isToday, isPast, d, dayName }, idx) => (
-                          <div
-                            key={ymd}
-                            className="flex flex-col items-center justify-center py-2.5 gap-1"
-                            style={{
-                              borderLeft: idx > 0 ? "1px solid var(--border)" : "none",
-                              boxShadow: isToday ? "inset 0 0 0 2px #2653d4" : "none",
-                              opacity: isPast ? 0.25 : 1,
-                            }}
-                          >
+                          <div key={ymd} className="flex flex-col items-center justify-center py-2.5 gap-1" style={{ borderLeft: idx > 0 ? "1px solid var(--border)" : "none", boxShadow: isToday ? "inset 0 0 0 2px #2653d4" : "none", opacity: isPast ? 0.25 : 1 }}>
                             <span className="text-[10px] font-bold" style={{ color: isToday ? "#2653d4" : "var(--muted)" }}>{dayName}</span>
                             <span className="text-sm font-bold leading-none" style={{ color: isToday ? "#2653d4" : "var(--text)" }}>{d.getDate()}</span>
                           </div>
                         ))}
                       </div>
-                      {/* Row 2: type of day */}
                       <div className="grid grid-cols-7 border-t border-[var(--border)]">
                         {days.map(({ ymd, isToday, isPast, label, labelColor }, idx) => (
-                          <div
-                            key={ymd}
-                            className="flex items-center justify-center py-2"
-                            style={{
-                              borderLeft: idx > 0 ? "1px solid var(--border)" : "none",
-                              background: isToday ? "#f9f9f9" : "transparent",
-                              opacity: isPast ? 0.25 : 1,
-                            }}
-                          >
+                          <div key={ymd} className="flex items-center justify-center py-2" style={{ borderLeft: idx > 0 ? "1px solid var(--border)" : "none", background: isToday ? "#f9f9f9" : "transparent", opacity: isPast ? 0.25 : 1 }}>
                             <span className="text-base font-extrabold" style={{ color: labelColor, fontFamily: "var(--font-hanken)" }}>{label[0]}</span>
                           </div>
                         ))}
                       </div>
-                      {/* Key */}
                       <div className="flex items-center gap-3 px-3 py-2 border-t border-[var(--border)]">
-                        <span className="text-[10px] font-bold" style={{ color: "#16a34a" }}>G</span>
-                        <span className="text-[10px] text-[var(--muted)]">Game day</span>
-                        <span className="text-[10px] font-bold ml-2" style={{ color: "#7c3aed" }}>R</span>
-                        <span className="text-[10px] text-[var(--muted)]">Rest</span>
-                        <span className="text-[10px] font-bold ml-2" style={{ color: "#2653d4" }}>T</span>
-                        <span className="text-[10px] text-[var(--muted)]">Train</span>
+                        <span className="text-[10px] font-bold" style={{ color: "#16a34a" }}>G</span><span className="text-[10px] text-[var(--muted)]">Game day</span>
+                        <span className="text-[10px] font-bold ml-2" style={{ color: "#7c3aed" }}>R</span><span className="text-[10px] text-[var(--muted)]">Rest</span>
+                        <span className="text-[10px] font-bold ml-2" style={{ color: "#2653d4" }}>T</span><span className="text-[10px] text-[var(--muted)]">Train</span>
                       </div>
                     </div>
-                  );
-                })()}
-
-                {/* Weekly digest inline */}
-                {digest && (
-                  <div className="mt-3 pt-3 border-t border-[var(--border)]">
-                    <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-3">Recap</p>
-                    {digest.matches > 0 && (
-                      <div className="grid grid-cols-4 gap-2 mb-3">
-                        <div className="bg-[var(--bg)] rounded-xl py-2.5 flex flex-col items-center gap-0.5">
-                          <p className="text-xl font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>{digest.matches}</p>
-                          <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)]">Played</p>
-                        </div>
-                        <div className="bg-[var(--bg)] rounded-xl py-2.5 flex flex-col items-center gap-0.5">
-                          <p className="text-xl font-extrabold" style={{ fontFamily: "var(--font-hanken)", color: "#16a34a" }}>{digest.wins}</p>
-                          <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)]">Wins</p>
-                        </div>
-                        <div className="bg-[var(--bg)] rounded-xl py-2.5 flex flex-col items-center gap-0.5">
-                          <p className="text-xl font-extrabold" style={{ fontFamily: "var(--font-hanken)", color: "#dc2626" }}>{digest.losses}</p>
-                          <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)]">Losses</p>
-                        </div>
-                        <div className="bg-[var(--bg)] rounded-xl py-2.5 flex flex-col items-center gap-1">
-                          {digest.avgEnergy
-                            ? <EnergyIcon level={digest.avgEnergy} size={20} color="var(--text)" />
-                            : <span className="text-xl font-extrabold text-[var(--muted)]" style={{ fontFamily: "var(--font-hanken)" }}>—</span>
-                          }
-                          <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)]">Energy</p>
-                        </div>
-                      </div>
-                    )}
-                    {digest.topStrengths.length > 0 && (
-                      <div className="flex items-start gap-2 mb-2">
-                        <span className="text-xs font-bold mt-0.5" style={{ color: "#16a34a" }}>✓</span>
-                        <p className="text-xs text-[var(--text)] leading-snug"><span className="font-bold">Strengths:</span> {digest.topStrengths.join(", ")}</p>
-                      </div>
-                    )}
-                    {digest.topWorkOn.length > 0 && (
-                      <div className="flex items-start gap-2 mb-2">
-                        <span className="text-xs font-bold mt-0.5" style={{ color: "#2653d4" }}>↑</span>
-                        <p className="text-xs text-[var(--text)] leading-snug"><span className="font-bold">Focus on:</span> {digest.topWorkOn.join(", ")}</p>
-                      </div>
-                    )}
-                    {digest.avgHydrationL !== null && (
-                      <div className="flex items-center gap-2 mt-1">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M12 2C12 2 5 10 5 15a7 7 0 0 0 14 0c0-5-7-13-7-13z" />
-                        </svg>
-                        <p className="text-xs text-[var(--muted)]">Avg hydration: <span className="font-bold text-[var(--text)]">{digest.avgHydrationL}L/day</span></p>
+                    {digest && (
+                      <div className="mt-3 pt-3 border-t border-[var(--border)]">
+                        <p className="text-xs font-bold tracking-widest uppercase text-[var(--muted)] mb-3">Recap</p>
+                        {digest.matches > 0 && (
+                          <div className="grid grid-cols-4 gap-2 mb-3">
+                            <div className="bg-[var(--bg)] rounded-xl py-2.5 flex flex-col items-center gap-0.5"><p className="text-xl font-extrabold text-[var(--text)]" style={{ fontFamily: "var(--font-hanken)" }}>{digest.matches}</p><p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)]">Played</p></div>
+                            <div className="bg-[var(--bg)] rounded-xl py-2.5 flex flex-col items-center gap-0.5"><p className="text-xl font-extrabold" style={{ fontFamily: "var(--font-hanken)", color: "#16a34a" }}>{digest.wins}</p><p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)]">Wins</p></div>
+                            <div className="bg-[var(--bg)] rounded-xl py-2.5 flex flex-col items-center gap-0.5"><p className="text-xl font-extrabold" style={{ fontFamily: "var(--font-hanken)", color: "#dc2626" }}>{digest.losses}</p><p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)]">Losses</p></div>
+                            <div className="bg-[var(--bg)] rounded-xl py-2.5 flex flex-col items-center gap-1">{digest.avgEnergy ? <EnergyIcon level={digest.avgEnergy} size={20} color="var(--text)" /> : <span className="text-xl font-extrabold text-[var(--muted)]" style={{ fontFamily: "var(--font-hanken)" }}>—</span>}<p className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted)]">Energy</p></div>
+                          </div>
+                        )}
+                        {digest.topStrengths.length > 0 && <div className="flex items-start gap-2 mb-2"><span className="text-xs font-bold mt-0.5" style={{ color: "#16a34a" }}>✓</span><p className="text-xs text-[var(--text)] leading-snug"><span className="font-bold">Strengths:</span> {digest.topStrengths.join(", ")}</p></div>}
+                        {digest.topWorkOn.length > 0 && <div className="flex items-start gap-2 mb-2"><span className="text-xs font-bold mt-0.5" style={{ color: "#2653d4" }}>↑</span><p className="text-xs text-[var(--text)] leading-snug"><span className="font-bold">Focus on:</span> {digest.topWorkOn.join(", ")}</p></div>}
+                        {digest.avgHydrationL !== null && <div className="flex items-center gap-2 mt-1"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C12 2 5 10 5 15a7 7 0 0 0 14 0c0-5-7-13-7-13z"/></svg><p className="text-xs text-[var(--muted)]">Avg hydration: <span className="font-bold text-[var(--text)]">{digest.avgHydrationL}L/day</span></p></div>}
                       </div>
                     )}
                   </div>
-                )}
-                </>
-              </>
-            )}
+                );
+              })()}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Improve Score modal */}
       {improveScoreOpen && (
