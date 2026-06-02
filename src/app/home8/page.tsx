@@ -160,7 +160,7 @@ export default function Home8() {
         <div
           style={{
             display: "flex", width: "300%", marginLeft: "-100%",
-            height: "calc(100dvh - 4rem)", touchAction: "none",
+            height: "calc(100dvh - 4rem)", touchAction: doIdx >= 1 ? "pan-y" : "none",
             transform: cardSnap === 'right' ? "translateX(calc(33.333% - 50px))" : cardSnap === 'left' ? "translateX(calc(-33.333% + 50px))" : `translateX(${liveX}px)`,
             transition: liveX !== 0 ? "none" : "transform 0s cubic-bezier(0.4,0,0.2,1)",
           }}
@@ -187,7 +187,7 @@ export default function Home8() {
               } else if (cardSnap === 'left' && dx > 60) setCardSnap('none');
               else if (cardSnap === 'right' && dx < -60) setCardSnap('none');
             } else if (swipeDirRef.current === 'v' && cardSnap === 'none') {
-              if (dy < -40) goNext();
+              if (dy < -40 && doIdx < 1) goNext();
               else if (dy > 40) goPrev();
             }
             swipeDirRef.current = null;
@@ -220,7 +220,7 @@ export default function Home8() {
             <div style={{
               display: "flex", flexDirection: "column", gap: 10,
               transform: doIdx >= 1
-                ? `translateY(calc(-3 * (100vw - 30px)))`
+                ? `translateY(calc(-3 * (100vw - 30px) + 44px))`
                 : `translateY(calc(50dvh - 4rem - (100vw - 40px) / 2 - ${doIdx + 2} * (100vw - 30px)))`,
               transition: "transform 0s cubic-bezier(0.4,0,0.2,1)",
             }}>
@@ -308,7 +308,7 @@ export default function Home8() {
                 const matchNextYMD = matchYMD ? (() => { const d = new Date(matchYMD); d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10); })() : null;
                 const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
                 return (
-                  <div key="sched" style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "white", display: "flex", flexDirection: "column", opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === 1 ? 2 : 1 }}>
+                  <div key="sched" style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "white", display: "flex", flexDirection: "column", opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === 1 ? 2 : 1, maxHeight: "calc(100dvh - 4rem - 44px)", overflowY: "auto" }}>
                     {/* Tab header */}
                     <div style={{ padding: "20px 20px 0", display: "flex", flexDirection: "column", alignItems: "center" }}>
                       <div style={{ width: "100%", overflow: "hidden", display: "flex", justifyContent: "center" }}>
