@@ -162,8 +162,8 @@ export default function Home8() {
           style={{
             display: "flex", width: "300%", marginLeft: "-100%",
             height: "calc(100dvh - 4rem)", touchAction: doIdx >= 1 ? "pan-y" : "none",
-            transform: cardSnap === 'right' ? "translateX(calc(33.333% - 50px))" : cardSnap === 'left' ? "translateX(calc(-33.333% + 50px))" : `translateX(${liveX}px)`,
-            transition: liveX !== 0 ? "none" : "transform 0s cubic-bezier(0.4,0,0.2,1)",
+            transform: cardSnap === 'right' ? `translateX(calc(33.333% - 50px + ${liveX}px))` : cardSnap === 'left' ? `translateX(calc(-33.333% + 50px + ${liveX}px))` : `translateX(${liveX}px)`,
+            transition: liveX !== 0 ? "none" : "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
           }}
           onTouchStart={e => {
             touchStartYRef.current = e.touches[0].clientY;
@@ -175,7 +175,7 @@ export default function Home8() {
             const dy = e.touches[0].clientY - touchStartYRef.current;
             if (!swipeDirRef.current && (Math.abs(dx) > 8 || Math.abs(dy) > 8))
               swipeDirRef.current = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
-            if (swipeDirRef.current === 'h' && cardSnap === 'none') setLiveX(dx);
+            if (swipeDirRef.current === 'h') setLiveX(dx);
             if (swipeDirRef.current === 'v' && cardSnap === 'none' && doIdx < 1) setLiveY(dy);
           }}
           onTouchEnd={e => {
