@@ -160,7 +160,7 @@ export default function Home8() {
             display: "flex", width: "300%", marginLeft: "-100%",
             height: "calc(100dvh - 4rem)", touchAction: "none",
             transform: cardSnap === 'right' ? "translateX(33.333%)" : cardSnap === 'left' ? "translateX(-33.333%)" : `translateX(${liveX}px)`,
-            transition: liveX !== 0 ? "none" : "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
+            transition: liveX !== 0 ? "none" : "transform 0s cubic-bezier(0.4,0,0.2,1)",
           }}
           onTouchStart={e => {
             touchStartYRef.current = e.touches[0].clientY;
@@ -195,9 +195,9 @@ export default function Home8() {
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingRight: 20 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, transform: "translateY(calc(50dvh - 4rem - 3 * (100vw - 40px) / 2 - 10px))" }}>
               {/* Placeholder above */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0.35 }} />
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
               {/* Main card */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "0 24px", marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0.35, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "0 24px", marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0s cubic-bezier(0.4,0,0.2,1), opacity 0s cubic-bezier(0.4,0,0.2,1)" }}>
                 <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Log Data</p>
                 {([
                   { label: "Hydration", color: "#0891b2" },
@@ -209,7 +209,7 @@ export default function Home8() {
                 ))}
               </div>
               {/* Placeholder below */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0.35 }} />
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
             </div>
           </div>
 
@@ -218,7 +218,7 @@ export default function Home8() {
             <div style={{
               display: "flex", flexDirection: "column", gap: 10,
               transform: `translateY(calc(50dvh - 4rem - (100vw - 40px) / 2 - ${doIdx + 2} * (100vw - 30px)))`,
-              transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
+              transition: "transform 0s cubic-bezier(0.4,0,0.2,1)",
             }}>
               {/* Logo above top card */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none", opacity: 0.12 }}>
@@ -231,7 +231,7 @@ export default function Home8() {
               </div>
 
               {/* Card 0: next match */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", gap: 8, opacity: cardSnap === 'none' && doIdx === -1 ? 1 : 0.35, transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", gap: 8, opacity: cardSnap === 'none' && doIdx === -1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)" }}>
                 <p className="text-[13px] font-bold tracking-widest uppercase text-center" style={{ color: "#9aa5b0" }}>Next Match</p>
                 {match ? (() => {
                   const [y, mo, d] = match.date.split('-').map(Number);
@@ -262,7 +262,7 @@ export default function Home8() {
                 const nextSlide = schedule[currentIdx + 1];
                 const minsUntilNext = nextSlide ? toMins(nextSlide.time) - curMins : 0;
                 const fmtMins = (m: number) => { if (m <= 0) return "a moment"; const h = Math.floor(m / 60), rem = m % 60; if (h > 0 && rem > 0) return `${h}h ${rem}m`; return h > 0 ? `${h}h` : `${rem}m`; };
-                const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: cardSnap === 'none' && doIdx === 0 ? 1 : 0.35, transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1)" };
+                const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: cardSnap === 'none' && doIdx === 0 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)" };
                 if (isDone) return (
                   <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
                     <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: `${s.color}18` }}>
@@ -284,7 +284,7 @@ export default function Home8() {
               })()}
 
               {/* Card 2: today's schedule */}
-              <div key="sched" style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", display: "flex", flexDirection: "column", padding: "20px 0 0", opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0.35, transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+              <div key="sched" style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", display: "flex", flexDirection: "column", padding: "20px 0 0", opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)" }}>
                 <p className="text-[13px] font-bold tracking-widest uppercase text-center mb-3" style={{ color: "#9aa5b0", flexShrink: 0 }}>Today&apos;s Schedule</p>
                 <div style={{ flex: 1, overflowY: "auto", padding: "0 20px 20px" }}>
                   {schedule.map((s, i) => {
@@ -310,7 +310,7 @@ export default function Home8() {
 
           {/* Readiness panel */}
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 20, paddingTop: "calc(50dvh - 4rem - (100vw - 40px) / 2)" }}>
-            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: "0 24px", marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0.35, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: "0 24px", marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transition: "margin 0s cubic-bezier(0.4,0,0.2,1), opacity 0s cubic-bezier(0.4,0,0.2,1)" }}>
               <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Match Readiness</p>
               <svg width="120" height="120" viewBox="0 0 120 120">
                 <circle cx="60" cy="60" r="50" fill="none" stroke="#f0f0f0" strokeWidth="8" />
