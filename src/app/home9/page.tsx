@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import LogSheet from "@/components/log-sheet";
 import { computeScores, loadScoringData } from "@/lib/scoring";
 
@@ -142,7 +143,8 @@ const S: React.CSSProperties = {
   lineHeight: 1.6,
 };
 
-export default function Home4() {
+export default function Home9() {
+  const router = useRouter();
   const [doModalOpen, setDoModalOpen] = useState(false);
   const [logSheetOpen, setLogSheetOpen] = useState(false);
   const [schedOpen, setSchedOpen] = useState(false);
@@ -186,8 +188,8 @@ export default function Home4() {
 
 
   const { schedule: _s } = getScheduleData(match?.date ?? null, match?.time ?? null);
-  const isSleepytime = doSlideIdx === 0 || doSlideIdx >= _s.length + 1;
-  const _safeDoIdx = Math.min(doSlideIdx, _s.length + 1);
+  const isSleepytime = doSlideIdx === 0 || doSlideIdx >= _s.length + 2;
+  const _safeDoIdx = Math.min(doSlideIdx, _s.length + 2);
   const accentColor = (_safeDoIdx >= 1 && _safeDoIdx <= _s.length) ? _s[_safeDoIdx - 1].color : "#7c3aed";
 
   return (
@@ -198,7 +200,7 @@ export default function Home4() {
       {(() => {
         const { schedule, currentIdx, dayType } = getScheduleData(match?.date ?? null, match?.time ?? null);
         const meta = DAY_TYPE_META[dayType];
-        const safeDoIdx = Math.min(doSlideIdx, schedule.length + 1);
+        const safeDoIdx = Math.min(doSlideIdx, schedule.length + 2);
         const doItem = schedule[safeDoIdx - 1];
         const curMins = now.getHours() * 60 + now.getMinutes();
         return (
@@ -212,7 +214,7 @@ export default function Home4() {
               onTouchEnd={e => {
                 const dy = e.changedTouches[0].clientY - doTouchStartX.current;
                 if (Math.abs(dy) > 40)
-                  setDoSlideIdx(prev => dy < 0 ? Math.min(prev + 1, schedule.length + 1) : Math.max(prev - 1, 0));
+                  setDoSlideIdx(prev => dy < 0 ? Math.min(prev + 1, schedule.length + 2) : Math.max(prev - 1, 0));
               }}
             >
               <div style={{
@@ -222,10 +224,16 @@ export default function Home4() {
                 transform: `translateY(calc((100dvh - 4rem - 56px - (100vw - 40px)) / 2 - 24px - ${safeDoIdx + 1} * (100vw - 24px)))`,
                 transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
               }}>
-                {([null, null, ...schedule, null, null] as (typeof schedule[0] | null)[]).map((s, i) => (
+                {([null, null, ...schedule.slice(0, currentIdx + 1), 'promo' as const, ...schedule.slice(currentIdx + 1), null, null] as (typeof schedule[0] | null | 'promo')[]).map((s, i) => (
                   <div key={i} style={{ height: "calc(100vw - 40px)", width: "100%", flexShrink: 0, opacity: i === safeDoIdx + 1 ? 1 : 0.35, filter: i === safeDoIdx + 1 ? "none" : "grayscale(1)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-                    {s === null ? (
-                      i === schedule.length + 3 ? (
+                    {s === 'promo' ? (
+                      <div className="bg-white rounded-[24px] flex flex-col items-center justify-center w-full h-full gap-2 px-6" style={{ border: `2px solid ${schedule[currentIdx]?.color ?? "#16a34a"}` }}>
+                        <p className="text-[12px] font-bold tracking-widest uppercase leading-none" style={{ color: "#5a7055" }}>Check out</p>
+                        <p className="text-[24px] font-bold text-[#1a1c1c] leading-tight text-center">Today&apos;s Schedule</p>
+                        <button onClick={() => { setSchedOpen(true); setDoSlideIdx(0); }} className="mt-1 text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: `${schedule[currentIdx]?.color ?? "#16a34a"}18`, color: schedule[currentIdx]?.color ?? "#16a34a" }}>View Schedule</button>
+                      </div>
+                    ) : s === null ? (
+                      i === schedule.length + 4 ? (
                         /* Last phantom — brand watermark */
                         <div className="rounded-[24px] w-full h-full relative overflow-hidden" style={{ background: "#e2e5e9", border: "2px solid #1a1c1c" }}>
                           <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.08 }}>
@@ -250,7 +258,7 @@ export default function Home4() {
                         </div>
                       )
                     ) : (() => {
-                      const schedIdx = i - 2;
+                      const schedIdx = i <= currentIdx + 2 ? i - 2 : i - 3;
                       const isDone = completed.has(schedIdx);
                       const nextSlide = schedule[schedIdx + 1];
                       const minsUntilNext = nextSlide ? toMins(nextSlide.time) - curMins : 0;
