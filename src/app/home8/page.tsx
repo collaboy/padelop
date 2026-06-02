@@ -192,23 +192,25 @@ export default function Home8() {
           }}
         >
           {/* Log panel */}
-          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", flexDirection: "column", alignItems: "stretch", justifyContent: "flex-start", paddingRight: 20, paddingTop: "calc(50dvh - 4rem - 3 * (100vw - 40px) / 2 - 10px)", gap: 10 }}>
-            {/* Placeholder above */}
-            <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0.35 }} />
-            {/* Main card */}
-            <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "0 24px", marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0.35, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-              <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Log Data</p>
-              {([
-                { label: "Hydration", color: "#0891b2" },
-                { label: "Check-in", color: "#2653d4" },
-                { label: "Nutrition", color: "#16a34a" },
-                { label: "Recovery", color: "#64748b" },
-              ] as const).map(item => (
-                <button key={item.label} onClick={() => { setCardSnap('none'); setLogSheetOpen(true); }} className="w-full py-3 rounded-2xl text-[15px] font-semibold" style={{ background: `${item.color}18`, color: item.color }}>{item.label}</button>
-              ))}
+          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingRight: 20 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, transform: "translateY(calc(50dvh - 4rem - 3 * (100vw - 40px) / 2 - 10px))" }}>
+              {/* Placeholder above */}
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0.35 }} />
+              {/* Main card */}
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "0 24px", marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0.35, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+                <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Log Data</p>
+                {([
+                  { label: "Hydration", color: "#0891b2" },
+                  { label: "Check-in", color: "#2653d4" },
+                  { label: "Nutrition", color: "#16a34a" },
+                  { label: "Recovery", color: "#64748b" },
+                ] as const).map(item => (
+                  <button key={item.label} onClick={() => { setCardSnap('none'); setLogSheetOpen(true); }} className="w-full py-3 rounded-2xl text-[15px] font-semibold" style={{ background: `${item.color}18`, color: item.color }}>{item.label}</button>
+                ))}
+              </div>
+              {/* Placeholder below */}
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0.35 }} />
             </div>
-            {/* Placeholder below */}
-            <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0.35 }} />
           </div>
 
           {/* Carousel center — all schedule cards, doIdx in transform */}
