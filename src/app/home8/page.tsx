@@ -286,7 +286,7 @@ export default function Home8() {
                 return (
                   <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
-                      <p className="text-[14px] font-bold tracking-widest uppercase leading-none mb-1" style={{ color: "#fff" }}>Do this now</p>
+                      <p className="text-[14px] font-bold tracking-widest uppercase leading-none mb-1" style={{ color: "#fff" }}>NOW</p>
                       <p className="text-[27px] font-bold leading-tight text-center" style={{ color: "#fff" }}>{s.title}</p>
                       {s.subtitle && <p className="text-[17px] leading-none text-center mt-0.5" style={{ color: "rgba(255,255,255,0.8)" }}>{s.subtitle}</p>}
                       <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 text-[15px] font-semibold px-5 py-2 rounded-full" style={{ background: "#fff", color: isReady ? s.color : "#b0b5ba" }}>Complete</button>
