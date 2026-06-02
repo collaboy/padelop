@@ -147,7 +147,7 @@ export default function Home8() {
   const doItem = schedule[currentIdx];
   const curMins = now.getHours() * 60 + now.getMinutes();
 
-  const goNext = () => setDoIdx(i => Math.min(i + 1, 1));
+  const goNext = () => setDoIdx(i => Math.min(i + 1, 2));
   const goPrev = () => setDoIdx(i => Math.max(i - 1, -1));
 
   return (
@@ -281,8 +281,15 @@ export default function Home8() {
                 );
               })()}
 
-              {/* Card 2: today's schedule */}
-              <div key="sched" style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", padding: "20px 0 0", opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0.35, transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+              {/* Card 2: check out today's schedule */}
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", gap: 8, opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0.35, transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+                <p className="text-[12px] font-bold tracking-widest uppercase leading-none" style={{ color: "#5a7055" }}>Check out</p>
+                <p className="text-[24px] font-bold text-[#1a1c1c] leading-tight text-center">Today&apos;s Schedule</p>
+                <button onClick={() => setDoIdx(2)} className="mt-1 text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: "#16a34a18", color: "#16a34a" }}>View Schedule</button>
+              </div>
+
+              {/* Card 3: today's schedule */}
+              <div key="sched" style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", padding: "20px 0 0", opacity: cardSnap === 'none' && doIdx === 2 ? 1 : 0.35, transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
                 <p className="text-[13px] font-bold tracking-widest uppercase text-center mb-3" style={{ color: "#9aa5b0", flexShrink: 0 }}>Today&apos;s Schedule</p>
                 <div style={{ flex: 1, overflowY: "auto", padding: "0 20px 20px" }}>
                   {schedule.map((s, i) => {
