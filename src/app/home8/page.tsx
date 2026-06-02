@@ -137,7 +137,7 @@ export default function Home8() {
         }
       }
     } catch {}
-    const id = setInterval(() => setNow(new Date()), 60_000);
+    const id = setInterval(() => setNow(new Date()), 1_000);
     return () => { clearInterval(id); window.removeEventListener("storage", loadReadiness); };
   }, []);
 
@@ -260,25 +260,25 @@ export default function Home8() {
                 const isDone = completed.has(currentIdx);
                 const isReady = curMins >= toMins(s.time);
                 const nextSlide = schedule[currentIdx + 1];
-                const minsUntilNext = nextSlide ? toMins(nextSlide.time) - curMins : 0;
-                const fmtMins = (m: number) => { if (m <= 0) return "a moment"; const h = Math.floor(m / 60), rem = m % 60; if (h > 0 && rem > 0) return `${h}h ${rem}m`; return h > 0 ? `${h}h` : `${rem}m`; };
+                const secsUntilNext = nextSlide ? toMins(nextSlide.time) * 60 - (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) : 0;
+                const fmtTime = (s: number) => { if (s <= 0) return "a moment"; const h = Math.floor(s / 3600), rem = s % 3600, m = Math.floor(rem / 60), sec = rem % 60; if (h > 0) return `${h}h ${m}m ${sec}s`; return m > 0 ? `${m}m ${sec}s` : `${sec}s`; };
                 const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: cardSnap === 'none' && doIdx === 0 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)" };
                 if (isDone) return (
                   <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
                     <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: `${s.color}18` }}>
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
-                    <p className="text-[52px] font-bold text-[#1a1c1c] leading-none text-center">Good Job!</p>
-                    <p className="text-[30px] font-semibold text-[#4a5050] mt-1 leading-none text-center">{s.title} complete</p>
-                    {nextSlide && <div className="mt-4 text-center"><p className="text-[26px] text-[#8a9096] leading-none">See you in <span className="font-semibold text-[#4a5050]">{fmtMins(minsUntilNext)}</span> for:</p><p className="text-[28px] font-bold text-[#1a1c1c] mt-1 leading-none">{nextSlide.title}</p></div>}
+                    <p className="text-[39px] font-bold text-[#1a1c1c] leading-none text-center">Good Job!</p>
+                    <p className="text-[22px] font-semibold text-[#4a5050] mt-1 leading-none text-center">{s.title} complete</p>
+                    {nextSlide && <div className="mt-4 text-center"><p className="text-[20px] text-[#8a9096] leading-none">See you in <span className="font-semibold text-[#4a5050]">{fmtTime(secsUntilNext)}</span> for:</p><p className="text-[21px] font-bold text-[#1a1c1c] mt-1 leading-none">{nextSlide.title}</p></div>}
                   </div>
                 );
                 return (
                   <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
-                    <p className="text-[24px] font-bold tracking-widest uppercase leading-none mb-1" style={{ color: "#5a7055" }}>Do this now</p>
-                    <p className="text-[48px] font-bold text-[#1a1c1c] leading-tight text-center">{s.title}</p>
-                    {s.subtitle && <p className="text-[30px] text-[#6b7480] leading-none text-center mt-0.5">{s.subtitle}</p>}
-                    <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 text-[26px] font-semibold px-5 py-2 rounded-full" style={{ background: isReady ? `${s.color}18` : "#f0f0f0", color: isReady ? s.color : "#b0b5ba" }}>Complete</button>
+                    <p className="text-[18px] font-bold tracking-widest uppercase leading-none mb-1" style={{ color: "#5a7055" }}>Do this now</p>
+                    <p className="text-[36px] font-bold text-[#1a1c1c] leading-tight text-center">{s.title}</p>
+                    {s.subtitle && <p className="text-[22px] text-[#6b7480] leading-none text-center mt-0.5">{s.subtitle}</p>}
+                    <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 text-[20px] font-semibold px-5 py-2 rounded-full" style={{ background: isReady ? `${s.color}18` : "#f0f0f0", color: isReady ? s.color : "#b0b5ba" }}>Complete</button>
                   </div>
                 );
               })()}
