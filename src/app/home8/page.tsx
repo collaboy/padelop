@@ -199,7 +199,7 @@ export default function Home8() {
               {/* Placeholder above */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
               {/* Main card */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "0 24px", marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0s cubic-bezier(0.4,0,0.2,1), opacity 0s cubic-bezier(0.4,0,0.2,1)" }}>
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "0 24px", marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0.2, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
                 <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Log Data</p>
                 {([
                   { label: "Hydration", color: "#0891b2" },
@@ -218,8 +218,8 @@ export default function Home8() {
           {/* Carousel center — all schedule cards, doIdx in transform */}
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingLeft: 10, paddingRight: 10 }}>
             <div style={{
-              display: "flex", flexDirection: "column", gap: 10,
-              transform: `translateY(calc(50dvh - 4rem - (100vw - 40px) / 2 - ${doIdx + 2} * (100vw - 30px)))`,
+              display: "flex", flexDirection: "column", gap: 80,
+              transform: `translateY(calc(50dvh - 4rem - (100vw - 40px) / 2 - ${doIdx + 2} * (100vw + 40px)))`,
               transition: "transform 0s cubic-bezier(0.4,0,0.2,1)",
             }}>
               {/* Logo above top card */}
@@ -265,22 +265,27 @@ export default function Home8() {
                 const secsUntilNext = nextSlide ? toMins(nextSlide.time) * 60 - (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) : 0;
                 const fmtTime = (s: number) => { if (s <= 0) return "a moment"; const h = Math.floor(s / 3600), rem = s % 3600, m = Math.floor(rem / 60), sec = rem % 60; if (h > 0) return `${h}h ${m}m ${sec}s`; return m > 0 ? `${m}m ${sec}s` : `${sec}s`; };
                 const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: 1, zIndex: doIdx === 0 ? 2 : 0 };
+                const contentOpacity = doIdx === 0 ? 1 : 0.2;
                 if (isDone) return (
                   <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: `${s.color}18` }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: "rgba(255,255,255,0.25)" }}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                      <p className="text-[39px] font-bold leading-none text-center" style={{ color: "#fff" }}>Good Job!</p>
+                      <p className="text-[22px] font-semibold mt-1 leading-none text-center" style={{ color: "#fff" }}>{s.title} complete</p>
+                      {nextSlide && <div className="mt-4 text-center"><p className="text-[20px] leading-none" style={{ color: "rgba(255,255,255,0.75)" }}>See you in <span className="font-semibold" style={{ color: "#fff" }}>{fmtTime(secsUntilNext)}</span> for:</p><p className="text-[21px] font-bold mt-1 leading-none" style={{ color: "#fff" }}>{nextSlide.title}</p></div>}
                     </div>
-                    <p className="text-[39px] font-bold leading-none text-center" style={{ color: "#fff" }}>Good Job!</p>
-                    <p className="text-[22px] font-semibold mt-1 leading-none text-center" style={{ color: "#fff" }}>{s.title} complete</p>
-                    {nextSlide && <div className="mt-4 text-center"><p className="text-[20px] leading-none" style={{ color: "rgba(255,255,255,0.75)" }}>See you in <span className="font-semibold" style={{ color: "#fff" }}>{fmtTime(secsUntilNext)}</span> for:</p><p className="text-[21px] font-bold mt-1 leading-none" style={{ color: "#fff" }}>{nextSlide.title}</p></div>}
                   </div>
                 );
                 return (
                   <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
-                    <p className="text-[18px] font-bold tracking-widest uppercase leading-none mb-1" style={{ color: "#fff" }}>Do this now</p>
-                    <p className="text-[36px] font-bold leading-tight text-center" style={{ color: "#fff" }}>{s.title}</p>
-                    {s.subtitle && <p className="text-[22px] leading-none text-center mt-0.5" style={{ color: "rgba(255,255,255,0.8)" }}>{s.subtitle}</p>}
-                    <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 text-[20px] font-semibold px-5 py-2 rounded-full" style={{ background: "#fff", color: isReady ? s.color : "#b0b5ba" }}>Complete</button>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
+                      <p className="text-[18px] font-bold tracking-widest uppercase leading-none mb-1" style={{ color: "#fff" }}>Do this now</p>
+                      <p className="text-[36px] font-bold leading-tight text-center" style={{ color: "#fff" }}>{s.title}</p>
+                      {s.subtitle && <p className="text-[22px] leading-none text-center mt-0.5" style={{ color: "rgba(255,255,255,0.8)" }}>{s.subtitle}</p>}
+                      <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 text-[20px] font-semibold px-5 py-2 rounded-full" style={{ background: "#fff", color: isReady ? s.color : "#b0b5ba" }}>Complete</button>
+                    </div>
                   </div>
                 );
               })()}
@@ -421,7 +426,7 @@ export default function Home8() {
 
           {/* Readiness panel */}
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 20, paddingTop: "calc(50dvh - 4rem - (100vw - 40px) / 2)" }}>
-            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: "0 24px", marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transition: "margin 0s cubic-bezier(0.4,0,0.2,1), opacity 0s cubic-bezier(0.4,0,0.2,1)" }}>
+            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: "0 24px", marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0.2, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
               <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Match Readiness</p>
               <svg width="120" height="120" viewBox="0 0 120 120">
                 <circle cx="60" cy="60" r="50" fill="none" stroke="#f0f0f0" strokeWidth="8" />
