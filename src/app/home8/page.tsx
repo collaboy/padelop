@@ -274,19 +274,19 @@ export default function Home8() {
                       <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: "rgba(255,255,255,0.25)" }}>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                       </div>
-                      <p className="text-[39px] font-bold leading-none text-center" style={{ color: "#fff" }}>Good Job!</p>
-                      <p className="text-[22px] font-semibold mt-1 leading-none text-center" style={{ color: "#fff" }}>{s.title} complete</p>
-                      {nextSlide && <div className="mt-4 text-center"><p className="text-[20px] leading-none" style={{ color: "rgba(255,255,255,0.75)" }}>See you in <span className="font-semibold" style={{ color: "#fff" }}>{fmtTime(secsUntilNext)}</span> for:</p><p className="text-[21px] font-bold mt-1 leading-none" style={{ color: "#fff" }}>{nextSlide.title}</p></div>}
+                      <p className="text-[29px] font-bold leading-none text-center" style={{ color: "#fff" }}>Good Job!</p>
+                      <p className="text-[17px] font-semibold mt-1 leading-none text-center" style={{ color: "#fff" }}>{s.title} complete</p>
+                      {nextSlide && <div className="mt-4 text-center"><p className="text-[15px] leading-none" style={{ color: "rgba(255,255,255,0.75)" }}>See you in <span className="font-semibold" style={{ color: "#fff" }}>{fmtTime(secsUntilNext)}</span> for:</p><p className="text-[16px] font-bold mt-1 leading-none" style={{ color: "#fff" }}>{nextSlide.title}</p></div>}
                     </div>
                   </div>
                 );
                 return (
                   <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
-                      <p className="text-[18px] font-bold tracking-widest uppercase leading-none mb-1" style={{ color: "#fff" }}>Do this now</p>
-                      <p className="text-[36px] font-bold leading-tight text-center" style={{ color: "#fff" }}>{s.title}</p>
-                      {s.subtitle && <p className="text-[22px] leading-none text-center mt-0.5" style={{ color: "rgba(255,255,255,0.8)" }}>{s.subtitle}</p>}
-                      <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 text-[20px] font-semibold px-5 py-2 rounded-full" style={{ background: "#fff", color: isReady ? s.color : "#b0b5ba" }}>Complete</button>
+                      <p className="text-[14px] font-bold tracking-widest uppercase leading-none mb-1" style={{ color: "#fff" }}>Do this now</p>
+                      <p className="text-[27px] font-bold leading-tight text-center" style={{ color: "#fff" }}>{s.title}</p>
+                      {s.subtitle && <p className="text-[17px] leading-none text-center mt-0.5" style={{ color: "rgba(255,255,255,0.8)" }}>{s.subtitle}</p>}
+                      <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 text-[15px] font-semibold px-5 py-2 rounded-full" style={{ background: "#fff", color: isReady ? s.color : "#b0b5ba" }}>Complete</button>
                     </div>
                   </div>
                 );
