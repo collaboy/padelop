@@ -275,12 +275,7 @@ export default function Home8() {
                 );
                 return (
                   <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: `${s.color}18` }}>
-                        <div className="w-2.5 h-2.5 rounded-full breathe-strong" style={{ background: s.color, ["--glow" as string]: s.color } as React.CSSProperties} />
-                      </div>
-                      <p className="text-[12px] font-bold tracking-widest uppercase leading-none" style={{ color: "#5a7055" }}>Do this now</p>
-                    </div>
+                    <p className="text-[12px] font-bold tracking-widest uppercase leading-none mb-1" style={{ color: "#5a7055" }}>Do this now</p>
                     <p className="text-[24px] font-bold text-[#1a1c1c] leading-tight text-center">{s.title}</p>
                     {s.subtitle && <p className="text-[15px] text-[#6b7480] leading-none text-center mt-0.5">{s.subtitle}</p>}
                     <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: isReady ? `${s.color}18` : "#f0f0f0", color: isReady ? s.color : "#b0b5ba" }}>Complete</button>
