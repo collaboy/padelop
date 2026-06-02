@@ -14,12 +14,13 @@ const NAV_ITEMS = [
   { href: "/insights4", label: "Insights",  icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> },
 ];
 
+type Sub = "checkin" | "hydration" | "nutrition" | "matchlist" | "matchreview" | null;
+
 interface Props {
   open: boolean;
   onClose: () => void;
+  defaultSub?: Sub;
 }
-
-type Sub = "checkin" | "hydration" | "nutrition" | "matchlist" | "matchreview" | null;
 
 const PURPLE = "#7c3aed";
 const BLUE = "#2653d4";
@@ -45,10 +46,15 @@ function Face({ v, sel, color }: { v: string; sel: boolean; color: string }) {
   );
 }
 
-export default function LogSheet({ open, onClose }: Props) {
+export default function LogSheet({ open, onClose, defaultSub }: Props) {
   const pathname = usePathname();
   const uploadRef = useRef<HTMLInputElement>(null);
   const [sub, setSub] = useState<Sub>(null);
+
+  React.useEffect(() => {
+    if (open) setSub(defaultSub ?? null);
+    else setSub(null);
+  }, [open]);
   const [logMethod, setLogMethod] = useState<"wizard" | null>(null);
 
   const [checkIn, setCheckIn] = useState({ sleep: 3, energy: 3, soreness: 3, hydration: 3 });

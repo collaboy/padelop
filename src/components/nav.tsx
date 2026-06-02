@@ -138,6 +138,14 @@ export default function Nav() {
       icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 10h8M8 14h5"/></svg>,
     },
     {
+      label: "Today — Alt View v2",
+      action: () => {
+        router.push("/home-v2");
+        setMenuOpen(false);
+      },
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 10h8M8 14h5"/></svg>,
+    },
+    {
       label: "Plan this week",
       action: () => {
         window.dispatchEvent(new CustomEvent("open-week-plan"));

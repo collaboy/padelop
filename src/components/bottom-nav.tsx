@@ -59,6 +59,16 @@ const items = [
     ),
   },
   {
+    href: "/home-v2",
+    label: "Home v2",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
+        <polyline points="9 21 9 12 15 12 15 21" />
+      </svg>
+    ),
+  },
+  {
     href: "/profile",
     label: "Profile",
     icon: (
@@ -72,7 +82,7 @@ const items = [
 
 export default function BottomNav() {
   const pathname = usePathname();
-  if (pathname === "/home4" || pathname === "/home8") return null;
+  if (pathname === "/home4" || pathname === "/home8" || pathname === "/home-v2") return null;
   return (
     <nav className="vt-footer md:hidden fixed bottom-0 inset-x-0 z-50 bg-[var(--surface)]/95 backdrop-blur-md border-t border-[var(--border)] shadow-2xl rounded-t-xl">
       <div className="flex justify-around items-center py-3 px-2">
@@ -82,7 +92,7 @@ export default function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-col items-center transition-all px-2 py-1"
+              className="flex flex-col items-center transition-all px-1 py-1"
               style={{ color: active ? "var(--green)" : "var(--muted)" }}
             >
               <span className="text-[12px] font-semibold">{item.label}</span>

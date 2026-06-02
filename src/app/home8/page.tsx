@@ -109,6 +109,7 @@ export default function Home8() {
   const router = useRouter();
   const [doModalOpen, setDoModalOpen] = useState(false);
   const [logSheetOpen, setLogSheetOpen] = useState(false);
+  const [logTab, setLogTab] = useState<"checkin" | "hydration" | "nutrition" | "matchreview" | null>(null);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
   const [now, setNow] = useState(new Date());
   const [doIdx, setDoIdx] = useState(0); // -1 = top holder, 0 = do-this-now, 1 = see schedule
@@ -205,12 +206,12 @@ export default function Home8() {
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "0 24px", marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
                 <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Log Data</p>
                 {([
-                  { label: "Hydration", color: "#0891b2" },
-                  { label: "Check-in", color: "#2653d4" },
-                  { label: "Nutrition", color: "#16a34a" },
-                  { label: "Recovery", color: "#64748b" },
+                  { label: "Hydration", color: "#0891b2", tab: "hydration" as const },
+                  { label: "Check-in",  color: "#2653d4", tab: "checkin"   as const },
+                  { label: "Nutrition", color: "#16a34a", tab: "nutrition" as const },
+                  { label: "Recovery",  color: "#64748b", tab: "matchreview" as const },
                 ] as const).map(item => (
-                  <button key={item.label} onClick={() => { setCardSnap('none'); setLogSheetOpen(true); }} className="w-full py-3 rounded-2xl text-[15px] font-semibold" style={{ background: `${item.color}18`, color: item.color }}>{item.label}</button>
+                  <button key={item.label} onClick={() => { setLogTab(item.tab); setLogSheetOpen(true); }} className="w-full py-3 rounded-2xl text-[15px] font-semibold" style={{ background: `${item.color}18`, color: item.color }}>{item.label}</button>
                 ))}
               </div>
               {/* Placeholder below */}
@@ -272,24 +273,28 @@ export default function Home8() {
                 const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: 1, zIndex: 3 };
                 const contentOpacity = doIdx === 0 ? 1 : 0.2;
                 if (isDone) return (
-                  <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
+                  <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => setDoModalOpen(true)}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: "rgba(255,255,255,0.25)" }}>
+                      <p className="font-bold leading-none text-center" style={{ color: "#fff", fontSize: "clamp(26px, 8vw, 36px)" }}>Good Job!</p>
+                      <p className="font-semibold mt-1 leading-none text-center" style={{ color: "#fff", fontSize: "clamp(15px, 4.8vw, 22px)" }}>{s.title} complete</p>
+                      <div className="w-10 h-10 rounded-full flex items-center justify-center mt-3" style={{ background: "rgba(255,255,255,0.25)" }}>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                       </div>
-                      <p className="text-[29px] font-bold leading-none text-center" style={{ color: "#fff" }}>Good Job!</p>
-                      <p className="text-[17px] font-semibold mt-1 leading-none text-center" style={{ color: "#fff" }}>{s.title} complete</p>
-                      {nextSlide && <div className="mt-4 text-center"><p className="text-[15px] leading-none" style={{ color: "rgba(255,255,255,0.75)" }}>See you in <span className="font-semibold" style={{ color: "#fff" }}>{fmtTime(secsUntilNext)}</span> for:</p><p className="text-[16px] font-bold mt-1 leading-none" style={{ color: "#fff" }}>{nextSlide.title}</p></div>}
+                      {nextSlide && <div className="mt-4 text-center">
+                        <p className="leading-none" style={{ color: "rgba(255,255,255,0.75)", fontSize: "clamp(12px, 3.7vw, 16px)" }}>see you in</p>
+                        <p className="font-bold leading-none mt-1" style={{ color: "#fff", fontSize: "clamp(22px, 7vw, 32px)" }}>{fmtTime(secsUntilNext)}</p>
+                        <p className="leading-none mt-1" style={{ color: "rgba(255,255,255,0.75)", fontSize: "clamp(12px, 3.7vw, 16px)" }}>for: <span className="font-semibold" style={{ color: "#fff" }}>{nextSlide.title}</span></p>
+                      </div>}
                     </div>
                   </div>
                 );
                 return (
-                  <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
+                  <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => setDoModalOpen(true)}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
-                      <p className="text-[14px] font-bold tracking-widest uppercase leading-none mb-1" style={{ color: "#fff" }}>NOW</p>
-                      <p className="text-[27px] font-bold leading-tight text-center" style={{ color: "#fff" }}>{s.title}</p>
-                      {s.subtitle && <p className="text-[17px] leading-none text-center mt-0.5" style={{ color: "rgba(255,255,255,0.8)" }}>{s.subtitle}</p>}
-                      <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 text-[15px] font-semibold px-5 py-2 rounded-full" style={{ background: "#fff", color: isReady ? s.color : "#b0b5ba" }}>Complete</button>
+                      <p className="animate-text-glow text-[14px] font-bold tracking-widest uppercase leading-none mb-1" style={{ color: "#fff" }}>NOW</p>
+                      <p className="font-bold leading-tight text-center" style={{ color: "#fff", fontSize: "clamp(24px, 7.5vw, 34px)" }}>{s.title}</p>
+                      {s.subtitle && <p className="leading-none text-center mt-0.5" style={{ color: "rgba(255,255,255,0.8)", fontSize: "clamp(15px, 4.8vw, 22px)" }}>{s.subtitle.split(", ").join(" · ")}</p>}
+                      <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 font-semibold px-5 py-2 rounded-full" style={{ background: "#fff", color: isReady ? s.color : "#b0b5ba", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me</button>
                     </div>
                   </div>
                 );
@@ -496,7 +501,7 @@ export default function Home8() {
           </svg>
         </button>
 
-        <LogSheet open={logSheetOpen} onClose={() => setLogSheetOpen(false)} />
+        <LogSheet open={logSheetOpen} onClose={() => { setLogSheetOpen(false); setLogTab(null); }} defaultSub={logTab} />
 
         {/* Schedule detail modal */}
         {schedDetailOpen && (

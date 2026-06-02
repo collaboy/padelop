@@ -59,6 +59,17 @@ body {
 .animate-breathe { animation: breathe 2.5s ease-in-out infinite; }
 @keyframes breathe-strong { 0%, 100% { box-shadow: 0 0 4px 2px color-mix(in srgb, var(--glow, #2653d4) 40%, transparent); } 50% { box-shadow: 0 0 10px 5px color-mix(in srgb, var(--glow, #2653d4) 25%, transparent); } }
 .breathe-strong { animation: breathe-strong 1.6s ease-in-out infinite; }
+@keyframes text-glow { 0%, 100% { text-shadow: 0 0 4px rgba(255,255,255,0.2); } 50% { text-shadow: 0 0 14px rgba(255,255,255,0.85), 0 0 4px rgba(255,255,255,0.4); } }
+.animate-text-glow { animation: text-glow 2s ease-in-out infinite; }
+@keyframes ball-drop {
+  0%   { transform: translateY(-80vh); animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45); }
+  65%  { transform: translateY(0); animation-timing-function: ease-out; }
+  78%  { transform: translateY(-14px); animation-timing-function: ease-in; }
+  90%  { transform: translateY(0); animation-timing-function: ease-out; }
+  97%  { transform: translateY(-4px); }
+  100% { transform: translateY(0); }
+}
+.animate-bounce-in { animation: ball-drop 0.9s both; animation-delay: 0.1s; }
 
 @keyframes nav-slide-out-left  { to   { transform: translateX(-28%); opacity: 0; } }
 @keyframes nav-slide-out-right { to   { transform: translateX(28%);  opacity: 0; } }
