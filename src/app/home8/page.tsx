@@ -209,14 +209,14 @@ export default function Home8() {
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
               {/* Main card */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "0 24px", marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-                <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Log Data</p>
+                <p className="font-bold tracking-widest uppercase" style={{ color: "#9aa5b0", fontSize: "clamp(11px, 3vw, 14px)" }}>Log Data</p>
                 {([
                   { label: "Hydration", color: "#0891b2", tab: "hydration" as const },
                   { label: "Check-in",  color: "#2653d4", tab: "checkin"   as const },
                   { label: "Nutrition", color: "#16a34a", tab: "nutrition" as const },
                   { label: "Recovery",  color: "#64748b", tab: "matchreview" as const },
                 ] as const).map(item => (
-                  <button key={item.label} onClick={() => { setLogTab(item.tab); setLogSheetOpen(true); }} className="w-full py-3 rounded-2xl text-[15px] font-semibold" style={{ background: `${item.color}18`, color: item.color }}>{item.label}</button>
+                  <button key={item.label} onClick={() => { setLogTab(item.tab); setLogSheetOpen(true); }} className="w-full py-3 rounded-2xl font-semibold" style={{ background: `${item.color}18`, color: item.color, fontSize: "clamp(14px, 4vw, 18px)" }}>{item.label}</button>
                 ))}
               </div>
               {/* Placeholder below */}
@@ -282,7 +282,7 @@ export default function Home8() {
                 const nextSlide = schedule[currentIdx + 1];
                 const secsUntilNext = nextSlide ? toMins(nextSlide.time) * 60 - (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) : 0;
                 const fmtTime = (s: number) => { if (s <= 0) return "a moment"; const h = Math.floor(s / 3600), rem = s % 3600, m = Math.floor(rem / 60), sec = rem % 60; if (h > 0) return `${h}h ${m}m ${sec}s`; return m > 0 ? `${m}m ${sec}s` : `${sec}s`; };
-                const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: 1, zIndex: 3, boxShadow: "0 8px 40px rgba(0, 212, 85, 0.45), 0 2px 12px rgba(0, 0, 0, 0.12)" };
+                const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: 1, zIndex: 3, boxShadow: "none" };
                 const contentOpacity = doIdx === 0 ? 1 : 0.2;
                 if (isDone) return (
                   <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => setDoModalOpen(true)}>
@@ -333,13 +333,13 @@ export default function Home8() {
                     <div style={{ padding: "20px 20px 0", display: "flex", flexDirection: "column", alignItems: "center" }}>
                       <div style={{ width: "100%", overflow: "hidden", display: "flex", justifyContent: "center" }}>
                         <span style={{ position: "relative", flexShrink: 0 }}>
-                          <span style={{ fontSize: 24, fontWeight: 800, color: "#1a1c1c", fontFamily: "var(--font-hanken, Inter, sans-serif)" }}>
+                          <span style={{ fontSize: 28, fontWeight: 800, color: "#1a1c1c", fontFamily: "var(--font-hanken, Inter, sans-serif)" }}>
                             {schedTab === "today" ? "Today" : "This Week"}
                           </span>
                           {schedTab === "today" ? (
-                            <button style={{ position: "absolute", top: 0, left: "100%", paddingLeft: 12, fontSize: 24, fontWeight: 800, whiteSpace: "nowrap", fontFamily: "var(--font-hanken, Inter, sans-serif)", color: "#1a1c1c", opacity: 0.18, WebkitMaskImage: "linear-gradient(to right, black 0%, transparent 65%)", maskImage: "linear-gradient(to right, black 0%, transparent 65%)", background: "none", border: "none", cursor: "pointer" }} onClick={() => setSchedTab("week")}>This Week</button>
+                            <button style={{ position: "absolute", top: 0, left: "100%", paddingLeft: 12, fontSize: 28, fontWeight: 800, whiteSpace: "nowrap", fontFamily: "var(--font-hanken, Inter, sans-serif)", color: "#1a1c1c", opacity: 0.18, WebkitMaskImage: "linear-gradient(to right, black 0%, transparent 65%)", maskImage: "linear-gradient(to right, black 0%, transparent 65%)", background: "none", border: "none", cursor: "pointer" }} onClick={() => setSchedTab("week")}>This Week</button>
                           ) : (
-                            <button style={{ position: "absolute", top: 0, right: "100%", paddingRight: 12, fontSize: 24, fontWeight: 800, whiteSpace: "nowrap", fontFamily: "var(--font-hanken, Inter, sans-serif)", color: "#1a1c1c", opacity: 0.18, WebkitMaskImage: "linear-gradient(to left, black 0%, transparent 65%)", maskImage: "linear-gradient(to left, black 0%, transparent 65%)", background: "none", border: "none", cursor: "pointer" }} onClick={() => setSchedTab("today")}>Today</button>
+                            <button style={{ position: "absolute", top: 0, right: "100%", paddingRight: 12, fontSize: 28, fontWeight: 800, whiteSpace: "nowrap", fontFamily: "var(--font-hanken, Inter, sans-serif)", color: "#1a1c1c", opacity: 0.18, WebkitMaskImage: "linear-gradient(to left, black 0%, transparent 65%)", maskImage: "linear-gradient(to left, black 0%, transparent 65%)", background: "none", border: "none", cursor: "pointer" }} onClick={() => setSchedTab("today")}>Today</button>
                           )}
                         </span>
                       </div>
@@ -364,8 +364,8 @@ export default function Home8() {
                           const detail = SCHEDULE_DETAILS[item.title];
                           return (
                             <div key={idx} style={{ display: "flex", gap: 12 }}>
-                              <div style={{ width: 40, flexShrink: 0, paddingTop: 2 }}>
-                                <p style={{ fontSize: 11, fontWeight: 700, color: "#6b7480", textAlign: "right", lineHeight: 1, margin: 0 }}>{item.time}</p>
+                              <div style={{ width: 44, flexShrink: 0, paddingTop: 2 }}>
+                                <p style={{ fontSize: 13, fontWeight: 700, color: "#6b7480", textAlign: "right", lineHeight: 1, margin: 0 }}>{item.time}</p>
                               </div>
                               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
                                 <div style={{ width: 8, height: 8, borderRadius: "50%", marginTop: 2, flexShrink: 0, background: isPast ? "#d0d3d6" : item.color }} />
@@ -387,8 +387,8 @@ export default function Home8() {
                                 onClick={() => detail && setSchedDetailOpen({ title: item.title, subtitle: item.subtitle, color: item.color, detail })}
                               >
                                 <div style={{ minWidth: 0 }}>
-                                  <p style={{ fontSize: 15, fontWeight: isCur ? 700 : 500, color: isPast ? "#a0a5aa" : "#1a1c1c", margin: 0, lineHeight: 1.3 }}>{item.title}</p>
-                                  {item.subtitle && <p style={{ fontSize: 13, color: "#6b7480", margin: "2px 0 0", lineHeight: 1.4 }}>{item.subtitle}</p>}
+                                  <p style={{ fontSize: 17, fontWeight: isCur ? 700 : 500, color: isPast ? "#a0a5aa" : "#1a1c1c", margin: 0, lineHeight: 1.3 }}>{item.title}</p>
+                                  {item.subtitle && <p style={{ fontSize: 14, color: "#6b7480", margin: "3px 0 0", lineHeight: 1.4 }}>{item.subtitle}</p>}
                                 </div>
                                 {detail && (
                                   <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#dfe3e7" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 4 }}>
@@ -449,8 +449,8 @@ export default function Home8() {
           {/* Readiness panel */}
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 20, paddingTop: "calc(45dvh - 4rem - (100vw - 40px) / 2)" }}>
             <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: "0 24px", marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-              <p className="text-[13px] font-bold tracking-widest uppercase" style={{ color: "#9aa5b0" }}>Match Readiness</p>
-              <svg width="120" height="120" viewBox="0 0 120 120">
+              <p className="font-bold tracking-widest uppercase" style={{ color: "#9aa5b0", fontSize: "clamp(11px, 3vw, 14px)" }}>Match Readiness</p>
+              <svg width="140" height="140" viewBox="0 0 120 120">
                 <circle cx="60" cy="60" r="50" fill="none" stroke="#f0f0f0" strokeWidth="8" />
                 <circle cx="60" cy="60" r="50" fill="none" stroke="#2653d4" strokeWidth="8" strokeLinecap="round"
                   strokeDasharray={`${2 * Math.PI * 50}`}
@@ -459,7 +459,7 @@ export default function Home8() {
                 />
                 <text x="60" y="60" textAnchor="middle" dominantBaseline="central" fontSize="28" fontWeight="700" fill="#1a1c1c" fontFamily="Inter, sans-serif">{readiness}</text>
               </svg>
-              <button onClick={() => router.push("/insights4")} className="text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: "#2653d418", color: "#2653d4" }}>See Breakdown</button>
+              <button onClick={() => router.push("/insights4")} className="font-semibold px-5 py-2.5 rounded-full" style={{ background: "#2653d418", color: "#2653d4", fontSize: "clamp(13px, 3.5vw, 17px)" }}>See Breakdown</button>
             </div>
           </div>
         </div>
