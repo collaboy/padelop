@@ -72,7 +72,7 @@ const items = [
 
 export default function BottomNav() {
   const pathname = usePathname();
-  if (pathname === "/home4") return null;
+  if (pathname === "/home4" || pathname === "/home8") return null;
   return (
     <nav className="vt-footer md:hidden fixed bottom-0 inset-x-0 z-50 bg-[var(--surface)]/95 backdrop-blur-md border-t border-[var(--border)] shadow-2xl rounded-t-xl">
       <div className="flex justify-around items-center py-3 px-2">
