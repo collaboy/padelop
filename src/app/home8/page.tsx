@@ -254,22 +254,22 @@ export default function Home8() {
                   const dateStr = dt.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
                   return (
                     <>
-                      <button onClick={() => setMatchActionOpen(true)} className="flex flex-col items-center gap-1.5 active:opacity-60 transition-opacity" style={{ background: "none", border: "none" }}>
-                        <p className="text-[26px] font-bold text-[#1a1c1c] leading-tight text-center">{dateStr}</p>
-                        <p className="text-[18px] font-semibold text-[#4a5050] leading-none text-center">{match.time}</p>
-                        {match.club && <p className="text-[14px] text-[#6b7480] leading-none text-center">{match.club}</p>}
-                        {match.players && match.players.length > 0 && <p className="text-[13px] text-[#9aa5b0] leading-snug text-center">{match.players.join(' · ')}</p>}
+                      <button onClick={() => setMatchActionOpen(true)} className="flex flex-col items-center gap-2 active:opacity-60 transition-opacity" style={{ background: "none", border: "none" }}>
+                        <p className="font-bold text-[#1a1c1c] leading-tight text-center" style={{ fontSize: "clamp(28px, 8vw, 40px)" }}>{dateStr}</p>
+                        <p className="font-semibold text-[#4a5050] leading-none text-center" style={{ fontSize: "clamp(20px, 5.5vw, 28px)" }}>{match.time}</p>
+                        {match.club && <p className="text-[#6b7480] leading-none text-center" style={{ fontSize: "clamp(16px, 4.5vw, 22px)" }}>{match.club}</p>}
+                        {match.players && match.players.length > 0 && <p className="text-[#9aa5b0] leading-snug text-center" style={{ fontSize: "clamp(14px, 4vw, 18px)" }}>{match.players.join(' · ')}</p>}
                       </button>
                       <div style={{ width: "100%", height: 1, background: "#f0f0f0", margin: "8px 0" }} />
-                      <p className="text-[11px] font-bold tracking-widest uppercase text-center" style={{ color: "#9aa5b0" }}>Match Readiness</p>
-                      <p className="font-bold leading-none text-center" style={{ fontSize: "clamp(32px, 10vw, 48px)", color: "#2653d4" }}>{readiness}</p>
-                      <button onClick={() => router.push("/insights4")} className="text-[13px] font-semibold px-4 py-2 rounded-full" style={{ background: "#2653d418", color: "#2653d4" }}>See Breakdown</button>
+                      <p className="font-bold tracking-widest uppercase text-center" style={{ color: "#9aa5b0", fontSize: "clamp(11px, 3vw, 14px)" }}>Match Readiness</p>
+                      <p className="font-bold leading-none text-center" style={{ fontSize: "clamp(40px, 12vw, 56px)", color: "#2653d4" }}>{readiness}</p>
+                      <button onClick={() => router.push("/insights4")} className="font-semibold px-5 py-2.5 rounded-full" style={{ background: "#2653d418", color: "#2653d4", fontSize: "clamp(14px, 4vw, 18px)" }}>See Breakdown</button>
                     </>
                   );
                 })() : (
                   <>
-                    <p className="text-[18px] font-semibold text-[#9aa5b0] text-center">No match set</p>
-                    <button onClick={() => { setMatchModalTab('pick'); setMatchModalOpen(true); }} className="mt-1 text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: "#2653d418", color: "#2653d4" }}>Add Match</button>
+                    <p className="font-semibold text-[#9aa5b0] text-center" style={{ fontSize: "clamp(18px, 5vw, 24px)" }}>No match set</p>
+                    <button onClick={() => { setMatchModalTab('pick'); setMatchModalOpen(true); }} className="mt-1 font-semibold px-5 py-2.5 rounded-full" style={{ background: "#2653d418", color: "#2653d4", fontSize: "clamp(14px, 4vw, 18px)" }}>Add Match</button>
                   </>
                 )}
               </div>
@@ -282,7 +282,7 @@ export default function Home8() {
                 const nextSlide = schedule[currentIdx + 1];
                 const secsUntilNext = nextSlide ? toMins(nextSlide.time) * 60 - (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) : 0;
                 const fmtTime = (s: number) => { if (s <= 0) return "a moment"; const h = Math.floor(s / 3600), rem = s % 3600, m = Math.floor(rem / 60), sec = rem % 60; if (h > 0) return `${h}h ${m}m ${sec}s`; return m > 0 ? `${m}m ${sec}s` : `${sec}s`; };
-                const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: 1, zIndex: 3 };
+                const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: 1, zIndex: 3, boxShadow: "0 8px 40px rgba(0, 212, 85, 0.45), 0 2px 12px rgba(0, 0, 0, 0.12)" };
                 const contentOpacity = doIdx === 0 ? 1 : 0.2;
                 if (isDone) return (
                   <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => setDoModalOpen(true)}>
