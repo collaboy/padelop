@@ -114,6 +114,8 @@ export default function Home8() {
   const [doIdx, setDoIdx] = useState(0); // -1 = top holder, 0 = do-this-now, 1 = see schedule
   const [completed, setCompleted] = useState<Set<number>>(new Set());
   const [readiness, setReadiness] = useState(65);
+  const [schedTab, setSchedTab] = useState<"today" | "week">("today");
+  const [schedDetailOpen, setSchedDetailOpen] = useState<{ title: string; subtitle?: string; color: string; detail: string } | null>(null);
 
   const touchStartXRef = useRef(0);
   const touchStartYRef = useRef(0);
@@ -214,7 +216,7 @@ export default function Home8() {
           </div>
 
           {/* Carousel center — all schedule cards, doIdx in transform */}
-          <div className="overflow-hidden" style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingLeft: 10, paddingRight: 10 }}>
+          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingLeft: 10, paddingRight: 10 }}>
             <div style={{
               display: "flex", flexDirection: "column", gap: 10,
               transform: `translateY(calc(50dvh - 4rem - (100vw - 40px) / 2 - ${doIdx + 2} * (100vw - 30px)))`,
@@ -283,28 +285,137 @@ export default function Home8() {
                 );
               })()}
 
-              {/* Card 2: today's schedule */}
-              <div key="sched" style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", display: "flex", flexDirection: "column", padding: "20px 0 0", opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)" }}>
-                <p className="text-[13px] font-bold tracking-widest uppercase text-center mb-3" style={{ color: "#9aa5b0", flexShrink: 0 }}>Today&apos;s Schedule</p>
-                <div style={{ flex: 1, overflowY: "auto", padding: "0 20px 20px" }}>
-                  {schedule.map((s, i) => {
-                    const isCur = i === currentIdx;
-                    const isPast = !isCur && curMins > toMins(s.time);
-                    return (
-                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 0", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f4" : "none" }}>
-                        <div style={{ width: 28, height: 28, borderRadius: "50%", background: isPast ? "#f0f0f0" : `${s.color}18`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                          <div style={{ width: 8, height: 8, borderRadius: "50%", background: isPast ? "#d0d3d6" : s.color }} />
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: isPast ? "#c4c7c7" : s.color, margin: 0 }}>{s.time}</p>
-                          <p style={{ fontSize: 14, fontWeight: isCur ? 700 : 500, color: isPast ? "#a0a5aa" : "#1a1c1c", margin: 0, lineHeight: 1.3 }}>{s.title}</p>
-                        </div>
-                        {isCur && <div style={{ width: 6, height: 6, borderRadius: "50%", background: s.color, flexShrink: 0 }} />}
+              {/* Card 2: today's / this week's schedule */}
+              {(() => {
+                const curMinsSched = now.getHours() * 60 + now.getMinutes();
+                const todayYMD = now.toISOString().slice(0, 10);
+                const dow = (now.getDay() + 6) % 7;
+                const monday = new Date(now);
+                monday.setDate(now.getDate() - dow);
+                const weekDays = Array.from({ length: 7 }, (_, i) => {
+                  const d = new Date(monday);
+                  d.setDate(monday.getDate() + i);
+                  return { ymd: d.toISOString().slice(0, 10), date: d };
+                });
+                const matchYMD = match?.date ?? null;
+                const matchNextYMD = matchYMD ? (() => { const d = new Date(matchYMD); d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10); })() : null;
+                const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+                return (
+                  <div key="sched" style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "white", display: "flex", flexDirection: "column", opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)" }}>
+                    {/* Tab header */}
+                    <div style={{ padding: "20px 20px 0", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                      <div style={{ width: "100%", overflow: "hidden", display: "flex", justifyContent: "center" }}>
+                        <span style={{ position: "relative", flexShrink: 0 }}>
+                          <span style={{ fontSize: 24, fontWeight: 800, color: "#1a1c1c", fontFamily: "var(--font-hanken, Inter, sans-serif)" }}>
+                            {schedTab === "today" ? "Today" : "This Week"}
+                          </span>
+                          {schedTab === "today" ? (
+                            <button style={{ position: "absolute", top: 0, left: "100%", paddingLeft: 12, fontSize: 24, fontWeight: 800, whiteSpace: "nowrap", fontFamily: "var(--font-hanken, Inter, sans-serif)", color: "#1a1c1c", opacity: 0.18, WebkitMaskImage: "linear-gradient(to right, black 0%, transparent 65%)", maskImage: "linear-gradient(to right, black 0%, transparent 65%)", background: "none", border: "none", cursor: "pointer" }} onClick={() => setSchedTab("week")}>This Week</button>
+                          ) : (
+                            <button style={{ position: "absolute", top: 0, right: "100%", paddingRight: 12, fontSize: 24, fontWeight: 800, whiteSpace: "nowrap", fontFamily: "var(--font-hanken, Inter, sans-serif)", color: "#1a1c1c", opacity: 0.18, WebkitMaskImage: "linear-gradient(to left, black 0%, transparent 65%)", maskImage: "linear-gradient(to left, black 0%, transparent 65%)", background: "none", border: "none", cursor: "pointer" }} onClick={() => setSchedTab("today")}>Today</button>
+                          )}
+                        </span>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
+                      <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
+                        <button onClick={() => setSchedTab("today")} style={{ width: 6, height: 6, borderRadius: "50%", background: schedTab === "today" ? "#1a1c1c" : "#dfe3e7", border: "none", padding: 0, cursor: "pointer" }} />
+                        <button onClick={() => setSchedTab("week")} style={{ width: 6, height: 6, borderRadius: "50%", background: schedTab === "week" ? "#1a1c1c" : "#dfe3e7", border: "none", padding: 0, cursor: "pointer" }} />
+                      </div>
+                    </div>
+                    <div style={{ height: 1, background: "#dfe3e7", margin: "12px 0 0" }} />
+
+                    {/* Today tab */}
+                    {schedTab === "today" && (
+                      <div style={{ padding: "16px 20px 28px" }}>
+                        {schedule.map((item, idx, arr) => {
+                          const isLast = idx === arr.length - 1;
+                          const blockMins = toMins(item.time);
+                          const nextMins = !isLast ? toMins(arr[idx + 1].time) : 24 * 60;
+                          const isCurrentSegment = !isLast && curMinsSched >= blockMins && curMinsSched < nextMins;
+                          const segmentPct = isCurrentSegment ? ((curMinsSched - blockMins) / (nextMins - blockMins)) * 100 : 0;
+                          const isCur = idx === currentIdx;
+                          const isPast = !isCur && curMinsSched > toMins(item.time);
+                          const detail = SCHEDULE_DETAILS[item.title];
+                          return (
+                            <div key={idx} style={{ display: "flex", gap: 12 }}>
+                              <div style={{ width: 40, flexShrink: 0, paddingTop: 2 }}>
+                                <p style={{ fontSize: 11, fontWeight: 700, color: "#6b7480", textAlign: "right", lineHeight: 1, margin: 0 }}>{item.time}</p>
+                              </div>
+                              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
+                                <div style={{ width: 8, height: 8, borderRadius: "50%", marginTop: 2, flexShrink: 0, background: isPast ? "#d0d3d6" : item.color }} />
+                                {!isLast && (
+                                  <div style={{ position: "relative", width: 1, flex: 1, background: "#dfe3e7", minHeight: 28, overflow: "visible" }}>
+                                    {isCurrentSegment && (
+                                      <div style={{ position: "absolute", display: "flex", alignItems: "center", top: `${segmentPct}%`, right: 0, transform: "translateY(-50%)" }}>
+                                        <span style={{ fontSize: 11, fontWeight: 700, color: "#fff", padding: "3px 8px", borderRadius: 4, marginRight: 2, whiteSpace: "nowrap", background: "#2653d4" }}>
+                                          {pad(now.getHours())}:{pad(now.getMinutes())}
+                                        </span>
+                                        <svg width="6" height="8" viewBox="0 0 6 8"><polygon points="0,0 6,4 0,8" fill="#171c1f" /></svg>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                              <button
+                                style={{ paddingBottom: 16, flex: 1, minWidth: 0, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, textAlign: "left", background: "none", border: "none", cursor: detail ? "pointer" : "default", padding: "0 0 16px" }}
+                                onClick={() => detail && setSchedDetailOpen({ title: item.title, subtitle: item.subtitle, color: item.color, detail })}
+                              >
+                                <div style={{ minWidth: 0 }}>
+                                  <p style={{ fontSize: 15, fontWeight: isCur ? 700 : 500, color: isPast ? "#a0a5aa" : "#1a1c1c", margin: 0, lineHeight: 1.3 }}>{item.title}</p>
+                                  {item.subtitle && <p style={{ fontSize: 13, color: "#6b7480", margin: "2px 0 0", lineHeight: 1.4 }}>{item.subtitle}</p>}
+                                </div>
+                                {detail && (
+                                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#dfe3e7" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 4 }}>
+                                    <line x1="5" y1="1" x2="5" y2="9" /><line x1="1" y1="5" x2="9" y2="5" />
+                                  </svg>
+                                )}
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* This Week tab */}
+                    {schedTab === "week" && (
+                      <div style={{ padding: "16px 20px 28px" }}>
+                        <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid #dfe3e7" }}>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
+                            {weekDays.map(({ ymd, date }, idx) => {
+                              const isToday = ymd === todayYMD;
+                              const isPast = ymd < todayYMD;
+                              return (
+                                <div key={ymd} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "10px 0", gap: 4, borderLeft: idx > 0 ? "1px solid #dfe3e7" : "none", boxShadow: isToday ? "inset 0 0 0 2px #2653d4" : "none", opacity: isPast ? 0.25 : 1 }}>
+                                  <span style={{ fontSize: 10, fontWeight: 700, color: isToday ? "#2653d4" : "#6b7480" }}>{dayNames[idx]}</span>
+                                  <span style={{ fontSize: 14, fontWeight: 700, lineHeight: 1, color: isToday ? "#2653d4" : "#1a1c1c" }}>{date.getDate()}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", borderTop: "1px solid #dfe3e7" }}>
+                            {weekDays.map(({ ymd }, idx) => {
+                              const isGame = ymd === matchYMD;
+                              const isRecovery = !isGame && ymd === matchNextYMD;
+                              const isPast = ymd < todayYMD;
+                              const label = isGame ? "G" : isRecovery ? "R" : "T";
+                              const labelColor = isGame ? "#16a34a" : isRecovery ? "#7c3aed" : "#2653d4";
+                              return (
+                                <div key={ymd} style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "8px 0", borderLeft: idx > 0 ? "1px solid #dfe3e7" : "none", background: ymd === todayYMD ? "#f9f9f9" : "transparent", opacity: isPast ? 0.25 : 1 }}>
+                                  <span style={{ fontSize: 16, fontWeight: 800, color: labelColor, fontFamily: "var(--font-hanken, Inter, sans-serif)" }}>{label}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderTop: "1px solid #dfe3e7" }}>
+                            <span style={{ fontSize: 10, fontWeight: 700, color: "#16a34a" }}>G</span><span style={{ fontSize: 10, color: "#6b7480" }}>Game</span>
+                            <span style={{ fontSize: 10, fontWeight: 700, color: "#7c3aed", marginLeft: 8 }}>R</span><span style={{ fontSize: 10, color: "#6b7480" }}>Rest</span>
+                            <span style={{ fontSize: 10, fontWeight: 700, color: "#2653d4", marginLeft: 8 }}>T</span><span style={{ fontSize: 10, color: "#6b7480" }}>Train</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           </div>
 
@@ -376,6 +487,22 @@ export default function Home8() {
         </button>
 
         <LogSheet open={logSheetOpen} onClose={() => setLogSheetOpen(false)} />
+
+        {/* Schedule detail modal */}
+        {schedDetailOpen && (
+          <div style={{ position: "fixed", inset: 0, zIndex: 60, display: "flex", alignItems: "center", justifyContent: "center", padding: 24, background: "rgba(0,0,0,0.5)" }} onClick={() => setSchedDetailOpen(null)}>
+            <div style={{ width: "100%", maxWidth: 360, background: "#fff", borderRadius: 24, padding: 24, boxShadow: "0 8px 40px rgba(0,0,0,0.18)" }} onClick={e => e.stopPropagation()}>
+              <div style={{ width: 36, height: 36, borderRadius: "50%", background: `${schedDetailOpen.color}18`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
+                <div style={{ width: 10, height: 10, borderRadius: "50%", background: schedDetailOpen.color }} />
+              </div>
+              <p style={{ fontSize: 17, fontWeight: 700, color: "#1a1c1c", margin: "0 0 4px" }}>{schedDetailOpen.title}</p>
+              {schedDetailOpen.subtitle && <p style={{ fontSize: 13, color: "#6b7480", margin: "0 0 12px" }}>{schedDetailOpen.subtitle}</p>}
+              <div style={{ height: 1, background: "#dfe3e7", margin: "12px 0" }} />
+              <p style={{ fontSize: 14, color: "#3a4550", lineHeight: 1.6, margin: 0 }}>{schedDetailOpen.detail}</p>
+              <button onClick={() => setSchedDetailOpen(null)} style={{ marginTop: 20, width: "100%", padding: "12px 0", borderRadius: 50, background: "#f4f4f6", border: "none", fontSize: 15, fontWeight: 600, color: "#1a1c1c", cursor: "pointer" }}>Done</button>
+            </div>
+          </div>
+        )}
       </main>
     </>
   );
