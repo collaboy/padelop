@@ -264,7 +264,7 @@ export default function Home8() {
                 const nextSlide = schedule[currentIdx + 1];
                 const secsUntilNext = nextSlide ? toMins(nextSlide.time) * 60 - (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) : 0;
                 const fmtTime = (s: number) => { if (s <= 0) return "a moment"; const h = Math.floor(s / 3600), rem = s % 3600, m = Math.floor(rem / 60), sec = rem % 60; if (h > 0) return `${h}h ${m}m ${sec}s`; return m > 0 ? `${m}m ${sec}s` : `${sec}s`; };
-                const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: cardSnap === 'none' && doIdx === 0 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)" };
+                const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#bcf063", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: cardSnap === 'none' && doIdx === 0 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)" };
                 if (isDone) return (
                   <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
                     <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: `${s.color}18` }}>
