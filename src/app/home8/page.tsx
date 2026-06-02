@@ -110,6 +110,10 @@ export default function Home8() {
   const [doModalOpen, setDoModalOpen] = useState(false);
   const [logSheetOpen, setLogSheetOpen] = useState(false);
   const [logTab, setLogTab] = useState<"checkin" | "hydration" | "nutrition" | "matchreview" | null>(null);
+  const [matchModalOpen, setMatchModalOpen] = useState(false);
+  const [matchModalTab, setMatchModalTab] = useState<'pick' | 'manual'>('pick');
+  const [matchForm, setMatchForm] = useState({ date: '', time: '', club: '', p1: '', p2: '', p3: '', p4: '' });
+  const [matchActionOpen, setMatchActionOpen] = useState(false);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
   const [now, setNow] = useState(new Date());
   const [doIdx, setDoIdx] = useState(0); // -1 = top holder, 0 = do-this-now, 1 = see schedule
@@ -118,6 +122,7 @@ export default function Home8() {
   const [schedTab, setSchedTab] = useState<"today" | "week">("today");
   const [schedDetailOpen, setSchedDetailOpen] = useState<{ title: string; subtitle?: string; color: string; detail: string } | null>(null);
 
+  const matchUploadRef = useRef<HTMLInputElement>(null);
   const touchStartXRef = useRef(0);
   const touchStartYRef = useRef(0);
   const swipeDirRef = useRef<'h' | 'v' | null>(null);
@@ -224,8 +229,10 @@ export default function Home8() {
             <div style={{
               display: "flex", flexDirection: "column", gap: 10,
               transform: doIdx >= 1
-                ? `translateY(calc(-3 * (100vw - 30px) + 44px))`
-                : `translateY(calc(45dvh - 4rem - (100vw - 40px) / 2 - ${doIdx + 2} * (100vw - 30px) + ${liveY}px))`,
+                ? `translateY(calc(84px + 4rem - 2 * (100vw - 30px) - 100dvh))`
+                : doIdx === -1
+                  ? `translateY(calc(10px - (100vw - 30px) + ${liveY}px))`
+                  : `translateY(calc(-55dvh - 150vw + 100px + ${liveY}px))`,
               transition: liveY !== 0 ? "none" : "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
             }}>
               {/* Logo above top card */}
@@ -239,7 +246,7 @@ export default function Home8() {
               </div>
 
               {/* Card 0: next match */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", gap: 8, opacity: cardSnap === 'none' && doIdx === -1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === -1 ? 2 : 1 }}>
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100dvh - 4rem - 60px)", borderRadius: 24, overflow: "hidden", background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "28px 24px", gap: 10, opacity: cardSnap === 'none' && doIdx === -1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === -1 ? 2 : 1 }}>
                 <p className="text-[13px] font-bold tracking-widest uppercase text-center" style={{ color: "#9aa5b0" }}>Next Match</p>
                 {match ? (() => {
                   const [y, mo, d] = match.date.split('-').map(Number);
@@ -247,17 +254,22 @@ export default function Home8() {
                   const dateStr = dt.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
                   return (
                     <>
-                      <p className="text-[26px] font-bold text-[#1a1c1c] leading-tight text-center">{dateStr}</p>
-                      <p className="text-[18px] font-semibold text-[#4a5050] leading-none text-center">{match.time}</p>
-                      {match.club && <p className="text-[14px] text-[#6b7480] leading-none text-center">{match.club}</p>}
-                      {match.players && match.players.length > 0 && <p className="text-[13px] text-[#9aa5b0] leading-snug text-center">{match.players.join(' · ')}</p>}
-                      <button onClick={() => router.push("/matches4")} className="mt-1 text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: "#2653d418", color: "#2653d4" }}>See Details</button>
+                      <button onClick={() => setMatchActionOpen(true)} className="flex flex-col items-center gap-1.5 active:opacity-60 transition-opacity" style={{ background: "none", border: "none" }}>
+                        <p className="text-[26px] font-bold text-[#1a1c1c] leading-tight text-center">{dateStr}</p>
+                        <p className="text-[18px] font-semibold text-[#4a5050] leading-none text-center">{match.time}</p>
+                        {match.club && <p className="text-[14px] text-[#6b7480] leading-none text-center">{match.club}</p>}
+                        {match.players && match.players.length > 0 && <p className="text-[13px] text-[#9aa5b0] leading-snug text-center">{match.players.join(' · ')}</p>}
+                      </button>
+                      <div style={{ width: "100%", height: 1, background: "#f0f0f0", margin: "8px 0" }} />
+                      <p className="text-[11px] font-bold tracking-widest uppercase text-center" style={{ color: "#9aa5b0" }}>Match Readiness</p>
+                      <p className="font-bold leading-none text-center" style={{ fontSize: "clamp(32px, 10vw, 48px)", color: "#2653d4" }}>{readiness}</p>
+                      <button onClick={() => router.push("/insights4")} className="text-[13px] font-semibold px-4 py-2 rounded-full" style={{ background: "#2653d418", color: "#2653d4" }}>See Breakdown</button>
                     </>
                   );
                 })() : (
                   <>
                     <p className="text-[18px] font-semibold text-[#9aa5b0] text-center">No match set</p>
-                    <button onClick={() => router.push("/matches4")} className="mt-1 text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: "#2653d418", color: "#2653d4" }}>Add Match</button>
+                    <button onClick={() => { setMatchModalTab('pick'); setMatchModalOpen(true); }} className="mt-1 text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: "#2653d418", color: "#2653d4" }}>Add Match</button>
                   </>
                 )}
               </div>
@@ -502,6 +514,129 @@ export default function Home8() {
         </button>
 
         <LogSheet open={logSheetOpen} onClose={() => { setLogSheetOpen(false); setLogTab(null); }} defaultSub={logTab} />
+
+        {/* Match action sheet */}
+        {matchActionOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" onClick={() => setMatchActionOpen(false)}>
+            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+            <div className="relative w-full max-w-sm bg-white rounded-[24px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+              <button onClick={() => { setMatchActionOpen(false); setMatchModalTab('pick'); setMatchModalOpen(true); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f4f6ff] transition-colors" style={{ borderBottom: "1px solid #f0f0f0" }}>
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#2653d418" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </div>
+                <span className="text-[15px] font-semibold text-[#1a1c1c]">Edit match</span>
+              </button>
+              <button onClick={() => { setMatchActionOpen(false); router.push("/matches4"); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#f4f4f6" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </div>
+                <span className="text-[15px] font-semibold text-[#1a1c1c]">See all matches</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Add / Edit Match modal */}
+        {matchModalOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" onClick={() => { setMatchModalOpen(false); setMatchModalTab('pick'); }}>
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+            <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+              {/* Header */}
+              <div className="px-6 pt-5 pb-4 flex items-center justify-between border-b border-[#f0f0f0]">
+                <div>
+                  <p className="text-[18px] font-bold text-[#1a1c1c]">{match ? "Edit Match" : "Add Match"}</p>
+                  <p className="text-[13px] text-[#6b7480] mt-0.5">Upload a screenshot or enter manually</p>
+                </div>
+                <button onClick={() => { setMatchModalOpen(false); setMatchModalTab('pick'); }} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "#f4f4f6" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+
+              {matchModalTab === 'pick' && (
+                <div className="px-6 py-6 flex flex-col gap-3">
+                  <button
+                    onClick={() => matchUploadRef.current?.click()}
+                    className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl active:opacity-70 transition-opacity"
+                    style={{ background: "#f4f6ff", border: "1.5px solid #2653d418" }}
+                  >
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#2653d4" }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                      </svg>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[15px] font-semibold text-[#1a1c1c]">Upload screenshot</p>
+                      <p className="text-[12px] text-[#6b7480] mt-0.5">From your camera roll or files</p>
+                    </div>
+                  </button>
+                  <input ref={matchUploadRef} type="file" accept="image/*" className="hidden" onChange={() => { setMatchModalTab('manual'); }} />
+
+                  <button
+                    onClick={() => { setMatchForm({ date: match?.date ?? '', time: match?.time ?? '', club: match?.club ?? '', p1: match?.players?.[0] ?? '', p2: match?.players?.[1] ?? '', p3: match?.players?.[2] ?? '', p4: match?.players?.[3] ?? '' }); setMatchModalTab('manual'); }}
+                    className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl active:opacity-70 transition-opacity"
+                    style={{ background: "#f9f9f9", border: "1.5px solid #f0f0f0" }}
+                  >
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#1a1c1c" }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="13" y2="18"/>
+                      </svg>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[15px] font-semibold text-[#1a1c1c]">Enter manually</p>
+                      <p className="text-[12px] text-[#6b7480] mt-0.5">Date, time, club and players</p>
+                    </div>
+                  </button>
+                </div>
+              )}
+
+              {matchModalTab === 'manual' && (
+                <div className="px-6 py-5 flex flex-col gap-4 max-h-[70vh] overflow-y-auto">
+                  <div className="flex gap-3">
+                    <div className="flex-1 flex flex-col gap-1">
+                      <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
+                      <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))}
+                        className="w-full px-3 py-2.5 rounded-xl border text-[14px] font-medium text-[#1a1c1c] outline-none"
+                        style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#f9f9f9" }} />
+                    </div>
+                    <div className="flex-1 flex flex-col gap-1">
+                      <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
+                      <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))}
+                        className="w-full px-3 py-2.5 rounded-xl border text-[14px] font-medium text-[#1a1c1c] outline-none"
+                        style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#f9f9f9" }} />
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Club</label>
+                    <input type="text" placeholder="e.g. Club Padel BCN" value={matchForm.club} onChange={e => setMatchForm(f => ({ ...f, club: e.target.value }))}
+                      className="w-full px-3 py-2.5 rounded-xl border text-[14px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]"
+                      style={{ borderColor: matchForm.club ? "#2653d4" : "#e2e2e2", background: matchForm.club ? "#f4f6ff" : "#f9f9f9" }} />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Players</label>
+                    {(['p1','p2','p3','p4'] as const).map((key, i) => (
+                      <input key={key} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={matchForm[key]} onChange={e => setMatchForm(f => ({ ...f, [key]: e.target.value }))}
+                        className="w-full px-3 py-2.5 rounded-xl border text-[14px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]"
+                        style={{ borderColor: matchForm[key] ? "#2653d4" : "#e2e2e2", background: matchForm[key] ? "#f4f6ff" : "#f9f9f9" }} />
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (!matchForm.date || !matchForm.time) return;
+                      const data = { date: matchForm.date, time: matchForm.time, club: matchForm.club, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
+                      try { localStorage.setItem("padelop:next-match", JSON.stringify(data)); window.dispatchEvent(new Event("storage")); } catch {}
+                      setMatch({ date: matchForm.date, time: matchForm.time, club: matchForm.club || undefined, players: [matchForm.p1, matchForm.p2, matchForm.p3, matchForm.p4].filter(Boolean) });
+                      setMatchModalOpen(false);
+                      setMatchModalTab('pick');
+                    }}
+                    className="w-full py-3.5 rounded-2xl text-white text-[15px] font-bold active:scale-[0.98] transition-transform"
+                    style={{ background: matchForm.date && matchForm.time ? "#2653d4" : "#d0d3d6" }}
+                  >Save Match</button>
+                  <button onClick={() => setMatchModalTab('pick')} className="w-full py-2 text-[13px] font-semibold text-[#6b7480]">← Back</button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Schedule detail modal */}
         {schedDetailOpen && (
