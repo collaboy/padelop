@@ -216,7 +216,7 @@ export default function Home8() {
           </div>
 
           {/* Carousel center — all schedule cards, doIdx in transform */}
-          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingLeft: 10, paddingRight: 10 }}>
+          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingLeft: 10, paddingRight: 10, position: "relative", zIndex: 2 }}>
             <div style={{
               display: "flex", flexDirection: "column", gap: 10,
               transform: doIdx >= 1
