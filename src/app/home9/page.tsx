@@ -151,7 +151,7 @@ export default function Home9() {
   const [schedItemModal, setSchedItemModal] = useState<{ title: string; subtitle?: string; color: string; detail: string } | null>(null);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
   const [now, setNow] = useState(new Date());
-  const [doSlideIdx, setDoSlideIdx] = useState(() => getScheduleData(null, null).currentIdx + 1);
+  const [doSlideIdx, setDoSlideIdx] = useState(() => getScheduleData(null, null).currentIdx + 2);
   const [completed, setCompleted] = useState<Set<number>>(new Set());
   const [readiness, setReadiness] = useState(65);
   const doTouchStartX = useRef(0);
@@ -177,7 +177,7 @@ export default function Home9() {
               club: m.club || undefined,
               players: [m.player_1, m.player_2, m.player_3, m.player_4].filter(Boolean),
             });
-            setDoSlideIdx(getScheduleData(m.date, m.time).currentIdx + 1);
+            setDoSlideIdx(getScheduleData(m.date, m.time).currentIdx + 2);
           }
         }
       }
@@ -188,8 +188,8 @@ export default function Home9() {
 
 
   const { schedule: _s } = getScheduleData(match?.date ?? null, match?.time ?? null);
-  const isSleepytime = doSlideIdx === 0 || doSlideIdx >= _s.length + 2;
-  const _safeDoIdx = Math.min(doSlideIdx, _s.length + 2);
+  const isSleepytime = doSlideIdx === 0 || doSlideIdx >= _s.length + 3;
+  const _safeDoIdx = Math.min(doSlideIdx, _s.length + 3);
   const accentColor = (_safeDoIdx >= 1 && _safeDoIdx <= _s.length) ? _s[_safeDoIdx - 1].color : "#7c3aed";
 
   return (
@@ -200,7 +200,7 @@ export default function Home9() {
       {(() => {
         const { schedule, currentIdx, dayType } = getScheduleData(match?.date ?? null, match?.time ?? null);
         const meta = DAY_TYPE_META[dayType];
-        const safeDoIdx = Math.min(doSlideIdx, schedule.length + 2);
+        const safeDoIdx = Math.min(doSlideIdx, schedule.length + 3);
         const doItem = schedule[safeDoIdx - 1];
         const curMins = now.getHours() * 60 + now.getMinutes();
         return (
@@ -214,7 +214,7 @@ export default function Home9() {
               onTouchEnd={e => {
                 const dy = e.changedTouches[0].clientY - doTouchStartX.current;
                 if (Math.abs(dy) > 40)
-                  setDoSlideIdx(prev => dy < 0 ? Math.min(prev + 1, schedule.length + 2) : Math.max(prev - 1, 0));
+                  setDoSlideIdx(prev => dy < 0 ? Math.min(prev + 1, schedule.length + 3) : Math.max(prev - 1, 0));
               }}
             >
               <div style={{
@@ -224,16 +224,34 @@ export default function Home9() {
                 transform: `translateY(calc((100dvh - 4rem - 56px - (100vw - 40px)) / 2 - 24px - ${safeDoIdx + 1} * (100vw - 24px)))`,
                 transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
               }}>
-                {([null, null, ...schedule.slice(0, currentIdx + 1), 'promo' as const, ...schedule.slice(currentIdx + 1), null, null] as (typeof schedule[0] | null | 'promo')[]).map((s, i) => (
+                {([null, null, ...schedule.slice(0, currentIdx), 'next-match' as const, schedule[currentIdx], 'promo' as const, ...schedule.slice(currentIdx + 1), null, null] as (typeof schedule[0] | null | 'promo' | 'next-match')[]).map((s, i) => (
                   <div key={i} style={{ height: "calc(100vw - 40px)", width: "100%", flexShrink: 0, opacity: i === safeDoIdx + 1 ? 1 : 0.35, filter: i === safeDoIdx + 1 ? "none" : "grayscale(1)", transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-                    {s === 'promo' ? (
+                    {s === 'next-match' ? (
+                      <div className="bg-white rounded-[24px] flex flex-col items-center justify-center w-full h-full gap-2 px-6" style={{ border: "2px solid #2653d4" }}>
+                        <p className="text-[12px] font-bold tracking-widest uppercase leading-none" style={{ color: "#5a7055" }}>Next Match</p>
+                        {match ? (() => {
+                          const [y, mo, d] = match.date.split('-').map(Number);
+                          const dateStr = new Date(y, mo - 1, d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+                          return <>
+                            <p className="text-[26px] font-bold text-[#1a1c1c] leading-tight text-center">{dateStr} · {match.time}</p>
+                            {match.club && <p className="text-[16px] text-[#6b7480] leading-none text-center">{match.club}</p>}
+                            <button onClick={() => router.push("/matches4")} className="mt-1 text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: "#2653d418", color: "#2653d4" }}>See Details</button>
+                          </>;
+                        })() : (
+                          <>
+                            <p className="text-[18px] font-semibold text-[#9aa5b0] text-center">No match set</p>
+                            <button onClick={() => router.push("/matches4")} className="mt-1 text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: "#2653d418", color: "#2653d4" }}>See Details</button>
+                          </>
+                        )}
+                      </div>
+                    ) : s === 'promo' ? (
                       <div className="bg-white rounded-[24px] flex flex-col items-center justify-center w-full h-full gap-2 px-6" style={{ border: `2px solid ${schedule[currentIdx]?.color ?? "#16a34a"}` }}>
                         <p className="text-[12px] font-bold tracking-widest uppercase leading-none" style={{ color: "#5a7055" }}>Check out</p>
                         <p className="text-[24px] font-bold text-[#1a1c1c] leading-tight text-center">Today&apos;s Schedule</p>
                         <button onClick={() => { setSchedOpen(true); setDoSlideIdx(0); }} className="mt-1 text-[13px] font-semibold px-5 py-2 rounded-full" style={{ background: `${schedule[currentIdx]?.color ?? "#16a34a"}18`, color: schedule[currentIdx]?.color ?? "#16a34a" }}>View Schedule</button>
                       </div>
                     ) : s === null ? (
-                      i === schedule.length + 4 ? (
+                      i === schedule.length + 5 ? (
                         /* Last phantom — brand watermark */
                         <div className="rounded-[24px] w-full h-full relative overflow-hidden" style={{ background: "#e2e5e9", border: "2px solid #1a1c1c" }}>
                           <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.08 }}>
@@ -258,7 +276,7 @@ export default function Home9() {
                         </div>
                       )
                     ) : (() => {
-                      const schedIdx = i <= currentIdx + 2 ? i - 2 : i - 3;
+                      const schedIdx = i <= currentIdx + 1 ? i - 2 : i <= currentIdx + 3 ? i - 3 : i - 4;
                       const isDone = completed.has(schedIdx);
                       const nextSlide = schedule[schedIdx + 1];
                       const minsUntilNext = nextSlide ? toMins(nextSlide.time) - curMins : 0;
