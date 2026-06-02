@@ -392,7 +392,7 @@ function CategoryBar({ score, color, icon, label }: {
 }
 
 export default function HomeClientV2() {
-  const todayYMD = new Date().toISOString().slice(0, 10);
+  const [todayYMD] = useState<string>(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; });
   const mondayYMD = offsetYMD(todayYMD, -((new Date().getDay() + 6) % 7));
   const [gameDays, setGameDays] = useState<string[]>(() => {
     try { const s = localStorage.getItem(STORAGE_KEY); if (s) return JSON.parse(s); } catch {}

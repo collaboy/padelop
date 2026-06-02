@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useRef, useState, useEffect } from "react";
 import { downloadSnapshot, importData } from "@/lib/storage";
 import ProfileModal from "@/components/profile-modal";
@@ -9,7 +8,6 @@ import { computeNotifications, type Notif } from "@/lib/notifications";
 import { computeScores, computeAllTimeScores, loadScoringData } from "@/lib/scoring";
 
 export default function Nav() {
-  const router = useRouter();
   const [pct, setPct] = useState(71);
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -68,92 +66,7 @@ export default function Nav() {
     return () => { clearInterval(id); window.removeEventListener("storage", () => {}); };
   }, []);
 
-  const items = [
-    {
-      label: "New Design (home3)",
-      action: () => { router.push("/home3"); setMenuOpen(false); },
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>,
-    },
-    {
-      label: "New Design (home4)",
-      action: () => { router.push("/home4"); setMenuOpen(false); },
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>,
-    },
-    {
-      label: "New Design (home5)",
-      action: () => { router.push("/home5"); setMenuOpen(false); },
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>,
-    },
-    {
-      label: "New Design (home6)",
-      action: () => { router.push("/home6"); setMenuOpen(false); },
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>,
-    },
-    {
-      label: "New Design (home7)",
-      action: () => { router.push("/home7"); setMenuOpen(false); },
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>,
-    },
-    {
-      label: "New Design (home8)",
-      action: () => { router.push("/home8"); setMenuOpen(false); },
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>,
-    },
-    {
-      label: "New Design (home9)",
-      action: () => { router.push("/home9"); setMenuOpen(false); },
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>,
-    },
-    {
-      label: "Today (today2a)",
-      action: () => { router.push("/today2a"); setMenuOpen(false); },
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>,
-    },
-    {
-      label: "Things to Do Today",
-      action: null as (() => void) | null,
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>,
-    },
-    {
-      label: "Things to Do This Week",
-      action: null as (() => void) | null,
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /><polyline points="9,16 11,18 15,14" /></svg>,
-    },
-    {
-      label: "Add Data",
-      action: null as (() => void) | null,
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>,
-    },
-    {
-      label: "Take Quiz",
-      action: null as (() => void) | null,
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 8v4" /><circle cx="12" cy="16" r="0.5" fill="currentColor" /></svg>,
-    },
-    {
-      label: "Today — Alt View",
-      action: () => {
-        router.push("/home-v1");
-        setMenuOpen(false);
-      },
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 10h8M8 14h5"/></svg>,
-    },
-    {
-      label: "Today — Alt View v2",
-      action: () => {
-        router.push("/home-v2");
-        setMenuOpen(false);
-      },
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 10h8M8 14h5"/></svg>,
-    },
-    {
-      label: "Plan this week",
-      action: () => {
-        window.dispatchEvent(new CustomEvent("open-week-plan"));
-        setMenuOpen(false);
-      },
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /><line x1="12" y1="14" x2="12" y2="18" /><line x1="10" y1="16" x2="14" y2="16" /></svg>,
-    },
-  ];
+  const items: { label: string; action: (() => void) | null; icon: React.ReactNode }[] = [];
 
   const dataItems = [
     {
@@ -202,7 +115,7 @@ export default function Nav() {
 
           {/* Right: profile avatar */}
           <div className="flex items-center justify-end">
-            <Link href="/profile" className="relative active:scale-90 transition-transform flex items-center">
+            <button onClick={() => setProfileOpen(true)} className="relative active:scale-90 transition-transform flex items-center">
               <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
                 {profileAvatar ? (
                   <img src={profileAvatar} alt="Profile" className="w-full h-full object-cover" />
@@ -216,7 +129,7 @@ export default function Nav() {
                   </svg>
                 )}
               </div>
-            </Link>
+            </button>
           </div>
         </div>
       </header>
