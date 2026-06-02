@@ -233,7 +233,7 @@ export default function Home8() {
               </div>
 
               {/* Card 0: next match */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", gap: 8, opacity: cardSnap === 'none' && doIdx === -1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)" }}>
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, overflow: "hidden", background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", gap: 8, opacity: cardSnap === 'none' && doIdx === -1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === -1 ? 2 : 1 }}>
                 <p className="text-[13px] font-bold tracking-widest uppercase text-center" style={{ color: "#9aa5b0" }}>Next Match</p>
                 {match ? (() => {
                   const [y, mo, d] = match.date.split('-').map(Number);
@@ -264,23 +264,23 @@ export default function Home8() {
                 const nextSlide = schedule[currentIdx + 1];
                 const secsUntilNext = nextSlide ? toMins(nextSlide.time) * 60 - (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) : 0;
                 const fmtTime = (s: number) => { if (s <= 0) return "a moment"; const h = Math.floor(s / 3600), rem = s % 3600, m = Math.floor(rem / 60), sec = rem % 60; if (h > 0) return `${h}h ${m}m ${sec}s`; return m > 0 ? `${m}m ${sec}s` : `${sec}s`; };
-                const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#bcf063", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: cardSnap === 'none' && doIdx === 0 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)" };
+                const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: 1, zIndex: doIdx === 0 ? 2 : 0 };
                 if (isDone) return (
                   <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
                     <div className="w-10 h-10 rounded-full flex items-center justify-center mb-3" style={{ background: `${s.color}18` }}>
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
-                    <p className="text-[39px] font-bold text-[#1a1c1c] leading-none text-center">Good Job!</p>
-                    <p className="text-[22px] font-semibold text-[#4a5050] mt-1 leading-none text-center">{s.title} complete</p>
-                    {nextSlide && <div className="mt-4 text-center"><p className="text-[20px] text-[#8a9096] leading-none">See you in <span className="font-semibold text-[#4a5050]">{fmtTime(secsUntilNext)}</span> for:</p><p className="text-[21px] font-bold text-[#1a1c1c] mt-1 leading-none">{nextSlide.title}</p></div>}
+                    <p className="text-[39px] font-bold leading-none text-center" style={{ color: "#fff" }}>Good Job!</p>
+                    <p className="text-[22px] font-semibold mt-1 leading-none text-center" style={{ color: "#fff" }}>{s.title} complete</p>
+                    {nextSlide && <div className="mt-4 text-center"><p className="text-[20px] leading-none" style={{ color: "rgba(255,255,255,0.75)" }}>See you in <span className="font-semibold" style={{ color: "#fff" }}>{fmtTime(secsUntilNext)}</span> for:</p><p className="text-[21px] font-bold mt-1 leading-none" style={{ color: "#fff" }}>{nextSlide.title}</p></div>}
                   </div>
                 );
                 return (
                   <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
-                    <p className="text-[18px] font-bold tracking-widest uppercase leading-none mb-1" style={{ color: "#5a7055" }}>Do this now</p>
-                    <p className="text-[36px] font-bold text-[#1a1c1c] leading-tight text-center">{s.title}</p>
-                    {s.subtitle && <p className="text-[22px] text-[#6b7480] leading-none text-center mt-0.5">{s.subtitle}</p>}
-                    <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 text-[20px] font-semibold px-5 py-2 rounded-full" style={{ background: isReady ? `${s.color}18` : "#f0f0f0", color: isReady ? s.color : "#b0b5ba" }}>Complete</button>
+                    <p className="text-[18px] font-bold tracking-widest uppercase leading-none mb-1" style={{ color: "#fff" }}>Do this now</p>
+                    <p className="text-[36px] font-bold leading-tight text-center" style={{ color: "#fff" }}>{s.title}</p>
+                    {s.subtitle && <p className="text-[22px] leading-none text-center mt-0.5" style={{ color: "rgba(255,255,255,0.8)" }}>{s.subtitle}</p>}
+                    <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 text-[20px] font-semibold px-5 py-2 rounded-full" style={{ background: "#fff", color: isReady ? s.color : "#b0b5ba" }}>Complete</button>
                   </div>
                 );
               })()}
@@ -301,7 +301,7 @@ export default function Home8() {
                 const matchNextYMD = matchYMD ? (() => { const d = new Date(matchYMD); d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10); })() : null;
                 const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
                 return (
-                  <div key="sched" style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "white", display: "flex", flexDirection: "column", opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)" }}>
+                  <div key="sched" style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "white", display: "flex", flexDirection: "column", opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === 1 ? 2 : 1 }}>
                     {/* Tab header */}
                     <div style={{ padding: "20px 20px 0", display: "flex", flexDirection: "column", alignItems: "center" }}>
                       <div style={{ width: "100%", overflow: "hidden", display: "flex", justifyContent: "center" }}>
