@@ -122,6 +122,7 @@ export default function Home8() {
   const swipeDirRef = useRef<'h' | 'v' | null>(null);
   const [cardSnap, setCardSnap] = useState<'none' | 'left' | 'right'>('none');
   const [liveX, setLiveX] = useState(0);
+  const [liveY, setLiveY] = useState(0);
 
   useEffect(() => {
     function loadReadiness() {
@@ -175,6 +176,7 @@ export default function Home8() {
             if (!swipeDirRef.current && (Math.abs(dx) > 8 || Math.abs(dy) > 8))
               swipeDirRef.current = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
             if (swipeDirRef.current === 'h' && cardSnap === 'none') setLiveX(dx);
+            if (swipeDirRef.current === 'v' && cardSnap === 'none' && doIdx < 1) setLiveY(dy);
           }}
           onTouchEnd={e => {
             const dx = e.changedTouches[0].clientX - touchStartXRef.current;
@@ -187,6 +189,7 @@ export default function Home8() {
               } else if (cardSnap === 'left' && dx > 60) setCardSnap('none');
               else if (cardSnap === 'right' && dx < -60) setCardSnap('none');
             } else if (swipeDirRef.current === 'v' && cardSnap === 'none') {
+              setLiveY(0);
               if (dy < -40 && doIdx < 1) goNext();
               else if (dy > 40) goPrev();
             }
@@ -221,8 +224,8 @@ export default function Home8() {
               display: "flex", flexDirection: "column", gap: 10,
               transform: doIdx >= 1
                 ? `translateY(calc(-3 * (100vw - 30px) + 44px))`
-                : `translateY(calc(50dvh - 4rem - (100vw - 40px) / 2 - ${doIdx + 2} * (100vw - 30px)))`,
-              transition: "transform 0s cubic-bezier(0.4,0,0.2,1)",
+                : `translateY(calc(50dvh - 4rem - (100vw - 40px) / 2 - ${doIdx + 2} * (100vw - 30px) + ${liveY}px))`,
+              transition: liveY !== 0 ? "none" : "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
             }}>
               {/* Logo above top card */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none", opacity: 0.12 }}>
