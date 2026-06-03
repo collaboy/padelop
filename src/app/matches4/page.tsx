@@ -7,23 +7,25 @@ import LogSheet from "@/components/log-sheet";
 const S = { fontFamily: "Inter, sans-serif" };
 const card: React.CSSProperties = { boxShadow: "0px 4px 20px rgba(0,0,0,0.04)" };
 
-type MatchEntry = {
-  id: string;
-  date: string;
-  time: string;
-  matchType?: string;
-  status: "confirmed" | "pending";
-  partner: string;
-  opponent1: string;
-  opponent2: string;
-  club: string;
-  result?: "win" | "loss";
-  score?: string;
+type StoredMatch = {
+  date: string; time: string; club: string;
+  player_1: string; player_2: string; player_3: string; player_4: string;
+};
+
+type ReviewEntry = {
+  ts: string;
+  feeling: string;
+  result: string;
+  opponent: string;
+  energy: string;
+  wellDone: string[];
+  improved: string[];
 };
 
 const AVATAR_COLORS = ["#2653d4", "#0891b2", "#7c3aed", "#0d9488", "#dc2626", "#ea580c", "#16a34a"];
 
 function initials(name: string) {
+  if (!name) return "?";
   return name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 }
 
@@ -36,140 +38,141 @@ function Avatar({ name, color, size = "md" }: { name: string; color: string; siz
   );
 }
 
-function StatusPill({ status }: { status: "confirmed" | "pending" }) {
-  return (
-    <span className="flex-shrink-0 text-[11px] font-bold tracking-wide px-3 py-1.5 rounded-full uppercase"
-      style={{ background: status === "confirmed" ? "#caecbc" : "#fef3c7", color: status === "confirmed" ? "#496640" : "#92400e" }}>
-      {status === "confirmed" ? "Confirmed" : "Pending"}
-    </span>
-  );
+function formatDate(dateStr: string) {
+  const d = new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
 }
 
-function NextMatchCard({ match }: { match: MatchEntry }) {
-  const d = new Date(match.date + "T00:00:00");
-  const dateLabel = d.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
-  const firstName = (n: string) => n.split(" ")[0];
-  const timeFormatted = (() => {
-    const [h, m] = match.time.split(":").map(Number);
-    const ampm = h >= 12 ? "PM" : "AM";
-    const h12 = h % 12 || 12;
-    return `${h12}:${String(m).padStart(2, "0")} ${ampm}`;
-  })();
-  return (
-    <div className="bg-white rounded-[24px] border border-[#e2e2e2] overflow-hidden" style={card}>
-      <div className="px-5 pt-5 pb-4 flex justify-between items-start gap-3">
-        <div>
-          <p className="text-[15px] font-bold text-[#496640] leading-snug uppercase tracking-wide">{match.matchType ?? "Friendly Match"}</p>
-          <p className="text-[15px] text-[#1a1c1c] mt-1">{dateLabel} • {timeFormatted}</p>
-        </div>
-        <StatusPill status={match.status} />
-      </div>
-      <div className="border-t border-[#ebebeb]" />
-      <div className="flex items-center justify-around px-5 py-6">
-        <div className="flex flex-col items-center gap-2.5">
-          <Avatar name="Me" color="#2653d4" size="lg" />
-          <p className="text-[14px] text-[#1a1c1c] font-medium">You & {firstName(match.partner)}</p>
-        </div>
-        <span className="text-[14px] font-semibold text-[#9aab96] uppercase tracking-widest">vs</span>
-        <div className="flex flex-col items-center gap-2.5">
-          <Avatar name={match.opponent1} color={AVATAR_COLORS[4]} size="lg" />
-          <p className="text-[14px] text-[#1a1c1c] font-medium">{firstName(match.opponent1)} & {firstName(match.opponent2)}</p>
-        </div>
-      </div>
-      <div className="border-t border-[#ebebeb]" />
-      <div className="flex items-center justify-between px-5 py-4">
-        <div className="flex items-center gap-2 text-[14px] text-[#747878]">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
-          </svg>
-          {match.club}
-        </div>
-        <button className="text-[14px] font-bold text-[#1a1c1c] active:opacity-50 transition-opacity">Details</button>
-      </div>
-    </div>
-  );
-}
-
-function MatchCard({ match, isPast }: { match: MatchEntry; isPast?: boolean }) {
-  const d = new Date(match.date + "T00:00:00");
-  const dateLabel = d.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
-  const firstName = (n: string) => n.split(" ")[0];
-  const resultColor = match.result === "win" ? "#496640" : "#dc2626";
-  return (
-    <div className="bg-white rounded-[20px] border border-[#e2e2e2] overflow-hidden" style={card}>
-      <div className="px-5 pt-4 pb-3 flex justify-between items-start gap-3">
-        <div>
-          <p className="text-[13px] font-bold text-[#496640] uppercase tracking-wide">{match.matchType ?? "Friendly Match"}</p>
-          <p className="text-[13px] text-[#747878] mt-0.5">{dateLabel} • {match.time}</p>
-        </div>
-        {isPast && match.result ? (
-          <div className="text-right flex-shrink-0">
-            <p className="text-[13px] font-bold" style={{ color: resultColor }}>{match.result === "win" ? "Win" : "Loss"}</p>
-            {match.score && <p className="text-[11px] text-[#747878]">{match.score}</p>}
-          </div>
-        ) : (
-          <StatusPill status={match.status} />
-        )}
-      </div>
-      <div className="border-t border-[#ebebeb]" />
-      <div className="flex items-center justify-around px-5 py-3">
-        <div className="flex items-center gap-2.5">
-          <Avatar name="Me" color="#2653d4" size="md" />
-          <p className="text-[12px] text-[#1a1c1c] font-medium">You & {firstName(match.partner)}</p>
-        </div>
-        <span className="text-[12px] font-semibold text-[#9aab96] uppercase tracking-widest">vs</span>
-        <div className="flex items-center gap-2.5">
-          <Avatar name={match.opponent1} color={AVATAR_COLORS[4]} size="md" />
-          <p className="text-[12px] text-[#1a1c1c] font-medium">{firstName(match.opponent1)} & {firstName(match.opponent2)}</p>
-        </div>
-      </div>
-      <div className="border-t border-[#ebebeb]" />
-      <div className="flex items-center justify-between px-5 py-2.5">
-        <div className="flex items-center gap-2 text-[12px] text-[#747878]">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
-          </svg>
-          {match.club}
-        </div>
-        <button className="text-[12px] font-bold text-[#1a1c1c] active:opacity-50 transition-opacity">Details</button>
-      </div>
-    </div>
-  );
+function formatTime(timeStr: string) {
+  if (!timeStr) return "";
+  const [h, m] = timeStr.split(":").map(Number);
+  const ampm = h >= 12 ? "PM" : "AM";
+  return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${ampm}`;
 }
 
 const TABS = ["All", "Upcoming", "Past"] as const;
 type Tab = (typeof TABS)[number];
 
-const NEXT_MATCH: MatchEntry = {
-  id: "next", date: "2026-05-28", time: "19:00", matchType: "Friendly Match", status: "confirmed",
-  partner: "Alex Ramos", opponent1: "Carlos Vega", opponent2: "David Puig", club: "Club Padel BCN",
-};
+function NextMatchCard({ match }: { match: StoredMatch }) {
+  const p1 = match.player_1 || "You";
+  const p2 = match.player_2 || "Partner";
+  const p3 = match.player_3 || "Opponent";
+  const p4 = match.player_4 || "";
+  const firstName = (n: string) => n.split(" ")[0];
+  return (
+    <div className="bg-white rounded-[24px] border border-[#e2e2e2] overflow-hidden" style={card}>
+      <div className="px-5 pt-5 pb-4 flex justify-between items-start gap-3">
+        <div>
+          <p className="text-[15px] font-bold text-[#496640] leading-snug uppercase tracking-wide">Friendly Match</p>
+          <p className="text-[15px] text-[#1a1c1c] mt-1">{formatDate(match.date)}{match.time ? ` • ${formatTime(match.time)}` : ""}</p>
+        </div>
+        <span className="flex-shrink-0 text-[11px] font-bold tracking-wide px-3 py-1.5 rounded-full uppercase" style={{ background: "#caecbc", color: "#496640" }}>Upcoming</span>
+      </div>
+      <div className="border-t border-[#ebebeb]" />
+      <div className="flex items-center justify-around px-5 py-6">
+        <div className="flex flex-col items-center gap-2.5">
+          <Avatar name={p1} color="#2653d4" size="lg" />
+          <p className="text-[14px] text-[#1a1c1c] font-medium">{firstName(p1)}{p2 ? ` & ${firstName(p2)}` : ""}</p>
+        </div>
+        <span className="text-[14px] font-semibold text-[#9aab96] uppercase tracking-widest">vs</span>
+        <div className="flex flex-col items-center gap-2.5">
+          <Avatar name={p3} color={AVATAR_COLORS[4]} size="lg" />
+          <p className="text-[14px] text-[#1a1c1c] font-medium">{firstName(p3)}{p4 ? ` & ${firstName(p4)}` : ""}</p>
+        </div>
+      </div>
+      {match.club ? (
+        <>
+          <div className="border-t border-[#ebebeb]" />
+          <div className="flex items-center px-5 py-4 gap-2 text-[14px] text-[#747878]">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
+            </svg>
+            {match.club}
+          </div>
+        </>
+      ) : null}
+    </div>
+  );
+}
 
-const UPCOMING: MatchEntry[] = [
-  { id: "u1", date: "2026-06-03", time: "18:30", status: "confirmed", partner: "Alex Ramos", opponent1: "Marc Torres", opponent2: "Jordi Gil", club: "Padel Indoor BCN" },
-  { id: "u2", date: "2026-06-10", time: "20:00", status: "pending", partner: "Sergi Mas", opponent1: "Carlos Vega", opponent2: "Pau Ferrer", club: "Club Padel BCN" },
-];
-
-const PAST: MatchEntry[] = [
-  { id: "p1", date: "2026-05-20", time: "19:30", status: "confirmed", partner: "Alex Ramos", opponent1: "Marc Torres", opponent2: "Jordi Gil", club: "Padel Indoor BCN", result: "win", score: "6-3 6-4" },
-  { id: "p2", date: "2026-05-14", time: "18:00", status: "confirmed", partner: "Sergi Mas", opponent1: "Carlos Vega", opponent2: "David Puig", club: "Club Padel BCN", result: "loss", score: "4-6 3-6" },
-  { id: "p3", date: "2026-05-07", time: "20:00", status: "confirmed", partner: "Alex Ramos", opponent1: "Pau Ferrer", opponent2: "Jordi Gil", club: "Padel Indoor BCN", result: "win", score: "6-2 7-5" },
-];
+function PastMatchCard({ review }: { review: ReviewEntry }) {
+  const date = review.ts.slice(0, 10);
+  const resultColor = review.result === "win" ? "#496640" : review.result === "loss" ? "#dc2626" : "#747878";
+  const resultLabel = review.result === "win" ? "Win" : review.result === "loss" ? "Loss" : "Played";
+  return (
+    <div className="bg-white rounded-[20px] border border-[#e2e2e2] overflow-hidden" style={card}>
+      <div className="px-5 pt-4 pb-3 flex justify-between items-start gap-3">
+        <div>
+          <p className="text-[13px] font-bold text-[#496640] uppercase tracking-wide">Match</p>
+          <p className="text-[13px] text-[#747878] mt-0.5">{formatDate(date)}</p>
+        </div>
+        <p className="text-[13px] font-bold flex-shrink-0" style={{ color: resultColor }}>{resultLabel}</p>
+      </div>
+      {review.opponent ? (
+        <>
+          <div className="border-t border-[#ebebeb]" />
+          <div className="px-5 py-3 text-[13px] text-[#747878]">
+            vs <span className="font-medium text-[#1a1c1c]">{review.opponent}</span>
+          </div>
+        </>
+      ) : null}
+      {review.wellDone.length > 0 || review.improved.length > 0 ? (
+        <>
+          <div className="border-t border-[#ebebeb]" />
+          <div className="px-5 py-3 flex flex-col gap-1.5">
+            {review.wellDone.slice(0, 2).map(t => (
+              <div key={t} className="flex items-center gap-2 text-[12px] text-[#496640]">
+                <span>✓</span><span>{t}</span>
+              </div>
+            ))}
+            {review.improved.slice(0, 1).map(t => (
+              <div key={t} className="flex items-center gap-2 text-[12px] text-[#2653d4]">
+                <span>↑</span><span>{t}</span>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : null}
+    </div>
+  );
+}
 
 export default function Matches4() {
   const [logSheetOpen, setLogSheetOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("All");
   const [filterOpen, setFilterOpen] = useState(false);
+  const [nextMatch, setNextMatch] = useState<StoredMatch | null>(null);
+  const [pastReviews, setPastReviews] = useState<ReviewEntry[]>([]);
+
+  function loadData() {
+    try {
+      const raw = localStorage.getItem("padelop:next-match");
+      if (raw) {
+        const m = JSON.parse(raw) as StoredMatch;
+        setNextMatch(m.date ? m : null);
+      } else {
+        setNextMatch(null);
+      }
+    } catch { setNextMatch(null); }
+
+    try {
+      const raw = localStorage.getItem("padelop:match-reviews");
+      const reviews = raw ? (JSON.parse(raw) as ReviewEntry[]) : [];
+      setPastReviews(reviews.sort((a, b) => b.ts.localeCompare(a.ts)));
+    } catch { setPastReviews([]); }
+  }
+
+  useEffect(() => {
+    loadData();
+    window.addEventListener("storage", loadData);
+    return () => window.removeEventListener("storage", loadData);
+  }, []);
+
   const showUpcoming = tab === "All" || tab === "Upcoming";
   const showPast = tab === "All" || tab === "Past";
 
-  const [_match, _setMatch] = useState<{ date: string; time: string } | null>(null);
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem("padelop:next-match");
-      if (raw) _setMatch(JSON.parse(raw));
-    } catch {}
-  }, []);
+  const hasUpcoming = !!nextMatch;
+  const hasPast = pastReviews.length > 0;
 
   return (
     <main style={{ ...S, background: "#e2e5e9", minHeight: "100vh", display: "flex", flexDirection: "column", gap: 16, padding: "40px 16px 176px" }}>
@@ -179,7 +182,7 @@ export default function Matches4() {
         <div>
           <h2 style={{ ...S, fontSize: 22, fontWeight: 700, color: "#1a1c1c", margin: 0, letterSpacing: "-0.01em" }}>My Matches</h2>
           <p style={{ ...S, fontSize: 14, color: "#747878", margin: "4px 0 0" }}>
-            <span style={{ fontWeight: 600, color: "#1a1c1c" }}>Interesting…</span> you win 73% when you take the first set.
+            {hasPast ? `${pastReviews.filter(r => r.result === "win").length} wins from ${pastReviews.length} logged matches` : "No matches logged yet"}
           </p>
         </div>
         <button
@@ -205,34 +208,42 @@ export default function Matches4() {
                 className="w-full flex items-center justify-between px-6 py-4 active:bg-[#f9f9f9] transition-colors"
                 style={{ borderTop: i > 0 ? "1px solid #ebebeb" : "none" }}>
                 <span className="text-[15px] font-medium text-[#1a1c1c]">{t}</span>
-                {tab === t && (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#496640" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                )}
+                {tab === t && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#496640" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
               </button>
             ))}
           </div>
         </div>
       )}
 
-      {/* Content */}
+      {/* Upcoming */}
       {showUpcoming && (
         <>
           <p style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>Next Match</p>
-          <NextMatchCard match={NEXT_MATCH} />
-          <p style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>Upcoming</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {UPCOMING.map(m => <MatchCard key={m.id} match={m} />)}
-          </div>
+          {hasUpcoming ? (
+            <NextMatchCard match={nextMatch!} />
+          ) : (
+            <div className="bg-white rounded-[20px] border border-[#e2e2e2] px-5 py-6 text-center" style={card}>
+              <p className="text-[15px] font-medium text-[#747878]">No upcoming match set</p>
+              <p className="text-[13px] text-[#9aab96] mt-1">Add one from the home screen</p>
+            </div>
+          )}
         </>
       )}
+
+      {/* Past */}
       {showPast && (
         <>
-          <p style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>Past</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {PAST.map(m => <MatchCard key={m.id} match={m} isPast />)}
-          </div>
+          <p style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0, marginTop: showUpcoming ? 4 : 0 }}>Past</p>
+          {hasPast ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {pastReviews.map(r => <PastMatchCard key={r.ts} review={r} />)}
+            </div>
+          ) : (
+            <div className="bg-white rounded-[20px] border border-[#e2e2e2] px-5 py-6 text-center" style={card}>
+              <p className="text-[15px] font-medium text-[#747878]">No match reviews yet</p>
+              <p className="text-[13px] text-[#9aab96] mt-1">Log a match review after your next game</p>
+            </div>
+          )}
         </>
       )}
 
@@ -240,13 +251,7 @@ export default function Matches4() {
       <button
         onClick={() => setLogSheetOpen(true)}
         className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
-        style={{
-          bottom: "calc(1.5rem + env(safe-area-inset-bottom))",
-          right: "1.25rem",
-          width: 56, height: 56, borderRadius: 28,
-          background: "#496640",
-          boxShadow: "0 4px 16px #49664055",
-        }}
+        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.25rem", width: 56, height: 56, borderRadius: 28, background: "#496640", boxShadow: "0 4px 16px #49664055" }}
         aria-label="Log activity"
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
