@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import LogSheet from "@/components/log-sheet";
 import PushPrompt from "@/components/push-prompt";
-import { computeScores, loadScoringData, computePillarStates, type PillarStates } from "@/lib/scoring";
+import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, type PillarStates } from "@/lib/scoring";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const addMins = (h: number, m: number, delta: number) => {
@@ -234,6 +234,7 @@ export default function Home8() {
   const [completed, setCompleted] = useState<Set<number>>(new Set());
   const [readiness, setReadiness] = useState(65);
   const [morningDone, setMorningDone] = useState(false);
+  const [streak, setStreak] = useState(0);
   const [pillarStates, setPillarStates] = useState<PillarStates>({
     recovery:  { status: "not_logged", reason: "" },
     nutrition: { status: "not_logged", reason: "" },
@@ -265,6 +266,14 @@ export default function Home8() {
       const d = loadScoringData();
       setReadiness(computeScores(d.checkIn, d.hydration, d.review, d.nutrition, d.gameDaysThisWeek, d.habits, d.training).overall);
       const todayStr = new Date().toISOString().slice(0, 10);
+      // Compute streak from score snapshot history
+      const history = loadScoreHistory();
+      const dateset = new Set(history.map(s => s.date));
+      let s = 0;
+      const cur = new Date();
+      if (!dateset.has(cur.toISOString().slice(0, 10))) cur.setDate(cur.getDate() - 1);
+      while (dateset.has(cur.toISOString().slice(0, 10))) { s++; cur.setDate(cur.getDate() - 1); }
+      setStreak(s);
       let m: { date: string; time: string } | null = null;
       try { m = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch {}
       const matchToday = m?.date === todayStr;
@@ -431,7 +440,6 @@ export default function Home8() {
               {/* Main card */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0, paddingRight: 40, marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
                 {/* Log section */}
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 14px" }}>Log</p>
                 <button onClick={() => { setMatchModalTab('pick'); setMatchModalOpen(true); }} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                   <span style={{ fontSize: "clamp(18px, 5vw, 22px)", fontWeight: 700, color: "#1a1c1c", letterSpacing: "-0.01em" }}>+ Add a Match</span>
                 </button>
@@ -659,9 +667,11 @@ export default function Home8() {
           {/* Readiness panel */}
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 40, paddingTop: "calc(45dvh - 4rem - (100vw - 40px) / 2)" }}>
             <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, padding: "20px 18px", marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-              <p style={{ fontSize: 22, margin: 0 }}>✦</p>
-              <p style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", margin: 0, textAlign: "center" }}>More coming soon</p>
-              <p style={{ fontSize: 12, color: "#9aa5b0", margin: 0, textAlign: "center", lineHeight: 1.5 }}>Your readiness insights{"\n"}are on their way.</p>
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 8px" }}>Streak</p>
+              <p style={{ fontSize: "clamp(56px, 15vw, 72px)", fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>{streak}</p>
+              <p style={{ fontSize: 13, fontWeight: 500, color: "#6b7480", margin: "8px 0 0", textAlign: "center" }}>days in a row</p>
+              <div style={{ width: 36, height: 1, background: "#e8eaed", margin: "20px 0" }} />
+              <p style={{ fontSize: 12, color: "#9aa5b0", margin: 0, textAlign: "center", lineHeight: 1.5 }}>{streak === 0 ? "Log today to\nstart your streak" : streak === 1 ? "Great start —\nkeep it going!" : "Keep it up!"}</p>
             </div>
           </div>
         </div>

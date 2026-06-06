@@ -104,13 +104,13 @@ function TagCloud({ reviews }: { reviews: ReviewEntry[] }) {
   const maxCount = tags[0].count;
   return (
     <div className="bg-white rounded-[20px] border border-[#e2e2e2] px-5 py-5" style={card}>
-      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 14px" }}>Improvement</p>
+      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 14px" }}>Trending in your matches</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "10px 12px", alignItems: "center" }}>
         {tags.map(({ text, count, type }) => {
           const ratio = maxCount > 1 ? (count - 1) / (maxCount - 1) : 1;
           const fontSize = Math.round(12 + ratio * 16);
-          const color = type === "good" ? "#496640" : "#ea580c";
-          const bg = type === "good" ? "#eef6eb" : "#fef0e8";
+          const color = type === "good" ? "#00a844" : "#ea580c";
+          const bg = type === "good" ? "#e6fff1" : "#fef0e8";
           const rot = ((hashStr(text) % 11) - 5) * 0.8;
           return (
             <span key={text + type} style={{
@@ -281,6 +281,7 @@ export default function Activity() {
   const [trainingSessions, setTrainingSessions] = useState<TrainingEntry[]>([
     { ts: new Date(Date.now() - 86400000).toISOString(), sessionType: ["Padel", "Drills"], drillFocus: ["Bandeja", "Volleys", "Positioning"], duration: "60min", intensity: "moderate" },
   ]);
+  const [archiveOpen, setArchiveOpen] = useState(false);
   const [restDays, setRestDays] = useState<Set<string>>(() => {
     if (typeof window === "undefined") return new Set<string>();
     try { return new Set<string>(JSON.parse(localStorage.getItem("padelop:rest-days") || "[]")); } catch { return new Set<string>(); }
@@ -404,84 +405,55 @@ export default function Activity() {
         const monthCells: (number | null)[] = [...Array(firstDow).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
         while (monthCells.length % 7 !== 0) monthCells.push(null);
         const monthLabel = now.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+        // Group month cells into rows of 7
+        const rows: (number | null)[][] = [];
+        for (let r = 0; r < monthCells.length / 7; r++) rows.push(monthCells.slice(r * 7, r * 7 + 7));
+        const todayDay = parseInt(todayYMD.slice(8));
+        const todayCell = monthCells.findIndex(d => d === todayDay && todayYMD.startsWith(`${yr}-${String(mo + 1).padStart(2, "0")}`));
+        const currentWeekRow = todayCell >= 0 ? Math.floor(todayCell / 7) : -1;
+
         return (
           <>
             <p style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>Schedule</p>
             <div className="bg-white rounded-[24px] border border-[#e2e2e2] overflow-hidden" style={card}>
-              {/* Week grid */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
-                {weekDays.map(({ ymd, date }, i) => {
-                  const isToday = ymd === todayYMD;
-                  const isPast = ymd < todayYMD;
-                  return (
-                    <div key={ymd} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "12px 0", gap: 4, borderLeft: i > 0 ? "1px solid #ebebeb" : "none", boxShadow: isToday ? "inset 0 0 0 2px #2653d4" : "none", opacity: isPast ? 0.3 : 1 }}>
-                      <span style={{ fontSize: 10, fontWeight: 700, color: isToday ? "#2653d4" : "#747878" }}>{dayNames[i]}</span>
-                      <span style={{ fontSize: 14, fontWeight: 700, lineHeight: 1, color: isToday ? "#2653d4" : "#1a1c1c" }}>{date.getDate()}</span>
-                    </div>
-                  );
-                })}
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", borderTop: "1px solid #ebebeb" }}>
-                {weekDays.map(({ ymd }, i) => {
-                  const isGame = ymd === matchYMD;
-                  const isRecovery = !isGame && ymd === matchNextYMD;
-                  const isRest = !isGame && !isRecovery && restDays.has(ymd);
-                  const isPast = ymd < todayYMD;
-                  const isToggleable = !isGame && !isRecovery && !isPast;
-                  const label = isGame ? "G" : isRecovery ? "R" : isRest ? "–" : "T";
-                  const labelColor = isGame ? "#496640" : isRecovery ? "#7c3aed" : isRest ? "#9aab96" : "#2653d4";
-                  return (
-                    <div key={ymd}
-                      onClick={() => {
-                        if (!isToggleable) return;
-                        setRestDays(prev => {
-                          const next = new Set(prev);
-                          next.has(ymd) ? next.delete(ymd) : next.add(ymd);
-                          try { localStorage.setItem("padelop:rest-days", JSON.stringify([...next])); } catch {}
-                          return next;
-                        });
-                      }}
-                      style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "10px 0", borderLeft: i > 0 ? "1px solid #ebebeb" : "none", background: ymd === todayYMD ? "#f9f9f9" : "transparent", opacity: isPast ? 0.3 : 1, cursor: isToggleable ? "pointer" : "default" }}
-                    >
-                      <span style={{ fontSize: 15, fontWeight: 800, color: labelColor, fontFamily: "Inter, sans-serif" }}>{label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 14px", borderTop: "1px solid #ebebeb" }}>
-                <span style={{ fontSize: 10, fontWeight: 700, color: "#496640" }}>G</span><span style={{ fontSize: 10, color: "#747878" }}>Game</span>
-                <span style={{ fontSize: 10, fontWeight: 700, color: "#7c3aed", marginLeft: 8 }}>R</span><span style={{ fontSize: 10, color: "#747878" }}>Recovery</span>
-                <span style={{ fontSize: 10, fontWeight: 700, color: "#2653d4", marginLeft: 8 }}>T</span><span style={{ fontSize: 10, color: "#747878" }}>Train</span>
-                <span style={{ fontSize: 10, fontWeight: 700, color: "#9aab96", marginLeft: 8 }}>–</span><span style={{ fontSize: 10, color: "#747878" }}>Rest</span>
-              </div>
-              {/* Month calendar */}
-              <div style={{ borderTop: "1px solid #ebebeb", padding: "16px 14px 20px" }}>
+              <div style={{ padding: "16px 14px 20px" }}>
                 <p style={{ fontSize: 12, fontWeight: 600, color: "#747878", marginBottom: 10, textTransform: "capitalize" }}>{monthLabel}</p>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", marginBottom: 2 }}>
+                {/* Day headers */}
+                <div style={{ display: "grid", gridTemplateColumns: "12px repeat(7, 1fr)", marginBottom: 2 }}>
+                  <div />
                   {["M","T","W","T","F","S","S"].map((d, i) => (
                     <div key={i} style={{ textAlign: "center", fontSize: 10, fontWeight: 700, color: "#9aab96", paddingBottom: 4 }}>{d}</div>
                   ))}
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
-                  {monthCells.map((day, i) => {
-                    if (day === null) return <div key={i} style={{ height: 34 }} />;
-                    const ymd = `${yr}-${String(mo + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-                    const isToday = ymd === todayYMD;
-                    const isMatch = matchDates.has(ymd);
-                    const isRecovery = !isMatch && recoveryDates.has(ymd);
-                    const isPast = ymd < todayYMD;
-                    const dotColor = isMatch ? "#496640" : isRecovery ? "#7c3aed" : "#2653d4";
-                    const hasDot = (isMatch || isRecovery) && !isPast;
-                    return (
-                      <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingBottom: 2 }}>
-                        <div style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: isToday ? "#2653d4" : "transparent", opacity: isPast ? 0.3 : 1 }}>
-                          <span style={{ fontSize: 12, fontWeight: isToday ? 700 : 400, color: isToday ? "#fff" : "#1a1c1c" }}>{day}</span>
+                {/* Rows with triangle indicator */}
+                {rows.map((rowCells, rowIdx) => (
+                  <div key={rowIdx} style={{ display: "grid", gridTemplateColumns: "12px repeat(7, 1fr)", alignItems: "center" }}>
+                    {/* Triangle for current week */}
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", alignSelf: "center" }}>
+                      {rowIdx === currentWeekRow && (
+                        <svg width="6" height="9" viewBox="0 0 6 9"><polygon points="0,0 6,4.5 0,9" fill="#2653d4"/></svg>
+                      )}
+                    </div>
+                    {rowCells.map((day, colIdx) => {
+                      if (day === null) return <div key={colIdx} style={{ height: 34 }} />;
+                      const ymd = `${yr}-${String(mo + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+                      const isToday = ymd === todayYMD;
+                      const isMatch = matchDates.has(ymd);
+                      const isRecovery = !isMatch && recoveryDates.has(ymd);
+                      const isPast = ymd < todayYMD;
+                      const dotColor = isMatch ? "#496640" : isRecovery ? "#7c3aed" : "#2653d4";
+                      const hasDot = (isMatch || isRecovery) && !isPast;
+                      return (
+                        <div key={colIdx} style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingBottom: 2 }}>
+                          <div style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: isToday ? "#2653d4" : "transparent", opacity: isPast ? 0.35 : 1 }}>
+                            <span style={{ fontSize: 12, fontWeight: isToday ? 700 : 400, color: isToday ? "#fff" : "#1a1c1c" }}>{day}</span>
+                          </div>
+                          <div style={{ height: 4, width: 4, borderRadius: "50%", background: hasDot ? dotColor : "transparent", marginTop: 1 }} />
                         </div>
-                        <div style={{ height: 4, width: 4, borderRadius: "50%", background: hasDot ? dotColor : "transparent", marginTop: 1 }} />
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                ))}
               </div>
             </div>
           </>
@@ -497,29 +469,35 @@ export default function Activity() {
         </>
       )}
 
-      {/* Activity feed */}
+      {/* Activity archive */}
       {(tab === "All" || tab === "Matches" || tab === "Training") && (
         <>
-          {visibleFeed.length > 0 && (
-            <p style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>
-              {tab === "All" ? "Activity" : tab}
-            </p>
-          )}
-          {visibleFeed.length > 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {visibleFeed.map(item =>
-                item.kind === "match"
-                  ? <MatchCard key={item.ts + "m"} review={item.data as ReviewEntry} />
-                  : <TrainingCard key={item.ts + "t"} entry={item.data as TrainingEntry} />
-              )}
-            </div>
-          ) : (
-            <div className="bg-white rounded-[20px] border border-[#e2e2e2] px-5 py-8 text-center" style={card}>
-              <p className="text-[15px] font-medium text-[#747878]">
-                {tab === "Training" ? "No training sessions logged yet" : tab === "Matches" ? "No match reviews yet" : "No activity logged yet"}
-              </p>
-              <p className="text-[13px] text-[#9aab96] mt-1">Tap + to log your first session</p>
-            </div>
+          <button
+            onClick={() => setArchiveOpen(o => !o)}
+            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", cursor: "pointer", padding: 0, width: "100%" }}
+          >
+            <p style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>Activity Archive</p>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: archiveOpen ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}>
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </button>
+          {archiveOpen && (
+            visibleFeed.length > 0 ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {visibleFeed.map(item =>
+                  item.kind === "match"
+                    ? <MatchCard key={item.ts + "m"} review={item.data as ReviewEntry} />
+                    : <TrainingCard key={item.ts + "t"} entry={item.data as TrainingEntry} />
+                )}
+              </div>
+            ) : (
+              <div className="bg-white rounded-[20px] border border-[#e2e2e2] px-5 py-8 text-center" style={card}>
+                <p className="text-[15px] font-medium text-[#747878]">
+                  {tab === "Training" ? "No training sessions logged yet" : tab === "Matches" ? "No match reviews yet" : "No activity logged yet"}
+                </p>
+                <p className="text-[13px] text-[#9aab96] mt-1">Tap + to log your first session</p>
+              </div>
+            )
           )}
         </>
       )}
