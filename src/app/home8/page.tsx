@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import LogSheet from "@/components/log-sheet";
+import ReadinessSheet from "@/components/readiness-sheet";
 import PushPrompt from "@/components/push-prompt";
 import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, type PillarStates } from "@/lib/scoring";
 
@@ -232,6 +233,7 @@ export default function Home8() {
   const [doModalOpen, setDoModalOpen] = useState(false);
   const [schedModalIdx, setSchedModalIdx] = useState<number | null>(null);
   const [logSheetOpen, setLogSheetOpen] = useState(false);
+  const [readinessSheetOpen, setReadinessSheetOpen] = useState(false);
   const [logTab, setLogTab] = useState<"checkin" | "wellbeing" | "matchreview" | null>(null);
   const [logWizard, setLogWizard] = useState(false);
   const [matchModalOpen, setMatchModalOpen] = useState(false);
@@ -537,7 +539,7 @@ export default function Home8() {
 
                           {/* Readiness */}
                           <p style={{ fontSize: 16, fontWeight: 400, color: "#3a4550", margin: "0 0 6px", textAlign: "center", lineHeight: 1.5 }}>{coachTip}</p>
-                          <button onClick={() => router.push('/readiness')} style={{ display: "flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                          <button onClick={() => setReadinessSheetOpen(true)} style={{ display: "flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                             <span style={{ fontSize: 14, fontWeight: 600, color: "#2653d4" }}>See insights</span>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                           </button>
@@ -807,6 +809,7 @@ export default function Home8() {
         </button>
 
         <LogSheet open={logSheetOpen} onClose={() => { setLogSheetOpen(false); setLogTab(null); setLogWizard(false); }} defaultSub={logTab} startWizard={logWizard} />
+        <ReadinessSheet open={readinessSheetOpen} onClose={() => setReadinessSheetOpen(false)} onOpenLog={tab => { setLogTab(tab as Parameters<typeof setLogTab>[0]); setLogSheetOpen(true); }} />
         <PushPrompt />
 
         {/* Post-match prompt */}
