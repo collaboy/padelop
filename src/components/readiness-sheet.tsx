@@ -150,7 +150,7 @@ export default function ReadinessSheet({ open, onClose, onOpenLog }: Props) {
       <style>{`@keyframes rsSlideDown{from{transform:translateY(-16px);opacity:0}to{transform:translateY(0);opacity:1}}`}</style>
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       <div
-        className="relative w-full max-w-lg bg-[#f0f2f5] rounded-[28px] flex flex-col overflow-hidden"
+        className="relative w-full max-w-lg mx-4 bg-[#f0f2f5] rounded-[28px] flex flex-col overflow-hidden"
         style={{ animation: "rsSlideDown 0.25s cubic-bezier(0.22,1,0.36,1)", maxHeight: "calc(100dvh - 4rem - 24px)", paddingBottom: "env(safe-area-inset-bottom)" }}
         onClick={e => e.stopPropagation()}
       >
