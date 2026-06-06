@@ -180,14 +180,6 @@ export default function ReadinessSheet({ open, onClose, onOpenLog }: Props) {
                 </div>
               ))}
             </div>
-            <div style={{ height: 1, background: "#f0f0f0", margin: "20px 0" }} />
-            <button
-              onClick={() => whyRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-              style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 4 }}
-            >
-              <span style={{ fontSize: 13, fontWeight: 600, color: "#2653d4" }}>See why</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
           </div>
 
           {/* What's driving it */}
