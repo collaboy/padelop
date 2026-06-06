@@ -9,7 +9,8 @@ import {
   type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry, type HabitsEntry,
 } from "@/lib/scoring";
 
-type Focus = { pillar: string; message: string; actions: string[] };
+type Action = { label: string; detail: string };
+type Focus = { pillar: string; message: string; actions: Action[] };
 
 function computeFocus(
   checkIn: DailyCheckIn | null,
@@ -19,18 +20,46 @@ function computeFocus(
   habits: HabitsEntry | null,
   daysToMatch: number | null,
 ): Focus {
-  if (daysToMatch === 0) return { pillar: "Recovery", message: "Match day — protect your energy.", actions: ["Hydration", "Warm up well", "Stay loose"] };
-  if (daysToMatch === 1) return { pillar: "Recovery", message: "Match tomorrow — recover well tonight.", actions: ["Hydration", "Sleep early", "Mobility"] };
-  if (!checkIn)          return { pillar: "Check in",  message: "Start your day with a quick check-in.", actions: ["Morning check-in", "Hydration", "Nutrition"] };
-  if (checkIn.sleep <= 2 || checkIn.soreness <= 2)
-    return { pillar: "Recovery", message: "Take it easy today.", actions: ["Hydration", "Mobility", "Sleep"] };
-  if (!hydration && !nutrition)
-    return { pillar: "Nutrition", message: "Fuel and hydrate before the day gets away.", actions: ["Hydration", "Protein", "Track meals"] };
-  if (checkIn.stress <= 2 || checkIn.motivation <= 2)
-    return { pillar: "Mindset", message: "Reset before you push hard.", actions: ["Box breathing", "Visualise", "Light walk"] };
-  if (!training)
-    return { pillar: "Training", message: "A session today will lift your week.", actions: ["Padel drills", "Gym", "Active recovery"] };
-  return { pillar: "Consistency", message: "You're on track. Keep the habits going.", actions: ["Foam roll", "Sleep early", "Log tonight"] };
+  if (daysToMatch === 0) return { pillar: "Recovery", message: "Match day — protect your energy.", actions: [
+    { label: "Hydration",    detail: "Keep sipping — don't wait until you're thirsty" },
+    { label: "Warm up well", detail: "Dynamic warmup before you step on court" },
+    { label: "Stay loose",   detail: "Stretch between sets, don't let muscles tighten" },
+  ]};
+  if (daysToMatch === 1) return { pillar: "Recovery", message: "Match tomorrow — recover well tonight.", actions: [
+    { label: "Hydration",   detail: "Aim for 2.5L through the day" },
+    { label: "Sleep early", detail: "Target 8 hours — this is your biggest lever" },
+    { label: "Mobility",    detail: "10 min light stretch before bed" },
+  ]};
+  if (!checkIn) return { pillar: "Check in", message: "Start your day with a quick check-in.", actions: [
+    { label: "Morning check-in", detail: "Log sleep, energy and soreness to set your baseline" },
+    { label: "Hydration",        detail: "Start the day with a full glass of water" },
+    { label: "Nutrition",        detail: "Log what you eat — small habit, big picture" },
+  ]};
+  if (checkIn.sleep <= 2 || checkIn.soreness <= 2) return { pillar: "Recovery", message: "Take it easy today.", actions: [
+    { label: "Hydration", detail: "Aim for 2.5L — helps flush out fatigue" },
+    { label: "Mobility",  detail: "10 min foam roll or light stretch, nothing intense" },
+    { label: "Sleep",     detail: "Target 8 hours tonight to reset properly" },
+  ]};
+  if (!hydration && !nutrition) return { pillar: "Nutrition", message: "Fuel and hydrate before the day gets away.", actions: [
+    { label: "Hydration",    detail: "Log your intake — aim for 2–3L today" },
+    { label: "Protein",      detail: "Hit your protein target to support muscle repair" },
+    { label: "Track meals",  detail: "Log what you eat tonight in the night check-in" },
+  ]};
+  if (checkIn.stress <= 2 || checkIn.motivation <= 2) return { pillar: "Mindset", message: "Reset before you push hard.", actions: [
+    { label: "Box breathing", detail: "4 counts in, hold, out, hold — 5 rounds" },
+    { label: "Visualise",     detail: "2 min eyes closed — picture yourself playing well" },
+    { label: "Light walk",    detail: "20 min outside clears the head better than rest" },
+  ]};
+  if (!training) return { pillar: "Training", message: "A session today will lift your week.", actions: [
+    { label: "Padel drills",     detail: "30–60 min focused drill work beats a full game" },
+    { label: "Gym",              detail: "Legs and core — the foundation of your game" },
+    { label: "Active recovery",  detail: "Even a 20 min walk counts — stay in the habit" },
+  ]};
+  return { pillar: "Consistency", message: "You're on track. Keep the habits going.", actions: [
+    { label: "Foam roll",   detail: "5–10 min on legs and back before bed" },
+    { label: "Sleep early", detail: "Consistent bedtime is more important than duration" },
+    { label: "Log tonight", detail: "Complete your night check-in to close the day" },
+  ]};
 }
 
 type LogTab = "checkin" | "hydration" | "nutrition" | "training" | "wellbeing";
@@ -188,9 +217,12 @@ export default function ReadinessPage() {
 
         <div style={{ height: 1, background: "#f0f0f0", margin: "20px 0" }} />
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {focus.actions.map(action => (
-            <p key={action} style={{ fontSize: 15, fontWeight: 500, color: "#1a1c1c", margin: 0 }}>{action}</p>
+            <div key={action.label}>
+              <p style={{ fontSize: 15, fontWeight: 600, color: "#1a1c1c", margin: "0 0 2px" }}>{action.label}</p>
+              <p style={{ fontSize: 13, color: "#9aa5b0", margin: 0, lineHeight: 1.4 }}>{action.detail}</p>
+            </div>
           ))}
         </div>
 
