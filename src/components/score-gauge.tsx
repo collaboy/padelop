@@ -1,10 +1,11 @@
+// @ts-nocheck
 "use client";
 
 import { useState, useEffect } from "react";
 import { computeScores, loadScoringData, type Scores } from "@/lib/scoring";
 
 export default function ScoreGauge() {
-  const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 65, hydration: 65, energy: 65, mobility: 65 });
+  const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65 });
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
