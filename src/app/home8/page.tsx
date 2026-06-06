@@ -337,50 +337,41 @@ export default function Home8() {
               {/* Placeholder above */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
               {/* Main card */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", justifyContent: "center", gap: 8, padding: "0 16px", marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-                <p className="font-bold tracking-widest uppercase" style={{ color: "#9aa5b0", fontSize: "clamp(10px, 2.8vw, 13px)", paddingLeft: 4 }}>Log Data</p>
-                {/* Add a Match */}
-                <button onClick={() => { setMatchModalTab('pick'); setMatchModalOpen(true); }} style={{ background: "#f0faf4", borderRadius: 18, padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", border: "none", cursor: "pointer" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#22c55e18", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
-                    </div>
-                    <div style={{ textAlign: "left" }}>
-                      <p style={{ fontSize: "clamp(13px, 3.8vw, 16px)", fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Add a Match</p>
-                      <p style={{ fontSize: "clamp(10px, 3vw, 12px)", color: "#6b7480", margin: "2px 0 0" }}>Schedule upcoming game</p>
-                    </div>
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "transparent", borderRadius: 24, display: "flex", flexDirection: "column", justifyContent: "center", gap: 7, marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 2px" }}>Log Data</p>
+                <button onClick={() => { setMatchModalTab('pick'); setMatchModalOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: "white", borderRadius: 18, border: "none", width: "100%", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#22c55e18", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
                   </div>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                  <div style={{ textAlign: "left", flex: 1 }}>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>Add a Match</p>
+                    <p style={{ fontSize: 12, color: "#6b7480", margin: "2px 0 0" }}>Schedule upcoming game</p>
+                  </div>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
-                <p className="font-bold tracking-widest uppercase" style={{ color: "#9aa5b0", fontSize: "clamp(10px, 2.8vw, 13px)", paddingLeft: 4, marginTop: 2 }}>Daily Check-in</p>
-                {/* Morning Check-in */}
-                <button onClick={() => { setLogWizard(false); setLogTab("checkin"); setLogSheetOpen(true); }} style={{ background: morningDone ? "#f0fdf4" : "#f4f6ff", borderRadius: 18, padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", border: "none", cursor: "pointer" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: morningDone ? "#16a34a18" : "#2653d418", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={morningDone ? "#16a34a" : "#2653d4"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-                    </div>
-                    <div style={{ textAlign: "left" }}>
-                      <p style={{ fontSize: "clamp(13px, 3.8vw, 16px)", fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Morning Check-in</p>
-                      <p style={{ fontSize: "clamp(10px, 3vw, 12px)", color: morningDone ? "#16a34a" : "#6b7480", margin: "2px 0 0" }}>{morningDone ? "Done today" : "Sleep, energy & soreness"}</p>
-                    </div>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "4px 0 2px" }}>Daily Check-in</p>
+                <button onClick={() => { setLogWizard(false); setLogTab("checkin"); setLogSheetOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: "white", borderRadius: 18, border: "none", width: "100%", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: morningDone ? "#16a34a18" : "#2653d418", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={morningDone ? "#16a34a" : "#2653d4"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                  </div>
+                  <div style={{ textAlign: "left", flex: 1 }}>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>Morning Check-in</p>
+                    <p style={{ fontSize: 12, color: morningDone ? "#16a34a" : "#6b7480", margin: "2px 0 0" }}>{morningDone ? "Done today" : "Sleep, energy & soreness"}</p>
                   </div>
                   {morningDone
-                    ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                    : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                   }
                 </button>
-                {/* Night Check-in */}
-                <button onClick={() => { setLogWizard(false); setLogTab("wellbeing"); setLogSheetOpen(true); }} style={{ background: "#f8f4ff", borderRadius: 18, padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", border: "none", cursor: "pointer" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#7c3aed18", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                    </div>
-                    <div style={{ textAlign: "left" }}>
-                      <p style={{ fontSize: "clamp(13px, 3.8vw, 16px)", fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Night Check-in</p>
-                      <p style={{ fontSize: "clamp(10px, 3vw, 12px)", color: "#6b7480", margin: "2px 0 0" }}>Stress & motivation</p>
-                    </div>
+                <button onClick={() => { setLogWizard(false); setLogTab("wellbeing"); setLogSheetOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: "white", borderRadius: 18, border: "none", width: "100%", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#7c3aed18", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
                   </div>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                  <div style={{ textAlign: "left", flex: 1 }}>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>Night Check-in</p>
+                    <p style={{ fontSize: 12, color: "#6b7480", margin: "2px 0 0" }}>Stress & motivation</p>
+                  </div>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
               </div>
               {/* Placeholder below */}
