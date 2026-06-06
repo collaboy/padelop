@@ -257,7 +257,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
         <style>{`@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
         <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
         <div className="h1-font relative w-full max-w-lg bg-white rounded-t-[28px] shadow-2xl"
-          style={{ minHeight: "58dvh", animation: "slideUp 0.28s cubic-bezier(0.22,1,0.36,1)" }}
+          style={{ minHeight: "82dvh", animation: "slideUp 0.28s cubic-bezier(0.22,1,0.36,1)" }}
           onClick={e => e.stopPropagation()}>
           {/* Handle */}
           <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4"/>
@@ -268,17 +268,14 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
               className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4]">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
-            {/* Progress dots */}
-            <div className="flex items-center gap-1.5">
-              {NIGHT_STEPS.map((_, i) => (
-                <div key={i} style={{
-                  width: i === nightStep ? 20 : 5,
-                  height: 5,
-                  borderRadius: 99,
-                  background: i <= nightStep ? PURPLE : "#e2e2e2",
-                  transition: "all 0.25s",
-                }}/>
-              ))}
+            {/* Progress */}
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-[12px] font-bold" style={{ color: PURPLE }}>{nightStep + 1} of {NIGHT_STEPS.length}</span>
+              <div className="flex items-center gap-1">
+                {NIGHT_STEPS.map((_, i) => (
+                  <div key={i} style={{ width: i === nightStep ? 16 : 4, height: 4, borderRadius: 99, background: i <= nightStep ? PURPLE : "#e2e2e2", transition: "all 0.25s" }}/>
+                ))}
+              </div>
             </div>
             <button onClick={handleClose} className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4]"><XIcon/></button>
           </div>
@@ -443,7 +440,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
         <style>{`@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
         <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
         <div className="h1-font relative w-full max-w-lg bg-white rounded-t-[28px] shadow-2xl"
-          style={{ minHeight: "58dvh", animation: "slideUp 0.28s cubic-bezier(0.22,1,0.36,1)" }}
+          style={{ minHeight: "82dvh", animation: "slideUp 0.28s cubic-bezier(0.22,1,0.36,1)" }}
           onClick={e => e.stopPropagation()}>
           {/* Handle */}
           <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4"/>
@@ -454,17 +451,14 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
               className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4]">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
-            {/* Progress dots */}
-            <div className="flex items-center gap-1.5">
-              {MORNING_STEPS.map((_, i) => (
-                <div key={i} style={{
-                  width: i === morningStep ? 20 : 5,
-                  height: 5,
-                  borderRadius: 99,
-                  background: i < morningStep ? BLUE : i === morningStep ? BLUE : "#e2e2e2",
-                  transition: "all 0.25s",
-                }}/>
-              ))}
+            {/* Progress */}
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-[12px] font-bold" style={{ color: BLUE }}>{morningStep + 1} of {MORNING_STEPS.length}</span>
+              <div className="flex items-center gap-1">
+                {MORNING_STEPS.map((_, i) => (
+                  <div key={i} style={{ width: i === morningStep ? 16 : 4, height: 4, borderRadius: 99, background: i <= morningStep ? BLUE : "#e2e2e2", transition: "all 0.25s" }}/>
+                ))}
+              </div>
             </div>
             <button onClick={handleClose} className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4]"><XIcon/></button>
           </div>
