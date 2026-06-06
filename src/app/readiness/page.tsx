@@ -205,29 +205,6 @@ export default function ReadinessPage() {
         </button>
       </div>
 
-      {/* Hero score */}
-      <div style={{ background: "#fff", borderRadius: 24, padding: "24px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 20 }}>
-          <div>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 8px" }}>Readiness Today</p>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-              <span style={{ fontSize: 52, fontWeight: 800, color, lineHeight: 1 }}>{score}</span>
-              <span style={{ fontSize: 15, fontWeight: 500, color: "#b0b8c1" }}>/100</span>
-            </div>
-          </div>
-          <span style={{ fontSize: 14, fontWeight: 700, padding: "6px 16px", borderRadius: 999, background: bg, color, marginTop: 4 }}>{word}</span>
-        </div>
-
-        {/* Fill bar */}
-        <div style={{ height: 8, borderRadius: 99, background: "#f0f0f0", overflow: "hidden" }}>
-          <div style={{ height: "100%", borderRadius: 99, background: color, width: `${fillPct}%`, transition: "width 0.5s cubic-bezier(0.4,0,0.2,1)" }} />
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-          <span style={{ fontSize: 10, color: "#c0c8d0" }}>65 min</span>
-          <span style={{ fontSize: 10, color: "#c0c8d0" }}>100 peak</span>
-        </div>
-      </div>
-
       {/* Context card */}
       {contextMsg && (
         <div style={{ background: "#1a2e8a", borderRadius: 20, padding: "14px 18px", display: "flex", alignItems: "center", gap: 12 }}>
