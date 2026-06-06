@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Nav4 from "@/components/nav4";
 import LogSheet from "@/components/log-sheet";
@@ -8,6 +8,30 @@ import {
   computeScores, loadScoringData, saveScoreSnapshot,
   type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry, type HabitsEntry,
 } from "@/lib/scoring";
+
+type Focus = { pillar: string; message: string; actions: string[] };
+
+function computeFocus(
+  checkIn: DailyCheckIn | null,
+  hydration: HydrationEntry | null,
+  nutrition: NutritionEntry | null,
+  training: TrainingEntry | null,
+  habits: HabitsEntry | null,
+  daysToMatch: number | null,
+): Focus {
+  if (daysToMatch === 0) return { pillar: "Recovery", message: "Match day — protect your energy.", actions: ["Hydration", "Warm up well", "Stay loose"] };
+  if (daysToMatch === 1) return { pillar: "Recovery", message: "Match tomorrow — recover well tonight.", actions: ["Hydration", "Sleep early", "Mobility"] };
+  if (!checkIn)          return { pillar: "Check in",  message: "Start your day with a quick check-in.", actions: ["Morning check-in", "Hydration", "Nutrition"] };
+  if (checkIn.sleep <= 2 || checkIn.soreness <= 2)
+    return { pillar: "Recovery", message: "Take it easy today.", actions: ["Hydration", "Mobility", "Sleep"] };
+  if (!hydration && !nutrition)
+    return { pillar: "Nutrition", message: "Fuel and hydrate before the day gets away.", actions: ["Hydration", "Protein", "Track meals"] };
+  if (checkIn.stress <= 2 || checkIn.motivation <= 2)
+    return { pillar: "Mindset", message: "Reset before you push hard.", actions: ["Box breathing", "Visualise", "Light walk"] };
+  if (!training)
+    return { pillar: "Training", message: "A session today will lift your week.", actions: ["Padel drills", "Gym", "Active recovery"] };
+  return { pillar: "Consistency", message: "You're on track. Keep the habits going.", actions: ["Foam roll", "Sleep early", "Log tonight"] };
+}
 
 type LogTab = "checkin" | "hydration" | "nutrition" | "training" | "wellbeing";
 
@@ -20,6 +44,7 @@ const rateLabel  = (v: number) => ["Very low",  "Low",  "Moderate", "Good", "Hig
 
 export default function ReadinessPage() {
   const router = useRouter();
+  const whyRef = useRef<HTMLDivElement>(null);
   const [logSheetOpen, setLogSheetOpen] = useState(false);
   const [logTab, setLogTab] = useState<LogTab>("checkin");
   const [score, setScore] = useState(65);
@@ -67,6 +92,8 @@ export default function ReadinessPage() {
   else if (daysToMatch === 1) contextMsg = "Match tomorrow — prioritise sleep and hydration tonight";
   else if (daysToMatch !== null && daysToMatch <= 3)
     contextMsg = `Match in ${daysToMatch} days — build recovery now`;
+
+  const focus = computeFocus(checkIn, hydration, nutrition, training, habits, daysToMatch);
 
   // 65 = 0%, 100 = 100%
   const fillPct = Math.round(((score - 65) / 35) * 100);
@@ -153,6 +180,31 @@ export default function ReadinessPage() {
         </div>
       </div>
 
+      {/* YOUR FOCUS */}
+      <div style={{ background: "#fff", borderRadius: 24, padding: "24px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 10px" }}>Your Focus</p>
+        <p style={{ fontSize: 28, fontWeight: 800, color: "#1a1c1c", margin: "0 0 6px", lineHeight: 1.1 }}>{focus.pillar}</p>
+        <p style={{ fontSize: 14, color: "#6b7480", margin: 0, lineHeight: 1.4 }}>{focus.message}</p>
+
+        <div style={{ height: 1, background: "#f0f0f0", margin: "20px 0" }} />
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {focus.actions.map(action => (
+            <p key={action} style={{ fontSize: 15, fontWeight: 500, color: "#1a1c1c", margin: 0 }}>{action}</p>
+          ))}
+        </div>
+
+        <div style={{ height: 1, background: "#f0f0f0", margin: "20px 0" }} />
+
+        <button
+          onClick={() => whyRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+          style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 4 }}
+        >
+          <span style={{ fontSize: 13, fontWeight: 600, color: "#2653d4" }}>See why</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
       {/* Hero score */}
       <div style={{ background: "#fff", borderRadius: 24, padding: "24px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 20 }}>
@@ -185,7 +237,7 @@ export default function ReadinessPage() {
       )}
 
       {/* What's driving it */}
-      <div style={{ background: "#fff", borderRadius: 24, padding: "20px 20px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+      <div ref={whyRef} style={{ background: "#fff", borderRadius: 24, padding: "20px 20px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
         <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 16px" }}>What&apos;s Driving It</p>
         <div style={{ display: "flex", flexDirection: "column" }}>
           {rows.map((row, i) => (
