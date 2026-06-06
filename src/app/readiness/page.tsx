@@ -5,61 +5,45 @@ import { useRouter } from "next/navigation";
 import Nav4 from "@/components/nav4";
 import LogSheet from "@/components/log-sheet";
 import {
-  computeScores, loadScoringData, saveScoreSnapshot, loadScoreHistory,
-  computePillarStates,
-  type Scores, type ScoreSnapshot, type PillarStates, type PillarStatus,
+  computeScores, loadScoringData, saveScoreSnapshot,
+  type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry, type HabitsEntry,
 } from "@/lib/scoring";
 
-const PILLARS: { key: keyof Omit<Scores, "overall">; label: string; color: string; icon: string }[] = [
-  { key: "recovery",  label: "Recovery",  color: "#7c3aed", icon: "🌙" },
-  { key: "nutrition", label: "Nutrition", color: "#0891b2", icon: "🥗" },
-  { key: "training",  label: "Training",  color: "#16a34a", icon: "🎾" },
-  { key: "wellbeing", label: "Wellbeing", color: "#f59e0b", icon: "🧠" },
-];
+type LogTab = "checkin" | "hydration" | "nutrition" | "training" | "wellbeing";
 
-const STATUS_META: Record<PillarStatus, { label: string; bg: string; text: string }> = {
-  good:       { label: "Good",       bg: "#f0fdf4", text: "#16a34a" },
-  ok:         { label: "OK",         bg: "#fffbeb", text: "#d97706" },
-  low:        { label: "Low",        bg: "#fef2f2", text: "#dc2626" },
-  not_logged: { label: "Not logged", bg: "#f4f4f6", text: "#9aa5b0" },
-};
+const scoreColor = (s: number) => s >= 85 ? "#16a34a" : s >= 75 ? "#d97706" : "#dc2626";
+const scoreWord  = (s: number) => s >= 85 ? "Good" : s >= 75 ? "OK" : "Low";
+const scoreBg    = (s: number) => s >= 85 ? "rgba(22,163,74,0.08)" : s >= 75 ? "rgba(217,119,6,0.08)" : "rgba(220,38,38,0.08)";
 
-function Sparkline({ data, color }: { data: number[]; color: string }) {
-  if (data.length < 2) return null;
-  const W = 56, H = 24;
-  const min = Math.min(...data), max = Math.max(...data);
-  const range = Math.max(max - min, 3);
-  const x = (i: number) => (i / (data.length - 1)) * W;
-  const y = (v: number) => H - ((v - min) / range) * (H - 4) - 2;
-  const d = data.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
-  return (
-    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ flexShrink: 0 }}>
-      <path d={d} fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
-      <circle cx={x(data.length - 1)} cy={y(data[data.length - 1])} r="2.5" fill={color}/>
-    </svg>
-  );
-}
+const sleepLabel = (v: number) => ["Very poor", "Poor", "OK", "Good", "Excellent"][v - 1] ?? `${v}/5`;
+const rateLabel  = (v: number) => ["Very low",  "Low",  "Moderate", "Good", "High"][v - 1] ?? `${v}/5`;
 
 export default function ReadinessPage() {
   const router = useRouter();
   const [logSheetOpen, setLogSheetOpen] = useState(false);
-  const [pillarStates, setPillarStates] = useState<PillarStates>({
-    recovery:  { status: "not_logged", reason: "Morning check-in not done" },
-    nutrition: { status: "not_logged", reason: "Night check-in not done yet" },
-    training:  { status: "not_logged", reason: "No session logged today" },
-    wellbeing: { status: "not_logged", reason: "Check-in not done yet" },
-  });
-  const [history, setHistory] = useState<ScoreSnapshot[]>([]);
+  const [logTab, setLogTab] = useState<LogTab>("checkin");
+  const [score, setScore] = useState(65);
+  const [checkIn, setCheckIn]   = useState<DailyCheckIn | null>(null);
+  const [hydration, setHydration] = useState<HydrationEntry | null>(null);
+  const [nutrition, setNutrition] = useState<NutritionEntry | null>(null);
+  const [training, setTraining]  = useState<TrainingEntry | null>(null);
+  const [habits, setHabits]      = useState<HabitsEntry | null>(null);
+  const [matchDate, setMatchDate] = useState<string | null>(null);
 
   function refresh() {
     const d = loadScoringData();
     const s = computeScores(d.checkIn, d.hydration, d.review, d.nutrition, d.gameDaysThisWeek, d.habits, d.training);
     saveScoreSnapshot(s);
-    setHistory(loadScoreHistory());
-    const todayStr = new Date().toISOString().slice(0, 10);
-    let m: { date: string } | null = null;
-    try { m = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch {}
-    setPillarStates(computePillarStates(d.checkIn, d.hydration, d.nutrition, d.habits, d.training, m?.date === todayStr));
+    setScore(s.overall);
+    setCheckIn(d.checkIn);
+    setHydration(d.hydration);
+    setNutrition(d.nutrition);
+    setTraining(d.training);
+    setHabits(d.habits);
+    try {
+      const m = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
+      setMatchDate(m?.date ?? null);
+    } catch {}
   }
 
   useEffect(() => {
@@ -68,18 +52,92 @@ export default function ReadinessPage() {
     return () => window.removeEventListener("storage", refresh);
   }, []);
 
-  const deduped = Object.values(
-    history.reduce((acc, s) => { acc[s.date] = s; return acc; }, {} as Record<string, ScoreSnapshot>)
-  ).sort((a, b) => a.date.localeCompare(b.date));
-  const last14 = deduped.slice(-14);
+  function openLog(tab: LogTab) {
+    setLogTab(tab);
+    setLogSheetOpen(true);
+  }
 
-  const vals = Object.values(pillarStates);
-  const allNotLogged = vals.every(v => v.status === "not_logged");
-  const hasLow = vals.some(v => v.status === "low");
-  const hasOk  = vals.some(v => v.status === "ok");
-  const word  = allNotLogged ? "–" : hasLow ? "Low" : hasOk ? "OK" : "Good";
-  const color = allNotLogged ? "#9aa5b0" : hasLow ? "#dc2626" : hasOk ? "#d97706" : "#16a34a";
-  const bg    = allNotLogged ? "rgba(154,165,176,0.1)" : hasLow ? "rgba(220,38,38,0.08)" : hasOk ? "rgba(217,119,6,0.08)" : "rgba(22,163,74,0.08)";
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const daysToMatch = matchDate
+    ? Math.round((new Date(matchDate).getTime() - new Date(todayStr).getTime()) / 86400000)
+    : null;
+
+  let contextMsg: string | null = null;
+  if (daysToMatch === 0)      contextMsg = "Match day — focus on warmup and hydration";
+  else if (daysToMatch === 1) contextMsg = "Match tomorrow — prioritise sleep and hydration tonight";
+  else if (daysToMatch !== null && daysToMatch <= 3)
+    contextMsg = `Match in ${daysToMatch} days — build recovery now`;
+
+  // 65 = 0%, 100 = 100%
+  const fillPct = Math.round(((score - 65) / 35) * 100);
+  const color = scoreColor(score);
+  const word  = scoreWord(score);
+  const bg    = scoreBg(score);
+
+  type Row = {
+    icon: string;
+    iconColor: string;
+    label: string;
+    impact: "High" | "Medium";
+    logged: boolean;
+    detail: string;
+    tab: LogTab;
+  };
+
+  const rows: Row[] = [
+    {
+      icon: "🌙", iconColor: "#7c3aed",
+      label: "Morning Check-in",
+      impact: "High",
+      logged: !!checkIn,
+      detail: checkIn
+        ? `Sleep ${sleepLabel(checkIn.sleep)} · Soreness ${sleepLabel(checkIn.soreness)}`
+        : "Not done — drives Recovery & Wellbeing",
+      tab: "checkin",
+    },
+    {
+      icon: "💧", iconColor: "#0891b2",
+      label: "Hydration",
+      impact: "High",
+      logged: !!hydration,
+      detail: hydration
+        ? `${hydration.litres} · ${hydration.urine} urine · ${hydration.quality}`
+        : "Not logged — biggest impact on Nutrition score",
+      tab: "hydration",
+    },
+    {
+      icon: "🥗", iconColor: "#16a34a",
+      label: "Nutrition",
+      impact: "Medium",
+      logged: !!nutrition,
+      detail: nutrition
+        ? `${nutrition.quality === "great" ? "Good" : nutrition.quality === "bad" ? "Poor" : "OK"} quality · protein ${nutrition.proteinRating}`
+        : "Not logged today",
+      tab: "nutrition",
+    },
+    {
+      icon: "🎾", iconColor: "#f59e0b",
+      label: "Training",
+      impact: "Medium",
+      logged: !!training,
+      detail: training
+        ? `${training.sessionType.join(" & ")} · ${training.duration} · ${training.intensity}`
+        : "No session logged today",
+      tab: "training",
+    },
+    {
+      icon: "🧠", iconColor: "#ec4899",
+      label: "Night Check-in",
+      impact: "Medium",
+      logged: !!habits,
+      detail: habits
+        ? `Habits done · ${[habits.sleep && "Sleep", habits.foamRoll && "Foam roll", habits.mobility && "Mobility"].filter(Boolean).join(" · ") || "logged"}`
+        : checkIn
+          ? `Stress ${rateLabel(checkIn.stress)} · Motivation ${rateLabel(checkIn.motivation)} — log tonight`
+          : "Do morning check-in first",
+      tab: "wellbeing",
+    },
+  ];
 
   return (
     <main style={{ fontFamily: "Inter, sans-serif", background: "#f0f2f5", minHeight: "100vh", display: "flex", flexDirection: "column", gap: 12, padding: "16px 16px 176px" }}>
@@ -95,96 +153,96 @@ export default function ReadinessPage() {
         </div>
       </div>
 
-      {/* Overall verdict */}
-      {(() => {
-        const stops: { key: string; label: string; color: string }[] = [
-          { key: 'low',  label: 'Low',  color: '#dc2626' },
-          { key: 'ok',   label: 'OK',   color: '#d97706' },
-          { key: 'good', label: 'Good', color: '#16a34a' },
-        ];
-        const activeIdx = allNotLogged ? -1 : hasLow ? 0 : hasOk ? 1 : 2;
-        const fillPct = activeIdx < 0 ? 0 : (activeIdx / (stops.length - 1)) * 100;
-        const trackColor = activeIdx < 0 ? '#e5e7eb' : stops[activeIdx].color;
-        return (
-          <div style={{ background: "#fff", borderRadius: 24, padding: "24px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 20 }}>
-              <div>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 6px" }}>Overall</p>
-                <span style={{ fontSize: 28, fontWeight: 800, color, lineHeight: 1, padding: "6px 18px", borderRadius: 999, background: bg, display: "inline-block" }}>{word}</span>
-              </div>
-              <div style={{ textAlign: "right" }}>
-                <p style={{ fontSize: 12, color: "#9aa5b0", margin: "0 0 2px" }}>Today&apos;s readiness</p>
-                <p style={{ fontSize: 12, color: "#6b7480", margin: 0 }}>{new Date().toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short" })}</p>
-              </div>
-            </div>
-            {/* Full-width scale */}
-            <div style={{ position: "relative", paddingBottom: 20 }}>
-              {/* Track */}
-              <div style={{ position: "relative", height: 6, borderRadius: 99, background: "#f0f0f0", margin: "0 6px" }}>
-                <div style={{ position: "absolute", left: 0, top: 0, height: "100%", borderRadius: 99, background: trackColor, width: `${fillPct}%`, transition: "width 0.4s ease" }} />
-              </div>
-              {/* Stops */}
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
-                {stops.map((s, i) => {
-                  const isActive = i === activeIdx;
-                  const isPast = i < activeIdx;
-                  const dotColor = isActive || isPast ? s.color : "#e5e7eb";
-                  return (
-                    <div key={s.key} style={{ display: "flex", flexDirection: "column", alignItems: i === 0 ? "flex-start" : i === stops.length - 1 ? "flex-end" : "center", gap: 0 }}>
-                      <div style={{ width: isActive ? 12 : 8, height: isActive ? 12 : 8, borderRadius: "50%", background: dotColor, marginTop: -13, border: isActive ? `2px solid #fff` : "none", boxShadow: isActive ? `0 0 0 2px ${s.color}` : "none", transition: "all 0.2s" }} />
-                      <span style={{ fontSize: 12, fontWeight: isActive ? 700 : 500, color: isActive ? s.color : "#9aa5b0", marginTop: 6, lineHeight: 1 }}>{s.label}</span>
-                    </div>
-                  );
-                })}
-              </div>
+      {/* Hero score */}
+      <div style={{ background: "#fff", borderRadius: 24, padding: "24px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 20 }}>
+          <div>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 8px" }}>Readiness Today</p>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+              <span style={{ fontSize: 52, fontWeight: 800, color, lineHeight: 1 }}>{score}</span>
+              <span style={{ fontSize: 15, fontWeight: 500, color: "#b0b8c1" }}>/100</span>
             </div>
           </div>
-        );
-      })()}
+          <span style={{ fontSize: 14, fontWeight: 700, padding: "6px 16px", borderRadius: 999, background: bg, color, marginTop: 4 }}>{word}</span>
+        </div>
 
-      {/* Take Action header */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 4 }}>
-        <div>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>Suggestions</p>
-          <h2 style={{ fontSize: 22, fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1.1 }}>Take Action!</h2>
+        {/* Fill bar */}
+        <div style={{ height: 8, borderRadius: 99, background: "#f0f0f0", overflow: "hidden" }}>
+          <div style={{ height: "100%", borderRadius: 99, background: color, width: `${fillPct}%`, transition: "width 0.5s cubic-bezier(0.4,0,0.2,1)" }} />
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
+          <span style={{ fontSize: 10, color: "#c0c8d0" }}>65 min</span>
+          <span style={{ fontSize: 10, color: "#c0c8d0" }}>100 peak</span>
         </div>
       </div>
 
-      {/* Log CTA */}
-      <div style={{ background: "#fff", borderRadius: 24, padding: "20px 24px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-        <p style={{ fontSize: 14, fontWeight: 500, color: "#3a4550", margin: "0 0 14px", lineHeight: 1.5 }}>Log your check-ins to keep your readiness score accurate.</p>
-        <button onClick={() => setLogSheetOpen(true)} className="w-full py-3 rounded-2xl text-[14px] font-semibold text-white active:opacity-70 transition-opacity" style={{ background: "#2653d4", border: "none", cursor: "pointer" }}>
-          Log data
-        </button>
-      </div>
+      {/* Context card */}
+      {contextMsg && (
+        <div style={{ background: "#1a2e8a", borderRadius: 20, padding: "14px 18px", display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{ fontSize: 20, flexShrink: 0 }}>📅</span>
+          <p style={{ fontSize: 13, fontWeight: 600, color: "#fff", margin: 0, lineHeight: 1.4 }}>{contextMsg}</p>
+        </div>
+      )}
 
-      {/* Pillar breakdown */}
-      <div style={{ background: "#fff", borderRadius: 24, padding: "20px 24px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 16px" }}>Pillar Breakdown</p>
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {PILLARS.map(row => {
-            const state = pillarStates[row.key as keyof PillarStates];
-            const meta = STATUS_META[state.status];
-            const sparkData = last14.map(s => s[row.key]);
-            return (
-              <div key={row.key} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 12, background: `${row.color}12`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 18 }}>{row.icon}</div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c" }}>{row.label}</span>
-                    <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 99, background: meta.bg, color: meta.text }}>{meta.label}</span>
-                  </div>
-                  <p style={{ fontSize: 12, color: "#6b7480", margin: 0, lineHeight: 1.3 }}>{state.reason}</p>
-                </div>
-                <Sparkline data={sparkData} color={row.color}/>
+      {/* What's driving it */}
+      <div style={{ background: "#fff", borderRadius: 24, padding: "20px 20px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 16px" }}>What&apos;s Driving It</p>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          {rows.map((row, i) => (
+            <div
+              key={row.tab + row.label}
+              style={{
+                display: "flex", alignItems: "center", gap: 12,
+                paddingTop: i > 0 ? 14 : 0, marginTop: i > 0 ? 14 : 0,
+                borderTop: i > 0 ? "1px solid #f4f4f6" : "none",
+              }}
+            >
+              {/* Icon */}
+              <div style={{ width: 40, height: 40, borderRadius: 14, background: `${row.iconColor}14`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 20 }}>
+                {row.icon}
               </div>
-            );
-          })}
+
+              {/* Text */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c" }}>{row.label}</span>
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, padding: "1px 7px", borderRadius: 99,
+                    color: row.impact === "High" ? "#dc2626" : "#d97706",
+                    background: row.impact === "High" ? "rgba(220,38,38,0.08)" : "rgba(217,119,6,0.08)",
+                  }}>
+                    {row.impact}
+                  </span>
+                </div>
+                <p style={{ fontSize: 12, color: row.logged ? "#6b7480" : "#9aa5b0", margin: 0, lineHeight: 1.3 }}>{row.detail}</p>
+              </div>
+
+              {/* Action */}
+              {row.logged ? (
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: "#f0fdf4", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 6L9 17l-5-5"/>
+                  </svg>
+                </div>
+              ) : (
+                <button
+                  onClick={() => openLog(row.tab)}
+                  style={{ flexShrink: 0, padding: "6px 14px", borderRadius: 999, background: "#2653d4", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, color: "#fff" }}
+                >
+                  Log +
+                </button>
+              )}
+            </div>
+          ))}
         </div>
       </div>
 
-      <Nav4/>
-      <LogSheet open={logSheetOpen} onClose={() => setLogSheetOpen(false)}/>
+      <Nav4 />
+      <LogSheet
+        open={logSheetOpen}
+        onClose={() => { setLogSheetOpen(false); refresh(); }}
+        defaultSub={logTab}
+      />
     </main>
   );
 }
