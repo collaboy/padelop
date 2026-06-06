@@ -185,6 +185,7 @@ export default function Home8() {
   const [schedDetailOpen, setSchedDetailOpen] = useState<{ title: string; subtitle?: string; color: string; detail: string; isDrill?: boolean } | null>(null);
   const [postMatchOpen, setPostMatchOpen] = useState(false);
   const [postMatchDate, setPostMatchDate] = useState<string | null>(null);
+  const [checkinNudgeOpen, setCheckinNudgeOpen] = useState(false);
   const [yesterdayWasMatch, setYesterdayWasMatch] = useState(false);
   const [drillTag, setDrillTag] = useState<string | null>(null);
   const [drillContext, setDrillContext] = useState<"court" | "solo">("court");
@@ -206,7 +207,14 @@ export default function Home8() {
       try { m = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch {}
       const matchToday = m?.date === todayStr;
       setPillarStates(computePillarStates(d.checkIn, d.hydration, d.nutrition, d.habits, d.training, matchToday));
-      try { const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null"); setMorningDone(ml?.date === todayStr); } catch { setMorningDone(false); }
+      try {
+        const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null");
+        const done = ml?.date === todayStr;
+        setMorningDone(done);
+        const hour = new Date().getHours();
+        const nudgeDismissed = localStorage.getItem("padelop:checkin-nudge-dismissed") === todayStr;
+        if (!done && !nudgeDismissed && hour < 13) setTimeout(() => setCheckinNudgeOpen(true), 1200);
+      } catch { setMorningDone(false); }
     }
     loadReadiness();
     window.addEventListener("storage", loadReadiness);
@@ -664,6 +672,35 @@ export default function Home8() {
                 </button>
                 <button onClick={() => { try { localStorage.setItem("padelop:post-match-dismissed", postMatchDate ?? ""); } catch {} setPostMatchOpen(false); }} className="w-full py-3 text-[14px] font-semibold text-[#6b7480]">
                   I&apos;ll do it later
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Morning check-in nudge */}
+        {checkinNudgeOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => { try { localStorage.setItem("padelop:checkin-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {} setCheckinNudgeOpen(false); }}>
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
+            <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+              <div className="px-6 pt-8 pb-6 flex flex-col items-center text-center gap-2">
+                <div className="w-14 h-14 rounded-full flex items-center justify-center mb-2" style={{ background: "#f0f4ff" }}>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                </div>
+                <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">Morning check-in</p>
+                <p className="text-[15px] text-[#4a5050] mt-1 leading-snug">30 seconds to set up your day — how did you sleep?</p>
+              </div>
+              <div className="px-6 pb-8 flex flex-col gap-3">
+                <button
+                  onClick={() => { setCheckinNudgeOpen(false); setLogWizard(false); setLogTab("checkin"); setLogSheetOpen(true); }}
+                  className="w-full py-3.5 rounded-2xl text-white text-[15px] font-bold active:scale-[0.98] transition-transform"
+                  style={{ background: "#2653d4" }}>
+                  Start check-in
+                </button>
+                <button
+                  onClick={() => { try { localStorage.setItem("padelop:checkin-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {} setCheckinNudgeOpen(false); }}
+                  className="w-full py-3 text-[14px] font-semibold text-[#6b7480]">
+                  Not now
                 </button>
               </div>
             </div>
