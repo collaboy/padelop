@@ -526,10 +526,7 @@ export default function Home8() {
                           <div style={{ width: 48, height: 1, background: "#e8eaed", margin: "24px 0" }} />
 
                           {/* Readiness */}
-                          {readinessLabel && (
-                            <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: readinessColor, margin: "0 0 8px" }}>{readinessLabel}</p>
-                          )}
-                          <p style={{ fontSize: 16, fontWeight: 400, color: "#3a4550", margin: "0 0 14px", textAlign: "center", lineHeight: 1.5 }}>{coachTip}</p>
+                          <p style={{ fontSize: 16, fontWeight: 400, color: "#3a4550", margin: "0 0 6px", textAlign: "center", lineHeight: 1.5 }}>{coachTip}</p>
                           <button onClick={() => router.push('/readiness')} style={{ display: "flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                             <span style={{ fontSize: 14, fontWeight: 600, color: "#2653d4" }}>See insights</span>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
