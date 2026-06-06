@@ -70,6 +70,8 @@ body {
   100% { transform: translateY(0); }
 }
 .animate-bounce-in { animation: ball-drop 0.9s both; animation-delay: 0.1s; }
+@keyframes time-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+.animate-time-blink { animation: time-blink 1.2s ease-in-out infinite; }
 
 @keyframes nav-slide-out-left  { to   { transform: translateX(-28%); opacity: 0; } }
 @keyframes nav-slide-out-right { to   { transform: translateX(28%);  opacity: 0; } }

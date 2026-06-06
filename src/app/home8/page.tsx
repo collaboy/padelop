@@ -337,8 +337,22 @@ export default function Home8() {
               {/* Placeholder above */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
               {/* Main card */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", justifyContent: "center", gap: 10, padding: "0 16px", marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", justifyContent: "center", gap: 8, padding: "0 16px", marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
                 <p className="font-bold tracking-widest uppercase" style={{ color: "#9aa5b0", fontSize: "clamp(10px, 2.8vw, 13px)", paddingLeft: 4 }}>Log Data</p>
+                {/* Add a Match */}
+                <button onClick={() => { setMatchModalTab('pick'); setMatchModalOpen(true); }} style={{ background: "#f0faf4", borderRadius: 18, padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", border: "none", cursor: "pointer" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#22c55e18", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
+                    </div>
+                    <div style={{ textAlign: "left" }}>
+                      <p style={{ fontSize: "clamp(13px, 3.8vw, 16px)", fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Add a Match</p>
+                      <p style={{ fontSize: "clamp(10px, 3vw, 12px)", color: "#6b7480", margin: "2px 0 0" }}>Schedule upcoming game</p>
+                    </div>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+                <p className="font-bold tracking-widest uppercase" style={{ color: "#9aa5b0", fontSize: "clamp(10px, 2.8vw, 13px)", paddingLeft: 4, marginTop: 2 }}>Daily Check-in</p>
                 {/* Morning Check-in */}
                 <button onClick={() => { setLogWizard(false); setLogTab("checkin"); setLogSheetOpen(true); }} style={{ background: morningDone ? "#f0fdf4" : "#f4f6ff", borderRadius: 18, padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", border: "none", cursor: "pointer" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -364,19 +378,6 @@ export default function Home8() {
                     <div style={{ textAlign: "left" }}>
                       <p style={{ fontSize: "clamp(13px, 3.8vw, 16px)", fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Night Check-in</p>
                       <p style={{ fontSize: "clamp(10px, 3vw, 12px)", color: "#6b7480", margin: "2px 0 0" }}>Stress & motivation</p>
-                    </div>
-                  </div>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                </button>
-                {/* Add a Match */}
-                <button onClick={() => { setMatchModalTab('pick'); setMatchModalOpen(true); }} style={{ background: "#f0faf4", borderRadius: 18, padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", border: "none", cursor: "pointer" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#22c55e18", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
-                    </div>
-                    <div style={{ textAlign: "left" }}>
-                      <p style={{ fontSize: "clamp(13px, 3.8vw, 16px)", fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Add a Match</p>
-                      <p style={{ fontSize: "clamp(10px, 3vw, 12px)", color: "#6b7480", margin: "2px 0 0" }}>Schedule upcoming game</p>
                     </div>
                   </div>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
@@ -425,8 +426,16 @@ export default function Home8() {
                       </button>
                       <div style={{ width: "100%", height: 1, background: "#f0f0f0", margin: "8px 0" }} />
                       <p className="font-bold tracking-widest uppercase text-center" style={{ color: "#9aa5b0", fontSize: "clamp(11px, 3vw, 14px)" }}>Match Readiness</p>
-                      <p className="font-bold leading-none text-center" style={{ fontSize: "clamp(40px, 12vw, 56px)", color: "#2653d4" }}>{readiness}</p>
-                      <button onClick={() => router.push("/insights4")} className="font-semibold px-5 py-2.5 rounded-full" style={{ background: "#2653d418", color: "#2653d4", fontSize: "clamp(14px, 4vw, 18px)" }}>See Breakdown</button>
+                      {(() => {
+                        const vals = Object.values(pillarStates);
+                        const allNotLogged = vals.every(v => v.status === 'not_logged');
+                        const hasLow = vals.some(v => v.status === 'low');
+                        const hasOk = vals.some(v => v.status === 'ok');
+                        const word = allNotLogged ? '–' : hasLow ? 'Low' : hasOk ? 'OK' : 'Good';
+                        const color = allNotLogged ? '#9aa5b0' : hasLow ? '#dc2626' : hasOk ? '#d97706' : '#16a34a';
+                        const bg = allNotLogged ? 'rgba(154,165,176,0.1)' : hasLow ? 'rgba(220,38,38,0.08)' : hasOk ? 'rgba(217,119,6,0.08)' : 'rgba(22,163,74,0.08)';
+                        return <span style={{ fontSize: "clamp(22px, 6vw, 30px)", fontWeight: 800, color, lineHeight: 1, padding: "6px 18px", borderRadius: 999, background: bg }}>{word}</span>;
+                      })()}
                     </>
                   );
                 })() : (
@@ -508,7 +517,7 @@ export default function Home8() {
                                   <div style={{ position: "relative", width: 2, flex: 1, background: "#dfe3e7", minHeight: 36, overflow: "visible" }}>
                                     {isCurrentSegment && (
                                       <div style={{ position: "absolute", display: "flex", alignItems: "center", top: `${segmentPct}%`, right: 0, transform: "translateY(-50%)" }}>
-                                        <span style={{ fontSize: 12, fontWeight: 700, color: "#fff", padding: "3px 9px", borderRadius: 4, marginRight: 2, whiteSpace: "nowrap", background: "#2653d4" }}>
+                                        <span className="animate-time-blink" style={{ fontSize: 15, fontWeight: 700, color: "#fff", padding: "3px 9px", borderRadius: 4, marginRight: 2, whiteSpace: "nowrap", background: "#2653d4" }}>
                                           {pad(now.getHours())}:{pad(now.getMinutes())}
                                         </span>
                                         <svg width="6" height="8" viewBox="0 0 6 8"><polygon points="0,0 6,4 0,8" fill="#171c1f" /></svg>
@@ -549,34 +558,29 @@ export default function Home8() {
           </div>
 
           {/* Readiness panel */}
-          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 20, paddingTop: "calc(45dvh - 4rem - (100vw - 40px) / 2)" }}>
-            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 20px 0 28px", gap: 10, marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-              <p className="font-bold tracking-widest uppercase" style={{ color: "#9aa5b0", fontSize: "clamp(9px, 2.5vw, 11px)", paddingLeft: 2 }}>Your State</p>
-              {([
-                { key: "recovery",  label: "Recovery",  color: "#7c3aed" },
-                { key: "nutrition", label: "Nutrition",  color: "#0891b2" },
-                { key: "training",  label: "Training",   color: "#16a34a" },
-                { key: "wellbeing", label: "Wellbeing",  color: "#f59e0b" },
-              ] as { key: keyof PillarStates; label: string; color: string }[]).map(({ key, label, color }) => {
-                const st = pillarStates[key];
-                const statusColors: Record<string, { bg: string; text: string }> = {
-                  good:       { bg: "#f0fdf4", text: "#16a34a" },
-                  ok:         { bg: "#fffbeb", text: "#d97706" },
-                  low:        { bg: "#fef2f2", text: "#dc2626" },
-                  not_logged: { bg: "#f4f4f6", text: "#9aa5b0" },
-                };
-                const sc = statusColors[st.status];
-                const word = st.status === "not_logged" ? "–" : st.status === "good" ? "Good" : st.status === "ok" ? "OK" : "Low";
-                return (
-                  <div key={key} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: color, flexShrink: 0 }}/>
-                    <span style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 600, color: "#1a1c1c", flex: 1 }}>{label}</span>
-                    <span style={{ fontSize: "clamp(9px, 2.5vw, 11px)", fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: sc.bg, color: sc.text, whiteSpace: "nowrap" }}>{word}</span>
+          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 40, paddingTop: "calc(45dvh - 4rem - (100vw - 40px) / 2)" }}>
+            {(() => {
+              const vals = Object.values(pillarStates);
+              const allNotLogged = vals.every(v => v.status === 'not_logged');
+              const hasLow = vals.some(v => v.status === 'low');
+              const hasOk = vals.some(v => v.status === 'ok');
+              const overallWord = allNotLogged ? '–' : hasLow ? 'Low' : hasOk ? 'OK' : 'Good';
+              const overallColor = allNotLogged ? '#9aa5b0' : hasLow ? '#dc2626' : hasOk ? '#d97706' : '#16a34a';
+              const overallBg = allNotLogged ? 'rgba(154,165,176,0.1)' : hasLow ? 'rgba(220,38,38,0.08)' : hasOk ? 'rgba(217,119,6,0.08)' : 'rgba(22,163,74,0.08)';
+              return (
+                <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "18px 16px 16px", gap: 10, marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+                  <p className="font-bold tracking-widest uppercase text-center" style={{ color: "#9aa5b0", fontSize: "clamp(11px, 3vw, 14px)" }}>Match Readiness</p>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, width: "100%" }}>
+                    <span style={{ fontSize: "clamp(44px, 13vw, 58px)", fontWeight: 800, color: overallColor, lineHeight: 1, padding: "10px 28px", borderRadius: 999, background: overallBg }}>{overallWord}</span>
+                    <p style={{ fontSize: "clamp(9px, 2.5vw, 11px)", color: "#9aa5b0", textAlign: "center", lineHeight: 1.5, margin: 0 }}>Based on recovery, nutrition,{"\n"}training &amp; wellbeing</p>
                   </div>
-                );
-              })}
-              <button onClick={() => router.push("/insights4")} className="font-semibold rounded-2xl" style={{ background: "#f4f4f6", color: "#6b7480", fontSize: "clamp(10px, 2.8vw, 12px)", padding: "8px 0", marginTop: 4 }}>See insights →</button>
-            </div>
+                  <button onClick={() => router.push("/insights4")} className="flex items-center justify-center gap-1" style={{ background: "none", border: "none", cursor: "pointer", padding: "4px 0" }}>
+                    <span style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 600, color: "#6b7480" }}>See details</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                  </button>
+                </div>
+              );
+            })()}
           </div>
         </div>
 
