@@ -4,20 +4,20 @@ import React, { useState, useEffect } from "react";
 import { computeScores, loadScoringData, type Scores } from "@/lib/scoring";
 
 const METRIC_META: Record<string, { label: string; sublabel: string; color: string }> = {
-  overall:   { label: "Match",    sublabel: "Readiness", color: "#2653d4" },
+  overall:   { label: "Match",     sublabel: "Readiness", color: "#2653d4" },
   recovery:  { label: "Recovery",  sublabel: "Score",     color: "#7c3aed" },
-  hydration: { label: "Hydration", sublabel: "Score",     color: "#0891b2" },
-  energy:    { label: "Energy",    sublabel: "Score",     color: "#f59e0b" },
-  mobility:  { label: "Mobility",  sublabel: "Score",     color: "#16a34a" },
+  nutrition: { label: "Nutrition", sublabel: "Score",     color: "#0891b2" },
+  training:  { label: "Training",  sublabel: "Score",     color: "#16a34a" },
+  wellbeing: { label: "Wellbeing", sublabel: "Score",     color: "#f59e0b" },
 };
 
 export default function ScoreRing({ metric = "overall" }: { metric?: string }) {
-  const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 65, hydration: 65, energy: 65, mobility: 65 });
+  const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65 });
 
   useEffect(() => {
     function load() {
       const data = loadScoringData();
-      setScores(computeScores(data.checkIn, data.hydration, data.review, data.nutrition, data.gameDaysThisWeek));
+      setScores(computeScores(data.checkIn, data.hydration, data.review, data.nutrition, data.gameDaysThisWeek, data.habits, data.training));
     }
     load();
     window.addEventListener("storage", load);
@@ -51,9 +51,9 @@ export default function ScoreRing({ metric = "overall" }: { metric?: string }) {
 
   const subMetrics = [
     { label: "Recovery",  value: scores.recovery,  color: "#7c3aed" },
-    { label: "Hydration", value: scores.hydration, color: "#0891b2" },
-    { label: "Energy",    value: scores.energy,    color: "#f59e0b" },
-    { label: "Mobility",  value: scores.mobility,  color: "#16a34a" },
+    { label: "Nutrition", value: scores.nutrition, color: "#0891b2" },
+    { label: "Training",  value: scores.training,  color: "#16a34a" },
+    { label: "Wellbeing", value: scores.wellbeing, color: "#f59e0b" },
   ];
 
   return (

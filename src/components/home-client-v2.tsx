@@ -430,7 +430,7 @@ export default function HomeClientV2() {
   const [heroMetric, setHeroMetric] = useState<string>("overall");
   const [heroCardExpanded, setHeroCardExpanded] = useState(false);
   const [improveScoreOpen, setImproveScoreOpen] = useState(false);
-  const [heroScores, setHeroScores] = useState<Scores>({ overall: 65, recovery: 60, hydration: 52, energy: 58, mobility: 58 });
+  const [heroScores, setHeroScores] = useState<Scores>({ overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65 });
   const cardTouchX = useRef(0);
   const notifTimeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -531,7 +531,7 @@ export default function HomeClientV2() {
       }
 
       const scoringData = loadScoringData();
-      setHeroScores(computeScores(scoringData.checkIn, scoringData.hydration, scoringData.review, scoringData.nutrition, scoringData.gameDaysThisWeek, scoringData.habits));
+      setHeroScores(computeScores(scoringData.checkIn, scoringData.hydration, scoringData.review, scoringData.nutrition, scoringData.gameDaysThisWeek, scoringData.habits, scoringData.training));
     } catch {}
 
     const handleWeekPlanSaved = () => {
@@ -1266,11 +1266,11 @@ export default function HomeClientV2() {
               <p className="text-[13px] text-[#6b7480] mb-4">Select a metric to see what drives it and how to improve.</p>
               <div className="flex gap-1 justify-center rounded-full px-1 py-1 w-full mb-4" style={{ background: "#f4f4f6" }}>
                 {[
-                  { key: "overall",   label: "All",   color: "#2653d4" },
-                  { key: "recovery",  label: "Rec",   color: "#7c3aed" },
-                  { key: "hydration", label: "Hyd",   color: "#0891b2" },
-                  { key: "energy",    label: "Nrg",   color: "#f59e0b" },
-                  { key: "mobility",  label: "Mob",   color: "#16a34a" },
+                  { key: "overall",   label: "All",  color: "#2653d4" },
+                  { key: "recovery",  label: "Rec",  color: "#7c3aed" },
+                  { key: "nutrition", label: "Nut",  color: "#0891b2" },
+                  { key: "training",  label: "Trn",  color: "#16a34a" },
+                  { key: "wellbeing", label: "Wlb",  color: "#f59e0b" },
                 ].map(m => (
                   <button
                     key={m.key}
@@ -1284,10 +1284,10 @@ export default function HomeClientV2() {
               </div>
               {heroMetric !== "overall" && (() => {
                 const details: Record<string, { color: string; desc: string; drivers: string[]; tip: string }> = {
-                  recovery:  { color: "#7c3aed", desc: "How well your body has bounced back.", drivers: ["Sleep quality & duration", "Muscle soreness level", "Hydration & injury status", "Recovery habits (foam roll, cold shower, walk)"], tip: "Sleep and foam rolling have the biggest impact here." },
-                  hydration: { color: "#0891b2", desc: "Your fluid balance and hydration status.", drivers: ["Litres of water logged today", "Urine colour (clear = good)", "Subjective hydration quality", "Check-in self-rating"], tip: "Log your water intake to get an accurate score." },
-                  energy:    { color: "#f59e0b", desc: "Your fuel and readiness to perform.", drivers: ["Check-in energy level", "Sleep quality (sleep debt tanks energy)", "Nutrition quality & protein intake", "Post-match energy logged in review"], tip: "Protein-rich meals and good sleep move this the most." },
-                  mobility:  { color: "#16a34a", desc: "Joint freedom and movement quality.", drivers: ["Soreness level (primary driver)", "Injury status", "Game activity this week", "Mobility habits (dynamic warm-up, foam roll, walk)"], tip: "10 min of daily mobility adds up fast over a week." },
+                  recovery:  { color: "#7c3aed", desc: "How well your body has bounced back.", drivers: ["Sleep quality", "Muscle soreness level", "Injury status (decays over 14 days)", "Recovery habits (foam roll, cold shower, walk)"], tip: "Sleep and foam rolling have the biggest impact here." },
+                  nutrition: { color: "#0891b2", desc: "Your fuelling and hydration status.", drivers: ["Litres of water logged", "Urine colour (clear = good)", "Protein intake rating", "Overall nutrition quality"], tip: "Hit 2.5L+ of water and a high-protein meal to move this fast." },
+                  training:  { color: "#16a34a", desc: "Your training load and focus this week.", drivers: ["Game days this week", "Training sessions logged (48h window)", "Drill focus specificity", "Gym or cardio sessions"], tip: "Log any session — even drills count toward your training score." },
+                  wellbeing: { color: "#f59e0b", desc: "Your mental readiness and motivation.", drivers: ["Stress level check-in", "Motivation check-in", "Energy level check-in", "Mental state logged in match reviews"], tip: "Box breathing and visualisation directly improve this score." },
                 };
                 const d = details[heroMetric];
                 if (!d) return null;
