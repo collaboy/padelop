@@ -664,59 +664,6 @@ export default function Home8() {
                           );
                         })}
 
-                        {/* Month at a Glance */}
-                        {(() => {
-                          const yr = now.getFullYear();
-                          const mo = now.getMonth();
-                          const todayD = now.getDate();
-                          const cells = buildMonthCells(yr, mo);
-                          const matchD = match?.date?.startsWith(`${yr}-${pad(mo + 1)}`)
-                            ? parseInt(match.date.slice(8)) : null;
-                          return (
-                            <div style={{ marginTop: 8, paddingTop: 24, borderTop: "1px solid #f0f0f0" }}>
-                              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-                                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>Month at a Glance</p>
-                                <p style={{ fontSize: 12, fontWeight: 600, color: "#9aa5b0", margin: 0 }}>{MONTH_NAMES[mo]} {yr}</p>
-                              </div>
-                              <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", marginBottom: 4 }}>
-                                {CAL_DOW.map((d, i) => (
-                                  <div key={i} style={{ textAlign: "center" }}>
-                                    <span style={{ fontSize: 10, fontWeight: 700, color: "#c0c8d0" }}>{d}</span>
-                                  </div>
-                                ))}
-                              </div>
-                              <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
-                                {cells.map((day, i) => {
-                                  if (!day) return <div key={i} style={{ height: 34 }} />;
-                                  const isToday = day === todayD;
-                                  const isMatch = day === matchD;
-                                  const ymd = `${yr}-${pad(mo + 1)}-${pad(day)}`;
-                                  const isPast = ymd < now.toISOString().slice(0, 10);
-                                  return (
-                                    <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingBottom: 2 }}>
-                                      <div style={{ width: 30, height: 30, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: isToday ? "#2653d4" : "transparent", opacity: isPast && !isToday ? 0.35 : 1 }}>
-                                        <span style={{ fontSize: 12, fontWeight: isToday ? 700 : 400, color: isToday ? "#fff" : "#1a1c1c" }}>{day}</span>
-                                      </div>
-                                      <div style={{ height: 4, width: 4, borderRadius: "50%", background: isMatch ? "#2653d4" : "transparent", marginTop: 1, opacity: isMatch && isToday ? 0.5 : 1 }} />
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                              <div style={{ display: "flex", gap: 14, marginTop: 12, paddingTop: 12, borderTop: "1px solid #f4f4f6" }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#2653d4" }} />
-                                  <span style={{ fontSize: 11, color: "#8a9096" }}>Today</span>
-                                </div>
-                                {matchD && (
-                                  <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#2653d4", opacity: 0.4 }} />
-                                    <span style={{ fontSize: 11, color: "#8a9096" }}>Match</span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })()}
                       </div>
                     </div>
                   </div>
