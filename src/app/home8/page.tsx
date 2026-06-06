@@ -458,25 +458,6 @@ export default function Home8() {
                       <p className="leading-none mt-1 mb-1" style={{ color: "rgba(255,255,255,0.8)", fontSize: "clamp(11.7px, 3.42vw, 15.3px)", fontWeight: 800 }}>{s.time} – {nextSlide ? nextSlide.time : "end"}</p>
                       {s.subtitle && <p className="leading-none text-center mt-0.5" style={{ color: "rgba(255,255,255,0.8)", fontSize: "clamp(15px, 4.8vw, 22px)" }}>{s.subtitle.split(", ").join(" · ")}</p>}
                       <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 font-semibold px-5 py-2 rounded-full" style={{ background: "#fff", color: isReady ? s.color : "#b0b5ba", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me</button>
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "5px 16px", marginTop: 14 }}>
-                        {([
-                          { key: "recovery",  label: "Recovery",  color: "#c4b5fd" },
-                          { key: "nutrition", label: "Nutrition", color: "#7dd3fc" },
-                          { key: "wellbeing", label: "Wellbeing", color: "#fcd34d" },
-                          { key: "training",  label: "Training",  color: "#86efac" },
-                        ] as { key: keyof PillarStates; label: string; color: string }[]).map(({ key, label, color }) => {
-                          const st = pillarStates[key];
-                          const dot = st.status === "low" ? "#fca5a5" : st.status === "not_logged" ? "rgba(255,255,255,0.25)" : color;
-                          const word = st.status === "not_logged" ? "–" : st.status === "good" ? "Good" : st.status === "ok" ? "OK" : "Low";
-                          return (
-                            <div key={key} style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                              <div style={{ width: 6, height: 6, borderRadius: "50%", background: dot, flexShrink: 0 }}/>
-                              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.6)", fontWeight: 500 }}>{label}</span>
-                              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.9)", fontWeight: 700, marginLeft: 2 }}>{word}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
                     </div>
                   </div>
                 );
@@ -556,18 +537,32 @@ export default function Home8() {
 
           {/* Readiness panel */}
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 20, paddingTop: "calc(45dvh - 4rem - (100vw - 40px) / 2)" }}>
-            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, padding: "0 24px", marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-              <p className="font-bold tracking-widest uppercase" style={{ color: "#9aa5b0", fontSize: "clamp(11px, 3vw, 14px)" }}>Match Readiness</p>
-              <svg width="140" height="140" viewBox="0 0 120 120">
-                <circle cx="60" cy="60" r="50" fill="none" stroke="#f0f0f0" strokeWidth="8" />
-                <circle cx="60" cy="60" r="50" fill="none" stroke="#2653d4" strokeWidth="8" strokeLinecap="round"
-                  strokeDasharray={`${2 * Math.PI * 50}`}
-                  strokeDashoffset={`${2 * Math.PI * 50 * (1 - readiness / 100)}`}
-                  transform="rotate(-90 60 60)"
-                />
-                <text x="60" y="60" textAnchor="middle" dominantBaseline="central" fontSize="28" fontWeight="700" fill="#1a1c1c" fontFamily="Inter, sans-serif">{readiness}</text>
-              </svg>
-              <button onClick={() => router.push("/insights4")} className="font-semibold px-5 py-2.5 rounded-full" style={{ background: "#2653d418", color: "#2653d4", fontSize: "clamp(13px, 3.5vw, 17px)" }}>See Breakdown</button>
+            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 18px", gap: 10, marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+              <p className="font-bold tracking-widest uppercase" style={{ color: "#9aa5b0", fontSize: "clamp(9px, 2.5vw, 11px)", paddingLeft: 2 }}>Your State</p>
+              {([
+                { key: "recovery",  label: "Recovery",  color: "#7c3aed" },
+                { key: "nutrition", label: "Nutrition",  color: "#0891b2" },
+                { key: "training",  label: "Training",   color: "#16a34a" },
+                { key: "wellbeing", label: "Wellbeing",  color: "#f59e0b" },
+              ] as { key: keyof PillarStates; label: string; color: string }[]).map(({ key, label, color }) => {
+                const st = pillarStates[key];
+                const statusColors: Record<string, { bg: string; text: string }> = {
+                  good:       { bg: "#f0fdf4", text: "#16a34a" },
+                  ok:         { bg: "#fffbeb", text: "#d97706" },
+                  low:        { bg: "#fef2f2", text: "#dc2626" },
+                  not_logged: { bg: "#f4f4f6", text: "#9aa5b0" },
+                };
+                const sc = statusColors[st.status];
+                const word = st.status === "not_logged" ? "–" : st.status === "good" ? "Good" : st.status === "ok" ? "OK" : "Low";
+                return (
+                  <div key={key} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: color, flexShrink: 0 }}/>
+                    <span style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 600, color: "#1a1c1c", flex: 1 }}>{label}</span>
+                    <span style={{ fontSize: "clamp(9px, 2.5vw, 11px)", fontWeight: 700, padding: "2px 7px", borderRadius: 99, background: sc.bg, color: sc.text, whiteSpace: "nowrap" }}>{word}</span>
+                  </div>
+                );
+              })}
+              <button onClick={() => router.push("/insights4")} className="font-semibold rounded-2xl" style={{ background: "#f4f4f6", color: "#6b7480", fontSize: "clamp(10px, 2.8vw, 12px)", padding: "8px 0", marginTop: 4 }}>See insights →</button>
             </div>
           </div>
         </div>
