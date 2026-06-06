@@ -138,11 +138,33 @@ const SCHEDULE_DETAILS: Record<string, string> = {
 
 const S: React.CSSProperties = { fontFamily: "Inter, sans-serif", fontSize: 17, fontWeight: 400, color: "#111", lineHeight: 1.6 };
 
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 12) return "Good Morning";
+  if (h < 18) return "Good Afternoon";
+  return "Good Evening";
+}
+
+function getDayMsg(match: { date: string; time: string } | null, now: Date): string {
+  const today = now.toISOString().slice(0, 10);
+  const yesterday = new Date(now.getTime() - 864e5).toISOString().slice(0, 10);
+  if (match?.date === today) {
+    const [mH, mM] = match.time.split(":").map(Number);
+    const diffMins = mH * 60 + mM - now.getHours() * 60 - now.getMinutes();
+    if (diffMins > 180) { const hrs = Math.floor(diffMins / 60); return `Match in ${hrs}h — hydrate and eat your pre-game meal ${hrs > 4 ? "a few hours before" : "soon"}.`; }
+    if (diffMins > 60) return "Time to warm up. Sip water and focus.";
+    if (diffMins > 0) return "Almost game time. Breathe and trust your prep.";
+    return "Great match today. Stretch, eat protein, and rest up.";
+  }
+  if (match?.date === yesterday) return "Recovery day. Drink plenty of water and get your protein in.";
+  return "Rest day. Hydrate, eat well, and take it easy.";
+}
+
 export default function Home8() {
   const router = useRouter();
   const [doModalOpen, setDoModalOpen] = useState(false);
   const [logSheetOpen, setLogSheetOpen] = useState(false);
-  const [logTab, setLogTab] = useState<"checkin" | "matchreview" | null>(null);
+  const [logTab, setLogTab] = useState<"checkin" | "wellbeing" | "matchreview" | null>(null);
   const [logWizard, setLogWizard] = useState(false);
   const [matchModalOpen, setMatchModalOpen] = useState(false);
   const [matchModalTab, setMatchModalTab] = useState<'pick' | 'manual'>('pick');
@@ -294,10 +316,47 @@ export default function Home8() {
               {/* Placeholder above */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
               {/* Main card */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "0 24px", marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-                <p className="font-bold tracking-widest uppercase" style={{ color: "#9aa5b0", fontSize: "clamp(11px, 3vw, 14px)" }}>Log Data</p>
-                <button onClick={() => { setLogWizard(false); setLogTab("checkin"); setLogSheetOpen(true); }} className="w-full py-3 rounded-2xl font-semibold" style={{ background: "#2653d418", color: "#2653d4", fontSize: "clamp(14px, 4vw, 18px)" }}>Daily check-in</button>
-                <button onClick={() => { setLogWizard(true); setLogTab(null); setLogSheetOpen(true); }} className="w-full py-3 rounded-2xl font-semibold" style={{ background: "#f4f4f6", color: "#6b7480", fontSize: "clamp(13px, 3.5vw, 16px)" }}>More options</button>
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", justifyContent: "center", gap: 10, padding: "0 16px", marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+                <p className="font-bold tracking-widest uppercase" style={{ color: "#9aa5b0", fontSize: "clamp(10px, 2.8vw, 13px)", paddingLeft: 4 }}>Log Data</p>
+                {/* Morning Check-in */}
+                <button onClick={() => { setLogWizard(false); setLogTab("checkin"); setLogSheetOpen(true); }} style={{ background: "#f4f6ff", borderRadius: 18, padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", border: "none", cursor: "pointer" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#2653d418", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                    </div>
+                    <div style={{ textAlign: "left" }}>
+                      <p style={{ fontSize: "clamp(13px, 3.8vw, 16px)", fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Morning Check-in</p>
+                      <p style={{ fontSize: "clamp(10px, 3vw, 12px)", color: "#6b7480", margin: "2px 0 0" }}>Sleep, energy & soreness</p>
+                    </div>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+                {/* Night Check-in */}
+                <button onClick={() => { setLogWizard(false); setLogTab("wellbeing"); setLogSheetOpen(true); }} style={{ background: "#f8f4ff", borderRadius: 18, padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", border: "none", cursor: "pointer" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#7c3aed18", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    </div>
+                    <div style={{ textAlign: "left" }}>
+                      <p style={{ fontSize: "clamp(13px, 3.8vw, 16px)", fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Night Check-in</p>
+                      <p style={{ fontSize: "clamp(10px, 3vw, 12px)", color: "#6b7480", margin: "2px 0 0" }}>Stress & motivation</p>
+                    </div>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+                {/* Add a Match */}
+                <button onClick={() => { setMatchModalTab('pick'); setMatchModalOpen(true); }} style={{ background: "#f0faf4", borderRadius: 18, padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", border: "none", cursor: "pointer" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#22c55e18", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
+                    </div>
+                    <div style={{ textAlign: "left" }}>
+                      <p style={{ fontSize: "clamp(13px, 3.8vw, 16px)", fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Add a Match</p>
+                      <p style={{ fontSize: "clamp(10px, 3vw, 12px)", color: "#6b7480", margin: "2px 0 0" }}>Schedule upcoming game</p>
+                    </div>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
               </div>
               {/* Placeholder below */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
@@ -384,8 +443,8 @@ export default function Home8() {
                   <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => setDoModalOpen(true)}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
                       <p className="animate-text-glow text-[14px] font-bold tracking-widest uppercase leading-none" style={{ color: "#fff" }}>NOW</p>
-                      <p className="leading-none mb-2" style={{ color: "rgba(255,255,255,0.65)", fontSize: "clamp(13px, 3.8vw, 17px)" }}>{s.time} – {nextSlide ? nextSlide.time : "end"}</p>
                       <p className="font-bold leading-tight text-center" style={{ color: "#fff", fontSize: "clamp(24px, 7.5vw, 34px)" }}>{s.title}</p>
+                      <p className="leading-none mt-1 mb-1" style={{ color: "rgba(255,255,255,0.8)", fontSize: "clamp(11.7px, 3.42vw, 15.3px)", fontWeight: 800 }}>{s.time} – {nextSlide ? nextSlide.time : "end"}</p>
                       {s.subtitle && <p className="leading-none text-center mt-0.5" style={{ color: "rgba(255,255,255,0.8)", fontSize: "clamp(15px, 4.8vw, 22px)" }}>{s.subtitle.split(", ").join(" · ")}</p>}
                       <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 font-semibold px-5 py-2 rounded-full" style={{ background: "#fff", color: isReady ? s.color : "#b0b5ba", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me</button>
                     </div>
@@ -398,8 +457,8 @@ export default function Home8() {
                 const curMinsSched = now.getHours() * 60 + now.getMinutes();
                 return (
                   <div key="sched" style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "white", display: "flex", flexDirection: "column", opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === 1 ? 2 : 1, height: "calc(100dvh - 4rem - 44px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none" }}>
-                    <div style={{ padding: "20px 20px 0", flexShrink: 0 }}>
-                      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9aa5b0", margin: 0 }}>Today</p>
+                    <div style={{ padding: "20px 20px 0", flexShrink: 0, textAlign: "center" }}>
+                      <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9aa5b0", margin: 0 }}>Today&apos;s Schedule</p>
                     </div>
                     <div style={{ height: 1, background: "#dfe3e7", margin: "12px 0 0", flexShrink: 0 }} />
                     <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
