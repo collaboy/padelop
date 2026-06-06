@@ -113,27 +113,84 @@ function getScheduleData(dayType: "match" | "recovery" | "training", matchTime: 
   return { schedule, currentIdx: idx };
 }
 
-const SCHEDULE_DETAILS: Record<string, string> = {
-  "Wake up & hydrate": "Starting your day with 500 ml of water re-hydrates you after 7–8 hours without fluids. Do this before coffee — caffeine is a mild diuretic and amplifies morning dehydration.",
-  "Breakfast": "Oats are a slow-releasing carbohydrate that keeps blood sugar stable for hours. Eggs deliver complete protein to protect muscle. Fruit provides natural sugars and hydrating water content.",
-  "Light breakfast": "Keep it light and easily digestible on a recovery day. Eggs provide amino acids for tissue repair. Greek yogurt delivers protein and probiotics.",
-  "Morning mobility": "Light mobility work increases range of motion and blood flow without fatiguing your muscles before a match. Key areas for padel: hip flexors, IT band, calves, thoracic spine.",
-  "Light mobility": "On rest days, gentle mobility keeps joints lubricated and prevents stiffness. Focus on hip flexors, thoracic rotation, and ankle circles. 10–15 minutes is enough.",
-  "Pre-game meal": "A small solid meal 60–90 min before the match tops off energy stores without sitting heavy in your stomach.",
-  "Warmup & activation": "Dynamic warmup primes the neuromuscular system. Lateral drills mimic court-side movement patterns. Build from 60% to 80–90% intensity.",
-  "Match": "Match time. Focus on early rhythm. Communicate constantly with your partner. Stay hydrated between sets.",
-  "Post-match cool down": "Cooling down gradually lowers your heart rate. Static stretching (30-sec holds) is most effective now — muscles are warm and pliable.",
-  "Recovery meal": "The 30-minute post-exercise window has the highest rate of muscle protein synthesis. Aim for 20–40 g protein + 60–80 g carbs.",
-  "Recovery walk": "Low-intensity movement increases blood flow to fatigued muscles without adding stress. 20 minutes helps flush metabolic waste.",
-  "Foam roll & stretch": "Work through quads, IT band, hip flexors, glutes, and calves. Spend 60–90 seconds on each area.",
-  "Protein-rich lunch": "Muscle repair peaks in the 24 hours after exercise. Aim for 30–40g of protein from high-quality sources.",
-  "Cold shower": "Two minutes of cold water constricts blood vessels, reduces inflammation, and blunts delayed onset muscle soreness.",
-  "Dinner": "Focus on anti-inflammatory foods: fatty fish, leafy greens, and complex carbs. Avoid alcohol — it significantly impairs muscle protein synthesis overnight.",
-  "Early wind down": "An early wind-down accelerates recovery: dim lights by 9pm, avoid screens, and aim to be in bed by 10:30.",
-  "Balanced lunch": "Build your lunch around a variety of colours — each pigment represents a different class of antioxidant that supports tissue repair.",
-  "Active recovery": "Light aerobic activity on rest days maintains cardiovascular fitness without accumulating fatigue. Keep heart rate below 130 bpm.",
-  "Visualisation": "Mental rehearsal activates the same motor pathways as physical practice. Spend 5 minutes visualising your strongest patterns.",
-  "Wind down": "Blue light from screens suppresses melatonin production by up to 50%. In the 60 minutes before bed: dim lights, avoid screens.",
+type DetailMeal     = { type: 'meal';     focus: string; options: [string, string, string] };
+type DetailExercise = { type: 'exercise'; focus: string; steps: { step: string; cue: string; reps: string }[] };
+type DetailInfo     = { type: 'info';     text: string };
+type ScheduleDetail = DetailMeal | DetailExercise | DetailInfo;
+
+const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
+  "Wake up & hydrate": { type: 'info', text: "Starting your day with 500 ml of water re-hydrates you after 7–8 hours without fluids. Do this before coffee — caffeine is a mild diuretic and amplifies morning dehydration." },
+  "Breakfast": { type: 'meal', focus: "High protein · slow-release carbs", options: [
+    "Scrambled eggs + oats with banana and almond butter",
+    "Greek yogurt bowl with granola, mixed berries and honey",
+    "Whole grain toast + 3-egg omelette with spinach and feta",
+  ]},
+  "Light breakfast": { type: 'meal', focus: "Light · easily digestible", options: [
+    "2 poached eggs on sourdough with sliced avocado",
+    "Greek yogurt with a small handful of granola and fruit",
+    "Banana with almond butter and a boiled egg",
+  ]},
+  "Morning mobility": { type: 'exercise', focus: "Hip flexors · thoracic spine · ankles", steps: [
+    { step: "Hip flexor lunge hold", cue: "Step into a deep lunge, front knee at 90°. Push hips gently forward and hold.", reps: "60 sec each side" },
+    { step: "Thoracic rotation", cue: "Sit back on heels, hands behind head. Rotate your upper back slowly left and right.", reps: "10 reps each direction" },
+    { step: "Ankle circles", cue: "Stand on one foot and draw slow controlled circles with your raised ankle.", reps: "10 each direction, each ankle" },
+  ]},
+  "Light mobility": { type: 'exercise', focus: "Joints · hip flexors · thoracic rotation", steps: [
+    { step: "Cat-cow", cue: "On hands and knees, alternate arching and rounding your back. Breathe with each rep.", reps: "10 slow reps" },
+    { step: "Hip flexor lunge hold", cue: "Low lunge — hold gently, no bouncing. Let the hip ease open.", reps: "45 sec each side" },
+    { step: "Thoracic opener", cue: "Arms crossed on chest, rotate torso slowly side to side keeping hips still.", reps: "8 reps each direction" },
+  ]},
+  "Pre-game meal": { type: 'meal', focus: "Easily digestible · energy without heaviness", options: [
+    "Grilled chicken breast + white rice + cucumber salad",
+    "Pasta with light tomato sauce and lean mince",
+    "Jacket potato + tuna + a small mixed salad",
+  ]},
+  "Warmup & activation": { type: 'exercise', focus: "Neuromuscular activation · movement prep", steps: [
+    { step: "Leg swings", cue: "Hold a wall for balance. Swing each leg forward and back, then laterally. Stay controlled.", reps: "15 reps each direction, each leg" },
+    { step: "Lateral shuffle", cue: "Stay low, weight on balls of feet. Shuffle 5 metres left and right. Explode off each plant.", reps: "3 sets of 10 metres" },
+    { step: "Shadow groundstrokes", cue: "20 forehand + 20 backhand shadow swings, building from 60% to 80% intensity. Focus on footwork first.", reps: "20 each side" },
+  ]},
+  "Match": { type: 'info', text: "Match time. Focus on early rhythm — the first two games set the tone. Communicate constantly with your partner. Stay hydrated between sets." },
+  "Post-match cool down": { type: 'exercise', focus: "Heart rate reduction · static stretching", steps: [
+    { step: "Standing quad stretch", cue: "Hold your ankle behind you against your glute. Keep the knee pointing straight down.", reps: "45 sec each leg" },
+    { step: "Seated hamstring stretch", cue: "Legs straight out in front, hinge from the hips and reach towards your feet.", reps: "45 sec" },
+    { step: "Shoulder cross-body stretch", cue: "Pull one arm across your chest. Keep your shoulder pressed down away from your ear.", reps: "30 sec each side" },
+  ]},
+  "Recovery meal": { type: 'meal', focus: "Protein + carbs · 30-min window", options: [
+    "Grilled salmon + sweet potato mash + wilted spinach",
+    "Chicken stir-fry with rice noodles and broccoli",
+    "Protein shake + banana + peanut butter on whole grain toast",
+  ]},
+  "Recovery walk": { type: 'info', text: "Walk at a pace where you can hold a full conversation. Low-intensity movement flushes metabolic waste from fatigued muscles without adding stress. 20 minutes is enough." },
+  "Foam roll & stretch": { type: 'exercise', focus: "Quads · IT band · hip flexors · calves", steps: [
+    { step: "IT band roll", cue: "Side-lying, roll slowly from hip to knee on the outer thigh. Pause and breathe on tight spots.", reps: "60–90 sec each leg" },
+    { step: "Quad roll", cue: "Face down, forearms supporting you. Roll from hip to knee on the front of the thigh.", reps: "60 sec each leg" },
+    { step: "Hip flexor lunge stretch", cue: "Low lunge, back knee down, slight backward lean. Feel the stretch in the front of the back hip.", reps: "60 sec each side" },
+  ]},
+  "Protein-rich lunch": { type: 'meal', focus: "30–40g protein · muscle repair", options: [
+    "Grilled chicken breast + quinoa + roasted courgette and peppers",
+    "Tuna nicoise salad with boiled eggs, green beans and olives",
+    "Salmon fillet + brown rice + steamed broccoli with olive oil",
+  ]},
+  "Cold shower": { type: 'info', text: "Two minutes of cold water constricts blood vessels, reduces inflammation, and blunts delayed onset muscle soreness. Start warm, finish cold for the last 90–120 seconds." },
+  "Dinner": { type: 'meal', focus: "Anti-inflammatory · high micronutrient", options: [
+    "Baked salmon + roasted sweet potato + wilted spinach with garlic",
+    "Grilled sea bass + brown rice + stir-fried kale and broccoli",
+    "Chicken thighs + roasted Mediterranean veg + a small portion of couscous",
+  ]},
+  "Early wind down": { type: 'info', text: "Dim lights by 9pm and avoid screens. Sleep is the highest-impact recovery tool available — aim for 8 hours tonight. A consistent bedtime rhythm compounds over weeks." },
+  "Balanced lunch": { type: 'meal', focus: "Variety · antioxidants · sustained energy", options: [
+    "Buddha bowl: brown rice, roasted veg, chickpeas and tahini dressing",
+    "Chicken wrap with avocado, spinach, cucumber and hummus",
+    "Lentil soup with whole grain bread and a large side salad",
+  ]},
+  "Active recovery": { type: 'info', text: "Walk, swim, or cycle at a pace where you can hold a full conversation. Keep heart rate below 130 bpm. Light aerobic activity maintains cardiovascular fitness without accumulating fatigue." },
+  "Visualisation": { type: 'exercise', focus: "Mental rehearsal · pattern reinforcement", steps: [
+    { step: "Replay a key moment", cue: "Pick one point from your last match that you lost. Replay it slowly in your mind — what would you change?", reps: "2 min" },
+    { step: "Strongest pattern", cue: "Visualise your best attacking sequence in full detail: footwork → position → shot → result. Make it vivid.", reps: "2 min" },
+    { step: "Next session intent", cue: "Walk through your next session mentally and set one specific technical focus before you begin.", reps: "1 min" },
+  ]},
+  "Wind down": { type: 'info', text: "Blue light from screens suppresses melatonin by up to 50%. In the 60 minutes before bed: dim lights, avoid screens, and keep the room cool for deeper sleep." },
 };
 
 const S: React.CSSProperties = { fontFamily: "Inter, sans-serif", fontSize: 17, fontWeight: 400, color: "#111", lineHeight: 1.6 };
@@ -163,6 +220,7 @@ function getDayMsg(match: { date: string; time: string } | null, now: Date): str
 export default function Home8() {
   const router = useRouter();
   const [doModalOpen, setDoModalOpen] = useState(false);
+  const [schedModalIdx, setSchedModalIdx] = useState<number | null>(null);
   const [logSheetOpen, setLogSheetOpen] = useState(false);
   const [logTab, setLogTab] = useState<"checkin" | "wellbeing" | "matchreview" | null>(null);
   const [logWizard, setLogWizard] = useState(false);
@@ -189,8 +247,12 @@ export default function Home8() {
   const [yesterdayWasMatch, setYesterdayWasMatch] = useState(false);
   const [drillTag, setDrillTag] = useState<string | null>(null);
   const [drillContext, setDrillContext] = useState<"court" | "solo">("court");
+  const [drillSteps, setDrillSteps] = useState<{ step: string; cue: string; reps: string }[] | null>(null);
+  const [drillLoading, setDrillLoading] = useState(false);
 
   const matchUploadRef = useRef<HTMLInputElement>(null);
+  const schedScrollRef = useRef<HTMLDivElement>(null);
+  const schedCurrentRef = useRef<HTMLDivElement>(null);
   const touchStartXRef = useRef(0);
   const touchStartYRef = useRef(0);
   const swipeDirRef = useRef<'h' | 'v' | null>(null);
@@ -260,6 +322,34 @@ export default function Home8() {
 
   useEffect(() => { setCardSnap('none'); setLiveX(0); }, [doIdx]);
 
+  useEffect(() => {
+    if (doIdx !== 1) return;
+    const container = schedScrollRef.current;
+    const current = schedCurrentRef.current;
+    if (!container || !current) return;
+    const top = current.offsetTop - container.clientHeight / 2 + current.clientHeight / 2;
+    container.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  }, [doIdx]);
+
+  useEffect(() => {
+    const item = schedule[schedModalIdx ?? currentIdx];
+    if (!doModalOpen || !item?.isDrill) { setDrillSteps(null); return; }
+    let cancelled = false;
+    setDrillSteps(null);
+    setDrillLoading(true);
+    fetch("/api/exercise-guide", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: item.title, tag: drillTag, context: drillContext, subtitle: item.subtitle }),
+    })
+      .then(r => r.json())
+      .then(data => { if (!cancelled && data.steps) setDrillSteps(data.steps); })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setDrillLoading(false); });
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [doModalOpen, drillContext, schedModalIdx]);
+
   // Detect when a loaded future match transitions to past while the app is open
   useEffect(() => {
     if (!match || postMatchOpen) return;
@@ -283,6 +373,8 @@ export default function Home8() {
   const dayType: "match" | "recovery" | "training" = match?.date === today ? "match" : yesterdayWasMatch ? "recovery" : "training";
   const { schedule, currentIdx } = getScheduleData(dayType, match?.time ?? null, drillTag);
   const doItem = schedule[currentIdx];
+  const modalIdx = schedModalIdx ?? currentIdx;
+  const modalItem = schedule[modalIdx] ?? doItem;
   const curMins = now.getHours() * 60 + now.getMinutes();
 
   const goNext = () => setDoIdx(i => Math.min(i + 1, 1));
@@ -332,46 +424,32 @@ export default function Home8() {
           }}
         >
           {/* Log panel */}
-          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingRight: 20 }}>
+          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingRight: 20, paddingLeft: 20 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, transform: `translateX(${cardSnap === 'right' ? 50 : 0}px) translateY(calc(45dvh - 4rem - 3 * (100vw - 40px) / 2 - 10px))`, transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
               {/* Placeholder above */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
               {/* Main card */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "transparent", borderRadius: 24, display: "flex", flexDirection: "column", justifyContent: "center", gap: 7, marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 2px" }}>Log Data</p>
-                <button onClick={() => { setMatchModalTab('pick'); setMatchModalOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: "white", borderRadius: 18, border: "none", width: "100%", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#22c55e18", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
-                  </div>
-                  <div style={{ textAlign: "left", flex: 1 }}>
-                    <p style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>Add a Match</p>
-                    <p style={{ fontSize: 12, color: "#6b7480", margin: "2px 0 0" }}>Schedule upcoming game</p>
-                  </div>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0, paddingRight: 40, marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+                {/* Log section */}
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 14px" }}>Log</p>
+                <button onClick={() => { setMatchModalTab('pick'); setMatchModalOpen(true); }} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                  <span style={{ fontSize: "clamp(18px, 5vw, 22px)", fontWeight: 700, color: "#1a1c1c", letterSpacing: "-0.01em" }}>+ Add a Match</span>
                 </button>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "4px 0 2px" }}>Daily Check-in</p>
-                <button onClick={() => { setLogWizard(false); setLogTab("checkin"); setLogSheetOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: "white", borderRadius: 18, border: "none", width: "100%", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: morningDone ? "#16a34a18" : "#2653d418", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={morningDone ? "#16a34a" : "#2653d4"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-                  </div>
-                  <div style={{ textAlign: "left", flex: 1 }}>
-                    <p style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>Morning Check-in</p>
-                    <p style={{ fontSize: 12, color: morningDone ? "#16a34a" : "#6b7480", margin: "2px 0 0" }}>{morningDone ? "Done today" : "Sleep, energy & soreness"}</p>
-                  </div>
+
+                {/* Divider */}
+                <div style={{ width: 36, height: 1, background: "#e8eaed", margin: "20px 0" }} />
+
+                {/* Check-in section */}
+                <button onClick={() => { setLogWizard(false); setLogTab("checkin"); setLogSheetOpen(true); }} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
+                  <span style={{ fontSize: "clamp(16px, 4.5vw, 20px)", fontWeight: morningDone ? 500 : 700, color: morningDone ? "#9aa5b0" : "#1a1c1c" }}>Morning Check-in</span>
                   {morningDone
                     ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                    : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                   }
                 </button>
-                <button onClick={() => { setLogWizard(false); setLogTab("wellbeing"); setLogSheetOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: "white", borderRadius: 18, border: "none", width: "100%", cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#7c3aed18", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                  </div>
-                  <div style={{ textAlign: "left", flex: 1 }}>
-                    <p style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>Night Check-in</p>
-                    <p style={{ fontSize: 12, color: "#6b7480", margin: "2px 0 0" }}>Stress & motivation</p>
-                  </div>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                <button onClick={() => { setLogWizard(false); setLogTab("wellbeing"); setLogSheetOpen(true); }} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 5 }}>
+                  <span style={{ fontSize: "clamp(16px, 4.5vw, 20px)", fontWeight: 700, color: "#1a1c1c" }}>Night Check-in</span>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
               </div>
               {/* Placeholder below */}
@@ -401,41 +479,65 @@ export default function Home8() {
               </div>
 
               {/* Card 0: next match */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(95dvh - 4rem - 60px)", borderRadius: 24, overflow: "hidden", background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "28px 24px", gap: 10, opacity: cardSnap === 'none' && doIdx === -1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === -1 ? 2 : 1, pointerEvents: doIdx === -1 ? "auto" : "none" }}>
-                <p className="text-[13px] font-bold tracking-widest uppercase text-center" style={{ color: "#9aa5b0" }}>Next Match</p>
-                {match ? (() => {
-                  const [y, mo, d] = match.date.split('-').map(Number);
-                  const dt = new Date(y, mo - 1, d);
-                  const dateStr = dt.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
-                  return (
-                    <>
-                      <button onClick={() => setMatchActionOpen(true)} className="flex flex-col items-center gap-2 active:opacity-60 transition-opacity" style={{ background: "none", border: "none" }}>
-                        <p className="font-bold text-[#1a1c1c] leading-tight text-center" style={{ fontSize: "clamp(28px, 8vw, 40px)" }}>{dateStr}</p>
-                        <p className="font-semibold text-[#4a5050] leading-none text-center" style={{ fontSize: "clamp(20px, 5.5vw, 28px)" }}>{match.time}</p>
-                        {match.club && <p className="text-[#6b7480] leading-none text-center" style={{ fontSize: "clamp(16px, 4.5vw, 22px)" }}>{match.club}</p>}
-                        {match.players && match.players.length > 0 && <p className="text-[#9aa5b0] leading-snug text-center" style={{ fontSize: "clamp(14px, 4vw, 18px)" }}>{match.players.join(' · ')}</p>}
-                      </button>
-                      <div style={{ width: "100%", height: 1, background: "#f0f0f0", margin: "8px 0" }} />
-                      <p className="font-bold tracking-widest uppercase text-center" style={{ color: "#9aa5b0", fontSize: "clamp(11px, 3vw, 14px)" }}>Match Readiness</p>
-                      {(() => {
-                        const vals = Object.values(pillarStates);
-                        const allNotLogged = vals.every(v => v.status === 'not_logged');
-                        const hasLow = vals.some(v => v.status === 'low');
-                        const hasOk = vals.some(v => v.status === 'ok');
-                        const word = allNotLogged ? '–' : hasLow ? 'Low' : hasOk ? 'OK' : 'Good';
-                        const color = allNotLogged ? '#9aa5b0' : hasLow ? '#dc2626' : hasOk ? '#d97706' : '#16a34a';
-                        const bg = allNotLogged ? 'rgba(154,165,176,0.1)' : hasLow ? 'rgba(220,38,38,0.08)' : hasOk ? 'rgba(217,119,6,0.08)' : 'rgba(22,163,74,0.08)';
-                        return <span style={{ fontSize: "clamp(22px, 6vw, 30px)", fontWeight: 800, color, lineHeight: 1, padding: "6px 18px", borderRadius: 999, background: bg }}>{word}</span>;
-                      })()}
-                    </>
-                  );
-                })() : (
-                  <>
-                    <p className="font-semibold text-[#9aa5b0] text-center" style={{ fontSize: "clamp(18px, 5vw, 24px)" }}>No match set</p>
-                    <button onClick={() => { setMatchModalTab('pick'); setMatchModalOpen(true); }} className="mt-1 font-semibold px-5 py-2.5 rounded-full" style={{ background: "#2653d418", color: "#2653d4", fontSize: "clamp(14px, 4vw, 18px)" }}>Add Match</button>
-                  </>
-                )}
-              </div>
+              {(() => {
+                const today = now.toISOString().slice(0, 10);
+                const vals = Object.values(pillarStates);
+                const allNL = vals.every(v => v.status === 'not_logged');
+                const hasLow = vals.some(v => v.status === 'low');
+                const hasOk  = vals.some(v => v.status === 'ok');
+                const readinessLabel = allNL ? null : hasLow ? 'LOW READINESS' : hasOk ? 'OK READINESS' : 'GOOD READINESS';
+                const readinessColor = hasLow ? '#dc2626' : hasOk ? '#d97706' : '#16a34a';
+                const coachTip = hasLow ? 'Focus on recovery today.' : hasOk ? 'Keep your habits consistent today.' : allNL ? 'Log your check-ins to track readiness.' : 'You\'re in great shape. Stay sharp.';
+
+                return (
+                  <div style={{ width: "100%", flexShrink: 0, height: "calc(95dvh - 4rem - 60px)", borderRadius: 24, background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px", opacity: cardSnap === 'none' && doIdx === -1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === -1 ? 2 : 1, pointerEvents: doIdx === -1 ? "auto" : "none" }}>
+                    {match ? (() => {
+                      const matchDate = new Date(match.date + "T12:00");
+                      const todayDate = new Date(today + "T12:00");
+                      const diffDays = Math.round((matchDate.getTime() - todayDate.getTime()) / 86400000);
+                      const countdownLabel = diffDays === 0 ? "TODAY" : diffDays === 1 ? "TOMORROW" : `IN ${diffDays} DAYS`;
+                      const dateStr = matchDate.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+                      const playerStr = match.players && match.players.length > 0
+                        ? `with ${match.players.join(', ')}`
+                        : null;
+
+                      return (
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+                          {/* Single muted header */}
+                          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 20px" }}>Next Match · {countdownLabel}</p>
+
+                          {/* Hero date */}
+                          <button onClick={() => setMatchActionOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                            <p style={{ fontSize: "clamp(34px, 9vw, 44px)", fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1, letterSpacing: "-0.02em" }}>{dateStr}</p>
+                            <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 700, color: "#2653d4", margin: 0, lineHeight: 1 }}>{match.time}</p>
+                            {match.club && <p style={{ fontSize: 17, fontWeight: 500, color: "#6b7480", margin: "4px 0 0" }}>{match.club}</p>}
+                            {playerStr && <p style={{ fontSize: 13, color: "#b0b8c1", margin: "3px 0 0", textAlign: "center", lineHeight: 1.4 }}>{playerStr}</p>}
+                          </button>
+
+                          {/* Divider */}
+                          <div style={{ width: 48, height: 1, background: "#e8eaed", margin: "24px 0" }} />
+
+                          {/* Readiness */}
+                          {readinessLabel && (
+                            <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: readinessColor, margin: "0 0 8px" }}>{readinessLabel}</p>
+                          )}
+                          <p style={{ fontSize: 16, fontWeight: 400, color: "#3a4550", margin: "0 0 14px", textAlign: "center", lineHeight: 1.5 }}>{coachTip}</p>
+                          <button onClick={() => router.push('/readiness')} style={{ display: "flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                            <span style={{ fontSize: 14, fontWeight: 600, color: "#2653d4" }}>See insights</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                          </button>
+                        </div>
+                      );
+                    })() : (
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+                        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: 0 }}>Next Match</p>
+                        <p style={{ fontSize: 20, fontWeight: 500, color: "#c0c7d0", margin: 0 }}>No match scheduled</p>
+                        <button onClick={() => { setMatchModalTab('pick'); setMatchModalOpen(true); }} style={{ fontSize: 15, fontWeight: 600, color: "#2653d4", background: "none", border: "none", cursor: "pointer", padding: 0 }}>+ Add a match</button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Card 1: do-this-now */}
               {(() => {
@@ -482,10 +584,17 @@ export default function Home8() {
                 return (
                   <div key="sched" style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "white", display: "flex", flexDirection: "column", opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === 1 ? 2 : 1, height: "calc(100dvh - 4rem - 44px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none" }}>
                     <div style={{ padding: "20px 20px 0", flexShrink: 0, textAlign: "center" }}>
-                      <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9aa5b0", margin: 0 }}>Today&apos;s Schedule</p>
+                      <p style={{ fontSize: 18, fontWeight: 700, color: "#1a1c1c", margin: "0 0 2px" }}>Today&apos;s Schedule</p>
+                      <span style={{
+                        fontSize: 12, fontWeight: 700, padding: "3px 12px", borderRadius: 99,
+                        background: dayType === "match" ? "#2653d418" : dayType === "recovery" ? "#7c3aed18" : "#16a34a18",
+                        color: dayType === "match" ? "#2653d4" : dayType === "recovery" ? "#7c3aed" : "#16a34a",
+                      }}>
+                        {dayType === "match" ? "Match Day" : dayType === "recovery" ? "Recovery Day" : "Training Day"}
+                      </span>
                     </div>
-                    <div style={{ height: 1, background: "#dfe3e7", margin: "12px 0 0", flexShrink: 0 }} />
-                    <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
+                    <div style={{ height: 1, background: "#dfe3e7", margin: "20px 0 0", flexShrink: 0 }} />
+                    <div ref={schedScrollRef} style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
                       <div style={{ padding: "16px 20px 28px" }}>
                         {schedule.map((item, idx, arr) => {
                           const isLast = idx === arr.length - 1;
@@ -498,7 +607,7 @@ export default function Home8() {
                           const detail = SCHEDULE_DETAILS[item.title];
                           const clickable = !!(detail || item.isDrill);
                           return (
-                            <div key={idx} style={{ display: "flex", gap: 14 }}>
+                            <div key={idx} ref={isCur ? schedCurrentRef : undefined} style={{ display: "flex", gap: 14 }}>
                               <div style={{ width: 56, flexShrink: 0, paddingTop: 3 }}>
                                 <p style={{ fontSize: 15, fontWeight: 700, color: "#6b7480", textAlign: "right", lineHeight: 1, margin: 0 }}>{item.time}</p>
                               </div>
@@ -520,10 +629,9 @@ export default function Home8() {
                               <button
                                 style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, textAlign: "left", background: "none", border: "none", cursor: clickable ? "pointer" : "default", padding: "0 0 24px" }}
                                 onClick={() => {
-                                  if (item.isDrill) {
-                                    setSchedDetailOpen({ title: item.title, subtitle: item.subtitle, color: item.color, detail: "", isDrill: true });
-                                  } else if (detail) {
-                                    setSchedDetailOpen({ title: item.title, subtitle: item.subtitle, color: item.color, detail });
+                                  if (item.isDrill || detail) {
+                                    setSchedModalIdx(idx);
+                                    setDoModalOpen(true);
                                   }
                                 }}
                               >
@@ -550,68 +658,113 @@ export default function Home8() {
 
           {/* Readiness panel */}
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 40, paddingTop: "calc(45dvh - 4rem - (100vw - 40px) / 2)" }}>
-            {(() => {
-              const vals = Object.values(pillarStates);
-              const allNotLogged = vals.every(v => v.status === 'not_logged');
-              const hasLow = vals.some(v => v.status === 'low');
-              const hasOk = vals.some(v => v.status === 'ok');
-              const overallWord = allNotLogged ? '–' : hasLow ? 'Low' : hasOk ? 'OK' : 'Good';
-              const overallColor = allNotLogged ? '#9aa5b0' : hasLow ? '#dc2626' : hasOk ? '#d97706' : '#16a34a';
-              const overallBg = allNotLogged ? 'rgba(154,165,176,0.1)' : hasLow ? 'rgba(220,38,38,0.08)' : hasOk ? 'rgba(217,119,6,0.08)' : 'rgba(22,163,74,0.08)';
-              return (
-                <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "18px 16px 16px", gap: 10, marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-                  <p className="font-bold tracking-widest uppercase text-center" style={{ color: "#9aa5b0", fontSize: "clamp(11px, 3vw, 14px)" }}>Match Readiness</p>
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, width: "100%" }}>
-                    <span style={{ fontSize: "clamp(44px, 13vw, 58px)", fontWeight: 800, color: overallColor, lineHeight: 1, padding: "10px 28px", borderRadius: 999, background: overallBg }}>{overallWord}</span>
-                    <p style={{ fontSize: "clamp(9px, 2.5vw, 11px)", color: "#9aa5b0", textAlign: "center", lineHeight: 1.5, margin: 0 }}>Based on recovery, nutrition,{"\n"}training &amp; wellbeing</p>
-                  </div>
-                  <button onClick={() => router.push("/insights4")} className="flex items-center justify-center gap-1" style={{ background: "none", border: "none", cursor: "pointer", padding: "4px 0" }}>
-                    <span style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 600, color: "#6b7480" }}>See details</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                  </button>
-                </div>
-              );
-            })()}
+            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, padding: "20px 18px", marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+              <p style={{ fontSize: 22, margin: 0 }}>✦</p>
+              <p style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", margin: 0, textAlign: "center" }}>More coming soon</p>
+              <p style={{ fontSize: 12, color: "#9aa5b0", margin: 0, textAlign: "center", lineHeight: 1.5 }}>Your readiness insights{"\n"}are on their way.</p>
+            </div>
           </div>
         </div>
 
         {/* Complete modal */}
-        {doModalOpen && doItem && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => setDoModalOpen(false)}>
+        {doModalOpen && modalItem && (
+          <div className="fixed inset-0 z-[200] flex items-start justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)" }} onClick={() => { setDoModalOpen(false); setSchedModalIdx(null); }}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
             <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden max-h-[88vh] overflow-y-auto" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.15)" }} onClick={e => e.stopPropagation()}>
-              <div className="px-6 pt-5 pb-4" style={{ background: `${doItem.color}18` }}>
+              <div className="px-6 pt-5 pb-4" style={{ background: `${modalItem.color}18` }}>
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: doItem.color }} />
-                  <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: doItem.color }}>Today&apos;s Schedule</p>
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ background: modalItem.color }} />
+                  <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: modalItem.color }}>Today&apos;s Schedule</p>
                 </div>
-                <h3 className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{doItem.title}</h3>
-                {doItem.subtitle && <p className="text-[15px] text-[#6b7480] mt-0.5">{doItem.subtitle}</p>}
+                <h3 className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{modalItem.title}</h3>
+                {modalItem.subtitle && <p className="text-[15px] text-[#6b7480] mt-0.5">{modalItem.subtitle}</p>}
               </div>
-              {doItem.isDrill ? (
+              {modalItem.isDrill ? (
                 <div className="px-6 py-5">
                   <p className="text-[11px] font-bold uppercase tracking-widest text-[#8a9096] mb-3">Where are you today?</p>
-                  <div className="flex gap-2 mb-4">
+                  <div className="flex gap-2 mb-5">
                     <button onClick={() => setDrillContext("court")} className="flex-1 py-2.5 rounded-xl text-[14px] font-semibold transition-colors" style={{ background: drillContext === "court" ? "#2653d4" : "#f4f4f6", color: drillContext === "court" ? "#fff" : "#4a5050" }}>Court</button>
                     <button onClick={() => setDrillContext("solo")} className="flex-1 py-2.5 rounded-xl text-[14px] font-semibold transition-colors" style={{ background: drillContext === "solo" ? "#2653d4" : "#f4f4f6", color: drillContext === "solo" ? "#fff" : "#4a5050" }}>Anywhere</button>
                   </div>
-                  <p className="text-[15px] text-[#2c3235] leading-relaxed">
-                    {drillContext === "court" ? (DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).court : (DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).solo}
-                  </p>
+                  {drillLoading ? (
+                    <div className="flex flex-col gap-4">
+                      {[1,2,3].map(i => (
+                        <div key={i} className="flex items-start gap-3 animate-pulse">
+                          <div className="w-6 h-6 rounded-full bg-[#f0f2f5] flex-shrink-0"/>
+                          <div className="flex-1 space-y-1.5">
+                            <div className="h-3.5 bg-[#f0f2f5] rounded w-3/4"/>
+                            <div className="h-3 bg-[#f0f2f5] rounded w-full"/>
+                            <div className="h-3 bg-[#f0f2f5] rounded w-1/2"/>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : drillSteps ? (
+                    <div className="flex flex-col gap-4">
+                      {drillSteps.map((s, i) => (
+                        <div key={i} className="flex items-start gap-3">
+                          <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: `${modalItem.color}18` }}>
+                            <span className="text-[11px] font-bold" style={{ color: modalItem.color }}>{i + 1}</span>
+                          </div>
+                          <div>
+                            <p className="text-[14px] font-semibold text-[#1a1c1c]">{s.step}</p>
+                            <p className="text-[13px] text-[#6b7480] mt-0.5 leading-snug">{s.cue}</p>
+                            <p className="text-[12px] font-semibold mt-1" style={{ color: modalItem.color }}>{s.reps}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
-              ) : SCHEDULE_DETAILS[doItem.title] && (
-                <div className="px-6 py-5">
-                  <p className="text-[17px] text-[#2c3235] leading-relaxed">{SCHEDULE_DETAILS[doItem.title]}</p>
-                </div>
-              )}
+              ) : (() => {
+                const detail = SCHEDULE_DETAILS[modalItem.title];
+                if (!detail) return null;
+                if (detail.type === 'meal') return (
+                  <div className="px-6 py-5">
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-[#8a9096] mb-4">{detail.focus}</p>
+                    <div className="flex flex-col gap-3">
+                      {detail.options.map((meal, i) => (
+                        <div key={i} className="flex items-start gap-3">
+                          <div className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style={{ background: modalItem.color }}/>
+                          <p className="text-[15px] text-[#2c3235] leading-snug">{meal}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+                if (detail.type === 'exercise') return (
+                  <div className="px-6 py-5">
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-[#8a9096] mb-4">{detail.focus}</p>
+                    <div className="flex flex-col gap-4">
+                      {detail.steps.map((s, i) => (
+                        <div key={i} className="flex items-start gap-3">
+                          <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: `${modalItem.color}18` }}>
+                            <span className="text-[11px] font-bold" style={{ color: modalItem.color }}>{i + 1}</span>
+                          </div>
+                          <div>
+                            <p className="text-[14px] font-semibold text-[#1a1c1c]">{s.step}</p>
+                            <p className="text-[13px] text-[#6b7480] mt-0.5 leading-snug">{s.cue}</p>
+                            <p className="text-[12px] font-semibold mt-1" style={{ color: modalItem.color }}>{s.reps}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+                return (
+                  <div className="px-6 py-5">
+                    <p className="text-[16px] text-[#2c3235] leading-relaxed">{detail.text}</p>
+                  </div>
+                );
+              })()}
               <div className="px-6 pb-6">
                 {(() => {
-                  const isComplete = completed.has(currentIdx);
+                  const isComplete = completed.has(modalIdx);
                   return (
                     <button
-                      onClick={() => { setDoModalOpen(false); setCompleted(prev => { const n = new Set(prev); isComplete ? n.delete(currentIdx) : n.add(currentIdx); return n; }); }}
+                      onClick={() => { setDoModalOpen(false); setSchedModalIdx(null); setCompleted(prev => { const n = new Set(prev); isComplete ? n.delete(modalIdx) : n.add(modalIdx); return n; }); }}
                       className="w-full py-3.5 rounded-2xl text-[15px] font-bold active:scale-[0.98] transition-transform"
-                      style={isComplete ? { background: `${doItem.color}18`, color: doItem.color } : { background: doItem.color, color: "#fff" }}
+                      style={isComplete ? { background: `${modalItem.color}18`, color: modalItem.color } : { background: modalItem.color, color: "#fff" }}
                     >
                       {isComplete ? "Mark as incomplete" : "Mark as complete"}
                     </button>
@@ -640,7 +793,7 @@ export default function Home8() {
 
         {/* Post-match prompt */}
         {postMatchOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => setPostMatchOpen(false)}>
+          <div className="fixed inset-0 z-[200] flex items-start justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)" }} onClick={() => setPostMatchOpen(false)}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
             <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
               <div className="px-6 pt-8 pb-6 flex flex-col items-center text-center gap-2">
@@ -675,7 +828,7 @@ export default function Home8() {
 
         {/* Morning check-in nudge */}
         {checkinNudgeOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => { try { localStorage.setItem("padelop:checkin-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {} setCheckinNudgeOpen(false); }}>
+          <div className="fixed inset-0 z-[200] flex items-start justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)" }} onClick={() => { try { localStorage.setItem("padelop:checkin-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {} setCheckinNudgeOpen(false); }}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
             <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
               <div className="px-6 pt-8 pb-6 flex flex-col items-center text-center gap-2">
@@ -704,7 +857,7 @@ export default function Home8() {
 
         {/* Match action sheet */}
         {matchActionOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" onClick={() => setMatchActionOpen(false)}>
+          <div className="fixed inset-0 z-[200] flex items-start justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)" }} onClick={() => setMatchActionOpen(false)}>
             <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
             <div className="relative w-full max-w-sm bg-white rounded-[24px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
               <button onClick={() => { setMatchActionOpen(false); setMatchModalTab('pick'); setMatchModalOpen(true); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f4f6ff] transition-colors" style={{ borderBottom: "1px solid #f0f0f0" }}>
@@ -853,6 +1006,7 @@ export default function Home8() {
             </div>
           </div>
         )}
+
       </main>
     </>
   );
