@@ -248,6 +248,87 @@ export function loadScoreHistory(): ScoreSnapshot[] {
   } catch { return []; }
 }
 
+export type PillarStatus = "good" | "ok" | "low" | "not_logged";
+export type PillarState = { status: PillarStatus; reason: string };
+export type PillarStates = {
+  recovery: PillarState;
+  nutrition: PillarState;
+  training: PillarState;
+  wellbeing: PillarState;
+};
+
+export function computePillarStates(
+  checkIn: DailyCheckIn | null,
+  hydration: HydrationEntry | null,
+  nutrition: NutritionEntry | null,
+  habits: HabitsEntry | null,
+  training: TrainingEntry | null,
+  matchToday: boolean,
+): PillarStates {
+  // ── Recovery ─────────────────────────────────────────────────────────────
+  let recovery: PillarState;
+  if (!checkIn) {
+    recovery = { status: "not_logged", reason: "Morning check-in not done" };
+  } else {
+    const s = checkIn.sleep, so = checkIn.soreness;
+    const habitBoost = habits ? (habits.foamRoll ? 1 : 0) + (habits.coldShower ? 1 : 0) + (habits.mobility ? 1 : 0) : 0;
+    if (s >= 4 && so >= 4)
+      recovery = { status: "good", reason: habitBoost > 0 ? "Good sleep · habits done" : "Good sleep, body feels fresh" };
+    else if (s >= 3 && so >= 3)
+      recovery = { status: "ok", reason: s < 4 ? "Sleep could be better" : "Some soreness today" };
+    else
+      recovery = { status: "low", reason: s <= 2 ? "Poor sleep last night" : "High soreness today" };
+  }
+
+  // ── Nutrition ─────────────────────────────────────────────────────────────
+  let nutritionState: PillarState;
+  if (!nutrition && !hydration) {
+    nutritionState = { status: "not_logged", reason: "Night check-in not done yet" };
+  } else {
+    const q = nutrition?.quality, p = nutrition?.proteinRating;
+    const litres = hydration?.litres, urine = hydration?.urine;
+    const badHydration = ["<1L", "1–1.5L"].includes(litres ?? "") || urine === "dark" || urine === "brown";
+    const goodHydration = ["2–2.5L", "2.5–3L", "3L+"].includes(litres ?? "");
+    if (badHydration)
+      nutritionState = { status: "low", reason: urine === "dark" || urine === "brown" ? "Drink more — urine is dark" : "Not enough fluids today" };
+    else if (p === "low" || q === "bad")
+      nutritionState = { status: "low", reason: p === "low" ? "Protein intake low today" : "Poor nutrition quality" };
+    else if ((q === "great" || p === "high") && !badHydration)
+      nutritionState = { status: "good", reason: p === "high" ? "Protein target hit" : "Well fuelled today" };
+    else
+      nutritionState = { status: "ok", reason: goodHydration ? "Hydration on track" : "Nutrition adequate" };
+  }
+
+  // ── Training ─────────────────────────────────────────────────────────────
+  let trainingState: PillarState;
+  if (training) {
+    const type = training.sessionType.length > 0 ? training.sessionType.join(" & ") : "Session";
+    trainingState = { status: "good", reason: `${type} logged` };
+  } else if (matchToday) {
+    trainingState = { status: "good", reason: "Match day — game counts" };
+  } else if (habits && (habits.lightWalk || habits.mobility)) {
+    trainingState = { status: "ok", reason: "Light activity logged" };
+  } else {
+    trainingState = { status: "not_logged", reason: "No session logged today" };
+  }
+
+  // ── Wellbeing ─────────────────────────────────────────────────────────────
+  let wellbeing: PillarState;
+  if (!checkIn) {
+    wellbeing = { status: "not_logged", reason: "Check-in not done yet" };
+  } else {
+    const st = checkIn.stress, mo = checkIn.motivation, en = checkIn.energy;
+    if (st >= 4 && mo >= 4)
+      wellbeing = { status: "good", reason: "Low stress, feeling motivated" };
+    else if (st >= 3 && mo >= 3)
+      wellbeing = { status: "ok", reason: en >= 4 ? "Good energy today" : "Feeling steady" };
+    else
+      wellbeing = { status: "low", reason: st <= 2 ? "High stress today" : "Low motivation" };
+  }
+
+  return { recovery, nutrition: nutritionState, training: trainingState, wellbeing };
+}
+
 export function saveCheckIn(ci: Omit<DailyCheckIn, "date">): void {
   const entry: DailyCheckIn = { ...ci, date: new Date().toISOString().slice(0, 10) };
   localStorage.setItem("padelop:daily-checkin", JSON.stringify(entry));

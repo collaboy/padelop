@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import LogSheet from "@/components/log-sheet";
 import PushPrompt from "@/components/push-prompt";
-import { computeScores, loadScoringData } from "@/lib/scoring";
+import { computeScores, loadScoringData, computePillarStates, type PillarStates } from "@/lib/scoring";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const addMins = (h: number, m: number, delta: number) => {
@@ -175,6 +175,12 @@ export default function Home8() {
   const [doIdx, setDoIdx] = useState(0); // -1 = top holder, 0 = do-this-now, 1 = see schedule
   const [completed, setCompleted] = useState<Set<number>>(new Set());
   const [readiness, setReadiness] = useState(65);
+  const [pillarStates, setPillarStates] = useState<PillarStates>({
+    recovery:  { status: "not_logged", reason: "" },
+    nutrition: { status: "not_logged", reason: "" },
+    training:  { status: "not_logged", reason: "" },
+    wellbeing: { status: "not_logged", reason: "" },
+  });
   const [schedDetailOpen, setSchedDetailOpen] = useState<{ title: string; subtitle?: string; color: string; detail: string; isDrill?: boolean } | null>(null);
   const [postMatchOpen, setPostMatchOpen] = useState(false);
   const [postMatchDate, setPostMatchDate] = useState<string | null>(null);
@@ -194,6 +200,11 @@ export default function Home8() {
     function loadReadiness() {
       const d = loadScoringData();
       setReadiness(computeScores(d.checkIn, d.hydration, d.review, d.nutrition, d.gameDaysThisWeek, d.habits, d.training).overall);
+      const todayStr = new Date().toISOString().slice(0, 10);
+      let m: { date: string; time: string } | null = null;
+      try { m = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch {}
+      const matchToday = m?.date === todayStr;
+      setPillarStates(computePillarStates(d.checkIn, d.hydration, d.nutrition, d.habits, d.training, matchToday));
     }
     loadReadiness();
     window.addEventListener("storage", loadReadiness);
@@ -447,6 +458,25 @@ export default function Home8() {
                       <p className="leading-none mt-1 mb-1" style={{ color: "rgba(255,255,255,0.8)", fontSize: "clamp(11.7px, 3.42vw, 15.3px)", fontWeight: 800 }}>{s.time} – {nextSlide ? nextSlide.time : "end"}</p>
                       {s.subtitle && <p className="leading-none text-center mt-0.5" style={{ color: "rgba(255,255,255,0.8)", fontSize: "clamp(15px, 4.8vw, 22px)" }}>{s.subtitle.split(", ").join(" · ")}</p>}
                       <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 font-semibold px-5 py-2 rounded-full" style={{ background: "#fff", color: isReady ? s.color : "#b0b5ba", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me</button>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "5px 16px", marginTop: 14 }}>
+                        {([
+                          { key: "recovery",  label: "Recovery",  color: "#c4b5fd" },
+                          { key: "nutrition", label: "Nutrition", color: "#7dd3fc" },
+                          { key: "wellbeing", label: "Wellbeing", color: "#fcd34d" },
+                          { key: "training",  label: "Training",  color: "#86efac" },
+                        ] as { key: keyof PillarStates; label: string; color: string }[]).map(({ key, label, color }) => {
+                          const st = pillarStates[key];
+                          const dot = st.status === "low" ? "#fca5a5" : st.status === "not_logged" ? "rgba(255,255,255,0.25)" : color;
+                          const word = st.status === "not_logged" ? "–" : st.status === "good" ? "Good" : st.status === "ok" ? "OK" : "Low";
+                          return (
+                            <div key={key} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                              <div style={{ width: 6, height: 6, borderRadius: "50%", background: dot, flexShrink: 0 }}/>
+                              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.6)", fontWeight: 500 }}>{label}</span>
+                              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.9)", fontWeight: 700, marginLeft: 2 }}>{word}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 );
