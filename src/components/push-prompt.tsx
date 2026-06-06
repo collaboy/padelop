@@ -24,13 +24,27 @@ function hasCheckedInToday(): boolean {
   } catch { return false; }
 }
 
+function hasNotifiedToday(): boolean {
+  try {
+    return localStorage.getItem("padelop:notified-date") === new Date().toISOString().slice(0, 10);
+  } catch { return false; }
+}
+
+function markNotifiedToday(): void {
+  try {
+    localStorage.setItem("padelop:notified-date", new Date().toISOString().slice(0, 10));
+  } catch {}
+}
+
 async function notify(reg: ServiceWorkerRegistration) {
+  if (hasNotifiedToday()) return;
+  markNotifiedToday();
   await reg.showNotification("padla", {
-    body: "Time for your daily check-in — takes 20 seconds",
+    body: "Time for your morning check-in — takes 30 seconds",
     icon: "/icon-192.png",
     badge: "/icon-192.png",
     tag: "daily-checkin",
-    data: { url: "/" },
+    data: { url: "/home8" },
   } as NotificationOptions);
 }
 
@@ -39,11 +53,9 @@ function scheduleDaily(reg: ServiceWorkerRegistration) {
   const past8 = now.getHours() >= 8;
 
   if (past8) {
-    // Already past 8am — fire now if not checked in, then repeat tomorrow
     if (!hasCheckedInToday()) notify(reg);
     setTimeout(() => { if (!hasCheckedInToday()) notify(reg); scheduleDaily(reg); }, msUntilTomorrow8am());
   } else {
-    // Before 8am — wait until 8am today
     setTimeout(() => { if (!hasCheckedInToday()) notify(reg); scheduleDaily(reg); }, msUntilToday8am());
   }
 }
