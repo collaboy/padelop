@@ -250,13 +250,6 @@ export default function ReadinessPage() {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
                   <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c" }}>{row.label}</span>
-                  <span style={{
-                    fontSize: 10, fontWeight: 700, padding: "1px 7px", borderRadius: 99,
-                    color: row.impact === "High" ? "#dc2626" : "#d97706",
-                    background: row.impact === "High" ? "rgba(220,38,38,0.08)" : "rgba(217,119,6,0.08)",
-                  }}>
-                    {row.impact}
-                  </span>
                 </div>
                 <p style={{ fontSize: 12, color: row.logged ? "#6b7480" : "#9aa5b0", margin: 0, lineHeight: 1.3 }}>{row.detail}</p>
               </div>
