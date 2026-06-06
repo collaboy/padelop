@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import LogSheet from "@/components/log-sheet";
+import PushPrompt from "@/components/push-prompt";
 import { computeScores, loadScoringData } from "@/lib/scoring";
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -11,6 +12,35 @@ const addMins = (h: number, m: number, delta: number) => {
   return `${pad(Math.floor(total / 60) % 24)}:${pad(total % 60)}`;
 };
 const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+
+type DrillDef = { subtitle: string; court: string; solo: string };
+const DRILL_LIBRARY: Record<string, DrillDef> = {
+  "Serve":          { subtitle: "Serve consistency & placement",   court: "Hit 30 serves alternating cross-court and down-the-T. Focus on placement over power — 70% cross-court. Add spin variation in the final set.", solo: "Shadow your serve motion 20× each side. Practice the toss alone until it's consistent — contact point variability is the #1 cause of serve errors." },
+  "Bandeja":        { subtitle: "Bandeja contact point & control", court: "Feed 20 bandejas from mid-court lobs. Focus on getting under the ball, closed racket face, and directing to back corners. Film your shoulder rotation.", solo: "Shadow the bandeja in slow motion — trophy position, shoulder turn, controlled wrist snap. 3 sets of 15 reps each side. Takes 10 minutes anywhere." },
+  "Smash":          { subtitle: "Overhead timing & footwork",      court: "Alternate left/right overhead feeds, 30 reps. Prioritise feet set before contact. Work on vibora and k-smash variations once timing feels clean.", solo: "Jump and reach drill — 3 sets of 10. Time your jump so contact happens at maximum reach. Wall tosses help if you have space." },
+  "Volleys":        { subtitle: "Compact volley technique",        court: "Stand 3m from the wall, volley continuously — 3 sets of 100. No backswing. Wrist locked, punch motion. Progress to alternating forehand/backhand.", solo: "Shadow volley drill — 3 sets of 20 each hand. Elbow up, racket face open, contact point in front. Can be done in any room." },
+  "Defense":        { subtitle: "Defensive positioning & lobs",    court: "Partner smashes from net, you return high defensive lobs to back corners. Focus on reading the ball early and getting low before contact.", solo: "Lateral shuffle + split step — 5 sets of 30 seconds. Defensive positioning is 80% footwork. Quick direction change every 3 shuffles." },
+  "Attack":         { subtitle: "Attacking patterns at net",       court: "Approach-and-finish patterns — feed to mid-court, move to net, volley to finish. Focus on angle and depth, not power.", solo: "Reaction time: drop a ball from shoulder height, catch before the second bounce. 3 sets of 15. Simulates quick hands at net." },
+  "Positioning":    { subtitle: "Court coverage & positioning",    court: "Shadow movement without a ball — coach calls positions (net, mid, back) and you move to the T and recover. 5 sets of 90 seconds.", solo: "Eyes-closed visualisation — 5 min picturing court positions from your last match. Find 3 moments where better positioning changes the point." },
+  "Communication":  { subtitle: "On-court communication habits",   court: "Call every ball in practice — 'mine', 'yours', 'leave'. Make it automatic under low pressure so it's instinct under high pressure.", solo: "Replay your last match mentally. Find 3 moments where a call or no-call cost a point. Rehearse what you would have said." },
+  "Movement":       { subtitle: "Footwork & court coverage",       court: "Cone agility — 5 cones T-shape, 5 sets of lateral shuffle + sprint to net. Split step timing before every direction change.", solo: "Side-to-side shuffle + split step — 5 sets of 20 seconds. Any hallway works. Add a forward lunge at each end." },
+  "Mental strength":{ subtitle: "Focus & pressure management",     court: "Pressure tiebreaks only — start every game at 6-6. Focus on your between-point routine: bounce, breathe, pick a target.", solo: "Box breathing + visualisation — 5 min. In 4, hold 4, out 4, hold 4. Then 3 min visualising winning points under pressure." },
+};
+const DEFAULT_DRILL: DrillDef = {
+  subtitle: "General technical session",
+  court: "General rally practice — focus on consistency over winners. Work on the shot you feel least confident about. 30 minutes of deliberate repetition beats 90 minutes of casual play.",
+  solo: "20 min shadow footwork and stroke mechanics. Then 5 min visualising your strongest patterns and your next match.",
+};
+
+function getTopNeedsWorkTag(): string | null {
+  try {
+    const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+    const counts: Record<string, number> = {};
+    for (const r of reviews) for (const tag of (r.improved ?? [])) counts[tag] = (counts[tag] ?? 0) + 1;
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    return sorted[0]?.[0] ?? null;
+  } catch { return null; }
+}
 
 const ITEM_COLORS: Record<string, string> = {
   "Wake up & hydrate": "#0e7490", "Light breakfast": "#16a34a", "Breakfast": "#16a34a",
@@ -25,16 +55,15 @@ const ITEM_COLORS: Record<string, string> = {
   "Wind down": "#64748b",
 };
 
-function getScheduleData(matchDate: string | null, matchTime: string | null) {
-  const today = new Date().toISOString().slice(0, 10);
-  const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
-  let dayType: "match" | "recovery" | "rest" = "rest";
-  if (matchDate === today) dayType = "match";
-  else if (matchDate === yesterday) dayType = "recovery";
+type ScheduleItem = { time: string; title: string; subtitle?: string; color: string; isDrill?: boolean };
+
+function getScheduleData(dayType: "match" | "recovery" | "training", matchTime: string | null, drillTag: string | null): { schedule: ScheduleItem[]; currentIdx: number } {
   const mH = matchTime ? parseInt(matchTime.split(":")[0]) : 18;
   const mM = matchTime ? parseInt(matchTime.split(":")[1]) : 30;
   const mt = matchTime ?? "18:30";
-  const schedules = {
+  const drill = DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL;
+  const drillTitle = drillTag ? `${drillTag} Drill` : "Training Session";
+  const rawSchedules: Record<string, Array<{ time: string; title: string; subtitle?: string; isDrill?: boolean }>> = {
     match: [
       { time: "07:00", title: "Wake up & hydrate",   subtitle: "500ml water before anything else" },
       { time: "07:30", title: "Breakfast",            subtitle: "Oats, eggs, fruit" },
@@ -56,10 +85,11 @@ function getScheduleData(matchDate: string | null, matchTime: string | null) {
       { time: "19:00", title: "Dinner",              subtitle: "Anti-inflammatory focus — fish, greens" },
       { time: "21:30", title: "Early wind down",     subtitle: "Sleep is your best recovery tool tonight" },
     ],
-    rest: [
+    training: [
       { time: "07:00", title: "Wake up & hydrate", subtitle: "500ml water before coffee" },
       { time: "07:30", title: "Breakfast",          subtitle: "High protein — eggs, yogurt, fruit" },
       { time: "09:30", title: "Light mobility",     subtitle: "Hip flexors, thoracic spine, ankles" },
+      { time: "11:00", title: drillTitle,           subtitle: drill.subtitle, isDrill: true },
       { time: "12:30", title: "Balanced lunch",     subtitle: "Carbs + protein + greens" },
       { time: "15:00", title: "Active recovery",    subtitle: "Walk, swim or light cycling" },
       { time: "19:00", title: "Dinner",             subtitle: "Focus on variety and micronutrients" },
@@ -67,7 +97,10 @@ function getScheduleData(matchDate: string | null, matchTime: string | null) {
       { time: "22:30", title: "Wind down",          subtitle: "No screens, consistent bedtime" },
     ],
   };
-  const schedule = schedules[dayType].map(item => ({ ...item, color: ITEM_COLORS[item.title] ?? "#8a9096" }));
+  const schedule: ScheduleItem[] = rawSchedules[dayType].map(item => ({
+    ...item,
+    color: item.isDrill ? "#2653d4" : (ITEM_COLORS[item.title] ?? "#8a9096"),
+  }));
   const curMins = new Date().getHours() * 60 + new Date().getMinutes();
   let idx = 0;
   if (curMins >= toMins(schedule[schedule.length - 1].time)) {
@@ -77,7 +110,7 @@ function getScheduleData(matchDate: string | null, matchTime: string | null) {
       if (curMins >= toMins(schedule[i].time) && curMins < toMins(schedule[i + 1].time)) { idx = i; break; }
     }
   }
-  return { schedule, currentIdx: idx, dayType };
+  return { schedule, currentIdx: idx };
 }
 
 const SCHEDULE_DETAILS: Record<string, string> = {
@@ -109,7 +142,8 @@ export default function Home8() {
   const router = useRouter();
   const [doModalOpen, setDoModalOpen] = useState(false);
   const [logSheetOpen, setLogSheetOpen] = useState(false);
-  const [logTab, setLogTab] = useState<"checkin" | "hydration" | "nutrition" | "matchreview" | null>(null);
+  const [logTab, setLogTab] = useState<"checkin" | "matchreview" | null>(null);
+  const [logWizard, setLogWizard] = useState(false);
   const [matchModalOpen, setMatchModalOpen] = useState(false);
   const [matchModalTab, setMatchModalTab] = useState<'pick' | 'manual'>('pick');
   const [matchForm, setMatchForm] = useState({ date: '', time: '', club: '', p1: '', p2: '', p3: '', p4: '' });
@@ -119,8 +153,12 @@ export default function Home8() {
   const [doIdx, setDoIdx] = useState(0); // -1 = top holder, 0 = do-this-now, 1 = see schedule
   const [completed, setCompleted] = useState<Set<number>>(new Set());
   const [readiness, setReadiness] = useState(65);
-  const [schedTab, setSchedTab] = useState<"today" | "week">("today");
-  const [schedDetailOpen, setSchedDetailOpen] = useState<{ title: string; subtitle?: string; color: string; detail: string } | null>(null);
+  const [schedDetailOpen, setSchedDetailOpen] = useState<{ title: string; subtitle?: string; color: string; detail: string; isDrill?: boolean } | null>(null);
+  const [postMatchOpen, setPostMatchOpen] = useState(false);
+  const [postMatchDate, setPostMatchDate] = useState<string | null>(null);
+  const [yesterdayWasMatch, setYesterdayWasMatch] = useState(false);
+  const [drillTag, setDrillTag] = useState<string | null>(null);
+  const [drillContext, setDrillContext] = useState<"court" | "solo">("court");
 
   const matchUploadRef = useRef<HTMLInputElement>(null);
   const touchStartXRef = useRef(0);
@@ -133,7 +171,7 @@ export default function Home8() {
   useEffect(() => {
     function loadReadiness() {
       const d = loadScoringData();
-      setReadiness(computeScores(d.checkIn, d.hydration, d.review, d.nutrition, d.gameDaysThisWeek).overall);
+      setReadiness(computeScores(d.checkIn, d.hydration, d.review, d.nutrition, d.gameDaysThisWeek, d.habits, d.training).overall);
     }
     loadReadiness();
     window.addEventListener("storage", loadReadiness);
@@ -141,18 +179,66 @@ export default function Home8() {
       const raw = localStorage.getItem("padelop:next-match");
       if (raw) {
         const m = JSON.parse(raw);
-        if (m.date && m.time && new Date(`${m.date}T${m.time}`).getTime() > Date.now()) {
-          setMatch({ date: m.date, time: m.time, club: m.club || undefined, players: [m.player_1, m.player_2, m.player_3, m.player_4].filter(Boolean) });
+        if (m.date && m.time) {
+          const matchTs = new Date(`${m.date}T${m.time}`).getTime();
+          if (matchTs > Date.now()) {
+            setMatch({ date: m.date, time: m.time, club: m.club || undefined, players: [m.player_1, m.player_2, m.player_3, m.player_4].filter(Boolean) });
+          } else {
+            // Match has passed — check if it's been reviewed
+            const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+            const alreadyReviewed = reviews.some((r: { ts?: string }) => r.ts?.slice(0, 10) === m.date);
+            const dismissed = localStorage.getItem("padelop:post-match-dismissed") === m.date;
+            if (!alreadyReviewed && !dismissed) {
+              try { localStorage.setItem("padelop:post-match-dismissed", m.date); } catch {}
+              setPostMatchDate(m.date);
+              setPostMatchOpen(true);
+            }
+          }
+        }
+        const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+        if (m.date === yesterday) setYesterdayWasMatch(true);
+      }
+    } catch {}
+    // Also check match reviews for yesterday
+    try {
+      const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+      const rawReviews = localStorage.getItem("padelop:match-reviews");
+      if (rawReviews) {
+        const reviews = JSON.parse(rawReviews);
+        if (reviews.some((r: { ts?: string }) => r.ts && r.ts.slice(0, 10) === yesterday)) {
+          setYesterdayWasMatch(true);
         }
       }
     } catch {}
+    setDrillTag(getTopNeedsWorkTag());
     const id = setInterval(() => setNow(new Date()), 1_000);
     return () => { clearInterval(id); window.removeEventListener("storage", loadReadiness); };
   }, []);
 
   useEffect(() => { setCardSnap('none'); setLiveX(0); }, [doIdx]);
 
-  const { schedule, currentIdx } = getScheduleData(match?.date ?? null, match?.time ?? null);
+  // Detect when a loaded future match transitions to past while the app is open
+  useEffect(() => {
+    if (!match || postMatchOpen) return;
+    const matchTs = new Date(`${match.date}T${match.time}`).getTime();
+    if (matchTs >= now.getTime()) return;
+    // Match just passed
+    setMatch(null);
+    try {
+      const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+      const alreadyReviewed = reviews.some((r: { ts?: string }) => r.ts?.slice(0, 10) === match.date);
+      const dismissed = localStorage.getItem("padelop:post-match-dismissed") === match.date;
+      if (!alreadyReviewed && !dismissed) {
+        try { localStorage.setItem("padelop:post-match-dismissed", match.date); } catch {}
+        setPostMatchDate(match.date);
+        setPostMatchOpen(true);
+      }
+    } catch {}
+  }, [now]);
+
+  const today = new Date().toISOString().slice(0, 10);
+  const dayType: "match" | "recovery" | "training" = match?.date === today ? "match" : yesterdayWasMatch ? "recovery" : "training";
+  const { schedule, currentIdx } = getScheduleData(dayType, match?.time ?? null, drillTag);
   const doItem = schedule[currentIdx];
   const curMins = now.getHours() * 60 + now.getMinutes();
 
@@ -181,13 +267,13 @@ export default function Home8() {
             const dy = e.touches[0].clientY - touchStartYRef.current;
             if (!swipeDirRef.current && (Math.abs(dx) > 8 || Math.abs(dy) > 8))
               swipeDirRef.current = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
-            if (swipeDirRef.current === 'h') setLiveX(dx);
+            if (swipeDirRef.current === 'h' && doIdx === 0) setLiveX(dx);
             if (swipeDirRef.current === 'v' && cardSnap === 'none' && doIdx < 1) setLiveY(dy);
           }}
           onTouchEnd={e => {
             const dx = e.changedTouches[0].clientX - touchStartXRef.current;
             const dy = e.changedTouches[0].clientY - touchStartYRef.current;
-            if (swipeDirRef.current === 'h') {
+            if (swipeDirRef.current === 'h' && doIdx === 0) {
               setLiveX(0);
               if (cardSnap === 'none') {
                 if (dx < -60) setCardSnap('left');
@@ -210,14 +296,8 @@ export default function Home8() {
               {/* Main card */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "0 24px", marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
                 <p className="font-bold tracking-widest uppercase" style={{ color: "#9aa5b0", fontSize: "clamp(11px, 3vw, 14px)" }}>Log Data</p>
-                {([
-                  { label: "Hydration", color: "#0891b2", tab: "hydration" as const },
-                  { label: "Check-in",  color: "#2653d4", tab: "checkin"   as const },
-                  { label: "Nutrition", color: "#16a34a", tab: "nutrition" as const },
-                  { label: "Recovery",  color: "#64748b", tab: "matchreview" as const },
-                ] as const).map(item => (
-                  <button key={item.label} onClick={() => { setLogTab(item.tab); setLogSheetOpen(true); }} className="w-full py-3 rounded-2xl font-semibold" style={{ background: `${item.color}18`, color: item.color, fontSize: "clamp(14px, 4vw, 18px)" }}>{item.label}</button>
-                ))}
+                <button onClick={() => { setLogWizard(false); setLogTab("checkin"); setLogSheetOpen(true); }} className="w-full py-3 rounded-2xl font-semibold" style={{ background: "#2653d418", color: "#2653d4", fontSize: "clamp(14px, 4vw, 18px)" }}>Daily check-in</button>
+                <button onClick={() => { setLogWizard(true); setLogTab(null); setLogSheetOpen(true); }} className="w-full py-3 rounded-2xl font-semibold" style={{ background: "#f4f4f6", color: "#6b7480", fontSize: "clamp(13px, 3.5vw, 16px)" }}>More options</button>
               </div>
               {/* Placeholder below */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
@@ -246,7 +326,7 @@ export default function Home8() {
               </div>
 
               {/* Card 0: next match */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(95dvh - 4rem - 60px)", borderRadius: 24, overflow: "hidden", background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "28px 24px", gap: 10, opacity: cardSnap === 'none' && doIdx === -1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === -1 ? 2 : 1 }}>
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(95dvh - 4rem - 60px)", borderRadius: 24, overflow: "hidden", background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "28px 24px", gap: 10, opacity: cardSnap === 'none' && doIdx === -1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === -1 ? 2 : 1, pointerEvents: doIdx === -1 ? "auto" : "none" }}>
                 <p className="text-[13px] font-bold tracking-widest uppercase text-center" style={{ color: "#9aa5b0" }}>Next Match</p>
                 {match ? (() => {
                   const [y, mo, d] = match.date.split('-').map(Number);
@@ -303,7 +383,8 @@ export default function Home8() {
                 return (
                   <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => setDoModalOpen(true)}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
-                      <p className="animate-text-glow text-[14px] font-bold tracking-widest uppercase leading-none mb-1" style={{ color: "#fff" }}>NOW</p>
+                      <p className="animate-text-glow text-[14px] font-bold tracking-widest uppercase leading-none" style={{ color: "#fff" }}>NOW</p>
+                      <p className="leading-none mb-2" style={{ color: "rgba(255,255,255,0.65)", fontSize: "clamp(13px, 3.8vw, 17px)" }}>{s.time} – {nextSlide ? nextSlide.time : "end"}</p>
                       <p className="font-bold leading-tight text-center" style={{ color: "#fff", fontSize: "clamp(24px, 7.5vw, 34px)" }}>{s.title}</p>
                       {s.subtitle && <p className="leading-none text-center mt-0.5" style={{ color: "rgba(255,255,255,0.8)", fontSize: "clamp(15px, 4.8vw, 22px)" }}>{s.subtitle.split(", ").join(" · ")}</p>}
                       <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 font-semibold px-5 py-2 rounded-full" style={{ background: "#fff", color: isReady ? s.color : "#b0b5ba", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me</button>
@@ -312,46 +393,16 @@ export default function Home8() {
                 );
               })()}
 
-              {/* Card 2: today's / this week's schedule */}
+              {/* Card 2: today's schedule */}
               {(() => {
                 const curMinsSched = now.getHours() * 60 + now.getMinutes();
-                const todayYMD = now.toISOString().slice(0, 10);
-                const dow = (now.getDay() + 6) % 7;
-                const monday = new Date(now);
-                monday.setDate(now.getDate() - dow);
-                const weekDays = Array.from({ length: 7 }, (_, i) => {
-                  const d = new Date(monday);
-                  d.setDate(monday.getDate() + i);
-                  return { ymd: d.toISOString().slice(0, 10), date: d };
-                });
-                const matchYMD = match?.date ?? null;
-                const matchNextYMD = matchYMD ? (() => { const d = new Date(matchYMD); d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10); })() : null;
-                const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
                 return (
-                  <div key="sched" style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "white", display: "flex", flexDirection: "column", opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === 1 ? 2 : 1, maxHeight: "calc(100dvh - 4rem - 44px)", overflowY: "auto" }}>
-                    {/* Tab header */}
-                    <div style={{ padding: "20px 20px 0", display: "flex", flexDirection: "column", alignItems: "center" }}>
-                      <div style={{ width: "100%", overflow: "hidden", display: "flex", justifyContent: "center" }}>
-                        <span style={{ position: "relative", flexShrink: 0 }}>
-                          <span style={{ fontSize: 32, fontWeight: 800, color: "#1a1c1c", fontFamily: "var(--font-hanken, Inter, sans-serif)" }}>
-                            {schedTab === "today" ? "Today" : "This Week"}
-                          </span>
-                          {schedTab === "today" ? (
-                            <button style={{ position: "absolute", top: 0, left: "100%", paddingLeft: 12, fontSize: 32, fontWeight: 800, whiteSpace: "nowrap", fontFamily: "var(--font-hanken, Inter, sans-serif)", color: "#1a1c1c", opacity: 0.18, WebkitMaskImage: "linear-gradient(to right, black 0%, transparent 65%)", maskImage: "linear-gradient(to right, black 0%, transparent 65%)", background: "none", border: "none", cursor: "pointer" }} onClick={() => setSchedTab("week")}>This Week</button>
-                          ) : (
-                            <button style={{ position: "absolute", top: 0, right: "100%", paddingRight: 12, fontSize: 32, fontWeight: 800, whiteSpace: "nowrap", fontFamily: "var(--font-hanken, Inter, sans-serif)", color: "#1a1c1c", opacity: 0.18, WebkitMaskImage: "linear-gradient(to left, black 0%, transparent 65%)", maskImage: "linear-gradient(to left, black 0%, transparent 65%)", background: "none", border: "none", cursor: "pointer" }} onClick={() => setSchedTab("today")}>Today</button>
-                          )}
-                        </span>
-                      </div>
-                      <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
-                        <button onClick={() => setSchedTab("today")} style={{ width: 6, height: 6, borderRadius: "50%", background: schedTab === "today" ? "#1a1c1c" : "#dfe3e7", border: "none", padding: 0, cursor: "pointer" }} />
-                        <button onClick={() => setSchedTab("week")} style={{ width: 6, height: 6, borderRadius: "50%", background: schedTab === "week" ? "#1a1c1c" : "#dfe3e7", border: "none", padding: 0, cursor: "pointer" }} />
-                      </div>
+                  <div key="sched" style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "white", display: "flex", flexDirection: "column", opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === 1 ? 2 : 1, height: "calc(100dvh - 4rem - 44px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none" }}>
+                    <div style={{ padding: "20px 20px 0", flexShrink: 0 }}>
+                      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9aa5b0", margin: 0 }}>Today</p>
                     </div>
-                    <div style={{ height: 1, background: "#dfe3e7", margin: "12px 0 0" }} />
-
-                    {/* Today tab */}
-                    {schedTab === "today" && (
+                    <div style={{ height: 1, background: "#dfe3e7", margin: "12px 0 0", flexShrink: 0 }} />
+                    <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
                       <div style={{ padding: "16px 20px 28px" }}>
                         {schedule.map((item, idx, arr) => {
                           const isLast = idx === arr.length - 1;
@@ -362,6 +413,7 @@ export default function Home8() {
                           const isCur = idx === currentIdx;
                           const isPast = !isCur && curMinsSched > toMins(item.time);
                           const detail = SCHEDULE_DETAILS[item.title];
+                          const clickable = !!(detail || item.isDrill);
                           return (
                             <div key={idx} style={{ display: "flex", gap: 14 }}>
                               <div style={{ width: 56, flexShrink: 0, paddingTop: 3 }}>
@@ -383,14 +435,20 @@ export default function Home8() {
                                 )}
                               </div>
                               <button
-                                style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, textAlign: "left", background: "none", border: "none", cursor: detail ? "pointer" : "default", padding: "0 0 24px" }}
-                                onClick={() => detail && setSchedDetailOpen({ title: item.title, subtitle: item.subtitle, color: item.color, detail })}
+                                style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, textAlign: "left", background: "none", border: "none", cursor: clickable ? "pointer" : "default", padding: "0 0 24px" }}
+                                onClick={() => {
+                                  if (item.isDrill) {
+                                    setSchedDetailOpen({ title: item.title, subtitle: item.subtitle, color: item.color, detail: "", isDrill: true });
+                                  } else if (detail) {
+                                    setSchedDetailOpen({ title: item.title, subtitle: item.subtitle, color: item.color, detail });
+                                  }
+                                }}
                               >
                                 <div style={{ minWidth: 0 }}>
                                   <p style={{ fontSize: 21, fontWeight: isCur ? 700 : 500, color: isPast ? "#a0a5aa" : "#1a1c1c", margin: 0, lineHeight: 1.25 }}>{item.title}</p>
                                   {item.subtitle && <p style={{ fontSize: 16, color: "#6b7480", margin: "4px 0 0", lineHeight: 1.4 }}>{item.subtitle}</p>}
                                 </div>
-                                {detail && (
+                                {clickable && (
                                   <svg width="12" height="12" viewBox="0 0 10 10" fill="none" stroke="#dfe3e7" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 5 }}>
                                     <line x1="5" y1="1" x2="5" y2="9" /><line x1="1" y1="5" x2="9" y2="5" />
                                   </svg>
@@ -400,46 +458,7 @@ export default function Home8() {
                           );
                         })}
                       </div>
-                    )}
-
-                    {/* This Week tab */}
-                    {schedTab === "week" && (
-                      <div style={{ padding: "16px 20px 28px" }}>
-                        <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid #dfe3e7" }}>
-                          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
-                            {weekDays.map(({ ymd, date }, idx) => {
-                              const isToday = ymd === todayYMD;
-                              const isPast = ymd < todayYMD;
-                              return (
-                                <div key={ymd} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "10px 0", gap: 4, borderLeft: idx > 0 ? "1px solid #dfe3e7" : "none", boxShadow: isToday ? "inset 0 0 0 2px #2653d4" : "none", opacity: isPast ? 0.25 : 1 }}>
-                                  <span style={{ fontSize: 10, fontWeight: 700, color: isToday ? "#2653d4" : "#6b7480" }}>{dayNames[idx]}</span>
-                                  <span style={{ fontSize: 14, fontWeight: 700, lineHeight: 1, color: isToday ? "#2653d4" : "#1a1c1c" }}>{date.getDate()}</span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                          <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", borderTop: "1px solid #dfe3e7" }}>
-                            {weekDays.map(({ ymd }, idx) => {
-                              const isGame = ymd === matchYMD;
-                              const isRecovery = !isGame && ymd === matchNextYMD;
-                              const isPast = ymd < todayYMD;
-                              const label = isGame ? "G" : isRecovery ? "R" : "T";
-                              const labelColor = isGame ? "#16a34a" : isRecovery ? "#7c3aed" : "#2653d4";
-                              return (
-                                <div key={ymd} style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "8px 0", borderLeft: idx > 0 ? "1px solid #dfe3e7" : "none", background: ymd === todayYMD ? "#f9f9f9" : "transparent", opacity: isPast ? 0.25 : 1 }}>
-                                  <span style={{ fontSize: 16, fontWeight: 800, color: labelColor, fontFamily: "var(--font-hanken, Inter, sans-serif)" }}>{label}</span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                          <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderTop: "1px solid #dfe3e7" }}>
-                            <span style={{ fontSize: 10, fontWeight: 700, color: "#16a34a" }}>G</span><span style={{ fontSize: 10, color: "#6b7480" }}>Game</span>
-                            <span style={{ fontSize: 10, fontWeight: 700, color: "#7c3aed", marginLeft: 8 }}>R</span><span style={{ fontSize: 10, color: "#6b7480" }}>Rest</span>
-                            <span style={{ fontSize: 10, fontWeight: 700, color: "#2653d4", marginLeft: 8 }}>T</span><span style={{ fontSize: 10, color: "#6b7480" }}>Train</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                    </div>
                   </div>
                 );
               })()}
@@ -477,7 +496,18 @@ export default function Home8() {
                 <h3 className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{doItem.title}</h3>
                 {doItem.subtitle && <p className="text-[15px] text-[#6b7480] mt-0.5">{doItem.subtitle}</p>}
               </div>
-              {SCHEDULE_DETAILS[doItem.title] && (
+              {doItem.isDrill ? (
+                <div className="px-6 py-5">
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-[#8a9096] mb-3">Where are you today?</p>
+                  <div className="flex gap-2 mb-4">
+                    <button onClick={() => setDrillContext("court")} className="flex-1 py-2.5 rounded-xl text-[14px] font-semibold transition-colors" style={{ background: drillContext === "court" ? "#2653d4" : "#f4f4f6", color: drillContext === "court" ? "#fff" : "#4a5050" }}>Court</button>
+                    <button onClick={() => setDrillContext("solo")} className="flex-1 py-2.5 rounded-xl text-[14px] font-semibold transition-colors" style={{ background: drillContext === "solo" ? "#2653d4" : "#f4f4f6", color: drillContext === "solo" ? "#fff" : "#4a5050" }}>Anywhere</button>
+                  </div>
+                  <p className="text-[15px] text-[#2c3235] leading-relaxed">
+                    {drillContext === "court" ? (DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).court : (DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).solo}
+                  </p>
+                </div>
+              ) : SCHEDULE_DETAILS[doItem.title] && (
                 <div className="px-6 py-5">
                   <p className="text-[17px] text-[#2c3235] leading-relaxed">{SCHEDULE_DETAILS[doItem.title]}</p>
                 </div>
@@ -513,7 +543,43 @@ export default function Home8() {
           </svg>
         </button>
 
-        <LogSheet open={logSheetOpen} onClose={() => { setLogSheetOpen(false); setLogTab(null); }} defaultSub={logTab} />
+        <LogSheet open={logSheetOpen} onClose={() => { setLogSheetOpen(false); setLogTab(null); setLogWizard(false); }} defaultSub={logTab} startWizard={logWizard} />
+        <PushPrompt />
+
+        {/* Post-match prompt */}
+        {postMatchOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={() => setPostMatchOpen(false)}>
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+            <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+              <div className="px-6 pt-8 pb-6 flex flex-col items-center text-center gap-2">
+                <div className="w-14 h-14 rounded-full flex items-center justify-center mb-2" style={{ background: "#f0fdf4" }}>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M8 21h8M12 17v4"/><path d="M7 4H4a2 2 0 0 0-2 2v2c0 3.3 2.7 6 6 6"/><path d="M17 4h3a2 2 0 0 1 2 2v2c0 3.3-2.7 6-6 6"/><path d="M7 4h10v8a5 5 0 0 1-10 0V4z"/>
+                  </svg>
+                </div>
+                <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">Great game!</p>
+                {postMatchDate && (
+                  <p className="text-[14px] text-[#6b7480]">
+                    {new Date(postMatchDate + "T12:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short" })}
+                  </p>
+                )}
+                <p className="text-[15px] text-[#4a5050] mt-1 leading-snug">Rate your match while it&apos;s fresh — it only takes a minute.</p>
+              </div>
+              <div className="px-6 pb-8 flex flex-col gap-3">
+                <button
+                  onClick={() => { setPostMatchOpen(false); setLogTab("matchreview"); setLogSheetOpen(true); }}
+                  className="w-full py-3.5 rounded-2xl text-white text-[15px] font-bold active:scale-[0.98] transition-transform"
+                  style={{ background: "#2653d4" }}
+                >
+                  Rate my match
+                </button>
+                <button onClick={() => { try { localStorage.setItem("padelop:post-match-dismissed", postMatchDate ?? ""); } catch {} setPostMatchOpen(false); }} className="w-full py-3 text-[14px] font-semibold text-[#6b7480]">
+                  I&apos;ll do it later
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Match action sheet */}
         {matchActionOpen && (
@@ -648,7 +714,20 @@ export default function Home8() {
               <p style={{ fontSize: 17, fontWeight: 700, color: "#1a1c1c", margin: "0 0 4px" }}>{schedDetailOpen.title}</p>
               {schedDetailOpen.subtitle && <p style={{ fontSize: 13, color: "#6b7480", margin: "0 0 12px" }}>{schedDetailOpen.subtitle}</p>}
               <div style={{ height: 1, background: "#dfe3e7", margin: "12px 0" }} />
-              <p style={{ fontSize: 14, color: "#3a4550", lineHeight: 1.6, margin: 0 }}>{schedDetailOpen.detail}</p>
+              {schedDetailOpen.isDrill ? (
+                <div>
+                  <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#8a9096", margin: "0 0 10px" }}>Where are you today?</p>
+                  <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+                    <button onClick={() => setDrillContext("court")} style={{ flex: 1, padding: "10px 0", borderRadius: 12, fontSize: 14, fontWeight: 600, border: "none", cursor: "pointer", background: drillContext === "court" ? "#2653d4" : "#f4f4f6", color: drillContext === "court" ? "#fff" : "#4a5050" }}>Court</button>
+                    <button onClick={() => setDrillContext("solo")} style={{ flex: 1, padding: "10px 0", borderRadius: 12, fontSize: 14, fontWeight: 600, border: "none", cursor: "pointer", background: drillContext === "solo" ? "#2653d4" : "#f4f4f6", color: drillContext === "solo" ? "#fff" : "#4a5050" }}>Anywhere</button>
+                  </div>
+                  <p style={{ fontSize: 14, color: "#3a4550", lineHeight: 1.6, margin: 0 }}>
+                    {drillContext === "court" ? (DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).court : (DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).solo}
+                  </p>
+                </div>
+              ) : (
+                <p style={{ fontSize: 14, color: "#3a4550", lineHeight: 1.6, margin: 0 }}>{schedDetailOpen.detail}</p>
+              )}
               <button onClick={() => setSchedDetailOpen(null)} style={{ marginTop: 20, width: "100%", padding: "12px 0", borderRadius: 50, background: "#f4f4f6", border: "none", fontSize: 15, fontWeight: 600, color: "#1a1c1c", cursor: "pointer" }}>Done</button>
             </div>
           </div>

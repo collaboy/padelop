@@ -3,34 +3,38 @@
 import React, { useState, useEffect } from "react";
 import Nav4 from "@/components/nav4";
 import LogSheet from "@/components/log-sheet";
-import { computeScores, loadScoringData, type Scores } from "@/lib/scoring";
+import { computeScores, loadScoringData, saveScoreSnapshot, loadScoreHistory, type Scores, type ScoreSnapshot } from "@/lib/scoring";
 
 const S = { fontFamily: "Inter, sans-serif" };
 
 const SCORE_ROWS: { key: keyof Omit<Scores, "overall">; label: string; color: string }[] = [
   { key: "recovery",  label: "Recovery",  color: "#7c3aed" },
-  { key: "hydration", label: "Hydration", color: "#0891b2" },
-  { key: "energy",    label: "Energy",    color: "#f59e0b" },
-  { key: "mobility",  label: "Mobility",  color: "#16a34a" },
+  { key: "nutrition", label: "Nutrition", color: "#0891b2" },
+  { key: "training",  label: "Training",  color: "#16a34a" },
+  { key: "wellbeing", label: "Wellbeing", color: "#f59e0b" },
 ];
 
 function improveTips(scores: Scores): string[] {
   const tips: string[] = [];
-  if (scores.hydration < 75) tips.push("Log your water intake — hydration is your quickest win");
-  if (scores.recovery < 75)  tips.push("A foam roll or cold shower boosts recovery fast");
-  if (scores.energy < 75)    tips.push("Protein-rich meal + earlier sleep tonight");
-  if (scores.mobility < 75)  tips.push("10 min mobility session — hips and shoulders");
-  if (tips.length === 0)     tips.push("You're in great shape — keep the habits going");
+  if (scores.nutrition < 75)  tips.push("Log your water intake — hydration is your quickest nutrition win");
+  if (scores.recovery < 75)   tips.push("A foam roll or cold shower boosts recovery fast");
+  if (scores.training < 75)   tips.push("Log a training session — even 30 min of drills counts");
+  if (scores.wellbeing < 75)  tips.push("High stress or low motivation? Box breathing helps both");
+  if (tips.length === 0)      tips.push("You're in great shape — keep the habits going");
   return tips.slice(0, 3);
 }
 
 export default function Insights4() {
   const [logSheetOpen, setLogSheetOpen] = useState(false);
-  const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 65, hydration: 65, energy: 65, mobility: 65 });
+  const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65 });
+  const [history, setHistory] = useState<ScoreSnapshot[]>([]);
 
   function refresh() {
     const data = loadScoringData();
-    setScores(computeScores(data.checkIn, data.hydration, data.review, data.nutrition, data.gameDaysThisWeek, data.habits));
+    const s = computeScores(data.checkIn, data.hydration, data.review, data.nutrition, data.gameDaysThisWeek, data.habits, data.training);
+    setScores(s);
+    saveScoreSnapshot(s);
+    setHistory(loadScoreHistory());
   }
 
   useEffect(() => {
@@ -42,7 +46,7 @@ export default function Insights4() {
   const tips = improveTips(scores);
 
   return (
-    <main style={{ ...S, background: "#e2e5e9", minHeight: "100vh", display: "flex", flexDirection: "column", gap: 16, padding: "40px 16px 176px" }}>
+    <main style={{ ...S, background: "#ffffff", minHeight: "100vh", display: "flex", flexDirection: "column", gap: 16, padding: "40px 16px 176px" }}>
 
       {/* Match Readiness score */}
       <div style={{ background: "#fff", borderRadius: 24, padding: "20px 24px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
@@ -74,6 +78,40 @@ export default function Insights4() {
           })}
         </div>
       </div>
+
+      {/* Trend */}
+      {history.length > 1 && (() => {
+        const pts = history.slice(0, 14).reverse();
+        const vals = pts.map(p => p.overall);
+        const min = Math.min(...vals);
+        const max = Math.max(...vals);
+        const range = Math.max(max - min, 5);
+        const W = 280, H = 48;
+        const x = (i: number) => (i / (pts.length - 1)) * W;
+        const y = (v: number) => H - ((v - min) / range) * H;
+        const d = vals.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+        const latest = vals[vals.length - 1];
+        const prev = vals[vals.length - 2];
+        const delta = latest - prev;
+        return (
+          <div style={{ background: "#fff", borderRadius: 24, padding: "20px 24px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+              <p style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>Trend</p>
+              <span style={{ ...S, fontSize: 13, fontWeight: 700, color: delta >= 0 ? "#496640" : "#dc2626" }}>
+                {delta >= 0 ? "+" : ""}{delta} pts
+              </span>
+            </div>
+            <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ overflow: "visible" }}>
+              <path d={d} fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <circle cx={x(vals.length - 1)} cy={y(latest)} r="3.5" fill="#2653d4" />
+            </svg>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
+              <span style={{ ...S, fontSize: 10, color: "#9aab96" }}>{pts[0].date.slice(5)}</span>
+              <span style={{ ...S, fontSize: 10, color: "#9aab96" }}>{pts[pts.length - 1].date.slice(5)}</span>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Improve Score */}
       <div style={{ background: "#fff", borderRadius: 24, padding: "20px 24px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>

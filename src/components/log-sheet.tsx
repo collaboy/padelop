@@ -14,16 +14,18 @@ const NAV_ITEMS = [
   { href: "/insights4", label: "Insights",  icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> },
 ];
 
-type Sub = "checkin" | "hydration" | "nutrition" | "matchlist" | "matchreview" | null;
+type Sub = "recovery" | "wellbeing" | "checkin" | "hydration" | "nutrition" | "training" | "matchlist" | "matchreview" | null;
 
 interface Props {
   open: boolean;
   onClose: () => void;
   defaultSub?: Sub;
+  startWizard?: boolean;
 }
 
 const PURPLE = "#7c3aed";
-const BLUE = "#2653d4";
+const AMBER  = "#f59e0b";
+const BLUE   = "#2653d4";
 
 function XIcon() {
   return (
@@ -46,18 +48,26 @@ function Face({ v, sel, color }: { v: string; sel: boolean; color: string }) {
   );
 }
 
-export default function LogSheet({ open, onClose, defaultSub }: Props) {
+export default function LogSheet({ open, onClose, defaultSub, startWizard }: Props) {
   const pathname = usePathname();
   const uploadRef = useRef<HTMLInputElement>(null);
   const [sub, setSub] = useState<Sub>(null);
 
   React.useEffect(() => {
-    if (open) setSub(defaultSub ?? null);
-    else setSub(null);
+    if (open) {
+      setSub(defaultSub ?? null);
+      setLogMethod(startWizard ? "wizard" : null);
+    } else {
+      setSub(null);
+      setLogMethod(null);
+    }
   }, [open]);
   const [logMethod, setLogMethod] = useState<"wizard" | null>(null);
 
-  const [checkIn, setCheckIn] = useState({ sleep: 3, energy: 3, soreness: 3, hydration: 3 });
+  const [checkIn, setCheckIn] = useState({ sleep: 3, energy: 3, soreness: 3, hydration: 3, stress: 3, motivation: 3 });
+  const [recoveryCI, setRecoveryCI] = useState({ sleep: 3, energy: 3, soreness: 3, hydration: 3 });
+  const [wellbeingCI, setWellbeingCI] = useState({ stress: 3, motivation: 3 });
+  const [trainingLog, setTrainingLog] = useState({ sessionType: [] as string[], drillFocus: [] as string[], duration: "", intensity: "" });
   const [hydrationLog, setHydrationLog] = useState({ litres: "", timing: [] as string[], quality: "", urine: "" });
   const [nutritionLog, setNutritionLog] = useState({ proteinRating: "", foods: [] as string[], postMatch: "", quality: "" });
   const [matchReview, setMatchReview] = useState({ feeling: "", result: "", opponent: "", energy: "", injury: "", wellDone: [] as string[], improved: [] as string[], mentalBefore: "", mentalDuring: "", mentalAfter: "" });
@@ -89,6 +99,115 @@ export default function LogSheet({ open, onClose, defaultSub }: Props) {
 
   // ── Sub-modals ──────────────────────────────────────────────────────────
 
+  function savePartialCheckIn(partial: Partial<Omit<import("@/lib/scoring").DailyCheckIn, "date">>) {
+    let base = { sleep: 3, energy: 3, soreness: 3, hydration: 3, stress: 3, motivation: 3 };
+    try {
+      const raw = localStorage.getItem("padelop:daily-checkin");
+      if (raw) { const p = JSON.parse(raw); base = { sleep: p.sleep ?? 3, energy: p.energy ?? 3, soreness: p.soreness ?? 3, hydration: p.hydration ?? 3, stress: p.stress ?? 3, motivation: p.motivation ?? 3 }; }
+    } catch {}
+    saveCheckIn({ ...base, ...partial });
+  }
+
+  if (sub === "recovery") {
+    return (
+      <div className="fixed inset-0 z-[70] flex items-end justify-center px-4 pb-4" onClick={handleClose}>
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
+        <div className="h1-font relative w-full max-w-lg bg-white rounded-[28px] overflow-hidden shadow-2xl" style={{ animation: "slideUp 0.28s cubic-bezier(0.22,1,0.36,1)" }} onClick={e => e.stopPropagation()}>
+          <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4 mb-1"/>
+          <div className="px-6 pt-3 pb-4 flex items-center justify-between">
+            <div><p className="h1-headline-md text-[#1a1c1c]">Recovery Check-in</p><p className="text-[13px] text-[#4a5050] mt-0.5">How is your body feeling today?</p></div>
+            <button onClick={handleClose} className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4]"><XIcon/></button>
+          </div>
+          <div className="px-6 pb-8 flex flex-col gap-6">
+            {([
+              { key: "sleep",    label: "Sleep quality",   lo: "Poor",       hi: "Excellent" },
+              { key: "energy",   label: "Energy level",    lo: "Exhausted",  hi: "Energised" },
+              { key: "soreness", label: "Muscle soreness", lo: "Very sore",  hi: "No soreness" },
+              { key: "hydration",label: "Hydration",       lo: "Dehydrated", hi: "Well hydrated" },
+            ] as { key: keyof typeof recoveryCI; label: string; lo: string; hi: string }[]).map(({ key, label, lo, hi }) => (
+              <div key={key}>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[13px] font-semibold text-[#1a1c1c]">{label}</p>
+                  <span className="text-[13px] font-bold" style={{ color: PURPLE }}>{recoveryCI[key]}/5</span>
+                </div>
+                <div className="flex gap-2">
+                  {[1,2,3,4,5].map(v => {
+                    const sel = recoveryCI[key] === v;
+                    return (
+                      <button key={v} onClick={() => setRecoveryCI(c => ({ ...c, [key]: v }))}
+                        className="flex-1 py-2.5 rounded-2xl border-2 text-[13px] font-bold transition-all active:scale-95"
+                        style={{ borderColor: sel ? PURPLE : "#e2e2e2", background: sel ? "#f5f3ff" : "#f9f9f9", color: sel ? PURPLE : "#4a5050" }}>
+                        {v}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="flex justify-between mt-1">
+                  <span className="text-[10px] text-[#8a9096]">{lo}</span>
+                  <span className="text-[10px] text-[#8a9096]">{hi}</span>
+                </div>
+              </div>
+            ))}
+            <button onClick={() => { savePartialCheckIn(recoveryCI); afterSave(); }}
+              className="w-full py-3.5 rounded-2xl text-white text-[14px] font-semibold active:scale-[0.98] transition-transform"
+              style={{ background: PURPLE }}>
+              Save Recovery
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (sub === "wellbeing") {
+    return (
+      <div className="fixed inset-0 z-[70] flex items-end justify-center px-4 pb-4" onClick={handleClose}>
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
+        <div className="h1-font relative w-full max-w-lg bg-white rounded-[28px] overflow-hidden shadow-2xl" style={{ animation: "slideUp 0.28s cubic-bezier(0.22,1,0.36,1)" }} onClick={e => e.stopPropagation()}>
+          <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4 mb-1"/>
+          <div className="px-6 pt-3 pb-4 flex items-center justify-between">
+            <div><p className="h1-headline-md text-[#1a1c1c]">Wellbeing Check-in</p><p className="text-[13px] text-[#4a5050] mt-0.5">How is your head today?</p></div>
+            <button onClick={handleClose} className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4]"><XIcon/></button>
+          </div>
+          <div className="px-6 pb-8 flex flex-col gap-6">
+            {([
+              { key: "stress",     label: "Stress level",  lo: "Very stressed", hi: "No stress" },
+              { key: "motivation", label: "Motivation",     lo: "None",          hi: "Fired up" },
+            ] as { key: keyof typeof wellbeingCI; label: string; lo: string; hi: string }[]).map(({ key, label, lo, hi }) => (
+              <div key={key}>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[13px] font-semibold text-[#1a1c1c]">{label}</p>
+                  <span className="text-[13px] font-bold" style={{ color: AMBER }}>{wellbeingCI[key]}/5</span>
+                </div>
+                <div className="flex gap-2">
+                  {[1,2,3,4,5].map(v => {
+                    const sel = wellbeingCI[key] === v;
+                    return (
+                      <button key={v} onClick={() => setWellbeingCI(c => ({ ...c, [key]: v }))}
+                        className="flex-1 py-2.5 rounded-2xl border-2 text-[13px] font-bold transition-all active:scale-95"
+                        style={{ borderColor: sel ? AMBER : "#e2e2e2", background: sel ? "#fffbeb" : "#f9f9f9", color: sel ? AMBER : "#4a5050" }}>
+                        {v}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="flex justify-between mt-1">
+                  <span className="text-[10px] text-[#8a9096]">{lo}</span>
+                  <span className="text-[10px] text-[#8a9096]">{hi}</span>
+                </div>
+              </div>
+            ))}
+            <button onClick={() => { savePartialCheckIn(wellbeingCI); afterSave(); }}
+              className="w-full py-3.5 rounded-2xl text-white text-[14px] font-semibold active:scale-[0.98] transition-transform"
+              style={{ background: AMBER }}>
+              Save Wellbeing
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (sub === "checkin") {
     return (
       <div className="fixed inset-0 z-[70] flex items-end justify-center px-4 pb-4" onClick={handleClose}>
@@ -101,10 +220,12 @@ export default function LogSheet({ open, onClose, defaultSub }: Props) {
           </div>
           <div className="px-6 pb-8 flex flex-col gap-6">
             {([
-              { key: "sleep",     label: "Sleep quality",   lo: "Poor",       hi: "Excellent" },
-              { key: "energy",    label: "Energy level",    lo: "Exhausted",  hi: "Energised" },
-              { key: "soreness",  label: "Muscle soreness", lo: "Very sore",  hi: "No soreness" },
-              { key: "hydration", label: "Hydration",       lo: "Dehydrated", hi: "Well hydrated" },
+              { key: "sleep",      label: "Sleep quality",   lo: "Poor",          hi: "Excellent" },
+              { key: "energy",     label: "Energy level",    lo: "Exhausted",     hi: "Energised" },
+              { key: "soreness",   label: "Muscle soreness", lo: "Very sore",     hi: "No soreness" },
+              { key: "hydration",  label: "Hydration",       lo: "Dehydrated",    hi: "Well hydrated" },
+              { key: "stress",     label: "Stress level",    lo: "Very stressed", hi: "No stress" },
+              { key: "motivation", label: "Motivation",      lo: "None",          hi: "Fired up" },
             ] as { key: keyof typeof checkIn; label: string; lo: string; hi: string }[]).map(({ key, label, lo, hi }) => (
               <div key={key}>
                 <div className="flex items-center justify-between mb-2">
@@ -129,7 +250,7 @@ export default function LogSheet({ open, onClose, defaultSub }: Props) {
                 </div>
               </div>
             ))}
-            <button onClick={() => { saveCheckIn(checkIn); afterSave(); }}
+            <button onClick={() => { savePartialCheckIn(checkIn); afterSave(); }}
               className="w-full py-3.5 rounded-2xl text-white text-[14px] font-semibold active:scale-[0.98] transition-transform"
               style={{ background: BLUE }}>
               Save check-in
@@ -306,6 +427,79 @@ export default function LogSheet({ open, onClose, defaultSub }: Props) {
     );
   }
 
+  if (sub === "training") {
+    return (
+      <div className="fixed inset-0 z-[70] flex items-center justify-center px-5" onClick={handleClose}>
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
+        <div className="h1-font relative w-full max-w-lg bg-white rounded-[28px] overflow-y-auto max-h-[88vh] shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="px-6 pt-6 pb-4 flex items-center justify-between">
+            <div><p className="h1-headline-md text-[#1a1c1c]">Log Training</p><p className="text-[13px] text-[#4a5050] mt-0.5">What did you do today?</p></div>
+            <button onClick={handleClose} className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f4f4f4]"><XIcon/></button>
+          </div>
+          <div className="px-6 pb-8 flex flex-col gap-6">
+            <div>
+              <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">Session type</p>
+              <div className="flex flex-wrap gap-2">
+                {["Padel", "Drills", "Gym", "Cardio", "Mobility", "Rest"].map(t => {
+                  const sel = trainingLog.sessionType.includes(t);
+                  return <button key={t} onClick={() => setTrainingLog(l => ({ ...l, sessionType: sel ? l.sessionType.filter(s => s !== t) : [...l.sessionType, t] }))}
+                    className="px-4 py-2 rounded-full border-2 text-[13px] font-bold transition-all active:scale-95"
+                    style={{ borderColor: sel ? BLUE : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9", color: sel ? BLUE : "#4a5050" }}>{t}</button>;
+                })}
+              </div>
+            </div>
+            <div>
+              <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">Drill focus</p>
+              <div className="flex flex-wrap gap-2">
+                {["Serve", "Bandeja", "Smash", "Volleys", "Defense", "Attack", "Positioning", "Movement"].map(tag => {
+                  const sel = trainingLog.drillFocus.includes(tag);
+                  return <button key={tag} onClick={() => setTrainingLog(l => ({ ...l, drillFocus: sel ? l.drillFocus.filter(t => t !== tag) : [...l.drillFocus, tag] }))}
+                    className="px-3 py-1.5 rounded-full border text-[12px] font-bold transition-all active:scale-95"
+                    style={{ borderColor: sel ? BLUE : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9", color: sel ? BLUE : "#4a5050" }}>{tag}</button>;
+                })}
+              </div>
+            </div>
+            <div>
+              <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">Duration</p>
+              <div className="flex gap-2">
+                {["30min", "60min", "90min", "2h+"].map(d => {
+                  const sel = trainingLog.duration === d;
+                  return <button key={d} onClick={() => setTrainingLog(l => ({ ...l, duration: d }))}
+                    className="flex-1 py-2.5 rounded-2xl border-2 text-[13px] font-bold transition-all active:scale-95"
+                    style={{ borderColor: sel ? BLUE : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9", color: sel ? BLUE : "#4a5050" }}>{d}</button>;
+                })}
+              </div>
+            </div>
+            <div>
+              <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">Intensity</p>
+              <div className="flex gap-3">
+                {([["light","Light"],["moderate","Moderate"],["hard","Hard"]] as const).map(([v, label]) => {
+                  const sel = trainingLog.intensity === v;
+                  const color = v === "hard" ? "#dc2626" : v === "moderate" ? BLUE : "#16a34a";
+                  return <button key={v} onClick={() => setTrainingLog(l => ({ ...l, intensity: v }))}
+                    className="flex-1 py-3 rounded-2xl border-2 text-[13px] font-bold transition-all active:scale-95"
+                    style={{ borderColor: sel ? color : "#e2e2e2", background: sel ? `${color}12` : "#f9f9f9", color: sel ? color : "#4a5050" }}>{label}</button>;
+                })}
+              </div>
+            </div>
+            <button onClick={() => {
+                try {
+                  const entry = { ...trainingLog, ts: new Date().toISOString() };
+                  const prev = JSON.parse(localStorage.getItem("padelop:training-logs") || "[]");
+                  localStorage.setItem("padelop:training-logs", JSON.stringify([entry, ...prev].slice(0, 50)));
+                } catch {}
+                afterSave();
+              }}
+              className="w-full py-3.5 rounded-2xl text-white text-[14px] font-semibold active:scale-[0.98] transition-transform"
+              style={{ background: BLUE }}>
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (sub === "matchreview") {
     return (
       <div className="fixed inset-0 z-[70] flex items-end justify-center" onClick={handleClose}>
@@ -355,6 +549,33 @@ export default function LogSheet({ open, onClose, defaultSub }: Props) {
                     className="flex-1 py-3 rounded-2xl border-2 text-[13px] font-bold transition-all active:scale-95"
                     style={{ borderColor: sel ? PURPLE : "#e2e2e2", background: sel ? "#f5f3ff" : "#f9f9f9", color: sel ? PURPLE : "#4a5050" }}>{label}</button>;
                 })}
+              </div>
+            </div>
+            <div>
+              <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">Mental state</p>
+              <div className="flex flex-col gap-3">
+                {([
+                  { key: "mentalBefore", label: "Before", opts: [["bad","Nervous"],["ok","Calm"],["great","Confident"]] },
+                  { key: "mentalDuring", label: "During", opts: [["bad","Lost focus"],["ok","Steady"],["great","In the zone"]] },
+                  { key: "mentalAfter",  label: "After",  opts: [["bad","Frustrated"],["ok","OK"],["great","Satisfied"]] },
+                ] as { key: "mentalBefore"|"mentalDuring"|"mentalAfter"; label: string; opts: [string,string][] }[]).map(({ key, label, opts }) => (
+                  <div key={key} className="flex items-center gap-3">
+                    <span className="text-[11px] font-bold text-[#8a9096] w-12 flex-shrink-0">{label}</span>
+                    <div className="flex gap-2 flex-1">
+                      {opts.map(([v, text]) => {
+                        const sel = matchReview[key] === v;
+                        return (
+                          <button key={v} onClick={() => setMatchReview(r => ({ ...r, [key]: v }))}
+                            className="flex-1 flex flex-col items-center gap-1 py-2 rounded-2xl border-2 transition-all active:scale-95"
+                            style={{ borderColor: sel ? PURPLE : "#e2e2e2", background: sel ? "#f5f3ff" : "#f9f9f9" }}>
+                            <Face v={v} sel={sel} color={PURPLE}/>
+                            <span className="text-[9px] font-bold leading-tight text-center" style={{ color: sel ? PURPLE : "#4a5050" }}>{text}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
             <div>
@@ -481,28 +702,40 @@ export default function LogSheet({ open, onClose, defaultSub }: Props) {
   // ── Main picker ──────────────────────────────────────────────────────────
 
   const scoringData = loadScoringData();
-  const overallScore = Math.round(computeScores(scoringData.checkIn, scoringData.hydration, scoringData.review, scoringData.nutrition, scoringData.gameDaysThisWeek, scoringData.habits).overall);
+  const overallScore = Math.round(computeScores(scoringData.checkIn, scoringData.hydration, scoringData.review, scoringData.nutrition, scoringData.gameDaysThisWeek, scoringData.habits, scoringData.training).overall);
 
   const todayStr = todayYMD;
-  let ciDone = false;
-  try { const ci = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null"); ciDone = ci?.date === todayStr; } catch {}
+  let recoveryDone = false;
+  try { const ci = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null"); recoveryDone = ci?.date === todayStr && ci.sleep !== undefined; } catch {}
+  let wellbeingDone = false;
+  try { const ci = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null"); wellbeingDone = ci?.date === todayStr && ci.stress !== undefined; } catch {}
   let hydroDone = false;
   try { const r = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]")[0]; hydroDone = r?.ts.slice(0, 10) === todayStr; } catch {}
   let nutriDone = false;
   try { const r = JSON.parse(localStorage.getItem("padelop:nutrition-logs") || "[]")[0]; nutriDone = r?.ts.slice(0, 10) === todayStr; } catch {}
   let reviewDone = false;
   try { const r = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]")[0]; reviewDone = r?.ts.slice(0, 10) === todayStr; } catch {}
+  let trainingDone = false;
+  try { const r = JSON.parse(localStorage.getItem("padelop:training-logs") || "[]")[0]; trainingDone = r?.ts.slice(0, 10) === todayStr; } catch {}
 
+  const GREEN = "#16a34a";
+  const TEAL = "#0891b2";
   const categories = [
-    { label: "Daily Check-in", sub: "Sleep · energy · soreness · hydration", color: "#4169e1", done: ciDone,
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4169e1" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>,
-      action: () => setSub("checkin") },
-    { label: "Hydration", sub: "Log today's water intake", color: "#0891b2", done: hydroDone,
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0891b2" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C12 2 5 10 5 15a7 7 0 0 0 14 0c0-5-7-13-7-13z"/></svg>,
-      action: () => setSub("hydration") },
-    { label: "Nutrition", sub: "Protein & recovery fuel", color: "#ea580c", done: nutriDone,
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>,
+    { label: "Recovery", sub: "Sleep · energy · soreness · hydration", color: PURPLE, done: recoveryDone,
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={PURPLE} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>,
+      action: () => setSub("recovery") },
+    { label: "Nutrition", sub: "Protein, fuel & hydration", color: TEAL, done: nutriDone && hydroDone,
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={TEAL} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>,
       action: () => setSub("nutrition") },
+    { label: "Training", sub: "Sessions, drills & intensity", color: GREEN, done: trainingDone,
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={GREEN} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4M6 12h12"/></svg>,
+      action: () => setSub("training") },
+    { label: "Wellbeing", sub: "Stress & motivation", color: AMBER, done: wellbeingDone,
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={AMBER} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 14c1 2 6 2 8 0"/><circle cx="9" cy="9.5" r="0.8" fill={AMBER} stroke="none"/><circle cx="15" cy="9.5" r="0.8" fill={AMBER} stroke="none"/></svg>,
+      action: () => setSub("wellbeing") },
+    { label: "Hydration", sub: "Log today's water intake", color: TEAL, done: hydroDone,
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={TEAL} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2C12 2 5 10 5 15a7 7 0 0 0 14 0c0-5-7-13-7-13z"/></svg>,
+      action: () => setSub("hydration") },
     { label: "Review a match", sub: "Log your last match performance", color: PURPLE, done: reviewDone,
       icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={PURPLE} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 14c1 2 6 2 8 0"/><circle cx="9" cy="9.5" r="0.8" fill={PURPLE} stroke="none"/><circle cx="15" cy="9.5" r="0.8" fill={PURPLE} stroke="none"/></svg>,
       action: () => setSub("matchlist") },
@@ -513,7 +746,7 @@ export default function LogSheet({ open, onClose, defaultSub }: Props) {
       <style>{`@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
       <div className="h1-font relative w-full max-w-lg bg-white rounded-t-[28px] flex flex-col overflow-hidden"
-        style={{ animation: "slideUp 0.3s cubic-bezier(0.22,1,0.36,1)", minHeight: "50vh", maxHeight: "85vh", paddingBottom: "env(safe-area-inset-bottom)" }}
+        style={{ animation: "slideUp 0.3s cubic-bezier(0.22,1,0.36,1)", minHeight: startWizard ? "65vh" : "50vh", maxHeight: startWizard ? "65vh" : "85vh", paddingBottom: "env(safe-area-inset-bottom)" }}
         onClick={e => e.stopPropagation()}>
         <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4 mb-2 flex-shrink-0"/>
         {/* Nav row */}

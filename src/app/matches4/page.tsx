@@ -13,27 +13,48 @@ type StoredMatch = {
 };
 
 type ReviewEntry = {
-  ts: string;
-  feeling: string;
-  result: string;
-  opponent: string;
-  energy: string;
-  wellDone: string[];
-  improved: string[];
+  ts: string; feeling: string; result: string; opponent: string;
+  energy: string; wellDone: string[]; improved: string[];
 };
 
-const AVATAR_COLORS = ["#2653d4", "#0891b2", "#7c3aed", "#0d9488", "#dc2626", "#ea580c", "#16a34a"];
+type TrainingEntry = {
+  ts: string; sessionType: string[]; drillFocus: string[];
+  duration: string; intensity: string;
+};
+
+type ActivityItem =
+  | { kind: "match"; ts: string; data: ReviewEntry }
+  | { kind: "training"; ts: string; data: TrainingEntry };
+
+// ── Helpers ───────────────────────────────────────────────────────────────
 
 function initials(name: string) {
   if (!name) return "?";
   return name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 }
 
-function Avatar({ name, color, size = "md" }: { name: string; color: string; size?: "md" | "lg" }) {
-  const dim = size === "lg" ? "w-16 h-16 text-[14px]" : "w-10 h-10 text-[11px]";
+const TEAM_A = ["#2653d4", "#0891b2"];
+const TEAM_B = ["#ea580c", "#dc2626"];
+
+function PairAvatars({ names, colors, size }: { names: [string, string]; colors: [string, string]; size: "lg" | "sm" }) {
+  const px = size === "lg" ? 44 : 30;
+  const overlap = size === "lg" ? 14 : 10;
+  const fontSize = size === "lg" ? 13 : 10;
+  const border = size === "lg" ? 3 : 2;
+  const total = px + px - overlap;
   return (
-    <div className={`${dim} rounded-full flex items-center justify-center font-black text-white ring-2 ring-white flex-shrink-0`} style={{ background: color }}>
-      {initials(name)}
+    <div style={{ position: "relative", width: total, height: px, flexShrink: 0 }}>
+      {names.map((name, i) => (
+        <div key={i} style={{
+          position: "absolute", left: i * (px - overlap),
+          width: px, height: px, borderRadius: "50%",
+          background: colors[i], border: `${border}px solid #fff`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize, fontWeight: 800, color: "#fff", zIndex: i === 0 ? 1 : 0,
+        }}>
+          {initials(name)}
+        </div>
+      ))}
     </div>
   );
 }
@@ -43,6 +64,10 @@ function formatDate(dateStr: string) {
   return d.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
 }
 
+function formatTs(ts: string) {
+  return formatDate(ts.slice(0, 10));
+}
+
 function formatTime(timeStr: string) {
   if (!timeStr) return "";
   const [h, m] = timeStr.split(":").map(Number);
@@ -50,8 +75,60 @@ function formatTime(timeStr: string) {
   return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${ampm}`;
 }
 
-const TABS = ["All", "Upcoming", "Past"] as const;
-type Tab = (typeof TABS)[number];
+// ── Tag cloud ─────────────────────────────────────────────────────────────
+
+type TagEntry = { text: string; count: number; type: "good" | "bad" };
+
+function buildTagCloud(reviews: ReviewEntry[]): TagEntry[] {
+  const good: Record<string, number> = {};
+  const bad: Record<string, number> = {};
+  for (const r of reviews) {
+    for (const t of r.wellDone) good[t] = (good[t] ?? 0) + 1;
+    for (const t of r.improved) bad[t] = (bad[t] ?? 0) + 1;
+  }
+  return [
+    ...Object.entries(good).map(([text, count]) => ({ text, count, type: "good" as const })),
+    ...Object.entries(bad).map(([text, count]) => ({ text, count, type: "bad" as const })),
+  ].sort((a, b) => b.count - a.count);
+}
+
+function hashStr(s: string) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+function TagCloud({ reviews }: { reviews: ReviewEntry[] }) {
+  const tags = buildTagCloud(reviews);
+  if (tags.length === 0) return null;
+  const maxCount = tags[0].count;
+  return (
+    <div className="bg-white rounded-[20px] border border-[#e2e2e2] px-5 py-5" style={card}>
+      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 14px" }}>Improvement</p>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "10px 12px", alignItems: "center" }}>
+        {tags.map(({ text, count, type }) => {
+          const ratio = maxCount > 1 ? (count - 1) / (maxCount - 1) : 1;
+          const fontSize = Math.round(12 + ratio * 16);
+          const color = type === "good" ? "#496640" : "#ea580c";
+          const bg = type === "good" ? "#eef6eb" : "#fef0e8";
+          const rot = ((hashStr(text) % 11) - 5) * 0.8;
+          return (
+            <span key={text + type} style={{
+              fontSize, fontWeight: ratio > 0.5 ? 700 : 500, color, background: bg,
+              borderRadius: 999, padding: "3px 10px", display: "inline-block",
+              transform: `rotate(${rot}deg)`, lineHeight: 1.4, whiteSpace: "nowrap",
+            }}>
+              {text}
+              {count > 1 && <sup style={{ fontSize: 9, marginLeft: 2, opacity: 0.7 }}>{count}</sup>}
+            </span>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Next Match card ───────────────────────────────────────────────────────
 
 function NextMatchCard({ match }: { match: StoredMatch }) {
   const p1 = match.player_1 || "You";
@@ -69,18 +146,18 @@ function NextMatchCard({ match }: { match: StoredMatch }) {
         <span className="flex-shrink-0 text-[11px] font-bold tracking-wide px-3 py-1.5 rounded-full uppercase" style={{ background: "#caecbc", color: "#496640" }}>Upcoming</span>
       </div>
       <div className="border-t border-[#ebebeb]" />
-      <div className="flex items-center justify-around px-5 py-6">
-        <div className="flex flex-col items-center gap-2.5">
-          <Avatar name={p1} color="#2653d4" size="lg" />
-          <p className="text-[14px] text-[#1a1c1c] font-medium">{firstName(p1)}{p2 ? ` & ${firstName(p2)}` : ""}</p>
+      <div className="flex items-center justify-around px-5 py-5">
+        <div className="flex flex-col items-center gap-2">
+          <PairAvatars names={[p1, p2]} colors={[TEAM_A[0], TEAM_A[1]]} size="lg" />
+          <p className="text-[13px] text-[#1a1c1c] font-medium">{firstName(p1)} & {firstName(p2)}</p>
         </div>
-        <span className="text-[14px] font-semibold text-[#9aab96] uppercase tracking-widest">vs</span>
-        <div className="flex flex-col items-center gap-2.5">
-          <Avatar name={p3} color={AVATAR_COLORS[4]} size="lg" />
-          <p className="text-[14px] text-[#1a1c1c] font-medium">{firstName(p3)}{p4 ? ` & ${firstName(p4)}` : ""}</p>
+        <span className="text-[13px] font-semibold text-[#9aab96] uppercase tracking-widest">vs</span>
+        <div className="flex flex-col items-center gap-2">
+          <PairAvatars names={[p3, p4 || "?"]} colors={[TEAM_B[0], TEAM_B[1]]} size="lg" />
+          <p className="text-[13px] text-[#1a1c1c] font-medium">{firstName(p3)}{p4 ? ` & ${firstName(p4)}` : ""}</p>
         </div>
       </div>
-      {match.club ? (
+      {match.club && (
         <>
           <div className="border-t border-[#ebebeb]" />
           <div className="flex items-center px-5 py-4 gap-2 text-[14px] text-[#747878]">
@@ -90,76 +167,142 @@ function NextMatchCard({ match }: { match: StoredMatch }) {
             {match.club}
           </div>
         </>
-      ) : null}
+      )}
     </div>
   );
 }
 
-function PastMatchCard({ review }: { review: ReviewEntry }) {
-  const date = review.ts.slice(0, 10);
+// ── Activity cards ────────────────────────────────────────────────────────
+
+function MatchCard({ review }: { review: ReviewEntry }) {
   const resultColor = review.result === "win" ? "#496640" : review.result === "loss" ? "#dc2626" : "#747878";
+  const resultBg = review.result === "win" ? "#eef6eb" : review.result === "loss" ? "#fef2f2" : "#f4f4f6";
   const resultLabel = review.result === "win" ? "Win" : review.result === "loss" ? "Loss" : "Played";
+  const hasTags = review.wellDone.length > 0 || review.improved.length > 0;
   return (
     <div className="bg-white rounded-[20px] border border-[#e2e2e2] overflow-hidden" style={card}>
-      <div className="px-5 pt-4 pb-3 flex justify-between items-start gap-3">
+      <div className="px-5 pt-4 pb-3 flex items-center justify-between gap-4">
         <div>
-          <p className="text-[13px] font-bold text-[#496640] uppercase tracking-wide">Match</p>
-          <p className="text-[13px] text-[#747878] mt-0.5">{formatDate(date)}</p>
+          <p className="text-[13px] font-bold text-[#1a1c1c]">Match</p>
+          <p className="text-[11px] text-[#9aab96] mt-0.5">{formatTs(review.ts)}</p>
         </div>
-        <p className="text-[13px] font-bold flex-shrink-0" style={{ color: resultColor }}>{resultLabel}</p>
+        <div className="flex items-center gap-2">
+          {review.opponent && (
+            <span className="text-[11px] font-semibold text-[#747878]">vs {review.opponent}</span>
+          )}
+          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ background: resultBg, color: resultColor }}>
+            {resultLabel}
+          </span>
+        </div>
       </div>
-      {review.opponent ? (
+      {hasTags && (
         <>
           <div className="border-t border-[#ebebeb]" />
-          <div className="px-5 py-3 text-[13px] text-[#747878]">
-            vs <span className="font-medium text-[#1a1c1c]">{review.opponent}</span>
+          <div className="px-5 py-3 flex flex-col gap-2">
+            {review.wellDone.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {review.wellDone.map(t => (
+                  <span key={t} className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full" style={{ background: "#eef6eb", color: "#496640" }}>{t}</span>
+                ))}
+              </div>
+            )}
+            {review.improved.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {review.improved.map(t => (
+                  <span key={t} className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-[#f9f9f9] text-[#747878] border border-[#ebebeb]">{t}</span>
+                ))}
+              </div>
+            )}
           </div>
         </>
-      ) : null}
-      {review.wellDone.length > 0 || review.improved.length > 0 ? (
-        <>
-          <div className="border-t border-[#ebebeb]" />
-          <div className="px-5 py-3 flex flex-col gap-1.5">
-            {review.wellDone.slice(0, 2).map(t => (
-              <div key={t} className="flex items-center gap-2 text-[12px] text-[#496640]">
-                <span>✓</span><span>{t}</span>
-              </div>
-            ))}
-            {review.improved.slice(0, 1).map(t => (
-              <div key={t} className="flex items-center gap-2 text-[12px] text-[#2653d4]">
-                <span>↑</span><span>{t}</span>
-              </div>
-            ))}
-          </div>
-        </>
-      ) : null}
+      )}
     </div>
   );
 }
 
-export default function Matches4() {
+const INTENSITY_COLOR: Record<string, string> = { light: "#16a34a", moderate: "#2653d4", hard: "#dc2626" };
+
+function TrainingCard({ entry }: { entry: TrainingEntry }) {
+  const intensityColor = INTENSITY_COLOR[entry.intensity] ?? "#747878";
+  return (
+    <div className="bg-white rounded-[20px] border border-[#e2e2e2] overflow-hidden" style={card}>
+      <div className="px-5 pt-4 pb-3 flex items-center justify-between gap-4">
+        <div>
+          <p className="text-[13px] font-bold text-[#16a34a]">Training</p>
+          <p className="text-[11px] text-[#9aab96] mt-0.5">{formatTs(entry.ts)}</p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          {entry.duration && (
+            <span className="text-[11px] font-semibold text-[#747878]">{entry.duration}</span>
+          )}
+          {entry.intensity && (
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${intensityColor}15`, color: intensityColor }}>
+              {entry.intensity.charAt(0).toUpperCase() + entry.intensity.slice(1)}
+            </span>
+          )}
+        </div>
+      </div>
+      {(entry.sessionType.length > 0 || entry.drillFocus.length > 0) && (
+        <>
+          <div className="border-t border-[#ebebeb]" />
+          <div className="px-5 py-3 flex flex-col gap-2">
+            {entry.sessionType.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {entry.sessionType.map(t => (
+                  <span key={t} className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#f0f4ff] text-[#2653d4]">{t}</span>
+                ))}
+              </div>
+            )}
+            {entry.drillFocus.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {entry.drillFocus.map(t => (
+                  <span key={t} className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-[#f9f9f9] text-[#747878] border border-[#ebebeb]">{t}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────
+
+const TABS = ["All", "Matches", "Training"] as const;
+type Tab = (typeof TABS)[number];
+
+export default function Activity() {
   const [logSheetOpen, setLogSheetOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("All");
   const [filterOpen, setFilterOpen] = useState(false);
   const [nextMatch, setNextMatch] = useState<StoredMatch | null>(null);
-  const [pastReviews, setPastReviews] = useState<ReviewEntry[]>([]);
+  const [reviews, setReviews] = useState<ReviewEntry[]>([]);
+  const [trainingSessions, setTrainingSessions] = useState<TrainingEntry[]>([
+    { ts: new Date(Date.now() - 86400000).toISOString(), sessionType: ["Padel", "Drills"], drillFocus: ["Bandeja", "Volleys", "Positioning"], duration: "60min", intensity: "moderate" },
+  ]);
+  const [restDays, setRestDays] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set<string>();
+    try { return new Set<string>(JSON.parse(localStorage.getItem("padelop:rest-days") || "[]")); } catch { return new Set<string>(); }
+  });
 
   function loadData() {
     try {
       const raw = localStorage.getItem("padelop:next-match");
-      if (raw) {
-        const m = JSON.parse(raw) as StoredMatch;
-        setNextMatch(m.date ? m : null);
-      } else {
-        setNextMatch(null);
-      }
+      const m = raw ? JSON.parse(raw) as StoredMatch : null;
+      const isFuture = m?.date && m?.time && new Date(`${m.date}T${m.time}`).getTime() > Date.now();
+      setNextMatch(isFuture ? m : null);
     } catch { setNextMatch(null); }
 
     try {
       const raw = localStorage.getItem("padelop:match-reviews");
-      const reviews = raw ? (JSON.parse(raw) as ReviewEntry[]) : [];
-      setPastReviews(reviews.sort((a, b) => b.ts.localeCompare(a.ts)));
-    } catch { setPastReviews([]); }
+      setReviews(raw ? (JSON.parse(raw) as ReviewEntry[]).sort((a, b) => b.ts.localeCompare(a.ts)) : []);
+    } catch { setReviews([]); }
+
+    try {
+      const raw = localStorage.getItem("padelop:training-logs");
+      if (raw) setTrainingSessions((JSON.parse(raw) as TrainingEntry[]).sort((a, b) => b.ts.localeCompare(a.ts)));
+    } catch { setTrainingSessions([]); }
   }
 
   useEffect(() => {
@@ -168,22 +311,37 @@ export default function Matches4() {
     return () => window.removeEventListener("storage", loadData);
   }, []);
 
-  const showUpcoming = tab === "All" || tab === "Upcoming";
-  const showPast = tab === "All" || tab === "Past";
+  // Build unified feed
+  const feed: ActivityItem[] = [
+    ...reviews.map(r => ({ kind: "match" as const, ts: r.ts, data: r })),
+    ...trainingSessions.map(t => ({ kind: "training" as const, ts: t.ts, data: t })),
+  ].sort((a, b) => b.ts.localeCompare(a.ts));
 
-  const hasUpcoming = !!nextMatch;
-  const hasPast = pastReviews.length > 0;
+  const visibleFeed = tab === "Matches"
+    ? feed.filter(i => i.kind === "match")
+    : tab === "Training"
+    ? feed.filter(i => i.kind === "training")
+    : feed;
+
+  const totalMatches = reviews.length;
+  const totalSessions = trainingSessions.length;
+  const wins = reviews.filter(r => r.result === "win").length;
+
+  const subtitle = totalMatches === 0 && totalSessions === 0
+    ? "Nothing logged yet"
+    : [
+        totalMatches > 0 && `${wins}W–${totalMatches - wins}L`,
+        totalSessions > 0 && `${totalSessions} training session${totalSessions !== 1 ? "s" : ""}`,
+      ].filter(Boolean).join(" · ");
 
   return (
-    <main style={{ ...S, background: "#e2e5e9", minHeight: "100vh", display: "flex", flexDirection: "column", gap: 16, padding: "40px 16px 176px" }}>
+    <main style={{ ...S, background: "#ffffff", minHeight: "100vh", display: "flex", flexDirection: "column", gap: 16, padding: "16px 16px 176px" }}>
 
       {/* Header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
         <div>
-          <h2 style={{ ...S, fontSize: 22, fontWeight: 700, color: "#1a1c1c", margin: 0, letterSpacing: "-0.01em" }}>My Matches</h2>
-          <p style={{ ...S, fontSize: 14, color: "#747878", margin: "4px 0 0" }}>
-            {hasPast ? `${pastReviews.filter(r => r.result === "win").length} wins from ${pastReviews.length} logged matches` : "No matches logged yet"}
-          </p>
+          <h2 style={{ ...S, fontSize: 22, fontWeight: 700, color: "#1a1c1c", margin: 0, letterSpacing: "-0.01em" }}>Activity</h2>
+          <p style={{ ...S, fontSize: 14, color: "#747878", margin: "4px 0 0" }}>{subtitle}</p>
         </div>
         <button
           onClick={() => setFilterOpen(true)}
@@ -215,33 +373,152 @@ export default function Matches4() {
         </div>
       )}
 
-      {/* Upcoming */}
-      {showUpcoming && (
+      {/* Schedule: week grid + month calendar */}
+      {tab === "All" && (() => {
+        const now = new Date();
+        const todayYMD = now.toISOString().slice(0, 10);
+        const dow = (now.getDay() + 6) % 7;
+        const monday = new Date(now);
+        monday.setDate(now.getDate() - dow);
+        const weekDays = Array.from({ length: 7 }, (_, i) => {
+          const d = new Date(monday);
+          d.setDate(monday.getDate() + i);
+          return { ymd: d.toISOString().slice(0, 10), date: d };
+        });
+        const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+        const matchYMD = nextMatch?.date ?? null;
+        const matchNextYMD = matchYMD ? (() => { const d = new Date(matchYMD); d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10); })() : null;
+        const yr = now.getFullYear();
+        const mo = now.getMonth();
+        const daysInMonth = new Date(yr, mo + 1, 0).getDate();
+        const firstDow = (new Date(yr, mo, 1).getDay() + 6) % 7;
+        const matchDates = new Set<string>();
+        try { reviews.forEach(r => { if (r.ts) matchDates.add(r.ts.slice(0, 10)); }); } catch {}
+        if (nextMatch?.date) matchDates.add(nextMatch.date);
+        const recoveryDates = new Set<string>();
+        matchDates.forEach(d => {
+          const next = new Date(d + "T12:00:00");
+          next.setDate(next.getDate() + 1);
+          recoveryDates.add(next.toISOString().slice(0, 10));
+        });
+        const monthCells: (number | null)[] = [...Array(firstDow).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
+        while (monthCells.length % 7 !== 0) monthCells.push(null);
+        const monthLabel = now.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+        return (
+          <>
+            <p style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>Schedule</p>
+            <div className="bg-white rounded-[24px] border border-[#e2e2e2] overflow-hidden" style={card}>
+              {/* Week grid */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
+                {weekDays.map(({ ymd, date }, i) => {
+                  const isToday = ymd === todayYMD;
+                  const isPast = ymd < todayYMD;
+                  return (
+                    <div key={ymd} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "12px 0", gap: 4, borderLeft: i > 0 ? "1px solid #ebebeb" : "none", boxShadow: isToday ? "inset 0 0 0 2px #2653d4" : "none", opacity: isPast ? 0.3 : 1 }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: isToday ? "#2653d4" : "#747878" }}>{dayNames[i]}</span>
+                      <span style={{ fontSize: 14, fontWeight: 700, lineHeight: 1, color: isToday ? "#2653d4" : "#1a1c1c" }}>{date.getDate()}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", borderTop: "1px solid #ebebeb" }}>
+                {weekDays.map(({ ymd }, i) => {
+                  const isGame = ymd === matchYMD;
+                  const isRecovery = !isGame && ymd === matchNextYMD;
+                  const isRest = !isGame && !isRecovery && restDays.has(ymd);
+                  const isPast = ymd < todayYMD;
+                  const isToggleable = !isGame && !isRecovery && !isPast;
+                  const label = isGame ? "G" : isRecovery ? "R" : isRest ? "–" : "T";
+                  const labelColor = isGame ? "#496640" : isRecovery ? "#7c3aed" : isRest ? "#9aab96" : "#2653d4";
+                  return (
+                    <div key={ymd}
+                      onClick={() => {
+                        if (!isToggleable) return;
+                        setRestDays(prev => {
+                          const next = new Set(prev);
+                          next.has(ymd) ? next.delete(ymd) : next.add(ymd);
+                          try { localStorage.setItem("padelop:rest-days", JSON.stringify([...next])); } catch {}
+                          return next;
+                        });
+                      }}
+                      style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "10px 0", borderLeft: i > 0 ? "1px solid #ebebeb" : "none", background: ymd === todayYMD ? "#f9f9f9" : "transparent", opacity: isPast ? 0.3 : 1, cursor: isToggleable ? "pointer" : "default" }}
+                    >
+                      <span style={{ fontSize: 15, fontWeight: 800, color: labelColor, fontFamily: "Inter, sans-serif" }}>{label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 14px", borderTop: "1px solid #ebebeb" }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: "#496640" }}>G</span><span style={{ fontSize: 10, color: "#747878" }}>Game</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: "#7c3aed", marginLeft: 8 }}>R</span><span style={{ fontSize: 10, color: "#747878" }}>Recovery</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: "#2653d4", marginLeft: 8 }}>T</span><span style={{ fontSize: 10, color: "#747878" }}>Train</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: "#9aab96", marginLeft: 8 }}>–</span><span style={{ fontSize: 10, color: "#747878" }}>Rest</span>
+              </div>
+              {/* Month calendar */}
+              <div style={{ borderTop: "1px solid #ebebeb", padding: "16px 14px 20px" }}>
+                <p style={{ fontSize: 12, fontWeight: 600, color: "#747878", marginBottom: 10, textTransform: "capitalize" }}>{monthLabel}</p>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", marginBottom: 2 }}>
+                  {["M","T","W","T","F","S","S"].map((d, i) => (
+                    <div key={i} style={{ textAlign: "center", fontSize: 10, fontWeight: 700, color: "#9aab96", paddingBottom: 4 }}>{d}</div>
+                  ))}
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
+                  {monthCells.map((day, i) => {
+                    if (day === null) return <div key={i} style={{ height: 34 }} />;
+                    const ymd = `${yr}-${String(mo + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+                    const isToday = ymd === todayYMD;
+                    const isMatch = matchDates.has(ymd);
+                    const isRecovery = !isMatch && recoveryDates.has(ymd);
+                    const isPast = ymd < todayYMD;
+                    const dotColor = isMatch ? "#496640" : isRecovery ? "#7c3aed" : "#2653d4";
+                    const hasDot = (isMatch || isRecovery) && !isPast;
+                    return (
+                      <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingBottom: 2 }}>
+                        <div style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: isToday ? "#2653d4" : "transparent", opacity: isPast ? 0.3 : 1 }}>
+                          <span style={{ fontSize: 12, fontWeight: isToday ? 700 : 400, color: isToday ? "#fff" : "#1a1c1c" }}>{day}</span>
+                        </div>
+                        <div style={{ height: 4, width: 4, borderRadius: "50%", background: hasDot ? dotColor : "transparent", marginTop: 1 }} />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </>
+        );
+      })()}
+
+      {/* Next Match + Improvement cloud */}
+      {nextMatch && (tab === "All" || tab === "Matches") && (
         <>
           <p style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>Next Match</p>
-          {hasUpcoming ? (
-            <NextMatchCard match={nextMatch!} />
-          ) : (
-            <div className="bg-white rounded-[20px] border border-[#e2e2e2] px-5 py-6 text-center" style={card}>
-              <p className="text-[15px] font-medium text-[#747878]">No upcoming match set</p>
-              <p className="text-[13px] text-[#9aab96] mt-1">Add one from the home screen</p>
-            </div>
-          )}
+          <NextMatchCard match={nextMatch} />
+          {reviews.length > 0 && <TagCloud reviews={reviews} />}
         </>
       )}
 
-      {/* Past */}
-      {showPast && (
+      {/* Activity feed */}
+      {(tab === "All" || tab === "Matches" || tab === "Training") && (
         <>
-          <p style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0, marginTop: showUpcoming ? 4 : 0 }}>Past</p>
-          {hasPast ? (
+          {visibleFeed.length > 0 && (
+            <p style={{ ...S, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>
+              {tab === "All" ? "Activity" : tab}
+            </p>
+          )}
+          {visibleFeed.length > 0 ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {pastReviews.map(r => <PastMatchCard key={r.ts} review={r} />)}
+              {visibleFeed.map(item =>
+                item.kind === "match"
+                  ? <MatchCard key={item.ts + "m"} review={item.data as ReviewEntry} />
+                  : <TrainingCard key={item.ts + "t"} entry={item.data as TrainingEntry} />
+              )}
             </div>
           ) : (
-            <div className="bg-white rounded-[20px] border border-[#e2e2e2] px-5 py-6 text-center" style={card}>
-              <p className="text-[15px] font-medium text-[#747878]">No match reviews yet</p>
-              <p className="text-[13px] text-[#9aab96] mt-1">Log a match review after your next game</p>
+            <div className="bg-white rounded-[20px] border border-[#e2e2e2] px-5 py-8 text-center" style={card}>
+              <p className="text-[15px] font-medium text-[#747878]">
+                {tab === "Training" ? "No training sessions logged yet" : tab === "Matches" ? "No match reviews yet" : "No activity logged yet"}
+              </p>
+              <p className="text-[13px] text-[#9aab96] mt-1">Tap + to log your first session</p>
             </div>
           )}
         </>

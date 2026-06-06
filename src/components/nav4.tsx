@@ -72,7 +72,7 @@ export default function Nav4() {
   useEffect(() => {
     function load() {
       const d = loadScoringData();
-      setReadiness(Math.round(computeScores(d.checkIn, d.hydration, d.review, d.nutrition, d.gameDaysThisWeek).overall));
+      setReadiness(Math.round(computeScores(d.checkIn, d.hydration, d.review, d.nutrition, d.gameDaysThisWeek, d.habits, d.training).overall));
     }
     load();
     window.addEventListener("storage", load);

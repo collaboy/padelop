@@ -1,9 +1,11 @@
 export type DailyCheckIn = {
-  date: string; // YYYY-MM-DD — only today's entry is used
-  sleep: number;     // 1–5 (5 = excellent)
-  energy: number;    // 1–5 (5 = high energy)
-  soreness: number;  // 1–5 (5 = no soreness)
-  hydration: number; // 1–5 (5 = well hydrated)
+  date: string;
+  sleep: number;      // 1–5 (5 = excellent)
+  energy: number;     // 1–5 (5 = high energy)
+  soreness: number;   // 1–5 (5 = no soreness)
+  hydration: number;  // 1–5 subjective feeling (5 = well hydrated)
+  stress: number;     // 1–5 (5 = low stress = good)
+  motivation: number; // 1–5 (5 = high motivation)
 };
 
 export type HydrationEntry = {
@@ -33,12 +35,12 @@ export type NutritionEntry = {
   quality: string;       // "bad" | "ok" | "great"
 };
 
-export type Scores = {
-  overall: number;
-  recovery: number;
-  hydration: number;
-  energy: number;
-  mobility: number;
+export type TrainingEntry = {
+  ts: string;
+  sessionType: string[]; // ["Padel", "Gym", "Cardio", "Drills"]
+  drillFocus: string[];  // ["Serve", "Bandeja", ...]
+  duration: string;      // "30min" | "60min" | "90min+"
+  intensity: string;     // "light" | "moderate" | "hard"
 };
 
 export type HabitsEntry = {
@@ -50,6 +52,15 @@ export type HabitsEntry = {
   foamRoll: boolean;
   lightWalk: boolean;
   coldShower: boolean;
+};
+
+// 4-pillar readiness score
+export type Scores = {
+  overall: number;
+  recovery: number;
+  nutrition: number;
+  training: number;
+  wellbeing: number;
 };
 
 const LITRE_DELTA: Record<string, number> = {
@@ -65,77 +76,84 @@ export function computeScores(
   nutrition: NutritionEntry | null,
   gameDaysThisWeek: number,
   habits: HabitsEntry | null = null,
+  training: TrainingEntry | null = null,
 ): Scores {
-  const ci = checkIn ?? { sleep: 3, energy: 3, soreness: 3, hydration: 3, date: "" };
+  const ci = checkIn ?? { sleep: 3, energy: 3, soreness: 3, hydration: 3, stress: 3, motivation: 3, date: "" };
 
-  // Recovery: sleep quality, muscle soreness, injury status, hydration quality
-  let recovery = 65;
-  recovery += (ci.sleep - 3) * 8;     // ±16
-  recovery += (ci.soreness - 3) * 6;  // ±12 (5 = no soreness = good)
-  if (hydration) {
-    recovery += hydration.quality === "great" ? 8 : hydration.quality === "bad" ? -8 : 0;
-    if (hydration.urine === "clear" || hydration.urine === "pale") recovery += 4;
-    else if (hydration.urine === "dark") recovery -= 6;
-    else if (hydration.urine === "brown") recovery -= 12;
-  }
+  // Injury impact decays linearly to zero over 14 days
+  const injuryDecay = review?.ts
+    ? Math.max(0, 1 - Math.floor((Date.now() - new Date(review.ts).getTime()) / 86400000) / 14)
+    : 0;
+
+  // ── Recovery (sleep, soreness, habits, injury) ──────────────────────────
+  let rec = 65;
+  rec += (ci.sleep - 3) * 8;     // ±16
+  rec += (ci.soreness - 3) * 7;  // ±14 (5 = no soreness = good)
   if (review) {
-    recovery += review.injury === "no" ? 5 : review.injury === "yes" ? -15 : review.injury === "minor" ? -5 : 0;
+    const injuryDelta = review.injury === "no" ? 5 : review.injury === "yes" ? -15 : review.injury === "minor" ? -5 : 0;
+    rec += Math.round(injuryDelta * injuryDecay);
   }
-
-  // Hydration: logged litres, urine colour, subjective quality, check-in self-rating
-  let hydr = 65;
-  hydr += (ci.hydration - 3) * 7;  // ±14
-  if (hydration) {
-    hydr += LITRE_DELTA[hydration.litres] ?? 0;  // ±20
-    hydr += hydration.quality === "great" ? 6 : hydration.quality === "bad" ? -6 : 0;
-    if (hydration.urine === "clear" || hydration.urine === "pale") hydr += 6;
-    else if (hydration.urine === "yellow") hydr += 0;
-    else if (hydration.urine === "dark") hydr -= 10;
-    else if (hydration.urine === "brown") hydr -= 18;
-  }
-
-  // Energy: check-in energy + sleep (sleep debt tanks energy), nutrition quality
-  let energy = 65;
-  energy += (ci.energy - 3) * 9;   // ±18
-  energy += (ci.sleep - 3) * 5;    // ±10 — sleep heavily affects energy
-  if (nutrition) {
-    energy += nutrition.quality === "great" ? 6 : nutrition.quality === "bad" ? -6 : 0;
-    energy += nutrition.proteinRating === "high" ? 4 : nutrition.proteinRating === "low" ? -4 : 0;
-  }
-  if (review) {
-    energy += review.energy === "high" ? 5 : review.energy === "low" ? -5 : 0;
-  }
-
-  // Mobility: soreness (primary driver), injury, activity frequency this week
-  let mobility = 65;
-  mobility += (ci.soreness - 3) * 8;  // ±16
-  mobility += (ci.energy - 3) * 2;    // low energy usually means stiff
-  if (review) {
-    mobility += review.injury === "yes" ? -14 : review.injury === "minor" ? -6 : review.injury === "no" ? 5 : 0;
-  }
-  // Active players maintain mobility better (capped at 2 game days to avoid over-inflation)
-  mobility += Math.min(gameDaysThisWeek, 2) * 3;
-
-  // Habit contributions
   if (habits) {
-    if (habits.sleep)        { recovery += 10; energy += 8;  mobility += 4; }
-    if (habits.mobility)     { mobility += 8; }
-    if (habits.visualise)    { energy += 4;   recovery += 2; }
-    if (habits.boxBreathing) { recovery += 6; energy += 4; }
-    if (habits.foamRoll)     { recovery += 8; mobility += 6; }
-    if (habits.lightWalk)    { recovery += 5; mobility += 3; }
-    if (habits.coldShower)   { recovery += 7; }
+    if (habits.sleep)        rec += 10;
+    if (habits.foamRoll)     rec += 8;
+    if (habits.coldShower)   rec += 7;
+    if (habits.boxBreathing) rec += 6;
+    if (habits.lightWalk)    rec += 5;
+    if (habits.mobility)     rec += 4;
+    if (habits.visualise)    rec += 2;
   }
 
-  const r = clamp(recovery);
-  const h = clamp(hydr);
-  const e = clamp(energy);
-  const m = clamp(mobility);
+  // ── Nutrition (hydration + food quality) ────────────────────────────────
+  let nut = 65;
+  nut += (ci.hydration - 3) * 7;  // ±14 — subjective feeling from check-in
+  if (hydration) {
+    nut += LITRE_DELTA[hydration.litres] ?? 0;  // ±20
+    nut += hydration.quality === "great" ? 6 : hydration.quality === "bad" ? -6 : 0;
+    if (hydration.urine === "clear" || hydration.urine === "pale") nut += 6;
+    else if (hydration.urine === "dark")  nut -= 10;
+    else if (hydration.urine === "brown") nut -= 18;
+  }
+  if (nutrition) {
+    nut += nutrition.proteinRating === "high" ? 8 : nutrition.proteinRating === "low" ? -8 : 0;
+    nut += nutrition.quality === "great" ? 8 : nutrition.quality === "bad" ? -8 : 0;
+    nut += nutrition.postMatch === "yes" ? 4 : 0;
+  }
 
-  // Overall: weighted average — recovery and energy are the biggest drivers of match readiness
-  const overall = clamp(r * 0.30 + h * 0.25 + e * 0.30 + m * 0.15);
+  // ── Training (sessions, load, focus) ────────────────────────────────────
+  let trn = 65;
+  trn += Math.min(gameDaysThisWeek, 2) * 5;  // up to +10 for 2 game days
+  if (training) {
+    trn += 10;  // logged a training session
+    if (training.drillFocus.length > 0)          trn += 4;
+    if (training.sessionType.includes("Gym") || training.sessionType.includes("Cardio")) trn += 4;
+    if (training.intensity === "hard")     trn += 2;
+    if (training.intensity === "light")    trn -= 2;
+  }
 
-  return { overall, recovery: r, hydration: h, energy: e, mobility: m };
+  // ── Wellbeing (stress, motivation, energy, mental state) ────────────────
+  let wb = 65;
+  wb += (ci.stress - 3) * 8;      // ±16 (5 = low stress = good)
+  wb += (ci.motivation - 3) * 6;  // ±12
+  wb += (ci.energy - 3) * 4;      // ±8
+  if (review) {
+    const mentalScore = (v: string) => v === "great" ? 1 : v === "bad" ? -1 : 0;
+    const mentalSum = mentalScore(review.mentalBefore as string ?? "")
+      + mentalScore(review.mentalDuring as string ?? "")
+      + mentalScore(review.mentalAfter as string ?? "");
+    wb += Math.round(mentalSum * 3 * injuryDecay);
+    wb += Math.round((review.energy === "high" ? 5 : review.energy === "low" ? -5 : 0) * injuryDecay);
+  }
+  if (habits?.visualise) wb += 4;
+
+  const r = clamp(rec);
+  const n = clamp(nut);
+  const t = clamp(trn);
+  const w = clamp(wb);
+
+  // Overall: Recovery 30%, Nutrition 25%, Training 20%, Wellbeing 25%
+  const overall = clamp(r * 0.30 + n * 0.25 + t * 0.20 + w * 0.25);
+
+  return { overall, recovery: r, nutrition: n, training: t, wellbeing: w };
 }
 
 export function saveHabits(habits: Omit<HabitsEntry, "date">): void {
@@ -151,6 +169,7 @@ export function loadScoringData(): {
   nutrition: NutritionEntry | null;
   gameDaysThisWeek: number;
   habits: HabitsEntry | null;
+  training: TrainingEntry | null;
 } {
   const todayYMD = new Date().toISOString().slice(0, 10);
 
@@ -167,10 +186,7 @@ export function loadScoringData(): {
   try {
     const logs = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]") as HydrationEntry[];
     const recent = logs[0];
-    // Use if logged within the last 36 hours
-    if (recent && Date.now() - new Date(recent.ts).getTime() < 36 * 3600_000) {
-      hydration = recent;
-    }
+    if (recent && Date.now() - new Date(recent.ts).getTime() < 36 * 3600_000) hydration = recent;
   } catch {}
 
   let review: ReviewEntry | null = null;
@@ -182,7 +198,15 @@ export function loadScoringData(): {
   let nutrition: NutritionEntry | null = null;
   try {
     const logs = JSON.parse(localStorage.getItem("padelop:nutrition-logs") || "[]") as NutritionEntry[];
-    if (logs.length > 0) nutrition = logs[0];
+    const recent = logs[0];
+    if (recent && Date.now() - new Date(recent.ts).getTime() < 24 * 3600_000) nutrition = recent;
+  } catch {}
+
+  let training: TrainingEntry | null = null;
+  try {
+    const logs = JSON.parse(localStorage.getItem("padelop:training-logs") || "[]") as TrainingEntry[];
+    const recent = logs[0];
+    if (recent && Date.now() - new Date(recent.ts).getTime() < 48 * 3600_000) training = recent;
   } catch {}
 
   let gameDaysThisWeek = 0;
@@ -203,7 +227,25 @@ export function loadScoringData(): {
     }
   } catch {}
 
-  return { checkIn, hydration, review, nutrition, gameDaysThisWeek, habits };
+  return { checkIn, hydration, review, nutrition, gameDaysThisWeek, habits, training };
+}
+
+export type ScoreSnapshot = Scores & { date: string };
+
+export function saveScoreSnapshot(scores: Scores): void {
+  const date = new Date().toISOString().slice(0, 10);
+  try {
+    const history: ScoreSnapshot[] = JSON.parse(localStorage.getItem("padelop:score-history") || "[]");
+    const filtered = history.filter(s => s.date !== date);
+    filtered.unshift({ ...scores, date });
+    localStorage.setItem("padelop:score-history", JSON.stringify(filtered.slice(0, 90)));
+  } catch {}
+}
+
+export function loadScoreHistory(): ScoreSnapshot[] {
+  try {
+    return JSON.parse(localStorage.getItem("padelop:score-history") || "[]") as ScoreSnapshot[];
+  } catch { return []; }
 }
 
 export function saveCheckIn(ci: Omit<DailyCheckIn, "date">): void {
@@ -218,7 +260,7 @@ export function computeAllTimeScores(): Scores {
     const revLogs = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]") as ReviewEntry[];
 
     const len = Math.max(hydLogs.length, nutLogs.length, revLogs.length);
-    if (len === 0) return { overall: 65, recovery: 65, hydration: 65, energy: 65, mobility: 65 };
+    if (len === 0) return { overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65 };
 
     const all: Scores[] = [];
     for (let i = 0; i < len; i++) {
@@ -229,11 +271,11 @@ export function computeAllTimeScores(): Scores {
     return {
       overall:   avg(all.map(s => s.overall)),
       recovery:  avg(all.map(s => s.recovery)),
-      hydration: avg(all.map(s => s.hydration)),
-      energy:    avg(all.map(s => s.energy)),
-      mobility:  avg(all.map(s => s.mobility)),
+      nutrition: avg(all.map(s => s.nutrition)),
+      training:  avg(all.map(s => s.training)),
+      wellbeing: avg(all.map(s => s.wellbeing)),
     };
   } catch {
-    return { overall: 65, recovery: 65, hydration: 65, energy: 65, mobility: 65 };
+    return { overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65 };
   }
 }
