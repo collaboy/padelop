@@ -205,14 +205,6 @@ export default function ReadinessPage() {
         </button>
       </div>
 
-      {/* Context card */}
-      {contextMsg && (
-        <div style={{ background: "#1a2e8a", borderRadius: 20, padding: "14px 18px", display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{ fontSize: 20, flexShrink: 0 }}>📅</span>
-          <p style={{ fontSize: 13, fontWeight: 600, color: "#fff", margin: 0, lineHeight: 1.4 }}>{contextMsg}</p>
-        </div>
-      )}
-
       {/* What's driving it */}
       <div ref={whyRef} style={{ background: "#fff", borderRadius: 24, padding: "20px 20px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
         <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 16px" }}>What&apos;s Driving It</p>
