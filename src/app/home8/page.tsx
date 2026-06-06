@@ -175,6 +175,7 @@ export default function Home8() {
   const [doIdx, setDoIdx] = useState(0); // -1 = top holder, 0 = do-this-now, 1 = see schedule
   const [completed, setCompleted] = useState<Set<number>>(new Set());
   const [readiness, setReadiness] = useState(65);
+  const [morningDone, setMorningDone] = useState(false);
   const [pillarStates, setPillarStates] = useState<PillarStates>({
     recovery:  { status: "not_logged", reason: "" },
     nutrition: { status: "not_logged", reason: "" },
@@ -205,6 +206,7 @@ export default function Home8() {
       try { m = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch {}
       const matchToday = m?.date === todayStr;
       setPillarStates(computePillarStates(d.checkIn, d.hydration, d.nutrition, d.habits, d.training, matchToday));
+      try { const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null"); setMorningDone(ml?.date === todayStr); } catch { setMorningDone(false); }
     }
     loadReadiness();
     window.addEventListener("storage", loadReadiness);
@@ -330,17 +332,20 @@ export default function Home8() {
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", justifyContent: "center", gap: 10, padding: "0 16px", marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
                 <p className="font-bold tracking-widest uppercase" style={{ color: "#9aa5b0", fontSize: "clamp(10px, 2.8vw, 13px)", paddingLeft: 4 }}>Log Data</p>
                 {/* Morning Check-in */}
-                <button onClick={() => { setLogWizard(false); setLogTab("checkin"); setLogSheetOpen(true); }} style={{ background: "#f4f6ff", borderRadius: 18, padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", border: "none", cursor: "pointer" }}>
+                <button onClick={() => { setLogWizard(false); setLogTab("checkin"); setLogSheetOpen(true); }} style={{ background: morningDone ? "#f0fdf4" : "#f4f6ff", borderRadius: 18, padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", border: "none", cursor: "pointer" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#2653d418", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: morningDone ? "#16a34a18" : "#2653d418", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={morningDone ? "#16a34a" : "#2653d4"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
                     </div>
                     <div style={{ textAlign: "left" }}>
                       <p style={{ fontSize: "clamp(13px, 3.8vw, 16px)", fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Morning Check-in</p>
-                      <p style={{ fontSize: "clamp(10px, 3vw, 12px)", color: "#6b7480", margin: "2px 0 0" }}>Sleep, energy & soreness</p>
+                      <p style={{ fontSize: "clamp(10px, 3vw, 12px)", color: morningDone ? "#16a34a" : "#6b7480", margin: "2px 0 0" }}>{morningDone ? "Done today" : "Sleep, energy & soreness"}</p>
                     </div>
                   </div>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                  {morningDone
+                    ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                  }
                 </button>
                 {/* Night Check-in */}
                 <button onClick={() => { setLogWizard(false); setLogTab("wellbeing"); setLogSheetOpen(true); }} style={{ background: "#f8f4ff", borderRadius: 18, padding: "12px 14px", display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", border: "none", cursor: "pointer" }}>
