@@ -263,6 +263,8 @@ export default function Home8() {
   const [matchModalOpen, setMatchModalOpen] = useState(false);
   const [matchModalTab, setMatchModalTab] = useState<'pick' | 'manual'>('pick');
   const [matchForm, setMatchForm] = useState({ date: '', time: '', club: '', p1: '', p2: '', p3: '', p4: '' });
+  const [uploadExtracting, setUploadExtracting] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [pastReviews, setPastReviews] = useState<{ ts: string; result: string; opponentNames: string; wellDone: string[]; improved: string[] }[]>([]);
   const [matchActionOpen, setMatchActionOpen] = useState(false);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
@@ -1382,7 +1384,7 @@ export default function Home8() {
 
         {/* Add / Edit Match modal */}
         {matchModalOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" onClick={() => { setMatchModalOpen(false); setMatchModalTab('pick'); }}>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" onClick={() => { setMatchModalOpen(false); setMatchModalTab('pick'); setUploadError(null); setUploadExtracting(false); }}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
             <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
               {/* Header */}
@@ -1391,17 +1393,27 @@ export default function Home8() {
                   <p className="text-[18px] font-bold text-[#1a1c1c]">{isAddMode ? "Add Match" : "Edit Match"}</p>
                   <p className="text-[13px] text-[#6b7480] mt-0.5">Upload a screenshot or enter manually</p>
                 </div>
-                <button onClick={() => { setMatchModalOpen(false); setMatchModalTab('pick'); }} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "#f4f4f6" }}>
+                <button onClick={() => { setMatchModalOpen(false); setMatchModalTab('pick'); setUploadError(null); setUploadExtracting(false); }} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "#f4f4f6" }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
               </div>
 
               {matchModalTab === 'pick' && (
                 <div className="px-6 py-6 flex flex-col gap-3">
+                  {uploadExtracting && (
+                    <div className="flex items-center justify-center gap-3 py-4">
+                      <svg className="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                      <span className="text-[14px] font-medium text-[#2653d4]">Reading screenshot…</span>
+                    </div>
+                  )}
+                  {uploadError && (
+                    <div className="px-4 py-3 rounded-2xl text-[13px] text-[#c0392b]" style={{ background: "#fff0f0", border: "1.5px solid #ffd0d0" }}>{uploadError}</div>
+                  )}
                   <button
-                    onClick={() => matchUploadRef.current?.click()}
+                    disabled={uploadExtracting}
+                    onClick={() => { setUploadError(null); matchUploadRef.current?.click(); }}
                     className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl active:opacity-70 transition-opacity"
-                    style={{ background: "#f4f6ff", border: "1.5px solid #2653d418" }}
+                    style={{ background: "#f4f6ff", border: "1.5px solid #2653d418", opacity: uploadExtracting ? 0.5 : 1 }}
                   >
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#2653d4" }}>
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1413,12 +1425,54 @@ export default function Home8() {
                       <p className="text-[12px] text-[#6b7480] mt-0.5">From your camera roll or files</p>
                     </div>
                   </button>
-                  <input ref={matchUploadRef} type="file" accept="image/*" className="hidden" onChange={() => { setMatchModalTab('manual'); }} />
+                  <input ref={matchUploadRef} type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setUploadError(null);
+                    setUploadExtracting(true);
+                    try {
+                      const reader = new FileReader();
+                      const base64 = await new Promise<string>((resolve, reject) => {
+                        reader.onload = () => {
+                          const result = reader.result as string;
+                          resolve(result.split(',')[1]);
+                        };
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                      });
+                      const res = await fetch('/api/extract-match', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image: base64, mediaType: file.type }),
+                      });
+                      const data = await res.json();
+                      if (!res.ok || data.error) {
+                        setUploadError(data.message || 'Could not read the screenshot. Please enter manually.');
+                        setUploadExtracting(false);
+                        return;
+                      }
+                      setMatchForm({
+                        date: data.date ?? '',
+                        time: data.time ?? '',
+                        club: data.club ?? '',
+                        p1: data.player_1 ?? '',
+                        p2: data.player_2 ?? '',
+                        p3: data.player_3 ?? '',
+                        p4: data.player_4 ?? '',
+                      });
+                      setMatchModalTab('manual');
+                    } catch {
+                      setUploadError('Upload failed. Please try again or enter manually.');
+                    }
+                    setUploadExtracting(false);
+                    if (matchUploadRef.current) matchUploadRef.current.value = '';
+                  }} />
 
                   <button
+                    disabled={uploadExtracting}
                     onClick={() => { setMatchForm({ date: match?.date ?? '', time: match?.time ?? '', club: match?.club ?? '', p1: match?.players?.[0] ?? '', p2: match?.players?.[1] ?? '', p3: match?.players?.[2] ?? '', p4: match?.players?.[3] ?? '' }); setMatchModalTab('manual'); }}
                     className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl active:opacity-70 transition-opacity"
-                    style={{ background: "#f9f9f9", border: "1.5px solid #f0f0f0" }}
+                    style={{ background: "#f9f9f9", border: "1.5px solid #f0f0f0", opacity: uploadExtracting ? 0.5 : 1 }}
                   >
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#1a1c1c" }}>
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
