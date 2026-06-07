@@ -280,8 +280,15 @@ export default function Home8() {
   const [nutritionData, setNutritionData] = useState<NutritionEntry | null>(null);
   const [trainingData, setTrainingData]   = useState<TrainingEntry | null>(null);
   const [reviews, setReviews] = useState<ReviewEntry[]>([]);
+  const [mealsToday, setMealsToday] = useState<{ id: string; time: string; description: string }[]>([]);
+  const [mealTime, setMealTime] = useState("");
+  const [mealText, setMealText] = useState("");
+  const [noteText, setNoteText] = useState("");
   const [morningDone, setMorningDone] = useState(false);
   const [streak, setStreak] = useState(0);
+  const [profile, setProfile] = useState<{ name: string; level: string }>({ name: "", level: "Recreational" });
+  const [matchCount, setMatchCount] = useState(0);
+  const [winRate, setWinRate] = useState<number | null>(null);
   const [pillarStates, setPillarStates] = useState<PillarStates>({
     recovery:  { status: "not_logged", reason: "" },
     nutrition: { status: "not_logged", reason: "" },
@@ -332,6 +339,11 @@ export default function Home8() {
       setNutritionData(d.nutrition);
       setTrainingData(d.training);
       try {
+        const todayKey2 = new Date().toISOString().slice(0, 10);
+        const mealLog = JSON.parse(localStorage.getItem("padelop:meal-log") || "[]");
+        setMealsToday(mealLog.filter((m: { date: string }) => m.date === todayKey2));
+      } catch { setMealsToday([]); }
+      try {
         const raw = localStorage.getItem("padelop:match-reviews");
         setReviews(raw ? (JSON.parse(raw) as ReviewEntry[]) : []);
       } catch { setReviews([]); }
@@ -344,6 +356,16 @@ export default function Home8() {
       if (!dateset.has(cur.toISOString().slice(0, 10))) cur.setDate(cur.getDate() - 1);
       while (dateset.has(cur.toISOString().slice(0, 10))) { s++; cur.setDate(cur.getDate() - 1); }
       setStreak(s);
+      try {
+        const p = JSON.parse(localStorage.getItem("padelop:profile") || "null");
+        if (p) setProfile(p);
+      } catch {}
+      try {
+        const reviews: { result: string }[] = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+        setMatchCount(reviews.length);
+        const decided = reviews.filter(r => r.result === "win" || r.result === "loss");
+        setWinRate(decided.length > 0 ? Math.round((decided.filter(r => r.result === "win").length / decided.length) * 100) : null);
+      } catch {}
       let m: { date: string; time: string } | null = null;
       try { m = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch {}
       const matchToday = m?.date === todayStr;
@@ -431,6 +453,33 @@ export default function Home8() {
     } catch {}
     setUpcomingCount(future.length);
     return future;
+  }
+
+  function saveMealEntry(time: string, description: string) {
+    if (!description.trim()) return;
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const entry = { id: Date.now().toString(), date: todayKey, time, description: description.trim() };
+    try {
+      const existing = JSON.parse(localStorage.getItem("padelop:meal-log") || "[]");
+      localStorage.setItem("padelop:meal-log", JSON.stringify([...existing, entry]));
+    } catch {}
+    setMealsToday(prev => [...prev, entry]);
+    setMealText("");
+  }
+
+  function saveNote(text: string) {
+    if (!text.trim()) return;
+    const entry = { id: Date.now().toString(), date: new Date().toISOString().slice(0, 10), ts: new Date().toISOString(), text: text.trim() };
+    try {
+      const existing = JSON.parse(localStorage.getItem("padelop:notes") || "[]");
+      localStorage.setItem("padelop:notes", JSON.stringify([entry, ...existing].slice(0, 200)));
+    } catch {}
+    setNoteText("");
+  }
+
+  function nowTimeStr() {
+    const n = new Date();
+    return `${String(n.getHours()).padStart(2, "0")}:${String(n.getMinutes()).padStart(2, "0")}`;
   }
 
   function saveLogHydration(ml: number) {
@@ -784,14 +833,53 @@ export default function Home8() {
             </div>
           </div>
 
-          {/* Streak panel */}
+          {/* Profile panel */}
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 40, paddingTop: "calc(45dvh - 4rem - (100vw - 40px) / 2)" }}>
-            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, padding: "20px 18px", marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 8px" }}>Streak</p>
-              <p style={{ fontSize: "clamp(56px, 15vw, 72px)", fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>{streak}</p>
-              <p style={{ fontSize: 13, fontWeight: 500, color: "#6b7480", margin: "8px 0 0", textAlign: "center" }}>days in a row</p>
-              <div style={{ width: 36, height: 1, background: "#e8eaed", margin: "20px 0" }} />
-              <p style={{ fontSize: 12, color: "#9aa5b0", margin: 0, textAlign: "center", lineHeight: 1.5 }}>{streak === 0 ? "Log today to\nstart your streak" : streak === 1 ? "Great start —\nkeep it going!" : "Keep it up!"}</p>
+            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "20px 16px", marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+              {/* Avatar */}
+              <button onClick={() => router.push("/profile")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+                <div style={{ width: 52, height: 52, borderRadius: "50%", background: "#2653d4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span style={{ fontSize: 20, fontWeight: 800, color: "#fff" }}>
+                    {profile.name ? profile.name.trim().split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "?"}
+                  </span>
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{profile.name || "Add your name"}</p>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: "#b0b8c1", margin: "2px 0 0", letterSpacing: "0.04em" }}>{profile.level}</p>
+                </div>
+              </button>
+
+              {/* Divider */}
+              <div style={{ width: "80%", height: 1, background: "#f0f0f0", margin: "16px 0" }} />
+
+              {/* Stats row */}
+              <div style={{ display: "flex", width: "100%", justifyContent: "space-around" }}>
+                {[
+                  { value: streak, label: "Streak", suffix: "d" },
+                  { value: matchCount, label: "Matches", suffix: "" },
+                  { value: winRate !== null ? `${winRate}%` : "—", label: "Win rate", suffix: "" },
+                ].map(stat => (
+                  <div key={stat.label} style={{ textAlign: "center" }}>
+                    <p style={{ fontSize: 22, fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>
+                      {stat.value}{stat.suffix}
+                    </p>
+                    <p style={{ fontSize: 10, fontWeight: 600, color: "#b0b8c1", margin: "3px 0 0", textTransform: "uppercase", letterSpacing: "0.06em" }}>{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Contextual message */}
+              <p style={{ fontSize: 14, color: "#8a9096", margin: "14px 0 0", textAlign: "center", lineHeight: 1.4, paddingLeft: 8, paddingRight: 8 }}>
+                {(() => {
+                  if (matchCount === 0) return "Log your first match to track progress.";
+                  if (streak >= 7) return "Incredible consistency — keep it up!";
+                  if (winRate !== null && winRate >= 65) return "You're winning more than you're losing. Keep going!";
+                  if (winRate !== null && winRate < 40) return "Focus on the process — results will follow.";
+                  if (streak === 0) return "Log today to get your streak back.";
+                  if (streak >= 3) return "Good momentum — don't break the chain.";
+                  return "Stay consistent and the results will come.";
+                })()}
+              </p>
             </div>
           </div>
         </div>
@@ -1021,13 +1109,11 @@ export default function Home8() {
                       : "Aim for 2–3L. The single biggest lever on your energy.",
                   },
                   {
-                    label: "Nutrition", tab: "nutrition" as const,
+                    label: "Food & Snacks", tab: "nutrition" as const,
                     iconBg: "rgba(22,163,74,0.1)", iconColor: "#16a34a",
-                    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4.5 8-11.8A8 8 0 0 0 4 10.2C4 17.5 12 22 12 22z"/><path d="M12 22V12"/></svg>,
-                    logged: readinessItems[2],
-                    detail: nutritionData
-                      ? `${nutritionData.quality === "great" ? "Good" : nutritionData.quality === "bad" ? "Poor" : "OK"} quality · protein ${nutritionData.proteinRating}`
-                      : "Log your meals to track protein and overall quality.",
+                    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>,
+                    logged: mealsToday.length > 0,
+                    detail: mealsToday.length > 0 ? `${mealsToday.length} entr${mealsToday.length === 1 ? "y" : "ies"} today` : "Log what you eat as you go.",
                   },
                   {
                     label: "Pre-Match Routine", tab: "training" as const,
@@ -1037,6 +1123,13 @@ export default function Home8() {
                     detail: trainingData
                       ? `${trainingData.sessionType.join(" & ")} · ${trainingData.duration} · ${trainingData.intensity}`
                       : "A short activation — drills, gym, or active recovery.",
+                  },
+                  {
+                    label: "Add a note", tab: "matchreview" as const,
+                    iconBg: "rgba(107,116,128,0.1)", iconColor: "#6b7480",
+                    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>,
+                    logged: false,
+                    detail: "Capture anything — how you felt, what you noticed, what to work on.",
                   },
                   {
                     label: "Night Check-in", tab: "wellbeing" as const,
@@ -1170,6 +1263,56 @@ export default function Home8() {
                               <span style={{ fontSize: 10, color: "#b0b8c1" }}>2.5L</span>
                               <span style={{ fontSize: 10, color: "#c8ccd0" }}>3L+</span>
                             </div>
+                          </div>
+                        ) : item.tab === "nutrition" ? (
+                          <div style={{ padding: "0 20px 16px 20px" }}>
+                            {/* Entry form */}
+                            <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+                              <input
+                                type="time"
+                                value={mealTime || nowTimeStr()}
+                                onChange={e => setMealTime(e.target.value)}
+                                onClick={() => { if (!mealTime) setMealTime(nowTimeStr()); }}
+                                style={{ width: 90, padding: "7px 10px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: 13, color: "#1a1c1c", outline: "none", flexShrink: 0 }}
+                              />
+                              <input
+                                type="text"
+                                placeholder="What are you eating?"
+                                value={mealText}
+                                onChange={e => setMealText(e.target.value)}
+                                onKeyDown={e => { if (e.key === "Enter" && mealText.trim()) { saveMealEntry(mealTime || nowTimeStr(), mealText); } }}
+                                style={{ flex: 1, padding: "7px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: 13, color: "#1a1c1c", outline: "none" }}
+                              />
+                              <button
+                                onClick={() => saveMealEntry(mealTime || nowTimeStr(), mealText)}
+                                style={{ padding: "7px 14px", borderRadius: 10, background: mealText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: mealText.trim() ? "pointer" : "default", fontSize: 12, fontWeight: 700, color: mealText.trim() ? "#fff" : "#b0b8c1", flexShrink: 0 }}
+                              >Save</button>
+                            </div>
+                            {/* Today's entries */}
+                            {mealsToday.length > 0 && (
+                              <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 12 }}>
+                                {mealsToday.map(m => (
+                                  <div key={m.id} style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
+                                    <span style={{ fontSize: 11, fontWeight: 600, color: "#b0b8c1", flexShrink: 0 }}>{m.time}</span>
+                                    <span style={{ fontSize: 13, color: "#6b7480", lineHeight: 1.4 }}>{m.description}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ) : item.tab === "matchreview" ? (
+                          <div style={{ padding: "0 20px 16px 20px" }}>
+                            <textarea
+                              value={noteText}
+                              onChange={e => setNoteText(e.target.value)}
+                              placeholder="What's on your mind?"
+                              rows={3}
+                              style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: 13, color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box" }}
+                            />
+                            <button
+                              onClick={() => { saveNote(noteText); setLogPickerExpanded(null); }}
+                              style={{ marginTop: 8, padding: "7px 18px", borderRadius: 999, background: noteText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: noteText.trim() ? "pointer" : "default", fontSize: 12, fontWeight: 700, color: noteText.trim() ? "#fff" : "#b0b8c1" }}
+                            >Save</button>
                           </div>
                         ) : (
                           <div style={{ padding: "0 20px 16px 68px" }}>
