@@ -306,8 +306,8 @@ export default function Home8() {
       if (raw) {
         const m = JSON.parse(raw);
         if (m.date && m.time) {
-          const matchTs = new Date(`${m.date}T${m.time}`).getTime();
-          if (matchTs > Date.now()) {
+          const todayD = new Date().toISOString().slice(0, 10);
+          if (m.date >= todayD) {
             setMatch({ date: m.date, time: m.time, club: m.club || undefined, players: [m.player_1, m.player_2, m.player_3, m.player_4].filter(Boolean) });
           } else {
             // Match has passed — check if it's been reviewed
@@ -374,9 +374,10 @@ export default function Home8() {
   // Detect when a loaded future match transitions to past while the app is open
   useEffect(() => {
     if (!match || postMatchOpen) return;
-    const matchTs = new Date(`${match.date}T${match.time}`).getTime();
-    if (matchTs >= now.getTime()) return;
-    // Match just passed
+    const matchDay = match.date;
+    const todayDay = now.toISOString().slice(0, 10);
+    if (matchDay >= todayDay) return;
+    // Match day has passed
     setMatch(null);
     try {
       const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
