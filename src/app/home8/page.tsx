@@ -7,6 +7,30 @@ import ReadinessSheet from "@/components/readiness-sheet";
 import PushPrompt from "@/components/push-prompt";
 import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, type PillarStates } from "@/lib/scoring";
 
+// ── Tag cloud (mirrors matches4) ──────────────────────────────────────────
+type ReviewEntry = { ts: string; feeling: string; result: string; opponent: string; energy: string; wellDone: string[]; improved: string[] };
+type TagEntry    = { text: string; count: number; type: "good" | "bad" };
+
+function buildTagCloud(reviews: ReviewEntry[]): TagEntry[] {
+  const good: Record<string, number> = {};
+  const bad:  Record<string, number> = {};
+  for (const r of reviews) {
+    for (const t of r.wellDone) good[t] = (good[t] ?? 0) + 1;
+    for (const t of r.improved) bad[t]  = (bad[t]  ?? 0) + 1;
+  }
+  return [
+    ...Object.entries(good).map(([text, count]) => ({ text, count, type: "good" as const })),
+    ...Object.entries(bad) .map(([text, count]) => ({ text, count, type: "bad"  as const })),
+  ].sort((a, b) => b.count - a.count);
+}
+
+function hashStr(s: string) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 const pad = (n: number) => String(n).padStart(2, "0");
 const addMins = (h: number, m: number, delta: number) => {
   const total = h * 60 + m + delta;
@@ -245,6 +269,8 @@ export default function Home8() {
   const [doIdx, setDoIdx] = useState(0); // -1 = top holder, 0 = do-this-now, 1 = see schedule
   const [completed, setCompleted] = useState<Set<number>>(new Set());
   const [readiness, setReadiness] = useState(65);
+  const [readinessDone, setReadinessDone] = useState(0);
+  const [reviews, setReviews] = useState<ReviewEntry[]>([]);
   const [morningDone, setMorningDone] = useState(false);
   const [streak, setStreak] = useState(0);
   const [pillarStates, setPillarStates] = useState<PillarStates>({
@@ -277,6 +303,11 @@ export default function Home8() {
     function loadReadiness() {
       const d = loadScoringData();
       setReadiness(computeScores(d.checkIn, d.hydration, d.review, d.nutrition, d.gameDaysThisWeek, d.habits, d.training).overall);
+      setReadinessDone([!!d.checkIn, !!d.hydration, !!d.nutrition, !!d.training].filter(Boolean).length);
+      try {
+        const raw = localStorage.getItem("padelop:match-reviews");
+        setReviews(raw ? (JSON.parse(raw) as ReviewEntry[]) : []);
+      } catch { setReviews([]); }
       const todayStr = new Date().toISOString().slice(0, 10);
       // Compute streak from score snapshot history
       const history = loadScoreHistory();
@@ -410,7 +441,7 @@ export default function Home8() {
         <div
           style={{
             display: "flex", width: "300%", marginLeft: "-100%",
-            height: "calc(100dvh - 4rem)", touchAction: doIdx >= 1 ? "pan-y" : "none",
+            height: "calc(100dvh - 4rem)", touchAction: doIdx >= 1 ? "pan-y" : "manipulation",
             transform: cardSnap === 'right' ? `translateX(calc(33.333% - 50px + ${liveX}px))` : cardSnap === 'left' ? `translateX(calc(-33.333% + 50px + ${liveX}px))` : `translateX(${liveX}px)`,
             transition: liveX !== 0 ? "none" : "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
           }}
@@ -451,27 +482,32 @@ export default function Home8() {
               {/* Placeholder above */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
               {/* Main card */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0, paddingRight: 40, marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-                {/* Log section */}
-                <button onClick={() => { setMatchModalTab('pick'); setMatchModalOpen(true); }} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-                  <span style={{ fontSize: "clamp(18px, 5vw, 22px)", fontWeight: 700, color: "#1a1c1c", letterSpacing: "-0.01em" }}>+ Add a Match</span>
-                </button>
-
-                {/* Divider */}
-                <div style={{ width: 36, height: 1, background: "#e8eaed", margin: "20px 0" }} />
-
-                {/* Check-in section */}
-                <button onClick={() => { setLogWizard(false); setLogTab("checkin"); setLogSheetOpen(true); }} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
-                  <span style={{ fontSize: "clamp(16px, 4.5vw, 20px)", fontWeight: morningDone ? 500 : 700, color: morningDone ? "#9aa5b0" : "#1a1c1c" }}>Morning Check-in</span>
-                  {morningDone
-                    ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                    : <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                  }
-                </button>
-                <button onClick={() => { setLogWizard(false); setLogTab("wellbeing"); setLogSheetOpen(true); }} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 5 }}>
-                  <span style={{ fontSize: "clamp(16px, 4.5vw, 20px)", fontWeight: 700, color: "#1a1c1c" }}>Night Check-in</span>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                </button>
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, padding: "20px 18px 20px 20px", marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 14px", flexShrink: 0, textAlign: "center" }}>Trending in your matches</p>
+                {(() => {
+                  const tags = buildTagCloud(reviews);
+                  if (tags.length === 0) return (
+                    <p style={{ fontSize: 14, color: "#b0b8c1", margin: 0 }}>Log match reviews to see your trends.</p>
+                  );
+                  const maxCount = tags[0].count;
+                  return (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 10px", alignItems: "center" }}>
+                      {tags.map(({ text, count, type }) => {
+                        const ratio = maxCount > 1 ? (count - 1) / (maxCount - 1) : 1;
+                        const fontSize = Math.round(10 + ratio * 7);
+                        const color = type === "good" ? "#00a844" : "#ea580c";
+                        const bg    = type === "good" ? "#e6fff1"  : "#fef0e8";
+                        const rot   = ((hashStr(text) % 11) - 5) * 0.8;
+                        return (
+                          <span key={text + type} style={{ fontSize, fontWeight: ratio > 0.5 ? 700 : 500, color, background: bg, borderRadius: 999, padding: "3px 10px", display: "inline-block", transform: `rotate(${rot}deg)`, lineHeight: 1.4, whiteSpace: "nowrap" }}>
+                            {text}
+                            {count > 1 && <sup style={{ fontSize: 9, marginLeft: 2, opacity: 0.7 }}>{count}</sup>}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
               </div>
               {/* Placeholder below */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
@@ -539,10 +575,11 @@ export default function Home8() {
                           <div style={{ width: 48, height: 1, background: "#e8eaed", margin: "24px 0" }} />
 
                           {/* Readiness */}
-                          <p style={{ fontSize: 16, fontWeight: 400, color: "#3a4550", margin: "0 0 6px", textAlign: "center", lineHeight: 1.5 }}>{coachTip}</p>
-                          <button onClick={() => setReadinessSheetOpen(true)} style={{ display: "flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-                            <span style={{ fontSize: 14, fontWeight: 600, color: "#2653d4" }}>See insights</span>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 6px" }}>Readiness</p>
+                          <button onClick={() => setReadinessSheetOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                            <span style={{ fontSize: 32, fontWeight: 800, color: "#1a1c1c", lineHeight: 1, letterSpacing: "-0.02em" }}>
+                              {readinessDone}<span style={{ color: "#dde0e4" }}>/4</span>
+                            </span>
                           </button>
                         </div>
                       );
@@ -675,7 +712,7 @@ export default function Home8() {
             </div>
           </div>
 
-          {/* Readiness panel */}
+          {/* Streak panel */}
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 40, paddingTop: "calc(45dvh - 4rem - (100vw - 40px) / 2)" }}>
             <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, padding: "20px 18px", marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
               <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 8px" }}>Streak</p>
@@ -887,6 +924,12 @@ export default function Home8() {
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 </div>
                 <span className="text-[15px] font-semibold text-[#1a1c1c]">Edit match</span>
+              </button>
+              <button onClick={() => { setMatchActionOpen(false); setMatchForm({ date: '', time: '', club: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('manual'); setMatchModalOpen(true); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors" style={{ borderBottom: "1px solid #f0f0f0" }}>
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#f0fdf4" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </div>
+                <span className="text-[15px] font-semibold text-[#1a1c1c]">Add a match</span>
               </button>
               <button onClick={() => { setMatchActionOpen(false); router.push("/matches4"); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#f4f4f6" }}>
