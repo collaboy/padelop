@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   computeScores, loadScoringData, saveScoreSnapshot,
   type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry, type HabitsEntry,
@@ -25,7 +25,60 @@ export default function ReadinessSheet({ open, onClose, onOpenLog }: Props) {
   const [habits, setHabits]       = useState<HabitsEntry | null>(null);
   const [matchDate, setMatchDate] = useState<string | null>(null);
   const [matchTime, setMatchTime] = useState<string | null>(null);
-  const [expanded, setExpanded]   = useState<LogTab | null>(null);
+  const [expanded, setExpanded]       = useState<LogTab | null>(null);
+  const [hydrationMl, setHydrationMl] = useState(0);
+  const [mealLogOpen, setMealLogOpen] = useState(false);
+  const [mealForm, setMealForm]       = useState({ type: "meal" as "meal" | "snack", time: "", description: "" });
+
+  function openMealLog() {
+    const now = new Date();
+    setMealForm({ type: "meal", time: `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`, description: "" });
+    setMealLogOpen(true);
+  }
+
+  function saveMeal() {
+    if (!mealForm.description.trim()) return;
+    const entry = { id: Date.now().toString(), date: todayKey, time: mealForm.time, type: mealForm.type, description: mealForm.description.trim() };
+    try {
+      const existing = JSON.parse(localStorage.getItem("padelop:meal-log") || "[]");
+      localStorage.setItem("padelop:meal-log", JSON.stringify([...existing, entry]));
+    } catch {}
+    setMealLogOpen(false);
+  }
+  const gaugeRef    = useRef<HTMLDivElement>(null);
+  const dragStartX  = useRef(0);
+  const dragStartMl = useRef(0);
+
+  const GOAL_ML  = 2500;
+  const MAX_ML   = 3000;
+  const todayKey = new Date().toISOString().slice(0, 10);
+
+  function loadHydrationMl() {
+    try {
+      const raw = JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null");
+      setHydrationMl(raw?.date === todayKey ? (raw.ml ?? 0) : 0);
+    } catch { setHydrationMl(0); }
+  }
+
+  function saveHydration(ml: number) {
+    localStorage.setItem("padelop:hydration-quick", JSON.stringify({ date: todayKey, ml }));
+  }
+
+  function onDotTouchStart(e: React.TouchEvent) {
+    dragStartX.current  = e.touches[0].clientX;
+    dragStartMl.current = hydrationMl;
+  }
+
+  function onDotTouchMove(e: React.TouchEvent) {
+    e.stopPropagation();
+    const dx      = e.touches[0].clientX - dragStartX.current;
+    const barW    = gaugeRef.current?.offsetWidth ?? 1;
+    const deltaMl = (dx / barW) * MAX_ML;
+    const snapped = Math.round((dragStartMl.current + deltaMl) / 250) * 250;
+    const clamped = Math.max(0, Math.min(MAX_ML, snapped));
+    setHydrationMl(clamped);
+    saveHydration(clamped);
+  }
 
   function refresh() {
     const d = loadScoringData();
@@ -36,6 +89,7 @@ export default function ReadinessSheet({ open, onClose, onOpenLog }: Props) {
     setNutrition(d.nutrition);
     setTraining(d.training);
     setHabits(d.habits);
+    loadHydrationMl();
     try {
       const m = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
       setMatchDate(m?.date ?? null);
@@ -87,7 +141,7 @@ export default function ReadinessSheet({ open, onClose, onOpenLog }: Props) {
         : "Log sleep, energy and soreness to set your baseline.",
     },
     {
-      label: "Hydration Target", tab: "hydration", logged: !!hydration,
+      label: "Hydration", tab: "hydration", logged: hydrationMl >= GOAL_ML,
       detail: hydration
         ? `${hydration.litres} · ${hydration.urine} urine · ${hydration.quality}`
         : "Aim for 2–3L. The single biggest lever on your energy.",
@@ -96,7 +150,7 @@ export default function ReadinessSheet({ open, onClose, onOpenLog }: Props) {
       label: "Nutrition", tab: "nutrition", logged: !!nutrition,
       detail: nutrition
         ? `${nutrition.quality === "great" ? "Good" : nutrition.quality === "bad" ? "Poor" : "OK"} quality · protein ${nutrition.proteinRating}`
-        : "Log your meals to track protein and overall quality.",
+        : "Log a meal or snack",
     },
     {
       label: "Pre-Match Routine", tab: "training", logged: !!training,
@@ -203,8 +257,13 @@ export default function ReadinessSheet({ open, onClose, onOpenLog }: Props) {
                       </svg>
                     )}
                   </div>
-                  <span style={{ flex: 1, fontSize: 15, fontWeight: 500, color: item.logged ? "#1a1c1c" : "#9aa5b0" }}>
+                  <span style={{ flex: 1, fontSize: 15, fontWeight: 500, color: "#1a1c1c" }}>
                     {item.label}
+                    {item.tab === "hydration" && hydrationMl > 0 && (
+                      <span style={{ fontSize: 12, fontWeight: 600, color: "#2653d4", marginLeft: 8 }}>
+                        {Math.min(100, Math.round(hydrationMl / GOAL_ML * 100))}%
+                      </span>
+                    )}
                   </span>
                   <svg
                     width="14" height="14" viewBox="0 0 24 24" fill="none"
@@ -216,15 +275,66 @@ export default function ReadinessSheet({ open, onClose, onOpenLog }: Props) {
                 </button>
 
                 {expanded === item.tab && (
-                  <div style={{ paddingBottom: 16, paddingLeft: 36 }}>
-                    <p style={{ fontSize: 13, color: "#9aa5b0", margin: "0 0 12px", lineHeight: 1.5 }}>{item.detail}</p>
-                    {!item.logged && (
-                      <button
-                        onClick={() => { onClose(); setTimeout(() => onOpenLog(item.tab), 200); }}
-                        style={{ padding: "7px 18px", borderRadius: 999, background: "#2653d4", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, color: "#fff" }}
-                      >
-                        Log +
-                      </button>
+                  <div style={{ paddingBottom: 16, paddingLeft: 36, paddingRight: 4 }}>
+                    {item.tab === "hydration" ? (
+                      <div>
+                        {/* Amount label */}
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: "#1a1c1c" }}>
+                            {hydrationMl >= 1000 ? `${+(hydrationMl / 1000).toFixed(1)}L` : `${hydrationMl}ml`}
+                            <span style={{ fontWeight: 400, color: "#c8ccd0" }}> / 2.5L</span>
+                          </span>
+                          {hydrationMl >= GOAL_ML && <span style={{ fontSize: 12, fontWeight: 600, color: "#16a34a" }}>Goal reached</span>}
+                        </div>
+
+                        {/* Gauge with draggable dot */}
+                        <div ref={gaugeRef} style={{ position: "relative", height: 8, borderRadius: 999, background: "#e8eaed", marginBottom: 20 }}>
+                          {/* Fill */}
+                          <div style={{ position: "absolute", left: 0, top: 0, height: "100%", borderRadius: 999, background: "#2653d4", width: `${Math.min(100, (hydrationMl / MAX_ML) * 100)}%`, transition: "width 0.15s" }} />
+                          {/* Goal marker */}
+                          <div style={{ position: "absolute", top: -4, left: `${(GOAL_ML / MAX_ML) * 100}%`, width: 2, height: 16, background: "#b0b8c1", borderRadius: 1 }} />
+                          {/* Draggable dot */}
+                          <div
+                            onTouchStart={onDotTouchStart}
+                            onTouchMove={onDotTouchMove}
+                            style={{
+                              position: "absolute", top: "50%", left: `${Math.min(100, (hydrationMl / MAX_ML) * 100)}%`,
+                              transform: "translate(-50%, -50%)",
+                              width: 22, height: 22, borderRadius: "50%",
+                              background: "#fff", border: "2.5px solid #2653d4",
+                              boxShadow: "0 1px 6px rgba(38,83,212,0.25)",
+                              cursor: "grab", touchAction: "none",
+                            }}
+                          />
+                        </div>
+
+                        {/* Scale labels */}
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                          <span style={{ fontSize: 10, color: "#c8ccd0" }}>0</span>
+                          <span style={{ fontSize: 10, color: "#b0b8c1" }}>2.5L</span>
+                          <span style={{ fontSize: 10, color: "#c8ccd0" }}>3L+</span>
+                        </div>
+                      </div>
+                    ) : item.tab === "nutrition" ? (
+                      <>
+                        <p style={{ fontSize: 13, color: "#9aa5b0", margin: "0 0 12px", lineHeight: 1.5 }}>{item.detail}</p>
+                        <button
+                          onClick={openMealLog}
+                          style={{ padding: 0, background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, color: "#2653d4" }}
+                        >
+                          Log a meal or snack +
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <p style={{ fontSize: 13, color: "#9aa5b0", margin: "0 0 12px", lineHeight: 1.5 }}>{item.detail}</p>
+                        <button
+                          onClick={() => { onClose(); setTimeout(() => onOpenLog(item.tab), 200); }}
+                          style={{ padding: 0, background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, color: item.logged ? "#c0c5ca" : "#2653d4" }}
+                        >
+                          {item.logged ? "Edit" : "Log +"}
+                        </button>
+                      </>
                     )}
                   </div>
                 )}
@@ -234,6 +344,58 @@ export default function ReadinessSheet({ open, onClose, onOpenLog }: Props) {
 
         </div>
       </div>
+
+      {/* Meal / snack log modal */}
+      {mealLogOpen && (
+        <div className="fixed inset-0 z-[90] flex items-end justify-center" onClick={() => setMealLogOpen(false)}>
+          <div className="absolute inset-0 bg-black/30" />
+          <div
+            className="relative w-full max-w-lg bg-white rounded-t-[28px] overflow-hidden"
+            style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Handle */}
+            <div className="w-10 h-1 rounded-full bg-[#d0d3d6] mx-auto mt-4 mb-5" />
+
+            <div style={{ padding: "0 20px 28px" }}>
+              {/* Type toggle */}
+              <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+                {(["meal", "snack"] as const).map(t => (
+                  <button key={t} onClick={() => setMealForm(f => ({ ...f, type: t }))} style={{ flex: 1, padding: "9px 0", borderRadius: 12, border: "none", cursor: "pointer", fontSize: 14, fontWeight: 700, background: mealForm.type === t ? "#2653d4" : "#f4f4f6", color: mealForm.type === t ? "#fff" : "#6b7480", textTransform: "capitalize" }}>
+                    {t}
+                  </button>
+                ))}
+              </div>
+
+              {/* Time */}
+              <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", display: "block", marginBottom: 6 }}>Time</label>
+              <input
+                type="time"
+                value={mealForm.time}
+                onChange={e => setMealForm(f => ({ ...f, time: e.target.value }))}
+                style={{ width: "100%", padding: "10px 14px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: 15, color: "#1a1c1c", marginBottom: 16, outline: "none" }}
+              />
+
+              {/* Description */}
+              <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", display: "block", marginBottom: 6 }}>What did you have?</label>
+              <textarea
+                value={mealForm.description}
+                onChange={e => setMealForm(f => ({ ...f, description: e.target.value }))}
+                placeholder="e.g. chicken rice bowl, protein shake…"
+                rows={3}
+                style={{ width: "100%", padding: "10px 14px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: 15, color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", marginBottom: 20 }}
+              />
+
+              <button
+                onClick={saveMeal}
+                style={{ width: "100%", padding: "14px 0", borderRadius: 14, background: mealForm.description.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: mealForm.description.trim() ? "pointer" : "default", fontSize: 15, fontWeight: 700, color: mealForm.description.trim() ? "#fff" : "#b0b8c1" }}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
