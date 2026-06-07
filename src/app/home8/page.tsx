@@ -265,6 +265,8 @@ export default function Home8() {
   const [matchForm, setMatchForm] = useState({ date: '', time: '', club: '', p1: '', p2: '', p3: '', p4: '' });
   const [matchActionOpen, setMatchActionOpen] = useState(false);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
+  const [isAddMode, setIsAddMode] = useState(false);
+  const [upcomingCount, setUpcomingCount] = useState(0);
   const [now, setNow] = useState(new Date());
   const [doIdx, setDoIdx] = useState(0); // -1 = top holder, 0 = do-this-now, 1 = see schedule
   const [completed, setCompleted] = useState<Set<number>>(new Set());
@@ -358,11 +360,21 @@ export default function Home8() {
     loadReadiness();
     window.addEventListener("storage", loadReadiness);
     try {
+      const todayD = new Date().toISOString().slice(0, 10);
+      // Load full upcoming list, keep padelop:next-match synced to soonest
+      try {
+        const listRaw = localStorage.getItem("padelop:upcoming-matches");
+        const list: StoredMatch[] = listRaw ? JSON.parse(listRaw) : [];
+        const future = list.filter(m => m.date >= todayD).sort((a, b) => a.date.localeCompare(b.date));
+        setUpcomingCount(future.length);
+        if (future.length > 0 && future[0].date !== JSON.parse(localStorage.getItem("padelop:next-match") || "{}").date) {
+          localStorage.setItem("padelop:next-match", JSON.stringify(future[0]));
+        }
+      } catch {}
       const raw = localStorage.getItem("padelop:next-match");
       if (raw) {
         const m = JSON.parse(raw);
         if (m.date && m.time) {
-          const todayD = new Date().toISOString().slice(0, 10);
           if (m.date >= todayD) {
             setMatch({ date: m.date, time: m.time, club: m.club || undefined, players: [m.player_1, m.player_2, m.player_3, m.player_4].filter(Boolean) });
           } else {
@@ -396,6 +408,30 @@ export default function Home8() {
     const id = setInterval(() => setNow(new Date()), 1_000);
     return () => { clearInterval(id); window.removeEventListener("storage", loadReadiness); };
   }, []);
+
+  type StoredMatch = { date: string; time: string; club: string; player_1: string; player_2: string; player_3: string; player_4: string };
+
+  function getMatchList(): StoredMatch[] {
+    try {
+      const raw = localStorage.getItem("padelop:upcoming-matches");
+      if (raw) return JSON.parse(raw);
+      const single = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
+      if (single?.date) return [single];
+    } catch {}
+    return [];
+  }
+
+  function saveMatchList(list: StoredMatch[]) {
+    const today = new Date().toISOString().slice(0, 10);
+    const future = list.filter(m => m.date >= today).sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+    try {
+      localStorage.setItem("padelop:upcoming-matches", JSON.stringify(future));
+      if (future.length > 0) localStorage.setItem("padelop:next-match", JSON.stringify(future[0]));
+      window.dispatchEvent(new Event("storage"));
+    } catch {}
+    setUpcomingCount(future.length);
+    return future;
+  }
 
   function saveLogHydration(ml: number) {
     const todayKey = new Date().toISOString().slice(0, 10);
@@ -594,7 +630,10 @@ export default function Home8() {
                       return (
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
                           {/* Single muted header */}
-                          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 20px" }}>Next Match · {countdownLabel}</p>
+                          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 20px" }}>
+                            Next Match · {countdownLabel}
+                            {upcomingCount > 1 && <span style={{ marginLeft: 6, fontWeight: 600, color: "#c8ccd0" }}>+{upcomingCount - 1} more</span>}
+                          </p>
 
                           {/* Hero date */}
                           <button onClick={() => setMatchActionOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
@@ -620,7 +659,7 @@ export default function Home8() {
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
                         <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: 0 }}>Next Match</p>
                         <p style={{ fontSize: 20, fontWeight: 500, color: "#c0c7d0", margin: 0 }}>No match scheduled</p>
-                        <button onClick={() => { setMatchModalTab('pick'); setMatchModalOpen(true); }} style={{ fontSize: 15, fontWeight: 600, color: "#2653d4", background: "none", border: "none", cursor: "pointer", padding: 0 }}>+ Add a match</button>
+                        <button onClick={() => { setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('manual'); setMatchModalOpen(true); }} style={{ fontSize: 15, fontWeight: 600, color: "#2653d4", background: "none", border: "none", cursor: "pointer", padding: 0 }}>+ Add a match</button>
                       </div>
                     )}
                   </div>
@@ -964,35 +1003,45 @@ export default function Home8() {
                 const schedDue   = dueIndices.length;
                 const items = [
                   {
-                    label: "Morning Check-in", tab: "checkin" as const, icon: "🌙",
+                    label: "Morning Check-in", tab: "checkin" as const,
+                    iconBg: "rgba(124,58,237,0.1)", iconColor: "#7c3aed",
+                    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>,
                     logged: readinessItems[0],
                     detail: checkInData
                       ? `Sleep ${sleepLbl(checkInData.sleep)} · Soreness ${sleepLbl(checkInData.soreness)} · Stress ${rateLbl(checkInData.stress)}`
                       : "Log sleep, energy and soreness to set your baseline.",
                   },
                   {
-                    label: "Hydration", tab: "hydration" as const, icon: "💧",
+                    label: "Hydration", tab: "hydration" as const,
+                    iconBg: "rgba(8,145,178,0.1)", iconColor: "#0891b2",
+                    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>,
                     logged: readinessItems[1],
                     detail: hydrationData
                       ? `${hydrationData.litres} · ${hydrationData.urine} urine · ${hydrationData.quality}`
                       : "Aim for 2–3L. The single biggest lever on your energy.",
                   },
                   {
-                    label: "Nutrition", tab: "nutrition" as const, icon: "🥗",
+                    label: "Nutrition", tab: "nutrition" as const,
+                    iconBg: "rgba(22,163,74,0.1)", iconColor: "#16a34a",
+                    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4.5 8-11.8A8 8 0 0 0 4 10.2C4 17.5 12 22 12 22z"/><path d="M12 22V12"/></svg>,
                     logged: readinessItems[2],
                     detail: nutritionData
                       ? `${nutritionData.quality === "great" ? "Good" : nutritionData.quality === "bad" ? "Poor" : "OK"} quality · protein ${nutritionData.proteinRating}`
                       : "Log your meals to track protein and overall quality.",
                   },
                   {
-                    label: "Pre-Match Routine", tab: "training" as const, icon: "🎾",
+                    label: "Pre-Match Routine", tab: "training" as const,
+                    iconBg: "rgba(245,158,11,0.1)", iconColor: "#f59e0b",
+                    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
                     logged: readinessItems[3],
                     detail: trainingData
                       ? `${trainingData.sessionType.join(" & ")} · ${trainingData.duration} · ${trainingData.intensity}`
                       : "A short activation — drills, gym, or active recovery.",
                   },
                   {
-                    label: "Night Check-in", tab: "wellbeing" as const, icon: "🧠",
+                    label: "Night Check-in", tab: "wellbeing" as const,
+                    iconBg: "rgba(236,72,153,0.1)", iconColor: "#ec4899",
+                    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
                     logged: false,
                     detail: checkInData
                       ? `Stress ${rateLbl(checkInData.stress)} · Motivation ${rateLbl(checkInData.motivation)} — complete before bed`
@@ -1004,7 +1053,9 @@ export default function Home8() {
                 const scheduleRow = schedDue > 0 ? (
                   <div key="schedule" style={{ borderBottom: "1px solid #f0f0f0" }}>
                     <button onClick={() => setLogPickerExpanded(schedExpanded ? null : "schedule")} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#f4f4f6", fontSize: 18 }}>📅</div>
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(107,116,128,0.1)", color: "#6b7480" }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                      </div>
                       <div style={{ flex: 1, textAlign: "left" }}>
                         <p style={{ fontSize: 15, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>Today&apos;s Schedule</p>
                         <p style={{ fontSize: 12, color: "#9aa5b0", margin: "2px 0 0" }}>{schedDone} of {schedDue} items completed</p>
@@ -1060,7 +1111,7 @@ export default function Home8() {
                   ...items.slice(0, 1).map((item, i) => (
                     <div key={item.tab} style={{ borderBottom: "1px solid #f0f0f0" }}>
                       <button onClick={() => setLogPickerExpanded(logPickerExpanded === item.tab ? null : item.tab)} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-[18px]" style={{ background: "#f4f4f6" }}>{item.icon}</div>
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: item.iconBg, color: item.iconColor }}>{item.icon}</div>
                         <span className="text-[15px] font-semibold text-[#1a1c1c]">{item.label}</span>
                         <div className="ml-auto flex items-center gap-2 flex-shrink-0">
                           {item.logged && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>}
@@ -1074,7 +1125,7 @@ export default function Home8() {
                   ...items.slice(1).map((item, i, rest) => (
                     <div key={item.tab} style={{ borderBottom: i < rest.length - 1 ? "1px solid #f0f0f0" : "none" }}>
                       <button onClick={() => setLogPickerExpanded(logPickerExpanded === item.tab ? null : item.tab)} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-[18px]" style={{ background: "#f4f4f6" }}>{item.icon}</div>
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: item.iconBg, color: item.iconColor }}>{item.icon}</div>
                         <span className="text-[15px] font-semibold text-[#1a1c1c]">
                           {item.label}
                           {item.tab === "hydration" && logHydrationMl > 0 && (
@@ -1141,13 +1192,13 @@ export default function Home8() {
           <div className="fixed inset-0 z-[200] flex items-start justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)" }} onClick={() => setMatchActionOpen(false)}>
             <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
             <div className="relative w-full max-w-sm bg-white rounded-[24px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
-              <button onClick={() => { setMatchActionOpen(false); setMatchModalTab('pick'); setMatchModalOpen(true); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f4f6ff] transition-colors" style={{ borderBottom: "1px solid #f0f0f0" }}>
+              <button onClick={() => { setMatchActionOpen(false); setIsAddMode(false); setMatchModalTab('pick'); setMatchModalOpen(true); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f4f6ff] transition-colors" style={{ borderBottom: "1px solid #f0f0f0" }}>
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#2653d418" }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 </div>
                 <span className="text-[15px] font-semibold text-[#1a1c1c]">Edit match</span>
               </button>
-              <button onClick={() => { setMatchActionOpen(false); setMatchForm({ date: '', time: '', club: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('manual'); setMatchModalOpen(true); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors" style={{ borderBottom: "1px solid #f0f0f0" }}>
+              <button onClick={() => { setMatchActionOpen(false); setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('manual'); setMatchModalOpen(true); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors" style={{ borderBottom: "1px solid #f0f0f0" }}>
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#f0fdf4" }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 </div>
@@ -1171,7 +1222,7 @@ export default function Home8() {
               {/* Header */}
               <div className="px-6 pt-5 pb-4 flex items-center justify-between border-b border-[#f0f0f0]">
                 <div>
-                  <p className="text-[18px] font-bold text-[#1a1c1c]">{match ? "Edit Match" : "Add Match"}</p>
+                  <p className="text-[18px] font-bold text-[#1a1c1c]">{isAddMode ? "Add Match" : "Edit Match"}</p>
                   <p className="text-[13px] text-[#6b7480] mt-0.5">Upload a screenshot or enter manually</p>
                 </div>
                 <button onClick={() => { setMatchModalOpen(false); setMatchModalTab('pick'); }} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "#f4f4f6" }}>
@@ -1249,9 +1300,19 @@ export default function Home8() {
                   <button
                     onClick={() => {
                       if (!matchForm.date || !matchForm.time) return;
-                      const data = { date: matchForm.date, time: matchForm.time, club: matchForm.club, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
-                      try { localStorage.setItem("padelop:next-match", JSON.stringify(data)); window.dispatchEvent(new Event("storage")); } catch {}
-                      setMatch({ date: matchForm.date, time: matchForm.time, club: matchForm.club || undefined, players: [matchForm.p1, matchForm.p2, matchForm.p3, matchForm.p4].filter(Boolean) });
+                      const data: StoredMatch = { date: matchForm.date, time: matchForm.time, club: matchForm.club, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
+                      const current = getMatchList();
+                      let updated: StoredMatch[];
+                      if (isAddMode) {
+                        updated = [...current, data];
+                      } else {
+                        // Replace the current next match (matched by date+time)
+                        const replaced = current.map(m => m.date === match?.date && m.time === match?.time ? data : m);
+                        updated = replaced.some(m => m === data) ? replaced : [data, ...current];
+                      }
+                      const sorted = saveMatchList(updated);
+                      const next = sorted[0];
+                      if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
                       setMatchModalOpen(false);
                       setMatchModalTab('pick');
                       setCardSnap('none');
