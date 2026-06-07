@@ -911,7 +911,7 @@ export default function Home8() {
 
         {/* Complete modal */}
         {doModalOpen && modalItem && (
-          <div className="fixed inset-0 z-[200] flex items-start justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)" }} onClick={() => { setDoModalOpen(false); setSchedModalIdx(null); }}>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { setDoModalOpen(false); setSchedModalIdx(null); }}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
             <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden max-h-[88vh] overflow-y-auto" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.15)" }} onClick={e => e.stopPropagation()}>
               <div className="px-6 pt-5 pb-4" style={{ background: `${modalItem.color}18` }}>
@@ -1037,7 +1037,7 @@ export default function Home8() {
 
         {/* Post-match prompt */}
         {postMatchOpen && (
-          <div className="fixed inset-0 z-[200] flex items-start justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)" }} onClick={() => setPostMatchOpen(false)}>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => setPostMatchOpen(false)}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
             <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
               <div className="px-6 pt-8 pb-6 flex flex-col items-center text-center gap-2">
@@ -1072,7 +1072,7 @@ export default function Home8() {
 
         {/* Morning check-in nudge */}
         {checkinNudgeOpen && (
-          <div className="fixed inset-0 z-[200] flex items-start justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)" }} onClick={() => { try { localStorage.setItem("padelop:checkin-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {} setCheckinNudgeOpen(false); }}>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { try { localStorage.setItem("padelop:checkin-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {} setCheckinNudgeOpen(false); }}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
             <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
               <div className="px-6 pt-8 pb-6 flex flex-col items-center text-center gap-2">
@@ -1101,7 +1101,7 @@ export default function Home8() {
 
         {/* Log picker */}
         {logPickerOpen && (
-          <div className="fixed inset-0 z-[200] flex items-start justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)" }} onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); }}>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); }}>
             <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
             <div className="relative w-full max-w-sm bg-white rounded-[24px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
               <div className="px-5 pt-5 pb-4" style={{ borderBottom: "1px solid #f0f0f0" }}>
@@ -1357,7 +1357,7 @@ export default function Home8() {
 
         {/* Match action sheet */}
         {matchActionOpen && (
-          <div className="fixed inset-0 z-[200] flex items-start justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)" }} onClick={() => setMatchActionOpen(false)}>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => setMatchActionOpen(false)}>
             <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
             <div className="relative w-full max-w-sm bg-white rounded-[24px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
               <button onClick={() => { setMatchActionOpen(false); setIsAddMode(false); setMatchModalTab('pick'); setMatchModalOpen(true); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f4f6ff] transition-colors" style={{ borderBottom: "1px solid #f0f0f0" }}>
@@ -1384,7 +1384,7 @@ export default function Home8() {
 
         {/* Add / Edit Match modal */}
         {matchModalOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" onClick={() => { setMatchModalOpen(false); setMatchModalTab('pick'); setUploadError(null); setUploadExtracting(false); }}>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { setMatchModalOpen(false); setMatchModalTab('pick'); setUploadError(null); setUploadExtracting(false); }}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
             <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
               {/* Header */}

@@ -59,7 +59,7 @@ export default function ProfileModal({ open, onClose }: { open: boolean; onClose
   const canSave = profile.name.trim().length > 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-5" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-5" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={onClose}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
         className="relative w-full max-w-[420px] bg-white rounded-[28px] shadow-2xl overflow-y-auto max-h-[88vh]"

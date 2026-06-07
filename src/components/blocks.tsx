@@ -555,6 +555,7 @@ export function CheckInModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center px-6"
+      style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }}
       onClick={onClose}
     >
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />

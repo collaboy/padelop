@@ -528,7 +528,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
 
   if (sub === "hydration") {
     return (
-      <div className="fixed inset-0 z-[70] flex items-center justify-center px-5" onClick={handleClose}>
+      <div className="fixed inset-0 z-[70] flex items-center justify-center px-5" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={handleClose}>
         <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
         <div className="h1-font relative w-full max-w-lg bg-white rounded-[28px] overflow-y-auto max-h-[88vh] shadow-2xl" onClick={e => e.stopPropagation()}>
           <div className="px-6 pt-6 pb-4 flex items-center justify-between">
@@ -612,7 +612,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
 
   if (sub === "nutrition") {
     return (
-      <div className="fixed inset-0 z-[70] flex items-center justify-center px-5" onClick={handleClose}>
+      <div className="fixed inset-0 z-[70] flex items-center justify-center px-5" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={handleClose}>
         <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
         <div className="h1-font relative w-full max-w-lg bg-white rounded-[28px] overflow-y-auto max-h-[88vh] shadow-2xl" onClick={e => e.stopPropagation()}>
           <div className="px-6 pt-6 pb-4 flex items-center justify-between">
@@ -694,7 +694,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
 
   if (sub === "training") {
     return (
-      <div className="fixed inset-0 z-[70] flex items-center justify-center px-5" onClick={handleClose}>
+      <div className="fixed inset-0 z-[70] flex items-center justify-center px-5" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={handleClose}>
         <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
         <div className="h1-font relative w-full max-w-lg bg-white rounded-[28px] overflow-y-auto max-h-[88vh] shadow-2xl" onClick={e => e.stopPropagation()}>
           <div className="px-6 pt-6 pb-4 flex items-center justify-between">

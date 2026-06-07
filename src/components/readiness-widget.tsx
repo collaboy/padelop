@@ -392,7 +392,7 @@ export default function ReadinessWidget({ hideCard = false, showImprove = false,
 
       {/* Daily Check-In modal */}
       {checkInOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-5" onClick={() => setCheckInOpen(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-5" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => setCheckInOpen(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div
             className="h1-font relative w-full max-w-lg bg-white rounded-[28px] overflow-hidden flex flex-col max-h-[88vh]"
@@ -496,7 +496,7 @@ export default function ReadinessWidget({ hideCard = false, showImprove = false,
 
       {/* Category detail modal */}
       {categoryModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-6" onClick={() => setCategoryModal(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => setCategoryModal(null)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <div className="h1-font relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <div className="px-6 pt-6 pb-4" style={{ background: categoryModal.color + "18" }}>

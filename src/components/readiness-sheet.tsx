@@ -198,8 +198,8 @@ export default function ReadinessSheet({ open, onClose, onOpenLog: _onOpenLog, o
 
   return (
     <div
-      className="fixed inset-0 z-[80] flex items-start justify-center"
-      style={{ paddingTop: "calc(4rem + 24px)" }}
+      className="fixed inset-0 z-[80] flex items-center justify-center"
+      style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }}
       onClick={onClose}
     >
       <style>{`@keyframes rsSlideDown{from{transform:translateY(-16px);opacity:0}to{transform:translateY(0);opacity:1}}`}</style>
