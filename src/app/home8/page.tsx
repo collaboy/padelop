@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import LogSheet from "@/components/log-sheet";
 import ReadinessSheet from "@/components/readiness-sheet";
 import PushPrompt from "@/components/push-prompt";
-import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, type PillarStates } from "@/lib/scoring";
+import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
 
 // ── Tag cloud (mirrors matches4) ──────────────────────────────────────────
 type ReviewEntry = { ts: string; feeling: string; result: string; opponent: string; energy: string; wellDone: string[]; improved: string[] };
@@ -258,7 +258,7 @@ export default function Home8() {
   const [schedModalIdx, setSchedModalIdx] = useState<number | null>(null);
   const [logSheetOpen, setLogSheetOpen] = useState(false);
   const [readinessSheetOpen, setReadinessSheetOpen] = useState(false);
-  const [logTab, setLogTab] = useState<"checkin" | "wellbeing" | "matchreview" | null>(null);
+  const [logTab, setLogTab] = useState<"checkin" | "wellbeing" | "matchreview" | "hydration" | "nutrition" | "training" | null>(null);
   const [logWizard, setLogWizard] = useState(false);
   const [matchModalOpen, setMatchModalOpen] = useState(false);
   const [matchModalTab, setMatchModalTab] = useState<'pick' | 'manual'>('pick');
@@ -270,6 +270,13 @@ export default function Home8() {
   const [completed, setCompleted] = useState<Set<number>>(new Set());
   const [readiness, setReadiness] = useState(65);
   const [readinessDone, setReadinessDone] = useState(0);
+  const [readinessItems, setReadinessItems] = useState([false, false, false, false]);
+  const [logPickerOpen, setLogPickerOpen] = useState(false);
+  const [logPickerExpanded, setLogPickerExpanded] = useState<string | null>(null);
+  const [checkInData, setCheckInData]     = useState<DailyCheckIn | null>(null);
+  const [hydrationData, setHydrationData] = useState<HydrationEntry | null>(null);
+  const [nutritionData, setNutritionData] = useState<NutritionEntry | null>(null);
+  const [trainingData, setTrainingData]   = useState<TrainingEntry | null>(null);
   const [reviews, setReviews] = useState<ReviewEntry[]>([]);
   const [morningDone, setMorningDone] = useState(false);
   const [streak, setStreak] = useState(0);
@@ -303,7 +310,13 @@ export default function Home8() {
     function loadReadiness() {
       const d = loadScoringData();
       setReadiness(computeScores(d.checkIn, d.hydration, d.review, d.nutrition, d.gameDaysThisWeek, d.habits, d.training).overall);
-      setReadinessDone([!!d.checkIn, !!d.hydration, !!d.nutrition, !!d.training].filter(Boolean).length);
+      const ri = [!!d.checkIn, !!d.hydration, !!d.nutrition, !!d.training];
+      setReadinessDone(ri.filter(Boolean).length);
+      setReadinessItems(ri);
+      setCheckInData(d.checkIn);
+      setHydrationData(d.hydration);
+      setNutritionData(d.nutrition);
+      setTrainingData(d.training);
       try {
         const raw = localStorage.getItem("padelop:match-reviews");
         setReviews(raw ? (JSON.parse(raw) as ReviewEntry[]) : []);
@@ -482,32 +495,13 @@ export default function Home8() {
               {/* Placeholder above */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
               {/* Main card */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, padding: "20px 18px 20px 20px", marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 14px", flexShrink: 0, textAlign: "center" }}>Trending in your matches</p>
-                {(() => {
-                  const tags = buildTagCloud(reviews);
-                  if (tags.length === 0) return (
-                    <p style={{ fontSize: 14, color: "#b0b8c1", margin: 0 }}>Log match reviews to see your trends.</p>
-                  );
-                  const maxCount = tags[0].count;
-                  return (
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 10px", alignItems: "center" }}>
-                      {tags.map(({ text, count, type }) => {
-                        const ratio = maxCount > 1 ? (count - 1) / (maxCount - 1) : 1;
-                        const fontSize = Math.round(10 + ratio * 7);
-                        const color = type === "good" ? "#00a844" : "#ea580c";
-                        const bg    = type === "good" ? "#e6fff1"  : "#fef0e8";
-                        const rot   = ((hashStr(text) % 11) - 5) * 0.8;
-                        return (
-                          <span key={text + type} style={{ fontSize, fontWeight: ratio > 0.5 ? 700 : 500, color, background: bg, borderRadius: 999, padding: "3px 10px", display: "inline-block", transform: `rotate(${rot}deg)`, lineHeight: 1.4, whiteSpace: "nowrap" }}>
-                            {text}
-                            {count > 1 && <sup style={{ fontSize: 9, marginLeft: 2, opacity: 0.7 }}>{count}</sup>}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  );
-                })()}
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <button
+                  onClick={() => setLogPickerOpen(true)}
+                  style={{ padding: "14px 28px", borderRadius: 999, background: "#2653d4", border: "none", cursor: "pointer", fontSize: 16, fontWeight: 700, color: "#fff" }}
+                >
+                  Log +
+                </button>
               </div>
               {/* Placeholder below */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
@@ -910,6 +904,87 @@ export default function Home8() {
                   Not now
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Log picker */}
+        {logPickerOpen && (
+          <div className="fixed inset-0 z-[200] flex items-start justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)" }} onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); }}>
+            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+            <div className="relative w-full max-w-sm bg-white rounded-[24px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+              <div className="px-5 pt-5 pb-4" style={{ borderBottom: "1px solid #f0f0f0" }}>
+                <p style={{ fontSize: 18, fontWeight: 800, color: "#1a1c1c", margin: 0 }}>What do you want to log?</p>
+              </div>
+              {(() => {
+                const sleepLbl = (v: number) => ["Very poor","Poor","OK","Good","Excellent"][v-1] ?? `${v}/5`;
+                const rateLbl  = (v: number) => ["Very low","Low","Moderate","Good","High"][v-1] ?? `${v}/5`;
+                const items = [
+                  {
+                    label: "Morning Check-in", tab: "checkin" as const, icon: "🌙",
+                    logged: readinessItems[0],
+                    detail: checkInData
+                      ? `Sleep ${sleepLbl(checkInData.sleep)} · Soreness ${sleepLbl(checkInData.soreness)} · Stress ${rateLbl(checkInData.stress)}`
+                      : "Log sleep, energy and soreness to set your baseline.",
+                  },
+                  {
+                    label: "Hydration Target", tab: "hydration" as const, icon: "💧",
+                    logged: readinessItems[1],
+                    detail: hydrationData
+                      ? `${hydrationData.litres} · ${hydrationData.urine} urine · ${hydrationData.quality}`
+                      : "Aim for 2–3L. The single biggest lever on your energy.",
+                  },
+                  {
+                    label: "Nutrition", tab: "nutrition" as const, icon: "🥗",
+                    logged: readinessItems[2],
+                    detail: nutritionData
+                      ? `${nutritionData.quality === "great" ? "Good" : nutritionData.quality === "bad" ? "Poor" : "OK"} quality · protein ${nutritionData.proteinRating}`
+                      : "Log your meals to track protein and overall quality.",
+                  },
+                  {
+                    label: "Pre-Match Routine", tab: "training" as const, icon: "🎾",
+                    logged: readinessItems[3],
+                    detail: trainingData
+                      ? `${trainingData.sessionType.join(" & ")} · ${trainingData.duration} · ${trainingData.intensity}`
+                      : "A short activation — drills, gym, or active recovery.",
+                  },
+                  {
+                    label: "Night Check-in", tab: "wellbeing" as const, icon: "🧠",
+                    logged: false,
+                    detail: checkInData
+                      ? `Stress ${rateLbl(checkInData.stress)} · Motivation ${rateLbl(checkInData.motivation)} — complete before bed`
+                      : "Do your morning check-in first.",
+                  },
+                ];
+                return items.map((item, i, arr) => (
+                  <div key={item.tab} style={{ borderBottom: i < arr.length - 1 ? "1px solid #f0f0f0" : "none" }}>
+                    <button
+                      onClick={() => setLogPickerExpanded(logPickerExpanded === item.tab ? null : item.tab)}
+                      className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors"
+                    >
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-[18px]" style={{ background: "#f4f4f6" }}>
+                        {item.icon}
+                      </div>
+                      <span className="text-[15px] font-semibold text-[#1a1c1c]">{item.label}</span>
+                      <div className="ml-auto flex items-center gap-2 flex-shrink-0">
+                        {item.logged && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>}
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c8ccd0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: logPickerExpanded === item.tab ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
+                      </div>
+                    </button>
+                    {logPickerExpanded === item.tab && (
+                      <div style={{ padding: "0 20px 16px 68px" }}>
+                        <p style={{ fontSize: 13, color: "#9aa5b0", margin: "0 0 12px", lineHeight: 1.5 }}>{item.detail}</p>
+                        <button
+                          onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogWizard(false); setLogTab(item.tab); setLogSheetOpen(true); }}
+                          style={{ padding: "7px 18px", borderRadius: 999, background: "#2653d4", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, color: "#fff" }}
+                        >
+                          Log +
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ));
+              })()}
             </div>
           </div>
         )}
