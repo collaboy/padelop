@@ -12,12 +12,13 @@ interface Props {
   open: boolean;
   onClose: () => void;
   onOpenLog: (tab: LogTab) => void;
+  onOpenLogScreen?: () => void;
 }
 
 const sleepLabel = (v: number) => ["Very poor", "Poor", "OK", "Good", "Excellent"][v - 1] ?? `${v}/5`;
 const rateLabel  = (v: number) => ["Very low",  "Low",  "Moderate", "Good", "High"][v - 1] ?? `${v}/5`;
 
-export default function ReadinessSheet({ open, onClose, onOpenLog }: Props) {
+export default function ReadinessSheet({ open, onClose, onOpenLog, onOpenLogScreen }: Props) {
   const [checkIn, setCheckIn]     = useState<DailyCheckIn | null>(null);
   const [hydration, setHydration] = useState<HydrationEntry | null>(null);
   const [nutrition, setNutrition] = useState<NutritionEntry | null>(null);
@@ -238,6 +239,7 @@ export default function ReadinessSheet({ open, onClose, onOpenLog }: Props) {
 
           {/* CHECKLIST */}
           <div style={{ background: "#fff", borderRadius: 24, padding: "4px 20px" }}>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "16px 0 4px", textAlign: "center" }}>Match Checklist</p>
             {items.map((item, i) => (
               <div key={item.tab}>
                 {i > 0 && <div style={{ height: 1, background: "#f4f4f6" }} />}
@@ -341,6 +343,16 @@ export default function ReadinessSheet({ open, onClose, onOpenLog }: Props) {
               </div>
             ))}
           </div>
+
+          {/* Log screen link */}
+          {onOpenLogScreen && (
+            <button
+              onClick={() => { onClose(); setTimeout(onOpenLogScreen, 200); }}
+              style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#b0b8c1", padding: "4px 0 8px", textAlign: "center", width: "100%" }}
+            >
+              Complete or edit in log screen →
+            </button>
+          )}
 
         </div>
       </div>
