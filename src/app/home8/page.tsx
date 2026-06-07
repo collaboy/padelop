@@ -860,14 +860,14 @@ export default function Home8() {
             <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: "16px 16px", marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
               {/* Avatar */}
               <button onClick={() => router.push("/profile")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-                <div style={{ width: 52, height: 52, borderRadius: "50%", background: "#2653d4", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontSize: 20, fontWeight: 800, color: "#fff" }}>
+                <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#2653d4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span style={{ fontSize: 22, fontWeight: 800, color: "#fff" }}>
                     {profile.name ? profile.name.trim().split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "?"}
                   </span>
                 </div>
                 <div style={{ textAlign: "center" }}>
-                  <p style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{profile.name || "Add your name"}</p>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: "#b0b8c1", margin: "2px 0 0", letterSpacing: "0.04em" }}>{profile.level}</p>
+                  <p style={{ fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{profile.name || "Add your name"}</p>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: "#b0b8c1", margin: "2px 0 0", letterSpacing: "0.04em" }}>{profile.level}</p>
                 </div>
               </button>
 
@@ -876,25 +876,25 @@ export default function Home8() {
               {/* Stats row */}
               <div style={{ display: "flex", width: "100%", justifyContent: "space-around", padding: "4px 8px" }}>
                 <div style={{ textAlign: "center" }}>
-                  <p style={{ fontSize: 16, fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>{matchCount}</p>
-                  <p style={{ fontSize: 10, fontWeight: 600, color: "#b0b8c1", margin: "3px 0 0", letterSpacing: "0.04em", textTransform: "uppercase" }}>Matches</p>
+                  <p style={{ fontSize: 20, fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>{streak}</p>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: "#b0b8c1", margin: "3px 0 0", letterSpacing: "0.04em", textTransform: "uppercase" }}>Streak</p>
                 </div>
                 <div style={{ width: 1, background: "#f0f0f0", alignSelf: "stretch" }} />
                 <div style={{ textAlign: "center" }}>
-                  <p style={{ fontSize: 16, fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>{streak}</p>
-                  <p style={{ fontSize: 10, fontWeight: 600, color: "#b0b8c1", margin: "3px 0 0", letterSpacing: "0.04em", textTransform: "uppercase" }}>Streak</p>
+                  <p style={{ fontSize: 20, fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>{matchCount}</p>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: "#b0b8c1", margin: "3px 0 0", letterSpacing: "0.04em", textTransform: "uppercase" }}>Matches</p>
                 </div>
                 <div style={{ width: 1, background: "#f0f0f0", alignSelf: "stretch" }} />
                 <div style={{ textAlign: "center" }}>
-                  <p style={{ fontSize: 16, fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>{winRate !== null ? `${winRate}%` : "—"}</p>
-                  <p style={{ fontSize: 10, fontWeight: 600, color: "#b0b8c1", margin: "3px 0 0", letterSpacing: "0.04em", textTransform: "uppercase" }}>Win rate</p>
+                  <p style={{ fontSize: 20, fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>{winRate !== null ? `${winRate}%` : "—"}</p>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: "#b0b8c1", margin: "3px 0 0", letterSpacing: "0.04em", textTransform: "uppercase" }}>Win rate</p>
                 </div>
               </div>
 
               <div style={{ width: "100%", height: 1, background: "#f0f0f0", margin: "2px 0" }} />
 
               {/* Contextual message */}
-              <p style={{ fontSize: 13, color: "#8a9096", margin: 0, textAlign: "center", lineHeight: 1.4, paddingLeft: 8, paddingRight: 8 }}>
+              <p style={{ fontSize: 14, color: "#8a9096", margin: 0, textAlign: "center", lineHeight: 1.4, paddingLeft: 8, paddingRight: 8 }}>
                 {(() => {
                   if (matchCount === 0) return "Log your first match to track progress.";
                   if (streak >= 7) return "Incredible consistency — keep it up!";
@@ -1137,7 +1137,7 @@ export default function Home8() {
                     label: "Food & Snacks", tab: "nutrition" as const,
                     iconBg: "rgba(22,163,74,0.1)", iconColor: "#16a34a",
                     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>,
-                    logged: mealsToday.length > 0,
+                    logged: false,
                     detail: mealsToday.length > 0 ? `${mealsToday.length} entr${mealsToday.length === 1 ? "y" : "ies"} today` : "Log what you eat as you go.",
                   },
                   {

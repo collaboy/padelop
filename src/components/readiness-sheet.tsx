@@ -98,32 +98,61 @@ export default function ReadinessSheet({ open, onClose, onOpenLog: _onOpenLog, o
       : "Training Day";
 
   type Item = { label: string; logged: boolean; detail: string; tab: LogTab };
-  const items: Item[] = [
-    {
-      label: "Morning Check-in", tab: "checkin", logged: !!checkIn,
-      detail: checkIn
-        ? `Sleep ${sleepLabel(checkIn.sleep)} · Soreness ${sleepLabel(checkIn.soreness)} · Stress ${rateLabel(checkIn.stress)}`
-        : "Log sleep, energy and soreness to set your baseline.",
-    },
-    {
-      label: "Hydration", tab: "hydration", logged: hydrationMl >= GOAL_ML,
-      detail: hydration
-        ? `${hydration.litres} · ${hydration.urine} urine · ${hydration.quality}`
-        : "Aim for 2–3L. The single biggest lever on your energy.",
-    },
-    {
-      label: "Nutrition", tab: "nutrition", logged: !!nutrition,
-      detail: nutrition
-        ? `${nutrition.quality === "great" ? "Good" : nutrition.quality === "bad" ? "Poor" : "OK"} quality · protein ${nutrition.proteinRating}`
-        : "Log a meal or snack",
-    },
-    {
-      label: "Pre-Match Routine", tab: "training", logged: !!training,
-      detail: training
-        ? `${training.sessionType.join(" & ")} · ${training.duration} · ${training.intensity}`
+
+  const checkInItem: Item = {
+    label: "Morning Check-in", tab: "checkin", logged: !!checkIn,
+    detail: checkIn
+      ? `Sleep ${sleepLabel(checkIn.sleep)} · Soreness ${sleepLabel(checkIn.soreness)} · Stress ${rateLabel(checkIn.stress)}`
+      : "Log sleep, energy and soreness to set your baseline.",
+  };
+  const hydrationItem: Item = {
+    label: "Hydration", tab: "hydration", logged: hydrationMl >= GOAL_ML,
+    detail: hydration
+      ? `${hydration.litres} · ${hydration.urine} urine · ${hydration.quality}`
+      : "Aim for 2–3L. The single biggest lever on your energy.",
+  };
+  const nutritionItem: Item = {
+    label: "Nutrition", tab: "nutrition", logged: !!nutrition,
+    detail: nutrition
+      ? `${nutrition.quality === "great" ? "Good" : nutrition.quality === "bad" ? "Poor" : "OK"} quality · protein ${nutrition.proteinRating}`
+      : "Eat well — good fuel now builds readiness for match day.",
+  };
+  const trainingItem: Item = {
+    label: "Training Session", tab: "training", logged: !!training,
+    detail: training
+      ? `${training.sessionType.join(" & ")} · ${training.duration} · ${training.intensity}`
+      : daysToMatch !== null && daysToMatch > 1
+        ? "Get a drill or gym session in — sharpen your game before match day."
         : "A short activation — drills, gym, or active recovery.",
-    },
-  ];
+  };
+  const preMatchItem: Item = {
+    label: "Pre-Match Routine", tab: "training", logged: !!training,
+    detail: training
+      ? `${training.sessionType.join(" & ")} · ${training.duration} · ${training.intensity}`
+      : "A short activation — drills, gym, or active recovery.",
+  };
+
+  const items: Item[] =
+    state === "match-day" || state === "match-active"
+      ? [checkInItem, hydrationItem, nutritionItem, preMatchItem]
+      : state === "recovery"
+      ? [checkInItem, hydrationItem, nutritionItem, trainingItem]
+      : state === "preparation"
+      ? [checkInItem, hydrationItem, nutritionItem, trainingItem]
+      : [checkInItem, hydrationItem, nutritionItem, trainingItem];
+
+  const checklistLabel =
+    state === "match-day" || state === "match-active" ? "Match Day Checklist" :
+    state === "recovery"     ? "Recovery Checklist"     :
+    state === "preparation"  ? `${daysToMatch}-Day Prep Checklist` :
+    "Daily Checklist";
+
+  const prepCoachNote =
+    daysToMatch !== null && daysToMatch >= 5
+      ? "You have time — focus on quality sleep, consistent hydration, and getting a training session in each day."
+      : daysToMatch !== null && daysToMatch >= 3
+      ? "Keep your body primed. Sleep well, hydrate, and fit in a drill session."
+      : "Final stretch. Keep it light today — rest up and stay hydrated.";
 
   // derive count from checklist so card and list are always in sync
   const done  = items.filter(i => i.logged).length;
@@ -172,22 +201,29 @@ export default function ReadinessSheet({ open, onClose, onOpenLog: _onOpenLog, o
               {stateLabel}
             </p>
 
-            {(state === "readiness" || state === "preparation" || state === "match-day") && (
+            {(state === "readiness" || state === "match-day") && (
               <>
                 <p style={{ fontSize: "clamp(64px, 20vw, 80px)", fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1, letterSpacing: "-0.03em" }}>
                   {done}<span style={{ color: "#e2e5e9" }}>/{total}</span>
                 </p>
-                {state === "preparation" && daysToMatch !== null ? (
-                  <p style={{ fontSize: 15, fontWeight: 600, color: progressColor, margin: "16px 0 0" }}>
-                    {progressText} · {daysToMatch} day{daysToMatch === 1 ? "" : "s"} to go
-                  </p>
-                ) : state === "match-day" ? (
+                {state === "match-day" ? (
                   <p style={{ fontSize: 15, fontWeight: 600, color: progressColor, margin: "16px 0 0" }}>
                     {done === total ? "You're ready — go play your best" : progressText}
                   </p>
                 ) : (
                   <p style={{ fontSize: 15, fontWeight: 600, color: progressColor, margin: "16px 0 0" }}>{progressText}</p>
                 )}
+              </>
+            )}
+
+            {state === "preparation" && daysToMatch !== null && (
+              <>
+                <p style={{ fontSize: "clamp(56px, 18vw, 72px)", fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1, letterSpacing: "-0.03em" }}>
+                  {daysToMatch}<span style={{ fontSize: "clamp(28px, 9vw, 36px)", color: "#b0b8c1", marginLeft: 6 }}>day{daysToMatch === 1 ? "" : "s"}</span>
+                </p>
+                <p style={{ fontSize: 13, fontWeight: 500, color: "#8a9096", margin: "16px 0 0", lineHeight: 1.5, maxWidth: 260, marginLeft: "auto", marginRight: "auto" }}>
+                  {prepCoachNote}
+                </p>
               </>
             )}
 
@@ -212,7 +248,7 @@ export default function ReadinessSheet({ open, onClose, onOpenLog: _onOpenLog, o
 
           {/* CHECKLIST */}
           <div style={{ background: "#fff", borderRadius: 24, padding: "4px 20px 16px" }}>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "16px 0 4px", textAlign: "center" }}>Match Checklist</p>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "16px 0 4px", textAlign: "center" }}>{checklistLabel}</p>
             {items.map((item, i) => (
               <div key={item.tab}>
                 {i > 0 && <div style={{ height: 1, background: "#f4f4f6" }} />}
