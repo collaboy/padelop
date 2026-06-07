@@ -132,13 +132,42 @@ export default function ReadinessSheet({ open, onClose, onOpenLog: _onOpenLog, o
       : "A short activation — drills, gym, or active recovery.",
   };
 
+  const prepItems: Item[] = [
+    {
+      label: "Sleep well tonight", tab: "checkin", logged: !!checkIn,
+      detail: checkIn
+        ? `Sleep ${sleepLabel(checkIn.sleep)} · Soreness ${sleepLabel(checkIn.soreness)} · Stress ${rateLabel(checkIn.stress)}`
+        : "Sleep is the biggest performance lever before a match. Log your quality.",
+    },
+    {
+      label: "Hit your hydration goal", tab: "hydration", logged: hydrationMl >= GOAL_ML,
+      detail: hydration
+        ? `${hydration.litres} · ${hydration.urine} urine · ${hydration.quality}`
+        : `${Math.min(100, Math.round(hydrationMl / GOAL_ML * 100))}% of 2.5L — pre-loading hydration in the days before is key.`,
+    },
+    {
+      label: "Fuel clean today", tab: "nutrition", logged: !!nutrition,
+      detail: nutrition
+        ? `${nutrition.quality === "great" ? "Good" : nutrition.quality === "bad" ? "Poor" : "OK"} quality · protein ${nutrition.proteinRating}`
+        : "High protein, complex carbs. What you eat now is what you'll perform on.",
+    },
+    {
+      label: daysToMatch !== null && daysToMatch <= 2 ? "Light session or rest" : "Get a training session in", tab: "training", logged: !!training,
+      detail: training
+        ? `${training.sessionType.join(" & ")} · ${training.duration} · ${training.intensity}`
+        : daysToMatch !== null && daysToMatch <= 2
+          ? "Keep it short and sharp — footwork, serve, nothing that leaves you tired."
+          : "Drill your weaknesses. You have time to sharpen before match day.",
+    },
+  ];
+
   const items: Item[] =
     state === "match-day" || state === "match-active"
       ? [checkInItem, hydrationItem, nutritionItem, preMatchItem]
       : state === "recovery"
       ? [checkInItem, hydrationItem, nutritionItem, trainingItem]
       : state === "preparation"
-      ? [checkInItem, hydrationItem, nutritionItem, trainingItem]
+      ? prepItems
       : [checkInItem, hydrationItem, nutritionItem, trainingItem];
 
   const checklistLabel =
