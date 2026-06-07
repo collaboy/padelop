@@ -296,6 +296,13 @@ export default function Home8() {
   const [drillSteps, setDrillSteps] = useState<{ step: string; cue: string; reps: string }[] | null>(null);
   const [drillLoading, setDrillLoading] = useState(false);
 
+  const [logHydrationMl, setLogHydrationMl] = useState(0);
+  const logGaugeRef    = useRef<HTMLDivElement>(null);
+  const logDragStartX  = useRef(0);
+  const logDragStartMl = useRef(0);
+  const LOG_GOAL_ML = 2500;
+  const LOG_MAX_ML  = 3000;
+
   const matchUploadRef = useRef<HTMLInputElement>(null);
   const schedScrollRef = useRef<HTMLDivElement>(null);
   const schedCurrentRef = useRef<HTMLDivElement>(null);
@@ -315,6 +322,11 @@ export default function Home8() {
       setReadinessItems(ri);
       setCheckInData(d.checkIn);
       setHydrationData(d.hydration);
+      try {
+        const todayKey = new Date().toISOString().slice(0, 10);
+        const hq = JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null");
+        setLogHydrationMl(hq?.date === todayKey ? (hq.ml ?? 0) : 0);
+      } catch { setLogHydrationMl(0); }
       setNutritionData(d.nutrition);
       setTrainingData(d.training);
       try {
@@ -384,6 +396,25 @@ export default function Home8() {
     const id = setInterval(() => setNow(new Date()), 1_000);
     return () => { clearInterval(id); window.removeEventListener("storage", loadReadiness); };
   }, []);
+
+  function saveLogHydration(ml: number) {
+    const todayKey = new Date().toISOString().slice(0, 10);
+    try { localStorage.setItem("padelop:hydration-quick", JSON.stringify({ date: todayKey, ml })); } catch {}
+  }
+  function onLogDotTouchStart(e: React.TouchEvent) {
+    logDragStartX.current  = e.touches[0].clientX;
+    logDragStartMl.current = logHydrationMl;
+  }
+  function onLogDotTouchMove(e: React.TouchEvent) {
+    e.stopPropagation();
+    const dx      = e.touches[0].clientX - logDragStartX.current;
+    const barW    = logGaugeRef.current?.offsetWidth ?? 1;
+    const deltaMl = (dx / barW) * LOG_MAX_ML;
+    const snapped = Math.round((logDragStartMl.current + deltaMl) / 250) * 250;
+    const clamped = Math.max(0, Math.min(LOG_MAX_ML, snapped));
+    setLogHydrationMl(clamped);
+    saveLogHydration(clamped);
+  }
 
   useEffect(() => { setCardSnap('none'); setLiveX(0); }, [doIdx]);
 
@@ -464,6 +495,8 @@ export default function Home8() {
             swipeDirRef.current = null;
           }}
           onTouchMove={e => {
+            // When on the schedule card, let native scroll handle everything
+            if (doIdx >= 1) return;
             const dx = e.touches[0].clientX - touchStartXRef.current;
             const dy = e.touches[0].clientY - touchStartYRef.current;
             if (!swipeDirRef.current && (Math.abs(dx) > 8 || Math.abs(dy) > 8))
@@ -472,8 +505,14 @@ export default function Home8() {
             if (swipeDirRef.current === 'v' && cardSnap === 'none' && doIdx < 1) setLiveY(dy);
           }}
           onTouchEnd={e => {
-            const dx = e.changedTouches[0].clientX - touchStartXRef.current;
             const dy = e.changedTouches[0].clientY - touchStartYRef.current;
+            const dx = e.changedTouches[0].clientX - touchStartXRef.current;
+            // On schedule card: only intercept swipe-down from the very top to go back
+            if (doIdx >= 1) {
+              if (dy > 56 && (schedScrollRef.current?.scrollTop ?? 0) === 0) goPrev();
+              swipeDirRef.current = null;
+              return;
+            }
             if (swipeDirRef.current === 'h' && doIdx === 0) {
               setLiveX(0);
               if (cardSnap === 'none') {
@@ -484,7 +523,7 @@ export default function Home8() {
             } else if (swipeDirRef.current === 'v' && cardSnap === 'none') {
               setLiveY(0);
               if (dy < -40 && doIdx < 1) goNext();
-              else if (dy > 40 && (doIdx < 1 || (schedScrollRef.current?.scrollTop ?? 0) === 0)) goPrev();
+              else if (dy > 40) goPrev();
             }
             swipeDirRef.current = null;
           }}
@@ -919,6 +958,10 @@ export default function Home8() {
               {(() => {
                 const sleepLbl = (v: number) => ["Very poor","Poor","OK","Good","Excellent"][v-1] ?? `${v}/5`;
                 const rateLbl  = (v: number) => ["Very low","Low","Moderate","Good","High"][v-1] ?? `${v}/5`;
+                const nowMins    = now.getHours() * 60 + now.getMinutes();
+                const dueIndices = schedule.map((_, i) => i).filter(i => toMins(schedule[i].time) <= nowMins);
+                const schedDone  = dueIndices.filter(i => completed.has(i)).length;
+                const schedDue   = dueIndices.length;
                 const items = [
                   {
                     label: "Morning Check-in", tab: "checkin" as const, icon: "🌙",
@@ -928,7 +971,7 @@ export default function Home8() {
                       : "Log sleep, energy and soreness to set your baseline.",
                   },
                   {
-                    label: "Hydration Target", tab: "hydration" as const, icon: "💧",
+                    label: "Hydration", tab: "hydration" as const, icon: "💧",
                     logged: readinessItems[1],
                     detail: hydrationData
                       ? `${hydrationData.litres} · ${hydrationData.urine} urine · ${hydrationData.quality}`
@@ -956,34 +999,138 @@ export default function Home8() {
                       : "Do your morning check-in first.",
                   },
                 ];
-                return items.map((item, i, arr) => (
-                  <div key={item.tab} style={{ borderBottom: i < arr.length - 1 ? "1px solid #f0f0f0" : "none" }}>
-                    <button
-                      onClick={() => setLogPickerExpanded(logPickerExpanded === item.tab ? null : item.tab)}
-                      className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors"
-                    >
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-[18px]" style={{ background: "#f4f4f6" }}>
-                        {item.icon}
+                // Inject schedule row after index 0 (Morning Check-in)
+                const schedExpanded = logPickerExpanded === "schedule";
+                const scheduleRow = schedDue > 0 ? (
+                  <div key="schedule" style={{ borderBottom: "1px solid #f0f0f0" }}>
+                    <button onClick={() => setLogPickerExpanded(schedExpanded ? null : "schedule")} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#f4f4f6", fontSize: 18 }}>📅</div>
+                      <div style={{ flex: 1, textAlign: "left" }}>
+                        <p style={{ fontSize: 15, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>Today&apos;s Schedule</p>
+                        <p style={{ fontSize: 12, color: "#9aa5b0", margin: "2px 0 0" }}>{schedDone} of {schedDue} items completed</p>
                       </div>
-                      <span className="text-[15px] font-semibold text-[#1a1c1c]">{item.label}</span>
-                      <div className="ml-auto flex items-center gap-2 flex-shrink-0">
-                        {item.logged && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>}
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c8ccd0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: logPickerExpanded === item.tab ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {schedDone === schedDue ? (
+                          <div style={{ width: 22, height: 22, borderRadius: "50%", background: "#f0fdf4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                          </div>
+                        ) : (
+                          <span style={{ fontSize: 13, fontWeight: 700, color: "#2653d4" }}>{schedDone}/{schedDue}</span>
+                        )}
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c8ccd0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: schedExpanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
                       </div>
                     </button>
-                    {logPickerExpanded === item.tab && (
-                      <div style={{ padding: "0 20px 16px 68px" }}>
-                        <p style={{ fontSize: 13, color: "#9aa5b0", margin: "0 0 12px", lineHeight: 1.5 }}>{item.detail}</p>
-                        <button
-                          onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogWizard(false); setLogTab(item.tab); setLogSheetOpen(true); }}
-                          style={{ padding: "7px 18px", borderRadius: 999, background: "#2653d4", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, color: "#fff" }}
-                        >
-                          Log +
-                        </button>
+                    {schedExpanded && (
+                      <div style={{ padding: "0 20px 14px 68px", display: "flex", flexDirection: "column", gap: 10 }}>
+                        {dueIndices.map(idx => {
+                          const item = schedule[idx];
+                          const done = completed.has(idx);
+                          return (
+                            <button
+                              key={idx}
+                              onClick={() => setCompleted(prev => {
+                                const next = new Set(prev);
+                                done ? next.delete(idx) : next.add(idx);
+                                return next;
+                              })}
+                              className="flex items-center gap-3 w-full active:opacity-70 transition-opacity"
+                              style={{ background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" }}
+                            >
+                              <div style={{
+                                width: 20, height: 20, borderRadius: 6, flexShrink: 0,
+                                border: done ? "none" : "1.5px solid #d0d4da",
+                                background: done ? "#16a34a" : "transparent",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                              }}>
+                                {done && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>}
+                              </div>
+                              <div style={{ flex: 1 }}>
+                                <p style={{ fontSize: 13, fontWeight: 600, color: done ? "#9aa5b0" : "#1a1c1c", margin: 0, textDecoration: done ? "line-through" : "none" }}>{item.title}</p>
+                                <p style={{ fontSize: 11, color: "#b0b8c1", margin: "1px 0 0" }}>{item.time}</p>
+                              </div>
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
-                ));
+                ) : null;
+
+                return [
+                  ...items.slice(0, 1).map((item, i) => (
+                    <div key={item.tab} style={{ borderBottom: "1px solid #f0f0f0" }}>
+                      <button onClick={() => setLogPickerExpanded(logPickerExpanded === item.tab ? null : item.tab)} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-[18px]" style={{ background: "#f4f4f6" }}>{item.icon}</div>
+                        <span className="text-[15px] font-semibold text-[#1a1c1c]">{item.label}</span>
+                        <div className="ml-auto flex items-center gap-2 flex-shrink-0">
+                          {item.logged && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>}
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c8ccd0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: logPickerExpanded === item.tab ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
+                        </div>
+                      </button>
+                      {logPickerExpanded === item.tab && (<div style={{ padding: "0 20px 16px 68px" }}><p style={{ fontSize: 13, color: "#9aa5b0", margin: "0 0 12px", lineHeight: 1.5 }}>{item.detail}</p><button onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogWizard(false); setLogTab(item.tab); setLogSheetOpen(true); }} style={{ padding: "7px 18px", borderRadius: 999, background: "#2653d4", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, color: "#fff" }}>Log +</button></div>)}
+                    </div>
+                  )),
+                  scheduleRow,
+                  ...items.slice(1).map((item, i, rest) => (
+                    <div key={item.tab} style={{ borderBottom: i < rest.length - 1 ? "1px solid #f0f0f0" : "none" }}>
+                      <button onClick={() => setLogPickerExpanded(logPickerExpanded === item.tab ? null : item.tab)} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-[18px]" style={{ background: "#f4f4f6" }}>{item.icon}</div>
+                        <span className="text-[15px] font-semibold text-[#1a1c1c]">
+                          {item.label}
+                          {item.tab === "hydration" && logHydrationMl > 0 && (
+                            <span style={{ fontSize: 12, fontWeight: 600, color: "#2653d4", marginLeft: 8 }}>
+                              {Math.min(100, Math.round(logHydrationMl / LOG_GOAL_ML * 100))}%
+                            </span>
+                          )}
+                        </span>
+                        <div className="ml-auto flex items-center gap-2 flex-shrink-0">
+                          {item.logged && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>}
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c8ccd0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: logPickerExpanded === item.tab ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
+                        </div>
+                      </button>
+                      {logPickerExpanded === item.tab && (
+                        item.tab === "hydration" ? (
+                          <div style={{ padding: "0 20px 18px 20px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+                              <span style={{ fontSize: 13, fontWeight: 600, color: "#1a1c1c" }}>
+                                {logHydrationMl >= 1000 ? `${+(logHydrationMl / 1000).toFixed(1)}L` : `${logHydrationMl}ml`}
+                                <span style={{ fontWeight: 400, color: "#c8ccd0" }}> / 2.5L</span>
+                              </span>
+                              {logHydrationMl >= LOG_GOAL_ML && <span style={{ fontSize: 12, fontWeight: 600, color: "#16a34a" }}>Goal reached</span>}
+                            </div>
+                            <div ref={logGaugeRef} style={{ position: "relative", height: 8, borderRadius: 999, background: "#e8eaed", marginBottom: 20 }}>
+                              <div style={{ position: "absolute", left: 0, top: 0, height: "100%", borderRadius: 999, background: "#2653d4", width: `${Math.min(100, (logHydrationMl / LOG_MAX_ML) * 100)}%`, transition: "width 0.15s" }} />
+                              <div style={{ position: "absolute", top: -4, left: `${(LOG_GOAL_ML / LOG_MAX_ML) * 100}%`, width: 2, height: 16, background: "#b0b8c1", borderRadius: 1 }} />
+                              <div
+                                onTouchStart={onLogDotTouchStart}
+                                onTouchMove={onLogDotTouchMove}
+                                style={{
+                                  position: "absolute", top: "50%", left: `${Math.min(100, (logHydrationMl / LOG_MAX_ML) * 100)}%`,
+                                  transform: "translate(-50%, -50%)",
+                                  width: 22, height: 22, borderRadius: "50%",
+                                  background: "#fff", border: "2.5px solid #2653d4",
+                                  boxShadow: "0 1px 6px rgba(38,83,212,0.25)",
+                                  cursor: "grab", touchAction: "none",
+                                }}
+                              />
+                            </div>
+                            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                              <span style={{ fontSize: 10, color: "#c8ccd0" }}>0</span>
+                              <span style={{ fontSize: 10, color: "#b0b8c1" }}>2.5L</span>
+                              <span style={{ fontSize: 10, color: "#c8ccd0" }}>3L+</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div style={{ padding: "0 20px 16px 68px" }}>
+                            <p style={{ fontSize: 13, color: "#9aa5b0", margin: "0 0 12px", lineHeight: 1.5 }}>{item.detail}</p>
+                            <button onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogWizard(false); setLogTab(item.tab); setLogSheetOpen(true); }} style={{ padding: "7px 18px", borderRadius: 999, background: "#2653d4", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, color: "#fff" }}>Log +</button>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  )),
+                ];
+
               })()}
             </div>
           </div>

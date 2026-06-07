@@ -112,8 +112,8 @@ export default function ReadinessSheet({ open, onClose, onOpenLog, onOpenLogScre
     ? Math.round((new Date(matchDate).getTime() - new Date(todayStr).getTime()) / 86400000)
     : null;
 
-  type State = "preparation" | "match-active" | "recovery";
-  let state: State = "preparation";
+  type State = "readiness" | "preparation" | "match-day" | "match-active" | "recovery";
+  let state: State = "readiness";
   if (daysToMatch !== null && daysToMatch < 0) {
     state = "recovery";
   } else if (daysToMatch === 0 && matchTime) {
@@ -123,15 +123,26 @@ export default function ReadinessSheet({ open, onClose, onOpenLog, onOpenLogScre
     const nowMins    = now.getHours() * 60 + now.getMinutes();
     if (nowMins >= matchEnd)        state = "recovery";
     else if (nowMins >= matchStart) state = "match-active";
+    else                            state = "match-day";
+  } else if (daysToMatch === 0) {
+    state = "match-day";
+  } else if (daysToMatch !== null && daysToMatch <= 7) {
+    state = "preparation";
   }
 
   const stateLabel =
     state === "match-active" ? "Match Active" :
-    state === "recovery"     ? "Recovery"     : "Readiness";
+    state === "recovery"     ? "Recovery"     :
+    state === "match-day"    ? "Match Day"    :
+    state === "preparation"  ? "Preparation"  : "Readiness";
 
   const dayTypeLabel =
-    daysToMatch === 0        ? "Match Day"    :
-    state === "recovery"     ? "Recovery Day" : "Training Day";
+    state === "match-active" ? "Match Day" :
+    state === "match-day"    ? "Match Day" :
+    state === "recovery"     ? "Recovery Day" :
+    state === "preparation" && daysToMatch !== null
+      ? `Match in ${daysToMatch} day${daysToMatch === 1 ? "" : "s"}`
+      : "Training Day";
 
   type Item = { label: string; logged: boolean; detail: string; tab: LogTab };
   const items: Item[] = [
@@ -204,17 +215,26 @@ export default function ReadinessSheet({ open, onClose, onOpenLog, onOpenLogScre
 
           {/* STATUS CARD */}
           <div style={{ background: "#fff", borderRadius: 24, padding: "36px 24px 32px", textAlign: "center" }}>
-            {/* State name */}
             <p style={{ fontSize: 28, fontWeight: 800, color: "#1a1c1c", margin: "0 0 20px", lineHeight: 1.1 }}>
               {stateLabel}
             </p>
 
-            {state === "preparation" && (
+            {(state === "readiness" || state === "preparation" || state === "match-day") && (
               <>
                 <p style={{ fontSize: "clamp(64px, 20vw, 80px)", fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1, letterSpacing: "-0.03em" }}>
                   {done}<span style={{ color: "#e2e5e9" }}>/{total}</span>
                 </p>
-                <p style={{ fontSize: 15, fontWeight: 600, color: progressColor, margin: "16px 0 0" }}>{progressText}</p>
+                {state === "preparation" && daysToMatch !== null ? (
+                  <p style={{ fontSize: 15, fontWeight: 600, color: progressColor, margin: "16px 0 0" }}>
+                    {progressText} · {daysToMatch} day{daysToMatch === 1 ? "" : "s"} to go
+                  </p>
+                ) : state === "match-day" ? (
+                  <p style={{ fontSize: 15, fontWeight: 600, color: progressColor, margin: "16px 0 0" }}>
+                    {done === total ? "You're ready — go play your best" : progressText}
+                  </p>
+                ) : (
+                  <p style={{ fontSize: 15, fontWeight: 600, color: progressColor, margin: "16px 0 0" }}>{progressText}</p>
+                )}
               </>
             )}
 
