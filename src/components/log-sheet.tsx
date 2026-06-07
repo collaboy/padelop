@@ -75,7 +75,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
   const [trainingLog, setTrainingLog] = useState({ sessionType: [] as string[], drillFocus: [] as string[], duration: "", intensity: "" });
   const [hydrationLog, setHydrationLog] = useState({ litres: "", timing: [] as string[], quality: "", urine: "" });
   const [nutritionLog, setNutritionLog] = useState({ proteinRating: "", foods: [] as string[], postMatch: "", quality: "" });
-  const [matchReview, setMatchReview] = useState({ feeling: "", result: "", opponent: "", energy: "", injury: "", wellDone: [] as string[], improved: [] as string[], mentalBefore: "", mentalDuring: "", mentalAfter: "" });
+  const [matchReview, setMatchReview] = useState({ feeling: "", result: "", opponent: "", opponentNames: "", energy: "", injury: "", wellDone: [] as string[], improved: [] as string[], mentalBefore: "", mentalDuring: "", mentalAfter: "" });
 
   const [morningStep, setMorningStep] = useState(0);
   const [morningData, setMorningData] = useState<Record<string, string | number>>({});
@@ -804,6 +804,17 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
                     style={{ borderColor: sel ? color : "#e2e2e2", background: sel ? bg : "#f9f9f9", color: sel ? color : "#4a5050" }}>{label}</button>;
                 })}
               </div>
+            </div>
+            <div>
+              <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">Who did you play against?</p>
+              <input
+                type="text"
+                placeholder="e.g. Marco & Luis"
+                value={matchReview.opponentNames}
+                onChange={e => setMatchReview(r => ({ ...r, opponentNames: e.target.value }))}
+                className="w-full px-4 py-3 rounded-2xl border-2 text-[14px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]"
+                style={{ borderColor: matchReview.opponentNames ? PURPLE : "#e2e2e2", background: matchReview.opponentNames ? "#f5f3ff" : "#f9f9f9" }}
+              />
             </div>
             <div>
               <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">Opponent level?</p>

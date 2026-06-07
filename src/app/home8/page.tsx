@@ -263,6 +263,7 @@ export default function Home8() {
   const [matchModalOpen, setMatchModalOpen] = useState(false);
   const [matchModalTab, setMatchModalTab] = useState<'pick' | 'manual'>('pick');
   const [matchForm, setMatchForm] = useState({ date: '', time: '', club: '', p1: '', p2: '', p3: '', p4: '' });
+  const [pastReviews, setPastReviews] = useState<{ ts: string; result: string; opponentNames: string; wellDone: string[]; improved: string[] }[]>([]);
   const [matchActionOpen, setMatchActionOpen] = useState(false);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
   const [isAddMode, setIsAddMode] = useState(false);
@@ -379,11 +380,9 @@ export default function Home8() {
         if (!done && !nudgeDismissed && hour < 13) setTimeout(() => setCheckinNudgeOpen(true), 1200);
       } catch { setMorningDone(false); }
     }
-    loadReadiness();
-    window.addEventListener("storage", loadReadiness);
-    try {
+    function loadMatch() {
       const todayD = new Date().toISOString().slice(0, 10);
-      // Load full upcoming list, keep padelop:next-match synced to soonest
+      const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
       try {
         const listRaw = localStorage.getItem("padelop:upcoming-matches");
         const list: StoredMatch[] = listRaw ? JSON.parse(listRaw) : [];
@@ -393,42 +392,49 @@ export default function Home8() {
           localStorage.setItem("padelop:next-match", JSON.stringify(future[0]));
         }
       } catch {}
-      const raw = localStorage.getItem("padelop:next-match");
-      if (raw) {
-        const m = JSON.parse(raw);
-        if (m.date && m.time) {
-          if (m.date >= todayD) {
-            setMatch({ date: m.date, time: m.time, club: m.club || undefined, players: [m.player_1, m.player_2, m.player_3, m.player_4].filter(Boolean) });
-          } else {
-            // Match has passed — check if it's been reviewed
-            const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
-            const alreadyReviewed = reviews.some((r: { ts?: string }) => r.ts?.slice(0, 10) === m.date);
-            const dismissed = localStorage.getItem("padelop:post-match-dismissed") === m.date;
-            if (!alreadyReviewed && !dismissed) {
-              try { localStorage.setItem("padelop:post-match-dismissed", m.date); } catch {}
-              setPostMatchDate(m.date);
-              setPostMatchOpen(true);
+      let wasYesterday = false;
+      try {
+        const raw = localStorage.getItem("padelop:next-match");
+        if (raw) {
+          const m = JSON.parse(raw);
+          if (m.date && m.time) {
+            if (m.date >= todayD) {
+              setMatch({ date: m.date, time: m.time, club: m.club || undefined, players: [m.player_1, m.player_2, m.player_3, m.player_4].filter(Boolean) });
+            } else {
+              setMatch(null);
+              const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+              const alreadyReviewed = reviews.some((r: { ts?: string }) => r.ts?.slice(0, 10) === m.date);
+              const dismissed = localStorage.getItem("padelop:post-match-dismissed") === m.date;
+              if (!alreadyReviewed && !dismissed) {
+                try { localStorage.setItem("padelop:post-match-dismissed", m.date); } catch {}
+                setPostMatchDate(m.date);
+                setPostMatchOpen(true);
+              }
             }
+          } else {
+            setMatch(null);
           }
+          if (m.date === yesterday) wasYesterday = true;
+        } else {
+          setMatch(null);
         }
-        const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
-        if (m.date === yesterday) setYesterdayWasMatch(true);
-      }
-    } catch {}
-    // Also check match reviews for yesterday
-    try {
-      const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
-      const rawReviews = localStorage.getItem("padelop:match-reviews");
-      if (rawReviews) {
-        const reviews = JSON.parse(rawReviews);
-        if (reviews.some((r: { ts?: string }) => r.ts && r.ts.slice(0, 10) === yesterday)) {
-          setYesterdayWasMatch(true);
+      } catch {}
+      try {
+        const rawReviews = localStorage.getItem("padelop:match-reviews");
+        if (rawReviews) {
+          const reviews = JSON.parse(rawReviews);
+          if (reviews.some((r: { ts?: string }) => r.ts && r.ts.slice(0, 10) === yesterday)) wasYesterday = true;
         }
-      }
-    } catch {}
+      } catch {}
+      setYesterdayWasMatch(wasYesterday);
+    }
+    loadReadiness();
+    loadMatch();
+    function handleStorage() { loadReadiness(); loadMatch(); }
+    window.addEventListener("storage", handleStorage);
     setDrillTag(getTopNeedsWorkTag());
     const id = setInterval(() => setNow(new Date()), 1_000);
-    return () => { clearInterval(id); window.removeEventListener("storage", loadReadiness); };
+    return () => { clearInterval(id); window.removeEventListener("storage", handleStorage); };
   }, []);
 
   type StoredMatch = { date: string; time: string; club: string; player_1: string; player_2: string; player_3: string; player_4: string };
@@ -550,6 +556,20 @@ export default function Home8() {
       }
     } catch {}
   }, [now]);
+
+  useEffect(() => {
+    if (!matchModalOpen) return;
+    try {
+      const raw = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+      setPastReviews(raw.map((r: Record<string, unknown>) => ({
+        ts: String(r.ts ?? ""),
+        result: String(r.result ?? ""),
+        opponentNames: typeof r.opponentNames === "string" ? r.opponentNames : "",
+        wellDone: Array.isArray(r.wellDone) ? r.wellDone as string[] : [],
+        improved: Array.isArray(r.improved) ? r.improved as string[] : [],
+      })).filter((r: { opponentNames: string }) => r.opponentNames));
+    } catch {}
+  }, [matchModalOpen]);
 
   const today = new Date().toISOString().slice(0, 10);
   const dayType: "match" | "recovery" | "training" = match?.date === today ? "match" : yesterdayWasMatch ? "recovery" : "training";
@@ -835,9 +855,9 @@ export default function Home8() {
 
           {/* Profile panel */}
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 40, paddingTop: "calc(45dvh - 4rem - (100vw - 40px) / 2)" }}>
-            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "20px 16px", marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: "16px 16px", marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
               {/* Avatar */}
-              <button onClick={() => router.push("/profile")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+              <button onClick={() => router.push("/profile")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
                 <div style={{ width: 52, height: 52, borderRadius: "50%", background: "#2653d4", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <span style={{ fontSize: 20, fontWeight: 800, color: "#fff" }}>
                     {profile.name ? profile.name.trim().split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "?"}
@@ -849,27 +869,30 @@ export default function Home8() {
                 </div>
               </button>
 
-              {/* Divider */}
-              <div style={{ width: "80%", height: 1, background: "#f0f0f0", margin: "16px 0" }} />
+              <div style={{ width: "100%", height: 1, background: "#f0f0f0", margin: "2px 0" }} />
 
               {/* Stats row */}
-              <div style={{ display: "flex", width: "100%", justifyContent: "space-around" }}>
-                {[
-                  { value: streak, label: "Streak", suffix: "d" },
-                  { value: matchCount, label: "Matches", suffix: "" },
-                  { value: winRate !== null ? `${winRate}%` : "—", label: "Win rate", suffix: "" },
-                ].map(stat => (
-                  <div key={stat.label} style={{ textAlign: "center" }}>
-                    <p style={{ fontSize: 22, fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>
-                      {stat.value}{stat.suffix}
-                    </p>
-                    <p style={{ fontSize: 10, fontWeight: 600, color: "#b0b8c1", margin: "3px 0 0", textTransform: "uppercase", letterSpacing: "0.06em" }}>{stat.label}</p>
-                  </div>
-                ))}
+              <div style={{ display: "flex", width: "100%", justifyContent: "space-around", padding: "4px 8px" }}>
+                <div style={{ textAlign: "center" }}>
+                  <p style={{ fontSize: 16, fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>{matchCount}</p>
+                  <p style={{ fontSize: 10, fontWeight: 600, color: "#b0b8c1", margin: "3px 0 0", letterSpacing: "0.04em", textTransform: "uppercase" }}>Matches</p>
+                </div>
+                <div style={{ width: 1, background: "#f0f0f0", alignSelf: "stretch" }} />
+                <div style={{ textAlign: "center" }}>
+                  <p style={{ fontSize: 16, fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>{streak}</p>
+                  <p style={{ fontSize: 10, fontWeight: 600, color: "#b0b8c1", margin: "3px 0 0", letterSpacing: "0.04em", textTransform: "uppercase" }}>Streak</p>
+                </div>
+                <div style={{ width: 1, background: "#f0f0f0", alignSelf: "stretch" }} />
+                <div style={{ textAlign: "center" }}>
+                  <p style={{ fontSize: 16, fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>{winRate !== null ? `${winRate}%` : "—"}</p>
+                  <p style={{ fontSize: 10, fontWeight: 600, color: "#b0b8c1", margin: "3px 0 0", letterSpacing: "0.04em", textTransform: "uppercase" }}>Win rate</p>
+                </div>
               </div>
 
+              <div style={{ width: "100%", height: 1, background: "#f0f0f0", margin: "2px 0" }} />
+
               {/* Contextual message */}
-              <p style={{ fontSize: 14, color: "#8a9096", margin: "14px 0 0", textAlign: "center", lineHeight: 1.4, paddingLeft: 8, paddingRight: 8 }}>
+              <p style={{ fontSize: 13, color: "#8a9096", margin: 0, textAlign: "center", lineHeight: 1.4, paddingLeft: 8, paddingRight: 8 }}>
                 {(() => {
                   if (matchCount === 0) return "Log your first match to track progress.";
                   if (streak >= 7) return "Incredible consistency — keep it up!";
@@ -1439,6 +1462,37 @@ export default function Home8() {
                         className="w-full px-3 py-2.5 rounded-xl border text-[14px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]"
                         style={{ borderColor: matchForm[key] ? "#2653d4" : "#e2e2e2", background: matchForm[key] ? "#f4f6ff" : "#f9f9f9" }} />
                     ))}
+                    {(() => {
+                      const opponentInputs = [matchForm.p3, matchForm.p4].filter(Boolean).map(s => s.toLowerCase().trim());
+                      if (!opponentInputs.length) return null;
+                      const matched = pastReviews.filter(r =>
+                        opponentInputs.some(name =>
+                          r.opponentNames.toLowerCase().split(/[\s,&]+/).some(n => n.length > 2 && name.includes(n))
+                        )
+                      );
+                      if (!matched.length) return null;
+                      const wins   = matched.filter(r => r.result === "win").length;
+                      const losses = matched.filter(r => r.result === "loss").length;
+                      const topStrength = matched.flatMap(r => r.wellDone).slice(0, 3).filter((v, i, a) => a.indexOf(v) === i);
+                      const topWeakness = matched.flatMap(r => r.improved).slice(0, 3).filter((v, i, a) => a.indexOf(v) === i);
+                      return (
+                        <div style={{ background: "#f4f6ff", borderRadius: 14, padding: "12px 14px", marginTop: 4, display: "flex", flexDirection: "column", gap: 6 }}>
+                          <p style={{ fontSize: 11, fontWeight: 700, color: "#2653d4", letterSpacing: "0.06em", textTransform: "uppercase", margin: 0 }}>
+                            History vs this opponent — {wins}W {losses}L
+                          </p>
+                          {topStrength.length > 0 && (
+                            <p style={{ fontSize: 12, color: "#496640", margin: 0 }}>
+                              Worked well: {topStrength.join(", ")}
+                            </p>
+                          )}
+                          {topWeakness.length > 0 && (
+                            <p style={{ fontSize: 12, color: "#d97706", margin: 0 }}>
+                              Focus on: {topWeakness.join(", ")}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                   <button
                     onClick={() => {

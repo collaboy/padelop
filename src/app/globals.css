@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #e2e5e9;
+  --bg: #ffffff;
   --surface: #ffffff;
   --green: #1e3a1e;
   --green-mid: #3a7a3a;
@@ -41,7 +41,7 @@
 .shadow-sm { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03); }
 
 body {
-  background: #e2e5e9 !important;
+  background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
 }

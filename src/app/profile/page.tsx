@@ -118,7 +118,7 @@ function hashStr(s: string) {
   return Math.abs(h);
 }
 
-const card: React.CSSProperties = { boxShadow: "0px 4px 20px rgba(0,0,0,0.04)" };
+const card: React.CSSProperties = { boxShadow: "0px 4px 24px rgba(0,0,0,0.10)" };
 
 function TagCloud({ reviews }: { reviews: ReviewEntry[] }) {
   const tags = buildTagCloud(reviews);
@@ -193,22 +193,19 @@ function NextMatchCard({ match }: { match: StoredMatch }) {
 }
 
 function MatchCard({ review }: { review: ReviewEntry }) {
-  const resultColor = review.result === "win" ? "#496640" : review.result === "loss" ? "#dc2626" : "#747878";
-  const resultBg    = review.result === "win" ? "#eef6eb" : review.result === "loss" ? "#fef2f2" : "#f4f4f6";
-  const resultLabel = review.result === "win" ? "Win"     : review.result === "loss" ? "Loss"    : "Played";
-  const opponent    = typeof review.opponent === "string" ? review.opponent : null;
+  const resultColor    = review.result === "win" ? "#496640" : review.result === "loss" ? "#dc2626" : "#747878";
+  const resultBg       = review.result === "win" ? "#eef6eb" : review.result === "loss" ? "#fef2f2" : "#f4f4f6";
+  const resultLabel    = review.result === "win" ? "Win"     : review.result === "loss" ? "Loss"    : "Played";
+  const opponentNames  = typeof review.opponentNames === "string" && review.opponentNames ? review.opponentNames : null;
   const hasTags = review.wellDone.length > 0 || review.improved.length > 0;
   return (
     <div className="bg-white rounded-[20px] border border-[#e2e2e2] overflow-hidden" style={card}>
       <div className="px-5 pt-4 pb-3 flex items-center justify-between gap-4">
         <div>
-          <p className="text-[13px] font-bold text-[#1a1c1c]">Match</p>
+          <p className="text-[13px] font-bold text-[#1a1c1c]">{opponentNames ? `vs ${opponentNames}` : "Match"}</p>
           <p className="text-[11px] text-[#9aab96] mt-0.5">{formatTs(review.ts)}</p>
         </div>
-        <div className="flex items-center gap-2">
-          {opponent && <span className="text-[11px] font-semibold text-[#747878]">vs {opponent}</span>}
-          <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ background: resultBg, color: resultColor }}>{resultLabel}</span>
-        </div>
+        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: resultBg, color: resultColor }}>{resultLabel}</span>
       </div>
       {hasTags && (
         <>
@@ -307,8 +304,6 @@ function topTag(tags: string[]): string | null {
 
 // ── Page ──────────────────────────────────────────────────────────────────
 
-const TABS = ["All", "Matches", "Training"] as const;
-type Tab = (typeof TABS)[number];
 
 export default function ProfilePage() {
   // Profile
@@ -317,12 +312,11 @@ export default function ProfilePage() {
 
   // Matches
   const [logSheetOpen, setLogSheetOpen]       = useState(false);
-  const [tab, setTab]                         = useState<Tab>("All");
-  const [filterOpen, setFilterOpen]           = useState(false);
-  const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null);
+const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null);
   const [reviews, setReviews]                 = useState<ReviewEntry[]>([]);
   const [trainingSessions, setTrainingSessions] = useState<TrainingEntry[]>([]);
   const [archiveOpen, setArchiveOpen]         = useState(false);
+  const [tagCloudOpen, setTagCloudOpen]       = useState(false);
 
   // Insights
   const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65 });
@@ -427,11 +421,7 @@ export default function ProfilePage() {
     ...trainingSessions.map(t => ({ kind: "training" as const, ts: t.ts, data: t })),
   ].sort((a, b) => b.ts.localeCompare(a.ts));
 
-  const visibleFeed = tab === "Matches"
-    ? feed.filter(i => i.kind === "match")
-    : tab === "Training"
-    ? feed.filter(i => i.kind === "training")
-    : feed;
+  const visibleFeed = feed;
 
   // Schedule data
   const now = new Date();
@@ -464,7 +454,7 @@ export default function ProfilePage() {
 
       {/* ── Profile header + collapsible form ───────────────────────────── */}
 
-      <div className="bg-white rounded-[24px] overflow-hidden border border-[#c4c7c7]/10">
+      <div className="bg-white rounded-[24px] overflow-hidden" style={{ boxShadow: "0px 4px 24px rgba(0,0,0,0.10)" }}>
         {/* Always-visible header row */}
         <button
           onClick={() => setProfileOpen(o => !o)}
@@ -590,8 +580,20 @@ export default function ProfilePage() {
         )}
       </div>
 
+      <div style={{ background: "#fff", borderRadius: 24, padding: "20px 24px", boxShadow: "0px 4px 24px rgba(0,0,0,0.10)" }}>
+        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 16px" }}>Focus Today</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {tips.map(tip => (
+            <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+              <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#2653d4", flexShrink: 0, marginTop: 5 }}/>
+              <span style={{ fontSize: 14, fontWeight: 500, color: "#1a1c1c", lineHeight: 1.4 }}>{tip}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {reviews.length > 0 && (
-        <div style={{ background: "#fff", borderRadius: 24, padding: "20px 24px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+        <div style={{ background: "#fff", borderRadius: 24, padding: "20px 24px", boxShadow: "0px 4px 24px rgba(0,0,0,0.10)" }}>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 16px" }}>Match Record</p>
           <div style={{ display: "flex", gap: 10, marginBottom: topStrength || topWeakness ? 16 : 0 }}>
             <div style={{ flex: 1, textAlign: "center", background: "#f0fdf4", borderRadius: 14, padding: "12px 8px" }}>
@@ -610,79 +612,45 @@ export default function ProfilePage() {
             )}
           </div>
           {(topStrength || topWeakness) && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <button
+              onClick={() => setTagCloudOpen(o => !o)}
+              style={{ display: "flex", flexDirection: "column", gap: 8, background: "none", border: "none", cursor: "pointer", padding: 0, width: "100%", textAlign: "left" }}
+            >
               {topStrength && (
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a", flexShrink: 0 }}/>
                   <span style={{ fontSize: 13, color: "#1a1c1c" }}>Strongest: <strong>{topStrength}</strong></span>
+                  {!topWeakness && (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                      style={{ marginLeft: "auto", flexShrink: 0, transition: "transform 0.2s", transform: tagCloudOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
+                      <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                  )}
                 </div>
               )}
               {topWeakness && (
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#f59e0b", flexShrink: 0 }}/>
                   <span style={{ fontSize: 13, color: "#1a1c1c" }}>Focus area: <strong>{topWeakness}</strong></span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                    style={{ marginLeft: "auto", flexShrink: 0, transition: "transform 0.2s", transform: tagCloudOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
+                    <path d="M6 9l6 6 6-6"/>
+                  </svg>
                 </div>
               )}
-            </div>
+            </button>
           )}
         </div>
       )}
 
-      {reviews.length > 0 && <TagCloud reviews={reviews} />}
-
-      <div style={{ background: "#fff", borderRadius: 24, padding: "20px 24px", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 16px" }}>Focus Today</p>
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {tips.map(tip => (
-            <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-              <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#2653d4", flexShrink: 0, marginTop: 5 }}/>
-              <span style={{ fontSize: 14, fontWeight: 500, color: "#1a1c1c", lineHeight: 1.4 }}>{tip}</span>
-            </div>
-          ))}
-        </div>
-        <button onClick={() => setLogSheetOpen(true)}
-          className="w-full mt-5 py-3 rounded-2xl text-[14px] font-semibold text-white active:opacity-70 transition-opacity"
-          style={{ background: "#2653d4" }}>
-          Log data
-        </button>
-      </div>
+      {tagCloudOpen && reviews.length > 0 && <TagCloud reviews={reviews} />}
 
       {/* ── Activity ─────────────────────────────────────────────────────── */}
 
-      <div style={{ height: 1, background: "#e8eaed", margin: "4px 0" }} />
+      <div style={{ height: 1, background: "#e8eaed", margin: "0" }} />
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>Activity</p>
-        <button onClick={() => setFilterOpen(true)}
-          className="w-8 h-8 rounded-full bg-white border border-[#e2e2e2] flex items-center justify-center active:scale-90 transition-transform relative"
-          style={card}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#444748" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
-          </svg>
-          {tab !== "All" && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#496640]" />}
-        </button>
-      </div>
-
-      {filterOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-6" onClick={() => setFilterOpen(false)}>
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
-          <div className="relative bg-white rounded-[24px] w-full max-w-xs overflow-hidden" style={card} onClick={e => e.stopPropagation()}>
-            <p className="text-[11px] font-semibold text-[#747878] uppercase tracking-widest px-6 pt-5 pb-3">Show</p>
-            {TABS.map((t, i) => (
-              <button key={t} onClick={() => { setTab(t); setFilterOpen(false); }}
-                className="w-full flex items-center justify-between px-6 py-4 active:bg-[#f9f9f9] transition-colors"
-                style={{ borderTop: i > 0 ? "1px solid #ebebeb" : "none" }}>
-                <span className="text-[15px] font-medium text-[#1a1c1c]">{t}</span>
-                {tab === t && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#496640" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {tab === "All" && (
-        <>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>Schedule</p>
+      <>
+          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>Your Calendar</p>
           <div className="bg-white rounded-[24px] border border-[#e2e2e2] overflow-hidden" style={card}>
             <div style={{ padding: "16px 14px 20px" }}>
               <p style={{ fontSize: 12, fontWeight: 600, color: "#747878", marginBottom: 10, textTransform: "capitalize" }}>{monthLabel}</p>
@@ -694,7 +662,7 @@ export default function ProfilePage() {
               </div>
               {rows.map((rowCells, rowIdx) => (
                 <div key={rowIdx} style={{ display: "grid", gridTemplateColumns: "12px repeat(7, 1fr)", alignItems: "center" }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", alignSelf: "center" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", alignSelf: "center", marginBottom: 5 }}>
                     {rowIdx === currentWeekRow && (
                       <svg width="6" height="9" viewBox="0 0 6 9"><polygon points="0,0 6,4.5 0,9" fill="#2653d4"/></svg>
                     )}
@@ -706,7 +674,7 @@ export default function ProfilePage() {
                     const isMatch    = matchDates.has(ymd);
                     const isRecovery = !isMatch && recoveryDates.has(ymd);
                     const isPast     = ymd < todayYMD;
-                    const dotColor   = isMatch ? "#496640" : isRecovery ? "#7c3aed" : "#2653d4";
+                    const dotColor   = isMatch ? "#22c55e" : isRecovery ? "#f97316" : "#2653d4";
                     const hasDot     = (isMatch || isRecovery) && !isPast;
                     return (
                       <div key={colIdx} style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingBottom: 2 }}>
@@ -720,11 +688,25 @@ export default function ProfilePage() {
                 </div>
               ))}
             </div>
+            <div style={{ display: "grid", gridTemplateColumns: "12px repeat(7, 1fr)", borderTop: "1px solid #f4f4f6", marginTop: 4, paddingTop: 12, paddingBottom: 8 }}>
+              <div />
+              <div style={{ gridColumn: "2 / span 7", display: "flex", gap: 14 }}>
+                {[
+                  { color: "#22c55e", label: "Match", border: false },
+                  { color: "#f97316", label: "Recovery", border: false },
+                  { color: "transparent", label: "Rest", border: true },
+                ].map(({ color, label, border }) => (
+                  <div key={label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: color, flexShrink: 0, border: border ? "1.5px solid #c0c4c8" : "none" }} />
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "#9aa5b0" }}>{label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </>
-      )}
+      </>
 
-      {nextMatch && (tab === "All" || tab === "Matches") && (
+      {nextMatch && (
         <>
           <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>Next Match</p>
           <NextMatchCard match={nextMatch} />
@@ -752,7 +734,7 @@ export default function ProfilePage() {
         ) : (
           <div className="bg-white rounded-[20px] border border-[#e2e2e2] px-5 py-8 text-center" style={card}>
             <p className="text-[15px] font-medium text-[#747878]">
-              {tab === "Training" ? "No training sessions logged yet" : tab === "Matches" ? "No match reviews yet" : "No activity logged yet"}
+              No activity logged yet
             </p>
             <p className="text-[13px] text-[#9aab96] mt-1">Tap + to log your first session</p>
           </div>
