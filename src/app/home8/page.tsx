@@ -989,6 +989,8 @@ export default function Home8() {
                       setMatch({ date: matchForm.date, time: matchForm.time, club: matchForm.club || undefined, players: [matchForm.p1, matchForm.p2, matchForm.p3, matchForm.p4].filter(Boolean) });
                       setMatchModalOpen(false);
                       setMatchModalTab('pick');
+                      setCardSnap('none');
+                      setDoIdx(-1);
                     }}
                     className="w-full py-3.5 rounded-2xl text-white text-[15px] font-bold active:scale-[0.98] transition-transform"
                     style={{ background: matchForm.date && matchForm.time ? "#2653d4" : "#d0d3d6" }}
