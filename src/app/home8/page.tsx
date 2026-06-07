@@ -440,7 +440,7 @@ export default function Home8() {
             } else if (swipeDirRef.current === 'v' && cardSnap === 'none') {
               setLiveY(0);
               if (dy < -40 && doIdx < 1) goNext();
-              else if (dy > 40) goPrev();
+              else if (dy > 40 && (doIdx < 1 || (schedScrollRef.current?.scrollTop ?? 0) === 0)) goPrev();
             }
             swipeDirRef.current = null;
           }}
