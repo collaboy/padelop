@@ -550,17 +550,22 @@ export default function Home8() {
       }
     };
 
-    const trigger = (endY: number) => {
-      // fire goPrev if user dragged ≥30px past the top, OR arrived at the top with enough velocity
-      const dist = hitTopYRef.current !== null ? endY - hitTopYRef.current : 0;
-      if (dist > 30 || (hitTopYRef.current !== null && vel > 0.4))
+    const trigger = (endY: number, isCancel = false) => {
+      const atTop = hitTopYRef.current !== null;
+      const dist  = atTop ? endY - hitTopYRef.current! : 0;
+      // primary path: user was at scrollTop=0 and dragged or flicked downward
+      if (atTop && (dist > 30 || vel > 0.3))
+        setDoIdx(i => Math.max(i - 1, -1));
+      // cancel path: iOS claimed the gesture for rubber-band before our handler
+      // could set hitTopYRef, but scrollTop===0 and downward vel confirm intent
+      else if (isCancel && div.scrollTop === 0 && vel > 0.2)
         setDoIdx(i => Math.max(i - 1, -1));
       hitTopYRef.current = null;
       vel = 0;
     };
 
-    const onEnd   = (e: TouchEvent) => { if (doIdxRef.current >= 1) trigger(e.changedTouches[0].clientY); };
-    const onCancel = () => { if (doIdxRef.current >= 1) trigger(lastTouchYRef.current); };
+    const onEnd    = (e: TouchEvent) => { if (doIdxRef.current >= 1) trigger(e.changedTouches[0].clientY); };
+    const onCancel = ()              => { if (doIdxRef.current >= 1) trigger(lastTouchYRef.current, true); };
 
     div.addEventListener('touchstart',  onStart,   { passive: true });
     div.addEventListener('touchmove',   onMove,    { passive: false });
@@ -872,7 +877,7 @@ export default function Home8() {
                       </div>
                     </div>
                     <div style={{ height: 1, background: "#dfe3e7", flexShrink: 0 }} />
-                    <div ref={schedScrollRef} style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
+                    <div ref={schedScrollRef} style={{ flex: 1, overflowY: "auto", minHeight: 0, overscrollBehavior: "none" }}>
                       <div style={{ padding: "16px 20px 28px" }}>
                         {schedule.map((item, idx, arr) => {
                           const isLast = idx === arr.length - 1;
