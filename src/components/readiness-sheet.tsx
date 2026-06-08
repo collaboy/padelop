@@ -146,7 +146,7 @@ export default function ReadinessSheet({ open, onClose, onOpenLog: _onOpenLog, o
         : `${Math.min(100, Math.round(hydrationMl / GOAL_ML * 100))}% of 2.5L — pre-loading hydration in the days before is key.`,
     },
     {
-      label: "Fuel clean today", tab: "nutrition", logged: !!nutrition,
+      label: "Eat well today", tab: "nutrition", logged: !!nutrition,
       detail: nutrition
         ? `${nutrition.quality === "great" ? "Good" : nutrition.quality === "bad" ? "Poor" : "OK"} quality · protein ${nutrition.proteinRating}`
         : "High protein, complex carbs. What you eat now is what you'll perform on.",
