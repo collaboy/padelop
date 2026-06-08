@@ -318,8 +318,12 @@ export default function Home8() {
   const matchUploadRef = useRef<HTMLInputElement>(null);
   const schedScrollRef = useRef<HTMLDivElement>(null);
   const schedCurrentRef = useRef<HTMLDivElement>(null);
+  const outerRef = useRef<HTMLDivElement>(null);
+  const doIdxRef = useRef(doIdx);
   const touchStartXRef = useRef(0);
   const touchStartYRef = useRef(0);
+  const lastTouchYRef = useRef(0);
+  const handleDragStartY = useRef(0);
   const swipeDirRef = useRef<'h' | 'v' | null>(null);
   const [cardSnap, setCardSnap] = useState<'none' | 'left' | 'right'>('none');
   const [liveX, setLiveX] = useState(0);
@@ -510,6 +514,23 @@ export default function Home8() {
   }
 
   useEffect(() => { setCardSnap('none'); setLiveX(0); }, [doIdx]);
+  useEffect(() => { doIdxRef.current = doIdx; }, [doIdx]);
+
+  // Non-passive touchmove to intercept swipe-down from top of schedule — prevents
+  // iOS from firing touchcancel when it would otherwise claim the pan-y gesture.
+  useEffect(() => {
+    const outer = outerRef.current;
+    if (!outer) return;
+    const handler = (e: TouchEvent) => {
+      if (doIdxRef.current < 1) return;
+      const dy = e.touches[0].clientY - touchStartYRef.current;
+      if (dy > 4 && (schedScrollRef.current?.scrollTop ?? 0) === 0) {
+        e.preventDefault();
+      }
+    };
+    outer.addEventListener('touchmove', handler, { passive: false });
+    return () => outer.removeEventListener('touchmove', handler);
+  }, []);
 
   useEffect(() => {
     if (doIdx !== 1) return;
@@ -590,6 +611,7 @@ export default function Home8() {
 
         {/* Horizontal strip: [readiness | carousel | log] */}
         <div
+          ref={outerRef}
           style={{
             display: "flex", width: "300%", marginLeft: "-100%",
             height: "calc(100dvh - 4rem)", touchAction: doIdx >= 1 ? "pan-y" : "manipulation",
@@ -602,6 +624,7 @@ export default function Home8() {
             swipeDirRef.current = null;
           }}
           onTouchMove={e => {
+            lastTouchYRef.current = e.touches[0].clientY;
             // When on the schedule card, let native scroll handle everything
             if (doIdx >= 1) return;
             const dx = e.touches[0].clientX - touchStartXRef.current;
@@ -632,6 +655,17 @@ export default function Home8() {
               if (dy < -40 && doIdx < 1) goNext();
               else if (dy > 40) goPrev();
             }
+            swipeDirRef.current = null;
+          }}
+          onTouchCancel={() => {
+            // Fallback: if iOS fires touchcancel instead of touchend (e.g. browser claimed pan-y),
+            // still trigger goPrev when user swiped down far enough from the schedule top.
+            if (doIdx >= 1) {
+              const dy = lastTouchYRef.current - touchStartYRef.current;
+              if (dy > 40 && (schedScrollRef.current?.scrollTop ?? 0) === 0) goPrev();
+            }
+            setLiveX(0);
+            setLiveY(0);
             swipeDirRef.current = null;
           }}
         >
@@ -747,6 +781,7 @@ export default function Home8() {
                 const fmtTime = (s: number) => { if (s <= 0) return "a moment"; const h = Math.floor(s / 3600), rem = s % 3600, m = Math.floor(rem / 60), sec = rem % 60; if (h > 0) return `${h}h ${m}m ${sec}s`; return m > 0 ? `${m}m ${sec}s` : `${sec}s`; };
                 const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: 1, zIndex: 3, boxShadow: "none" };
                 const contentOpacity = doIdx === 0 ? 1 : 0.2;
+
                 if (isDone) return (
                   <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => setDoModalOpen(true)}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
@@ -781,7 +816,15 @@ export default function Home8() {
                 const curMinsSched = now.getHours() * 60 + now.getMinutes();
                 return (
                   <div key="sched" style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "white", display: "flex", flexDirection: "column", opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === 1 ? 2 : 1, height: "calc(100dvh - 4rem - 44px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none" }}>
-                    <div style={{ padding: "20px 20px 0", flexShrink: 0, textAlign: "center" }}>
+                    {/* Drag handle — dedicated swipe-down zone, no scroll conflict */}
+                    <div
+                      style={{ padding: "12px 0 8px", flexShrink: 0, display: "flex", justifyContent: "center", alignItems: "center", touchAction: "none", cursor: "grab" }}
+                      onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
+                      onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 30) goPrev(); }}
+                    >
+                      <div style={{ width: 36, height: 4, borderRadius: 2, background: "#d0d3d6" }} />
+                    </div>
+                    <div style={{ padding: "0 20px 0", flexShrink: 0, textAlign: "center" }}>
                       <p style={{ fontSize: 18, fontWeight: 700, color: "#1a1c1c", margin: "0 0 2px" }}>Today&apos;s Schedule</p>
                       <span style={{
                         fontSize: 12, fontWeight: 700, padding: "3px 12px", borderRadius: 99,

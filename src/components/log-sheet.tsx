@@ -1022,7 +1022,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
       <style>{`@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
       <div className="h1-font relative w-full max-w-lg bg-white rounded-t-[28px] flex flex-col overflow-hidden"
-        style={{ animation: "slideUp 0.3s cubic-bezier(0.22,1,0.36,1)", minHeight: startWizard ? "65vh" : "50vh", maxHeight: startWizard ? "65vh" : "85vh", paddingBottom: "env(safe-area-inset-bottom)" }}
+        style={{ animation: "slideUp 0.3s cubic-bezier(0.22,1,0.36,1)", minHeight: startWizard ? "65vh" : "55vh", maxHeight: "90dvh", paddingBottom: "env(safe-area-inset-bottom)" }}
         onClick={e => e.stopPropagation()}>
         <div className="w-10 h-1 rounded-full bg-[#e2e2e2] mx-auto mt-4 mb-2 flex-shrink-0"/>
         {/* Nav row */}
@@ -1044,32 +1044,32 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
         <div className="overflow-y-auto flex-1 overscroll-contain">
           {/* Method picker */}
           {!logMethod && (
-            <div className="px-5 pt-4 pb-8">
-              <p className="text-[10px] font-bold tracking-widest uppercase text-[#8a9096] mb-3 text-center">Log something to update your score</p>
-              <div className="grid grid-cols-3 gap-2.5">
-                <button onClick={handleCamera} className="flex flex-col items-center gap-2 py-4 rounded-2xl active:scale-95 transition-transform" style={{ background: "#f4f6ff" }}>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: BLUE }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div className="px-5 pt-5 pb-8">
+              <p className="text-[13px] font-bold tracking-widest uppercase text-[#8a9096] mb-4 text-center">Log something to update your score</p>
+              <div className="grid grid-cols-3 gap-3">
+                <button onClick={handleCamera} className="flex flex-col items-center gap-3 py-6 rounded-2xl active:scale-95 transition-transform" style={{ background: "#f4f6ff" }}>
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: BLUE }}>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
                     </svg>
                   </div>
-                  <span className="text-[12px] font-semibold" style={{ color: BLUE }}>Camera</span>
+                  <span className="text-[14px] font-semibold" style={{ color: BLUE }}>Camera</span>
                 </button>
-                <button onClick={() => uploadRef.current?.click()} className="flex flex-col items-center gap-2 py-4 rounded-2xl active:scale-95 transition-transform" style={{ background: "#f4f6ff" }}>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: BLUE }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <button onClick={() => uploadRef.current?.click()} className="flex flex-col items-center gap-3 py-6 rounded-2xl active:scale-95 transition-transform" style={{ background: "#f4f6ff" }}>
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: BLUE }}>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
                     </svg>
                   </div>
-                  <span className="text-[12px] font-semibold" style={{ color: BLUE }}>Upload</span>
+                  <span className="text-[14px] font-semibold" style={{ color: BLUE }}>Upload</span>
                 </button>
-                <button onClick={() => setLogMethod("wizard")} className="flex flex-col items-center gap-2 py-4 rounded-2xl active:scale-95 transition-transform" style={{ background: "#f4f6ff" }}>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: BLUE }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <button onClick={() => setLogMethod("wizard")} className="flex flex-col items-center gap-3 py-6 rounded-2xl active:scale-95 transition-transform" style={{ background: "#f4f6ff" }}>
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ background: BLUE }}>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M15 3l-4 8h6l-4 10"/><path d="M5 12h2"/><path d="M17 12h2"/><path d="M12 5v-2"/><path d="M12 21v-2"/>
                     </svg>
                   </div>
-                  <span className="text-[12px] font-semibold" style={{ color: BLUE }}>Wizard</span>
+                  <span className="text-[14px] font-semibold" style={{ color: BLUE }}>Wizard</span>
                 </button>
               </div>
               <input ref={uploadRef} type="file" accept="image/*" className="hidden" onChange={() => {}}/>
@@ -1078,26 +1078,26 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
 
           {/* Wizard category list */}
           {logMethod === "wizard" && (
-            <div className="px-5 pt-4 pb-8">
-              <div className="flex items-center gap-3 mb-4">
-                <button onClick={() => setLogMethod(null)} className="w-7 h-7 rounded-full flex items-center justify-center active:bg-[#f0f0f0]" style={{ background: "#f4f4f6" }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            <div className="px-5 pt-5 pb-8">
+              <div className="flex items-center gap-3 mb-5">
+                <button onClick={() => setLogMethod(null)} className="w-8 h-8 rounded-full flex items-center justify-center active:bg-[#f0f0f0]" style={{ background: "#f4f4f6" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                 </button>
-                <p className="text-[13px] font-bold text-[#1a1c1c]">What are you logging?</p>
+                <p className="text-[16px] font-bold text-[#1a1c1c]">What are you logging?</p>
               </div>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-3">
                 {categories.map(cat => (
                   <button key={cat.label} onClick={cat.action}
-                    className="flex items-center gap-4 px-4 py-3.5 rounded-2xl active:opacity-70 transition-opacity"
+                    className="flex items-center gap-4 px-5 py-5 rounded-2xl active:opacity-70 transition-opacity"
                     style={{ background: "#f9f9f9", border: "1px solid #f0f0f0" }}>
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${cat.color}15` }}>
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: `${cat.color}15` }}>
                       {cat.icon}
                     </div>
                     <div className="flex-1 min-w-0 text-left">
-                      <p className="text-[14px] font-semibold text-[#1a1c1c]">{cat.label}</p>
-                      <p className="text-[11px] text-[#6b7480] mt-0.5">{cat.sub}</p>
+                      <p className="text-[17px] font-semibold text-[#1a1c1c]">{cat.label}</p>
+                      <p className="text-[13px] text-[#6b7480] mt-0.5">{cat.sub}</p>
                     </div>
-                    {cat.done && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: "#f0fdf4", color: "#16a34a" }}>Done</span>}
+                    {cat.done && <span className="text-[12px] font-bold px-3 py-1 rounded-full flex-shrink-0" style={{ background: "#f0fdf4", color: "#16a34a" }}>Done</span>}
                   </button>
                 ))}
               </div>
