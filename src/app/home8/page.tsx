@@ -323,6 +323,7 @@ export default function Home8() {
   const touchStartXRef = useRef(0);
   const touchStartYRef = useRef(0);
   const lastTouchYRef = useRef(0);
+  const hitTopYRef = useRef<number | null>(null); // Y when scroll first reached 0
   const handleDragStartY = useRef(0);
   const swipeDirRef = useRef<'h' | 'v' | null>(null);
   const [cardSnap, setCardSnap] = useState<'none' | 'left' | 'right'>('none');
@@ -516,20 +517,39 @@ export default function Home8() {
   useEffect(() => { setCardSnap('none'); setLiveX(0); }, [doIdx]);
   useEffect(() => { doIdxRef.current = doIdx; }, [doIdx]);
 
-  // Non-passive touchmove to intercept swipe-down from top of schedule — prevents
-  // iOS from firing touchcancel when it would otherwise claim the pan-y gesture.
+  // Non-passive listener on the outer strip — records hitTopY and calls
+  // preventDefault when the user overscrolls past the top of the schedule.
   useEffect(() => {
     const outer = outerRef.current;
     if (!outer) return;
     const handler = (e: TouchEvent) => {
       if (doIdxRef.current < 1) return;
-      const dy = e.touches[0].clientY - touchStartYRef.current;
-      if (dy > 4 && (schedScrollRef.current?.scrollTop ?? 0) === 0) {
+      const y = e.touches[0].clientY;
+      lastTouchYRef.current = y;
+      if ((schedScrollRef.current?.scrollTop ?? 0) === 0 && y > touchStartYRef.current) {
+        if (hitTopYRef.current === null) hitTopYRef.current = y;
         e.preventDefault();
       }
     };
     outer.addEventListener('touchmove', handler, { passive: false });
     return () => outer.removeEventListener('touchmove', handler);
+  }, []);
+
+  // Non-passive listener directly on the scroll div — catches the gesture at
+  // its source before the outer touchAction: pan-y can claim it.
+  useEffect(() => {
+    const div = schedScrollRef.current;
+    if (!div) return;
+    const handler = (e: TouchEvent) => {
+      if (doIdxRef.current < 1) return;
+      const y = e.touches[0].clientY;
+      if (div.scrollTop === 0 && y > touchStartYRef.current) {
+        if (hitTopYRef.current === null) hitTopYRef.current = y;
+        e.preventDefault(); // stop rubber-band / touchcancel
+      }
+    };
+    div.addEventListener('touchmove', handler, { passive: false });
+    return () => div.removeEventListener('touchmove', handler);
   }, []);
 
   useEffect(() => {
@@ -621,12 +641,19 @@ export default function Home8() {
           onTouchStart={e => {
             touchStartYRef.current = e.touches[0].clientY;
             touchStartXRef.current = e.touches[0].clientX;
+            lastTouchYRef.current = e.touches[0].clientY;
+            hitTopYRef.current = null;
             swipeDirRef.current = null;
           }}
           onTouchMove={e => {
-            lastTouchYRef.current = e.touches[0].clientY;
-            // When on the schedule card, let native scroll handle everything
-            if (doIdx >= 1) return;
+            const y = e.touches[0].clientY;
+            lastTouchYRef.current = y;
+            if (doIdx >= 1) {
+              // Track the moment scroll first reaches 0 and user keeps pulling down
+              if ((schedScrollRef.current?.scrollTop ?? 0) === 0 && y > touchStartYRef.current && hitTopYRef.current === null)
+                hitTopYRef.current = y;
+              return;
+            }
             const dx = e.touches[0].clientX - touchStartXRef.current;
             const dy = e.touches[0].clientY - touchStartYRef.current;
             if (!swipeDirRef.current && (Math.abs(dx) > 8 || Math.abs(dy) > 8))
@@ -635,14 +662,17 @@ export default function Home8() {
             if (swipeDirRef.current === 'v' && cardSnap === 'none' && doIdx < 1) setLiveY(dy);
           }}
           onTouchEnd={e => {
-            const dy = e.changedTouches[0].clientY - touchStartYRef.current;
+            const endY = e.changedTouches[0].clientY;
             const dx = e.changedTouches[0].clientX - touchStartXRef.current;
-            // On schedule card: only intercept swipe-down from the very top to go back
             if (doIdx >= 1) {
-              if (dy > 56 && (schedScrollRef.current?.scrollTop ?? 0) === 0) goPrev();
+              // Measure from when scroll first hit 0, not from original touchStart
+              const ref = hitTopYRef.current ?? touchStartYRef.current;
+              if (endY - ref > 30 && (schedScrollRef.current?.scrollTop ?? 0) === 0) goPrev();
+              hitTopYRef.current = null;
               swipeDirRef.current = null;
               return;
             }
+            const dy = endY - touchStartYRef.current;
             if (swipeDirRef.current === 'h' && doIdx === 0) {
               setLiveX(0);
               if (cardSnap === 'none') {
@@ -658,12 +688,11 @@ export default function Home8() {
             swipeDirRef.current = null;
           }}
           onTouchCancel={() => {
-            // Fallback: if iOS fires touchcancel instead of touchend (e.g. browser claimed pan-y),
-            // still trigger goPrev when user swiped down far enough from the schedule top.
             if (doIdx >= 1) {
-              const dy = lastTouchYRef.current - touchStartYRef.current;
-              if (dy > 40 && (schedScrollRef.current?.scrollTop ?? 0) === 0) goPrev();
+              const ref = hitTopYRef.current ?? touchStartYRef.current;
+              if (lastTouchYRef.current - ref > 30 && (schedScrollRef.current?.scrollTop ?? 0) === 0) goPrev();
             }
+            hitTopYRef.current = null;
             setLiveX(0);
             setLiveY(0);
             swipeDirRef.current = null;
