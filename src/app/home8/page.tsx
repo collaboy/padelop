@@ -1373,7 +1373,7 @@ export default function Home8() {
                                 value={mealTime || nowTimeStr()}
                                 onChange={e => setMealTime(e.target.value)}
                                 onClick={() => { if (!mealTime) setMealTime(nowTimeStr()); }}
-                                style={{ width: 90, padding: "7px 10px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: 13, color: "#1a1c1c", outline: "none", flexShrink: 0 }}
+                                style={{ width: 90, padding: "7px 10px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: 16, color: "#1a1c1c", outline: "none", flexShrink: 0 }}
                               />
                               <input
                                 type="text"
@@ -1381,7 +1381,7 @@ export default function Home8() {
                                 value={mealText}
                                 onChange={e => setMealText(e.target.value)}
                                 onKeyDown={e => { if (e.key === "Enter" && mealText.trim()) { saveMealEntry(mealTime || nowTimeStr(), mealText); } }}
-                                style={{ flex: 1, padding: "7px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: 13, color: "#1a1c1c", outline: "none" }}
+                                style={{ flex: 1, padding: "7px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: 16, color: "#1a1c1c", outline: "none" }}
                               />
                               <button
                                 onClick={() => saveMealEntry(mealTime || nowTimeStr(), mealText)}
@@ -1407,7 +1407,7 @@ export default function Home8() {
                               onChange={e => setNoteText(e.target.value)}
                               placeholder="What's on your mind?"
                               rows={3}
-                              style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: 13, color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box" }}
+                              style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: 16, color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box" }}
                             />
                             <button
                               onClick={() => { saveNote(noteText); setLogPickerExpanded(null); }}
