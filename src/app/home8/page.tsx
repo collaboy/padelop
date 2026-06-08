@@ -571,14 +571,15 @@ export default function Home8() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (doIdx !== 1) return;
-    const container = schedScrollRef.current;
-    const current = schedCurrentRef.current;
-    if (!container || !current) return;
-    const top = current.offsetTop - container.clientHeight / 2 + current.clientHeight / 2;
-    container.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-  }, [doIdx]);
+  // auto-scroll disabled for gesture testing
+  // useEffect(() => {
+  //   if (doIdx !== 1) return;
+  //   const container = schedScrollRef.current;
+  //   const current = schedCurrentRef.current;
+  //   if (!container || !current) return;
+  //   const top = current.offsetTop - container.clientHeight / 2 + current.clientHeight / 2;
+  //   container.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  // }, [doIdx]);
 
   useEffect(() => {
     const item = schedule[schedModalIdx ?? currentIdx];
@@ -868,7 +869,7 @@ export default function Home8() {
                       </div>
                     </div>
                     <div style={{ height: 1, background: "#dfe3e7", flexShrink: 0 }} />
-                    <div ref={schedScrollRef} style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
+                    <div ref={schedScrollRef} style={{ flex: 1, overflowY: "hidden", minHeight: 0 }}>
                       <div style={{ padding: "16px 20px 28px" }}>
                         {schedule.map((item, idx, arr) => {
                           const isLast = idx === arr.length - 1;
