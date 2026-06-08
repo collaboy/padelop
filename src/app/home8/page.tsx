@@ -816,25 +816,27 @@ export default function Home8() {
                 const curMinsSched = now.getHours() * 60 + now.getMinutes();
                 return (
                   <div key="sched" style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "white", display: "flex", flexDirection: "column", opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === 1 ? 2 : 1, height: "calc(100dvh - 4rem - 44px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none" }}>
-                    {/* Drag handle — dedicated swipe-down zone, no scroll conflict */}
+                    {/* Entire header is the drag zone — easy to swipe down back to hero */}
                     <div
-                      style={{ padding: "12px 0 8px", flexShrink: 0, display: "flex", justifyContent: "center", alignItems: "center", touchAction: "none", cursor: "grab" }}
+                      style={{ flexShrink: 0, touchAction: "none", cursor: "grab", userSelect: "none" }}
                       onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
-                      onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 30) goPrev(); }}
+                      onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
                     >
-                      <div style={{ width: 36, height: 4, borderRadius: 2, background: "#d0d3d6" }} />
+                      <div style={{ padding: "14px 0 10px", display: "flex", justifyContent: "center" }}>
+                        <div style={{ width: 36, height: 4, borderRadius: 2, background: "#d0d3d6" }} />
+                      </div>
+                      <div style={{ padding: "0 20px 16px", textAlign: "center" }}>
+                        <p style={{ fontSize: 18, fontWeight: 700, color: "#1a1c1c", margin: "0 0 4px" }}>Today&apos;s Schedule</p>
+                        <span style={{
+                          fontSize: 12, fontWeight: 700, padding: "3px 12px", borderRadius: 99,
+                          background: dayType === "match" ? "#2653d418" : dayType === "recovery" ? "#7c3aed18" : "#16a34a18",
+                          color: dayType === "match" ? "#2653d4" : dayType === "recovery" ? "#7c3aed" : "#16a34a",
+                        }}>
+                          {dayType === "match" ? "Match Day" : dayType === "recovery" ? "Recovery Day" : "Training Day"}
+                        </span>
+                      </div>
                     </div>
-                    <div style={{ padding: "0 20px 0", flexShrink: 0, textAlign: "center" }}>
-                      <p style={{ fontSize: 18, fontWeight: 700, color: "#1a1c1c", margin: "0 0 2px" }}>Today&apos;s Schedule</p>
-                      <span style={{
-                        fontSize: 12, fontWeight: 700, padding: "3px 12px", borderRadius: 99,
-                        background: dayType === "match" ? "#2653d418" : dayType === "recovery" ? "#7c3aed18" : "#16a34a18",
-                        color: dayType === "match" ? "#2653d4" : dayType === "recovery" ? "#7c3aed" : "#16a34a",
-                      }}>
-                        {dayType === "match" ? "Match Day" : dayType === "recovery" ? "Recovery Day" : "Training Day"}
-                      </span>
-                    </div>
-                    <div style={{ height: 1, background: "#dfe3e7", margin: "20px 0 0", flexShrink: 0 }} />
+                    <div style={{ height: 1, background: "#dfe3e7", flexShrink: 0 }} />
                     <div ref={schedScrollRef} style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
                       <div style={{ padding: "16px 20px 28px" }}>
                         {schedule.map((item, idx, arr) => {
