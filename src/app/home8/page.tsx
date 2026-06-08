@@ -279,6 +279,7 @@ export default function Home8() {
   const [logPickerOpen, setLogPickerOpen] = useState(false);
   const [logPickerExpanded, setLogPickerExpanded] = useState<string | null>(null);
   const [logPickerSub, setLogPickerSub] = useState<"nutrition" | "matchreview" | null>(null);
+  const [extrasOpen, setExtrasOpen] = useState(false);
   const [checkInData, setCheckInData]     = useState<DailyCheckIn | null>(null);
   const [hydrationData, setHydrationData] = useState<HydrationEntry | null>(null);
   const [nutritionData, setNutritionData] = useState<NutritionEntry | null>(null);
@@ -1189,7 +1190,7 @@ export default function Home8() {
 
         {/* Log picker */}
         {logPickerOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogPickerSub(null); }}>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogPickerSub(null); setExtrasOpen(false); }}>
             <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
             <div className="relative w-full max-w-sm bg-white rounded-[24px] shadow-2xl" style={{ overflow: "hidden", maxHeight: "82dvh", display: "flex", flexDirection: "column" }} onClick={e => e.stopPropagation()}>
               <div className="px-5 pt-5 pb-4 flex-shrink-0" style={{ borderBottom: "1px solid #f0f0f0" }}>
@@ -1234,13 +1235,6 @@ export default function Home8() {
                       ? `Stress ${rateLbl(checkInData.stress)} · Motivation ${rateLbl(checkInData.motivation)} — complete before bed`
                       : "Do your morning check-in first.",
                   },
-                  {
-                    label: "Extras", tab: "extras" as const,
-                    iconBg: "rgba(107,116,128,0.1)", iconColor: "#6b7480",
-                    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>,
-                    logged: false,
-                    detail: "",
-                  },
                 ];
                 return [
                   ...items.slice(0, 1).map((item, i) => (
@@ -1258,7 +1252,7 @@ export default function Home8() {
                   )),
                   ...items.slice(1).map((item, i, rest) => (
                     <div key={item.tab} style={{ borderBottom: i < rest.length - 1 ? "1px solid #f0f0f0" : "none" }}>
-                      <button onClick={() => { const next = logPickerExpanded === item.tab ? null : item.tab; setLogPickerExpanded(next); if (next !== "extras") setLogPickerSub(null); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
+                      <button onClick={() => { setLogPickerExpanded(logPickerExpanded === item.tab ? null : item.tab); setLogPickerSub(null); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
                         <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: item.iconBg, color: item.iconColor }}>{item.icon}</div>
                         <span className="text-[19px] font-semibold text-[#1a1c1c]">
                           {item.label}
@@ -1345,59 +1339,6 @@ export default function Home8() {
                               Save
                             </button>
                           </div>
-                        ) : item.tab === "extras" ? (
-                          <div style={{ borderTop: "1px solid #f0f0f0" }}>
-                            {/* Food & Snacks sub-row */}
-                            <button
-                              onClick={() => setLogPickerSub(logPickerSub === "nutrition" ? null : "nutrition")}
-                              className="w-full flex items-center gap-3 px-5 py-3 active:bg-[#f9f9f9] transition-colors"
-                              style={{ background: "none", border: "none", cursor: "pointer", borderBottom: "1px solid #f0f0f0" }}
-                            >
-                              <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(22,163,74,0.1)", color: "#16a34a" }}>
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-                              </div>
-                              <span style={{ fontSize: 16, fontWeight: 500, color: "#1a1c1c", flex: 1, textAlign: "left" }}>Food & Snacks</span>
-                              {mealsToday.length > 0 && <span style={{ fontSize: 12, fontWeight: 600, color: "#2653d4" }}>{mealsToday.length} logged</span>}
-                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c8ccd0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: logPickerSub === "nutrition" ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
-                            </button>
-                            {logPickerSub === "nutrition" && (
-                              <div style={{ padding: "10px 20px 14px 20px", borderBottom: "1px solid #f0f0f0" }}>
-                                <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-                                  <input type="time" value={mealTime || nowTimeStr()} onChange={e => setMealTime(e.target.value)} onClick={() => { if (!mealTime) setMealTime(nowTimeStr()); }} style={{ width: 90, padding: "7px 10px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: 16, color: "#1a1c1c", outline: "none", flexShrink: 0 }} />
-                                  <input type="text" placeholder="What are you eating?" value={mealText} onChange={e => setMealText(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && mealText.trim()) saveMealEntry(mealTime || nowTimeStr(), mealText); }} style={{ flex: 1, padding: "7px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: 16, color: "#1a1c1c", outline: "none" }} />
-                                  <button onClick={() => saveMealEntry(mealTime || nowTimeStr(), mealText)} style={{ padding: "7px 14px", borderRadius: 10, background: mealText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: mealText.trim() ? "pointer" : "default", fontSize: 12, fontWeight: 700, color: mealText.trim() ? "#fff" : "#b0b8c1", flexShrink: 0 }}>Save</button>
-                                </div>
-                                {mealsToday.length > 0 && (
-                                  <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                                    {mealsToday.map(m => (
-                                      <div key={m.id} style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
-                                        <span style={{ fontSize: 11, fontWeight: 600, color: "#b0b8c1", flexShrink: 0 }}>{m.time}</span>
-                                        <span style={{ fontSize: 13, color: "#6b7480", lineHeight: 1.4 }}>{m.description}</span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                            {/* Add a note sub-row */}
-                            <button
-                              onClick={() => setLogPickerSub(logPickerSub === "matchreview" ? null : "matchreview")}
-                              className="w-full flex items-center gap-3 px-5 py-3 active:bg-[#f9f9f9] transition-colors"
-                              style={{ background: "none", border: "none", cursor: "pointer" }}
-                            >
-                              <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(107,116,128,0.1)", color: "#6b7480" }}>
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                              </div>
-                              <span style={{ fontSize: 16, fontWeight: 500, color: "#1a1c1c", flex: 1, textAlign: "left" }}>Add a note</span>
-                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c8ccd0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: logPickerSub === "matchreview" ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
-                            </button>
-                            {logPickerSub === "matchreview" && (
-                              <div style={{ padding: "10px 20px 14px 20px" }}>
-                                <textarea value={noteText} onChange={e => setNoteText(e.target.value)} placeholder="What's on your mind?" rows={3} style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: 16, color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box" }} />
-                                <button onClick={() => { saveNote(noteText); setLogPickerSub(null); }} style={{ marginTop: 8, padding: "7px 18px", borderRadius: 999, background: noteText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: noteText.trim() ? "pointer" : "default", fontSize: 12, fontWeight: 700, color: noteText.trim() ? "#fff" : "#b0b8c1" }}>Save</button>
-                              </div>
-                            )}
-                          </div>
                         ) : (
                           <div style={{ padding: "0 20px 18px 20px" }}>
                             <p style={{ fontSize: 15, color: "#9aa5b0", margin: "0 0 14px", lineHeight: 1.5 }}>{item.detail}</p>
@@ -1410,6 +1351,67 @@ export default function Home8() {
                 ];
 
               })()}
+
+              {/* Extras reveal */}
+              {extrasOpen && (
+                <div style={{ borderTop: "1px solid #f0f0f0" }}>
+                  {/* Food & Snacks */}
+                  <div style={{ borderBottom: "1px solid #f0f0f0" }}>
+                    <button onClick={() => setLogPickerSub(logPickerSub === "nutrition" ? null : "nutrition")} className="w-full flex items-center gap-3 px-5 py-4 active:bg-[#f9f9f9] transition-colors" style={{ background: "none", border: "none", cursor: "pointer" }}>
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(22,163,74,0.1)", color: "#16a34a" }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                      </div>
+                      <span style={{ fontSize: 17, fontWeight: 500, color: "#1a1c1c", flex: 1, textAlign: "left" }}>Food & Snacks</span>
+                      {mealsToday.length > 0 && <span style={{ fontSize: 12, fontWeight: 600, color: "#2653d4" }}>{mealsToday.length} logged</span>}
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c8ccd0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: logPickerSub === "nutrition" ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                    {logPickerSub === "nutrition" && (
+                      <div style={{ padding: "4px 20px 14px 20px" }}>
+                        <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+                          <input type="time" value={mealTime || nowTimeStr()} onChange={e => setMealTime(e.target.value)} onClick={() => { if (!mealTime) setMealTime(nowTimeStr()); }} style={{ width: 90, padding: "7px 10px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: 16, color: "#1a1c1c", outline: "none", flexShrink: 0 }} />
+                          <input type="text" placeholder="What are you eating?" value={mealText} onChange={e => setMealText(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && mealText.trim()) saveMealEntry(mealTime || nowTimeStr(), mealText); }} style={{ flex: 1, padding: "7px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: 16, color: "#1a1c1c", outline: "none" }} />
+                          <button onClick={() => saveMealEntry(mealTime || nowTimeStr(), mealText)} style={{ padding: "7px 14px", borderRadius: 10, background: mealText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: mealText.trim() ? "pointer" : "default", fontSize: 12, fontWeight: 700, color: mealText.trim() ? "#fff" : "#b0b8c1", flexShrink: 0 }}>Save</button>
+                        </div>
+                        {mealsToday.length > 0 && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                            {mealsToday.map(m => (
+                              <div key={m.id} style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
+                                <span style={{ fontSize: 11, fontWeight: 600, color: "#b0b8c1", flexShrink: 0 }}>{m.time}</span>
+                                <span style={{ fontSize: 13, color: "#6b7480", lineHeight: 1.4 }}>{m.description}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {/* Add a note */}
+                  <div>
+                    <button onClick={() => setLogPickerSub(logPickerSub === "matchreview" ? null : "matchreview")} className="w-full flex items-center gap-3 px-5 py-4 active:bg-[#f9f9f9] transition-colors" style={{ background: "none", border: "none", cursor: "pointer" }}>
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(107,116,128,0.1)", color: "#6b7480" }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                      </div>
+                      <span style={{ fontSize: 17, fontWeight: 500, color: "#1a1c1c", flex: 1, textAlign: "left" }}>Add a note</span>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c8ccd0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: logPickerSub === "matchreview" ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                    {logPickerSub === "matchreview" && (
+                      <div style={{ padding: "4px 20px 14px 20px" }}>
+                        <textarea value={noteText} onChange={e => setNoteText(e.target.value)} placeholder="What's on your mind?" rows={3} style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: 16, color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box" }} />
+                        <button onClick={() => { saveNote(noteText); setLogPickerSub(null); }} style={{ marginTop: 8, padding: "7px 18px", borderRadius: 999, background: noteText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: noteText.trim() ? "pointer" : "default", fontSize: 12, fontWeight: 700, color: noteText.trim() ? "#fff" : "#b0b8c1" }}>Save</button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Bottom chevron toggle */}
+              <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 14px", borderTop: "1px solid #f0f0f0" }}>
+                <button onClick={() => { setExtrasOpen(o => !o); setLogPickerSub(null); }} style={{ background: "none", border: "none", cursor: "pointer", padding: "4px 16px" }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c8ccd0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: extrasOpen ? "rotate(180deg)" : "none", transition: "transform 0.25s" }}>
+                    <path d="M6 9l6 6 6-6"/>
+                  </svg>
+                </button>
+              </div>
               </div>
             </div>
           </div>
