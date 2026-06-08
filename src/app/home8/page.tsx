@@ -1196,10 +1196,6 @@ export default function Home8() {
               {(() => {
                 const sleepLbl = (v: number) => ["Very poor","Poor","OK","Good","Excellent"][v-1] ?? `${v}/5`;
                 const rateLbl  = (v: number) => ["Very low","Low","Moderate","Good","High"][v-1] ?? `${v}/5`;
-                const nowMins    = now.getHours() * 60 + now.getMinutes();
-                const dueIndices = schedule.map((_, i) => i).filter(i => toMins(schedule[i].time) <= nowMins);
-                const schedDone  = dueIndices.filter(i => completed.has(i)).length;
-                const schedDue   = dueIndices.length;
                 const items = [
                   {
                     label: "Morning Check-in", tab: "checkin" as const,
@@ -1252,65 +1248,6 @@ export default function Home8() {
                       : "Do your morning check-in first.",
                   },
                 ];
-                // Inject schedule row after index 0 (Morning Check-in)
-                const schedExpanded = logPickerExpanded === "schedule";
-                const scheduleRow = schedDue > 0 ? (
-                  <div key="schedule" style={{ borderBottom: "1px solid #f0f0f0" }}>
-                    <button onClick={() => setLogPickerExpanded(schedExpanded ? null : "schedule")} className="w-full flex items-center gap-4 px-5 py-5 active:bg-[#f9f9f9] transition-colors">
-                      <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(107,116,128,0.1)", color: "#6b7480" }}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                      </div>
-                      <div style={{ flex: 1, textAlign: "left" }}>
-                        <p style={{ fontSize: 19, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>Today&apos;s Schedule</p>
-                        <p style={{ fontSize: 14, color: "#9aa5b0", margin: "2px 0 0" }}>{schedDone} of {schedDue} items completed</p>
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        {schedDone === schedDue ? (
-                          <div style={{ width: 22, height: 22, borderRadius: "50%", background: "#f0fdf4", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-                          </div>
-                        ) : (
-                          <span style={{ fontSize: 13, fontWeight: 700, color: "#2653d4" }}>{schedDone}/{schedDue}</span>
-                        )}
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c8ccd0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: schedExpanded ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
-                      </div>
-                    </button>
-                    {schedExpanded && (
-                      <div style={{ padding: "0 20px 14px 68px", display: "flex", flexDirection: "column", gap: 10 }}>
-                        {dueIndices.map(idx => {
-                          const item = schedule[idx];
-                          const done = completed.has(idx);
-                          return (
-                            <button
-                              key={idx}
-                              onClick={() => setCompleted(prev => {
-                                const next = new Set(prev);
-                                done ? next.delete(idx) : next.add(idx);
-                                return next;
-                              })}
-                              className="flex items-center gap-3 w-full active:opacity-70 transition-opacity"
-                              style={{ background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" }}
-                            >
-                              <div style={{
-                                width: 20, height: 20, borderRadius: 6, flexShrink: 0,
-                                border: done ? "none" : "1.5px solid #d0d4da",
-                                background: done ? "#16a34a" : "transparent",
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                              }}>
-                                {done && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>}
-                              </div>
-                              <div style={{ flex: 1 }}>
-                                <p style={{ fontSize: 16, fontWeight: 600, color: done ? "#9aa5b0" : "#1a1c1c", margin: 0, textDecoration: done ? "line-through" : "none" }}>{item.title}</p>
-                                <p style={{ fontSize: 13, color: "#b0b8c1", margin: "2px 0 0" }}>{item.time}</p>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                ) : null;
-
                 return [
                   ...items.slice(0, 1).map((item, i) => (
                     <div key={item.tab} style={{ borderBottom: "1px solid #f0f0f0" }}>
@@ -1325,7 +1262,6 @@ export default function Home8() {
                       {logPickerExpanded === item.tab && (<div style={{ padding: "0 20px 18px 20px" }}><p style={{ fontSize: 15, color: "#9aa5b0", margin: "0 0 14px", lineHeight: 1.5 }}>{item.detail}</p><button onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogWizard(false); setLogTab(item.tab); setLogSheetOpen(true); }} style={{ padding: "10px 22px", borderRadius: 999, background: "#2653d4", border: "none", cursor: "pointer", fontSize: 15, fontWeight: 700, color: "#fff" }}>Log +</button></div>)}
                     </div>
                   )),
-                  scheduleRow,
                   ...items.slice(1).map((item, i, rest) => (
                     <div key={item.tab} style={{ borderBottom: i < rest.length - 1 ? "1px solid #f0f0f0" : "none" }}>
                       <button onClick={() => setLogPickerExpanded(logPickerExpanded === item.tab ? null : item.tab)} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
