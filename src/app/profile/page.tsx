@@ -327,6 +327,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
     wellbeing: { status: "not_logged", reason: "Check-in not done yet" },
   });
   const [history, setHistory] = useState<ScoreSnapshot[]>([]);
+  const [streak, setStreak] = useState(0);
 
   function loadAll() {
     // Profile
@@ -359,7 +360,14 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
     const s = computeScores(d.checkIn, d.hydration, d.review, d.nutrition, d.gameDaysThisWeek, d.habits, d.training);
     setScores(s);
     saveScoreSnapshot(s);
-    setHistory(loadScoreHistory());
+    const hist = loadScoreHistory();
+    setHistory(hist);
+    const dateset = new Set(hist.map((h: ScoreSnapshot) => h.date));
+    const cur = new Date();
+    if (!dateset.has(cur.toISOString().slice(0, 10))) cur.setDate(cur.getDate() - 1);
+    let streakCount = 0;
+    while (dateset.has(cur.toISOString().slice(0, 10))) { streakCount++; cur.setDate(cur.getDate() - 1); }
+    setStreak(streakCount);
     const todayStr = new Date().toISOString().slice(0, 10);
     let m2: { date: string } | null = null;
     try { m2 = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch {}
@@ -451,6 +459,22 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
 
   return (
     <div className="px-4 pt-6 pb-20 max-w-lg mx-auto flex flex-col gap-6">
+
+      {/* ── Streak banner ────────────────────────────────────────────────── */}
+      <div className="bg-white rounded-[20px] px-5 py-4 flex items-center gap-4" style={{ boxShadow: "0px 4px 24px rgba(0,0,0,0.10)" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: 52 }}>
+          <p style={{ fontSize: 32, fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>{streak}</p>
+          <p style={{ fontSize: 11, fontWeight: 700, color: "#b0b8c1", margin: "3px 0 0", letterSpacing: "0.06em", textTransform: "uppercase" }}>Streak</p>
+        </div>
+        <div style={{ width: 1, height: 40, background: "#f0f0f0", flexShrink: 0 }} />
+        <p style={{ fontSize: 14, color: "#6b7480", margin: 0, lineHeight: 1.45 }}>
+          {streak === 0 && "Log today to start your streak."}
+          {streak === 1 && "Good start — log again tomorrow to build momentum."}
+          {streak >= 2 && streak < 7 && "Good momentum — don't break the chain."}
+          {streak >= 7 && streak < 14 && "Incredible consistency — keep it up!"}
+          {streak >= 14 && "Elite habit. You're in the top tier of consistency."}
+        </p>
+      </div>
 
       {/* ── Profile header + collapsible form ───────────────────────────── */}
 

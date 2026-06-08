@@ -948,52 +948,17 @@ export default function Home8() {
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 40, paddingTop: "calc(45dvh - 4rem - (100vw - 40px) / 2)" }}>
             <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: "16px 16px", marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
               {/* Avatar */}
-              <button onClick={() => router.push("/profile")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-                <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#2653d4", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontSize: 22, fontWeight: 800, color: "#fff" }}>
+              <button onClick={() => router.push("/profile")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+                <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#2653d4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <span style={{ fontSize: 24, fontWeight: 800, color: "#fff" }}>
                     {profile.name ? profile.name.trim().split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "?"}
                   </span>
                 </div>
                 <div style={{ textAlign: "center" }}>
-                  <p style={{ fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{profile.name || "Add your name"}</p>
-                  <p style={{ fontSize: 12, fontWeight: 600, color: "#b0b8c1", margin: "2px 0 0", letterSpacing: "0.04em" }}>{profile.level}</p>
+                  <p style={{ fontSize: 17, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{profile.name || "Add your name"}</p>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: "#b0b8c1", margin: "4px 0 0", letterSpacing: "0.04em" }}>{profile.level}</p>
                 </div>
               </button>
-
-              <div style={{ width: "100%", height: 1, background: "#f0f0f0", margin: "2px 0" }} />
-
-              {/* Stats row */}
-              <div style={{ display: "flex", width: "100%", justifyContent: "space-around", padding: "4px 8px" }}>
-                <div style={{ textAlign: "center" }}>
-                  <p style={{ fontSize: 20, fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>{streak}</p>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: "#b0b8c1", margin: "3px 0 0", letterSpacing: "0.04em", textTransform: "uppercase" }}>Streak</p>
-                </div>
-                <div style={{ width: 1, background: "#f0f0f0", alignSelf: "stretch" }} />
-                <div style={{ textAlign: "center" }}>
-                  <p style={{ fontSize: 20, fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>{matchCount}</p>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: "#b0b8c1", margin: "3px 0 0", letterSpacing: "0.04em", textTransform: "uppercase" }}>Matches</p>
-                </div>
-                <div style={{ width: 1, background: "#f0f0f0", alignSelf: "stretch" }} />
-                <div style={{ textAlign: "center" }}>
-                  <p style={{ fontSize: 20, fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>{winRate !== null ? `${winRate}%` : "—"}</p>
-                  <p style={{ fontSize: 11, fontWeight: 600, color: "#b0b8c1", margin: "3px 0 0", letterSpacing: "0.04em", textTransform: "uppercase" }}>Win rate</p>
-                </div>
-              </div>
-
-              <div style={{ width: "100%", height: 1, background: "#f0f0f0", margin: "2px 0" }} />
-
-              {/* Contextual message */}
-              <p style={{ fontSize: 14, color: "#8a9096", margin: 0, textAlign: "center", lineHeight: 1.4, paddingLeft: 8, paddingRight: 8 }}>
-                {(() => {
-                  if (matchCount === 0) return "Log your first match to track progress.";
-                  if (streak >= 7) return "Incredible consistency — keep it up!";
-                  if (winRate !== null && winRate >= 65) return "You're winning more than you're losing. Keep going!";
-                  if (winRate !== null && winRate < 40) return "Focus on the process — results will follow.";
-                  if (streak === 0) return "Log today to get your streak back.";
-                  if (streak >= 3) return "Good momentum — don't break the chain.";
-                  return "Stay consistent and the results will come.";
-                })()}
-              </p>
             </div>
           </div>
         </div>
