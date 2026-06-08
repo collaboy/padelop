@@ -946,19 +946,78 @@ export default function Home8() {
 
           {/* Profile panel */}
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 40, paddingTop: "calc(45dvh - 4rem - (100vw - 40px) / 2)" }}>
-            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: "16px 16px", marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-              {/* Avatar */}
-              <button onClick={() => router.push("/profile")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-                <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#2653d4", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontSize: 24, fontWeight: 800, color: "#fff" }}>
-                    {profile.name ? profile.name.trim().split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "?"}
-                  </span>
-                </div>
-                <div style={{ textAlign: "center" }}>
-                  <p style={{ fontSize: 17, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{profile.name || "Add your name"}</p>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: "#b0b8c1", margin: "4px 0 0", letterSpacing: "0.04em" }}>{profile.level}</p>
-                </div>
-              </button>
+            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, padding: "16px 12px", marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+              {/* Hydration teardrop meter */}
+              {(() => {
+                const MAX = 3000;
+                const pct = Math.min(1, logHydrationMl / MAX);
+                // teardrop viewBox 100 × 130, drop path fills from y=130 up
+                const innerH = 118; // usable vertical fill space inside the drop
+                const fillH  = pct * innerH;
+                const waterY = 130 - fillH; // top of water rect
+                const waveAmp = logHydrationMl > 0 ? 7 : 0;
+                const labelMl = logHydrationMl >= 1000
+                  ? `${+(logHydrationMl / 1000).toFixed(1)}L`
+                  : `${logHydrationMl}ml`;
+                return (
+                  <>
+                    <svg viewBox="0 0 100 130" width="110" height="143" style={{ overflow: "visible" }}>
+                      <defs>
+                        <clipPath id="drop-clip-r">
+                          {/* teardrop: pointed top, circular bottom */}
+                          <path d="M50 4 C72 22 94 58 94 84 A44 44 0 0 1 6 84 C6 58 28 22 50 4 Z"/>
+                        </clipPath>
+                      </defs>
+
+                      {/* Background (empty) */}
+                      <path d="M50 4 C72 22 94 58 94 84 A44 44 0 0 1 6 84 C6 58 28 22 50 4 Z"
+                        fill="#f0f6ff" stroke="#dce8f8" strokeWidth="2"/>
+
+                      {/* Water fill clipped to teardrop */}
+                      <g clipPath="url(#drop-clip-r)">
+                        {/* Solid fill below wave */}
+                        <rect x="-10" y={waterY + waveAmp} width="120" height={fillH + 10} fill="#3b9eff" opacity="0.85"/>
+                        {/* Animated wave at water surface */}
+                        {logHydrationMl > 0 && (
+                          <g style={{ animation: "water-wave 2.4s linear infinite", willChange: "transform" }}>
+                            <path
+                              d={`M-100 ${waterY} Q-75 ${waterY - waveAmp} -50 ${waterY} Q-25 ${waterY + waveAmp} 0 ${waterY} Q25 ${waterY - waveAmp} 50 ${waterY} Q75 ${waterY + waveAmp} 100 ${waterY} Q125 ${waterY - waveAmp} 150 ${waterY} Q175 ${waterY + waveAmp} 200 ${waterY} L200 130 L-100 130 Z`}
+                              fill="#3b9eff" opacity="0.85"
+                            />
+                          </g>
+                        )}
+                      </g>
+
+                      {/* Outline on top */}
+                      <path d="M50 4 C72 22 94 58 94 84 A44 44 0 0 1 6 84 C6 58 28 22 50 4 Z"
+                        fill="none" stroke="#b8d4f4" strokeWidth="2.5"/>
+
+                      {/* Amount label inside drop */}
+                      <text x="50" y="88" textAnchor="middle" fontSize="15" fontWeight="800"
+                        fill={pct > 0.45 ? "#fff" : "#5b8fcc"} fontFamily="inherit">
+                        {labelMl}
+                      </text>
+                    </svg>
+
+                    {/* 3L goal label */}
+                    <p style={{ fontSize: 11, fontWeight: 700, color: "#b0bec8", letterSpacing: "0.06em", textTransform: "uppercase", margin: 0 }}>
+                      {logHydrationMl >= MAX ? "Goal reached 🎉" : `Goal: 3L`}
+                    </p>
+
+                    {/* +250ml button */}
+                    <button
+                      onClick={() => {
+                        const next = Math.min(MAX, logHydrationMl + 250);
+                        setLogHydrationMl(next);
+                        saveLogHydration(next);
+                      }}
+                      style={{ padding: "10px 28px", borderRadius: 999, background: logHydrationMl >= MAX ? "#e8f0e8" : "#2653d4", border: "none", cursor: logHydrationMl >= MAX ? "default" : "pointer", fontSize: 15, fontWeight: 700, color: logHydrationMl >= MAX ? "#16a34a" : "#fff" }}
+                    >
+                      {logHydrationMl >= MAX ? "Done" : "+ 250ml"}
+                    </button>
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>

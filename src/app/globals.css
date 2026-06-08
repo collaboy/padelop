@@ -77,6 +77,8 @@ body {
 @keyframes nav-slide-out-right { to   { transform: translateX(28%);  opacity: 0; } }
 @keyframes nav-slide-in-right  { from { transform: translateX(100%); opacity: 0; } }
 @keyframes nav-slide-in-left   { from { transform: translateX(-100%); opacity: 0; } }
+@keyframes water-wave { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+.animate-water-wave { animation: water-wave 2.4s linear infinite; }
 
 /* Root: no animation (background stays put) */
 ::view-transition-old(root),
