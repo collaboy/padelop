@@ -524,17 +524,25 @@ export default function Home8() {
     const div = schedScrollRef.current;
     if (!div) return;
     let prevY = 0;
+    let prevT = 0;
+    let vel = 0; // px/ms, positive = finger moving downward
 
     const onStart = (e: TouchEvent) => {
       prevY = e.touches[0].clientY;
+      prevT = e.timeStamp;
+      vel = 0;
       hitTopYRef.current = null;
     };
 
     const onMove = (e: TouchEvent) => {
       if (doIdxRef.current < 1) return;
       const y = e.touches[0].clientY;
+      const t = e.timeStamp;
+      const dt = t - prevT;
+      if (dt > 0) vel = (y - prevY) / dt;
       const movingDown = y > prevY;
       prevY = y;
+      prevT = t;
       lastTouchYRef.current = y;
       if (div.scrollTop === 0 && movingDown) {
         if (hitTopYRef.current === null) hitTopYRef.current = y;
@@ -542,44 +550,39 @@ export default function Home8() {
       }
     };
 
-    const onEnd = (e: TouchEvent) => {
-      if (doIdxRef.current >= 1 && hitTopYRef.current !== null) {
-        if (e.changedTouches[0].clientY - hitTopYRef.current > 30)
-          setDoIdx(i => Math.max(i - 1, -1));
-      }
+    const trigger = (endY: number) => {
+      // fire goPrev if user dragged ≥30px past the top, OR arrived at the top with enough velocity
+      const dist = hitTopYRef.current !== null ? endY - hitTopYRef.current : 0;
+      if (dist > 30 || (hitTopYRef.current !== null && vel > 0.4))
+        setDoIdx(i => Math.max(i - 1, -1));
       hitTopYRef.current = null;
+      vel = 0;
     };
 
-    const onCancel = () => {
-      if (doIdxRef.current >= 1 && hitTopYRef.current !== null) {
-        if (lastTouchYRef.current - hitTopYRef.current > 30)
-          setDoIdx(i => Math.max(i - 1, -1));
-      }
-      hitTopYRef.current = null;
-    };
+    const onEnd   = (e: TouchEvent) => { if (doIdxRef.current >= 1) trigger(e.changedTouches[0].clientY); };
+    const onCancel = () => { if (doIdxRef.current >= 1) trigger(lastTouchYRef.current); };
 
-    div.addEventListener('touchstart', onStart,  { passive: true });
-    div.addEventListener('touchmove',  onMove,   { passive: false });
-    div.addEventListener('touchend',   onEnd,    { passive: true });
-    div.addEventListener('touchcancel', onCancel, { passive: true });
+    div.addEventListener('touchstart',  onStart,   { passive: true });
+    div.addEventListener('touchmove',   onMove,    { passive: false });
+    div.addEventListener('touchend',    onEnd,     { passive: true });
+    div.addEventListener('touchcancel', onCancel,  { passive: true });
     return () => {
-      div.removeEventListener('touchstart', onStart);
-      div.removeEventListener('touchmove',  onMove);
-      div.removeEventListener('touchend',   onEnd);
+      div.removeEventListener('touchstart',  onStart);
+      div.removeEventListener('touchmove',   onMove);
+      div.removeEventListener('touchend',    onEnd);
       div.removeEventListener('touchcancel', onCancel);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // auto-scroll disabled for gesture testing
-  // useEffect(() => {
-  //   if (doIdx !== 1) return;
-  //   const container = schedScrollRef.current;
-  //   const current = schedCurrentRef.current;
-  //   if (!container || !current) return;
-  //   const top = current.offsetTop - container.clientHeight / 2 + current.clientHeight / 2;
-  //   container.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-  // }, [doIdx]);
+  useEffect(() => {
+    if (doIdx !== 1) return;
+    const container = schedScrollRef.current;
+    const current = schedCurrentRef.current;
+    if (!container || !current) return;
+    const top = current.offsetTop - container.clientHeight / 2 + current.clientHeight / 2;
+    container.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  }, [doIdx]);
 
   useEffect(() => {
     const item = schedule[schedModalIdx ?? currentIdx];
@@ -869,7 +872,7 @@ export default function Home8() {
                       </div>
                     </div>
                     <div style={{ height: 1, background: "#dfe3e7", flexShrink: 0 }} />
-                    <div ref={schedScrollRef} style={{ flex: 1, overflowY: "hidden", minHeight: 0 }}>
+                    <div ref={schedScrollRef} style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
                       <div style={{ padding: "16px 20px 28px" }}>
                         {schedule.map((item, idx, arr) => {
                           const isLast = idx === arr.length - 1;
