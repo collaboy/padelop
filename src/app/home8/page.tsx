@@ -1004,17 +1004,29 @@ export default function Home8() {
                       {logHydrationMl >= MAX ? "Goal reached 🎉" : `Goal: 3L`}
                     </p>
 
-                    {/* +250ml button */}
-                    <button
-                      onClick={() => {
-                        const next = Math.min(MAX, logHydrationMl + 250);
-                        setLogHydrationMl(next);
-                        saveLogHydration(next);
-                      }}
-                      style={{ padding: "10px 28px", borderRadius: 999, background: logHydrationMl >= MAX ? "#e8f0e8" : "#2653d4", border: "none", cursor: logHydrationMl >= MAX ? "default" : "pointer", fontSize: 15, fontWeight: 700, color: logHydrationMl >= MAX ? "#16a34a" : "#fff" }}
-                    >
-                      {logHydrationMl >= MAX ? "Done" : "+ 250ml"}
-                    </button>
+                    {/* + / − buttons */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <button
+                        onClick={() => {
+                          const next = Math.min(MAX, logHydrationMl + 250);
+                          setLogHydrationMl(next);
+                          saveLogHydration(next);
+                        }}
+                        style={{ width: 44, height: 44, borderRadius: "50%", background: logHydrationMl >= MAX ? "#e8f0e8" : "#2653d4", border: "none", cursor: logHydrationMl >= MAX ? "default" : "pointer", fontSize: 22, fontWeight: 700, color: logHydrationMl >= MAX ? "#16a34a" : "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}
+                      >
+                        +
+                      </button>
+                      <button
+                        onClick={() => {
+                          const next = Math.max(0, logHydrationMl - 250);
+                          setLogHydrationMl(next);
+                          saveLogHydration(next);
+                        }}
+                        style={{ width: 44, height: 44, borderRadius: "50%", background: "#f0f2f5", border: "none", cursor: logHydrationMl <= 0 ? "default" : "pointer", fontSize: 22, fontWeight: 700, color: logHydrationMl <= 0 ? "#c8cdd3" : "#1a1c1c", display: "flex", alignItems: "center", justifyContent: "center" }}
+                      >
+                        −
+                      </button>
+                    </div>
                   </>
                 );
               })()}
