@@ -834,8 +834,8 @@ export default function Home8() {
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
                       <p className="animate-text-glow text-[14px] font-bold tracking-widest uppercase leading-none" style={{ color: "#fff" }}>NOW</p>
                       <p className="font-bold leading-tight text-center" style={{ color: "#fff", fontSize: "clamp(24px, 7.5vw, 34px)" }}>{s.title}</p>
-                      <p className="leading-none mt-1 mb-1" style={{ color: "rgba(255,255,255,0.8)", fontSize: "clamp(11.7px, 3.42vw, 15.3px)", fontWeight: 800 }}>{s.time} – {nextSlide ? nextSlide.time : "end"}</p>
-                      {s.subtitle && <p className="leading-none text-center mt-0.5" style={{ color: "rgba(255,255,255,0.8)", fontSize: "clamp(15px, 4.8vw, 22px)" }}>{s.subtitle.split(", ").join(" · ")}</p>}
+                      <p className="leading-none mt-1 mb-1" style={{ color: "rgba(255,255,255,0.9)", fontSize: "clamp(11.7px, 3.42vw, 15.3px)", fontWeight: 900 }}>{s.time} – {nextSlide ? nextSlide.time : "end"}</p>
+                      {s.subtitle && <p className="leading-none text-center mt-0.5" style={{ color: "rgba(255,255,255,0.8)", fontSize: "clamp(15px, 4.8vw, 22px)", fontWeight: 700 }}>{s.subtitle.split(", ").join(" · ")}</p>}
                       <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 font-semibold px-5 py-2 rounded-full" style={{ background: "#fff", color: isReady ? s.color : "#b0b5ba", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me</button>
                     </div>
                   </div>
