@@ -134,7 +134,7 @@ export default function ReadinessSheet({ open, onClose, onOpenLog: _onOpenLog, o
 
   const prepItems: Item[] = [
     {
-      label: "Sleep well tonight", tab: "checkin", logged: !!checkIn,
+      label: "Log last night's sleep", tab: "checkin", logged: !!checkIn,
       detail: checkIn
         ? `Sleep ${sleepLabel(checkIn.sleep)} · Soreness ${sleepLabel(checkIn.soreness)} · Stress ${rateLabel(checkIn.stress)}`
         : "Sleep is the biggest performance lever before a match. Log your quality.",
