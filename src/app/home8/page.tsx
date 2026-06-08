@@ -517,39 +517,58 @@ export default function Home8() {
   useEffect(() => { setCardSnap('none'); setLiveX(0); }, [doIdx]);
   useEffect(() => { doIdxRef.current = doIdx; }, [doIdx]);
 
-  // Non-passive listener on the outer strip — records hitTopY and calls
-  // preventDefault when the user overscrolls past the top of the schedule.
-  useEffect(() => {
-    const outer = outerRef.current;
-    if (!outer) return;
-    const handler = (e: TouchEvent) => {
-      if (doIdxRef.current < 1) return;
-      const y = e.touches[0].clientY;
-      lastTouchYRef.current = y;
-      if ((schedScrollRef.current?.scrollTop ?? 0) === 0 && y > touchStartYRef.current) {
-        if (hitTopYRef.current === null) hitTopYRef.current = y;
-        e.preventDefault();
-      }
-    };
-    outer.addEventListener('touchmove', handler, { passive: false });
-    return () => outer.removeEventListener('touchmove', handler);
-  }, []);
-
-  // Non-passive listener directly on the scroll div — catches the gesture at
-  // its source before the outer touchAction: pan-y can claim it.
+  // Overscroll-to-navigate on the schedule scroll div.
+  // Tracks direction per-frame so we only intercept when the user is at the
+  // top AND actively moving downward — never interferes with normal scrolling.
   useEffect(() => {
     const div = schedScrollRef.current;
     if (!div) return;
-    const handler = (e: TouchEvent) => {
+    let prevY = 0;
+
+    const onStart = (e: TouchEvent) => {
+      prevY = e.touches[0].clientY;
+      hitTopYRef.current = null;
+    };
+
+    const onMove = (e: TouchEvent) => {
       if (doIdxRef.current < 1) return;
       const y = e.touches[0].clientY;
-      if (div.scrollTop === 0 && y > touchStartYRef.current) {
+      const movingDown = y > prevY;
+      prevY = y;
+      lastTouchYRef.current = y;
+      if (div.scrollTop === 0 && movingDown) {
         if (hitTopYRef.current === null) hitTopYRef.current = y;
-        e.preventDefault(); // stop rubber-band / touchcancel
+        e.preventDefault(); // block rubber-band / touchcancel
       }
     };
-    div.addEventListener('touchmove', handler, { passive: false });
-    return () => div.removeEventListener('touchmove', handler);
+
+    const onEnd = (e: TouchEvent) => {
+      if (doIdxRef.current >= 1 && hitTopYRef.current !== null) {
+        if (e.changedTouches[0].clientY - hitTopYRef.current > 30)
+          setDoIdx(i => Math.max(i - 1, -1));
+      }
+      hitTopYRef.current = null;
+    };
+
+    const onCancel = () => {
+      if (doIdxRef.current >= 1 && hitTopYRef.current !== null) {
+        if (lastTouchYRef.current - hitTopYRef.current > 30)
+          setDoIdx(i => Math.max(i - 1, -1));
+      }
+      hitTopYRef.current = null;
+    };
+
+    div.addEventListener('touchstart', onStart,  { passive: true });
+    div.addEventListener('touchmove',  onMove,   { passive: false });
+    div.addEventListener('touchend',   onEnd,    { passive: true });
+    div.addEventListener('touchcancel', onCancel, { passive: true });
+    return () => {
+      div.removeEventListener('touchstart', onStart);
+      div.removeEventListener('touchmove',  onMove);
+      div.removeEventListener('touchend',   onEnd);
+      div.removeEventListener('touchcancel', onCancel);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -648,12 +667,7 @@ export default function Home8() {
           onTouchMove={e => {
             const y = e.touches[0].clientY;
             lastTouchYRef.current = y;
-            if (doIdx >= 1) {
-              // Track the moment scroll first reaches 0 and user keeps pulling down
-              if ((schedScrollRef.current?.scrollTop ?? 0) === 0 && y > touchStartYRef.current && hitTopYRef.current === null)
-                hitTopYRef.current = y;
-              return;
-            }
+            if (doIdx >= 1) return; // scroll div's native listeners own goPrev logic
             const dx = e.touches[0].clientX - touchStartXRef.current;
             const dy = e.touches[0].clientY - touchStartYRef.current;
             if (!swipeDirRef.current && (Math.abs(dx) > 8 || Math.abs(dy) > 8))
@@ -664,14 +678,7 @@ export default function Home8() {
           onTouchEnd={e => {
             const endY = e.changedTouches[0].clientY;
             const dx = e.changedTouches[0].clientX - touchStartXRef.current;
-            if (doIdx >= 1) {
-              // Measure from when scroll first hit 0, not from original touchStart
-              const ref = hitTopYRef.current ?? touchStartYRef.current;
-              if (endY - ref > 30 && (schedScrollRef.current?.scrollTop ?? 0) === 0) goPrev();
-              hitTopYRef.current = null;
-              swipeDirRef.current = null;
-              return;
-            }
+            if (doIdx >= 1) { swipeDirRef.current = null; return; } // scroll div handles goPrev
             const dy = endY - touchStartYRef.current;
             if (swipeDirRef.current === 'h' && doIdx === 0) {
               setLiveX(0);
@@ -688,11 +695,6 @@ export default function Home8() {
             swipeDirRef.current = null;
           }}
           onTouchCancel={() => {
-            if (doIdx >= 1) {
-              const ref = hitTopYRef.current ?? touchStartYRef.current;
-              if (lastTouchYRef.current - ref > 30 && (schedScrollRef.current?.scrollTop ?? 0) === 0) goPrev();
-            }
-            hitTopYRef.current = null;
             setLiveX(0);
             setLiveY(0);
             swipeDirRef.current = null;
