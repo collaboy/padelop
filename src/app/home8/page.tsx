@@ -1357,11 +1357,11 @@ export default function Home8() {
                 <div style={{ borderTop: "1px solid #f0f0f0" }}>
                   {/* Food & Snacks */}
                   <div style={{ borderBottom: "1px solid #f0f0f0" }}>
-                    <button onClick={() => setLogPickerSub(logPickerSub === "nutrition" ? null : "nutrition")} className="w-full flex items-center gap-3 px-5 py-4 active:bg-[#f9f9f9] transition-colors" style={{ background: "none", border: "none", cursor: "pointer" }}>
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(22,163,74,0.1)", color: "#16a34a" }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                    <button onClick={() => setLogPickerSub(logPickerSub === "nutrition" ? null : "nutrition")} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors" style={{ background: "none", border: "none", cursor: "pointer" }}>
+                      <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(22,163,74,0.1)", color: "#16a34a" }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
                       </div>
-                      <span style={{ fontSize: 17, fontWeight: 500, color: "#1a1c1c", flex: 1, textAlign: "left" }}>Food & Snacks</span>
+                      <span style={{ fontSize: 19, fontWeight: 600, color: "#1a1c1c", flex: 1, textAlign: "left" }}>Food & Snacks</span>
                       {mealsToday.length > 0 && <span style={{ fontSize: 12, fontWeight: 600, color: "#2653d4" }}>{mealsToday.length} logged</span>}
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c8ccd0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: logPickerSub === "nutrition" ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
                     </button>
@@ -1387,11 +1387,11 @@ export default function Home8() {
                   </div>
                   {/* Add a note */}
                   <div>
-                    <button onClick={() => setLogPickerSub(logPickerSub === "matchreview" ? null : "matchreview")} className="w-full flex items-center gap-3 px-5 py-4 active:bg-[#f9f9f9] transition-colors" style={{ background: "none", border: "none", cursor: "pointer" }}>
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(107,116,128,0.1)", color: "#6b7480" }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    <button onClick={() => setLogPickerSub(logPickerSub === "matchreview" ? null : "matchreview")} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors" style={{ background: "none", border: "none", cursor: "pointer" }}>
+                      <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(107,116,128,0.1)", color: "#6b7480" }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                       </div>
-                      <span style={{ fontSize: 17, fontWeight: 500, color: "#1a1c1c", flex: 1, textAlign: "left" }}>Add a note</span>
+                      <span style={{ fontSize: 19, fontWeight: 600, color: "#1a1c1c", flex: 1, textAlign: "left" }}>Add a note</span>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c8ccd0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: logPickerSub === "matchreview" ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
                     </button>
                     {logPickerSub === "matchreview" && (
