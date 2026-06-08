@@ -1148,10 +1148,11 @@ export default function Home8() {
         {logPickerOpen && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); }}>
             <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
-            <div className="relative w-full max-w-sm bg-white rounded-[24px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
-              <div className="px-5 pt-5 pb-4" style={{ borderBottom: "1px solid #f0f0f0" }}>
-                <p style={{ fontSize: 18, fontWeight: 800, color: "#1a1c1c", margin: 0 }}>What do you want to log?</p>
+            <div className="relative w-full max-w-sm bg-white rounded-[24px] shadow-2xl" style={{ overflow: "hidden", maxHeight: "82dvh", display: "flex", flexDirection: "column" }} onClick={e => e.stopPropagation()}>
+              <div className="px-5 pt-5 pb-4 flex-shrink-0" style={{ borderBottom: "1px solid #f0f0f0" }}>
+                <p style={{ fontSize: 22, fontWeight: 800, color: "#1a1c1c", margin: 0 }}>What do you want to log?</p>
               </div>
+              <div style={{ overflowY: "auto" }}>
               {(() => {
                 const sleepLbl = (v: number) => ["Very poor","Poor","OK","Good","Excellent"][v-1] ?? `${v}/5`;
                 const rateLbl  = (v: number) => ["Very low","Low","Moderate","Good","High"][v-1] ?? `${v}/5`;
@@ -1215,13 +1216,13 @@ export default function Home8() {
                 const schedExpanded = logPickerExpanded === "schedule";
                 const scheduleRow = schedDue > 0 ? (
                   <div key="schedule" style={{ borderBottom: "1px solid #f0f0f0" }}>
-                    <button onClick={() => setLogPickerExpanded(schedExpanded ? null : "schedule")} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(107,116,128,0.1)", color: "#6b7480" }}>
+                    <button onClick={() => setLogPickerExpanded(schedExpanded ? null : "schedule")} className="w-full flex items-center gap-4 px-5 py-5 active:bg-[#f9f9f9] transition-colors">
+                      <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(107,116,128,0.1)", color: "#6b7480" }}>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                       </div>
                       <div style={{ flex: 1, textAlign: "left" }}>
-                        <p style={{ fontSize: 15, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>Today&apos;s Schedule</p>
-                        <p style={{ fontSize: 12, color: "#9aa5b0", margin: "2px 0 0" }}>{schedDone} of {schedDue} items completed</p>
+                        <p style={{ fontSize: 19, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>Today&apos;s Schedule</p>
+                        <p style={{ fontSize: 14, color: "#9aa5b0", margin: "2px 0 0" }}>{schedDone} of {schedDue} items completed</p>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {schedDone === schedDue ? (
@@ -1259,8 +1260,8 @@ export default function Home8() {
                                 {done && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>}
                               </div>
                               <div style={{ flex: 1 }}>
-                                <p style={{ fontSize: 13, fontWeight: 600, color: done ? "#9aa5b0" : "#1a1c1c", margin: 0, textDecoration: done ? "line-through" : "none" }}>{item.title}</p>
-                                <p style={{ fontSize: 11, color: "#b0b8c1", margin: "1px 0 0" }}>{item.time}</p>
+                                <p style={{ fontSize: 16, fontWeight: 600, color: done ? "#9aa5b0" : "#1a1c1c", margin: 0, textDecoration: done ? "line-through" : "none" }}>{item.title}</p>
+                                <p style={{ fontSize: 13, color: "#b0b8c1", margin: "2px 0 0" }}>{item.time}</p>
                               </div>
                             </button>
                           );
@@ -1273,26 +1274,26 @@ export default function Home8() {
                 return [
                   ...items.slice(0, 1).map((item, i) => (
                     <div key={item.tab} style={{ borderBottom: "1px solid #f0f0f0" }}>
-                      <button onClick={() => setLogPickerExpanded(logPickerExpanded === item.tab ? null : item.tab)} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: item.iconBg, color: item.iconColor }}>{item.icon}</div>
-                        <span className="text-[15px] font-semibold text-[#1a1c1c]">{item.label}</span>
+                      <button onClick={() => setLogPickerExpanded(logPickerExpanded === item.tab ? null : item.tab)} className="w-full flex items-center gap-4 px-5 py-5 active:bg-[#f9f9f9] transition-colors">
+                        <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: item.iconBg, color: item.iconColor }}>{item.icon}</div>
+                        <span className="text-[19px] font-semibold text-[#1a1c1c]">{item.label}</span>
                         <div className="ml-auto flex items-center gap-2 flex-shrink-0">
                           {item.logged && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>}
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c8ccd0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: logPickerExpanded === item.tab ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
                         </div>
                       </button>
-                      {logPickerExpanded === item.tab && (<div style={{ padding: "0 20px 16px 68px" }}><p style={{ fontSize: 13, color: "#9aa5b0", margin: "0 0 12px", lineHeight: 1.5 }}>{item.detail}</p><button onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogWizard(false); setLogTab(item.tab); setLogSheetOpen(true); }} style={{ padding: "7px 18px", borderRadius: 999, background: "#2653d4", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, color: "#fff" }}>Log +</button></div>)}
+                      {logPickerExpanded === item.tab && (<div style={{ padding: "0 20px 18px 20px" }}><p style={{ fontSize: 15, color: "#9aa5b0", margin: "0 0 14px", lineHeight: 1.5 }}>{item.detail}</p><button onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogWizard(false); setLogTab(item.tab); setLogSheetOpen(true); }} style={{ padding: "10px 22px", borderRadius: 999, background: "#2653d4", border: "none", cursor: "pointer", fontSize: 15, fontWeight: 700, color: "#fff" }}>Log +</button></div>)}
                     </div>
                   )),
                   scheduleRow,
                   ...items.slice(1).map((item, i, rest) => (
                     <div key={item.tab} style={{ borderBottom: i < rest.length - 1 ? "1px solid #f0f0f0" : "none" }}>
                       <button onClick={() => setLogPickerExpanded(logPickerExpanded === item.tab ? null : item.tab)} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: item.iconBg, color: item.iconColor }}>{item.icon}</div>
-                        <span className="text-[15px] font-semibold text-[#1a1c1c]">
+                        <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: item.iconBg, color: item.iconColor }}>{item.icon}</div>
+                        <span className="text-[19px] font-semibold text-[#1a1c1c]">
                           {item.label}
                           {item.tab === "hydration" && logHydrationMl > 0 && (
-                            <span style={{ fontSize: 12, fontWeight: 600, color: "#2653d4", marginLeft: 8 }}>
+                            <span style={{ fontSize: 14, fontWeight: 600, color: "#2653d4", marginLeft: 8 }}>
                               {Math.min(100, Math.round(logHydrationMl / LOG_GOAL_ML * 100))}%
                             </span>
                           )}
@@ -1385,9 +1386,9 @@ export default function Home8() {
                             >Save</button>
                           </div>
                         ) : (
-                          <div style={{ padding: "0 20px 16px 68px" }}>
-                            <p style={{ fontSize: 13, color: "#9aa5b0", margin: "0 0 12px", lineHeight: 1.5 }}>{item.detail}</p>
-                            <button onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogWizard(false); setLogTab(item.tab); setLogSheetOpen(true); }} style={{ padding: "7px 18px", borderRadius: 999, background: "#2653d4", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, color: "#fff" }}>Log +</button>
+                          <div style={{ padding: "0 20px 18px 20px" }}>
+                            <p style={{ fontSize: 15, color: "#9aa5b0", margin: "0 0 14px", lineHeight: 1.5 }}>{item.detail}</p>
+                            <button onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogWizard(false); setLogTab(item.tab); setLogSheetOpen(true); }} style={{ padding: "10px 22px", borderRadius: 999, background: "#2653d4", border: "none", cursor: "pointer", fontSize: 15, fontWeight: 700, color: "#fff" }}>Log +</button>
                           </div>
                         )
                       )}
@@ -1396,6 +1397,7 @@ export default function Home8() {
                 ];
 
               })()}
+              </div>
             </div>
           </div>
         )}
