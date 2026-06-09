@@ -823,7 +823,7 @@ export default function Home8() {
                 const nextSlide = schedule[currentIdx + 1];
                 const secsUntilNext = nextSlide ? toMins(nextSlide.time) * 60 - (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) : 0;
                 const fmtTime = (s: number) => { if (s <= 0) return "a moment"; const h = Math.floor(s / 3600), rem = s % 3600, m = Math.floor(rem / 60), sec = rem % 60; if (h > 0) return `${h}h ${m}m ${sec}s`; return m > 0 ? `${m}m ${sec}s` : `${sec}s`; };
-                const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: 1, zIndex: 3, boxShadow: "none" };
+                const cardStyle: React.CSSProperties = { width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", border: "6px solid #00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: 1, zIndex: 3, boxShadow: "none" };
                 const contentOpacity = doIdx === 0 ? 1 : 0.2;
 
                 if (isDone) return (
@@ -845,11 +845,11 @@ export default function Home8() {
                 return (
                   <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => setDoModalOpen(true)}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
-                      <p className="animate-text-glow text-[14px] font-bold tracking-widest uppercase leading-none" style={{ color: "#fff" }}>NOW</p>
-                      <p className="font-bold leading-tight text-center" style={{ color: "#fff", fontSize: "clamp(24px, 7.5vw, 34px)" }}>{s.title}</p>
-                      <p className="leading-none mt-1 mb-1" style={{ color: "rgba(255,255,255,0.9)", fontSize: "clamp(11.7px, 3.42vw, 15.3px)", fontWeight: 900 }}>{s.time} – {nextSlide ? nextSlide.time : "end"}</p>
-                      {s.subtitle && <p className="leading-none text-center mt-0.5" style={{ color: "rgba(255,255,255,0.8)", fontSize: "clamp(15px, 4.8vw, 22px)", fontWeight: 700 }}>{s.subtitle.split(", ").join(" · ")}</p>}
-                      <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 font-semibold px-5 py-2 rounded-full" style={{ background: "#fff", color: isReady ? s.color : "#b0b5ba", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me</button>
+                      <p className="text-[14px] font-bold tracking-widest uppercase leading-none" style={{ color: "#000" }}>NOW</p>
+                      <p className="font-bold leading-tight text-center" style={{ color: "#000", fontSize: "clamp(24px, 7.5vw, 34px)" }}>{s.title}</p>
+                      <p className="leading-none mt-1 mb-1" style={{ color: "#000", fontSize: "clamp(11.7px, 3.42vw, 15.3px)", fontWeight: 900 }}>{s.time} – {nextSlide ? nextSlide.time : "end"}</p>
+                      {s.subtitle && <p className="leading-none text-center mt-0.5" style={{ color: "#000", fontSize: "clamp(15px, 4.8vw, 22px)", fontWeight: 700 }}>{s.subtitle.split(", ").join(" · ")}</p>}
+                      <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 font-semibold px-5 py-2 rounded-full flex items-center gap-1" style={{ background: "#fff", color: isReady ? s.color : "#b0b5ba", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
                     </div>
                   </div>
                 );
@@ -971,7 +971,7 @@ export default function Home8() {
 
                       {/* Background (empty) */}
                       <path d="M50 4 C72 22 94 58 94 84 A44 44 0 0 1 6 84 C6 58 28 22 50 4 Z"
-                        fill="#f0f6ff" stroke="#dce8f8" strokeWidth="2"/>
+                        fill="#dce8f8"/>
 
                       {/* Water fill clipped to teardrop */}
                       <g clipPath="url(#drop-clip-r)">
@@ -987,10 +987,6 @@ export default function Home8() {
                           </g>
                         )}
                       </g>
-
-                      {/* Outline on top */}
-                      <path d="M50 4 C72 22 94 58 94 84 A44 44 0 0 1 6 84 C6 58 28 22 50 4 Z"
-                        fill="none" stroke="#b8d4f4" strokeWidth="2.5"/>
 
                       {/* Amount label inside drop */}
                       <text x="50" y="88" textAnchor="middle" fontSize="15" fontWeight="800"
@@ -1012,7 +1008,7 @@ export default function Home8() {
                           setLogHydrationMl(next);
                           saveLogHydration(next);
                         }}
-                        style={{ width: 44, height: 44, borderRadius: "50%", background: logHydrationMl >= MAX ? "#e8f0e8" : "#2653d4", border: "none", cursor: logHydrationMl >= MAX ? "default" : "pointer", fontSize: 22, fontWeight: 700, color: logHydrationMl >= MAX ? "#16a34a" : "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}
+                        style={{ width: 44, height: 44, borderRadius: "50%", background: logHydrationMl >= MAX ? "#e8f0e8" : "#3b9eff", border: "none", cursor: logHydrationMl >= MAX ? "default" : "pointer", fontSize: 22, fontWeight: 700, color: logHydrationMl >= MAX ? "#16a34a" : "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}
                       >
                         +
                       </button>
