@@ -882,7 +882,7 @@ export default function Home8() {
                     <div ref={schedScrollRef} style={{ flex: 1, overflowY: "auto", minHeight: 0, overscrollBehavior: "none" }}>
                       <div style={{ padding: "16px 0 28px" }}>
                         {/* ── Today4-style schedule list ── */}
-                        <div style={{ background: "#fff", borderRadius: 16, marginBottom: 20 }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
                           {schedule.map((s4, i) => {
                             const isCur4 = i === currentIdx;
                             const isPast4 = !isCur4 && now.getHours() * 60 + now.getMinutes() > toMins(s4.time);
@@ -894,11 +894,11 @@ export default function Home8() {
                                 style={{
                                   position: "relative",
                                   display: "flex", alignItems: "center", gap: 12,
-                                  borderBottom: isCur4 ? "none" : i < schedule.length - 1 ? "1px solid #f4f4f4" : "none",
+                                  background: "#fff", borderRadius: 14,
                                   cursor: detail4 ? "pointer" : "default",
                                   ...(isCur4
-                                    ? { boxShadow: `0 0 0 1.5px ${s4.color}`, borderRadius: 14, padding: "10px 10px", margin: "4px 4px", marginBottom: i < schedule.length - 1 ? 4 : 4 }
-                                    : { padding: "10px 10px 10px 14px" }),
+                                    ? { boxShadow: `0 0 0 1.5px ${s4.color}`, padding: "10px 10px" }
+                                    : { border: "1px solid #f0f0f0", padding: "10px 10px 10px 14px" }),
                                 }}
                                 onClick={() => detail4 && (() => { setSchedModalIdx(i); setDoModalOpen(true); })()}
                               >
