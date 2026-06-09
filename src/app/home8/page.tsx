@@ -916,9 +916,7 @@ export default function Home8() {
                                   const data = new Uint8Array(bins);
                                   analyser.getByteFrequencyData(data);
                                   const W = canvas.width, H = canvas.height;
-                                  const progH = 4; // reserved for progress bar at bottom
-                                  const vizH = H - progH - 4;
-                                  const centerY = vizH / 2;
+                                  const centerY = H / 2;
                                   ctx2d.clearRect(0, 0, W, H);
                                   // Sample raw values then sort highest→center, lowest→edges
                                   const count = 28;
@@ -939,14 +937,18 @@ export default function Home8() {
                                     ctx2d.fillStyle = `rgba(0,0,0,${0.25 + v * 0.75})`;
                                     ctx2d.fillRect(i * (barW + gap), centerY - halfH, barW, halfH * 2);
                                   }
-                                  // Progress bar at bottom
+                                  // Center track line
+                                  ctx2d.fillStyle = "rgba(0,0,0,0.12)";
+                                  ctx2d.fillRect(0, centerY - 0.5, W, 1);
+                                  // Progress dot on center line
                                   const dur = warmupDurationRef.current;
                                   const cur = warmupCurrentTimeRef.current;
                                   const pct = dur > 0 ? cur / dur : 0;
-                                  ctx2d.fillStyle = "rgba(0,0,0,0.15)";
-                                  ctx2d.fillRect(0, H - progH, W, progH);
-                                  ctx2d.fillStyle = "rgba(0,0,0,0.8)";
-                                  ctx2d.fillRect(0, H - progH, W * pct, progH);
+                                  const dotX = pct * W;
+                                  ctx2d.beginPath();
+                                  ctx2d.arc(dotX, centerY, 4, 0, Math.PI * 2);
+                                  ctx2d.fillStyle = "rgba(0,0,0,0.85)";
+                                  ctx2d.fill();
                                   warmupRafRef.current = requestAnimationFrame(draw);
                                 };
                                 draw();
@@ -961,17 +963,17 @@ export default function Home8() {
                           </button>
                           {warmupStarted && (
                             <div style={{ width: "80%", marginTop: 8 }}>
-                              <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 4 }}>
-                                <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.5)" }}>
-                                  {warmupDuration > 0 ? `${Math.floor(warmupDuration / 60)}:${String(Math.round(warmupDuration % 60)).padStart(2, "0")}` : "--:--"}
-                                </span>
-                              </div>
                               <canvas
                                 ref={warmupVizRef}
                                 width={240}
                                 height={56}
-                                style={{ width: "100%", height: 56, borderRadius: 6 }}
+                                style={{ width: "100%", height: 56, borderRadius: 6, display: "block" }}
                               />
+                              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 4 }}>
+                                <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.45)" }}>
+                                  {warmupDuration > 0 ? `${Math.floor(warmupDuration / 60)}:${String(Math.round(warmupDuration % 60)).padStart(2, "0")}` : "--:--"}
+                                </span>
+                              </div>
                             </div>
                           )}
                         </div>
