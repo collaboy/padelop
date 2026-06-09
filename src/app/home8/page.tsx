@@ -904,9 +904,13 @@ export default function Home8() {
                                 const draw = () => {
                                   const canvas = warmupVizRef.current;
                                   const analyser = warmupAnalyserRef.current;
-                                  if (!canvas || !analyser) return;
+                                  // Keep looping even if canvas isn't mounted yet
+                                  if (!canvas || !analyser) {
+                                    warmupRafRef.current = requestAnimationFrame(draw);
+                                    return;
+                                  }
                                   const ctx2d = canvas.getContext("2d");
-                                  if (!ctx2d) return;
+                                  if (!ctx2d) { warmupRafRef.current = requestAnimationFrame(draw); return; }
                                   const bins = analyser.frequencyBinCount;
                                   const data = new Uint8Array(bins);
                                   analyser.getByteFrequencyData(data);
@@ -920,9 +924,7 @@ export default function Home8() {
                                     const v = data[idx] / 255;
                                     const bH = Math.max(2, v * H);
                                     ctx2d.fillStyle = `rgba(0,0,0,${0.3 + v * 0.7})`;
-                                    ctx2d.beginPath();
-                                    ctx2d.roundRect(i * (barW + gap), H - bH, barW, bH, 2);
-                                    ctx2d.fill();
+                                    ctx2d.fillRect(i * (barW + gap), H - bH, barW, bH);
                                   }
                                   warmupRafRef.current = requestAnimationFrame(draw);
                                 };
