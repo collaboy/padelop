@@ -324,6 +324,11 @@ export default function Home8() {
   const [warmupDuration, setWarmupDuration] = useState(0);
   const [warmupStarted, setWarmupStarted] = useState(false);
   const warmupAudioRef = useRef<HTMLAudioElement | null>(null);
+  const warmupAudioCtxRef = useRef<AudioContext | null>(null);
+  const warmupAnalyserRef = useRef<AnalyserNode | null>(null);
+  const warmupSourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const warmupVizRef = useRef<HTMLCanvasElement | null>(null);
+  const warmupRafRef = useRef<number | null>(null);
 
   const matchUploadRef = useRef<HTMLInputElement>(null);
   const schedScrollRef = useRef<HTMLDivElement>(null);
@@ -863,17 +868,65 @@ export default function Home8() {
                               if (!warmupAudioRef.current) {
                                 const a = new Audio("/warmup.mp3");
                                 warmupAudioRef.current = a;
-                                a.onended = () => { setWarmupPlaying(false); setWarmupCurrentTime(0); };
+                                a.onended = () => {
+                                  setWarmupPlaying(false);
+                                  setWarmupCurrentTime(0);
+                                  if (warmupRafRef.current) cancelAnimationFrame(warmupRafRef.current);
+                                  const canvas = warmupVizRef.current;
+                                  if (canvas) canvas.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
+                                };
                                 a.ontimeupdate = () => setWarmupCurrentTime(a.currentTime);
                                 a.onloadedmetadata = () => setWarmupDuration(a.duration);
                               }
                               if (warmupPlaying) {
                                 warmupAudioRef.current.pause();
                                 setWarmupPlaying(false);
+                                if (warmupRafRef.current) cancelAnimationFrame(warmupRafRef.current);
                               } else {
+                                // Wire up Web Audio API on first play (requires user gesture)
+                                if (!warmupAudioCtxRef.current) {
+                                  const ctx = new AudioContext();
+                                  warmupAudioCtxRef.current = ctx;
+                                  const analyser = ctx.createAnalyser();
+                                  analyser.fftSize = 64;
+                                  analyser.smoothingTimeConstant = 0.8;
+                                  warmupAnalyserRef.current = analyser;
+                                  const source = ctx.createMediaElementSource(warmupAudioRef.current!);
+                                  warmupSourceRef.current = source;
+                                  source.connect(analyser);
+                                  analyser.connect(ctx.destination);
+                                }
+                                warmupAudioCtxRef.current?.resume();
                                 warmupAudioRef.current.play();
                                 setWarmupPlaying(true);
                                 setWarmupStarted(true);
+                                // Start visualizer loop
+                                const draw = () => {
+                                  const canvas = warmupVizRef.current;
+                                  const analyser = warmupAnalyserRef.current;
+                                  if (!canvas || !analyser) return;
+                                  const ctx2d = canvas.getContext("2d");
+                                  if (!ctx2d) return;
+                                  const bins = analyser.frequencyBinCount;
+                                  const data = new Uint8Array(bins);
+                                  analyser.getByteFrequencyData(data);
+                                  const W = canvas.width, H = canvas.height;
+                                  ctx2d.clearRect(0, 0, W, H);
+                                  const count = 28;
+                                  const gap = 2;
+                                  const barW = (W - gap * (count - 1)) / count;
+                                  for (let i = 0; i < count; i++) {
+                                    const idx = Math.floor(i * bins / count);
+                                    const v = data[idx] / 255;
+                                    const bH = Math.max(2, v * H);
+                                    ctx2d.fillStyle = `rgba(0,0,0,${0.3 + v * 0.7})`;
+                                    ctx2d.beginPath();
+                                    ctx2d.roundRect(i * (barW + gap), H - bH, barW, bH, 2);
+                                    ctx2d.fill();
+                                  }
+                                  warmupRafRef.current = requestAnimationFrame(draw);
+                                };
+                                draw();
                               }
                             }}
                             style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
@@ -893,6 +946,12 @@ export default function Home8() {
                                   {warmupDuration > 0 ? `${Math.floor(warmupDuration / 60)}:${String(Math.round(warmupDuration % 60)).padStart(2, "0")}` : "--:--"}
                                 </span>
                               </div>
+                              <canvas
+                                ref={warmupVizRef}
+                                width={240}
+                                height={40}
+                                style={{ width: "100%", height: 40, marginTop: 8, borderRadius: 6 }}
+                              />
                             </div>
                           )}
                         </div>
