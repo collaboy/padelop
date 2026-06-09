@@ -1368,13 +1368,6 @@ export default function Home8() {
                       ? `${hydrationData.litres} · ${hydrationData.urine} urine · ${hydrationData.quality}`
                       : "Aim for 2–3L. The single biggest lever on your energy.",
                   },
-                  ...(dayType === "match" ? [{
-                    label: "Pre-Match Routine", tab: "training" as const,
-                    iconBg: "rgba(245,158,11,0.1)", iconColor: "#f59e0b",
-                    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
-                    logged: readinessItems[3],
-                    detail: "",
-                  }] : []),
                   {
                     label: "Night Check-in", tab: "wellbeing" as const,
                     iconBg: "rgba(236,72,153,0.1)", iconColor: "#ec4899",
@@ -1447,46 +1440,6 @@ export default function Home8() {
                               <span style={{ fontSize: 10, color: "#b0b8c1" }}>2.5L</span>
                               <span style={{ fontSize: 10, color: "#c8ccd0" }}>3L+</span>
                             </div>
-                          </div>
-                        ) : item.tab === "training" ? (
-                          <div style={{ padding: "4px 20px 16px 20px" }}>
-                            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9aa5b0", margin: "0 0 10px" }}>What did you do?</p>
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
-                              {["Dynamic warmup", "Activation drills", "Ball hit-up", "Visualization", "Breathing"].map(act => {
-                                const on = preMatchChecked.includes(act);
-                                return (
-                                  <button key={act} onClick={() => setPreMatchChecked(p => on ? p.filter(x => x !== act) : [...p, act])}
-                                    style={{ padding: "6px 14px", borderRadius: 999, border: `1.5px solid ${on ? "#f59e0b" : "#e8eaed"}`, background: on ? "rgba(245,158,11,0.1)" : "#f9f9f9", color: on ? "#b45309" : "#6b7480", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-                                    {act}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9aa5b0", margin: "0 0 10px" }}>Duration</p>
-                            <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-                              {["15 min", "30 min", "45 min+"].map(d => {
-                                const on = preMatchDuration === d;
-                                return (
-                                  <button key={d} onClick={() => setPreMatchDuration(on ? "" : d)}
-                                    style={{ flex: 1, padding: "8px 0", borderRadius: 12, border: `1.5px solid ${on ? "#f59e0b" : "#e8eaed"}`, background: on ? "rgba(245,158,11,0.1)" : "#f9f9f9", color: on ? "#b45309" : "#6b7480", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-                                    {d}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                            <button
-                              onClick={() => {
-                                try {
-                                  const entry = { activities: preMatchChecked, duration: preMatchDuration, ts: new Date().toISOString() };
-                                  const prev = JSON.parse(localStorage.getItem("padelop:prematch-logs") || "[]");
-                                  localStorage.setItem("padelop:prematch-logs", JSON.stringify([entry, ...prev].slice(0, 50)));
-                                } catch {}
-                                setLogPickerExpanded(null);
-                              }}
-                              disabled={preMatchChecked.length === 0 && !preMatchDuration}
-                              style={{ padding: "8px 22px", borderRadius: 999, background: (preMatchChecked.length > 0 || preMatchDuration) ? "#f59e0b" : "#e8eaed", border: "none", cursor: (preMatchChecked.length > 0 || preMatchDuration) ? "pointer" : "default", fontSize: 13, fontWeight: 700, color: (preMatchChecked.length > 0 || preMatchDuration) ? "#fff" : "#b0b8c1" }}>
-                              Save
-                            </button>
                           </div>
                         ) : (
                           <div style={{ padding: "0 20px 18px 20px" }}>

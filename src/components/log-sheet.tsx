@@ -75,7 +75,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
   const [trainingLog, setTrainingLog] = useState({ sessionType: [] as string[], drillFocus: [] as string[], duration: "", intensity: "" });
   const [hydrationLog, setHydrationLog] = useState({ litres: "", timing: [] as string[], quality: "", urine: "" });
   const [nutritionLog, setNutritionLog] = useState({ proteinRating: "", foods: [] as string[], postMatch: "", quality: "" });
-  const [matchReview, setMatchReview] = useState({ feeling: "", result: "", opponent: "", opponentNames: "", energy: "", injury: "", wellDone: [] as string[], improved: [] as string[], mentalBefore: "", mentalDuring: "", mentalAfter: "" });
+  const [matchReview, setMatchReview] = useState({ feeling: "", result: "", opponent: "", opponentNames: "", energy: "", injury: "", wellDone: [] as string[], improved: [] as string[], mentalBefore: "", mentalDuring: "", mentalAfter: "", warmup: "" });
 
   const [morningStep, setMorningStep] = useState(0);
   const [morningData, setMorningData] = useState<Record<string, string | number>>({});
@@ -852,6 +852,17 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">Did you warm up?</p>
+              <div className="flex gap-3">
+                {[{ v: "none", label: "No warmup" }, { v: "quick", label: "Quick" }, { v: "full", label: "Full warmup" }].map(({ v, label }) => {
+                  const sel = matchReview.warmup === v;
+                  return <button key={v} onClick={() => setMatchReview(r => ({ ...r, warmup: v }))}
+                    className="flex-1 py-3 rounded-2xl border-2 text-[13px] font-bold transition-all active:scale-95"
+                    style={{ borderColor: sel ? PURPLE : "#e2e2e2", background: sel ? "#f5f3ff" : "#f9f9f9", color: sel ? PURPLE : "#4a5050" }}>{label}</button>;
+                })}
               </div>
             </div>
             <div>
