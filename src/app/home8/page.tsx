@@ -955,7 +955,7 @@ export default function Home8() {
                 const innerH = 118; // usable vertical fill space inside the drop
                 const fillH  = pct * innerH;
                 const waterY = 130 - fillH; // top of water rect
-                const waveAmp = logHydrationMl > 0 ? 7 : 0;
+                const waveAmp = logHydrationMl > 0 ? 3 : 0;
                 const labelMl = logHydrationMl >= 1000
                   ? `${+(logHydrationMl / 1000).toFixed(1)}L`
                   : `${logHydrationMl}ml`;
@@ -979,9 +979,9 @@ export default function Home8() {
                         <rect x="-10" y={waterY + waveAmp} width="120" height={fillH + 10} fill="#3b9eff" opacity="0.85"/>
                         {/* Animated wave at water surface */}
                         {logHydrationMl > 0 && (
-                          <g style={{ animation: "water-wave 2.4s linear infinite", willChange: "transform" }}>
+                          <g style={{ animation: "water-wave 5s linear infinite", willChange: "transform", transformBox: "fill-box" }}>
                             <path
-                              d={`M-100 ${waterY} Q-75 ${waterY - waveAmp} -50 ${waterY} Q-25 ${waterY + waveAmp} 0 ${waterY} Q25 ${waterY - waveAmp} 50 ${waterY} Q75 ${waterY + waveAmp} 100 ${waterY} Q125 ${waterY - waveAmp} 150 ${waterY} Q175 ${waterY + waveAmp} 200 ${waterY} L200 130 L-100 130 Z`}
+                              d={`M0 ${waterY} Q25 ${waterY - waveAmp} 50 ${waterY} Q75 ${waterY + waveAmp} 100 ${waterY} Q125 ${waterY - waveAmp} 150 ${waterY} Q175 ${waterY + waveAmp} 200 ${waterY} L200 130 L0 130 Z`}
                               fill="#3b9eff" opacity="0.85"
                             />
                           </g>
