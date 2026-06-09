@@ -882,6 +882,46 @@ export default function Home8() {
                     <div style={{ height: 1, background: "#dfe3e7", flexShrink: 0 }} />
                     <div ref={schedScrollRef} style={{ flex: 1, overflowY: "auto", minHeight: 0, overscrollBehavior: "none" }}>
                       <div style={{ padding: "16px 20px 28px" }}>
+                        {/* ── Today4-style schedule list ── */}
+                        <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", marginBottom: 20, border: "1px solid #e8e8e8" }}>
+                          {schedule.map((s4, i) => {
+                            const isCur4 = i === currentIdx;
+                            const isPast4 = !isCur4 && now.getHours() * 60 + now.getMinutes() > toMins(s4.time);
+                            const detail4 = SCHEDULE_DETAILS[s4.title];
+                            return (
+                              <div
+                                key={i}
+                                style={{
+                                  display: "flex", alignItems: "center", gap: 12,
+                                  borderBottom: isCur4 ? "none" : i < schedule.length - 1 ? "1px solid #f4f4f4" : "none",
+                                  cursor: detail4 ? "pointer" : "default",
+                                  ...(isCur4
+                                    ? { boxShadow: `0 0 0 1.5px ${s4.color}`, borderRadius: 14, padding: "10px 10px", margin: "4px 4px", marginBottom: i < schedule.length - 1 ? 4 : 4 }
+                                    : { padding: "10px 10px 10px 14px" }),
+                                }}
+                                onClick={() => detail4 && (() => { setSchedModalIdx(i); setDoModalOpen(true); })()}
+                              >
+                                <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: isPast4 ? "#f0f0f0" : `${s4.color}18` }}>
+                                  {isCur4
+                                    ? <div className="animate-breathe" style={{ width: 12, height: 12, borderRadius: "50%", background: s4.color, ["--glow" as string]: s4.color } as React.CSSProperties} />
+                                    : <div style={{ width: 12, height: 12, borderRadius: "50%", background: isPast4 ? "#d0d3d6" : s4.color }} />
+                                  }
+                                </div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", margin: "0 0 2px", color: isPast4 ? "#c4c7c7" : s4.color }}>{s4.time}</p>
+                                  <p style={{ fontSize: 16, fontWeight: 600, margin: 0, lineHeight: 1.25, color: isPast4 ? "#a0a5aa" : "#1a1c1c" }}>{s4.title}</p>
+                                  {s4.subtitle && <p style={{ fontSize: 13, margin: "2px 0 0", color: isPast4 ? "#c4c7c7" : "#6b7480" }}>{s4.subtitle}</p>}
+                                </div>
+                                {detail4 && (
+                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                                    <path d="M9 18l6-6-6-6"/>
+                                  </svg>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+
                         {schedule.map((item, idx, arr) => {
                           const isLast = idx === arr.length - 1;
                           const blockMins = toMins(item.time);
