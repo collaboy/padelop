@@ -708,7 +708,7 @@ export default function Home8() {
       {/* Fixed triangle — outside all overflow constraints, tracks current schedule item */}
       {schedTriangleTop !== null && (
         <div style={{
-          position: "fixed", left: 3, top: schedTriangleTop, transform: "translateY(-50%)",
+          position: "fixed", left: 9, top: schedTriangleTop, transform: "translateY(-50%)",
           zIndex: 200, pointerEvents: "none",
           width: 0, height: 0,
           borderTop: "6px solid transparent",
