@@ -62,6 +62,11 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
       setNightStep(0);
       setNightData({});
       setNightHabits([]);
+      try {
+        const hq = JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null");
+        const today = new Date().toISOString().slice(0, 10);
+        setNightQuickMl(hq?.date === today ? (hq.ml ?? 0) : 0);
+      } catch { setNightQuickMl(0); }
     } else {
       setSub(null);
       setLogMethod(null);
@@ -83,6 +88,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
   const [nightStep, setNightStep] = useState(0);
   const [nightData, setNightData] = useState<Record<string, string | number>>({});
   const [nightHabits, setNightHabits] = useState<string[]>([]);
+  const [nightQuickMl, setNightQuickMl] = useState(0);
 
   const todayYMD = new Date().toISOString().slice(0, 10);
 
@@ -187,6 +193,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
         ]
       },
       { key: "habits", type: "habits", question: "Which habits did you do today?" },
+      { key: "hydrationQuick", type: "hydration-quick", question: "Update your water intake?" },
       { key: "bedtime", type: "opts", question: "Bedtime tonight?", opts: ["9pm","10pm","10:30pm","11pm","After 11"] },
     ] as const;
     const totalNightSteps = NIGHT_STEPS.length;
@@ -394,6 +401,41 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
                   className="w-full rounded-2xl text-white text-[16px] font-bold transition-all active:scale-95"
                   style={{ height: 52, background: PURPLE }}>
                   Done →
+                </button>
+              </div>
+            )}
+            {nightStepDef.type === "hydration-quick" && (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
+                {/* ml display */}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                  <p style={{ fontSize: "clamp(48px,15vw,64px)", fontWeight: 800, color: "#3b9eff", margin: 0, lineHeight: 1, letterSpacing: "-0.03em" }}>
+                    {nightQuickMl >= 1000 ? `${+(nightQuickMl / 1000).toFixed(1)}L` : `${nightQuickMl}ml`}
+                  </p>
+                  <p style={{ fontSize: 13, color: "#9aa5b0", margin: 0 }}>of 3L goal · {Math.min(100, Math.round(nightQuickMl / 3000 * 100))}%</p>
+                </div>
+                {/* +/− buttons */}
+                <div style={{ display: "flex", gap: 16 }}>
+                  <button
+                    onClick={() => setNightQuickMl(m => Math.max(0, m - 250))}
+                    style={{ width: 64, height: 64, borderRadius: "50%", border: "none", background: "#f4f4f6", fontSize: 28, fontWeight: 700, color: "#1a1c1c", cursor: "pointer" }}>−</button>
+                  <button
+                    onClick={() => setNightQuickMl(m => Math.min(5000, m + 250))}
+                    style={{ width: 64, height: 64, borderRadius: "50%", border: "none", background: "#3b9eff", fontSize: 28, fontWeight: 700, color: "#fff", cursor: "pointer" }}>+</button>
+                </div>
+                <p style={{ fontSize: 12, color: "#b0b8c1", margin: 0 }}>Each tap = 250ml</p>
+                {/* Done */}
+                <button
+                  onClick={() => {
+                    try {
+                      const today = new Date().toISOString().slice(0, 10);
+                      localStorage.setItem("padelop:hydration-quick", JSON.stringify({ date: today, ml: nightQuickMl }));
+                      window.dispatchEvent(new Event("storage"));
+                    } catch {}
+                    nightAdvance();
+                  }}
+                  className="w-full rounded-2xl text-white text-[16px] font-bold transition-all active:scale-95"
+                  style={{ height: 52, background: PURPLE }}>
+                  Save & continue →
                 </button>
               </div>
             )}
