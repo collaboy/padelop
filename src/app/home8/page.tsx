@@ -856,7 +856,6 @@ export default function Home8() {
 
               {/* Card 2: today's schedule */}
               {(() => {
-                const curMinsSched = now.getHours() * 60 + now.getMinutes();
                 return (
                   <div key="sched" style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "white", display: "flex", flexDirection: "column", opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === 1 ? 2 : 1, height: "calc(100dvh - 4rem - 44px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none" }}>
                     {/* Entire header is the drag zone — easy to swipe down back to hero */}
@@ -891,6 +890,7 @@ export default function Home8() {
                             return (
                               <div
                                 key={i}
+                                ref={isCur4 ? schedCurrentRef : undefined}
                                 style={{
                                   display: "flex", alignItems: "center", gap: 12,
                                   borderBottom: isCur4 ? "none" : i < schedule.length - 1 ? "1px solid #f4f4f4" : "none",
@@ -921,59 +921,6 @@ export default function Home8() {
                             );
                           })}
                         </div>
-
-                        {schedule.map((item, idx, arr) => {
-                          const isLast = idx === arr.length - 1;
-                          const blockMins = toMins(item.time);
-                          const nextMins = !isLast ? toMins(arr[idx + 1].time) : 24 * 60;
-                          const isCurrentSegment = !isLast && curMinsSched >= blockMins && curMinsSched < nextMins;
-                          const segmentPct = isCurrentSegment ? ((curMinsSched - blockMins) / (nextMins - blockMins)) * 100 : 0;
-                          const isCur = idx === currentIdx;
-                          const isPast = !isCur && curMinsSched > toMins(item.time);
-                          const detail = SCHEDULE_DETAILS[item.title];
-                          const clickable = !!(detail || item.isDrill);
-                          return (
-                            <div key={idx} ref={isCur ? schedCurrentRef : undefined} style={{ display: "flex", gap: 14 }}>
-                              <div style={{ width: 56, flexShrink: 0, paddingTop: 3 }}>
-                                <p style={{ fontSize: 15, fontWeight: 700, color: "#6b7480", textAlign: "right", lineHeight: 1, margin: 0 }}>{item.time}</p>
-                              </div>
-                              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
-                                <div style={{ width: 10, height: 10, borderRadius: "50%", marginTop: 4, flexShrink: 0, background: isPast ? "#d0d3d6" : item.color }} />
-                                {!isLast && (
-                                  <div style={{ position: "relative", width: 2, flex: 1, background: "#dfe3e7", minHeight: 36, overflow: "visible" }}>
-                                    {isCurrentSegment && (
-                                      <div style={{ position: "absolute", display: "flex", alignItems: "center", top: `${segmentPct}%`, right: 0, transform: "translateY(-50%)" }}>
-                                        <span className="animate-time-blink" style={{ fontSize: 15, fontWeight: 700, color: "#fff", padding: "3px 9px", borderRadius: 4, marginRight: 2, whiteSpace: "nowrap", background: "#2653d4" }}>
-                                          {pad(now.getHours())}:{pad(now.getMinutes())}
-                                        </span>
-                                        <svg width="6" height="8" viewBox="0 0 6 8"><polygon points="0,0 6,4 0,8" fill="#171c1f" /></svg>
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                              <button
-                                style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, textAlign: "left", background: "none", border: "none", cursor: clickable ? "pointer" : "default", padding: "0 0 24px" }}
-                                onClick={() => {
-                                  if (item.isDrill || detail) {
-                                    setSchedModalIdx(idx);
-                                    setDoModalOpen(true);
-                                  }
-                                }}
-                              >
-                                <div style={{ minWidth: 0 }}>
-                                  <p style={{ fontSize: 21, fontWeight: isCur ? 700 : 500, color: isPast ? "#a0a5aa" : "#1a1c1c", margin: 0, lineHeight: 1.25 }}>{item.title}</p>
-                                  {item.subtitle && <p style={{ fontSize: 16, color: "#6b7480", margin: "4px 0 0", lineHeight: 1.4 }}>{item.subtitle}</p>}
-                                </div>
-                                {clickable && (
-                                  <svg width="12" height="12" viewBox="0 0 10 10" fill="none" stroke="#dfe3e7" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 5 }}>
-                                    <line x1="5" y1="1" x2="5" y2="9" /><line x1="1" y1="5" x2="9" y2="5" />
-                                  </svg>
-                                )}
-                              </button>
-                            </div>
-                          );
-                        })}
 
                       </div>
                     </div>
