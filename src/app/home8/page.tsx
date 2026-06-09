@@ -920,13 +920,21 @@ export default function Home8() {
                                   const vizH = H - progH - 4;
                                   const centerY = vizH / 2;
                                   ctx2d.clearRect(0, 0, W, H);
-                                  // Bars growing from center up and down
+                                  // Sample raw values then sort highest→center, lowest→edges
                                   const count = 28;
                                   const gap = 2;
                                   const barW = (W - gap * (count - 1)) / count;
+                                  const raw: number[] = [];
+                                  for (let i = 0; i < count; i++) raw.push(data[Math.floor(i * bins / count)] / 255);
+                                  raw.sort((a, b) => b - a); // descending
+                                  const vals = new Array(count).fill(0);
                                   for (let i = 0; i < count; i++) {
-                                    const idx = Math.floor(i * bins / count);
-                                    const v = data[idx] / 255;
+                                    const offset = Math.floor(i / 2);
+                                    if (i % 2 === 0) vals[Math.floor(count / 2) + offset] = raw[i];
+                                    else vals[Math.floor(count / 2) - 1 - offset] = raw[i];
+                                  }
+                                  for (let i = 0; i < count; i++) {
+                                    const v = vals[i];
                                     const halfH = Math.max(1, v * centerY);
                                     ctx2d.fillStyle = `rgba(0,0,0,${0.25 + v * 0.75})`;
                                     ctx2d.fillRect(i * (barW + gap), centerY - halfH, barW, halfH * 2);
