@@ -422,7 +422,14 @@ export default function Home8() {
         if (raw) {
           const m = JSON.parse(raw);
           if (m.date && m.time) {
-            if (m.date >= todayD) {
+            // Match is today-or-future: check if it has already ended (today, past end time)
+            const nowD = new Date();
+            let matchEnded = m.date < todayD;
+            if (!matchEnded && m.date === todayD && m.time) {
+              const [mH, mM] = (m.time as string).split(":").map(Number);
+              matchEnded = nowD.getHours() * 60 + nowD.getMinutes() >= mH * 60 + mM + 90;
+            }
+            if (!matchEnded) {
               setMatch({ date: m.date, time: m.time, club: m.club || undefined, players: [m.player_1, m.player_2, m.player_3, m.player_4].filter(Boolean) });
             } else {
               setMatch(null);
@@ -625,14 +632,22 @@ export default function Home8() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [doModalOpen, drillContext, schedModalIdx]);
 
-  // Detect when a loaded future match transitions to past while the app is open
+  // Detect when a match has ended (same day or previous day) and prompt review
   useEffect(() => {
     if (!match || postMatchOpen) return;
     const matchDay = match.date;
     const todayDay = now.toISOString().slice(0, 10);
-    if (matchDay >= todayDay) return;
-    // Match day has passed
-    setMatch(null);
+
+    // Check if match has ended: either on a previous day, or today past match time + 90 min
+    let matchEnded = matchDay < todayDay;
+    if (!matchEnded && matchDay === todayDay && match.time) {
+      const [mH, mM] = match.time.split(":").map(Number);
+      const matchEndMins = mH * 60 + mM + 90;
+      const nowMins = now.getHours() * 60 + now.getMinutes();
+      matchEnded = nowMins >= matchEndMins;
+    }
+    if (!matchEnded) return;
+
     try {
       const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
       const alreadyReviewed = reviews.some((r: { ts?: string }) => r.ts?.slice(0, 10) === match.date);
