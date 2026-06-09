@@ -335,6 +335,11 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
       const raw = localStorage.getItem(PROFILE_KEY);
       if (raw) setProfile(JSON.parse(raw));
     } catch {}
+    try {
+      const g = JSON.parse(localStorage.getItem("padelop:gear") || "null");
+      if (g?.racketName) setRacketName(g.racketName);
+      if (g?.racketType) setRacketType(g.racketType);
+    } catch {}
 
     // Matches
     try {
@@ -381,6 +386,9 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
   }, []);
 
   const [profileOpen, setProfileOpen] = useState(false);
+  const [gearEditOpen, setGearEditOpen] = useState(false);
+  const [racketName, setRacketName] = useState("Wilson Carbon Pro v2");
+  const [racketType, setRacketType] = useState("Power & Control Hybrid");
 
   // Profile helpers
   const setField = (k: keyof Profile, v: string) => { setSaved(false); setProfile(p => ({ ...p, [k]: v })); };
@@ -459,6 +467,127 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
 
   return (
     <div className="px-4 pt-6 pb-20 max-w-lg mx-auto flex flex-col gap-6">
+
+      {/* ── New Profile Header ───────────────────────────────────────────── */}
+      <section style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 16 }}>
+        <div style={{ position: "relative" }}>
+          <div style={{ width: 96, height: 96, borderRadius: "50%", overflow: "hidden", boxShadow: "0px 4px 20px rgba(0,0,0,0.08)", border: "4px solid #fff", background: profile.avatar ? "transparent" : "#2653d4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {profile.avatar ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={profile.avatar} alt="User profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            ) : (
+              <span style={{ fontSize: 28, fontWeight: 800, color: "#fff" }}>
+                {profile.name ? profile.name.trim().split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "?"}
+              </span>
+            )}
+          </div>
+          <label htmlFor="top-avatar-upload" style={{ position: "absolute", bottom: 0, right: 0, background: "#000", color: "#fff", width: 32, height: 32, borderRadius: "50%", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </label>
+          <input id="top-avatar-upload" type="file" accept="image/*" className="hidden" onChange={e => { handleAvatar(e); save(); }} />
+        </div>
+        <div>
+          <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1a1c1c", margin: 0, lineHeight: "32px" }}>{profile.name || "Add your name"}</h1>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 4 }}>
+            {profile.level && <span style={{ background: "#caecbc", color: "#496640", padding: "2px 12px", borderRadius: 999, fontSize: 12, fontWeight: 500, letterSpacing: "0.05em" }}>Level {profile.level}</span>}
+            {profile.position && <span style={{ color: "#444748", fontSize: 12, fontWeight: 500 }}>• {profile.position}</span>}
+          </div>
+        </div>
+      </section>
+
+      {/* ── My Gear ─────────────────────────────────────────────────────── */}
+      <section style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <p style={{ fontSize: 20, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>My Gear</p>
+          <button onClick={() => setGearEditOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 500, color: "#496640" }}>{gearEditOpen ? "Done" : "Edit"}</button>
+        </div>
+        <div style={{ background: "#fff", borderRadius: 24, overflow: "hidden", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(196,199,199,0.1)" }}>
+          <div style={{ padding: 20, display: "flex", alignItems: "center", gap: 24 }}>
+            <div style={{ width: 80, height: 80, flexShrink: 0, background: "#f9f9f9", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            </div>
+            <div style={{ flex: 1 }}>
+              <span style={{ background: "rgba(202,236,188,0.3)", color: "#496640", padding: "2px 8px", borderRadius: 6, fontSize: 12, fontWeight: 500, display: "inline-block", marginBottom: 8 }}>Current Racket</span>
+              <p style={{ fontSize: 20, fontWeight: 600, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{racketName || "—"}</p>
+              <p style={{ fontSize: 15, color: "#444748", margin: "4px 0 0" }}>{racketType || "Add a description"}</p>
+            </div>
+          </div>
+          {gearEditOpen && (
+            <div style={{ borderTop: "1px solid #f0f0f0", padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+              <div>
+                <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9aa5b0", margin: "0 0 6px" }}>Racket name</p>
+                <input
+                  type="text" value={racketName} onChange={e => setRacketName(e.target.value)}
+                  placeholder="e.g. Bullpadel Vertex"
+                  style={{ width: "100%", padding: "10px 14px", borderRadius: 12, border: "2px solid #e2e2e2", fontSize: 15, fontWeight: 500, color: "#1a1c1c", outline: "none", background: "#f9f9f9" }}
+                />
+              </div>
+              <div>
+                <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9aa5b0", margin: "0 0 6px" }}>Type / description</p>
+                <input
+                  type="text" value={racketType} onChange={e => setRacketType(e.target.value)}
+                  placeholder="e.g. Control, Power, Hybrid"
+                  style={{ width: "100%", padding: "10px 14px", borderRadius: 12, border: "2px solid #e2e2e2", fontSize: 15, fontWeight: 500, color: "#1a1c1c", outline: "none", background: "#f9f9f9" }}
+                />
+              </div>
+              <button
+                onClick={() => { localStorage.setItem("padelop:gear", JSON.stringify({ racketName, racketType })); setGearEditOpen(false); }}
+                style={{ padding: "12px", borderRadius: 14, background: "#2653d4", border: "none", cursor: "pointer", fontSize: 15, fontWeight: 700, color: "#fff" }}
+              >
+                Save
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ── Stats Bento ─────────────────────────────────────────────────── */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        {[
+          { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#496640" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>, label: "Matches", value: reviews.length || 24 },
+          { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#496640" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, label: "Win Rate", value: winRate !== null ? `${winRate}%` : "68%" },
+        ].map(({ icon, label, value }) => (
+          <div key={label} style={{ background: "#fff", padding: 20, borderRadius: 24, border: "1px solid rgba(196,199,199,0.1)", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)" }}>
+            <div style={{ marginBottom: 8 }}>{icon}</div>
+            <p style={{ fontSize: 12, fontWeight: 500, color: "#444748", margin: "0 0 4px", letterSpacing: "0.05em" }}>{label}</p>
+            <p style={{ fontSize: 24, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>{value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Preferences ─────────────────────────────────────────────────── */}
+      <section style={{ background: "#fff", borderRadius: 24, overflow: "hidden", border: "1px solid rgba(196,199,199,0.1)", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)" }}>
+        <div style={{ padding: "16px 24px" }}>
+          <p style={{ fontSize: 20, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>Preferences</p>
+        </div>
+        {[
+          { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>, label: "Notifications", sub: null },
+          { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>, label: "Privacy & Security", sub: null },
+          { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>, label: "Language", sub: "English (US)" },
+          { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>, label: "Support Center", sub: null },
+        ].map(({ icon, label, sub }, i, arr) => (
+          <button key={label} style={{ width: "100%", padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", borderTop: i > 0 ? "1px solid rgba(196,199,199,0.3)" : "none", cursor: "pointer" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              <span style={{ color: "#444748" }}>{icon}</span>
+              <div style={{ textAlign: "left" }}>
+                <span style={{ fontSize: 17, color: "#1a1c1c", display: "block" }}>{label}</span>
+                {sub && <span style={{ fontSize: 12, color: "#444748", letterSpacing: "0.05em" }}>{sub}</span>}
+              </div>
+            </div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#747878" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        ))}
+      </section>
+
+      {/* ── Log Out ──────────────────────────────────────────────────────── */}
+      <div style={{ paddingTop: 16 }}>
+        <button style={{ width: "100%", padding: "16px", fontSize: 20, fontWeight: 600, color: "#ba1a1a", border: "1px solid rgba(186,26,26,0.2)", borderRadius: 16, background: "none", cursor: "pointer" }}>
+          Log Out
+        </button>
+        <p style={{ textAlign: "center", color: "#c4c7c7", fontSize: 12, fontWeight: 500, letterSpacing: "0.05em", marginTop: 32 }}>Padelop! Version 2.4.1 (Stable)</p>
+      </div>
+
+      <div style={{ height: 1, background: "#e8eaed" }} />
 
       {/* ── Streak banner ────────────────────────────────────────────────── */}
       <div className="bg-white rounded-[20px] px-5 py-4 flex items-center gap-4" style={{ boxShadow: "0px 4px 24px rgba(0,0,0,0.10)" }}>
