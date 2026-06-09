@@ -329,6 +329,8 @@ export default function Home8() {
   const warmupSourceRef = useRef<MediaElementAudioSourceNode | null>(null);
   const warmupVizRef = useRef<HTMLCanvasElement | null>(null);
   const warmupRafRef = useRef<number | null>(null);
+  const warmupCurrentTimeRef = useRef(0);
+  const warmupDurationRef = useRef(0);
 
   const matchUploadRef = useRef<HTMLInputElement>(null);
   const schedScrollRef = useRef<HTMLDivElement>(null);
@@ -875,8 +877,8 @@ export default function Home8() {
                                   const canvas = warmupVizRef.current;
                                   if (canvas) canvas.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
                                 };
-                                a.ontimeupdate = () => setWarmupCurrentTime(a.currentTime);
-                                a.onloadedmetadata = () => setWarmupDuration(a.duration);
+                                a.ontimeupdate = () => { setWarmupCurrentTime(a.currentTime); warmupCurrentTimeRef.current = a.currentTime; };
+                                a.onloadedmetadata = () => { setWarmupDuration(a.duration); warmupDurationRef.current = a.duration; };
                               }
                               if (warmupPlaying) {
                                 warmupAudioRef.current.pause();
@@ -904,7 +906,6 @@ export default function Home8() {
                                 const draw = () => {
                                   const canvas = warmupVizRef.current;
                                   const analyser = warmupAnalyserRef.current;
-                                  // Keep looping even if canvas isn't mounted yet
                                   if (!canvas || !analyser) {
                                     warmupRafRef.current = requestAnimationFrame(draw);
                                     return;
@@ -915,17 +916,29 @@ export default function Home8() {
                                   const data = new Uint8Array(bins);
                                   analyser.getByteFrequencyData(data);
                                   const W = canvas.width, H = canvas.height;
+                                  const progH = 4; // reserved for progress bar at bottom
+                                  const vizH = H - progH - 4;
+                                  const centerY = vizH / 2;
                                   ctx2d.clearRect(0, 0, W, H);
+                                  // Bars growing from center up and down
                                   const count = 28;
                                   const gap = 2;
                                   const barW = (W - gap * (count - 1)) / count;
                                   for (let i = 0; i < count; i++) {
                                     const idx = Math.floor(i * bins / count);
                                     const v = data[idx] / 255;
-                                    const bH = Math.max(2, v * H);
-                                    ctx2d.fillStyle = `rgba(0,0,0,${0.3 + v * 0.7})`;
-                                    ctx2d.fillRect(i * (barW + gap), H - bH, barW, bH);
+                                    const halfH = Math.max(1, v * centerY);
+                                    ctx2d.fillStyle = `rgba(0,0,0,${0.25 + v * 0.75})`;
+                                    ctx2d.fillRect(i * (barW + gap), centerY - halfH, barW, halfH * 2);
                                   }
+                                  // Progress bar at bottom
+                                  const dur = warmupDurationRef.current;
+                                  const cur = warmupCurrentTimeRef.current;
+                                  const pct = dur > 0 ? cur / dur : 0;
+                                  ctx2d.fillStyle = "rgba(0,0,0,0.15)";
+                                  ctx2d.fillRect(0, H - progH, W, progH);
+                                  ctx2d.fillStyle = "rgba(0,0,0,0.8)";
+                                  ctx2d.fillRect(0, H - progH, W * pct, progH);
                                   warmupRafRef.current = requestAnimationFrame(draw);
                                 };
                                 draw();
@@ -940,10 +953,7 @@ export default function Home8() {
                           </button>
                           {warmupStarted && (
                             <div style={{ width: "80%", marginTop: 8 }}>
-                              <div style={{ position: "relative", height: 3, borderRadius: 2, background: "rgba(0,0,0,0.15)" }}>
-                                <div style={{ position: "absolute", left: 0, top: 0, height: "100%", borderRadius: 2, background: "#000", width: warmupDuration > 0 ? `${(warmupCurrentTime / warmupDuration) * 100}%` : "0%" }} />
-                              </div>
-                              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 4 }}>
+                              <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 4 }}>
                                 <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.5)" }}>
                                   {warmupDuration > 0 ? `${Math.floor(warmupDuration / 60)}:${String(Math.round(warmupDuration % 60)).padStart(2, "0")}` : "--:--"}
                                 </span>
@@ -951,8 +961,8 @@ export default function Home8() {
                               <canvas
                                 ref={warmupVizRef}
                                 width={240}
-                                height={40}
-                                style={{ width: "100%", height: 40, marginTop: 8, borderRadius: 6 }}
+                                height={56}
+                                style={{ width: "100%", height: 56, borderRadius: 6 }}
                               />
                             </div>
                           )}
