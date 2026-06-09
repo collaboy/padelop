@@ -880,7 +880,7 @@ export default function Home8() {
                 const nextSlide = schedule[currentIdx + 1];
                 const secsUntilNext = nextSlide ? toMins(nextSlide.time) * 60 - (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) : 0;
                 const fmtTime = (s: number) => { if (s <= 0) return "a moment"; const h = Math.floor(s / 3600), rem = s % 3600, m = Math.floor(rem / 60), sec = rem % 60; if (h > 0) return `${h}h ${m}m ${sec}s`; return m > 0 ? `${m}m ${sec}s` : `${sec}s`; };
-                const cardStyle: React.CSSProperties = { position: "relative", width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", border: "6px solid transparent", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: 1, zIndex: 3, boxShadow: "none" };
+                const cardStyle: React.CSSProperties = { position: "relative", width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: 1, zIndex: 3, boxShadow: "none" };
                 const isSleepytime = now.getHours() < 7;
                 const contentOpacity = doIdx === 0 ? 1 : 0.2;
 
