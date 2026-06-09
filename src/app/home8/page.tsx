@@ -880,7 +880,7 @@ export default function Home8() {
                     </div>
                     <div style={{ height: 1, background: "#dfe3e7", flexShrink: 0 }} />
                     <div ref={schedScrollRef} style={{ flex: 1, overflowY: "auto", minHeight: 0, overscrollBehavior: "none" }}>
-                      <div style={{ padding: "16px 0 28px" }}>
+                      <div style={{ padding: "16px 2px 28px" }}>
                         {/* ── Today4-style schedule list ── */}
                         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
                           {schedule.map((s4, i) => {
