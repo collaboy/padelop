@@ -880,7 +880,7 @@ export default function Home8() {
                     </div>
                     <div style={{ height: 1, background: "#dfe3e7", flexShrink: 0 }} />
                     <div ref={schedScrollRef} style={{ flex: 1, overflowY: "auto", minHeight: 0, overscrollBehavior: "none" }}>
-                      <div style={{ padding: "16px 0 28px" }}>
+                      <div style={{ padding: "16px 16px 28px 0" }}>
                         {/* ── Today4-style schedule list ── */}
                         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
                           {schedule.map((s4, i) => {
@@ -895,10 +895,11 @@ export default function Home8() {
                                   position: "relative",
                                   display: "flex", alignItems: "center", gap: 12,
                                   background: "#fff", borderRadius: 14,
+                                  padding: "10px 10px 10px 14px",
                                   cursor: detail4 ? "pointer" : "default",
                                   ...(isCur4
-                                    ? { boxShadow: `0 0 0 1.5px ${s4.color}`, padding: "10px 10px" }
-                                    : { border: "1px solid #f0f0f0", padding: "10px 10px 10px 14px" }),
+                                    ? { boxShadow: `0 0 0 1.5px ${s4.color}` }
+                                    : { border: "1px solid #f0f0f0" }),
                                 }}
                                 onClick={() => detail4 && (() => { setSchedModalIdx(i); setDoModalOpen(true); })()}
                               >
