@@ -961,7 +961,7 @@ export default function Home8() {
                   : `${logHydrationMl}ml`;
                 return (
                   <>
-                    <svg viewBox="0 0 100 130" width="110" height="143" style={{ overflow: "visible" }}>
+                    <svg viewBox="0 0 100 130" width="138" height="179" style={{ overflow: "visible" }}>
                       <defs>
                         <clipPath id="drop-clip-r">
                           {/* teardrop: pointed top, circular bottom */}
@@ -989,14 +989,14 @@ export default function Home8() {
                       </g>
 
                       {/* Amount label inside drop */}
-                      <text x="50" y="88" textAnchor="middle" fontSize="15" fontWeight="800"
+                      <text x="50" y="88" textAnchor="middle" fontSize="19" fontWeight="800"
                         fill={pct > 0.45 ? "#fff" : "#5b8fcc"} fontFamily="inherit">
                         {labelMl}
                       </text>
                     </svg>
 
                     {/* 3L goal label */}
-                    <p style={{ fontSize: 11, fontWeight: 700, color: "#b0bec8", letterSpacing: "0.06em", textTransform: "uppercase", margin: 0 }}>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: "#6b7480", letterSpacing: "0.06em", textTransform: "uppercase", margin: 0 }}>
                       {logHydrationMl >= MAX ? "Goal reached 🎉" : `Goal: 3L`}
                     </p>
 
@@ -1008,7 +1008,7 @@ export default function Home8() {
                           setLogHydrationMl(next);
                           saveLogHydration(next);
                         }}
-                        style={{ width: 44, height: 44, borderRadius: "50%", background: logHydrationMl >= MAX ? "#e8f0e8" : "#3b9eff", border: "none", cursor: logHydrationMl >= MAX ? "default" : "pointer", fontSize: 22, fontWeight: 700, color: logHydrationMl >= MAX ? "#16a34a" : "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}
+                        style={{ width: 55, height: 55, borderRadius: "50%", background: logHydrationMl >= MAX ? "#e8f0e8" : "#3b9eff", border: "none", cursor: logHydrationMl >= MAX ? "default" : "pointer", fontSize: 27, fontWeight: 700, color: logHydrationMl >= MAX ? "#16a34a" : "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}
                       >
                         +
                       </button>
@@ -1018,7 +1018,7 @@ export default function Home8() {
                           setLogHydrationMl(next);
                           saveLogHydration(next);
                         }}
-                        style={{ width: 44, height: 44, borderRadius: "50%", background: "#f0f2f5", border: "none", cursor: logHydrationMl <= 0 ? "default" : "pointer", fontSize: 22, fontWeight: 700, color: logHydrationMl <= 0 ? "#c8cdd3" : "#1a1c1c", display: "flex", alignItems: "center", justifyContent: "center" }}
+                        style={{ width: 55, height: 55, borderRadius: "50%", background: "#f0f2f5", border: "none", cursor: logHydrationMl <= 0 ? "default" : "pointer", fontSize: 27, fontWeight: 700, color: logHydrationMl <= 0 ? "#c8cdd3" : "#1a1c1c", display: "flex", alignItems: "center", justifyContent: "center" }}
                       >
                         −
                       </button>
