@@ -271,6 +271,7 @@ export default function Home8() {
   const [isAddMode, setIsAddMode] = useState(false);
   const [upcomingCount, setUpcomingCount] = useState(0);
   const [now, setNow] = useState(new Date());
+  const lastDateRef = useRef(new Date().toISOString().slice(0, 10));
   const [doIdx, setDoIdx] = useState(0); // -1 = top holder, 0 = do-this-now, 1 = see schedule
   const [completed, setCompleted] = useState<Set<number>>(new Set());
   const [readiness, setReadiness] = useState(65);
@@ -469,6 +470,15 @@ export default function Home8() {
     const id = setInterval(() => setNow(new Date()), 1_000);
     return () => { clearInterval(id); window.removeEventListener("storage", handleStorage); };
   }, []);
+
+  // Reset hydration counter when date rolls over midnight
+  useEffect(() => {
+    const today = now.toISOString().slice(0, 10);
+    if (today !== lastDateRef.current) {
+      lastDateRef.current = today;
+      setLogHydrationMl(0);
+    }
+  }, [now]);
 
   type StoredMatch = { date: string; time: string; club: string; player_1: string; player_2: string; player_3: string; player_4: string };
 
