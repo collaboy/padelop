@@ -888,30 +888,31 @@ export default function Home8() {
                             const isPast4 = !isCur4 && now.getHours() * 60 + now.getMinutes() > toMins(s4.time);
                             const detail4 = SCHEDULE_DETAILS[s4.title];
                             return (
-                              <div key={i} ref={isCur4 ? schedCurrentRef : undefined} style={{ position: "relative" }}>
+                              <div
+                                key={i}
+                                ref={isCur4 ? schedCurrentRef : undefined}
+                                style={{
+                                  position: "relative",
+                                  display: "flex", alignItems: "center", gap: 12,
+                                  background: "#fff", borderRadius: 14,
+                                  padding: "10px 10px 10px 14px",
+                                  cursor: detail4 ? "pointer" : "default",
+                                  ...(isCur4
+                                    ? { boxShadow: `0 0 0 1.5px ${s4.color}` }
+                                    : { border: "1px solid #f0f0f0" }),
+                                }}
+                                onClick={() => detail4 && (() => { setSchedModalIdx(i); setDoModalOpen(true); })()}
+                              >
                                 {isCur4 && (
                                   <div style={{
-                                    position: "absolute", left: 6, top: "50%", transform: "translateY(-50%)",
-                                    zIndex: 1, pointerEvents: "none",
+                                    position: "absolute", left: 4, top: "50%", transform: "translateY(-50%)",
+                                    pointerEvents: "none",
                                     width: 0, height: 0,
-                                    borderTop: "6px solid transparent",
-                                    borderBottom: "6px solid transparent",
-                                    borderLeft: `8px solid ${s4.color}`,
+                                    borderTop: "5px solid transparent",
+                                    borderBottom: "5px solid transparent",
+                                    borderLeft: `7px solid ${s4.color}`,
                                   }} />
                                 )}
-                                {/* Card */}
-                                <div
-                                  style={{
-                                    display: "flex", alignItems: "center", gap: 12,
-                                    background: "#fff", borderRadius: 14,
-                                    padding: "10px 10px 10px 14px",
-                                    cursor: detail4 ? "pointer" : "default",
-                                    ...(isCur4
-                                      ? { boxShadow: `0 0 0 1.5px ${s4.color}` }
-                                      : { border: "1px solid #f0f0f0" }),
-                                  }}
-                                  onClick={() => detail4 && (() => { setSchedModalIdx(i); setDoModalOpen(true); })()}
-                                >
                                   <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: isPast4 ? "#f0f0f0" : `${s4.color}18` }}>
                                     {isCur4
                                       ? <div className="animate-breathe" style={{ width: 12, height: 12, borderRadius: "50%", background: s4.color, ["--glow" as string]: s4.color } as React.CSSProperties} />
@@ -928,7 +929,6 @@ export default function Home8() {
                                       <path d="M9 18l6-6-6-6"/>
                                     </svg>
                                   )}
-                                </div>
                               </div>
                             );
                           })}
