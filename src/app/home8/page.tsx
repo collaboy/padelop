@@ -882,7 +882,7 @@ export default function Home8() {
                     <div ref={schedScrollRef} style={{ flex: 1, overflowY: "auto", minHeight: 0, overscrollBehavior: "none" }}>
                       <div style={{ padding: "16px 0 28px" }}>
                         {/* ── Today4-style schedule list ── */}
-                        <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", marginBottom: 20 }}>
+                        <div style={{ background: "#fff", borderRadius: 16, marginBottom: 20 }}>
                           {schedule.map((s4, i) => {
                             const isCur4 = i === currentIdx;
                             const isPast4 = !isCur4 && now.getHours() * 60 + now.getMinutes() > toMins(s4.time);
@@ -892,6 +892,7 @@ export default function Home8() {
                                 key={i}
                                 ref={isCur4 ? schedCurrentRef : undefined}
                                 style={{
+                                  position: "relative",
                                   display: "flex", alignItems: "center", gap: 12,
                                   borderBottom: isCur4 ? "none" : i < schedule.length - 1 ? "1px solid #f4f4f4" : "none",
                                   cursor: detail4 ? "pointer" : "default",
@@ -901,6 +902,15 @@ export default function Home8() {
                                 }}
                                 onClick={() => detail4 && (() => { setSchedModalIdx(i); setDoModalOpen(true); })()}
                               >
+                                {isCur4 && (
+                                  <div style={{
+                                    position: "absolute", right: -10, top: "50%", transform: "translateY(-50%)",
+                                    width: 0, height: 0,
+                                    borderTop: "6px solid transparent",
+                                    borderBottom: "6px solid transparent",
+                                    borderLeft: `8px solid ${s4.color}`,
+                                  }} />
+                                )}
                                 <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: isPast4 ? "#f0f0f0" : `${s4.color}18` }}>
                                   {isCur4
                                     ? <div className="animate-breathe" style={{ width: 12, height: 12, borderRadius: "50%", background: s4.color, ["--glow" as string]: s4.color } as React.CSSProperties} />
