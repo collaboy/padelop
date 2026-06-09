@@ -319,6 +319,8 @@ export default function Home8() {
   const LOG_GOAL_ML = 2500;
   const LOG_MAX_ML  = 3000;
 
+  const [schedTriangleTop, setSchedTriangleTop] = useState<number | null>(null);
+
   const [warmupPlaying, setWarmupPlaying] = useState(false);
   const [warmupCurrentTime, setWarmupCurrentTime] = useState(0);
   const [warmupDuration, setWarmupDuration] = useState(0);
@@ -613,6 +615,22 @@ export default function Home8() {
     container.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
   }, [doIdx]);
 
+  // Track current schedule item's screen Y for the fixed triangle indicator
+  useEffect(() => {
+    if (doIdx !== 1) { setSchedTriangleTop(null); return; }
+    const update = () => {
+      const el = schedCurrentRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      setSchedTriangleTop(rect.top + rect.height / 2);
+    };
+    update();
+    const scroller = schedScrollRef.current;
+    scroller?.addEventListener("scroll", update, { passive: true });
+    return () => scroller?.removeEventListener("scroll", update);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [doIdx]);
+
   useEffect(() => {
     const item = schedule[schedModalIdx ?? currentIdx];
     if (!doModalOpen || !item?.isDrill) { setDrillSteps(null); return; }
@@ -687,6 +705,17 @@ export default function Home8() {
 
   return (
     <>
+      {/* Fixed triangle — outside all overflow constraints, tracks current schedule item */}
+      {schedTriangleTop !== null && (
+        <div style={{
+          position: "fixed", left: 3, top: schedTriangleTop, transform: "translateY(-50%)",
+          zIndex: 200, pointerEvents: "none",
+          width: 0, height: 0,
+          borderTop: "6px solid transparent",
+          borderBottom: "6px solid transparent",
+          borderLeft: `8px solid ${schedule[currentIdx]?.color ?? "#000"}`,
+        }} />
+      )}
       <main style={{ ...S, position: "fixed", inset: 0, paddingTop: "4rem", paddingLeft: 10, paddingRight: 10, paddingBottom: 0, overflow: "hidden", background: "#ffffff", zIndex: 60 }}>
 
         {/* Horizontal strip: [readiness | carousel | log] */}
