@@ -319,6 +319,9 @@ export default function Home8() {
   const LOG_GOAL_ML = 2500;
   const LOG_MAX_ML  = 3000;
 
+  const [warmupPlaying, setWarmupPlaying] = useState(false);
+  const warmupAudioRef = useRef<HTMLAudioElement | null>(null);
+
   const matchUploadRef = useRef<HTMLInputElement>(null);
   const schedScrollRef = useRef<HTMLDivElement>(null);
   const schedCurrentRef = useRef<HTMLDivElement>(null);
@@ -849,6 +852,30 @@ export default function Home8() {
                       <p className="font-bold leading-tight text-center" style={{ color: "#000", fontSize: "clamp(24px, 7.5vw, 34px)" }}>{s.title}</p>
                       {s.subtitle && <p className="leading-none text-center mt-0.5" style={{ color: "#000", fontSize: "clamp(15px, 4.8vw, 22px)", fontWeight: 500 }}>{s.subtitle.split(", ").join(" · ")}</p>}
                       <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 font-semibold px-5 py-2 rounded-full flex items-center gap-1" style={{ background: "#fff", color: isReady ? s.color : "#b0b5ba", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+                      {s.title === "Warmup & activation" && (
+                        <button
+                          onClick={e => {
+                            e.stopPropagation();
+                            if (!warmupAudioRef.current) {
+                              warmupAudioRef.current = new Audio("/warmup.mp3");
+                              warmupAudioRef.current.onended = () => setWarmupPlaying(false);
+                            }
+                            if (warmupPlaying) {
+                              warmupAudioRef.current.pause();
+                              setWarmupPlaying(false);
+                            } else {
+                              warmupAudioRef.current.play();
+                              setWarmupPlaying(true);
+                            }
+                          }}
+                          style={{ marginTop: 12, background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
+                        >
+                          {warmupPlaying
+                            ? <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect x="10" y="9" width="5" height="18" rx="2" fill="#000"/><rect x="21" y="9" width="5" height="18" rx="2" fill="#000"/></svg>
+                            : <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><polygon points="12,8 30,18 12,28" fill="#000"/></svg>
+                          }
+                        </button>
+                      )}
                     </div>
                   </div>
                 );
