@@ -969,8 +969,8 @@ export default function Home8() {
                                 height={56}
                                 style={{ width: "100%", height: 56, borderRadius: 6, display: "block" }}
                               />
-                              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 4 }}>
-                                <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.45)" }}>
+                              <div style={{ position: "relative", height: 16 }}>
+                                <span style={{ position: "absolute", right: 0, top: 2, fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.45)" }}>
                                   {warmupDuration > 0 ? `${Math.floor(warmupDuration / 60)}:${String(Math.round(warmupDuration % 60)).padStart(2, "0")}` : "--:--"}
                                 </span>
                               </div>
