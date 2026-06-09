@@ -320,6 +320,9 @@ export default function Home8() {
   const LOG_MAX_ML  = 3000;
 
   const [warmupPlaying, setWarmupPlaying] = useState(false);
+  const [warmupCurrentTime, setWarmupCurrentTime] = useState(0);
+  const [warmupDuration, setWarmupDuration] = useState(0);
+  const [warmupStarted, setWarmupStarted] = useState(false);
   const warmupAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const matchUploadRef = useRef<HTMLInputElement>(null);
@@ -853,28 +856,46 @@ export default function Home8() {
                       {s.subtitle && <p className="leading-none text-center mt-0.5" style={{ color: "#000", fontSize: "clamp(15px, 4.8vw, 22px)", fontWeight: 500 }}>{s.subtitle.split(", ").join(" · ")}</p>}
                       <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 font-semibold px-5 py-2 rounded-full flex items-center gap-1" style={{ background: "#fff", color: isReady ? s.color : "#b0b5ba", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
                       {true && (
-                        <button
-                          onClick={e => {
-                            e.stopPropagation();
-                            if (!warmupAudioRef.current) {
-                              warmupAudioRef.current = new Audio("/warmup.mp3");
-                              warmupAudioRef.current.onended = () => setWarmupPlaying(false);
+                        <div onClick={e => e.stopPropagation()} style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 12, width: "100%" }}>
+                          <button
+                            onClick={e => {
+                              e.stopPropagation();
+                              if (!warmupAudioRef.current) {
+                                const a = new Audio("/warmup.mp3");
+                                warmupAudioRef.current = a;
+                                a.onended = () => { setWarmupPlaying(false); setWarmupCurrentTime(0); };
+                                a.ontimeupdate = () => setWarmupCurrentTime(a.currentTime);
+                                a.onloadedmetadata = () => setWarmupDuration(a.duration);
+                              }
+                              if (warmupPlaying) {
+                                warmupAudioRef.current.pause();
+                                setWarmupPlaying(false);
+                              } else {
+                                warmupAudioRef.current.play();
+                                setWarmupPlaying(true);
+                                setWarmupStarted(true);
+                              }
+                            }}
+                            style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
+                          >
+                            {warmupPlaying
+                              ? <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect x="10" y="9" width="5" height="18" rx="2" fill="#000"/><rect x="21" y="9" width="5" height="18" rx="2" fill="#000"/></svg>
+                              : <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><polygon points="12,8 30,18 12,28" fill="#000"/></svg>
                             }
-                            if (warmupPlaying) {
-                              warmupAudioRef.current.pause();
-                              setWarmupPlaying(false);
-                            } else {
-                              warmupAudioRef.current.play();
-                              setWarmupPlaying(true);
-                            }
-                          }}
-                          style={{ marginTop: 12, background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}
-                        >
-                          {warmupPlaying
-                            ? <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect x="10" y="9" width="5" height="18" rx="2" fill="#000"/><rect x="21" y="9" width="5" height="18" rx="2" fill="#000"/></svg>
-                            : <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><polygon points="12,8 30,18 12,28" fill="#000"/></svg>
-                          }
-                        </button>
+                          </button>
+                          {warmupStarted && (
+                            <div style={{ width: "80%", marginTop: 8 }}>
+                              <div style={{ position: "relative", height: 3, borderRadius: 2, background: "rgba(0,0,0,0.15)" }}>
+                                <div style={{ position: "absolute", left: 0, top: 0, height: "100%", borderRadius: 2, background: "#000", width: warmupDuration > 0 ? `${(warmupCurrentTime / warmupDuration) * 100}%` : "0%" }} />
+                              </div>
+                              <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 4 }}>
+                                <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.5)" }}>
+                                  {warmupDuration > 0 ? `${Math.floor(warmupDuration / 60)}:${String(Math.round(warmupDuration % 60)).padStart(2, "0")}` : "--:--"}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
