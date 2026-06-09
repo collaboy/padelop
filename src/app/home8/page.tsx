@@ -880,7 +880,7 @@ export default function Home8() {
                     </div>
                     <div style={{ height: 1, background: "#dfe3e7", flexShrink: 0 }} />
                     <div ref={schedScrollRef} style={{ flex: 1, overflowY: "auto", minHeight: 0, overscrollBehavior: "none" }}>
-                      <div style={{ padding: "16px 16px 28px 0" }}>
+                      <div style={{ padding: "16px 0 28px" }}>
                         {/* ── Today4-style schedule list ── */}
                         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
                           {schedule.map((s4, i) => {
@@ -888,46 +888,48 @@ export default function Home8() {
                             const isPast4 = !isCur4 && now.getHours() * 60 + now.getMinutes() > toMins(s4.time);
                             const detail4 = SCHEDULE_DETAILS[s4.title];
                             return (
-                              <div
-                                key={i}
-                                ref={isCur4 ? schedCurrentRef : undefined}
-                                style={{
-                                  position: "relative",
-                                  display: "flex", alignItems: "center", gap: 12,
-                                  background: "#fff", borderRadius: 14,
-                                  padding: "10px 10px 10px 14px",
-                                  cursor: detail4 ? "pointer" : "default",
-                                  ...(isCur4
-                                    ? { boxShadow: `0 0 0 1.5px ${s4.color}` }
-                                    : { border: "1px solid #f0f0f0" }),
-                                }}
-                                onClick={() => detail4 && (() => { setSchedModalIdx(i); setDoModalOpen(true); })()}
-                              >
-                                {isCur4 && (
-                                  <div style={{
-                                    position: "absolute", right: -10, top: "50%", transform: "translateY(-50%)",
-                                    width: 0, height: 0,
-                                    borderTop: "6px solid transparent",
-                                    borderBottom: "6px solid transparent",
-                                    borderLeft: `8px solid ${s4.color}`,
-                                  }} />
-                                )}
-                                <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: isPast4 ? "#f0f0f0" : `${s4.color}18` }}>
-                                  {isCur4
-                                    ? <div className="animate-breathe" style={{ width: 12, height: 12, borderRadius: "50%", background: s4.color, ["--glow" as string]: s4.color } as React.CSSProperties} />
-                                    : <div style={{ width: 12, height: 12, borderRadius: "50%", background: isPast4 ? "#d0d3d6" : s4.color }} />
-                                  }
+                              <div key={i} ref={isCur4 ? schedCurrentRef : undefined} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                {/* Triangle slot — always reserves space so cards align */}
+                                <div style={{ width: 10, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                  {isCur4 && (
+                                    <div style={{
+                                      width: 0, height: 0,
+                                      borderTop: "6px solid transparent",
+                                      borderBottom: "6px solid transparent",
+                                      borderLeft: `8px solid ${s4.color}`,
+                                    }} />
+                                  )}
                                 </div>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", margin: "0 0 2px", color: isPast4 ? "#c4c7c7" : s4.color }}>{s4.time}</p>
-                                  <p style={{ fontSize: 16, fontWeight: 600, margin: 0, lineHeight: 1.25, color: isPast4 ? "#a0a5aa" : "#1a1c1c" }}>{s4.title}</p>
-                                  {s4.subtitle && <p style={{ fontSize: 13, margin: "2px 0 0", color: isPast4 ? "#c4c7c7" : "#6b7480" }}>{s4.subtitle}</p>}
+                                {/* Card */}
+                                <div
+                                  style={{
+                                    flex: 1, display: "flex", alignItems: "center", gap: 12,
+                                    background: "#fff", borderRadius: 14,
+                                    padding: "10px 10px 10px 14px",
+                                    cursor: detail4 ? "pointer" : "default",
+                                    ...(isCur4
+                                      ? { boxShadow: `0 0 0 1.5px ${s4.color}` }
+                                      : { border: "1px solid #f0f0f0" }),
+                                  }}
+                                  onClick={() => detail4 && (() => { setSchedModalIdx(i); setDoModalOpen(true); })()}
+                                >
+                                  <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: isPast4 ? "#f0f0f0" : `${s4.color}18` }}>
+                                    {isCur4
+                                      ? <div className="animate-breathe" style={{ width: 12, height: 12, borderRadius: "50%", background: s4.color, ["--glow" as string]: s4.color } as React.CSSProperties} />
+                                      : <div style={{ width: 12, height: 12, borderRadius: "50%", background: isPast4 ? "#d0d3d6" : s4.color }} />
+                                    }
+                                  </div>
+                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", margin: "0 0 2px", color: isPast4 ? "#c4c7c7" : s4.color }}>{s4.time}</p>
+                                    <p style={{ fontSize: 16, fontWeight: 600, margin: 0, lineHeight: 1.25, color: isPast4 ? "#a0a5aa" : "#1a1c1c" }}>{s4.title}</p>
+                                    {s4.subtitle && <p style={{ fontSize: 13, margin: "2px 0 0", color: isPast4 ? "#c4c7c7" : "#6b7480" }}>{s4.subtitle}</p>}
+                                  </div>
+                                  {detail4 && (
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                                      <path d="M9 18l6-6-6-6"/>
+                                    </svg>
+                                  )}
                                 </div>
-                                {detail4 && (
-                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                                    <path d="M9 18l6-6-6-6"/>
-                                  </svg>
-                                )}
                               </div>
                             );
                           })}
