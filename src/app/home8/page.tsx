@@ -880,7 +880,7 @@ export default function Home8() {
                     </div>
                     <div style={{ height: 1, background: "#dfe3e7", flexShrink: 0 }} />
                     <div ref={schedScrollRef} style={{ flex: 1, overflowY: "auto", minHeight: 0, overscrollBehavior: "none" }}>
-                      <div style={{ padding: "16px 0 28px" }}>
+                      <div style={{ padding: "16px 0 28px 16px" }}>
                         {/* ── Today4-style schedule list ── */}
                         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
                           {schedule.map((s4, i) => {
@@ -888,22 +888,20 @@ export default function Home8() {
                             const isPast4 = !isCur4 && now.getHours() * 60 + now.getMinutes() > toMins(s4.time);
                             const detail4 = SCHEDULE_DETAILS[s4.title];
                             return (
-                              <div key={i} ref={isCur4 ? schedCurrentRef : undefined} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                {/* Triangle slot — always reserves space so cards align */}
-                                <div style={{ width: 10, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                  {isCur4 && (
-                                    <div style={{
-                                      width: 0, height: 0,
-                                      borderTop: "6px solid transparent",
-                                      borderBottom: "6px solid transparent",
-                                      borderLeft: `8px solid ${s4.color}`,
-                                    }} />
-                                  )}
-                                </div>
+                              <div key={i} ref={isCur4 ? schedCurrentRef : undefined} style={{ position: "relative" }}>
+                                {isCur4 && (
+                                  <div style={{
+                                    position: "absolute", left: -14, top: "50%", transform: "translateY(-50%)",
+                                    width: 0, height: 0,
+                                    borderTop: "6px solid transparent",
+                                    borderBottom: "6px solid transparent",
+                                    borderLeft: `8px solid ${s4.color}`,
+                                  }} />
+                                )}
                                 {/* Card */}
                                 <div
                                   style={{
-                                    flex: 1, display: "flex", alignItems: "center", gap: 12,
+                                    display: "flex", alignItems: "center", gap: 12,
                                     background: "#fff", borderRadius: 14,
                                     padding: "10px 10px 10px 14px",
                                     cursor: detail4 ? "pointer" : "default",
