@@ -880,7 +880,7 @@ export default function Home8() {
                     </div>
                     <div style={{ height: 1, background: "#dfe3e7", flexShrink: 0 }} />
                     <div ref={schedScrollRef} style={{ flex: 1, overflowY: "auto", minHeight: 0, overscrollBehavior: "none" }}>
-                      <div style={{ padding: "16px 2px 28px" }}>
+                      <div style={{ padding: "16px 2px 28px 14px" }}>
                         {/* ── Today4-style schedule list ── */}
                         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
                           {schedule.map((s4, i) => {
@@ -903,6 +903,16 @@ export default function Home8() {
                                 }}
                                 onClick={() => detail4 && (() => { setSchedModalIdx(i); setDoModalOpen(true); })()}
                               >
+                                {isCur4 && (
+                                  <div style={{
+                                    position: "absolute", left: -11, top: "50%", transform: "translateY(-50%)",
+                                    pointerEvents: "none",
+                                    width: 0, height: 0,
+                                    borderTop: "5px solid transparent",
+                                    borderBottom: "5px solid transparent",
+                                    borderLeft: `7px solid ${s4.color}`,
+                                  }} />
+                                )}
                                   <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: isPast4 ? "#f0f0f0" : `${s4.color}18` }}>
                                     {isCur4
                                       ? <div className="animate-breathe" style={{ width: 12, height: 12, borderRadius: "50%", background: s4.color, ["--glow" as string]: s4.color } as React.CSSProperties} />
