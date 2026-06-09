@@ -880,9 +880,9 @@ export default function Home8() {
                     </div>
                     <div style={{ height: 1, background: "#dfe3e7", flexShrink: 0 }} />
                     <div ref={schedScrollRef} style={{ flex: 1, overflowY: "auto", minHeight: 0, overscrollBehavior: "none" }}>
-                      <div style={{ padding: "16px 20px 28px" }}>
+                      <div style={{ padding: "16px 0 28px" }}>
                         {/* ── Today4-style schedule list ── */}
-                        <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", marginBottom: 20, border: "1px solid #e8e8e8" }}>
+                        <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", marginBottom: 20 }}>
                           {schedule.map((s4, i) => {
                             const isCur4 = i === currentIdx;
                             const isPast4 = !isCur4 && now.getHours() * 60 + now.getMinutes() > toMins(s4.time);
