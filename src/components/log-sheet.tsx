@@ -76,6 +76,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
   const [hydrationLog, setHydrationLog] = useState({ litres: "", timing: [] as string[], quality: "", urine: "" });
   const [nutritionLog, setNutritionLog] = useState({ proteinRating: "", foods: [] as string[], postMatch: "", quality: "" });
   const [matchReview, setMatchReview] = useState({ feeling: "", result: "", opponent: "", opponentNames: "", energy: "", injury: "", wellDone: [] as string[], improved: [] as string[], mentalBefore: "", mentalDuring: "", mentalAfter: "", warmup: "" });
+  const [matchResultImage, setMatchResultImage] = useState<string | null>(null);
 
   const [morningStep, setMorningStep] = useState(0);
   const [morningData, setMorningData] = useState<Record<string, string | number>>({});
@@ -815,6 +816,34 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
                 className="w-full px-4 py-3 rounded-2xl border-2 text-[14px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]"
                 style={{ borderColor: matchReview.opponentNames ? PURPLE : "#e2e2e2", background: matchReview.opponentNames ? "#f5f3ff" : "#f9f9f9" }}
               />
+              {matchResultImage ? (
+                <div className="mt-3 relative">
+                  <img src={matchResultImage} alt="Match result" className="w-full rounded-2xl object-cover" style={{ maxHeight: 200 }} />
+                  <button
+                    onClick={() => setMatchResultImage(null)}
+                    className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center"
+                    style={{ background: "rgba(0,0,0,0.5)" }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                  </button>
+                </div>
+              ) : (
+                <label className="mt-3 flex items-center gap-2 px-4 py-3 rounded-2xl border-2 border-dashed cursor-pointer transition-colors"
+                  style={{ borderColor: "#e2e2e2", background: "#f9f9f9" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>
+                  </svg>
+                  <span className="text-[13px] font-medium text-[#8a9096]">Upload match result screenshot</span>
+                  <input type="file" accept="image/*" className="hidden" onChange={e => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = ev => setMatchResultImage(ev.target?.result as string);
+                    reader.readAsDataURL(file);
+                    e.target.value = "";
+                  }} />
+                </label>
+              )}
             </div>
             <div>
               <p className="text-[11px] font-bold tracking-widest uppercase text-[#4a5050] mb-3">Opponent level?</p>
@@ -889,7 +918,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
             </div>
             <button onClick={() => {
                 try {
-                  const entry = { ...matchReview, ts: new Date().toISOString() };
+                  const entry = { ...matchReview, resultImage: matchResultImage ?? undefined, ts: new Date().toISOString() };
                   const prev = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
                   localStorage.setItem("padelop:match-reviews", JSON.stringify([entry, ...prev].slice(0, 50)));
                 } catch {}

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import LogSheet from "@/components/log-sheet";
+import AvatarCropModal from "@/components/avatar-crop-modal";
 import {
   computeScores, loadScoringData, saveScoreSnapshot, loadScoreHistory,
   computePillarStates,
@@ -387,6 +388,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
 
   const [profileOpen, setProfileOpen] = useState(false);
   const [gearEditOpen, setGearEditOpen] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [racketName, setRacketName] = useState("Wilson Carbon Pro v2");
   const [racketType, setRacketType] = useState("Power & Control Hybrid");
 
@@ -396,9 +398,17 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => setField("avatar", reader.result as string);
+    reader.onload = () => setCropSrc(reader.result as string);
     reader.readAsDataURL(file);
     e.target.value = "";
+  };
+  const saveAvatar = (croppedDataUrl: string) => {
+    setCropSrc(null);
+    setField("avatar", croppedDataUrl);
+    const updated = { ...profile, avatar: croppedDataUrl };
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(updated));
+    window.dispatchEvent(new Event("storage"));
+    setSaved(true);
   };
   const save = () => {
     localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
@@ -484,7 +494,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
           <label htmlFor="top-avatar-upload" style={{ position: "absolute", bottom: 0, right: 0, background: "#000", color: "#fff", width: 32, height: 32, borderRadius: "50%", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </label>
-          <input id="top-avatar-upload" type="file" accept="image/*" className="hidden" onChange={e => { handleAvatar(e); save(); }} />
+          <input id="top-avatar-upload" type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
         </div>
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1a1c1c", margin: 0, lineHeight: "32px" }}>{profile.name || "Add your name"}</h1>
@@ -905,6 +915,14 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
       </button>
 
       <LogSheet open={logSheetOpen} onClose={() => setLogSheetOpen(false)} />
+
+      {cropSrc && (
+        <AvatarCropModal
+          imageSrc={cropSrc}
+          onSave={saveAvatar}
+          onClose={() => setCropSrc(null)}
+        />
+      )}
     </div>
   );
 }
