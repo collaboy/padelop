@@ -1231,13 +1231,10 @@ export default function Home8() {
 
         {/* Complete modal */}
         {doModalOpen && modalItem && (
-          <div className="fixed inset-0 z-[200] flex items-end" onClick={() => { setDoModalOpen(false); setSchedModalIdx(null); }}>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { setDoModalOpen(false); setSchedModalIdx(null); }}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-            <div className="relative w-full bg-white rounded-t-[28px] overflow-hidden overflow-y-auto" style={{ maxHeight: "85vh", boxShadow: "0 -4px 40px rgba(0,0,0,0.15)", paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
-              <div className="px-6 pt-3 pb-4" style={{ background: `${modalItem.color}18` }}>
-              <div className="flex justify-center pb-3">
-                <div className="w-10 h-1 rounded-full" style={{ background: `${modalItem.color}40` }} />
-              </div>
+            <div className="relative w-full bg-white rounded-[28px] overflow-hidden overflow-y-auto" style={{ maxHeight: "80vh", boxShadow: "0 8px 40px rgba(0,0,0,0.18)" }} onClick={e => e.stopPropagation()}>
+              <div className="px-6 pt-5 pb-4" style={{ background: `${modalItem.color}18` }}>
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-2.5 h-2.5 rounded-full" style={{ background: modalItem.color }} />
                   <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: modalItem.color }}>Today&apos;s Schedule</p>
