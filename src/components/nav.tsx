@@ -30,7 +30,7 @@ export default function Nav() {
           <button
             className="flex items-center justify-center active:scale-90 transition-transform"
             style={{ width: 36, height: 36, borderRadius: "50%", background: "#2653d4", boxShadow: "0 4px 12px #2653d455" }}
-            onClick={() => window.dispatchEvent(new Event("padelop:open-log-sheet"))}
+            onClick={() => window.dispatchEvent(new Event("padelop:toggle-log-sheet"))}
             aria-label="Menu"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
