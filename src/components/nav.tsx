@@ -16,7 +16,7 @@ export default function Nav() {
 
   return (
     <>
-      <header className="vt-header fixed top-0 w-full z-50 bg-[var(--surface)]/80 backdrop-blur-md border-b border-[var(--border)]">
+      <header className="vt-header fixed top-0 w-full z-[70] bg-[var(--surface)]/80 backdrop-blur-md border-b border-[var(--border)]">
         <div className="flex items-center justify-between w-full px-5 md:px-12 max-w-7xl mx-auto h-16">
           {/* Left: logo */}
           <Link href="/" className="text-lg font-semibold tracking-tight text-[var(--text)]" style={{ fontFamily: "Inter, sans-serif" }}>
