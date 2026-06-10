@@ -390,7 +390,6 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
 
   const searchParams = useSearchParams();
   const [profileOpen, setProfileOpen] = useState(() => searchParams.get("edit") === "1");
-  const profileCardRef = React.useRef<HTMLDivElement>(null);
   const [gearEditOpen, setGearEditOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [racketName, setRacketName] = useState("Wilson Carbon Pro v2");
@@ -491,10 +490,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
           </svg>
         </Link>
         <button
-          onClick={() => {
-            setProfileOpen(true);
-            setTimeout(() => profileCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
-          }}
+          onClick={() => setProfileOpen(o => !o)}
           style={{ background: "none", border: "none", cursor: "pointer", padding: 0, borderRadius: "50%" }}
         >
           <div style={{ width: 96, height: 96, borderRadius: "50%", overflow: "hidden", boxShadow: "0px 4px 20px rgba(0,0,0,0.08)", border: "4px solid #fff", background: profile.avatar ? "transparent" : "#2653d4", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -516,6 +512,95 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
           </div>
         </div>
       </section>
+
+      {/* ── Inline edit form ─────────────────────────────────────────────── */}
+      {profileOpen && (
+        <div style={{ background: "#fff", borderRadius: 24, padding: "20px 20px 8px", display: "flex", flexDirection: "column", gap: 20, boxShadow: "0px 4px 20px rgba(0,0,0,0.06)" }}>
+
+          {/* Avatar upload */}
+          <div className="flex flex-col items-center gap-2">
+            <label htmlFor="avatar-upload" className="cursor-pointer group">
+              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-[#e2e2e2] group-active:opacity-80 transition-opacity flex items-center justify-center bg-[#f4f4f4]">
+                {profile.avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={profile.avatar} alt="avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="9" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                  </svg>
+                )}
+              </div>
+            </label>
+            <input id="avatar-upload" type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
+            <p className="text-[12px] text-[#9aa5b0]">{profile.avatar ? "Tap to change photo" : "Add a photo (optional)"}</p>
+          </div>
+
+          {/* Name */}
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Your name</p>
+            <input type="text" value={profile.name} onChange={e => setField("name", e.target.value)} placeholder="e.g. Eddie"
+              className="w-full px-4 py-3 rounded-2xl border-2 border-[#e2e2e2] text-[15px] font-semibold text-[#1a1c1c] outline-none focus:border-[#2653d4] transition-colors bg-[#f9f9f9] focus:bg-white" />
+          </div>
+
+          {/* Level */}
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Padel level</p>
+            <div className="grid grid-cols-5 gap-2">
+              {LEVELS.map(l => {
+                const sel = profile.level === l;
+                return (
+                  <button key={l} onClick={() => setField("level", l)}
+                    className="py-2 rounded-xl border-2 text-[13px] font-bold transition-all active:scale-95"
+                    style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#2653d4" : "#f9f9f9", color: sel ? "#fff" : "#747878" }}>
+                    {l}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Position */}
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Preferred position</p>
+            <div className="flex gap-2">
+              {POSITIONS.map(pos => {
+                const sel = profile.position === pos;
+                return (
+                  <button key={pos} onClick={() => setField("position", pos)}
+                    className="flex-1 py-2 rounded-xl border-2 text-[12px] font-bold transition-all active:scale-95"
+                    style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9", color: sel ? "#2653d4" : "#747878" }}>
+                    {pos}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Hand */}
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Dominant hand</p>
+            <div className="flex gap-2">
+              {HANDS.map(h => {
+                const sel = profile.hand === h;
+                return (
+                  <button key={h} onClick={() => setField("hand", h)}
+                    className="flex-1 py-2 rounded-xl border-2 text-[13px] font-bold transition-all active:scale-95"
+                    style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9", color: sel ? "#2653d4" : "#747878" }}>
+                    {h}-handed
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Save */}
+          <button disabled={!canSave} onClick={() => { save(); setProfileOpen(false); }}
+            className="w-full py-3.5 rounded-2xl text-[15px] font-bold transition-all active:scale-[0.98] mb-4"
+            style={{ background: saved ? "#16a34a" : canSave ? "#2653d4" : "#e2e2e2", color: canSave ? "#fff" : "#b0b3b3" }}>
+            {saved ? "Saved ✓" : "Save profile"}
+          </button>
+        </div>
+      )}
 
       {/* ── My Gear ─────────────────────────────────────────────────────── */}
       <section style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -596,133 +681,6 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
         </p>
       </div>
 
-      {/* ── Profile header + collapsible form ───────────────────────────── */}
-
-      <div ref={profileCardRef} className="bg-white rounded-[24px] overflow-hidden" style={{ boxShadow: "0px 4px 24px rgba(0,0,0,0.10)" }}>
-        {/* Always-visible header row */}
-        <button
-          onClick={() => setProfileOpen(o => !o)}
-          className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors"
-        >
-          {/* Avatar */}
-          <div className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0"
-            style={{ background: profile.avatar ? "transparent" : "#2653d4" }}>
-            {profile.avatar ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={profile.avatar} alt="avatar" className="w-full h-full object-cover" />
-            ) : (
-              <span style={{ fontSize: 20, fontWeight: 800, color: "#fff" }}>
-                {profile.name ? profile.name.trim().split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "?"}
-              </span>
-            )}
-          </div>
-          {/* Name + level */}
-          <div className="flex-1 text-left">
-            <p style={{ fontSize: 17, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>
-              {profile.name || "Add your name"}
-            </p>
-            {(profile.level || profile.position) && (
-              <p style={{ fontSize: 12, color: "#9aa5b0", margin: "3px 0 0" }}>
-                {[profile.level && `Level ${profile.level}`, profile.position].filter(Boolean).join(" · ")}
-              </p>
-            )}
-          </div>
-          {/* Chevron */}
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-            style={{ flexShrink: 0, transition: "transform 0.2s", transform: profileOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
-            <path d="M6 9l6 6 6-6"/>
-          </svg>
-        </button>
-
-        {/* Expandable form */}
-        {profileOpen && (
-          <div style={{ borderTop: "1px solid #f0f0f0", padding: "20px 20px 4px", display: "flex", flexDirection: "column", gap: 20 }}>
-
-            {/* Avatar upload */}
-            <div className="flex flex-col items-center gap-2">
-              <label htmlFor="avatar-upload" className="cursor-pointer group">
-                <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-[#e2e2e2] group-active:opacity-80 transition-opacity flex items-center justify-center bg-[#f4f4f4]">
-                  {profile.avatar ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={profile.avatar} alt="avatar" className="w-full h-full object-cover" />
-                  ) : (
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="9" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-                    </svg>
-                  )}
-                </div>
-              </label>
-              <input id="avatar-upload" type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
-              <p className="text-[12px] text-[#9aa5b0]">{profile.avatar ? "Tap to change photo" : "Add a photo (optional)"}</p>
-            </div>
-
-            {/* Name */}
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Your name</p>
-              <input type="text" value={profile.name} onChange={e => setField("name", e.target.value)} placeholder="e.g. Eddie"
-                className="w-full px-4 py-3 rounded-2xl border-2 border-[#e2e2e2] text-[15px] font-semibold text-[#1a1c1c] outline-none focus:border-[#2653d4] transition-colors bg-[#f9f9f9] focus:bg-white" />
-            </div>
-
-            {/* Level */}
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Padel level</p>
-              <div className="grid grid-cols-5 gap-2">
-                {LEVELS.map(l => {
-                  const sel = profile.level === l;
-                  return (
-                    <button key={l} onClick={() => setField("level", l)}
-                      className="py-2 rounded-xl border-2 text-[13px] font-bold transition-all active:scale-95"
-                      style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#2653d4" : "#f9f9f9", color: sel ? "#fff" : "#747878" }}>
-                      {l}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Position */}
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Preferred position</p>
-              <div className="flex gap-2">
-                {POSITIONS.map(pos => {
-                  const sel = profile.position === pos;
-                  return (
-                    <button key={pos} onClick={() => setField("position", pos)}
-                      className="flex-1 py-2 rounded-xl border-2 text-[12px] font-bold transition-all active:scale-95"
-                      style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9", color: sel ? "#2653d4" : "#747878" }}>
-                      {pos}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Hand */}
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Dominant hand</p>
-              <div className="flex gap-2">
-                {HANDS.map(h => {
-                  const sel = profile.hand === h;
-                  return (
-                    <button key={h} onClick={() => setField("hand", h)}
-                      className="flex-1 py-2 rounded-xl border-2 text-[13px] font-bold transition-all active:scale-95"
-                      style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9", color: sel ? "#2653d4" : "#747878" }}>
-                      {h}-handed
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Save */}
-            <button disabled={!canSave} onClick={() => { save(); setProfileOpen(false); }}
-              className="w-full py-3.5 rounded-2xl text-[15px] font-bold transition-all active:scale-[0.98] mb-4"
-              style={{ background: saved ? "#16a34a" : canSave ? "#2653d4" : "#e2e2e2", color: canSave ? "#fff" : "#b0b3b3" }}>
-              {saved ? "Saved ✓" : "Save profile"}
-            </button>
-          </div>
-        )}
-      </div>
 
       <div style={{ background: "#fff", borderRadius: 24, padding: "20px 24px", boxShadow: "0px 4px 24px rgba(0,0,0,0.10)" }}>
         <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 16px" }}>Focus Today</p>
