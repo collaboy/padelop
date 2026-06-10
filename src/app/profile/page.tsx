@@ -166,7 +166,7 @@ function NextMatchCard({ match }: { match: StoredMatch }) {
           <p className="text-[15px] font-bold text-[#496640] leading-snug uppercase tracking-wide">Friendly Match</p>
           <p className="text-[15px] text-[#1a1c1c] mt-1">{formatDate(match.date)}{match.time ? ` • ${formatTime(match.time)}` : ""}</p>
         </div>
-        <span className="flex-shrink-0 text-[11px] font-bold tracking-wide px-3 py-1.5 rounded-full uppercase" style={{ background: "#caecbc", color: "#496640" }}>Upcoming</span>
+        <span className="flex-shrink-0 text-[11px] font-bold tracking-wide px-3 py-1.5 rounded-full uppercase" style={{ background: "#dbeafe", color: "#2653d4" }}>Upcoming</span>
       </div>
       <div className="border-t border-[#ebebeb]" />
       <div className="flex items-center justify-around px-5 py-5">
@@ -216,7 +216,7 @@ function MatchCard({ review }: { review: ReviewEntry }) {
           <div className="px-5 py-3 flex flex-col gap-2">
             {review.wellDone.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
-                {review.wellDone.map(t => <span key={t} className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full" style={{ background: "#eef6eb", color: "#496640" }}>{t}</span>)}
+                {review.wellDone.map(t => <span key={t} className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full" style={{ background: "#dbeafe", color: "#2653d4" }}>{t}</span>)}
               </div>
             )}
             {review.improved.length > 0 && (
@@ -507,7 +507,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1a1c1c", margin: 0, lineHeight: "32px" }}>{profile.name || "Add your name"}</h1>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 4 }}>
-            {profile.level && <span style={{ background: "#caecbc", color: "#496640", padding: "2px 12px", borderRadius: 999, fontSize: 12, fontWeight: 500, letterSpacing: "0.05em" }}>Level {profile.level}</span>}
+            {profile.level && <span style={{ background: "#dbeafe", color: "#2653d4", padding: "2px 12px", borderRadius: 999, fontSize: 12, fontWeight: 500, letterSpacing: "0.05em" }}>Level {profile.level}</span>}
             {profile.position && <span style={{ color: "#444748", fontSize: 12, fontWeight: 500 }}>• {profile.position}</span>}
           </div>
         </div>
@@ -614,7 +614,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
             </div>
             <div style={{ flex: 1 }}>
-              <span style={{ background: "rgba(202,236,188,0.3)", color: "#496640", padding: "2px 8px", borderRadius: 6, fontSize: 12, fontWeight: 500, display: "inline-block", marginBottom: 8 }}>Current Racket</span>
+              <span style={{ background: "rgba(37,99,212,0.08)", color: "#2653d4", padding: "2px 8px", borderRadius: 6, fontSize: 12, fontWeight: 500, display: "inline-block", marginBottom: 8 }}>Current Racket</span>
               <p style={{ fontSize: 20, fontWeight: 600, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{racketName || "—"}</p>
               <p style={{ fontSize: 15, color: "#444748", margin: "4px 0 0" }}>{racketType || "Add a description"}</p>
             </div>
