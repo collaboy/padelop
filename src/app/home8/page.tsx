@@ -1801,27 +1801,27 @@ export default function Home8() {
                     <div className="flex-1 flex flex-col gap-1">
                       <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
                       <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))}
-                        className="w-full px-3 py-2.5 rounded-xl border text-[14px] font-medium text-[#1a1c1c] outline-none"
+                        className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none"
                         style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#f9f9f9" }} />
                     </div>
                     <div className="flex-1 flex flex-col gap-1">
                       <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
                       <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))}
-                        className="w-full px-3 py-2.5 rounded-xl border text-[14px] font-medium text-[#1a1c1c] outline-none"
+                        className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none"
                         style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#f9f9f9" }} />
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Club</label>
                     <input type="text" placeholder="e.g. Club Padel BCN" value={matchForm.club} onChange={e => setMatchForm(f => ({ ...f, club: e.target.value }))}
-                      className="w-full px-3 py-2.5 rounded-xl border text-[14px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]"
+                      className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]"
                       style={{ borderColor: matchForm.club ? "#2653d4" : "#e2e2e2", background: matchForm.club ? "#f4f6ff" : "#f9f9f9" }} />
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Players</label>
                     {(['p1','p2','p3','p4'] as const).map((key, i) => (
                       <input key={key} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={matchForm[key]} onChange={e => setMatchForm(f => ({ ...f, [key]: e.target.value }))}
-                        className="w-full px-3 py-2.5 rounded-xl border text-[14px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]"
+                        className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]"
                         style={{ borderColor: matchForm[key] ? "#2653d4" : "#e2e2e2", background: matchForm[key] ? "#f4f6ff" : "#f9f9f9" }} />
                     ))}
                     {(() => {
