@@ -4,14 +4,26 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { computeNotifications, type Notif } from "@/lib/notifications";
 
+
 export default function Nav() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notif[]>([]);
+  const [profileAvatar, setProfileAvatar] = useState<string>("");
+  const [profileName, setProfileName] = useState<string>("");
 
   useEffect(() => {
+    function refreshProfile() {
+      try {
+        const p = JSON.parse(localStorage.getItem("padelop:profile") || "{}");
+        setProfileAvatar(p.avatar ?? "");
+        setProfileName(p.name ?? "");
+      } catch {}
+    }
+    refreshProfile();
     setNotifications(computeNotifications());
     const id = setInterval(() => setNotifications(computeNotifications()), 60_000);
-    return () => { clearInterval(id); };
+    window.addEventListener("storage", refreshProfile);
+    return () => { clearInterval(id); window.removeEventListener("storage", refreshProfile); };
   }, []);
 
   return (
@@ -26,20 +38,22 @@ export default function Nav() {
             <span id="logo-circle" style={{ display: "inline-block", width: "0.55em", height: "0.55em", borderRadius: "50%", background: "#22c55e", verticalAlign: "middle", margin: "0 0.02em 0.05em", transform: "translateY(-1px)" }} />
           </Link>
 
-          {/* Right: grid button — opens log sheet */}
-          <button
-            className="flex items-center justify-center active:scale-90 transition-transform"
-            style={{ width: 36, height: 36, borderRadius: "50%", background: "#2653d4", boxShadow: "0 4px 12px #2653d455" }}
-            onClick={() => window.dispatchEvent(new Event("padelop:toggle-log-sheet"))}
-            aria-label="Menu"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff">
-              <rect x="3" y="3" width="7" height="7" rx="1.5"/>
-              <rect x="14" y="3" width="7" height="7" rx="1.5"/>
-              <rect x="3" y="14" width="7" height="7" rx="1.5"/>
-              <rect x="14" y="14" width="7" height="7" rx="1.5"/>
-            </svg>
-          </button>
+          {/* Right: profile avatar */}
+          <Link href="/profile" className="relative active:scale-90 transition-transform flex items-center">
+            <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
+              {profileAvatar ? (
+                <img src={profileAvatar} alt="Profile" className="w-full h-full object-cover" />
+              ) : profileName ? (
+                <span className="t-body-sm font-bold text-[#1e3a1e]">{profileName.trim()[0].toUpperCase()}</span>
+              ) : (
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <circle cx="12" cy="9" r="3" />
+                  <path d="M6 20c0-3 2.7-5 6-5s6 2 6 5" />
+                </svg>
+              )}
+            </div>
+          </Link>
         </div>
       </header>
 
