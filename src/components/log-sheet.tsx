@@ -1195,7 +1195,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
                   ].map((item, i, arr) => (
                     <button key={item.label} onClick={item.action}
                       className="flex items-center gap-4 px-5 py-4 active:bg-c-bg transition-colors text-left w-full"
-                      style={{ borderBottom: i < arr.length - 1 ? "1px solid #ebebeb" : "none", background: "none", border_bottom: undefined }}>
+                      style={{ borderBottom: i < arr.length - 1 ? "1px solid #ebebeb" : "none", background: "none" }}>
                       <span style={{ color: "var(--c-text-dim)" }}>{item.icon}</span>
                       <span className="t-ui text-c-text">{item.label}</span>
                     </button>
