@@ -26,15 +26,16 @@ export default function Nav() {
             <span id="logo-circle" style={{ display: "inline-block", width: "0.55em", height: "0.55em", borderRadius: "50%", background: "#22c55e", verticalAlign: "middle", margin: "0 0.02em 0.05em", transform: "translateY(-1px)" }} />
           </Link>
 
-          {/* Right: hamburger — opens FAB sheet */}
+          {/* Right: FAB-style button — opens log sheet */}
           <button
-            className="w-9 h-9 flex flex-col items-center justify-center gap-[5px] active:scale-90 transition-transform"
+            className="flex items-center justify-center active:scale-90 transition-transform"
+            style={{ width: 36, height: 36, borderRadius: "50%", background: "#2653d4", boxShadow: "0 4px 12px #2653d455" }}
             onClick={() => window.dispatchEvent(new Event("padelop:open-log-sheet"))}
             aria-label="Menu"
           >
-            <span className="w-5 h-[1.5px] rounded-full bg-[var(--text)]" />
-            <span className="w-5 h-[1.5px] rounded-full bg-[var(--text)]" />
-            <span className="w-5 h-[1.5px] rounded-full bg-[var(--text)]" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
           </button>
         </div>
       </header>
