@@ -695,6 +695,7 @@ export default function Home8() {
   useEffect(() => {
     if (!matchModalOpen) return;
     setLiveX(0);
+    setLiveY(0);
     setCardSnap('none');
     try {
       const raw = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
@@ -1632,7 +1633,7 @@ export default function Home8() {
 
         {/* Add / Edit Match modal */}
         {matchModalOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { setMatchModalOpen(false); setMatchModalTab('pick'); setUploadError(null); setUploadExtracting(false); }}>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { setMatchModalOpen(false); setMatchModalTab('pick'); setLiveX(0); setLiveY(0); setUploadError(null); setUploadExtracting(false); }}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
             <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
               {/* Header */}
@@ -1641,7 +1642,7 @@ export default function Home8() {
                   <p className="text-[18px] font-bold text-[#1a1c1c]">{isAddMode ? "Add Match" : "Edit Match"}</p>
                   <p className="text-[13px] text-[#6b7480] mt-0.5">Upload a screenshot or enter manually</p>
                 </div>
-                <button onClick={() => { setMatchModalOpen(false); setMatchModalTab('pick'); setUploadError(null); setUploadExtracting(false); }} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "#f4f4f6" }}>
+                <button onClick={() => { setMatchModalOpen(false); setMatchModalTab('pick'); setLiveX(0); setLiveY(0); setUploadError(null); setUploadExtracting(false); }} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "#f4f4f6" }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
               </div>
@@ -1776,7 +1777,7 @@ export default function Home8() {
                       const sorted = saveMatchList(updated);
                       const next = sorted[0];
                       if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
-                      setMatchModalOpen(false); setMatchModalTab('pick'); setCardSnap('none'); setDoIdx(-1);
+                      setMatchModalOpen(false); setMatchModalTab('pick'); setLiveX(0); setLiveY(0); setCardSnap('none'); setDoIdx(-1);
                       window.dispatchEvent(new Event("storage"));
                     }}
                     className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white active:scale-[0.98] transition-transform"
@@ -1873,6 +1874,8 @@ export default function Home8() {
                       if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
                       setMatchModalOpen(false);
                       setMatchModalTab('pick');
+                      setLiveX(0);
+                      setLiveY(0);
                       setCardSnap('none');
                       setDoIdx(-1);
                     }}
