@@ -639,11 +639,10 @@ export default function Home8() {
 
   useEffect(() => {
     if (doIdx !== 1) return;
-    const container = schedScrollRef.current;
-    const current = schedCurrentRef.current;
-    if (!container || !current) return;
-    const top = current.offsetTop - container.clientHeight / 2 + current.clientHeight / 2;
-    container.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    const id = setTimeout(() => {
+      schedCurrentRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 320);
+    return () => clearTimeout(id);
   }, [doIdx]);
 
   // Track current schedule item's screen Y for the fixed triangle indicator
