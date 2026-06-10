@@ -534,6 +534,23 @@ export default function Home8() {
   function saveLogHydration(ml: number) {
     const todayKey = new Date().toISOString().slice(0, 10);
     try { localStorage.setItem("padelop:hydration-quick", JSON.stringify({ date: todayKey, ml })); } catch {}
+    // Keep hydration-logs in sync so the scoring engine picks up the quick counter
+    try {
+      const litres =
+        ml < 1000  ? "<1L"    :
+        ml < 1500  ? "1–1.5L" :
+        ml < 2000  ? "1.5–2L" :
+        ml < 2500  ? "2–2.5L" :
+        ml < 3000  ? "2.5–3L" : "3L+";
+      const quality = ml >= 2500 ? "great" : ml >= 1500 ? "ok" : "bad";
+      const entry = { ts: new Date().toISOString(), litres, quality, urine: "", timing: [] };
+      const prev: typeof entry[] = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]");
+      // Replace today's entry if it exists, otherwise prepend
+      const todayIdx = prev.findIndex(e => e.ts.slice(0, 10) === todayKey);
+      if (todayIdx >= 0) prev[todayIdx] = entry; else prev.unshift(entry);
+      localStorage.setItem("padelop:hydration-logs", JSON.stringify(prev.slice(0, 50)));
+      window.dispatchEvent(new Event("storage"));
+    } catch {}
   }
   function onLogDotTouchStart(e: React.TouchEvent) {
     logDragStartX.current  = e.touches[0].clientX;
