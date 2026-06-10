@@ -1170,6 +1170,13 @@ export default function Home8() {
                       </text>
                     </svg>
 
+                    {/* glasses count */}
+                    <p style={{ fontSize: 13, fontWeight: 600, color: "#3b9eff", margin: "-4px 0 0", letterSpacing: "0.01em" }}>
+                      {logHydrationMl > 0
+                        ? `${Math.round(logHydrationMl / 250)} glass${Math.round(logHydrationMl / 250) === 1 ? "" : "es"}`
+                        : "0 glasses"}
+                    </p>
+
                     {/* + / − buttons */}
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <button
@@ -1194,9 +1201,12 @@ export default function Home8() {
                       </button>
                     </div>
 
-                    {/* 3L goal label */}
-                    <p style={{ fontSize: 12, fontWeight: 700, color: "#6b7480", letterSpacing: "0.06em", textTransform: "uppercase", margin: 0 }}>
+                    {/* goal + hint */}
+                    <p style={{ fontSize: 11, fontWeight: 700, color: "#6b7480", letterSpacing: "0.06em", textTransform: "uppercase", margin: 0 }}>
                       {logHydrationMl >= MAX ? "Goal reached 🎉" : `Goal: 3L`}
+                    </p>
+                    <p style={{ fontSize: 11, color: "#b0b8c1", margin: "-4px 0 0", textAlign: "center", lineHeight: 1.4 }}>
+                      Tap + each time you finish a glass
                     </p>
                   </>
                 );
