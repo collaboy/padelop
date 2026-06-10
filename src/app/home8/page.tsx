@@ -810,6 +810,9 @@ export default function Home8() {
                   : `translateY(calc(-50dvh - 150vw + 100px + ${liveY}px))`,
               transition: liveY !== 0 ? "none" : "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
             }}>
+              {/* Structural spacer — keeps transform geometry intact */}
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", pointerEvents: "none" }} />
+
               {/* Card 0: next match */}
               {(() => {
                 const today = now.toISOString().slice(0, 10);
