@@ -12,6 +12,93 @@
   --muted: #3a4550;
   --border: #dfe3e7;
   --font-hanken: var(--font-hanken);
+
+/* ── Radius scale ───────────────────────────────────────────────────────
+     r-sm   14px  buttons, inputs, small cards
+     r-md   20px  standard cards
+     r-lg   24px  large cards, prominent sections
+     r-xl   28px  modals, bottom sheets
+     r-pill 999px badges, chips, avatars
+  ─────────────────────────────────────────────────────────────────────── */
+  --r-sm:   14px;
+  --r-md:   20px;
+  --r-lg:   24px;
+  --r-xl:   28px;
+  --r-pill: 999px;
+
+  /* ── Shadow scale ───────────────────────────────────────────────────────
+     shadow-soft  subtle background cards
+     shadow-card  primary card elevation
+     shadow-modal modals, bottom sheets
+  ─────────────────────────────────────────────────────────────────────── */
+  --shadow-soft:  0px 4px 20px rgba(0,0,0,0.05);
+  --shadow-card:  0px 4px 24px rgba(0,0,0,0.08);
+  --shadow-modal: 0px 8px 40px rgba(0,0,0,0.15);
+
+  /* ── Colour tokens ──────────────────────────────────────────────────────
+     Neutrals
+     --c-text        #1a1c1c   primary text
+     --c-text-sub    #4a5050   secondary / body text
+     --c-text-dim    #6b7480   muted text, icon strokes
+     --c-label       #8a9096   section eyebrows, sub-labels
+     --c-hint        #9aa5b0   captions, placeholders
+     --c-disabled    #c4c7c7   disabled states
+
+     Surfaces
+     --c-bg          #f4f4f6   neutral background, button bg
+     --c-bg-input    #f9f9f9   input / well background
+
+     Borders
+     --c-line        #e2e2e2   standard border / divider
+     --c-line-dim    #f0f0f0   subtle separator
+     --c-border-card rgba(196,199,199,0.15)  card outline
+
+     Accent
+     --c-blue        #2653d4   primary action / CTA
+     --c-blue-tint   #eef2ff   selected state background
+     --c-blue-light  #dbeafe   highlighted background
+
+     Semantic
+     --c-green       #16a34a   success / win
+     --c-green-bg    #f0fdf4   success background
+     --c-red         #dc2626   error / loss / danger
+     --c-red-bg      #fef2f2   error background
+     --c-amber       #f59e0b   warning / energy
+
+     Domain
+     --c-purple      #7c3aed   recovery flows
+     --c-teal        #0891b2   hydration metrics
+     --c-orange      #ea580c   energy / drills
+     --c-forest      #496640   FAB / game-day accent
+  ──────────────────────────────────────────────────────────────────────── */
+  --c-text:        #1a1c1c;
+  --c-text-sub:    #4a5050;
+  --c-text-dim:    #6b7480;
+  --c-label:       #8a9096;
+  --c-hint:        #9aa5b0;
+  --c-disabled:    #c4c7c7;
+
+  --c-bg:          #f4f4f6;
+  --c-bg-input:    #f9f9f9;
+
+  --c-line:        #e2e2e2;
+  --c-line-dim:    #f0f0f0;
+  --c-border-card: rgba(196,199,199,0.15);
+
+  --c-blue:        #2653d4;
+  --c-blue-tint:   #eef2ff;
+  --c-blue-light:  #dbeafe;
+
+  --c-green:       #16a34a;
+  --c-green-bg:    #f0fdf4;
+  --c-red:         #dc2626;
+  --c-red-bg:      #fef2f2;
+  --c-amber:       #f59e0b;
+
+  --c-purple:      #7c3aed;
+  --c-teal:        #0891b2;
+  --c-orange:      #ea580c;
+  --c-forest:      #496640;
 }
 
 @theme inline {
@@ -26,19 +113,69 @@
   --color-border: var(--border);
   --font-sans: var(--font-geist-sans);
   --font-display: var(--font-hanken);
+
+  /* Colour token aliases for Tailwind (text-c-text, bg-c-bg, etc.) */
+  --color-c-text:        var(--c-text);
+  --color-c-text-sub:    var(--c-text-sub);
+  --color-c-text-dim:    var(--c-text-dim);
+  --color-c-label:       var(--c-label);
+  --color-c-hint:        var(--c-hint);
+  --color-c-disabled:    var(--c-disabled);
+  --color-c-bg:          var(--c-bg);
+  --color-c-bg-input:    var(--c-bg-input);
+  --color-c-line:        var(--c-line);
+  --color-c-line-dim:    var(--c-line-dim);
+  --color-c-blue:        var(--c-blue);
+  --color-c-blue-tint:   var(--c-blue-tint);
+  --color-c-blue-light:  var(--c-blue-light);
+  --color-c-green:       var(--c-green);
+  --color-c-green-bg:    var(--c-green-bg);
+  --color-c-red:         var(--c-red);
+  --color-c-red-bg:      var(--c-red-bg);
+  --color-c-amber:       var(--c-amber);
+  --color-c-purple:      var(--c-purple);
+  --color-c-teal:        var(--c-teal);
+  --color-c-orange:      var(--c-orange);
+  --color-c-forest:      var(--c-forest);
 }
 
 * { box-sizing: border-box; }
 
-.h1-font { font-family: 'Inter', sans-serif; }
-.h1-display { font-size: 40px; line-height: 48px; font-weight: 700; letter-spacing: -0.02em; }
-.h1-headline-md { font-size: 20px; line-height: 28px; font-weight: 600; }
-.h1-label-sm { font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: 0.05em; }
-.h1-body-md { font-size: 15px; line-height: 22px; font-weight: 400; }
-.h1-body-lg { font-size: 17px; line-height: 26px; font-weight: 400; }
-.h1-ambient { box-shadow: 0px 4px 20px rgba(0,0,0,0.04); }
+/* ── Type scale ──────────────────────────────────────────────────────────
+   t-label    11/16  700  UPPERCASE wide  — section eyebrows, headers
+   t-tag      11/16  700                 — badge / pill text
+   t-caption  12/18  500                 — timestamps, hints, sub-labels
+   t-body-sm  13/20  400                 — secondary body, card captions
+   t-body     15/22  400                 — primary body copy
+   t-ui       15/20  600                 — buttons, list item primary text
+   t-subtitle 17/24  600                 — card titles, modal sub-headings
+   t-title    20/28  600                 — section headings, modal titles
+   t-heading  24/32  700                 — page titles
+   t-stat     32/36  800                 — big numbers, scores
+   t-display  40/48  800  tight          — hero numbers, splash
+──────────────────────────────────────────────────────────────────────── */
+.t-label    { font-size: 11px; line-height: 16px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.t-tag      { font-size: 11px; line-height: 16px; font-weight: 700; letter-spacing: 0.02em; }
+.t-caption  { font-size: 12px; line-height: 18px; font-weight: 500; }
+.t-body-sm  { font-size: 13px; line-height: 20px; font-weight: 400; }
+.t-body     { font-size: 15px; line-height: 22px; font-weight: 400; }
+.t-ui       { font-size: 15px; line-height: 20px; font-weight: 600; }
+.t-subtitle { font-size: 17px; line-height: 24px; font-weight: 600; }
+.t-title    { font-size: 20px; line-height: 28px; font-weight: 600; }
+.t-heading  { font-size: 24px; line-height: 32px; font-weight: 700; }
+.t-stat     { font-size: 32px; line-height: 36px; font-weight: 800; }
+.t-display  { font-size: 40px; line-height: 48px; font-weight: 800; letter-spacing: -0.02em; }
 
-.shadow-sm { box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03); }
+.r-sm   { border-radius: var(--r-sm); }
+.r-md   { border-radius: var(--r-md); }
+.r-lg   { border-radius: var(--r-lg); }
+.r-xl   { border-radius: var(--r-xl); }
+.r-pill { border-radius: var(--r-pill); }
+.r-t-xl { border-top-left-radius: var(--r-xl); border-top-right-radius: var(--r-xl); }
+
+.shadow-soft  { box-shadow: var(--shadow-soft); }
+.shadow-card  { box-shadow: var(--shadow-card); }
+.shadow-modal { box-shadow: var(--shadow-modal); }
 
 body {
   background: var(--bg);

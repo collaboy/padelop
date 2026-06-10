@@ -198,18 +198,17 @@ export default function ReadinessSheet({ open, onClose, onOpenLog: _onOpenLog, o
 
   return (
     <div
-      className="fixed inset-0 z-[80] flex items-center justify-center"
-      style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }}
+      className="fixed inset-0 z-[80] flex items-end"
       onClick={onClose}
     >
-      <style>{`@keyframes rsSlideDown{from{transform:translateY(-16px);opacity:0}to{transform:translateY(0);opacity:1}}`}</style>
+      <style>{`@keyframes rsSlideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}`}</style>
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
 
       <div
-        className="relative w-full max-w-lg mx-4 bg-[#f0f2f5] rounded-[28px] flex flex-col overflow-hidden"
+        className="relative w-full bg-[#f0f2f5] rounded-t-[28px] flex flex-col overflow-hidden"
         style={{
-          animation: "rsSlideDown 0.25s cubic-bezier(0.22,1,0.36,1)",
-          maxHeight: "calc(100dvh - 4rem - 24px)",
+          animation: "rsSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)",
+          maxHeight: "75vh",
           paddingBottom: "env(safe-area-inset-bottom)",
         }}
         onClick={e => e.stopPropagation()}

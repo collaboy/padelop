@@ -116,18 +116,21 @@ export default function WeekPlanModal() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center px-5"
-      style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }}
+      className="fixed inset-0 z-50 flex items-end"
       onClick={() => setOpen(false)}
     >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
-        className="relative w-full max-w-[480px] bg-white rounded-[28px] shadow-2xl overflow-y-auto max-h-[88vh]"
-        style={{ fontFamily: "var(--font-hanken)" }}
+        className="relative w-full bg-white rounded-t-[28px] shadow-2xl overflow-y-auto"
+        style={{ fontFamily: "var(--font-hanken)", maxHeight: "92vh", paddingBottom: "env(safe-area-inset-bottom)" }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* drag handle */}
+        <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+          <div className="w-10 h-1 rounded-full bg-[#e0e0e0]" />
+        </div>
         {/* Sticky header */}
-        <div className="sticky top-0 bg-white z-10 px-6 pt-6 pb-4 flex items-center justify-between border-b border-[#f4f4f4]">
+        <div className="sticky top-0 bg-white z-10 px-6 pt-4 pb-4 flex items-center justify-between border-b border-[#f4f4f4]">
           <div>
             <p className="text-[18px] font-bold text-[var(--text)]">
               Plan this{" "}

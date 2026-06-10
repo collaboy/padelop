@@ -882,10 +882,27 @@ export default function Home8() {
                         </div>
                       );
                     })() : (
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-                        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: 0 }}>Next Match</p>
-                        <p style={{ fontSize: 20, fontWeight: 500, color: "#c0c7d0", margin: 0 }}>No match scheduled</p>
-                        <button onClick={() => { setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('manual'); setMatchModalOpen(true); }} style={{ fontSize: 15, fontWeight: 600, color: "#2653d4", background: "none", border: "none", cursor: "pointer", padding: 0 }}>+ Add a match</button>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+                        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 10px" }}>Next Match</p>
+                        <button
+                          onClick={() => { setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('manual'); setMatchModalOpen(true); }}
+                          style={{ fontSize: 15, fontWeight: 600, color: "#2653d4", background: "#eef2ff", border: "none", cursor: "pointer", padding: "10px 24px", borderRadius: 999 }}
+                        >
+                          + Schedule a match
+                        </button>
+
+                        <div style={{ width: 48, height: 1, background: "#e8eaed", margin: "24px 0" }} />
+
+                        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 16px" }}>Today&apos;s Checklist</p>
+                        <button onClick={() => setReadinessSheetOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                          <span style={{ fontSize: "clamp(48px, 14vw, 64px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1, letterSpacing: "-0.03em" }}>
+                            {readinessDone}<span style={{ color: "#dde0e4", fontSize: "0.55em" }}>/4</span>
+                          </span>
+                          {readinessLabel && (
+                            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: readinessColor }}>{readinessLabel}</span>
+                          )}
+                        </button>
+                        <p style={{ fontSize: 14, color: "#8a9096", margin: "12px 0 0", textAlign: "center", lineHeight: 1.5 }}>{coachTip}</p>
                       </div>
                     )}
                   </div>
@@ -935,8 +952,8 @@ export default function Home8() {
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
                       <p className="text-[14px] tracking-wide leading-none" style={{ color: "#000", fontWeight: 600 }}>Now</p>
                       <p className="font-bold leading-tight text-center" style={{ color: "#000", fontSize: "clamp(24px, 7.5vw, 34px)" }}>{s.title}</p>
-                      {s.subtitle && <p className="leading-none text-center mt-0.5" style={{ color: "#000", fontSize: "clamp(15px, 4.8vw, 22px)", fontWeight: 500 }}>{s.subtitle.split(", ").join(" · ")}</p>}
-                      <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 font-semibold px-5 py-2 rounded-full flex items-center gap-1" style={{ background: isSleepytime ? "transparent" : "#fff", color: isReady ? s.color : "#b0b5ba", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+                      {s.subtitle && <p className="leading-none text-center mt-0.5" style={{ color: "#000", fontSize: "clamp(13px, 4vw, 18px)", fontWeight: 500 }}>{s.subtitle.split(", ").join(" · ")}</p>}
+                      <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 font-semibold px-5 py-2 rounded-full flex items-center gap-1" style={{ background: isSleepytime ? "transparent" : "#fff", color: "#0000ff", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me</button>
                       {dayType === "match" && match && (() => { const [mH, mM] = match.time.split(":").map(Number); return now.getHours() * 60 + now.getMinutes() >= mH * 60 + mM - 60; })() && (
                         <div onClick={e => e.stopPropagation()} style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 12, width: "100%" }}>
                           <button
@@ -1234,10 +1251,13 @@ export default function Home8() {
 
         {/* Complete modal */}
         {doModalOpen && modalItem && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { setDoModalOpen(false); setSchedModalIdx(null); }}>
+          <div className="fixed inset-0 z-[200] flex items-end" onClick={() => { setDoModalOpen(false); setSchedModalIdx(null); }}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-            <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden max-h-[88vh] overflow-y-auto" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.15)" }} onClick={e => e.stopPropagation()}>
-              <div className="px-6 pt-5 pb-4" style={{ background: `${modalItem.color}18` }}>
+            <div className="relative w-full bg-white rounded-t-[28px] overflow-hidden overflow-y-auto" style={{ maxHeight: "85vh", boxShadow: "0 -4px 40px rgba(0,0,0,0.15)", paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
+              <div className="px-6 pt-3 pb-4" style={{ background: `${modalItem.color}18` }}>
+              <div className="flex justify-center pb-3">
+                <div className="w-10 h-1 rounded-full" style={{ background: `${modalItem.color}40` }} />
+              </div>
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-2.5 h-2.5 rounded-full" style={{ background: modalItem.color }} />
                   <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: modalItem.color }}>Today&apos;s Schedule</p>
@@ -1323,7 +1343,7 @@ export default function Home8() {
                   </div>
                 );
               })()}
-              <div className="px-6 pb-6">
+              <div className="px-6 pb-8 pt-2">
                 {(() => {
                   const isComplete = completed.has(modalIdx);
                   return (
@@ -1424,10 +1444,11 @@ export default function Home8() {
 
         {/* Log picker */}
         {logPickerOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogPickerSub(null); setExtrasOpen(false); }}>
+          <div className="fixed inset-0 z-[200] flex items-end" onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogPickerSub(null); setExtrasOpen(false); }}>
             <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
-            <div className="relative w-full max-w-sm bg-white rounded-[24px] shadow-2xl" style={{ overflow: "hidden", maxHeight: "82dvh", display: "flex", flexDirection: "column" }} onClick={e => e.stopPropagation()}>
-              <div className="px-5 pt-5 pb-4 flex-shrink-0" style={{ borderBottom: "1px solid #f0f0f0" }}>
+            <div className="relative w-full bg-white rounded-t-[28px] shadow-2xl" style={{ overflow: "hidden", maxHeight: "80vh", display: "flex", flexDirection: "column", paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
+              <div className="flex justify-center pt-3 pb-1 flex-shrink-0"><div className="w-10 h-1 rounded-full bg-[#e0e0e0]" /></div>
+              <div className="px-5 pt-4 pb-4 flex-shrink-0" style={{ borderBottom: "1px solid #f0f0f0" }}>
                 <p style={{ fontSize: 22, fontWeight: 800, color: "#1a1c1c", margin: 0 }}>What do you want to log?</p>
               </div>
               <div style={{ overflowY: "auto" }}>
@@ -1599,6 +1620,7 @@ export default function Home8() {
                   </svg>
                 </button>
               </div>
+
               </div>
             </div>
           </div>

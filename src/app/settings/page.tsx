@@ -44,36 +44,36 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div className="px-4 pt-6 pb-24 max-w-lg mx-auto flex flex-col gap-6">
+    <div className="px-5 pt-6 pb-24 max-w-lg mx-auto flex flex-col gap-6">
 
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
         <button
           onClick={() => router.back()}
-          style={{ width: 36, height: 36, borderRadius: "50%", background: "#f4f4f6", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+          style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--c-bg)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--c-text)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
-        <h1 style={{ fontSize: 24, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Settings</h1>
+        <h1 className="t-heading" style={{ color: "var(--c-text)", margin: 0 }}>Settings</h1>
       </div>
 
       {/* Preferences */}
       <section>
-        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9aa5b0", margin: "0 4px 10px" }}>Preferences</p>
-        <div style={{ background: "#fff", borderRadius: 20, overflow: "hidden", boxShadow: "0px 2px 12px rgba(0,0,0,0.05)", border: "1px solid rgba(196,199,199,0.15)" }}>
+        <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px" }}>Preferences</p>
+        <div style={{ background: "#fff", borderRadius: "var(--r-md)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
           {prefItems.map(({ icon, label, sub }, i) => (
             <button
               key={label}
               style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", borderTop: i > 0 ? "1px solid #f4f4f6" : "none", cursor: "pointer" }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <span style={{ color: "#6b7480" }}>{icon}</span>
+                <span style={{ color: "var(--c-text-dim)" }}>{icon}</span>
                 <div style={{ textAlign: "left" }}>
-                  <span style={{ fontSize: 16, fontWeight: 500, color: "#1a1c1c", display: "block" }}>{label}</span>
-                  {sub && <span style={{ fontSize: 12, color: "#9aa5b0" }}>{sub}</span>}
+                  <span className="t-ui" style={{ color: "var(--c-text)", display: "block" }}>{label}</span>
+                  {sub && <span className="t-caption" style={{ color: "var(--c-hint)" }}>{sub}</span>}
                 </div>
               </div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
           ))}
         </div>
@@ -81,8 +81,8 @@ export default function SettingsPage() {
 
       {/* Data */}
       <section>
-        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9aa5b0", margin: "0 4px 10px" }}>Your Data</p>
-        <div style={{ background: "#fff", borderRadius: 20, overflow: "hidden", boxShadow: "0px 2px 12px rgba(0,0,0,0.05)", border: "1px solid rgba(196,199,199,0.15)" }}>
+        <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px" }}>Your Data</p>
+        <div style={{ background: "#fff", borderRadius: "var(--r-md)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
           {dataItems.map(({ icon, label, sub, action }, i) => (
             <button
               key={label}
@@ -90,13 +90,13 @@ export default function SettingsPage() {
               style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", borderTop: i > 0 ? "1px solid #f4f4f6" : "none", cursor: "pointer" }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <span style={{ color: importDone && label.includes("Import") ? "#16a34a" : "#6b7480" }}>{icon}</span>
+                <span style={{ color: importDone && label.includes("Import") ? "var(--c-green)" : "var(--c-text-dim)" }}>{icon}</span>
                 <div style={{ textAlign: "left" }}>
-                  <span style={{ fontSize: 16, fontWeight: 500, color: importDone && label.includes("Import") ? "#16a34a" : "#1a1c1c", display: "block" }}>{label}</span>
-                  {sub && <span style={{ fontSize: 12, color: "#9aa5b0" }}>{sub}</span>}
+                  <span className="t-ui" style={{ color: importDone && label.includes("Import") ? "var(--c-green)" : "var(--c-text)", display: "block" }}>{label}</span>
+                  {sub && <span className="t-caption" style={{ color: "var(--c-hint)" }}>{sub}</span>}
                 </div>
               </div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
           ))}
         </div>
@@ -127,13 +127,14 @@ export default function SettingsPage() {
       {/* Log out */}
       <section>
         <button
-          style={{ width: "100%", padding: "16px", fontSize: 16, fontWeight: 600, color: "#ba1a1a", border: "1.5px solid rgba(186,26,26,0.2)", borderRadius: 16, background: "#fff", cursor: "pointer", boxShadow: "0px 2px 12px rgba(0,0,0,0.04)" }}
+          className="t-ui"
+          style={{ width: "100%", padding: "16px", color: "#ba1a1a", border: "1.5px solid rgba(186,26,26,0.2)", borderRadius: "var(--r-sm)", background: "#fff", cursor: "pointer", boxShadow: "var(--shadow-soft)" }}
         >
           Log Out
         </button>
       </section>
 
-      <p style={{ textAlign: "center", color: "#c4c7c7", fontSize: 12, fontWeight: 500, letterSpacing: "0.05em" }}>
+      <p className="t-caption" style={{ textAlign: "center", color: "var(--c-disabled)" }}>
         padla Version 2.4.1
       </p>
 

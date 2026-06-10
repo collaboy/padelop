@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import LogSheet from "@/components/log-sheet";
 import AvatarCropModal from "@/components/avatar-crop-modal";
 import {
@@ -40,17 +39,17 @@ type ActivityItem =
 // ── Insights config ───────────────────────────────────────────────────────
 
 const PILLARS: { key: keyof Omit<Scores, "overall">; label: string; color: string }[] = [
-  { key: "recovery",  label: "Recovery",  color: "#7c3aed" },
-  { key: "nutrition", label: "Nutrition", color: "#0891b2" },
-  { key: "training",  label: "Training",  color: "#16a34a" },
-  { key: "wellbeing", label: "Wellbeing", color: "#f59e0b" },
+  { key: "recovery",  label: "Recovery",  color: "var(--c-purple)" },
+  { key: "nutrition", label: "Nutrition", color: "var(--c-teal)" },
+  { key: "training",  label: "Training",  color: "var(--c-green)" },
+  { key: "wellbeing", label: "Wellbeing", color: "var(--c-amber)" },
 ];
 
 const STATUS_META: Record<PillarStatus, { label: string; bg: string; text: string }> = {
-  good:       { label: "Good",       bg: "#f0fdf4", text: "#16a34a" },
+  good:       { label: "Good",       bg: "var(--c-green-bg)", text: "var(--c-green)" },
   ok:         { label: "OK",         bg: "#fffbeb", text: "#d97706" },
-  low:        { label: "Low",        bg: "#fef2f2", text: "#dc2626" },
-  not_logged: { label: "Not logged", bg: "#f4f4f6", text: "#9aa5b0" },
+  low:        { label: "Low",        bg: "var(--c-red-bg)", text: "var(--c-red)" },
+  not_logged: { label: "Not logged", bg: "var(--c-bg)", text: "var(--c-hint)" },
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -60,8 +59,8 @@ function initials(name: string) {
   return name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
 }
 
-const TEAM_A = ["#2653d4", "#0891b2"];
-const TEAM_B = ["#ea580c", "#dc2626"];
+const TEAM_A = ["var(--c-blue)", "var(--c-teal)"];
+const TEAM_B = ["var(--c-orange)", "var(--c-red)"];
 
 function PairAvatars({ names, colors, size }: { names: [string, string]; colors: [string, string]; size: "lg" | "sm" }) {
   const px = size === "lg" ? 44 : 30;
@@ -121,26 +120,26 @@ function hashStr(s: string) {
   return Math.abs(h);
 }
 
-const card: React.CSSProperties = { boxShadow: "0px 4px 24px rgba(0,0,0,0.10)" };
+const card: React.CSSProperties = { boxShadow: "var(--shadow-card)" };
 
 function TagCloud({ reviews }: { reviews: ReviewEntry[] }) {
   const tags = buildTagCloud(reviews);
   if (tags.length === 0) return null;
   const maxCount = tags[0].count;
   return (
-    <div className="bg-white rounded-[20px] border border-[#e2e2e2] px-5 py-5" style={card}>
-      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 14px" }}>Trending in your matches</p>
+    <div className="bg-white r-md border border-c-line px-5 py-5" style={card}>
+      <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 14px" }}>Trending in your matches</p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: "10px 12px", alignItems: "center" }}>
         {tags.map(({ text, count, type }) => {
           const ratio = maxCount > 1 ? (count - 1) / (maxCount - 1) : 1;
           const fontSize = Math.round(12 + ratio * 16);
-          const color = type === "good" ? "#00a844" : "#ea580c";
+          const color = type === "good" ? "#00a844" : "var(--c-orange)";
           const bg    = type === "good" ? "#e6fff1" : "#fef0e8";
           const rot   = ((hashStr(text) % 11) - 5) * 0.8;
           return (
             <span key={text + type} style={{
               fontSize, fontWeight: ratio > 0.5 ? 700 : 500, color, background: bg,
-              borderRadius: 999, padding: "3px 10px", display: "inline-block",
+              borderRadius: "var(--r-pill)", padding: "3px 10px", display: "inline-block",
               transform: `rotate(${rot}deg)`, lineHeight: 1.4, whiteSpace: "nowrap",
             }}>
               {text}
@@ -160,30 +159,30 @@ function NextMatchCard({ match }: { match: StoredMatch }) {
   const p4 = match.player_4 || "";
   const firstName = (n: string) => n.split(" ")[0];
   return (
-    <div className="bg-white rounded-[24px] border border-[#e2e2e2] overflow-hidden" style={card}>
+    <div className="bg-white r-lg border border-c-line overflow-hidden" style={card}>
       <div className="px-5 pt-5 pb-4 flex justify-between items-start gap-3">
         <div>
-          <p className="text-[15px] font-bold text-[#496640] leading-snug uppercase tracking-wide">Friendly Match</p>
-          <p className="text-[15px] text-[#1a1c1c] mt-1">{formatDate(match.date)}{match.time ? ` • ${formatTime(match.time)}` : ""}</p>
+          <p className="t-ui text-c-forest leading-snug uppercase tracking-wide">Friendly Match</p>
+          <p className="t-ui font-normal text-c-text mt-1">{formatDate(match.date)}{match.time ? ` • ${formatTime(match.time)}` : ""}</p>
         </div>
-        <span className="flex-shrink-0 text-[11px] font-bold tracking-wide px-3 py-1.5 rounded-full uppercase" style={{ background: "#dbeafe", color: "#2653d4" }}>Upcoming</span>
+        <span className="flex-shrink-0 t-tag px-3 py-1.5 rounded-full uppercase" style={{ background: "var(--c-blue-light)", color: "var(--c-blue)" }}>Upcoming</span>
       </div>
       <div className="border-t border-[#ebebeb]" />
       <div className="flex items-center justify-around px-5 py-5">
         <div className="flex flex-col items-center gap-2">
           <PairAvatars names={[p1, p2]} colors={[TEAM_A[0], TEAM_A[1]]} size="lg" />
-          <p className="text-[13px] text-[#1a1c1c] font-medium">{firstName(p1)} & {firstName(p2)}</p>
+          <p className="t-body-sm font-medium text-c-text">{firstName(p1)} & {firstName(p2)}</p>
         </div>
-        <span className="text-[13px] font-semibold text-[#9aab96] uppercase tracking-widest">vs</span>
+        <span className="t-body-sm font-semibold text-[#9aab96] uppercase tracking-widest">vs</span>
         <div className="flex flex-col items-center gap-2">
           <PairAvatars names={[p3, p4 || "?"]} colors={[TEAM_B[0], TEAM_B[1]]} size="lg" />
-          <p className="text-[13px] text-[#1a1c1c] font-medium">{firstName(p3)}{p4 ? ` & ${firstName(p4)}` : ""}</p>
+          <p className="t-body-sm font-medium text-c-text">{firstName(p3)}{p4 ? ` & ${firstName(p4)}` : ""}</p>
         </div>
       </div>
       {match.club && (
         <>
           <div className="border-t border-[#ebebeb]" />
-          <div className="flex items-center px-5 py-4 gap-2 text-[14px] text-[#747878]">
+          <div className="flex items-center px-5 py-4 gap-2 t-body-sm text-c-text-sub">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
             </svg>
@@ -196,19 +195,19 @@ function NextMatchCard({ match }: { match: StoredMatch }) {
 }
 
 function MatchCard({ review }: { review: ReviewEntry }) {
-  const resultColor    = review.result === "win" ? "#496640" : review.result === "loss" ? "#dc2626" : "#747878";
-  const resultBg       = review.result === "win" ? "#eef6eb" : review.result === "loss" ? "#fef2f2" : "#f4f4f6";
+  const resultColor    = review.result === "win" ? "var(--c-forest)" : review.result === "loss" ? "var(--c-red)" : "var(--c-text-sub)";
+  const resultBg       = review.result === "win" ? "#eef6eb" : review.result === "loss" ? "var(--c-red-bg)" : "var(--c-bg)";
   const resultLabel    = review.result === "win" ? "Win"     : review.result === "loss" ? "Loss"    : "Played";
   const opponentNames  = typeof review.opponentNames === "string" && review.opponentNames ? review.opponentNames : null;
   const hasTags = review.wellDone.length > 0 || review.improved.length > 0;
   return (
-    <div className="bg-white rounded-[20px] border border-[#e2e2e2] overflow-hidden" style={card}>
+    <div className="bg-white r-md border border-c-line overflow-hidden" style={card}>
       <div className="px-5 pt-4 pb-3 flex items-center justify-between gap-4">
         <div>
-          <p className="text-[13px] font-bold text-[#1a1c1c]">{opponentNames ? `vs ${opponentNames}` : "Match"}</p>
-          <p className="text-[11px] text-[#9aab96] mt-0.5">{formatTs(review.ts)}</p>
+          <p className="t-body-sm font-bold text-c-text">{opponentNames ? `vs ${opponentNames}` : "Match"}</p>
+          <p className="t-tag text-[#9aab96] mt-0.5">{formatTs(review.ts)}</p>
         </div>
-        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: resultBg, color: resultColor }}>{resultLabel}</span>
+        <span className="t-tag px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: resultBg, color: resultColor }}>{resultLabel}</span>
       </div>
       {hasTags && (
         <>
@@ -216,12 +215,12 @@ function MatchCard({ review }: { review: ReviewEntry }) {
           <div className="px-5 py-3 flex flex-col gap-2">
             {review.wellDone.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
-                {review.wellDone.map(t => <span key={t} className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full" style={{ background: "#dbeafe", color: "#2653d4" }}>{t}</span>)}
+                {review.wellDone.map(t => <span key={t} className="t-tag px-2.5 py-0.5 rounded-full" style={{ background: "var(--c-blue-light)", color: "var(--c-blue)" }}>{t}</span>)}
               </div>
             )}
             {review.improved.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
-                {review.improved.map(t => <span key={t} className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-[#f9f9f9] text-[#747878] border border-[#ebebeb]">{t}</span>)}
+                {review.improved.map(t => <span key={t} className="t-tag font-medium px-2.5 py-0.5 rounded-full bg-c-bg-input text-c-text-sub border border-[#ebebeb]">{t}</span>)}
               </div>
             )}
           </div>
@@ -231,21 +230,21 @@ function MatchCard({ review }: { review: ReviewEntry }) {
   );
 }
 
-const INTENSITY_COLOR: Record<string, string> = { light: "#16a34a", moderate: "#2653d4", hard: "#dc2626" };
+const INTENSITY_COLOR: Record<string, string> = { light: "var(--c-green)", moderate: "var(--c-blue)", hard: "var(--c-red)" };
 
 function TrainingCard({ entry }: { entry: TrainingEntry }) {
-  const intensityColor = INTENSITY_COLOR[entry.intensity] ?? "#747878";
+  const intensityColor = INTENSITY_COLOR[entry.intensity] ?? "var(--c-text-sub)";
   return (
-    <div className="bg-white rounded-[20px] border border-[#e2e2e2] overflow-hidden" style={card}>
+    <div className="bg-white r-md border border-c-line overflow-hidden" style={card}>
       <div className="px-5 pt-4 pb-3 flex items-center justify-between gap-4">
         <div>
-          <p className="text-[13px] font-bold text-[#16a34a]">Training</p>
-          <p className="text-[11px] text-[#9aab96] mt-0.5">{formatTs(entry.ts)}</p>
+          <p className="t-body-sm font-bold text-c-green">Training</p>
+          <p className="t-tag text-[#9aab96] mt-0.5">{formatTs(entry.ts)}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap justify-end">
-          {entry.duration && <span className="text-[11px] font-semibold text-[#747878]">{entry.duration}</span>}
+          {entry.duration && <span className="t-tag font-semibold text-c-text-sub">{entry.duration}</span>}
           {entry.intensity && (
-            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${intensityColor}15`, color: intensityColor }}>
+            <span className="t-tag px-2 py-0.5 rounded-full" style={{ background: `${intensityColor}15`, color: intensityColor }}>
               {entry.intensity.charAt(0).toUpperCase() + entry.intensity.slice(1)}
             </span>
           )}
@@ -257,12 +256,12 @@ function TrainingCard({ entry }: { entry: TrainingEntry }) {
           <div className="px-5 py-3 flex flex-col gap-2">
             {entry.sessionType.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
-                {entry.sessionType.map(t => <span key={t} className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#f0f4ff] text-[#2653d4]">{t}</span>)}
+                {entry.sessionType.map(t => <span key={t} className="t-tag px-2.5 py-0.5 rounded-full bg-[#f0f4ff] text-c-blue">{t}</span>)}
               </div>
             )}
             {entry.drillFocus.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
-                {entry.drillFocus.map(t => <span key={t} className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-[#f9f9f9] text-[#747878] border border-[#ebebeb]">{t}</span>)}
+                {entry.drillFocus.map(t => <span key={t} className="t-tag font-medium px-2.5 py-0.5 rounded-full bg-c-bg-input text-c-text-sub border border-[#ebebeb]">{t}</span>)}
               </div>
             )}
           </div>
@@ -310,7 +309,10 @@ function topTag(tags: string[]): string | null {
 
 export default function ProfilePage() {
   // Profile
-  const [profile, setProfile] = useState<Profile>(EMPTY);
+  const [profile, setProfile] = useState<Profile>(() => {
+    if (typeof window === "undefined") return EMPTY;
+    try { const raw = localStorage.getItem(PROFILE_KEY); return raw ? JSON.parse(raw) : EMPTY; } catch { return EMPTY; }
+  });
   const [saved, setSaved]     = useState(false);
 
   // Matches
@@ -388,8 +390,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
     return () => window.removeEventListener("storage", loadAll);
   }, []);
 
-  const searchParams = useSearchParams();
-  const [profileOpen, setProfileOpen] = useState(() => searchParams.get("edit") === "1");
+  const [profileOpen, setProfileOpen] = useState(false);
   const [gearEditOpen, setGearEditOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [racketName, setRacketName] = useState("Wilson Carbon Pro v2");
@@ -479,12 +480,12 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
   const currentWeekRow = todayCell >= 0 ? Math.floor(todayCell / 7) : -1;
 
   return (
-    <div className="px-4 pt-6 pb-20 max-w-lg mx-auto flex flex-col gap-6">
+    <div className="px-5 pt-6 pb-20 max-w-lg mx-auto flex flex-col gap-6">
 
       {/* ── New Profile Header ───────────────────────────────────────────── */}
-      <section style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 16 }}>
-        <Link href="/settings" style={{ position: "absolute", top: 0, right: 0, width: 36, height: 36, borderRadius: "50%", background: "#f4f4f6", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <section style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "16px" }}>
+        <Link href="/settings" style={{ position: "absolute", top: 0, right: 0, width: 36, height: 36, borderRadius: "50%", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--c-text-dim)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="3"/>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>
@@ -493,82 +494,82 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
           onClick={() => setProfileOpen(o => !o)}
           style={{ background: "none", border: "none", cursor: "pointer", padding: 0, borderRadius: "50%" }}
         >
-          <div style={{ width: 96, height: 96, borderRadius: "50%", overflow: "hidden", boxShadow: "0px 4px 20px rgba(0,0,0,0.08)", border: "4px solid #fff", background: profile.avatar ? "transparent" : "#2653d4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ width: 96, height: 96, borderRadius: "50%", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "4px solid #fff", background: profile.avatar ? "transparent" : "var(--c-blue)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             {profile.avatar ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={profile.avatar} alt="User profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             ) : (
-              <span style={{ fontSize: 28, fontWeight: 800, color: "#fff" }}>
+              <span className="t-stat" style={{ color: "#fff" }}>
                 {profile.name ? profile.name.trim().split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "?"}
               </span>
             )}
           </div>
         </button>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1a1c1c", margin: 0, lineHeight: "32px" }}>{profile.name || "Add your name"}</h1>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 4 }}>
-            {profile.level && <span style={{ background: "#dbeafe", color: "#2653d4", padding: "2px 12px", borderRadius: 999, fontSize: 12, fontWeight: 500, letterSpacing: "0.05em" }}>Level {profile.level}</span>}
-            {profile.position && <span style={{ color: "#444748", fontSize: 12, fontWeight: 500 }}>• {profile.position}</span>}
+          <h1 className="t-heading" style={{ color: "var(--c-text)", margin: 0, lineHeight: "32px" }}>{profile.name || "Add your name"}</h1>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginTop: "4px" }}>
+            {profile.level && <span className="t-caption" style={{ background: "var(--c-blue-light)", color: "var(--c-blue)", padding: "2px 12px", borderRadius: "var(--r-pill)" }}>Level {profile.level}</span>}
+            {profile.position && <span className="t-caption" style={{ color: "#444748" }}>• {profile.position}</span>}
           </div>
         </div>
       </section>
 
       {/* ── Inline edit form ─────────────────────────────────────────────── */}
       {profileOpen && (
-        <div style={{ background: "#fff", borderRadius: 24, padding: "20px 20px 8px", display: "flex", flexDirection: "column", gap: 20, boxShadow: "0px 4px 20px rgba(0,0,0,0.06)" }}>
+        <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", display: "flex", flexDirection: "column", gap: "20px", boxShadow: "var(--shadow-soft)" }}>
 
           {/* Avatar upload */}
-          <div className="flex flex-col items-center gap-2">
-            <label htmlFor="avatar-upload" className="cursor-pointer group">
-              <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-[#e2e2e2] group-active:opacity-80 transition-opacity flex items-center justify-center bg-[#f4f4f4]">
-                {profile.avatar ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={profile.avatar} alt="avatar" className="w-full h-full object-cover" />
-                ) : (
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="9" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-                  </svg>
-                )}
-              </div>
-            </label>
+          <label htmlFor="avatar-upload" className="cursor-pointer flex items-center gap-3 active:opacity-70 transition-opacity">
+            <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#f0f4ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--c-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </div>
+            <span className="t-ui" style={{ color: "var(--c-blue)" }}>Change Photo</span>
             <input id="avatar-upload" type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
-            <p className="text-[12px] text-[#9aa5b0]">{profile.avatar ? "Tap to change photo" : "Add a photo (optional)"}</p>
-          </div>
+          </label>
 
           {/* Name */}
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Your name</p>
+            <p className="t-label text-c-hint mb-2">Your name</p>
             <input type="text" value={profile.name} onChange={e => setField("name", e.target.value)} placeholder="e.g. Eddie"
-              className="w-full px-4 py-3 rounded-2xl border-2 border-[#e2e2e2] text-[15px] font-semibold text-[#1a1c1c] outline-none focus:border-[#2653d4] transition-colors bg-[#f9f9f9] focus:bg-white" />
+              className="t-ui w-full px-4 py-3 rounded-2xl border-2 border-c-line text-c-text outline-none focus:border-c-blue transition-colors bg-c-bg-input focus:bg-white" />
           </div>
 
           {/* Level */}
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Padel level</p>
-            <div className="grid grid-cols-5 gap-2">
-              {LEVELS.map(l => {
-                const sel = profile.level === l;
-                return (
-                  <button key={l} onClick={() => setField("level", l)}
-                    className="py-2 rounded-xl border-2 text-[13px] font-bold transition-all active:scale-95"
-                    style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#2653d4" : "#f9f9f9", color: sel ? "#fff" : "#747878" }}>
-                    {l}
-                  </button>
-                );
-              })}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+              <p className="t-label text-c-hint">Padel level</p>
+              <span className="t-heading" style={{ color: profile.level ? "var(--c-blue)" : "var(--c-disabled)", lineHeight: 1 }}>
+                {profile.level || "—"}
+              </span>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={LEVELS.length - 1}
+              step={1}
+              value={LEVELS.indexOf(profile.level) >= 0 ? LEVELS.indexOf(profile.level) : 0}
+              onChange={e => setField("level", LEVELS[parseInt(e.target.value)])}
+              className="w-full"
+              style={{ accentColor: "var(--c-blue)", height: 4, cursor: "pointer" }}
+            />
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
+              <span className="t-tag font-medium" style={{ color: "#b0b8c1" }}>1.0</span>
+              <span className="t-tag font-medium" style={{ color: "#b0b8c1" }}>5.0</span>
             </div>
           </div>
 
           {/* Position */}
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Preferred position</p>
+            <p className="t-label text-c-hint mb-2">Preferred position</p>
             <div className="flex gap-2">
               {POSITIONS.map(pos => {
                 const sel = profile.position === pos;
                 return (
                   <button key={pos} onClick={() => setField("position", pos)}
-                    className="flex-1 py-2 rounded-xl border-2 text-[12px] font-bold transition-all active:scale-95"
-                    style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9", color: sel ? "#2653d4" : "#747878" }}>
+                    className="t-caption flex-1 py-2 rounded-xl border-2 font-bold transition-all active:scale-95"
+                    style={{ borderColor: sel ? "var(--c-blue)" : "var(--c-line)", background: sel ? "var(--c-blue-tint)" : "var(--c-bg-input)", color: sel ? "var(--c-blue)" : "var(--c-text-sub)" }}>
                     {pos}
                   </button>
                 );
@@ -578,14 +579,14 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
 
           {/* Hand */}
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Dominant hand</p>
+            <p className="t-label text-c-hint mb-2">Dominant hand</p>
             <div className="flex gap-2">
               {HANDS.map(h => {
                 const sel = profile.hand === h;
                 return (
                   <button key={h} onClick={() => setField("hand", h)}
-                    className="flex-1 py-2 rounded-xl border-2 text-[13px] font-bold transition-all active:scale-95"
-                    style={{ borderColor: sel ? "#2653d4" : "#e2e2e2", background: sel ? "#eef2ff" : "#f9f9f9", color: sel ? "#2653d4" : "#747878" }}>
+                    className="t-body-sm flex-1 py-2 rounded-xl border-2 font-bold transition-all active:scale-95"
+                    style={{ borderColor: sel ? "var(--c-blue)" : "var(--c-line)", background: sel ? "var(--c-blue-tint)" : "var(--c-bg-input)", color: sel ? "var(--c-blue)" : "var(--c-text-sub)" }}>
                     {h}-handed
                   </button>
                 );
@@ -595,51 +596,49 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
 
           {/* Save */}
           <button disabled={!canSave} onClick={() => { save(); setProfileOpen(false); }}
-            className="w-full py-3.5 rounded-2xl text-[15px] font-bold transition-all active:scale-[0.98] mb-4"
-            style={{ background: saved ? "#16a34a" : canSave ? "#2653d4" : "#e2e2e2", color: canSave ? "#fff" : "#b0b3b3" }}>
+            className="t-ui w-full py-3.5 rounded-2xl font-bold transition-all active:scale-[0.98] mb-4"
+            style={{ background: saved ? "var(--c-green)" : canSave ? "var(--c-blue)" : "var(--c-line)", color: canSave ? "#fff" : "#b0b3b3" }}>
             {saved ? "Saved ✓" : "Save profile"}
           </button>
         </div>
       )}
 
       {/* ── My Gear ─────────────────────────────────────────────────────── */}
-      <section style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <section style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <p style={{ fontSize: 20, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>My Gear</p>
-          <button onClick={() => setGearEditOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 500, color: "#496640" }}>{gearEditOpen ? "Done" : "Edit"}</button>
+          <p className="t-title" style={{ color: "var(--c-text)", margin: 0 }}>My Gear</p>
+          <button onClick={() => setGearEditOpen(o => !o)} className="t-caption" style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 500, color: "var(--c-forest)" }}>{gearEditOpen ? "Done" : "Edit"}</button>
         </div>
-        <div style={{ background: "#fff", borderRadius: 24, overflow: "hidden", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)", border: "1px solid rgba(196,199,199,0.1)" }}>
-          <div style={{ padding: 20, display: "flex", alignItems: "center", gap: 24 }}>
-            <div style={{ width: 80, height: 80, flexShrink: 0, background: "#f9f9f9", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-            </div>
-            <div style={{ flex: 1 }}>
-              <span style={{ background: "rgba(37,99,212,0.08)", color: "#2653d4", padding: "2px 8px", borderRadius: 6, fontSize: 12, fontWeight: 500, display: "inline-block", marginBottom: 8 }}>Current Racket</span>
-              <p style={{ fontSize: 20, fontWeight: 600, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{racketName || "—"}</p>
-              <p style={{ fontSize: 15, color: "#444748", margin: "4px 0 0" }}>{racketType || "Add a description"}</p>
-            </div>
+        <div style={{ background: "#fff", borderRadius: "var(--r-lg)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
+          <div style={{ padding: "20px" }}>
+            <span className="t-label" style={{ color: "var(--c-label)", display: "block", marginBottom: "8px" }}>Current Racket</span>
+            <p className="t-title" style={{ color: "var(--c-text)", margin: 0, lineHeight: 1.2 }}>{racketName || "—"}</p>
+            <p className="t-body" style={{ color: "var(--c-text-dim)", margin: "4px 0 0" }}>{racketType || "Add a description"}</p>
           </div>
           {gearEditOpen && (
-            <div style={{ borderTop: "1px solid #f0f0f0", padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+            <div style={{ borderTop: "1px solid #f0f0f0", padding: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
               <div>
-                <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9aa5b0", margin: "0 0 6px" }}>Racket name</p>
+                <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 0 6px" }}>Racket name</p>
                 <input
                   type="text" value={racketName} onChange={e => setRacketName(e.target.value)}
                   placeholder="e.g. Bullpadel Vertex"
-                  style={{ width: "100%", padding: "10px 14px", borderRadius: 12, border: "2px solid #e2e2e2", fontSize: 15, fontWeight: 500, color: "#1a1c1c", outline: "none", background: "#f9f9f9" }}
+                  className="t-body"
+                  style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--r-sm)", border: "2px solid #e2e2e2", fontWeight: 500, color: "var(--c-text)", outline: "none", background: "var(--c-bg-input)" }}
                 />
               </div>
               <div>
-                <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9aa5b0", margin: "0 0 6px" }}>Type / description</p>
+                <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 0 6px" }}>Type / description</p>
                 <input
                   type="text" value={racketType} onChange={e => setRacketType(e.target.value)}
                   placeholder="e.g. Control, Power, Hybrid"
-                  style={{ width: "100%", padding: "10px 14px", borderRadius: 12, border: "2px solid #e2e2e2", fontSize: 15, fontWeight: 500, color: "#1a1c1c", outline: "none", background: "#f9f9f9" }}
+                  className="t-body"
+                  style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--r-sm)", border: "2px solid #e2e2e2", fontWeight: 500, color: "var(--c-text)", outline: "none", background: "var(--c-bg-input)" }}
                 />
               </div>
               <button
                 onClick={() => { localStorage.setItem("padelop:gear", JSON.stringify({ racketName, racketType })); setGearEditOpen(false); }}
-                style={{ padding: "12px", borderRadius: 14, background: "#2653d4", border: "none", cursor: "pointer", fontSize: 15, fontWeight: 700, color: "#fff" }}
+                className="t-ui"
+                style={{ padding: "12px", borderRadius: "var(--r-sm)", background: "var(--c-blue)", border: "none", cursor: "pointer", color: "#fff" }}
               >
                 Save
               </button>
@@ -649,15 +648,15 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
       </section>
 
       {/* ── Stats Bento ─────────────────────────────────────────────────── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
         {[
-          { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#496640" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>, label: "Matches", value: reviews.length || 24 },
-          { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#496640" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, label: "Win Rate", value: winRate !== null ? `${winRate}%` : "68%" },
+          { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--c-forest)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>, label: "Matches", value: reviews.length || 24 },
+          { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--c-forest)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, label: "Win Rate", value: winRate !== null ? `${winRate}%` : "68%" },
         ].map(({ icon, label, value }) => (
-          <div key={label} style={{ background: "#fff", padding: 20, borderRadius: 24, border: "1px solid rgba(196,199,199,0.1)", boxShadow: "0px 4px 20px rgba(0,0,0,0.04)" }}>
-            <div style={{ marginBottom: 8 }}>{icon}</div>
-            <p style={{ fontSize: 12, fontWeight: 500, color: "#444748", margin: "0 0 4px", letterSpacing: "0.05em" }}>{label}</p>
-            <p style={{ fontSize: 24, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>{value}</p>
+          <div key={label} style={{ background: "#fff", padding: "20px", borderRadius: "var(--r-lg)", border: "1px solid var(--c-border-card)", boxShadow: "var(--shadow-soft)" }}>
+            <div style={{ marginBottom: "8px" }}>{icon}</div>
+            <p className="t-caption" style={{ color: "#444748", margin: "0 0 4px" }}>{label}</p>
+            <p className="t-heading" style={{ color: "var(--c-text)", margin: 0 }}>{value}</p>
           </div>
         ))}
       </div>
@@ -666,13 +665,13 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
       <div style={{ height: 1, background: "#e8eaed" }} />
 
       {/* ── Streak banner ────────────────────────────────────────────────── */}
-      <div className="bg-white rounded-[20px] px-5 py-4 flex items-center gap-4" style={{ boxShadow: "0px 4px 24px rgba(0,0,0,0.10)" }}>
+      <div className="bg-white r-md px-5 py-4 flex items-center gap-4" style={{ boxShadow: "var(--shadow-card)" }}>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: 52 }}>
-          <p style={{ fontSize: 32, fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>{streak}</p>
-          <p style={{ fontSize: 11, fontWeight: 700, color: "#b0b8c1", margin: "3px 0 0", letterSpacing: "0.06em", textTransform: "uppercase" }}>Streak</p>
+          <p className="t-stat" style={{ color: "var(--c-text)", margin: 0, lineHeight: 1 }}>{streak}</p>
+          <p className="t-label" style={{ color: "var(--c-text-dim)", margin: "3px 0 0" }}>Streak</p>
         </div>
-        <div style={{ width: 1, height: 40, background: "#f0f0f0", flexShrink: 0 }} />
-        <p style={{ fontSize: 14, color: "#6b7480", margin: 0, lineHeight: 1.45 }}>
+        <div style={{ width: 1, height: 40, background: "var(--c-line-dim)", flexShrink: 0 }} />
+        <p className="t-body-sm" style={{ color: "var(--c-text-dim)", margin: 0, lineHeight: 1.45 }}>
           {streak === 0 && "Log today to start your streak."}
           {streak === 1 && "Good start — log again tomorrow to build momentum."}
           {streak >= 2 && streak < 7 && "Good momentum — don't break the chain."}
@@ -682,46 +681,46 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
       </div>
 
 
-      <div style={{ background: "#fff", borderRadius: 24, padding: "20px 24px", boxShadow: "0px 4px 24px rgba(0,0,0,0.10)" }}>
-        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 16px" }}>Focus Today</p>
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
+        <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Focus Today</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
           {tips.map(tip => (
-            <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-              <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#2653d4", flexShrink: 0, marginTop: 5 }}/>
-              <span style={{ fontSize: 14, fontWeight: 500, color: "#1a1c1c", lineHeight: 1.4 }}>{tip}</span>
+            <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
+              <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--c-blue)", flexShrink: 0, marginTop: 5 }}/>
+              <span className="t-body-sm" style={{ fontWeight: 500, color: "var(--c-text)", lineHeight: 1.4 }}>{tip}</span>
             </div>
           ))}
         </div>
       </div>
 
       {reviews.length > 0 && (
-        <div style={{ background: "#fff", borderRadius: 24, padding: "20px 24px", boxShadow: "0px 4px 24px rgba(0,0,0,0.10)" }}>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 16px" }}>Match Record</p>
-          <div style={{ display: "flex", gap: 10, marginBottom: topStrength || topWeakness ? 16 : 0 }}>
-            <div style={{ flex: 1, textAlign: "center", background: "#f0fdf4", borderRadius: 14, padding: "12px 8px" }}>
-              <p style={{ fontSize: 30, fontWeight: 700, color: "#16a34a", margin: 0, lineHeight: 1 }}>{wins}</p>
-              <p style={{ fontSize: 11, color: "#16a34a", margin: "4px 0 0", fontWeight: 600 }}>Wins</p>
+        <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
+          <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Match Record</p>
+          <div style={{ display: "flex", gap: "10px", marginBottom: topStrength || topWeakness ? 16 : 0 }}>
+            <div style={{ flex: 1, textAlign: "center", background: "var(--c-green-bg)", borderRadius: "var(--r-sm)", padding: "12px 8px" }}>
+              <p className="t-stat" style={{ color: "var(--c-green)", margin: 0, lineHeight: 1 }}>{wins}</p>
+              <p className="t-tag" style={{ color: "var(--c-green)", margin: "4px 0 0", fontWeight: 600 }}>Wins</p>
             </div>
-            <div style={{ flex: 1, textAlign: "center", background: "#fef2f2", borderRadius: 14, padding: "12px 8px" }}>
-              <p style={{ fontSize: 30, fontWeight: 700, color: "#dc2626", margin: 0, lineHeight: 1 }}>{losses}</p>
-              <p style={{ fontSize: 11, color: "#dc2626", margin: "4px 0 0", fontWeight: 600 }}>Losses</p>
+            <div style={{ flex: 1, textAlign: "center", background: "var(--c-red-bg)", borderRadius: "var(--r-sm)", padding: "12px 8px" }}>
+              <p className="t-stat" style={{ color: "var(--c-red)", margin: 0, lineHeight: 1 }}>{losses}</p>
+              <p className="t-tag" style={{ color: "var(--c-red)", margin: "4px 0 0", fontWeight: 600 }}>Losses</p>
             </div>
             {winRate !== null && (
-              <div style={{ flex: 1, textAlign: "center", background: "#f4f6ff", borderRadius: 14, padding: "12px 8px" }}>
-                <p style={{ fontSize: 30, fontWeight: 700, color: "#2653d4", margin: 0, lineHeight: 1 }}>{winRate}%</p>
-                <p style={{ fontSize: 11, color: "#2653d4", margin: "4px 0 0", fontWeight: 600 }}>Win rate</p>
+              <div style={{ flex: 1, textAlign: "center", background: "#f4f6ff", borderRadius: "var(--r-sm)", padding: "12px 8px" }}>
+                <p className="t-stat" style={{ color: "var(--c-blue)", margin: 0, lineHeight: 1 }}>{winRate}%</p>
+                <p className="t-tag" style={{ color: "var(--c-blue)", margin: "4px 0 0", fontWeight: 600 }}>Win rate</p>
               </div>
             )}
           </div>
           {(topStrength || topWeakness) && (
             <button
               onClick={() => setTagCloudOpen(o => !o)}
-              style={{ display: "flex", flexDirection: "column", gap: 8, background: "none", border: "none", cursor: "pointer", padding: 0, width: "100%", textAlign: "left" }}
+              style={{ display: "flex", flexDirection: "column", gap: "8px", background: "none", border: "none", cursor: "pointer", padding: 0, width: "100%", textAlign: "left" }}
             >
               {topStrength && (
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a", flexShrink: 0 }}/>
-                  <span style={{ fontSize: 13, color: "#1a1c1c" }}>Strongest: <strong>{topStrength}</strong></span>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--c-green)", flexShrink: 0 }}/>
+                  <span className="t-body-sm" style={{ color: "var(--c-text)" }}>Strongest: <strong>{topStrength}</strong></span>
                   {!topWeakness && (
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
                       style={{ marginLeft: "auto", flexShrink: 0, transition: "transform 0.2s", transform: tagCloudOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
@@ -731,9 +730,9 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
                 </div>
               )}
               {topWeakness && (
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#f59e0b", flexShrink: 0 }}/>
-                  <span style={{ fontSize: 13, color: "#1a1c1c" }}>Focus area: <strong>{topWeakness}</strong></span>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--c-amber)", flexShrink: 0 }}/>
+                  <span className="t-body-sm" style={{ color: "var(--c-text)" }}>Focus area: <strong>{topWeakness}</strong></span>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
                     style={{ marginLeft: "auto", flexShrink: 0, transition: "transform 0.2s", transform: tagCloudOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
                     <path d="M6 9l6 6 6-6"/>
@@ -752,21 +751,21 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
       <div style={{ height: 1, background: "#e8eaed", margin: "0" }} />
 
       <>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>Your Calendar</p>
-          <div className="bg-white rounded-[24px] border border-[#e2e2e2] overflow-hidden" style={card}>
+          <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>Your Calendar</p>
+          <div className="bg-white r-lg border border-c-line overflow-hidden" style={card}>
             <div style={{ padding: "16px 14px 20px" }}>
-              <p style={{ fontSize: 12, fontWeight: 600, color: "#747878", marginBottom: 10, textTransform: "capitalize" }}>{monthLabel}</p>
+              <p className="t-caption" style={{ fontWeight: 600, color: "var(--c-text-sub)", marginBottom: "10px", textTransform: "capitalize" }}>{monthLabel}</p>
               <div style={{ display: "grid", gridTemplateColumns: "12px repeat(7, 1fr)", marginBottom: 2 }}>
                 <div />
                 {["M","T","W","T","F","S","S"].map((d, i) => (
-                  <div key={i} style={{ textAlign: "center", fontSize: 10, fontWeight: 700, color: "#9aab96", paddingBottom: 4 }}>{d}</div>
+                  <div key={i} style={{ textAlign: "center", fontSize: 10, fontWeight: 700, color: "#9aab96", paddingBottom: "4px" }}>{d}</div>
                 ))}
               </div>
               {rows.map((rowCells, rowIdx) => (
                 <div key={rowIdx} style={{ display: "grid", gridTemplateColumns: "12px repeat(7, 1fr)", alignItems: "center" }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "center", alignSelf: "center", marginBottom: 5 }}>
                     {rowIdx === currentWeekRow && (
-                      <svg width="6" height="9" viewBox="0 0 6 9"><polygon points="0,0 6,4.5 0,9" fill="#2653d4"/></svg>
+                      <svg width="6" height="9" viewBox="0 0 6 9"><polygon points="0,0 6,4.5 0,9" fill="var(--c-blue)"/></svg>
                     )}
                   </div>
                   {rowCells.map((day, colIdx) => {
@@ -776,12 +775,12 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
                     const isMatch    = matchDates.has(ymd);
                     const isRecovery = !isMatch && recoveryDates.has(ymd);
                     const isPast     = ymd < todayYMD;
-                    const dotColor   = isMatch ? "#22c55e" : isRecovery ? "#f97316" : "#2653d4";
+                    const dotColor   = isMatch ? "#22c55e" : isRecovery ? "#f97316" : "var(--c-blue)";
                     const hasDot     = (isMatch || isRecovery) && !isPast;
                     return (
                       <div key={colIdx} style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingBottom: 2 }}>
-                        <div style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: isToday ? "#2653d4" : "transparent", opacity: isPast ? 0.35 : 1 }}>
-                          <span style={{ fontSize: 12, fontWeight: isToday ? 700 : 400, color: isToday ? "#fff" : "#1a1c1c" }}>{day}</span>
+                        <div style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: isToday ? "var(--c-blue)" : "transparent", opacity: isPast ? 0.35 : 1 }}>
+                          <span className="t-caption" style={{ fontWeight: isToday ? 700 : 400, color: isToday ? "#fff" : "var(--c-text)" }}>{day}</span>
                         </div>
                         <div style={{ height: 4, width: 4, borderRadius: "50%", background: hasDot ? dotColor : "transparent", marginTop: 1 }} />
                       </div>
@@ -790,7 +789,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
                 </div>
               ))}
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "12px repeat(7, 1fr)", borderTop: "1px solid #f4f4f6", marginTop: 4, paddingTop: 12, paddingBottom: 8 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "12px repeat(7, 1fr)", borderTop: "1px solid #f4f4f6", marginTop: "4px", paddingTop: "12px", paddingBottom: "8px" }}>
               <div />
               <div style={{ gridColumn: "2 / span 7", display: "flex", gap: 14 }}>
                 {[
@@ -800,7 +799,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
                 ].map(({ color, label, border }) => (
                   <div key={label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <div style={{ width: 7, height: 7, borderRadius: "50%", background: color, flexShrink: 0, border: border ? "1.5px solid #c0c4c8" : "none" }} />
-                    <span style={{ fontSize: 11, fontWeight: 600, color: "#9aa5b0" }}>{label}</span>
+                    <span className="t-tag" style={{ fontWeight: 600, color: "var(--c-hint)" }}>{label}</span>
                   </div>
                 ))}
               </div>
@@ -810,15 +809,15 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
 
       {nextMatch && (
         <>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>Next Match</p>
+          <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>Next Match</p>
           <NextMatchCard match={nextMatch} />
         </>
       )}
 
       <button onClick={() => setArchiveOpen(o => !o)}
         style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", cursor: "pointer", padding: 0, width: "100%" }}>
-        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0 }}>Activity Archive</p>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+        <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>Activity Archive</p>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-label)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
           style={{ transition: "transform 0.2s", transform: archiveOpen ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}>
           <path d="M9 18l6-6-6-6"/>
         </svg>
@@ -826,7 +825,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
 
       {archiveOpen && (
         visibleFeed.length > 0 ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
             {visibleFeed.map(item =>
               item.kind === "match"
                 ? <MatchCard key={item.ts + "m"} review={item.data as ReviewEntry} />
@@ -834,11 +833,11 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
             )}
           </div>
         ) : (
-          <div className="bg-white rounded-[20px] border border-[#e2e2e2] px-5 py-8 text-center" style={card}>
-            <p className="text-[15px] font-medium text-[#747878]">
+          <div className="bg-white r-md border border-c-line px-5 py-8 text-center" style={card}>
+            <p className="t-body font-medium text-c-text-sub">
               No activity logged yet
             </p>
-            <p className="text-[13px] text-[#9aab96] mt-1">Tap + to log your first session</p>
+            <p className="t-body-sm text-[#9aab96] mt-1">Tap + to log your first session</p>
           </div>
         )
       )}
@@ -846,7 +845,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
       {/* FAB */}
       <button onClick={() => setLogSheetOpen(true)}
         className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
-        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.25rem", width: 56, height: 56, borderRadius: 28, background: "#496640", boxShadow: "0 4px 16px #49664055" }}
+        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.25rem", width: 56, height: 56, borderRadius: "50%", background: "var(--c-forest)", boxShadow: "0 4px 16px #49664055" }}
         aria-label="Log activity">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
           <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
