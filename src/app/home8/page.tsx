@@ -261,7 +261,7 @@ export default function Home8() {
   const [logTab, setLogTab] = useState<"checkin" | "wellbeing" | "matchreview" | "hydration" | "nutrition" | "training" | null>(null);
   const [logWizard, setLogWizard] = useState(false);
   const [matchModalOpen, setMatchModalOpen] = useState(false);
-  const [matchModalTab, setMatchModalTab] = useState<'pick' | 'manual'>('pick');
+  const [matchModalTab, setMatchModalTab] = useState<'pick' | 'confirm' | 'manual'>('pick');
   const [matchForm, setMatchForm] = useState({ date: '', time: '', club: '', p1: '', p2: '', p3: '', p4: '' });
   const [uploadExtracting, setUploadExtracting] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -736,7 +736,7 @@ export default function Home8() {
       {schedTriangleTop !== null && (
         <div style={{
           position: "fixed", left: 9, top: schedTriangleTop, transform: "translateY(-50%)",
-          zIndex: 200, pointerEvents: "none",
+          zIndex: 65, pointerEvents: "none",
           width: 0, height: 0,
           borderTop: "6px solid transparent",
           borderBottom: "6px solid transparent",
@@ -1731,7 +1731,7 @@ export default function Home8() {
                         p3: data.player_3 ?? '',
                         p4: data.player_4 ?? '',
                       });
-                      setMatchModalTab('manual');
+                      setMatchModalTab('confirm');
                     } catch {
                       setUploadError('Upload failed. Please try again or enter manually.');
                     }
@@ -1754,6 +1754,58 @@ export default function Home8() {
                       <p className="text-[15px] font-semibold text-[#1a1c1c]">Enter manually</p>
                       <p className="text-[12px] text-[#6b7480] mt-0.5">Date, time, club and players</p>
                     </div>
+                  </button>
+                </div>
+              )}
+
+              {matchModalTab === 'confirm' && (
+                <div className="px-6 py-5 flex flex-col gap-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#f0fdf4" }}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <p className="text-[13px] font-semibold text-[#16a34a]">We read your screenshot — does this look right?</p>
+                  </div>
+                  <div style={{ background: "#f9f9f9", borderRadius: 16, overflow: "hidden", border: "1px solid #f0f0f0" }}>
+                    {[
+                      { label: "Date", value: matchForm.date ? new Date(matchForm.date + "T00:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" }) : "—" },
+                      { label: "Time", value: matchForm.time || "—" },
+                      { label: "Club", value: matchForm.club || "—" },
+                      { label: "Players", value: [matchForm.p1, matchForm.p2, matchForm.p3, matchForm.p4].filter(Boolean).join(", ") || "—" },
+                    ].map((row, i, arr) => (
+                      <div key={row.label} className="flex items-center px-4 py-3" style={{ borderBottom: i < arr.length - 1 ? "1px solid #f0f0f0" : "none" }}>
+                        <span className="text-[11px] font-bold uppercase tracking-widest text-[#8a9096] w-16 flex-shrink-0">{row.label}</span>
+                        <span className="text-[14px] font-medium text-[#1a1c1c]">{row.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (!matchForm.date || !matchForm.time) return;
+                      const data: StoredMatch = { date: matchForm.date, time: matchForm.time, club: matchForm.club, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
+                      const current = getMatchList();
+                      let updated: StoredMatch[];
+                      if (isAddMode) { updated = [...current, data]; } else {
+                        const replaced = current.map(m => m.date === match?.date && m.time === match?.time ? data : m);
+                        updated = replaced.some(m => m === data) ? replaced : [data, ...current];
+                      }
+                      const sorted = saveMatchList(updated);
+                      const next = sorted[0];
+                      if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
+                      setMatchModalOpen(false); setMatchModalTab('pick'); setCardSnap('none'); setDoIdx(-1);
+                      window.dispatchEvent(new Event("storage"));
+                    }}
+                    className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white active:scale-[0.98] transition-transform"
+                    style={{ background: (!matchForm.date || !matchForm.time) ? "#c4c7c7" : "#2653d4" }}
+                  >
+                    Yes, save match
+                  </button>
+                  <button
+                    onClick={() => setMatchModalTab('manual')}
+                    className="w-full py-3 rounded-2xl text-[15px] font-semibold active:opacity-70 transition-opacity"
+                    style={{ background: "#f4f4f6", color: "#4a5050" }}
+                  >
+                    Edit details
                   </button>
                 </div>
               )}
