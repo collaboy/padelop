@@ -487,7 +487,10 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>
         </Link>
-        <div style={{ position: "relative" }}>
+        <button
+          onClick={() => setProfileOpen(true)}
+          style={{ background: "none", border: "none", cursor: "pointer", padding: 0, borderRadius: "50%" }}
+        >
           <div style={{ width: 96, height: 96, borderRadius: "50%", overflow: "hidden", boxShadow: "0px 4px 20px rgba(0,0,0,0.08)", border: "4px solid #fff", background: profile.avatar ? "transparent" : "#2653d4", display: "flex", alignItems: "center", justifyContent: "center" }}>
             {profile.avatar ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -498,11 +501,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
               </span>
             )}
           </div>
-          <label htmlFor="top-avatar-upload" style={{ position: "absolute", bottom: 0, right: 0, background: "#000", color: "#fff", width: 32, height: 32, borderRadius: "50%", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </label>
-          <input id="top-avatar-upload" type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
-        </div>
+        </button>
         <div>
           <h1 style={{ fontSize: 24, fontWeight: 600, color: "#1a1c1c", margin: 0, lineHeight: "32px" }}>{profile.name || "Add your name"}</h1>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 4 }}>
