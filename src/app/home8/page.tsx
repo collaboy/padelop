@@ -694,6 +694,8 @@ export default function Home8() {
 
   useEffect(() => {
     if (!matchModalOpen) return;
+    setLiveX(0);
+    setCardSnap('none');
     try {
       const raw = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
       setPastReviews(raw.map((r: Record<string, unknown>) => ({
@@ -1660,7 +1662,14 @@ export default function Home8() {
                   )}
                   <button
                     disabled={uploadExtracting}
-                    onClick={() => { setUploadError(null); matchUploadRef.current?.click(); }}
+                    onClick={() => {
+                      setUploadError(null);
+                      setLiveX(0);
+                      setCardSnap('none');
+                      const onFocus = () => { setLiveX(0); setCardSnap('none'); window.removeEventListener('focus', onFocus); };
+                      window.addEventListener('focus', onFocus);
+                      matchUploadRef.current?.click();
+                    }}
                     className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl active:opacity-70 transition-opacity"
                     style={{ background: "#f4f6ff", border: "1.5px solid #2653d418", opacity: uploadExtracting ? 0.5 : 1 }}
                   >
