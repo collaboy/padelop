@@ -390,6 +390,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
 
   const searchParams = useSearchParams();
   const [profileOpen, setProfileOpen] = useState(() => searchParams.get("edit") === "1");
+  const profileCardRef = React.useRef<HTMLDivElement>(null);
   const [gearEditOpen, setGearEditOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [racketName, setRacketName] = useState("Wilson Carbon Pro v2");
@@ -490,7 +491,10 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
           </svg>
         </Link>
         <button
-          onClick={() => setProfileOpen(true)}
+          onClick={() => {
+            setProfileOpen(true);
+            setTimeout(() => profileCardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+          }}
           style={{ background: "none", border: "none", cursor: "pointer", padding: 0, borderRadius: "50%" }}
         >
           <div style={{ width: 96, height: 96, borderRadius: "50%", overflow: "hidden", boxShadow: "0px 4px 20px rgba(0,0,0,0.08)", border: "4px solid #fff", background: profile.avatar ? "transparent" : "#2653d4", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -594,7 +598,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
 
       {/* ── Profile header + collapsible form ───────────────────────────── */}
 
-      <div className="bg-white rounded-[24px] overflow-hidden" style={{ boxShadow: "0px 4px 24px rgba(0,0,0,0.10)" }}>
+      <div ref={profileCardRef} className="bg-white rounded-[24px] overflow-hidden" style={{ boxShadow: "0px 4px 24px rgba(0,0,0,0.10)" }}>
         {/* Always-visible header row */}
         <button
           onClick={() => setProfileOpen(o => !o)}
