@@ -810,7 +810,7 @@ export default function Home8() {
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <button
                   onClick={() => setLogPickerOpen(true)}
-                  style={{ padding: "14px 28px", borderRadius: 999, background: "#2653d4", border: "none", cursor: "pointer", fontSize: 16, fontWeight: 700, color: "#fff" }}
+                  style={{ padding: "14px 28px", borderRadius: 9, background: "#2653d4", border: "none", cursor: "pointer", fontSize: 16, fontWeight: 700, color: "#fff" }}
                 >
                   Log +
                 </button>
