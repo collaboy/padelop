@@ -810,16 +810,6 @@ export default function Home8() {
                   : `translateY(calc(-50dvh - 150vw + 100px + ${liveY}px))`,
               transition: liveY !== 0 ? "none" : "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
             }}>
-              {/* Logo above top card */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none", opacity: 0.12 }}>
-                <span style={{ fontFamily: "Inter, sans-serif", fontSize: 72, fontWeight: 700, letterSpacing: "-0.02em", color: "#1a1c1c", display: "flex", alignItems: "flex-end", gap: 1 }}>
-                  {["p","a","d","l","a"].map((ch, i) => (
-                    <span key={i} style={{ display: "inline-block", transform: `translateY(${(5 - i) * 1.5}px)` }}>{ch}</span>
-                  ))}
-                  <span style={{ display: "inline-block", width: "0.45em", height: "0.45em", borderRadius: "50%", background: "#22c55e", marginLeft: 4, marginBottom: 10 }} />
-                </span>
-              </div>
-
               {/* Card 0: next match */}
               {(() => {
                 const today = now.toISOString().slice(0, 10);
