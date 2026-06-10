@@ -888,7 +888,7 @@ export default function Home8() {
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
                         <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 10px" }}>Next Match</p>
                         <button
-                          onClick={() => { setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('manual'); setMatchModalOpen(true); }}
+                          onClick={() => { setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('pick'); setMatchModalOpen(true); }}
                           style={{ fontSize: 15, fontWeight: 600, color: "#2653d4", background: "#eef2ff", border: "none", cursor: "pointer", padding: "10px 24px", borderRadius: 999 }}
                         >
                           + Schedule a match
