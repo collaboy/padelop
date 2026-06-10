@@ -1110,7 +1110,9 @@ export default function Home8() {
                         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
                           {schedule.map((s4, i) => {
                             const isCur4 = i === currentIdx;
-                            const isPast4 = !isCur4 && now.getHours() * 60 + now.getMinutes() > toMins(s4.time);
+                            const nowMins4 = now.getHours() * 60 + now.getMinutes();
+                            const isPast4 = !isCur4 && nowMins4 > toMins(s4.time);
+                            const isFuture4 = !isCur4 && !isPast4;
                             const detail4 = SCHEDULE_DETAILS[s4.title];
                             return (
                               <div
@@ -1128,16 +1130,16 @@ export default function Home8() {
                                 }}
                                 onClick={() => detail4 && (() => { setSchedModalIdx(i); setDoModalOpen(true); })()}
                               >
-                                  <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: isPast4 ? "#f0f0f0" : `${s4.color}18` }}>
+                                  <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: (isPast4 || isFuture4) ? "#f0f0f0" : `${s4.color}18` }}>
                                     {isCur4
                                       ? <div className="animate-breathe" style={{ width: 12, height: 12, borderRadius: "50%", background: s4.color, ["--glow" as string]: s4.color } as React.CSSProperties} />
-                                      : <div style={{ width: 12, height: 12, borderRadius: "50%", background: isPast4 ? "#d0d3d6" : s4.color }} />
+                                      : <div style={{ width: 12, height: 12, borderRadius: "50%", background: (isPast4 || isFuture4) ? "#d0d3d6" : s4.color }} />
                                     }
                                   </div>
                                   <div style={{ flex: 1, minWidth: 0 }}>
-                                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", margin: "0 0 2px", color: isPast4 ? "#c4c7c7" : s4.color }}>{s4.time}</p>
-                                    <p style={{ fontSize: 16, fontWeight: 600, margin: 0, lineHeight: 1.25, color: isPast4 ? "#a0a5aa" : "#1a1c1c" }}>{s4.title}</p>
-                                    {s4.subtitle && <p style={{ fontSize: 13, margin: "2px 0 0", color: isPast4 ? "#c4c7c7" : "#6b7480" }}>{s4.subtitle}</p>}
+                                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", margin: "0 0 2px", color: (isPast4 || isFuture4) ? "#c4c7c7" : s4.color }}>{s4.time}</p>
+                                    <p style={{ fontSize: 16, fontWeight: 600, margin: 0, lineHeight: 1.25, color: (isPast4 || isFuture4) ? "#a0a5aa" : "#1a1c1c" }}>{s4.title}</p>
+                                    {s4.subtitle && <p style={{ fontSize: 13, margin: "2px 0 0", color: (isPast4 || isFuture4) ? "#c4c7c7" : "#6b7480" }}>{s4.subtitle}</p>}
                                   </div>
                                   {detail4 && (
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
