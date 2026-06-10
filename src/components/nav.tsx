@@ -7,14 +7,8 @@ import { computeNotifications, type Notif } from "@/lib/notifications";
 export default function Nav() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notif[]>([]);
-  const [profileAvatar, setProfileAvatar] = useState<string>(() => {
-    if (typeof window === "undefined") return "";
-    try { const p = JSON.parse(localStorage.getItem("padelop:profile") || "{}"); return p.avatar ?? ""; } catch { return ""; }
-  });
-  const [profileName, setProfileName] = useState<string>(() => {
-    if (typeof window === "undefined") return "";
-    try { const p = JSON.parse(localStorage.getItem("padelop:profile") || "{}"); return p.name ?? ""; } catch { return ""; }
-  });
+  const [profileAvatar, setProfileAvatar] = useState<string>("");
+  const [profileName, setProfileName] = useState<string>("");
 
   useEffect(() => {
     function refreshProfile() {
