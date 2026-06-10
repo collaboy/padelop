@@ -7,22 +7,11 @@ import { computeNotifications, type Notif } from "@/lib/notifications";
 export default function Nav() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notif[]>([]);
-  const [profileAvatar, setProfileAvatar] = useState<string>("");
-  const [profileName, setProfileName] = useState<string>("");
 
   useEffect(() => {
-    function refreshProfile() {
-      try {
-        const p = JSON.parse(localStorage.getItem("padelop:profile") || "{}");
-        setProfileAvatar(p.avatar ?? "");
-        setProfileName(p.name ?? "");
-      } catch {}
-    }
-    refreshProfile();
     setNotifications(computeNotifications());
     const id = setInterval(() => setNotifications(computeNotifications()), 60_000);
-    window.addEventListener("storage", refreshProfile);
-    return () => { clearInterval(id); window.removeEventListener("storage", refreshProfile); };
+    return () => { clearInterval(id); };
   }, []);
 
   return (
@@ -37,24 +26,16 @@ export default function Nav() {
             <span id="logo-circle" style={{ display: "inline-block", width: "0.55em", height: "0.55em", borderRadius: "50%", background: "#22c55e", verticalAlign: "middle", margin: "0 0.02em 0.05em", transform: "translateY(-1px)" }} />
           </Link>
 
-          {/* Right: profile avatar */}
-          <div className="flex items-center justify-end">
-            <Link href="/profile" className="relative active:scale-90 transition-transform flex items-center">
-              <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
-                {profileAvatar ? (
-                  <img src={profileAvatar} alt="Profile" className="w-full h-full object-cover" />
-                ) : profileName ? (
-                  <span className="t-body-sm font-bold text-[#1e3a1e]">{profileName.trim()[0].toUpperCase()}</span>
-                ) : (
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <circle cx="12" cy="9" r="3" />
-                    <path d="M6 20c0-3 2.7-5 6-5s6 2 6 5" />
-                  </svg>
-                )}
-              </div>
-            </Link>
-          </div>
+          {/* Right: hamburger — opens FAB sheet */}
+          <button
+            className="w-9 h-9 flex flex-col items-center justify-center gap-[5px] active:scale-90 transition-transform"
+            onClick={() => window.dispatchEvent(new Event("padelop:open-log-sheet"))}
+            aria-label="Menu"
+          >
+            <span className="w-5 h-[1.5px] rounded-full bg-[var(--text)]" />
+            <span className="w-5 h-[1.5px] rounded-full bg-[var(--text)]" />
+            <span className="w-5 h-[1.5px] rounded-full bg-[var(--text)]" />
+          </button>
         </div>
       </header>
 

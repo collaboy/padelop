@@ -466,9 +466,11 @@ export default function Home8() {
     loadMatch();
     function handleStorage() { loadReadiness(); loadMatch(); }
     window.addEventListener("storage", handleStorage);
+    function handleOpenLogSheet() { setLogSheetOpen(true); }
+    window.addEventListener("padelop:open-log-sheet", handleOpenLogSheet);
     setDrillTag(getTopNeedsWorkTag());
     const id = setInterval(() => setNow(new Date()), 1_000);
-    return () => { clearInterval(id); window.removeEventListener("storage", handleStorage); };
+    return () => { clearInterval(id); window.removeEventListener("storage", handleStorage); window.removeEventListener("padelop:open-log-sheet", handleOpenLogSheet); };
   }, []);
 
   // Reset hydration counter when date rolls over midnight
