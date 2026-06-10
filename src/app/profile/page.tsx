@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import LogSheet from "@/components/log-sheet";
 import AvatarCropModal from "@/components/avatar-crop-modal";
 import {
@@ -387,7 +388,8 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
     return () => window.removeEventListener("storage", loadAll);
   }, []);
 
-  const [profileOpen, setProfileOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const [profileOpen, setProfileOpen] = useState(() => searchParams.get("edit") === "1");
   const [gearEditOpen, setGearEditOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [racketName, setRacketName] = useState("Wilson Carbon Pro v2");

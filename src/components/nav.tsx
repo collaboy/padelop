@@ -115,7 +115,7 @@ export default function Nav() {
 
           {/* Right: profile avatar */}
           <div className="flex items-center justify-end">
-            <Link href="/profile" className="relative active:scale-90 transition-transform flex items-center">
+            <Link href="/profile?edit=1" className="relative active:scale-90 transition-transform flex items-center">
               <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
                 {profileAvatar ? (
                   <img src={profileAvatar} alt="Profile" className="w-full h-full object-cover" />
