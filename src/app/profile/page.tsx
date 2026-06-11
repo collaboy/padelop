@@ -346,6 +346,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
       if (g?.racketType)  setRacketType(g.racketType);
       if (g?.racketImage) setRacketImage(g.racketImage);
       if (g?.racketSince) setRacketSince(g.racketSince);
+      if (g?.shoeImage)   setShoeImage(g.shoeImage);
     } catch {}
 
     // Matches
@@ -399,6 +400,23 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
   const [racketType, setRacketType] = useState("Power & Control Hybrid");
   const [racketImage, setRacketImage] = useState("");
   const [racketSince, setRacketSince] = useState("");
+  const [shoeImage, setShoeImage] = useState("");
+
+  const handleShoeImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = reader.result as string;
+      setShoeImage(img);
+      try {
+        const existing = JSON.parse(localStorage.getItem("padelop:gear") || "{}");
+        localStorage.setItem("padelop:gear", JSON.stringify({ ...existing, shoeImage: img }));
+      } catch {}
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
 
   const handleRacketImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -768,16 +786,42 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
 
       {/* ── Stats Bento ─────────────────────────────────────────────────── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-        {[
-          { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--c-forest)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>, label: "Matches", value: reviews.length || 24 },
-          { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--c-forest)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, label: "Win Rate", value: winRate !== null ? `${winRate}%` : "68%" },
-        ].map(({ icon, label, value }) => (
-          <div key={label} style={{ background: "#fff", padding: "20px", borderRadius: "var(--r-lg)", border: "1px solid var(--c-border-card)", boxShadow: "var(--shadow-soft)" }}>
-            <div style={{ marginBottom: "8px" }}>{icon}</div>
-            <p className="t-caption" style={{ color: "#444748", margin: "0 0 4px" }}>{label}</p>
-            <p className="t-heading" style={{ color: "var(--c-text)", margin: 0 }}>{value}</p>
+
+        {/* My Shoes tile */}
+        <div style={{ background: "#fff", padding: "20px", borderRadius: "var(--r-lg)", border: "1px solid var(--c-border-card)", boxShadow: "var(--shadow-soft)", display: "flex", flexDirection: "column" }}>
+          <div style={{ marginBottom: "8px" }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--c-forest)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M2 18h1.4c.7 0 1.3-.4 1.6-1L7 13h10l2 4H2z"/>
+              <path d="M7 13V9a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v1"/>
+              <path d="M11 13V9"/>
+            </svg>
           </div>
-        ))}
+          <p className="t-caption" style={{ color: "#444748", margin: "0 0 10px" }}>My Shoes</p>
+          <label htmlFor="shoe-img-upload" style={{ cursor: "pointer", display: "block", flex: 1 }}>
+            <div style={{ aspectRatio: "1 / 1", borderRadius: 10, overflow: "hidden", background: "#f4f4f6", border: shoeImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {shoeImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={shoeImage} alt="Shoes" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c4c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                  <circle cx="12" cy="13" r="4"/>
+                </svg>
+              )}
+            </div>
+          </label>
+          <input id="shoe-img-upload" type="file" accept="image/*" className="hidden" onChange={handleShoeImage} />
+        </div>
+
+        {/* Win Rate tile */}
+        <div style={{ background: "#fff", padding: "20px", borderRadius: "var(--r-lg)", border: "1px solid var(--c-border-card)", boxShadow: "var(--shadow-soft)" }}>
+          <div style={{ marginBottom: "8px" }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--c-forest)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </div>
+          <p className="t-caption" style={{ color: "#444748", margin: "0 0 4px" }}>Win Rate</p>
+          <p className="t-heading" style={{ color: "var(--c-text)", margin: 0 }}>{winRate !== null ? `${winRate}%` : "68%"}</p>
+        </div>
+
       </div>
 
 
