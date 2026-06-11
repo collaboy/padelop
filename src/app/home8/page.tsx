@@ -590,7 +590,7 @@ export default function Home8() {
     saveLogHydration(clamped);
   }
 
-  useEffect(() => { setCardSnap('none'); setLiveX(0); }, [doIdx]);
+  useEffect(() => { setCardSnap('none'); setLiveX(0); setLiveY(0); }, [doIdx]);
   useEffect(() => { doIdxRef.current = doIdx; }, [doIdx]);
 
   // Overscroll-to-navigate on the schedule scroll div.
