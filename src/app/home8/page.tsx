@@ -813,7 +813,7 @@ export default function Home8() {
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
               {/* Main card */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1.5vw", width: "100%", padding: "0 8px" }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", padding: "0 8px" }}>
                   <div style={{ position: "relative", width: "75%", aspectRatio: "1 / 1" }}>
                     <svg width="100%" height="100%" viewBox="0 0 160 160" style={{ display: "block", overflow: "visible" }}>
                       <path d="M10 150 L10 10 L150 10 L150 150 L10 150" fill="none" stroke="#dce8f8" strokeWidth="5" strokeLinejoin="miter" />
@@ -834,12 +834,12 @@ export default function Home8() {
                     ];
                     const p = phases[breathPhase];
                     return (
-                      <p key={breathPhase} style={{ fontSize: "clamp(10px, 3.2vw, 14px)", color: "#3b9eff", margin: 0, textAlign: "center", lineHeight: 1.4, fontWeight: 600 }}>
+                      <p key={breathPhase} style={{ fontSize: "clamp(10px, 3.2vw, 14px)", color: "#3b9eff", margin: "4px 0 0", textAlign: "center", lineHeight: 1.4, fontWeight: 600 }}>
                         {p.action}{p.detail ? <span style={{ fontWeight: 400, color: "#9aa5b0" }}> {p.detail}</span> : null}
                       </p>
                     );
                   })()}
-                  <p style={{ fontSize: "clamp(8px, 2.2vw, 11px)", color: "#c8cdd3", margin: 0, textAlign: "center", lineHeight: 1.4 }}>Skip if you have a respiratory condition</p>
+                  <p style={{ fontSize: "clamp(10px, 2.8vw, 13px)", color: "#c8cdd3", margin: "10px 0 0", textAlign: "center", lineHeight: 1.4 }}>Skip if you have a respiratory condition</p>
                 </div>
               </div>
               {/* Placeholder below */}
