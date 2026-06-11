@@ -789,12 +789,21 @@ export default function Home8() {
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
               {/* Main card */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <button
-                  onClick={() => setLogPickerOpen(true)}
-                  style={{ width: 88, height: 88, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", fontSize: 16, fontWeight: 700, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}
-                >
-                  Log+
-                </button>
+                <style>{`@keyframes boxBreathDraw{0%{stroke-dashoffset:560}100%{stroke-dashoffset:0}}`}</style>
+                <div style={{ position: "relative", width: 160, height: 160 }}>
+                  <svg width="160" height="160" viewBox="0 0 160 160" style={{ display: "block" }}>
+                    {/* outline */}
+                    <rect x="10" y="10" width="140" height="140" fill="none" stroke="#dce8f8" strokeWidth="3.5" />
+                    {/* animated progress */}
+                    <rect x="10" y="10" width="140" height="140" fill="none" stroke="#3b9eff" strokeWidth="3.5"
+                      strokeDasharray="560" strokeLinejoin="miter"
+                      style={{ animation: "boxBreathDraw 16s linear infinite" }} />
+                  </svg>
+                  <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+                    <p style={{ fontSize: 17, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>Breathe</p>
+                    <p style={{ fontSize: 10, fontWeight: 500, color: "#9aa5b0", margin: "5px 0 0", textAlign: "center", lineHeight: 1.3 }}>(4x4 box breath)</p>
+                  </div>
+                </div>
               </div>
               {/* Placeholder below */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
@@ -1342,7 +1351,7 @@ export default function Home8() {
 
         {/* FAB */}
         <button
-          onClick={() => setLogSheetOpen(true)}
+          onClick={() => setLogPickerOpen(true)}
           className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
           style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.25rem", width: 56, height: 56, borderRadius: 28, background: doItem?.color ?? "#2653d4", boxShadow: `0 4px 16px ${doItem?.color ?? "#2653d4"}55` }}
           aria-label="Log activity"
