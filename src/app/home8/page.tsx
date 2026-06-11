@@ -802,6 +802,13 @@ export default function Home8() {
                   <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
                     <p style={{ fontSize: 17, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>Breathe</p>
                     <p style={{ fontSize: 10, fontWeight: 500, color: "#9aa5b0", margin: "5px 0 0", textAlign: "center", lineHeight: 1.3 }}>(4x4 box breath)</p>
+                    <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 2, alignItems: "center" }}>
+                      {[["In","through your nose"],["Hold",""],["Out","through your mouth"],["Hold",""]].map(([a, b], i) => (
+                        <p key={i} style={{ fontSize: 9, color: "#b8c4d0", margin: 0, lineHeight: 1.4, textAlign: "center" }}>
+                          <span style={{ fontWeight: 700 }}>{a}</span>{b ? ` ${b}` : ""}
+                        </p>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
