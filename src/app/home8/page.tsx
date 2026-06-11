@@ -1194,15 +1194,15 @@ export default function Home8() {
                       </text>
                     </svg>
 
-                    {/* + − row */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    {/* + with overlapping − */}
+                    <div style={{ position: "relative", width: 52, height: 52 }}>
                       <button
                         onClick={() => {
                           const next = Math.min(MAX, logHydrationMl + 250);
                           setLogHydrationMl(next);
                           saveLogHydration(next);
                         }}
-                        style={{ width: 40, height: 40, borderRadius: "50%", background: logHydrationMl >= MAX ? "#e8f0e8" : "#3b9eff", border: "none", cursor: logHydrationMl >= MAX ? "default" : "pointer", fontSize: 20, fontWeight: 700, color: logHydrationMl >= MAX ? "#16a34a" : "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}
+                        style={{ width: 52, height: 52, borderRadius: "50%", background: logHydrationMl >= MAX ? "#e8f0e8" : "#3b9eff", border: "none", cursor: logHydrationMl >= MAX ? "default" : "pointer", fontSize: 22, fontWeight: 700, color: logHydrationMl >= MAX ? "#16a34a" : "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}
                       >
                         +
                       </button>
@@ -1212,7 +1212,7 @@ export default function Home8() {
                           setLogHydrationMl(next);
                           saveLogHydration(next);
                         }}
-                        style={{ width: 40, height: 40, borderRadius: "50%", background: "#f0f2f5", border: "none", cursor: logHydrationMl <= 0 ? "default" : "pointer", fontSize: 20, fontWeight: 700, color: logHydrationMl <= 0 ? "#c8cdd3" : "#1a1c1c", display: "flex", alignItems: "center", justifyContent: "center" }}
+                        style={{ position: "absolute", bottom: -4, left: -4, width: 20, height: 20, borderRadius: "50%", background: "#fff", border: "1.5px solid #dde2e8", boxShadow: "0 1px 4px rgba(0,0,0,0.10)", cursor: logHydrationMl <= 0 ? "default" : "pointer", fontSize: 13, fontWeight: 700, color: logHydrationMl <= 0 ? "#c8cdd3" : "#6b7480", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1 }}
                       >
                         −
                       </button>
