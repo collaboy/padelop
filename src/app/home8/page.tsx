@@ -353,16 +353,22 @@ export default function Home8() {
     function loadReadiness() {
       const d = loadScoringData();
       setReadiness(computeScores(d.checkIn, d.hydration, d.review, d.nutrition, d.gameDaysThisWeek, d.habits, d.training).overall);
-      const ri = [!!d.checkIn, !!d.hydration, !!d.nutrition, !!d.training];
-      setReadinessDone(ri.filter(Boolean).length);
-      setReadinessItems(ri);
       setCheckInData(d.checkIn);
       setHydrationData(d.hydration);
       try {
         const todayKey = new Date().toISOString().slice(0, 10);
         const hq = JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null");
-        setLogHydrationMl(hq?.date === todayKey ? (hq.ml ?? 0) : 0);
-      } catch { setLogHydrationMl(0); }
+        const hml = hq?.date === todayKey ? (hq.ml ?? 0) : 0;
+        setLogHydrationMl(hml);
+        const ri = [!!d.checkIn, hml >= 2500, !!d.nutrition, !!d.training];
+        setReadinessDone(ri.filter(Boolean).length);
+        setReadinessItems(ri);
+      } catch {
+        setLogHydrationMl(0);
+        const ri = [!!d.checkIn, false, !!d.nutrition, !!d.training];
+        setReadinessDone(ri.filter(Boolean).length);
+        setReadinessItems(ri);
+      }
       setNutritionData(d.nutrition);
       setTrainingData(d.training);
       try {
@@ -931,9 +937,9 @@ export default function Home8() {
                     {textureOverlay}
                     {sleepOverlay}
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
-                      <p className="text-[14px] tracking-wide leading-none" style={{ color: "#fff", fontWeight: 600 }}>Now</p>
-                      <p className="font-bold text-center" style={{ color: "#fff", fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1 }}>{s.title}</p>
-                      <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-1.5 font-semibold px-3 py-1 rounded-full flex items-center gap-1" style={{ background: isSleepytime ? "transparent" : "#fff", color: "#000", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me</button>
+                      <p className="text-[14px] tracking-wide leading-none" style={{ color: "#000", fontWeight: 600 }}>Now</p>
+                      <p className="font-bold text-center" style={{ color: "#000", fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1 }}>{s.title}</p>
+                      <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-1.5 font-semibold px-3 py-1 rounded-full flex items-center gap-1" style={{ background: isSleepytime ? "transparent" : "#fff", color: "#0000ff", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me</button>
                       {dayType === "match" && match && (() => { const [mH, mM] = match.time.split(":").map(Number); return now.getHours() * 60 + now.getMinutes() >= mH * 60 + mM - 60; })() && (
                         <div onClick={e => e.stopPropagation()} style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 12, width: "100%" }}>
                           <button
