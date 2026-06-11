@@ -659,7 +659,11 @@ export default function Home8() {
   }, []);
 
   useEffect(() => {
-    if (doIdx !== 1) return;
+    if (doIdx !== 1) {
+      // Reset scroll to top so swipe-back gesture always starts at scrollTop=0
+      if (schedScrollRef.current) schedScrollRef.current.scrollTop = 0;
+      return;
+    }
     const id = setTimeout(() => {
       schedCurrentRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 320);
@@ -1123,7 +1127,10 @@ export default function Home8() {
                         <div style={{ width: 36, height: 4, borderRadius: 2, background: "#d0d3d6" }} />
                       </div>
                       <div style={{ padding: "0 20px 16px", textAlign: "center" }}>
-                        <p style={{ fontSize: "clamp(18px, 4.6vw, 22px)", fontWeight: 700, color: "#1a1c1c", margin: "0 0 4px" }}>Today&apos;s Schedule</p>
+                        <p style={{ fontSize: "clamp(12px, 3.1vw, 15px)", fontWeight: 600, color: "#8a9096", margin: "0 0 2px", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                          {now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}
+                        </p>
+                        <p style={{ fontSize: "clamp(18px, 4.6vw, 22px)", fontWeight: 700, color: "#1a1c1c", margin: "0 0 6px" }}>Today&apos;s Schedule</p>
                         <span style={{
                           fontSize: "clamp(12px, 3.1vw, 15px)", fontWeight: 700, padding: "3px 12px", borderRadius: 99,
                           background: dayType === "match" ? "#2653d418" : dayType === "recovery" ? "#7c3aed18" : "#16a34a18",
