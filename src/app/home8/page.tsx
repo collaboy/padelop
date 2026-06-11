@@ -1130,23 +1130,6 @@ export default function Home8() {
                           {dayType === "match" ? "Match Day" : dayType === "recovery" ? "Recovery Day" : "Training Day"}
                         </span>
                       </div>
-                      {/* Today's Notes */}
-                      {(() => {
-                        const tips = improveTips(pillarStates);
-                        return (
-                          <div style={{ margin: "0 16px 16px", background: "#f7f8fa", borderRadius: 14, padding: "12px 14px" }}>
-                            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "#9aa5b0", margin: "0 0 8px" }}>Today&apos;s Notes</p>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-                              {tips.map((tip, i) => (
-                                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                                  <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#2653d4", flexShrink: 0, marginTop: 5 }} />
-                                  <span style={{ fontSize: 12, fontWeight: 500, color: "#4a5050", lineHeight: 1.45 }}>{tip}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })()}
                     </div>
                     <div style={{ height: 1, background: "#dfe3e7", flexShrink: 0 }} />
                     <div ref={schedScrollRef} style={{ flex: 1, overflowY: "auto", minHeight: 0, overscrollBehavior: "none" }}>
