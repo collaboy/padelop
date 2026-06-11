@@ -1283,17 +1283,17 @@ export default function Home8() {
               <div className="px-6 pt-5 pb-4" style={{ background: `${modalItem.color}18` }}>
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-2.5 h-2.5 rounded-full" style={{ background: modalItem.color }} />
-                  <p className="text-[11px] font-bold tracking-widest uppercase" style={{ color: modalItem.color }}>Today&apos;s Schedule</p>
+                  <p className="text-[22px] font-bold tracking-widest uppercase" style={{ color: modalItem.color }}>Today&apos;s Schedule</p>
                 </div>
-                <h3 className="text-[22px] font-bold text-[#1a1c1c] leading-tight">{modalItem.title}</h3>
-                {modalItem.subtitle && <p className="text-[15px] text-[#6b7480] mt-0.5">{modalItem.subtitle}</p>}
+                <h3 className="text-[44px] font-bold text-[#1a1c1c] leading-tight">{modalItem.title}</h3>
+                {modalItem.subtitle && <p className="text-[30px] text-[#6b7480] mt-0.5">{modalItem.subtitle}</p>}
               </div>
               {modalItem.isDrill ? (
                 <div className="px-6 py-5">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-[#8a9096] mb-3">Where are you today?</p>
+                  <p className="text-[22px] font-bold uppercase tracking-widest text-[#8a9096] mb-3">Where are you today?</p>
                   <div className="flex gap-2 mb-5">
-                    <button onClick={() => setDrillContext("court")} className="flex-1 py-2.5 rounded-xl text-[14px] font-semibold transition-colors" style={{ background: drillContext === "court" ? "#2653d4" : "#f4f4f6", color: drillContext === "court" ? "#fff" : "#4a5050" }}>Court</button>
-                    <button onClick={() => setDrillContext("solo")} className="flex-1 py-2.5 rounded-xl text-[14px] font-semibold transition-colors" style={{ background: drillContext === "solo" ? "#2653d4" : "#f4f4f6", color: drillContext === "solo" ? "#fff" : "#4a5050" }}>Anywhere</button>
+                    <button onClick={() => setDrillContext("court")} className="flex-1 py-2.5 rounded-xl text-[28px] font-semibold transition-colors" style={{ background: drillContext === "court" ? "#2653d4" : "#f4f4f6", color: drillContext === "court" ? "#fff" : "#4a5050" }}>Court</button>
+                    <button onClick={() => setDrillContext("solo")} className="flex-1 py-2.5 rounded-xl text-[28px] font-semibold transition-colors" style={{ background: drillContext === "solo" ? "#2653d4" : "#f4f4f6", color: drillContext === "solo" ? "#fff" : "#4a5050" }}>Anywhere</button>
                   </div>
                   {drillLoading ? (
                     <div className="flex flex-col gap-4">
@@ -1313,12 +1313,12 @@ export default function Home8() {
                       {drillSteps.map((s, i) => (
                         <div key={i} className="flex items-start gap-3">
                           <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: `${modalItem.color}18` }}>
-                            <span className="text-[11px] font-bold" style={{ color: modalItem.color }}>{i + 1}</span>
+                            <span className="text-[22px] font-bold" style={{ color: modalItem.color }}>{i + 1}</span>
                           </div>
                           <div>
-                            <p className="text-[14px] font-semibold text-[#1a1c1c]">{s.step}</p>
-                            <p className="text-[13px] text-[#6b7480] mt-0.5 leading-snug">{s.cue}</p>
-                            <p className="text-[12px] font-semibold mt-1" style={{ color: modalItem.color }}>{s.reps}</p>
+                            <p className="text-[28px] font-semibold text-[#1a1c1c]">{s.step}</p>
+                            <p className="text-[26px] text-[#6b7480] mt-0.5 leading-snug">{s.cue}</p>
+                            <p className="text-[24px] font-semibold mt-1" style={{ color: modalItem.color }}>{s.reps}</p>
                           </div>
                         </div>
                       ))}
@@ -1330,12 +1330,12 @@ export default function Home8() {
                 if (!detail) return null;
                 if (detail.type === 'meal') return (
                   <div className="px-6 py-5">
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-[#8a9096] mb-4">{detail.focus}</p>
+                    <p className="text-[22px] font-bold uppercase tracking-widest text-[#8a9096] mb-4">{detail.focus}</p>
                     <div className="flex flex-col gap-3">
                       {detail.options.map((meal, i) => (
                         <div key={i} className="flex items-start gap-3">
                           <div className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style={{ background: modalItem.color }}/>
-                          <p className="text-[15px] text-[#2c3235] leading-snug">{meal}</p>
+                          <p className="text-[30px] text-[#2c3235] leading-snug">{meal}</p>
                         </div>
                       ))}
                     </div>
@@ -1343,17 +1343,17 @@ export default function Home8() {
                 );
                 if (detail.type === 'exercise') return (
                   <div className="px-6 py-5">
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-[#8a9096] mb-4">{detail.focus}</p>
+                    <p className="text-[22px] font-bold uppercase tracking-widest text-[#8a9096] mb-4">{detail.focus}</p>
                     <div className="flex flex-col gap-4">
                       {detail.steps.map((s, i) => (
                         <div key={i} className="flex items-start gap-3">
                           <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: `${modalItem.color}18` }}>
-                            <span className="text-[11px] font-bold" style={{ color: modalItem.color }}>{i + 1}</span>
+                            <span className="text-[22px] font-bold" style={{ color: modalItem.color }}>{i + 1}</span>
                           </div>
                           <div>
-                            <p className="text-[14px] font-semibold text-[#1a1c1c]">{s.step}</p>
-                            <p className="text-[13px] text-[#6b7480] mt-0.5 leading-snug">{s.cue}</p>
-                            <p className="text-[12px] font-semibold mt-1" style={{ color: modalItem.color }}>{s.reps}</p>
+                            <p className="text-[28px] font-semibold text-[#1a1c1c]">{s.step}</p>
+                            <p className="text-[26px] text-[#6b7480] mt-0.5 leading-snug">{s.cue}</p>
+                            <p className="text-[24px] font-semibold mt-1" style={{ color: modalItem.color }}>{s.reps}</p>
                           </div>
                         </div>
                       ))}
@@ -1362,7 +1362,7 @@ export default function Home8() {
                 );
                 return (
                   <div className="px-6 py-5">
-                    <p className="text-[16px] text-[#2c3235] leading-relaxed">{detail.text}</p>
+                    <p className="text-[32px] text-[#2c3235] leading-relaxed">{detail.text}</p>
                   </div>
                 );
               })()}
@@ -1372,7 +1372,7 @@ export default function Home8() {
                   return (
                     <button
                       onClick={() => { setDoModalOpen(false); setSchedModalIdx(null); setCompleted(prev => { const n = new Set(prev); isComplete ? n.delete(modalIdx) : n.add(modalIdx); return n; }); }}
-                      className="w-full py-3.5 rounded-2xl text-[15px] font-bold active:scale-[0.98] transition-transform"
+                      className="w-full py-3.5 rounded-2xl text-[30px] font-bold active:scale-[0.98] transition-transform"
                       style={isComplete ? { background: `${modalItem.color}18`, color: modalItem.color } : { background: modalItem.color, color: "#fff" }}
                     >
                       {isComplete ? "Mark as incomplete" : "Mark as complete"}
@@ -1898,24 +1898,24 @@ export default function Home8() {
               <div style={{ width: 36, height: 36, borderRadius: "50%", background: `${schedDetailOpen.color}18`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
                 <div style={{ width: 10, height: 10, borderRadius: "50%", background: schedDetailOpen.color }} />
               </div>
-              <p style={{ fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 700, color: "#1a1c1c", margin: "0 0 4px" }}>{schedDetailOpen.title}</p>
-              {schedDetailOpen.subtitle && <p style={{ fontSize: "clamp(13px, 3.4vw, 16px)", color: "#6b7480", margin: "0 0 12px" }}>{schedDetailOpen.subtitle}</p>}
+              <p style={{ fontSize: "clamp(34px, 8.8vw, 42px)", fontWeight: 700, color: "#1a1c1c", margin: "0 0 4px" }}>{schedDetailOpen.title}</p>
+              {schedDetailOpen.subtitle && <p style={{ fontSize: "clamp(26px, 6.8vw, 32px)", color: "#6b7480", margin: "0 0 12px" }}>{schedDetailOpen.subtitle}</p>}
               <div style={{ height: 1, background: "#dfe3e7", margin: "12px 0" }} />
               {schedDetailOpen.isDrill ? (
                 <div>
-                  <p style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#8a9096", margin: "0 0 10px" }}>Where are you today?</p>
+                  <p style={{ fontSize: "clamp(22px, 5.6vw, 28px)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#8a9096", margin: "0 0 10px" }}>Where are you today?</p>
                   <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-                    <button onClick={() => setDrillContext("court")} style={{ flex: 1, padding: "10px 0", borderRadius: 12, fontSize: "clamp(14px, 3.6vw, 17px)", fontWeight: 600, border: "none", cursor: "pointer", background: drillContext === "court" ? "#2653d4" : "#f4f4f6", color: drillContext === "court" ? "#fff" : "#4a5050" }}>Court</button>
-                    <button onClick={() => setDrillContext("solo")} style={{ flex: 1, padding: "10px 0", borderRadius: 12, fontSize: "clamp(14px, 3.6vw, 17px)", fontWeight: 600, border: "none", cursor: "pointer", background: drillContext === "solo" ? "#2653d4" : "#f4f4f6", color: drillContext === "solo" ? "#fff" : "#4a5050" }}>Anywhere</button>
+                    <button onClick={() => setDrillContext("court")} style={{ flex: 1, padding: "10px 0", borderRadius: 12, fontSize: "clamp(28px, 7.2vw, 34px)", fontWeight: 600, border: "none", cursor: "pointer", background: drillContext === "court" ? "#2653d4" : "#f4f4f6", color: drillContext === "court" ? "#fff" : "#4a5050" }}>Court</button>
+                    <button onClick={() => setDrillContext("solo")} style={{ flex: 1, padding: "10px 0", borderRadius: 12, fontSize: "clamp(28px, 7.2vw, 34px)", fontWeight: 600, border: "none", cursor: "pointer", background: drillContext === "solo" ? "#2653d4" : "#f4f4f6", color: drillContext === "solo" ? "#fff" : "#4a5050" }}>Anywhere</button>
                   </div>
-                  <p style={{ fontSize: "clamp(14px, 3.6vw, 17px)", color: "#3a4550", lineHeight: 1.6, margin: 0 }}>
+                  <p style={{ fontSize: "clamp(28px, 7.2vw, 34px)", color: "#3a4550", lineHeight: 1.6, margin: 0 }}>
                     {drillContext === "court" ? (DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).court : (DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).solo}
                   </p>
                 </div>
               ) : (
-                <p style={{ fontSize: "clamp(14px, 3.6vw, 17px)", color: "#3a4550", lineHeight: 1.6, margin: 0 }}>{schedDetailOpen.detail}</p>
+                <p style={{ fontSize: "clamp(28px, 7.2vw, 34px)", color: "#3a4550", lineHeight: 1.6, margin: 0 }}>{schedDetailOpen.detail}</p>
               )}
-              <button onClick={() => setSchedDetailOpen(null)} style={{ marginTop: 20, width: "100%", padding: "12px 0", borderRadius: 50, background: "#f4f4f6", border: "none", fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 600, color: "#1a1c1c", cursor: "pointer" }}>Done</button>
+              <button onClick={() => setSchedDetailOpen(null)} style={{ marginTop: 20, width: "100%", padding: "12px 0", borderRadius: 50, background: "#f4f4f6", border: "none", fontSize: "clamp(30px, 7.8vw, 36px)", fontWeight: 600, color: "#1a1c1c", cursor: "pointer" }}>Done</button>
             </div>
           </div>
         )}
