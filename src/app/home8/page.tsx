@@ -348,6 +348,8 @@ export default function Home8() {
   const [cardSnap, setCardSnap] = useState<'none' | 'left' | 'right'>('none');
   const [liveX, setLiveX] = useState(0);
   const [liveY, setLiveY] = useState(0);
+  const [breathPhase, setBreathPhase] = useState(0);
+  const breathStartRef = useRef(Date.now());
 
   useEffect(() => {
     function loadReadiness() {
@@ -715,6 +717,14 @@ export default function Home8() {
     } catch {}
   }, [matchModalOpen]);
 
+  useEffect(() => {
+    const id = setInterval(() => {
+      const elapsed = (Date.now() - breathStartRef.current) % 16000;
+      setBreathPhase(Math.floor(elapsed / 4000));
+    }, 100);
+    return () => clearInterval(id);
+  }, []);
+
   const today = new Date().toISOString().slice(0, 10);
   const dayType: "match" | "recovery" | "training" = match?.date === today ? "match" : yesterdayWasMatch ? "recovery" : "training";
   const { schedule, currentIdx } = getScheduleData(dayType, match?.time ?? null, drillTag);
@@ -802,13 +812,20 @@ export default function Home8() {
                   <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
                     <p style={{ fontSize: 17, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>Breathe</p>
                     <p style={{ fontSize: 10, fontWeight: 500, color: "#9aa5b0", margin: "5px 0 0", textAlign: "center", lineHeight: 1.3 }}>(4x4 box breath)</p>
-                    <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 2, alignItems: "center" }}>
-                      {[["In","through your nose"],["Hold",""],["Out","through your mouth"],["Hold",""]].map(([a, b], i) => (
-                        <p key={i} style={{ fontSize: 9, color: "#b8c4d0", margin: 0, lineHeight: 1.4, textAlign: "center" }}>
-                          <span style={{ fontWeight: 700 }}>{a}</span>{b ? ` ${b}` : ""}
+                    {(() => {
+                      const phases = [
+                        { action: "In", detail: "through your nose" },
+                        { action: "Hold", detail: "" },
+                        { action: "Out", detail: "through your mouth" },
+                        { action: "Hold", detail: "" },
+                      ];
+                      const p = phases[breathPhase];
+                      return (
+                        <p key={breathPhase} style={{ fontSize: 11, color: "#3b9eff", margin: "10px 0 0", textAlign: "center", lineHeight: 1.4, fontWeight: 600 }}>
+                          {p.action}{p.detail ? <span style={{ fontWeight: 400, color: "#9aa5b0" }}> {p.detail}</span> : null}
                         </p>
-                      ))}
-                    </div>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
