@@ -638,6 +638,8 @@ export default function Home8() {
         setDoIdx(i => Math.max(i - 1, -1));
       hitTopYRef.current = null;
       vel = 0;
+      swipeDirRef.current = null;
+      touchStartYRef.current = endY;
     };
 
     const onEnd    = (e: TouchEvent) => { if (doIdxRef.current >= 1) trigger(e.changedTouches[0].clientY); };
