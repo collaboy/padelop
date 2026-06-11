@@ -406,9 +406,10 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
   useEffect(() => {
     const el = racketRowRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => setRacketSlotSize(el.offsetHeight));
+    const measure = () => setRacketSlotSize(el.offsetHeight - 24);
+    const ro = new ResizeObserver(measure);
     ro.observe(el);
-    setRacketSlotSize(el.offsetHeight);
+    measure();
     return () => ro.disconnect();
   }, []);
 
