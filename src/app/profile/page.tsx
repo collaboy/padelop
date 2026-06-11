@@ -720,7 +720,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
         <div style={{ background: "#fff", borderRadius: "var(--r-lg)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
           <div style={{ display: "flex", alignItems: "stretch", padding: 12, gap: 14 }}>
             {/* Square upload — padding lives on parent so aspect-ratio works */}
-            <label htmlFor="racket-img-upload" style={{ cursor: "pointer", flexShrink: 0, alignSelf: "stretch", aspectRatio: "1 / 1", display: "block", minWidth: 0 }}>
+            <label htmlFor="racket-img-upload" style={{ cursor: "pointer", flexShrink: 0, alignSelf: "stretch", aspectRatio: "1 / 1", display: "block" }}>
               <div style={{ width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {racketImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -791,9 +791,9 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
         <div style={{ background: "#fff", padding: "20px", borderRadius: "var(--r-lg)", border: "1px solid var(--c-border-card)", boxShadow: "var(--shadow-soft)", display: "flex", flexDirection: "column" }}>
           <div style={{ marginBottom: "8px" }}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--c-forest)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M2 18h1.4c.7 0 1.3-.4 1.6-1L7 13h10l2 4H2z"/>
-              <path d="M7 13V9a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v1"/>
-              <path d="M11 13V9"/>
+              <path d="M2 17h20v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-1z"/>
+              <path d="M2 17c0-3.5 2.5-6 6-6h2l3-2h3c2.2 0 4 1.5 4.5 3.5L21 17"/>
+              <path d="M8 11v3M12 9.5v4"/>
             </svg>
           </div>
           <p className="t-caption" style={{ color: "#444748", margin: "0 0 10px" }}>My Shoes</p>
