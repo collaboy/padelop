@@ -702,8 +702,8 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
         <div style={{ background: "#fff", borderRadius: "var(--r-lg)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
           <div style={{ display: "flex", alignItems: "stretch", minHeight: 100 }}>
             {/* Full-height image / upload */}
-            <label htmlFor="racket-img-upload" style={{ cursor: "pointer", flexShrink: 0, display: "flex", width: 90 }}>
-              <div style={{ flex: 1, overflow: "hidden", background: "#f4f4f6", borderRight: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <label htmlFor="racket-img-upload" style={{ cursor: "pointer", flexShrink: 0, display: "flex", width: 90, padding: 12 }}>
+              <div style={{ flex: 1, overflow: "hidden", borderRadius: 10, background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {racketImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={racketImage} alt="Racket" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -721,11 +721,9 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
               <span className="t-label" style={{ color: "var(--c-label)", display: "block", marginBottom: "8px" }}>Current Racket</span>
               <p className="t-title" style={{ color: "var(--c-text)", margin: 0, lineHeight: 1.2 }}>{racketName || "—"}</p>
               <p className="t-body" style={{ color: "var(--c-text-dim)", margin: "4px 0 0" }}>{racketType || "Add a description"}</p>
-              {racketSince && (
-                <p className="t-caption" style={{ color: "var(--c-hint)", margin: "6px 0 0" }}>
-                  Using since {new Date(racketSince + "-01").toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
-                </p>
-              )}
+              <p className="t-caption" style={{ color: racketSince ? "var(--c-hint)" : "var(--c-disabled)", margin: "6px 0 0" }}>
+                {racketSince ? `Using since ${new Date(racketSince + "-01").toLocaleDateString("en-GB", { month: "short", year: "numeric" })}` : "Using since —"}
+              </p>
             </div>
           </div>
           {gearEditOpen && (
