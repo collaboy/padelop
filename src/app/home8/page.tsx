@@ -718,6 +718,7 @@ export default function Home8() {
   }, [matchModalOpen]);
 
   useEffect(() => {
+    breathStartRef.current = Date.now(); // align with CSS animation start
     const id = setInterval(() => {
       const elapsed = (Date.now() - breathStartRef.current) % 16000;
       setBreathPhase(Math.floor(elapsed / 4000));
