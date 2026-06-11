@@ -839,6 +839,7 @@ export default function Home8() {
                       </p>
                     );
                   })()}
+                  <p style={{ fontSize: 9, color: "#c8cdd3", margin: 0, textAlign: "center", lineHeight: 1.4 }}>Skip if you have a respiratory condition</p>
                 </div>
               </div>
               {/* Placeholder below */}
