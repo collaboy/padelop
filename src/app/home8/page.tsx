@@ -791,9 +791,9 @@ export default function Home8() {
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <button
                   onClick={() => setLogPickerOpen(true)}
-                  style={{ padding: "14px 28px", borderRadius: 9, background: "#2653d4", border: "none", cursor: "pointer", fontSize: 16, fontWeight: 700, color: "#fff" }}
+                  style={{ width: 88, height: 88, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", fontSize: 16, fontWeight: 700, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}
                 >
-                  Log +
+                  Log+
                 </button>
               </div>
               {/* Placeholder below */}
@@ -1149,11 +1149,13 @@ export default function Home8() {
                 const MAX = 3000;
                 const pct = Math.min(1, logHydrationMl / MAX);
                 // teardrop viewBox 100 × 130, drop path fills from y=130 up
-                const innerH = 118; // usable vertical fill space inside the drop
+                const innerH = 118;
                 const fillH  = pct * innerH;
-                const waterY = 130 - fillH; // top of water rect
+                const waterY = 130 - fillH;
                 const waveAmp = logHydrationMl > 0 ? 3 : 0;
-                const labelMl = logHydrationMl >= 1000
+                const labelMl = logHydrationMl === 0
+                  ? "Drink!"
+                  : logHydrationMl >= 1000
                   ? `${+(logHydrationMl / 1000).toFixed(1)}L`
                   : `${logHydrationMl}ml`;
                 return (
@@ -1161,9 +1163,9 @@ export default function Home8() {
                     <svg viewBox="0 0 100 130" width="138" height="179" style={{ overflow: "visible" }}>
                       <defs>
                         <clipPath id="drop-clip-r">
-                          {/* teardrop: pointed top, circular bottom */}
                           <path d="M50 4 C72 22 94 58 94 84 A44 44 0 0 1 6 84 C6 58 28 22 50 4 Z"/>
                         </clipPath>
+                        <path id="goal-arc-r" d="M16 22 A40 40 0 0 1 84 22"/>
                       </defs>
 
                       {/* Background (empty) */}
@@ -1192,22 +1194,15 @@ export default function Home8() {
                       </text>
                     </svg>
 
-                    {/* glasses count */}
-                    <p style={{ fontSize: 13, fontWeight: 600, color: "#3b9eff", margin: "-4px 0 0", letterSpacing: "0.01em" }}>
-                      {logHydrationMl > 0
-                        ? `${Math.round(logHydrationMl / 250)} glass${Math.round(logHydrationMl / 250) === 1 ? "" : "es"}`
-                        : "0 glasses"}
-                    </p>
-
-                    {/* + / − buttons */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    {/* + − row */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                       <button
                         onClick={() => {
                           const next = Math.min(MAX, logHydrationMl + 250);
                           setLogHydrationMl(next);
                           saveLogHydration(next);
                         }}
-                        style={{ width: 55, height: 55, borderRadius: "50%", background: logHydrationMl >= MAX ? "#e8f0e8" : "#3b9eff", border: "none", cursor: logHydrationMl >= MAX ? "default" : "pointer", fontSize: 27, fontWeight: 700, color: logHydrationMl >= MAX ? "#16a34a" : "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}
+                        style={{ width: 40, height: 40, borderRadius: "50%", background: logHydrationMl >= MAX ? "#e8f0e8" : "#3b9eff", border: "none", cursor: logHydrationMl >= MAX ? "default" : "pointer", fontSize: 20, fontWeight: 700, color: logHydrationMl >= MAX ? "#16a34a" : "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}
                       >
                         +
                       </button>
@@ -1217,19 +1212,17 @@ export default function Home8() {
                           setLogHydrationMl(next);
                           saveLogHydration(next);
                         }}
-                        style={{ width: 55, height: 55, borderRadius: "50%", background: "#f0f2f5", border: "none", cursor: logHydrationMl <= 0 ? "default" : "pointer", fontSize: 27, fontWeight: 700, color: logHydrationMl <= 0 ? "#c8cdd3" : "#1a1c1c", display: "flex", alignItems: "center", justifyContent: "center" }}
+                        style={{ width: 40, height: 40, borderRadius: "50%", background: "#f0f2f5", border: "none", cursor: logHydrationMl <= 0 ? "default" : "pointer", fontSize: 20, fontWeight: 700, color: logHydrationMl <= 0 ? "#c8cdd3" : "#1a1c1c", display: "flex", alignItems: "center", justifyContent: "center" }}
                       >
                         −
                       </button>
                     </div>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: "#3b9eff", margin: 0 }}>
+                      {logHydrationMl > 0
+                        ? `${Math.round(logHydrationMl / 250)} glass${Math.round(logHydrationMl / 250) === 1 ? "" : "es"}`
+                        : "0 glasses"}
+                    </p>
 
-                    {/* goal + hint */}
-                    <p style={{ fontSize: 11, fontWeight: 700, color: "#6b7480", letterSpacing: "0.06em", textTransform: "uppercase", margin: 0 }}>
-                      {logHydrationMl >= MAX ? "Goal reached 🎉" : `Goal: 3L`}
-                    </p>
-                    <p style={{ fontSize: 11, color: "#b0b8c1", margin: "-4px 0 0", textAlign: "center", lineHeight: 1.4 }}>
-                      Tap + each time you finish a glass
-                    </p>
                   </>
                 );
               })()}
@@ -1436,177 +1429,132 @@ export default function Home8() {
               <div className="px-5 pt-4 pb-4 flex-shrink-0" style={{ borderBottom: "1px solid #f0f0f0" }}>
                 <p style={{ fontSize: 22, fontWeight: 800, color: "#1a1c1c", margin: 0 }}>What do you want to log?</p>
               </div>
-              <div style={{ overflowY: "auto" }}>
-              {(() => {
-                const sleepLbl = (v: number) => ["Very poor","Poor","OK","Good","Excellent"][v-1] ?? `${v}/5`;
-                const rateLbl  = (v: number) => ["Very low","Low","Moderate","Good","High"][v-1] ?? `${v}/5`;
-                const items = [
-                  {
-                    label: "Morning Check-in", tab: "checkin" as const,
-                    iconBg: "rgba(124,58,237,0.1)", iconColor: "#7c3aed",
-                    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>,
-                    logged: readinessItems[0],
-                    detail: checkInData
-                      ? `Sleep ${sleepLbl(checkInData.sleep)} · Soreness ${sleepLbl(checkInData.soreness)} · Stress ${rateLbl(checkInData.stress)}`
-                      : "Log sleep, energy and soreness to set your baseline.",
-                  },
-                  {
-                    label: "Hydration", tab: "hydration" as const,
-                    iconBg: "rgba(8,145,178,0.1)", iconColor: "#0891b2",
-                    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>,
-                    logged: readinessItems[1],
-                    detail: hydrationData
-                      ? `${hydrationData.litres} · ${hydrationData.urine} urine · ${hydrationData.quality}`
-                      : "Aim for 2–3L. The single biggest lever on your energy.",
-                  },
-                  {
-                    label: "Night Check-in", tab: "wellbeing" as const,
-                    iconBg: "rgba(236,72,153,0.1)", iconColor: "#ec4899",
-                    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
-                    logged: false,
-                    detail: checkInData
-                      ? `Stress ${rateLbl(checkInData.stress)} · Motivation ${rateLbl(checkInData.motivation)} — complete before bed`
-                      : "Do your morning check-in first.",
-                  },
-                ];
-                return [
-                  ...items.slice(0, 1).map((item, i) => (
-                    <div key={item.tab} style={{ borderBottom: "1px solid #f0f0f0" }}>
-                      <button onClick={() => setLogPickerExpanded(logPickerExpanded === item.tab ? null : item.tab)} className="w-full flex items-center gap-4 px-5 py-5 active:bg-[#f9f9f9] transition-colors">
-                        <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: item.iconBg, color: item.iconColor }}>{item.icon}</div>
-                        <span className="text-[19px] font-semibold text-[#1a1c1c]">{item.label}</span>
-                        <div className="ml-auto flex items-center gap-2 flex-shrink-0">
-                          {item.logged && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>}
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c8ccd0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: logPickerExpanded === item.tab ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
-                        </div>
-                      </button>
-                      {logPickerExpanded === item.tab && (<div style={{ padding: "0 20px 18px 20px" }}><p style={{ fontSize: 15, color: "#9aa5b0", margin: "0 0 14px", lineHeight: 1.5 }}>{item.detail}</p><button onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogWizard(false); setLogTab(item.tab as Parameters<typeof setLogTab>[0]); setLogSheetOpen(true); }} style={{ padding: "10px 22px", borderRadius: 999, background: "#2653d4", border: "none", cursor: "pointer", fontSize: 15, fontWeight: 700, color: "#fff" }}>Log +</button></div>)}
+              <div style={{ padding: "12px 16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+
+                {/* Row 1: AM / PM check-in tiles */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <button
+                    onClick={() => { setLogPickerOpen(false); setLogPickerSub(null); setLogTab("checkin"); setLogSheetOpen(true); }}
+                    style={{ background: "#f5f0ff", border: "none", borderRadius: 16, padding: "18px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 24, position: "relative", minHeight: 110 }}
+                  >
+                    {readinessItems[0] && <div style={{ position: "absolute", top: 10, right: 10 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>}
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                    <div style={{ textAlign: "left" }}>
+                      <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Check-in</p>
+                      <p style={{ fontSize: 12, fontWeight: 600, color: "#7c3aed", margin: "3px 0 0" }}>AM</p>
                     </div>
-                  )),
-                  ...items.slice(1).map((item, i, rest) => (
-                    <div key={item.tab} style={{ borderBottom: i < rest.length - 1 ? "1px solid #f0f0f0" : "none" }}>
-                      <button onClick={() => { setLogPickerExpanded(logPickerExpanded === item.tab ? null : item.tab); setLogPickerSub(null); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
-                        <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: item.iconBg, color: item.iconColor }}>{item.icon}</div>
-                        <span className="text-[19px] font-semibold text-[#1a1c1c]">
-                          {item.label}
-                          {item.tab === "hydration" && logHydrationMl > 0 && (
-                            <span style={{ fontSize: 14, fontWeight: 600, color: "#2653d4", marginLeft: 8 }}>
-                              {Math.min(100, Math.round(logHydrationMl / LOG_GOAL_ML * 100))}%
-                            </span>
-                          )}
-                        </span>
-                        <div className="ml-auto flex items-center gap-2 flex-shrink-0">
-                          {item.logged && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>}
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c8ccd0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: logPickerExpanded === item.tab ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
-                        </div>
+                  </button>
+                  <button
+                    onClick={() => { setLogPickerOpen(false); setLogPickerSub(null); setLogTab("wellbeing" as Parameters<typeof setLogTab>[0]); setLogSheetOpen(true); }}
+                    style={{ background: "#fff0f8", border: "none", borderRadius: 16, padding: "18px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 24, position: "relative", minHeight: 110 }}
+                  >
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <div style={{ textAlign: "left" }}>
+                      <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Check-in</p>
+                      <p style={{ fontSize: 12, fontWeight: 600, color: "#ec4899", margin: "3px 0 0" }}>PM</p>
+                    </div>
+                  </button>
+                </div>
+
+                {/* Row 2: Hydration gauge full width */}
+                <div style={{ background: "#f0f6ff", borderRadius: 16, padding: "14px 18px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10, alignItems: "center" }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>
+                      Hydration · {logHydrationMl >= 1000 ? `${+(logHydrationMl / 1000).toFixed(1)}L` : `${logHydrationMl}ml`}
+                      <span style={{ fontWeight: 400, color: "#c8ccd0" }}> / 2.5L</span>
+                    </span>
+                    {logHydrationMl >= LOG_GOAL_ML && <span style={{ fontSize: 12, fontWeight: 600, color: "#16a34a" }}>Goal reached</span>}
+                  </div>
+                  <div ref={logGaugeRef} style={{ position: "relative", height: 8, borderRadius: 999, background: "#d0e4f8", marginBottom: 20 }}>
+                    <div style={{ position: "absolute", left: 0, top: 0, height: "100%", borderRadius: 999, background: "#2653d4", width: `${Math.min(100, (logHydrationMl / LOG_MAX_ML) * 100)}%`, transition: "width 0.15s" }} />
+                    <div style={{ position: "absolute", top: -4, left: `${(LOG_GOAL_ML / LOG_MAX_ML) * 100}%`, width: 2, height: 16, background: "#b0b8c1", borderRadius: 1 }} />
+                    <div
+                      onTouchStart={onLogDotTouchStart}
+                      onTouchMove={onLogDotTouchMove}
+                      style={{ position: "absolute", top: "50%", left: `${Math.min(100, (logHydrationMl / LOG_MAX_ML) * 100)}%`, transform: "translate(-50%, -50%)", width: 22, height: 22, borderRadius: "50%", background: "#fff", border: "2.5px solid #2653d4", boxShadow: "0 1px 6px rgba(38,83,212,0.25)", cursor: "grab", touchAction: "none" }}
+                    />
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <span style={{ fontSize: 10, color: "#c8ccd0" }}>0</span>
+                    <span style={{ fontSize: 10, color: "#b0b8c1" }}>2.5L</span>
+                    <span style={{ fontSize: 10, color: "#c8ccd0" }}>3L+</span>
+                  </div>
+                </div>
+
+                {/* Row 3: Food & Note tiles */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <button
+                    onClick={() => setLogPickerSub("nutrition")}
+                    style={{ background: "#f0fdf4", border: "none", borderRadius: 16, padding: "18px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 24, position: "relative", minHeight: 110 }}
+                  >
+                    {mealsToday.length > 0 && <div style={{ position: "absolute", top: 10, right: 10 }}><span style={{ fontSize: 11, fontWeight: 700, color: "#16a34a" }}>{mealsToday.length}</span></div>}
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                    <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2, textAlign: "left" }}>Food &amp; Snacks</p>
+                  </button>
+                  <button
+                    onClick={() => setLogPickerSub("matchreview")}
+                    style={{ background: "#f8f9fa", border: "none", borderRadius: 16, padding: "18px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 24, minHeight: 110 }}
+                  >
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2, textAlign: "left" }}>Add a note</p>
+                  </button>
+                </div>
+
+              </div>
+
+              {/* Food & Snacks sub-modal */}
+              {logPickerSub === "nutrition" && (
+                <div className="fixed inset-0 z-[300] flex items-end" onClick={() => setLogPickerSub(null)}>
+                  <div className="absolute inset-0 bg-black/20" />
+                  <div className="relative w-full bg-white rounded-t-[24px] shadow-2xl" style={{ paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
+                    <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-[#e0e0e0]" /></div>
+                    <div style={{ padding: "12px 20px 4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <p style={{ fontSize: 18, fontWeight: 800, color: "#1a1c1c", margin: 0 }}>Food &amp; Snacks</p>
+                      <button onClick={() => setLogPickerSub(null)} style={{ background: "rgba(0,0,0,0.06)", border: "none", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                       </button>
-                      {logPickerExpanded === item.tab && (
-                        item.tab === "hydration" ? (
-                          <div style={{ padding: "0 20px 18px 20px" }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
-                              <span style={{ fontSize: 13, fontWeight: 600, color: "#1a1c1c" }}>
-                                {logHydrationMl >= 1000 ? `${+(logHydrationMl / 1000).toFixed(1)}L` : `${logHydrationMl}ml`}
-                                <span style={{ fontWeight: 400, color: "#c8ccd0" }}> / 2.5L</span>
-                              </span>
-                              {logHydrationMl >= LOG_GOAL_ML && <span style={{ fontSize: 12, fontWeight: 600, color: "#16a34a" }}>Goal reached</span>}
+                    </div>
+                    <div style={{ padding: "12px 20px 20px" }}>
+                      <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+                        <input type="time" value={mealTime || nowTimeStr()} onChange={e => setMealTime(e.target.value)} onClick={() => { if (!mealTime) setMealTime(nowTimeStr()); }} style={{ width: 90, padding: "7px 10px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: 16, color: "#1a1c1c", outline: "none", flexShrink: 0 }} />
+                        <input type="text" placeholder="What are you eating?" value={mealText} onChange={e => setMealText(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && mealText.trim()) saveMealEntry(mealTime || nowTimeStr(), mealText); }} style={{ flex: 1, padding: "7px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: 16, color: "#1a1c1c", outline: "none" }} />
+                        <button onClick={() => saveMealEntry(mealTime || nowTimeStr(), mealText)} style={{ padding: "7px 14px", borderRadius: 10, background: mealText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: mealText.trim() ? "pointer" : "default", fontSize: 12, fontWeight: 700, color: mealText.trim() ? "#fff" : "#b0b8c1", flexShrink: 0 }}>Save</button>
+                      </div>
+                      {mealsToday.length > 0 && (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                          {mealsToday.map(m => (
+                            <div key={m.id} style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
+                              <span style={{ fontSize: 11, fontWeight: 600, color: "#b0b8c1", flexShrink: 0 }}>{m.time}</span>
+                              <span style={{ fontSize: 13, color: "#6b7480", lineHeight: 1.4 }}>{m.description}</span>
                             </div>
-                            <div ref={logGaugeRef} style={{ position: "relative", height: 8, borderRadius: 999, background: "#e8eaed", marginBottom: 20 }}>
-                              <div style={{ position: "absolute", left: 0, top: 0, height: "100%", borderRadius: 999, background: "#2653d4", width: `${Math.min(100, (logHydrationMl / LOG_MAX_ML) * 100)}%`, transition: "width 0.15s" }} />
-                              <div style={{ position: "absolute", top: -4, left: `${(LOG_GOAL_ML / LOG_MAX_ML) * 100}%`, width: 2, height: 16, background: "#b0b8c1", borderRadius: 1 }} />
-                              <div
-                                onTouchStart={onLogDotTouchStart}
-                                onTouchMove={onLogDotTouchMove}
-                                style={{
-                                  position: "absolute", top: "50%", left: `${Math.min(100, (logHydrationMl / LOG_MAX_ML) * 100)}%`,
-                                  transform: "translate(-50%, -50%)",
-                                  width: 22, height: 22, borderRadius: "50%",
-                                  background: "#fff", border: "2.5px solid #2653d4",
-                                  boxShadow: "0 1px 6px rgba(38,83,212,0.25)",
-                                  cursor: "grab", touchAction: "none",
-                                }}
-                              />
-                            </div>
-                            <div style={{ display: "flex", justifyContent: "space-between" }}>
-                              <span style={{ fontSize: 10, color: "#c8ccd0" }}>0</span>
-                              <span style={{ fontSize: 10, color: "#b0b8c1" }}>2.5L</span>
-                              <span style={{ fontSize: 10, color: "#c8ccd0" }}>3L+</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <div style={{ padding: "0 20px 18px 20px" }}>
-                            <p style={{ fontSize: 15, color: "#9aa5b0", margin: "0 0 14px", lineHeight: 1.5 }}>{item.detail}</p>
-                            <button onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogWizard(false); setLogTab(item.tab); setLogSheetOpen(true); }} style={{ padding: "10px 22px", borderRadius: 999, background: "#2653d4", border: "none", cursor: "pointer", fontSize: 15, fontWeight: 700, color: "#fff" }}>Log +</button>
-                          </div>
-                        )
+                          ))}
+                        </div>
                       )}
                     </div>
-                  )),
-                ];
-
-              })()}
-
-              {/* Extras reveal */}
-              {extrasOpen && (
-                <div style={{ borderTop: "1px solid #f0f0f0" }}>
-                  {/* Food & Snacks */}
-                  <div style={{ borderBottom: "1px solid #f0f0f0" }}>
-                    <button onClick={() => setLogPickerSub(logPickerSub === "nutrition" ? null : "nutrition")} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors" style={{ background: "none", border: "none", cursor: "pointer" }}>
-                      <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(22,163,74,0.1)", color: "#16a34a" }}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-                      </div>
-                      <span style={{ fontSize: 19, fontWeight: 600, color: "#1a1c1c", flex: 1, textAlign: "left" }}>Food & Snacks</span>
-                      {mealsToday.length > 0 && <span style={{ fontSize: 12, fontWeight: 600, color: "#2653d4" }}>{mealsToday.length} logged</span>}
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c8ccd0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: logPickerSub === "nutrition" ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
-                    </button>
-                    {logPickerSub === "nutrition" && (
-                      <div style={{ padding: "4px 20px 14px 20px" }}>
-                        <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-                          <input type="time" value={mealTime || nowTimeStr()} onChange={e => setMealTime(e.target.value)} onClick={() => { if (!mealTime) setMealTime(nowTimeStr()); }} style={{ width: 90, padding: "7px 10px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: 16, color: "#1a1c1c", outline: "none", flexShrink: 0 }} />
-                          <input type="text" placeholder="What are you eating?" value={mealText} onChange={e => setMealText(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && mealText.trim()) saveMealEntry(mealTime || nowTimeStr(), mealText); }} style={{ flex: 1, padding: "7px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: 16, color: "#1a1c1c", outline: "none" }} />
-                          <button onClick={() => saveMealEntry(mealTime || nowTimeStr(), mealText)} style={{ padding: "7px 14px", borderRadius: 10, background: mealText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: mealText.trim() ? "pointer" : "default", fontSize: 12, fontWeight: 700, color: mealText.trim() ? "#fff" : "#b0b8c1", flexShrink: 0 }}>Save</button>
-                        </div>
-                        {mealsToday.length > 0 && (
-                          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                            {mealsToday.map(m => (
-                              <div key={m.id} style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
-                                <span style={{ fontSize: 11, fontWeight: 600, color: "#b0b8c1", flexShrink: 0 }}>{m.time}</span>
-                                <span style={{ fontSize: 13, color: "#6b7480", lineHeight: 1.4 }}>{m.description}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  {/* Add a note */}
-                  <div>
-                    <button onClick={() => setLogPickerSub(logPickerSub === "matchreview" ? null : "matchreview")} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors" style={{ background: "none", border: "none", cursor: "pointer" }}>
-                      <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(107,116,128,0.1)", color: "#6b7480" }}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                      </div>
-                      <span style={{ fontSize: 19, fontWeight: 600, color: "#1a1c1c", flex: 1, textAlign: "left" }}>Add a note</span>
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c8ccd0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: logPickerSub === "matchreview" ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
-                    </button>
-                    {logPickerSub === "matchreview" && (
-                      <div style={{ padding: "4px 20px 14px 20px" }}>
-                        <textarea value={noteText} onChange={e => setNoteText(e.target.value)} placeholder="What's on your mind?" rows={3} style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: 16, color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box" }} />
-                        <button onClick={() => { saveNote(noteText); setLogPickerSub(null); }} style={{ marginTop: 8, padding: "7px 18px", borderRadius: 999, background: noteText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: noteText.trim() ? "pointer" : "default", fontSize: 12, fontWeight: 700, color: noteText.trim() ? "#fff" : "#b0b8c1" }}>Save</button>
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
 
-              {/* Bottom chevron toggle */}
-              <div style={{ display: "flex", justifyContent: "center", padding: "10px 0 14px", borderTop: "1px solid #f0f0f0" }}>
-                <button onClick={() => { setExtrasOpen(o => !o); setLogPickerSub(null); }} style={{ background: "none", border: "none", cursor: "pointer", padding: "4px 16px" }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c8ccd0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: extrasOpen ? "rotate(180deg)" : "none", transition: "transform 0.25s" }}>
-                    <path d="M6 9l6 6 6-6"/>
-                  </svg>
-                </button>
-              </div>
+              {/* Add a note sub-modal */}
+              {logPickerSub === "matchreview" && (
+                <div className="fixed inset-0 z-[300] flex items-end" onClick={() => setLogPickerSub(null)}>
+                  <div className="absolute inset-0 bg-black/20" />
+                  <div className="relative w-full bg-white rounded-t-[24px] shadow-2xl" style={{ paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
+                    <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-[#e0e0e0]" /></div>
+                    <div style={{ padding: "12px 20px 4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <p style={{ fontSize: 18, fontWeight: 800, color: "#1a1c1c", margin: 0 }}>Add a note</p>
+                      <button onClick={() => setLogPickerSub(null)} style={{ background: "rgba(0,0,0,0.06)", border: "none", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      </button>
+                    </div>
+                    <div style={{ padding: "12px 20px 20px" }}>
+                      <textarea value={noteText} onChange={e => setNoteText(e.target.value)} placeholder="What's on your mind?" rows={4} style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: 16, color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box" }} />
+                      <button onClick={() => { saveNote(noteText); setLogPickerSub(null); }} style={{ marginTop: 8, padding: "10px 22px", borderRadius: 999, background: noteText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: noteText.trim() ? "pointer" : "default", fontSize: 14, fontWeight: 700, color: noteText.trim() ? "#fff" : "#b0b8c1" }}>Save</button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-              </div>
             </div>
           </div>
         )}
