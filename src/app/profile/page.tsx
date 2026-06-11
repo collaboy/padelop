@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import LogSheet from "@/components/log-sheet";
 import AvatarCropModal from "@/components/avatar-crop-modal";
@@ -401,6 +401,16 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
   const [racketImage, setRacketImage] = useState("");
   const [racketSince, setRacketSince] = useState("");
   const [shoeImage, setShoeImage] = useState("");
+  const racketRowRef = useRef<HTMLDivElement>(null);
+  const [racketSlotSize, setRacketSlotSize] = useState(80);
+  useEffect(() => {
+    const el = racketRowRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setRacketSlotSize(el.offsetHeight));
+    ro.observe(el);
+    setRacketSlotSize(el.offsetHeight);
+    return () => ro.disconnect();
+  }, []);
 
   const handleShoeImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -718,9 +728,8 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
           <button onClick={() => setGearEditOpen(o => !o)} className="t-caption" style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 500, color: "var(--c-forest)" }}>{gearEditOpen ? "Done" : "Edit"}</button>
         </div>
         <div style={{ background: "#fff", borderRadius: "var(--r-lg)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
-          <div style={{ display: "flex", alignItems: "stretch", padding: 12, gap: 14 }}>
-            {/* Square upload — padding lives on parent so aspect-ratio works */}
-            <label htmlFor="racket-img-upload" style={{ cursor: "pointer", flexShrink: 0, width: "20vw", height: "20vw", display: "block" }}>
+          <div ref={racketRowRef} style={{ display: "flex", alignItems: "stretch", padding: 12, gap: 14 }}>
+            <label htmlFor="racket-img-upload" style={{ cursor: "pointer", flexShrink: 0, width: racketSlotSize, height: racketSlotSize, display: "block" }}>
               <div style={{ width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {racketImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
