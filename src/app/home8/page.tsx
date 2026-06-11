@@ -229,7 +229,7 @@ const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
   "Wind down": { type: 'info', text: "Blue light from screens suppresses melatonin by up to 50%. In the 60 minutes before bed: dim lights, avoid screens, and keep the room cool for deeper sleep." },
 };
 
-const S: React.CSSProperties = { fontFamily: "Inter, sans-serif", fontSize: 17, fontWeight: 400, color: "#111", lineHeight: 1.6 };
+const S: React.CSSProperties = { fontFamily: "Inter, sans-serif", fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 400, color: "#111", lineHeight: 1.6 };
 
 const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const CAL_DOW = ["M","T","W","T","F","S","S"];
@@ -887,7 +887,7 @@ export default function Home8() {
                       return (
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
                           {/* Single muted header */}
-                          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 20px" }}>
+                          <p style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 20px" }}>
                             Next Match · {countdownLabel}
                             {upcomingCount > 1 && <span style={{ marginLeft: 6, fontWeight: 600, color: "#c8ccd0" }}>+{upcomingCount - 1} more</span>}
                           </p>
@@ -896,17 +896,17 @@ export default function Home8() {
                           <button onClick={() => setMatchActionOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
                             <p style={{ fontSize: "clamp(34px, 9vw, 44px)", fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1, letterSpacing: "-0.02em" }}>{dateStr}</p>
                             <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 700, color: "#2653d4", margin: 0, lineHeight: 1 }}>{match.time}</p>
-                            {match.club && <p style={{ fontSize: 17, fontWeight: 500, color: "#6b7480", margin: "4px 0 0" }}>{match.club}</p>}
-                            {playerStr && <p style={{ fontSize: 13, color: "#b0b8c1", margin: "3px 0 0", textAlign: "center", lineHeight: 1.4 }}>{playerStr}</p>}
+                            {match.club && <p style={{ fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 500, color: "#6b7480", margin: "4px 0 0" }}>{match.club}</p>}
+                            {playerStr && <p style={{ fontSize: "clamp(13px, 3.4vw, 16px)", color: "#b0b8c1", margin: "3px 0 0", textAlign: "center", lineHeight: 1.4 }}>{playerStr}</p>}
                           </button>
 
                           {/* Divider */}
                           <div style={{ width: 48, height: 1, background: "#e8eaed", margin: "24px 0" }} />
 
                           {/* Readiness */}
-                          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 6px" }}>Readiness</p>
+                          <p style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 6px" }}>Readiness</p>
                           <button onClick={() => setReadinessSheetOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-                            <span style={{ fontSize: 32, fontWeight: 800, color: "#1a1c1c", lineHeight: 1, letterSpacing: "-0.02em" }}>
+                            <span style={{ fontSize: "clamp(32px, 8.2vw, 40px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1, letterSpacing: "-0.02em" }}>
                               {readinessDone}<span style={{ color: "#dde0e4" }}>/4</span>
                             </span>
                           </button>
@@ -914,26 +914,26 @@ export default function Home8() {
                       );
                     })() : (
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-                        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 10px" }}>Next Match</p>
+                        <p style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 10px" }}>Next Match</p>
                         <button
                           onClick={() => { setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('pick'); setMatchModalOpen(true); }}
-                          style={{ fontSize: 15, fontWeight: 600, color: "#2653d4", background: "#eef2ff", border: "none", cursor: "pointer", padding: "10px 24px", borderRadius: 999 }}
+                          style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 600, color: "#2653d4", background: "#eef2ff", border: "none", cursor: "pointer", padding: "10px 24px", borderRadius: 999 }}
                         >
                           + Schedule a match
                         </button>
 
                         <div style={{ width: 48, height: 1, background: "#e8eaed", margin: "24px 0" }} />
 
-                        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 16px" }}>Today&apos;s Checklist</p>
+                        <p style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 16px" }}>Today&apos;s Checklist</p>
                         <button onClick={() => setReadinessSheetOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
                           <span style={{ fontSize: "clamp(48px, 14vw, 64px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1, letterSpacing: "-0.03em" }}>
                             {readinessDone}<span style={{ color: "#dde0e4", fontSize: "0.55em" }}>/4</span>
                           </span>
                           {readinessLabel && (
-                            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: readinessColor }}>{readinessLabel}</span>
+                            <span style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: readinessColor }}>{readinessLabel}</span>
                           )}
                         </button>
-                        <p style={{ fontSize: 14, color: "#8a9096", margin: "12px 0 0", textAlign: "center", lineHeight: 1.5 }}>{coachTip}</p>
+                        <p style={{ fontSize: "clamp(14px, 3.6vw, 17px)", color: "#8a9096", margin: "12px 0 0", textAlign: "center", lineHeight: 1.5 }}>{coachTip}</p>
                       </div>
                     )}
                   </div>
@@ -1094,7 +1094,7 @@ export default function Home8() {
                                 style={{ width: "100%", height: 56, borderRadius: 6, display: "block" }}
                               />
                               <div style={{ position: "relative", height: 16 }}>
-                                <span style={{ position: "absolute", right: 0, top: 2, fontSize: 11, fontWeight: 600, color: "rgba(0,0,0,0.45)" }}>
+                                <span style={{ position: "absolute", right: 0, top: 2, fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 600, color: "rgba(0,0,0,0.45)" }}>
                                   {warmupDuration > 0 ? `${Math.floor(warmupDuration / 60)}:${String(Math.round(warmupDuration % 60)).padStart(2, "0")}` : "--:--"}
                                 </span>
                               </div>
@@ -1121,9 +1121,9 @@ export default function Home8() {
                         <div style={{ width: 36, height: 4, borderRadius: 2, background: "#d0d3d6" }} />
                       </div>
                       <div style={{ padding: "0 20px 16px", textAlign: "center" }}>
-                        <p style={{ fontSize: 18, fontWeight: 700, color: "#1a1c1c", margin: "0 0 4px" }}>Today&apos;s Schedule</p>
+                        <p style={{ fontSize: "clamp(18px, 4.6vw, 22px)", fontWeight: 700, color: "#1a1c1c", margin: "0 0 4px" }}>Today&apos;s Schedule</p>
                         <span style={{
-                          fontSize: 12, fontWeight: 700, padding: "3px 12px", borderRadius: 99,
+                          fontSize: "clamp(12px, 3.1vw, 15px)", fontWeight: 700, padding: "3px 12px", borderRadius: 99,
                           background: dayType === "match" ? "#2653d418" : dayType === "recovery" ? "#7c3aed18" : "#16a34a18",
                           color: dayType === "match" ? "#2653d4" : dayType === "recovery" ? "#7c3aed" : "#16a34a",
                         }}>
@@ -1165,9 +1165,9 @@ export default function Home8() {
                                     }
                                   </div>
                                   <div style={{ flex: 1, minWidth: 0 }}>
-                                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", margin: "0 0 2px", color: (isPast4 || isFuture4) ? "#c4c7c7" : s4.color }}>{s4.time}</p>
-                                    <p style={{ fontSize: 16, fontWeight: 600, margin: 0, lineHeight: 1.25, color: (isPast4 || isFuture4) ? "#a0a5aa" : "#1a1c1c" }}>{s4.title}</p>
-                                    {s4.subtitle && <p style={{ fontSize: 13, margin: "2px 0 0", color: (isPast4 || isFuture4) ? "#c4c7c7" : "#6b7480" }}>{s4.subtitle}</p>}
+                                    <p style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", margin: "0 0 2px", color: (isPast4 || isFuture4) ? "#c4c7c7" : s4.color }}>{s4.time}</p>
+                                    <p style={{ fontSize: "clamp(16px, 4.1vw, 19px)", fontWeight: 600, margin: 0, lineHeight: 1.25, color: (isPast4 || isFuture4) ? "#a0a5aa" : "#1a1c1c" }}>{s4.title}</p>
+                                    {s4.subtitle && <p style={{ fontSize: "clamp(13px, 3.4vw, 16px)", margin: "2px 0 0", color: (isPast4 || isFuture4) ? "#c4c7c7" : "#6b7480" }}>{s4.subtitle}</p>}
                                   </div>
                                   {detail4 && (
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
@@ -1248,7 +1248,7 @@ export default function Home8() {
                           setLogHydrationMl(next);
                           saveLogHydration(next);
                         }}
-                        style={{ width: 52, height: 52, borderRadius: "50%", background: logHydrationMl >= MAX ? "#e8f0e8" : "#3b9eff", border: "none", cursor: logHydrationMl >= MAX ? "default" : "pointer", fontSize: 22, fontWeight: 700, color: logHydrationMl >= MAX ? "#16a34a" : "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}
+                        style={{ width: 52, height: 52, borderRadius: "50%", background: logHydrationMl >= MAX ? "#e8f0e8" : "#3b9eff", border: "none", cursor: logHydrationMl >= MAX ? "default" : "pointer", fontSize: "clamp(22px, 5.6vw, 27px)", fontWeight: 700, color: logHydrationMl >= MAX ? "#16a34a" : "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}
                       >
                         +
                       </button>
@@ -1258,12 +1258,12 @@ export default function Home8() {
                           setLogHydrationMl(next);
                           saveLogHydration(next);
                         }}
-                        style={{ width: 20, height: 20, borderRadius: "50%", background: "#fff", border: "1.5px solid #dde2e8", boxShadow: "0 1px 4px rgba(0,0,0,0.10)", cursor: logHydrationMl <= 0 ? "default" : "pointer", fontSize: 13, fontWeight: 700, color: logHydrationMl <= 0 ? "#c8cdd3" : "#6b7480", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1 }}
+                        style={{ width: 20, height: 20, borderRadius: "50%", background: "#fff", border: "1.5px solid #dde2e8", boxShadow: "0 1px 4px rgba(0,0,0,0.10)", cursor: logHydrationMl <= 0 ? "default" : "pointer", fontSize: "clamp(13px, 3.4vw, 16px)", fontWeight: 700, color: logHydrationMl <= 0 ? "#c8cdd3" : "#6b7480", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1 }}
                       >
                         −
                       </button>
                     </div>
-                    <p style={{ fontSize: 13, fontWeight: 600, color: "#3b9eff", margin: 0 }}>
+                    <p style={{ fontSize: "clamp(13px, 3.4vw, 16px)", fontWeight: 600, color: "#3b9eff", margin: 0 }}>
                       {logHydrationMl > 0
                         ? `${Math.round(logHydrationMl / 250)} glass${Math.round(logHydrationMl / 250) === 1 ? "" : "es"}`
                         : "0 glasses"}
@@ -1472,7 +1472,7 @@ export default function Home8() {
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
             <div className="relative w-full max-w-sm bg-white rounded-[28px] shadow-2xl" style={{ overflow: "hidden", display: "flex", flexDirection: "column" }} onClick={e => e.stopPropagation()}>
               <div className="px-5 pt-6 pb-4 flex-shrink-0 flex items-center justify-between" style={{ borderBottom: "1px solid #f0f0f0" }}>
-                <p style={{ fontSize: 20, fontWeight: 800, color: "#1a1c1c", margin: 0 }}>What do you want to log?</p>
+                <p style={{ fontSize: "clamp(20px, 5.1vw, 25px)", fontWeight: 800, color: "#1a1c1c", margin: 0 }}>What do you want to log?</p>
                 <button onClick={() => { setLogPickerOpen(false); setLogPickerSub(null); }} style={{ width: 28, height: 28, borderRadius: "50%", background: "#f4f4f6", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
@@ -1488,8 +1488,8 @@ export default function Home8() {
                     {readinessItems[0] && <div style={{ position: "absolute", top: 10, right: 10 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>}
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
                     <div style={{ textAlign: "left" }}>
-                      <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Check-in</p>
-                      <p style={{ fontSize: 12, fontWeight: 600, color: "#7c3aed", margin: "3px 0 0" }}>AM</p>
+                      <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Check-in</p>
+                      <p style={{ fontSize: "clamp(12px, 3.1vw, 15px)", fontWeight: 600, color: "#7c3aed", margin: "3px 0 0" }}>AM</p>
                     </div>
                   </button>
                   <button
@@ -1498,8 +1498,8 @@ export default function Home8() {
                   >
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
                     <div style={{ textAlign: "left" }}>
-                      <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Check-in</p>
-                      <p style={{ fontSize: 12, fontWeight: 600, color: "#ec4899", margin: "3px 0 0" }}>PM</p>
+                      <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Check-in</p>
+                      <p style={{ fontSize: "clamp(12px, 3.1vw, 15px)", fontWeight: 600, color: "#ec4899", margin: "3px 0 0" }}>PM</p>
                     </div>
                   </button>
                 </div>
@@ -1507,11 +1507,11 @@ export default function Home8() {
                 {/* Row 2: Hydration gauge full width */}
                 <div style={{ background: "#f0f6ff", borderRadius: 16, padding: "14px 18px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10, alignItems: "center" }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>
+                    <span style={{ fontSize: "clamp(13px, 3.4vw, 16px)", fontWeight: 700, color: "#1a1c1c" }}>
                       Hydration · {logHydrationMl >= 1000 ? `${+(logHydrationMl / 1000).toFixed(1)}L` : `${logHydrationMl}ml`}
                       <span style={{ fontWeight: 400, color: "#c8ccd0" }}> / 2.5L</span>
                     </span>
-                    {logHydrationMl >= LOG_GOAL_ML && <span style={{ fontSize: 12, fontWeight: 600, color: "#16a34a" }}>Goal reached</span>}
+                    {logHydrationMl >= LOG_GOAL_ML && <span style={{ fontSize: "clamp(12px, 3.1vw, 15px)", fontWeight: 600, color: "#16a34a" }}>Goal reached</span>}
                   </div>
                   <div ref={logGaugeRef} style={{ position: "relative", height: 8, borderRadius: 999, background: "#d0e4f8", marginBottom: 20 }}>
                     <div style={{ position: "absolute", left: 0, top: 0, height: "100%", borderRadius: 999, background: "#2653d4", width: `${Math.min(100, (logHydrationMl / LOG_MAX_ML) * 100)}%`, transition: "width 0.15s" }} />
@@ -1523,9 +1523,9 @@ export default function Home8() {
                     />
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 10, color: "#c8ccd0" }}>0</span>
-                    <span style={{ fontSize: 10, color: "#b0b8c1" }}>2.5L</span>
-                    <span style={{ fontSize: 10, color: "#c8ccd0" }}>3L+</span>
+                    <span style={{ fontSize: "clamp(10px, 2.6vw, 13px)", color: "#c8ccd0" }}>0</span>
+                    <span style={{ fontSize: "clamp(10px, 2.6vw, 13px)", color: "#b0b8c1" }}>2.5L</span>
+                    <span style={{ fontSize: "clamp(10px, 2.6vw, 13px)", color: "#c8ccd0" }}>3L+</span>
                   </div>
                 </div>
 
@@ -1535,16 +1535,16 @@ export default function Home8() {
                     onClick={() => setLogPickerSub("nutrition")}
                     style={{ background: "#f0fdf4", border: "none", borderRadius: 16, padding: "18px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 24, position: "relative", minHeight: 110 }}
                   >
-                    {mealsToday.length > 0 && <div style={{ position: "absolute", top: 10, right: 10 }}><span style={{ fontSize: 11, fontWeight: 700, color: "#16a34a" }}>{mealsToday.length}</span></div>}
+                    {mealsToday.length > 0 && <div style={{ position: "absolute", top: 10, right: 10 }}><span style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, color: "#16a34a" }}>{mealsToday.length}</span></div>}
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-                    <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2, textAlign: "left" }}>Food &amp; Snacks</p>
+                    <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2, textAlign: "left" }}>Food &amp; Snacks</p>
                   </button>
                   <button
                     onClick={() => setLogPickerSub("matchreview")}
                     style={{ background: "#f8f9fa", border: "none", borderRadius: 16, padding: "18px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 24, minHeight: 110 }}
                   >
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                    <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2, textAlign: "left" }}>Add a note</p>
+                    <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2, textAlign: "left" }}>Add a note</p>
                   </button>
                 </div>
 
@@ -1557,23 +1557,23 @@ export default function Home8() {
                   <div className="relative w-full bg-white rounded-t-[24px] shadow-2xl" style={{ paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
                     <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-[#e0e0e0]" /></div>
                     <div style={{ padding: "12px 20px 4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <p style={{ fontSize: 18, fontWeight: 800, color: "#1a1c1c", margin: 0 }}>Food &amp; Snacks</p>
+                      <p style={{ fontSize: "clamp(18px, 4.6vw, 22px)", fontWeight: 800, color: "#1a1c1c", margin: 0 }}>Food &amp; Snacks</p>
                       <button onClick={() => setLogPickerSub(null)} style={{ background: "rgba(0,0,0,0.06)", border: "none", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                       </button>
                     </div>
                     <div style={{ padding: "12px 20px 20px" }}>
                       <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-                        <input type="time" value={mealTime || nowTimeStr()} onChange={e => setMealTime(e.target.value)} onClick={() => { if (!mealTime) setMealTime(nowTimeStr()); }} style={{ width: 90, padding: "7px 10px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: 16, color: "#1a1c1c", outline: "none", flexShrink: 0 }} />
-                        <input type="text" placeholder="What are you eating?" value={mealText} onChange={e => setMealText(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && mealText.trim()) saveMealEntry(mealTime || nowTimeStr(), mealText); }} style={{ flex: 1, padding: "7px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: 16, color: "#1a1c1c", outline: "none" }} />
-                        <button onClick={() => saveMealEntry(mealTime || nowTimeStr(), mealText)} style={{ padding: "7px 14px", borderRadius: 10, background: mealText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: mealText.trim() ? "pointer" : "default", fontSize: 12, fontWeight: 700, color: mealText.trim() ? "#fff" : "#b0b8c1", flexShrink: 0 }}>Save</button>
+                        <input type="time" value={mealTime || nowTimeStr()} onChange={e => setMealTime(e.target.value)} onClick={() => { if (!mealTime) setMealTime(nowTimeStr()); }} style={{ width: 90, padding: "7px 10px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: "clamp(16px, 4.1vw, 19px)", color: "#1a1c1c", outline: "none", flexShrink: 0 }} />
+                        <input type="text" placeholder="What are you eating?" value={mealText} onChange={e => setMealText(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && mealText.trim()) saveMealEntry(mealTime || nowTimeStr(), mealText); }} style={{ flex: 1, padding: "7px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: "clamp(16px, 4.1vw, 19px)", color: "#1a1c1c", outline: "none" }} />
+                        <button onClick={() => saveMealEntry(mealTime || nowTimeStr(), mealText)} style={{ padding: "7px 14px", borderRadius: 10, background: mealText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: mealText.trim() ? "pointer" : "default", fontSize: "clamp(12px, 3.1vw, 15px)", fontWeight: 700, color: mealText.trim() ? "#fff" : "#b0b8c1", flexShrink: 0 }}>Save</button>
                       </div>
                       {mealsToday.length > 0 && (
                         <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                           {mealsToday.map(m => (
                             <div key={m.id} style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
-                              <span style={{ fontSize: 11, fontWeight: 600, color: "#b0b8c1", flexShrink: 0 }}>{m.time}</span>
-                              <span style={{ fontSize: 13, color: "#6b7480", lineHeight: 1.4 }}>{m.description}</span>
+                              <span style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 600, color: "#b0b8c1", flexShrink: 0 }}>{m.time}</span>
+                              <span style={{ fontSize: "clamp(13px, 3.4vw, 16px)", color: "#6b7480", lineHeight: 1.4 }}>{m.description}</span>
                             </div>
                           ))}
                         </div>
@@ -1590,14 +1590,14 @@ export default function Home8() {
                   <div className="relative w-full bg-white rounded-t-[24px] shadow-2xl" style={{ paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
                     <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-[#e0e0e0]" /></div>
                     <div style={{ padding: "12px 20px 4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <p style={{ fontSize: 18, fontWeight: 800, color: "#1a1c1c", margin: 0 }}>Add a note</p>
+                      <p style={{ fontSize: "clamp(18px, 4.6vw, 22px)", fontWeight: 800, color: "#1a1c1c", margin: 0 }}>Add a note</p>
                       <button onClick={() => setLogPickerSub(null)} style={{ background: "rgba(0,0,0,0.06)", border: "none", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                       </button>
                     </div>
                     <div style={{ padding: "12px 20px 20px" }}>
-                      <textarea value={noteText} onChange={e => setNoteText(e.target.value)} placeholder="What's on your mind?" rows={4} style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: 16, color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box" }} />
-                      <button onClick={() => { saveNote(noteText); setLogPickerSub(null); }} style={{ marginTop: 8, padding: "10px 22px", borderRadius: 999, background: noteText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: noteText.trim() ? "pointer" : "default", fontSize: 14, fontWeight: 700, color: noteText.trim() ? "#fff" : "#b0b8c1" }}>Save</button>
+                      <textarea value={noteText} onChange={e => setNoteText(e.target.value)} placeholder="What's on your mind?" rows={4} style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: "clamp(16px, 4.1vw, 19px)", color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box" }} />
+                      <button onClick={() => { saveNote(noteText); setLogPickerSub(null); }} style={{ marginTop: 8, padding: "10px 22px", borderRadius: 999, background: noteText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: noteText.trim() ? "pointer" : "default", fontSize: "clamp(14px, 3.6vw, 17px)", fontWeight: 700, color: noteText.trim() ? "#fff" : "#b0b8c1" }}>Save</button>
                     </div>
                   </div>
                 </div>
@@ -1842,16 +1842,16 @@ export default function Home8() {
                       const topWeakness = matched.flatMap(r => r.improved).slice(0, 3).filter((v, i, a) => a.indexOf(v) === i);
                       return (
                         <div style={{ background: "#f4f6ff", borderRadius: 14, padding: "12px 14px", marginTop: 4, display: "flex", flexDirection: "column", gap: 6 }}>
-                          <p style={{ fontSize: 11, fontWeight: 700, color: "#2653d4", letterSpacing: "0.06em", textTransform: "uppercase", margin: 0 }}>
+                          <p style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, color: "#2653d4", letterSpacing: "0.06em", textTransform: "uppercase", margin: 0 }}>
                             History vs this opponent — {wins}W {losses}L
                           </p>
                           {topStrength.length > 0 && (
-                            <p style={{ fontSize: 12, color: "#496640", margin: 0 }}>
+                            <p style={{ fontSize: "clamp(12px, 3.1vw, 15px)", color: "#496640", margin: 0 }}>
                               Worked well: {topStrength.join(", ")}
                             </p>
                           )}
                           {topWeakness.length > 0 && (
-                            <p style={{ fontSize: 12, color: "#d97706", margin: 0 }}>
+                            <p style={{ fontSize: "clamp(12px, 3.1vw, 15px)", color: "#d97706", margin: 0 }}>
                               Focus on: {topWeakness.join(", ")}
                             </p>
                           )}
@@ -1899,24 +1899,24 @@ export default function Home8() {
               <div style={{ width: 36, height: 36, borderRadius: "50%", background: `${schedDetailOpen.color}18`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
                 <div style={{ width: 10, height: 10, borderRadius: "50%", background: schedDetailOpen.color }} />
               </div>
-              <p style={{ fontSize: 17, fontWeight: 700, color: "#1a1c1c", margin: "0 0 4px" }}>{schedDetailOpen.title}</p>
-              {schedDetailOpen.subtitle && <p style={{ fontSize: 13, color: "#6b7480", margin: "0 0 12px" }}>{schedDetailOpen.subtitle}</p>}
+              <p style={{ fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 700, color: "#1a1c1c", margin: "0 0 4px" }}>{schedDetailOpen.title}</p>
+              {schedDetailOpen.subtitle && <p style={{ fontSize: "clamp(13px, 3.4vw, 16px)", color: "#6b7480", margin: "0 0 12px" }}>{schedDetailOpen.subtitle}</p>}
               <div style={{ height: 1, background: "#dfe3e7", margin: "12px 0" }} />
               {schedDetailOpen.isDrill ? (
                 <div>
-                  <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#8a9096", margin: "0 0 10px" }}>Where are you today?</p>
+                  <p style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#8a9096", margin: "0 0 10px" }}>Where are you today?</p>
                   <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-                    <button onClick={() => setDrillContext("court")} style={{ flex: 1, padding: "10px 0", borderRadius: 12, fontSize: 14, fontWeight: 600, border: "none", cursor: "pointer", background: drillContext === "court" ? "#2653d4" : "#f4f4f6", color: drillContext === "court" ? "#fff" : "#4a5050" }}>Court</button>
-                    <button onClick={() => setDrillContext("solo")} style={{ flex: 1, padding: "10px 0", borderRadius: 12, fontSize: 14, fontWeight: 600, border: "none", cursor: "pointer", background: drillContext === "solo" ? "#2653d4" : "#f4f4f6", color: drillContext === "solo" ? "#fff" : "#4a5050" }}>Anywhere</button>
+                    <button onClick={() => setDrillContext("court")} style={{ flex: 1, padding: "10px 0", borderRadius: 12, fontSize: "clamp(14px, 3.6vw, 17px)", fontWeight: 600, border: "none", cursor: "pointer", background: drillContext === "court" ? "#2653d4" : "#f4f4f6", color: drillContext === "court" ? "#fff" : "#4a5050" }}>Court</button>
+                    <button onClick={() => setDrillContext("solo")} style={{ flex: 1, padding: "10px 0", borderRadius: 12, fontSize: "clamp(14px, 3.6vw, 17px)", fontWeight: 600, border: "none", cursor: "pointer", background: drillContext === "solo" ? "#2653d4" : "#f4f4f6", color: drillContext === "solo" ? "#fff" : "#4a5050" }}>Anywhere</button>
                   </div>
-                  <p style={{ fontSize: 14, color: "#3a4550", lineHeight: 1.6, margin: 0 }}>
+                  <p style={{ fontSize: "clamp(14px, 3.6vw, 17px)", color: "#3a4550", lineHeight: 1.6, margin: 0 }}>
                     {drillContext === "court" ? (DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).court : (DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).solo}
                   </p>
                 </div>
               ) : (
-                <p style={{ fontSize: 14, color: "#3a4550", lineHeight: 1.6, margin: 0 }}>{schedDetailOpen.detail}</p>
+                <p style={{ fontSize: "clamp(14px, 3.6vw, 17px)", color: "#3a4550", lineHeight: 1.6, margin: 0 }}>{schedDetailOpen.detail}</p>
               )}
-              <button onClick={() => setSchedDetailOpen(null)} style={{ marginTop: 20, width: "100%", padding: "12px 0", borderRadius: 50, background: "#f4f4f6", border: "none", fontSize: 15, fontWeight: 600, color: "#1a1c1c", cursor: "pointer" }}>Done</button>
+              <button onClick={() => setSchedDetailOpen(null)} style={{ marginTop: 20, width: "100%", padding: "12px 0", borderRadius: 50, background: "#f4f4f6", border: "none", fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 600, color: "#1a1c1c", cursor: "pointer" }}>Done</button>
             </div>
           </div>
         )}
