@@ -700,9 +700,9 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
           <button onClick={() => setGearEditOpen(o => !o)} className="t-caption" style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 500, color: "var(--c-forest)" }}>{gearEditOpen ? "Done" : "Edit"}</button>
         </div>
         <div style={{ background: "#fff", borderRadius: "var(--r-lg)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
-          <div style={{ display: "flex", alignItems: "stretch", minHeight: 100 }}>
-            {/* Full-height image / upload */}
-            <label htmlFor="racket-img-upload" style={{ cursor: "pointer", flexShrink: 0, display: "flex", width: 90, padding: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", minHeight: 100 }}>
+            {/* Square image / upload */}
+            <label htmlFor="racket-img-upload" style={{ cursor: "pointer", flexShrink: 0, display: "flex", width: 90, height: 90, padding: 12 }}>
               <div style={{ flex: 1, overflow: "hidden", borderRadius: 10, background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {racketImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
