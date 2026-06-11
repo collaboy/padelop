@@ -814,7 +814,7 @@ export default function Home8() {
               {/* Main card */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1.5vw", width: "100%", padding: "0 8px" }}>
-                  <div style={{ position: "relative", width: "100%", aspectRatio: "1 / 1" }}>
+                  <div style={{ position: "relative", width: "75%", aspectRatio: "1 / 1" }}>
                     <svg width="100%" height="100%" viewBox="0 0 160 160" style={{ display: "block", overflow: "visible" }}>
                       <path d="M10 150 L10 10 L150 10 L150 150 L10 150" fill="none" stroke="#dce8f8" strokeWidth="5" strokeLinejoin="miter" />
                       <path d="M10 150 L10 10 L150 10 L150 150 L10 150" fill="none" stroke="#3b9eff" strokeWidth="5" strokeLinejoin="miter"
