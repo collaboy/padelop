@@ -803,9 +803,9 @@ export default function Home8() {
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
                   <div style={{ position: "relative", width: 160, height: 160 }}>
                     <svg width="160" height="160" viewBox="0 0 160 160" style={{ display: "block" }}>
-                      <rect x="10" y="10" width="140" height="140" fill="none" stroke="#dce8f8" strokeWidth="3.5" />
-                      <rect x="10" y="10" width="140" height="140" fill="none" stroke="#3b9eff" strokeWidth="3.5"
-                        strokeDasharray="560" strokeLinejoin="miter"
+                      <path d="M10 150 L10 10 L150 10 L150 150 L10 150" fill="none" stroke="#dce8f8" strokeWidth="3.5" strokeLinejoin="miter" />
+                      <path d="M10 150 L10 10 L150 10 L150 150 L10 150" fill="none" stroke="#3b9eff" strokeWidth="3.5" strokeLinejoin="miter"
+                        strokeDasharray="560"
                         style={{ animation: "boxBreathDraw 16s linear infinite" }} />
                     </svg>
                     <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
