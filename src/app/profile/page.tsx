@@ -700,10 +700,10 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
           <button onClick={() => setGearEditOpen(o => !o)} className="t-caption" style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 500, color: "var(--c-forest)" }}>{gearEditOpen ? "Done" : "Edit"}</button>
         </div>
         <div style={{ background: "#fff", borderRadius: "var(--r-lg)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
-          <div style={{ display: "flex", alignItems: "stretch", minHeight: 110 }}>
-            {/* Square image / upload — fills card height, width matches height */}
-            <label htmlFor="racket-img-upload" style={{ cursor: "pointer", flexShrink: 0, display: "flex", alignSelf: "stretch", aspectRatio: "1", padding: 12 }}>
-              <div style={{ flex: 1, overflow: "hidden", borderRadius: 10, background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ display: "flex", alignItems: "stretch", padding: 12, gap: 14 }}>
+            {/* Square upload — padding lives on parent so aspect-ratio works */}
+            <label htmlFor="racket-img-upload" style={{ cursor: "pointer", flexShrink: 0, alignSelf: "stretch", aspectRatio: "1 / 1", display: "block", minWidth: 0 }}>
+              <div style={{ width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {racketImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={racketImage} alt="Racket" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -717,7 +717,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
             </label>
             <input id="racket-img-upload" type="file" accept="image/*" className="hidden" onChange={handleRacketImage} />
             {/* Text info */}
-            <div style={{ flex: 1, minWidth: 0, padding: "20px 20px 20px 16px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "8px 0" }}>
               <span className="t-label" style={{ color: "var(--c-label)", display: "block", marginBottom: "8px" }}>Current Racket</span>
               <p className="t-title" style={{ color: "var(--c-text)", margin: 0, lineHeight: 1.2 }}>{racketName || "—"}</p>
               <p className="t-body" style={{ color: "var(--c-text-dim)", margin: "4px 0 0" }}>{racketType || "Add a description"}</p>
