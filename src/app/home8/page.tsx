@@ -1194,8 +1194,8 @@ export default function Home8() {
                       </text>
                     </svg>
 
-                    {/* + with overlapping − */}
-                    <div style={{ position: "relative", width: 52, height: 52 }}>
+                    {/* + with subordinate − below-left */}
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 6 }}>
                       <button
                         onClick={() => {
                           const next = Math.min(MAX, logHydrationMl + 250);
@@ -1212,7 +1212,7 @@ export default function Home8() {
                           setLogHydrationMl(next);
                           saveLogHydration(next);
                         }}
-                        style={{ position: "absolute", bottom: -4, left: -4, width: 20, height: 20, borderRadius: "50%", background: "#fff", border: "1.5px solid #dde2e8", boxShadow: "0 1px 4px rgba(0,0,0,0.10)", cursor: logHydrationMl <= 0 ? "default" : "pointer", fontSize: 13, fontWeight: 700, color: logHydrationMl <= 0 ? "#c8cdd3" : "#6b7480", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1 }}
+                        style={{ width: 20, height: 20, borderRadius: "50%", background: "#fff", border: "1.5px solid #dde2e8", boxShadow: "0 1px 4px rgba(0,0,0,0.10)", cursor: logHydrationMl <= 0 ? "default" : "pointer", fontSize: 13, fontWeight: 700, color: logHydrationMl <= 0 ? "#c8cdd3" : "#6b7480", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1 }}
                       >
                         −
                       </button>
@@ -1422,12 +1422,14 @@ export default function Home8() {
 
         {/* Log picker */}
         {logPickerOpen && (
-          <div className="fixed inset-0 z-[200] flex items-end" onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogPickerSub(null); setExtrasOpen(false); }}>
-            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
-            <div className="relative w-full bg-white rounded-t-[28px] shadow-2xl" style={{ overflow: "hidden", maxHeight: "80vh", display: "flex", flexDirection: "column", paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
-              <div className="flex justify-center pt-3 pb-1 flex-shrink-0"><div className="w-10 h-1 rounded-full bg-[#e0e0e0]" /></div>
-              <div className="px-5 pt-4 pb-4 flex-shrink-0" style={{ borderBottom: "1px solid #f0f0f0" }}>
-                <p style={{ fontSize: 22, fontWeight: 800, color: "#1a1c1c", margin: 0 }}>What do you want to log?</p>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogPickerSub(null); setExtrasOpen(false); }}>
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+            <div className="relative w-full max-w-sm bg-white rounded-[28px] shadow-2xl" style={{ overflow: "hidden", display: "flex", flexDirection: "column" }} onClick={e => e.stopPropagation()}>
+              <div className="px-5 pt-6 pb-4 flex-shrink-0 flex items-center justify-between" style={{ borderBottom: "1px solid #f0f0f0" }}>
+                <p style={{ fontSize: 20, fontWeight: 800, color: "#1a1c1c", margin: 0 }}>What do you want to log?</p>
+                <button onClick={() => { setLogPickerOpen(false); setLogPickerSub(null); }} style={{ width: 28, height: 28, borderRadius: "50%", background: "#f4f4f6", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
               </div>
               <div style={{ padding: "12px 16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
 

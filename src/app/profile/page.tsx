@@ -342,8 +342,10 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
     } catch {}
     try {
       const g = JSON.parse(localStorage.getItem("padelop:gear") || "null");
-      if (g?.racketName) setRacketName(g.racketName);
-      if (g?.racketType) setRacketType(g.racketType);
+      if (g?.racketName)  setRacketName(g.racketName);
+      if (g?.racketType)  setRacketType(g.racketType);
+      if (g?.racketImage) setRacketImage(g.racketImage);
+      if (g?.racketSince) setRacketSince(g.racketSince);
     } catch {}
 
     // Matches
@@ -395,6 +397,17 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [racketName, setRacketName] = useState("Wilson Carbon Pro v2");
   const [racketType, setRacketType] = useState("Power & Control Hybrid");
+  const [racketImage, setRacketImage] = useState("");
+  const [racketSince, setRacketSince] = useState("");
+
+  const handleRacketImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setRacketImage(reader.result as string);
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
 
   // Profile helpers
   const setField = (k: keyof Profile, v: string) => { setSaved(false); setProfile(p => ({ ...p, [k]: v })); };
@@ -514,6 +527,76 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
         </div>
       </section>
 
+      {/* ── Focus Today ──────────────────────────────────────────────────── */}
+      <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
+        <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Focus Today</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          {tips.map(tip => (
+            <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
+              <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--c-blue)", flexShrink: 0, marginTop: 5 }}/>
+              <span className="t-body-sm" style={{ fontWeight: 500, color: "var(--c-text)", lineHeight: 1.4 }}>{tip}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Match Record ─────────────────────────────────────────────────── */}
+      {reviews.length > 0 && (
+        <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
+          <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Match Record</p>
+          <div style={{ display: "flex", gap: "10px", marginBottom: topStrength || topWeakness ? 16 : 0 }}>
+            <div style={{ flex: 1, textAlign: "center", background: "var(--c-green-bg)", borderRadius: "var(--r-sm)", padding: "12px 8px" }}>
+              <p className="t-stat" style={{ color: "var(--c-green)", margin: 0, lineHeight: 1 }}>{wins}</p>
+              <p className="t-tag" style={{ color: "var(--c-green)", margin: "4px 0 0", fontWeight: 600 }}>Wins</p>
+            </div>
+            <div style={{ flex: 1, textAlign: "center", background: "var(--c-red-bg)", borderRadius: "var(--r-sm)", padding: "12px 8px" }}>
+              <p className="t-stat" style={{ color: "var(--c-red)", margin: 0, lineHeight: 1 }}>{losses}</p>
+              <p className="t-tag" style={{ color: "var(--c-red)", margin: "4px 0 0", fontWeight: 600 }}>Losses</p>
+            </div>
+            {winRate !== null && (
+              <div style={{ flex: 1, textAlign: "center", background: "#f4f6ff", borderRadius: "var(--r-sm)", padding: "12px 8px" }}>
+                <p className="t-stat" style={{ color: "var(--c-blue)", margin: 0, lineHeight: 1 }}>{winRate}%</p>
+                <p className="t-tag" style={{ color: "var(--c-blue)", margin: "4px 0 0", fontWeight: 600 }}>Win rate</p>
+              </div>
+            )}
+          </div>
+          {(topStrength || topWeakness) && (
+            <button
+              onClick={() => setTagCloudOpen(o => !o)}
+              style={{ display: "flex", flexDirection: "column", gap: "8px", background: "none", border: "none", cursor: "pointer", padding: 0, width: "100%", textAlign: "left" }}
+            >
+              {topStrength && (
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--c-green)", flexShrink: 0 }}/>
+                  <span className="t-body-sm" style={{ color: "var(--c-text)" }}>Strongest: <strong>{topStrength}</strong></span>
+                  {!topWeakness && (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                      style={{ marginLeft: "auto", flexShrink: 0, transition: "transform 0.2s", transform: tagCloudOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
+                      <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                  )}
+                </div>
+              )}
+              {topWeakness && (
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--c-amber)", flexShrink: 0 }}/>
+                  <span className="t-body-sm" style={{ color: "var(--c-text)" }}>Focus area: <strong>{topWeakness}</strong></span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                    style={{ marginLeft: "auto", flexShrink: 0, transition: "transform 0.2s", transform: tagCloudOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
+                    <path d="M6 9l6 6 6-6"/>
+                  </svg>
+                </div>
+              )}
+            </button>
+          )}
+          {tagCloudOpen && reviews.length > 0 && (
+            <div style={{ marginTop: 16 }}>
+              <TagCloud reviews={reviews} />
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Inline edit form ─────────────────────────────────────────────── */}
       {profileOpen && (
         <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", display: "flex", flexDirection: "column", gap: "20px", boxShadow: "var(--shadow-soft)" }}>
@@ -611,9 +694,34 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
         </div>
         <div style={{ background: "#fff", borderRadius: "var(--r-lg)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
           <div style={{ padding: "20px" }}>
-            <span className="t-label" style={{ color: "var(--c-label)", display: "block", marginBottom: "8px" }}>Current Racket</span>
-            <p className="t-title" style={{ color: "var(--c-text)", margin: 0, lineHeight: 1.2 }}>{racketName || "—"}</p>
-            <p className="t-body" style={{ color: "var(--c-text-dim)", margin: "4px 0 0" }}>{racketType || "Add a description"}</p>
+            <span className="t-label" style={{ color: "var(--c-label)", display: "block", marginBottom: "12px" }}>Current Racket</span>
+            <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+              {/* Square image / upload */}
+              <label htmlFor="racket-img-upload" style={{ cursor: "pointer", flexShrink: 0 }}>
+                <div style={{ width: 72, height: 72, borderRadius: 12, overflow: "hidden", background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {racketImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={racketImage} alt="Racket" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c4c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                      <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                  )}
+                </div>
+              </label>
+              <input id="racket-img-upload" type="file" accept="image/*" className="hidden" onChange={handleRacketImage} />
+              {/* Text info */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p className="t-title" style={{ color: "var(--c-text)", margin: 0, lineHeight: 1.2 }}>{racketName || "—"}</p>
+                <p className="t-body" style={{ color: "var(--c-text-dim)", margin: "4px 0 0" }}>{racketType || "Add a description"}</p>
+                {racketSince && (
+                  <p className="t-caption" style={{ color: "var(--c-hint)", margin: "6px 0 0" }}>
+                    Using since {new Date(racketSince + "-01").toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
           {gearEditOpen && (
             <div style={{ borderTop: "1px solid #f0f0f0", padding: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -635,8 +743,16 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
                   style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--r-sm)", border: "2px solid #e2e2e2", fontWeight: 500, color: "var(--c-text)", outline: "none", background: "var(--c-bg-input)" }}
                 />
               </div>
+              <div>
+                <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 0 6px" }}>Using since</p>
+                <input
+                  type="month" value={racketSince} onChange={e => setRacketSince(e.target.value)}
+                  className="t-body"
+                  style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--r-sm)", border: "2px solid #e2e2e2", fontWeight: 500, color: "var(--c-text)", outline: "none", background: "var(--c-bg-input)" }}
+                />
+              </div>
               <button
-                onClick={() => { localStorage.setItem("padelop:gear", JSON.stringify({ racketName, racketType })); setGearEditOpen(false); }}
+                onClick={() => { localStorage.setItem("padelop:gear", JSON.stringify({ racketName, racketType, racketImage, racketSince })); setGearEditOpen(false); }}
                 className="t-ui"
                 style={{ padding: "12px", borderRadius: "var(--r-sm)", background: "var(--c-blue)", border: "none", cursor: "pointer", color: "#fff" }}
               >
@@ -679,72 +795,6 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
           {streak >= 14 && "Elite habit. You're in the top tier of consistency."}
         </p>
       </div>
-
-
-      <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
-        <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Focus Today</p>
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          {tips.map(tip => (
-            <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-              <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--c-blue)", flexShrink: 0, marginTop: 5 }}/>
-              <span className="t-body-sm" style={{ fontWeight: 500, color: "var(--c-text)", lineHeight: 1.4 }}>{tip}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {reviews.length > 0 && (
-        <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
-          <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Match Record</p>
-          <div style={{ display: "flex", gap: "10px", marginBottom: topStrength || topWeakness ? 16 : 0 }}>
-            <div style={{ flex: 1, textAlign: "center", background: "var(--c-green-bg)", borderRadius: "var(--r-sm)", padding: "12px 8px" }}>
-              <p className="t-stat" style={{ color: "var(--c-green)", margin: 0, lineHeight: 1 }}>{wins}</p>
-              <p className="t-tag" style={{ color: "var(--c-green)", margin: "4px 0 0", fontWeight: 600 }}>Wins</p>
-            </div>
-            <div style={{ flex: 1, textAlign: "center", background: "var(--c-red-bg)", borderRadius: "var(--r-sm)", padding: "12px 8px" }}>
-              <p className="t-stat" style={{ color: "var(--c-red)", margin: 0, lineHeight: 1 }}>{losses}</p>
-              <p className="t-tag" style={{ color: "var(--c-red)", margin: "4px 0 0", fontWeight: 600 }}>Losses</p>
-            </div>
-            {winRate !== null && (
-              <div style={{ flex: 1, textAlign: "center", background: "#f4f6ff", borderRadius: "var(--r-sm)", padding: "12px 8px" }}>
-                <p className="t-stat" style={{ color: "var(--c-blue)", margin: 0, lineHeight: 1 }}>{winRate}%</p>
-                <p className="t-tag" style={{ color: "var(--c-blue)", margin: "4px 0 0", fontWeight: 600 }}>Win rate</p>
-              </div>
-            )}
-          </div>
-          {(topStrength || topWeakness) && (
-            <button
-              onClick={() => setTagCloudOpen(o => !o)}
-              style={{ display: "flex", flexDirection: "column", gap: "8px", background: "none", border: "none", cursor: "pointer", padding: 0, width: "100%", textAlign: "left" }}
-            >
-              {topStrength && (
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--c-green)", flexShrink: 0 }}/>
-                  <span className="t-body-sm" style={{ color: "var(--c-text)" }}>Strongest: <strong>{topStrength}</strong></span>
-                  {!topWeakness && (
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                      style={{ marginLeft: "auto", flexShrink: 0, transition: "transform 0.2s", transform: tagCloudOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
-                      <path d="M6 9l6 6 6-6"/>
-                    </svg>
-                  )}
-                </div>
-              )}
-              {topWeakness && (
-                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--c-amber)", flexShrink: 0 }}/>
-                  <span className="t-body-sm" style={{ color: "var(--c-text)" }}>Focus area: <strong>{topWeakness}</strong></span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-                    style={{ marginLeft: "auto", flexShrink: 0, transition: "transform 0.2s", transform: tagCloudOpen ? "rotate(180deg)" : "rotate(0deg)" }}>
-                    <path d="M6 9l6 6 6-6"/>
-                  </svg>
-                </div>
-              )}
-            </button>
-          )}
-        </div>
-      )}
-
-      {tagCloudOpen && reviews.length > 0 && <TagCloud reviews={reviews} />}
 
       {/* ── Activity ─────────────────────────────────────────────────────── */}
 
