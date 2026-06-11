@@ -82,6 +82,17 @@ const ITEM_COLORS: Record<string, string> = {
 
 type ScheduleItem = { time: string; title: string; subtitle?: string; color: string; isDrill?: boolean };
 
+function improveTips(states: PillarStates): string[] {
+  const tips: string[] = [];
+  if (states.nutrition.status === "low")        tips.push(states.nutrition.reason);
+  if (states.recovery.status === "low")         tips.push(states.recovery.reason);
+  if (states.wellbeing.status === "low")        tips.push(states.wellbeing.reason);
+  if (states.training.status === "not_logged")  tips.push("Log a session — even 30 min of drills counts");
+  if (states.nutrition.status === "not_logged") tips.push("Complete your night check-in to track nutrition");
+  if (tips.length === 0) tips.push("You're in great shape — keep the habits going");
+  return tips.slice(0, 3);
+}
+
 function getScheduleData(dayType: "match" | "recovery" | "training", matchTime: string | null, drillTag: string | null): { schedule: ScheduleItem[]; currentIdx: number } {
   const mH = matchTime ? parseInt(matchTime.split(":")[0]) : 18;
   const mM = matchTime ? parseInt(matchTime.split(":")[1]) : 30;
@@ -1118,6 +1129,23 @@ export default function Home8() {
                           {dayType === "match" ? "Match Day" : dayType === "recovery" ? "Recovery Day" : "Training Day"}
                         </span>
                       </div>
+                      {/* Today's Notes */}
+                      {(() => {
+                        const tips = improveTips(pillarStates);
+                        return (
+                          <div style={{ margin: "0 16px 16px", background: "#f7f8fa", borderRadius: 14, padding: "12px 14px" }}>
+                            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "#9aa5b0", margin: "0 0 8px" }}>Today&apos;s Notes</p>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+                              {tips.map((tip, i) => (
+                                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                                  <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#2653d4", flexShrink: 0, marginTop: 5 }} />
+                                  <span style={{ fontSize: 12, fontWeight: 500, color: "#4a5050", lineHeight: 1.45 }}>{tip}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                     <div style={{ height: 1, background: "#dfe3e7", flexShrink: 0 }} />
                     <div ref={schedScrollRef} style={{ flex: 1, overflowY: "auto", minHeight: 0, overscrollBehavior: "none" }}>
