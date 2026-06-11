@@ -404,7 +404,14 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => setRacketImage(reader.result as string);
+    reader.onload = () => {
+      const img = reader.result as string;
+      setRacketImage(img);
+      try {
+        const existing = JSON.parse(localStorage.getItem("padelop:gear") || "{}");
+        localStorage.setItem("padelop:gear", JSON.stringify({ ...existing, racketImage: img }));
+      } catch {}
+    };
     reader.readAsDataURL(file);
     e.target.value = "";
   };
@@ -693,34 +700,32 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
           <button onClick={() => setGearEditOpen(o => !o)} className="t-caption" style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 500, color: "var(--c-forest)" }}>{gearEditOpen ? "Done" : "Edit"}</button>
         </div>
         <div style={{ background: "#fff", borderRadius: "var(--r-lg)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
-          <div style={{ padding: "20px" }}>
-            <span className="t-label" style={{ color: "var(--c-label)", display: "block", marginBottom: "12px" }}>Current Racket</span>
-            <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-              {/* Square image / upload */}
-              <label htmlFor="racket-img-upload" style={{ cursor: "pointer", flexShrink: 0 }}>
-                <div style={{ width: 72, height: 72, borderRadius: 12, overflow: "hidden", background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  {racketImage ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={racketImage} alt="Racket" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  ) : (
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c4c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                      <circle cx="12" cy="13" r="4"/>
-                    </svg>
-                  )}
-                </div>
-              </label>
-              <input id="racket-img-upload" type="file" accept="image/*" className="hidden" onChange={handleRacketImage} />
-              {/* Text info */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p className="t-title" style={{ color: "var(--c-text)", margin: 0, lineHeight: 1.2 }}>{racketName || "—"}</p>
-                <p className="t-body" style={{ color: "var(--c-text-dim)", margin: "4px 0 0" }}>{racketType || "Add a description"}</p>
-                {racketSince && (
-                  <p className="t-caption" style={{ color: "var(--c-hint)", margin: "6px 0 0" }}>
-                    Using since {new Date(racketSince + "-01").toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
-                  </p>
+          <div style={{ display: "flex", alignItems: "stretch", minHeight: 100 }}>
+            {/* Full-height image / upload */}
+            <label htmlFor="racket-img-upload" style={{ cursor: "pointer", flexShrink: 0, display: "flex", width: 90 }}>
+              <div style={{ flex: 1, overflow: "hidden", background: "#f4f4f6", borderRight: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {racketImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={racketImage} alt="Racket" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c4c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                  </svg>
                 )}
               </div>
+            </label>
+            <input id="racket-img-upload" type="file" accept="image/*" className="hidden" onChange={handleRacketImage} />
+            {/* Text info */}
+            <div style={{ flex: 1, minWidth: 0, padding: "20px 20px 20px 16px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+              <span className="t-label" style={{ color: "var(--c-label)", display: "block", marginBottom: "8px" }}>Current Racket</span>
+              <p className="t-title" style={{ color: "var(--c-text)", margin: 0, lineHeight: 1.2 }}>{racketName || "—"}</p>
+              <p className="t-body" style={{ color: "var(--c-text-dim)", margin: "4px 0 0" }}>{racketType || "Add a description"}</p>
+              {racketSince && (
+                <p className="t-caption" style={{ color: "var(--c-hint)", margin: "6px 0 0" }}>
+                  Using since {new Date(racketSince + "-01").toLocaleDateString("en-GB", { month: "short", year: "numeric" })}
+                </p>
+              )}
             </div>
           </div>
           {gearEditOpen && (
