@@ -720,7 +720,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
         <div style={{ background: "#fff", borderRadius: "var(--r-lg)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
           <div style={{ display: "flex", alignItems: "stretch", padding: 12, gap: 14 }}>
             {/* Square upload — padding lives on parent so aspect-ratio works */}
-            <label htmlFor="racket-img-upload" style={{ cursor: "pointer", flexShrink: 0, width: 88, height: 88, display: "block" }}>
+            <label htmlFor="racket-img-upload" style={{ cursor: "pointer", flexShrink: 0, alignSelf: "stretch", aspectRatio: "1 / 1", display: "block" }}>
               <div style={{ width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {racketImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
