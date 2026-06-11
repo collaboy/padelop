@@ -349,6 +349,7 @@ export default function Home8() {
   const [liveX, setLiveX] = useState(0);
   const [liveY, setLiveY] = useState(0);
   const [breathPhase, setBreathPhase] = useState(0);
+  const [breathDashOffset, setBreathDashOffset] = useState(560);
   const breathStartRef = useRef(Date.now());
 
   useEffect(() => {
@@ -718,11 +719,12 @@ export default function Home8() {
   }, [matchModalOpen]);
 
   useEffect(() => {
-    breathStartRef.current = Date.now(); // align with CSS animation start
+    breathStartRef.current = Date.now();
     const id = setInterval(() => {
       const elapsed = (Date.now() - breathStartRef.current) % 16000;
       setBreathPhase(Math.floor(elapsed / 4000));
-    }, 100);
+      setBreathDashOffset(560 - (elapsed / 16000) * 560);
+    }, 50);
     return () => clearInterval(id);
   }, []);
 
@@ -800,14 +802,12 @@ export default function Home8() {
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
               {/* Main card */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <style>{`@keyframes boxBreathDraw{0%{stroke-dashoffset:560}100%{stroke-dashoffset:0}}`}</style>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
                   <div style={{ position: "relative", width: 160, height: 160 }}>
                     <svg width="160" height="160" viewBox="0 0 160 160" style={{ display: "block" }}>
                       <path d="M10 150 L10 10 L150 10 L150 150 L10 150" fill="none" stroke="#dce8f8" strokeWidth="3.5" strokeLinejoin="miter" />
                       <path d="M10 150 L10 10 L150 10 L150 150 L10 150" fill="none" stroke="#3b9eff" strokeWidth="3.5" strokeLinejoin="miter"
-                        strokeDasharray="560"
-                        style={{ animation: "boxBreathDraw 16s linear infinite" }} />
+                        strokeDasharray="560" strokeDashoffset={breathDashOffset} />
                     </svg>
                     <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
                       <p style={{ fontSize: 17, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>Breathe</p>
