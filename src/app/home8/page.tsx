@@ -6,6 +6,7 @@ import LogSheet from "@/components/log-sheet";
 import ReadinessSheet from "@/components/readiness-sheet";
 import PushPrompt from "@/components/push-prompt";
 import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
+import { saveUpcomingMatch } from "@/lib/db";
 
 // ── Tag cloud (mirrors matches4) ──────────────────────────────────────────
 type ReviewEntry = { ts: string; feeling: string; result: string; opponent: string; energy: string; wellDone: string[]; improved: string[] };
@@ -1876,6 +1877,7 @@ export default function Home8() {
                       const sorted = saveMatchList(updated);
                       const next = sorted[0];
                       if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
+                      saveUpcomingMatch({ date: data.date, time: data.time, club: data.club, player_1: data.player_1, player_2: data.player_2, player_3: data.player_3, player_4: data.player_4 });
                       setMatchModalOpen(false); setMatchModalTab('pick'); setLiveX(0); setLiveY(0); setCardSnap('none'); setDoIdx(-1);
                       window.dispatchEvent(new Event("storage"));
                     }}
@@ -1971,6 +1973,7 @@ export default function Home8() {
                       const sorted = saveMatchList(updated);
                       const next = sorted[0];
                       if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
+                      saveUpcomingMatch({ date: data.date, time: data.time, club: data.club, player_1: data.player_1, player_2: data.player_2, player_3: data.player_3, player_4: data.player_4 });
                       setMatchModalOpen(false);
                       setMatchModalTab('pick');
                       setLiveX(0);

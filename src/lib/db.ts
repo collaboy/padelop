@@ -3,6 +3,29 @@
 
 import { createClient } from "@/lib/supabase/client";
 
+export async function saveUpcomingMatch(match: {
+  date: string;
+  time: string;
+  club?: string;
+  player_1?: string;
+  player_2?: string;
+  player_3?: string;
+  player_4?: string;
+}) {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase.from("matches").upsert({
+      user_id:  user.id,
+      date:     match.date,
+      time:     match.time,
+      location: match.club ?? null,
+    }, { onConflict: "user_id,date,time" });
+  } catch {}
+}
+
 export async function saveMatchReview(entry: {
   ts: string;
   result?: string;
