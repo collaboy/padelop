@@ -3,7 +3,6 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { downloadSnapshot, importData } from "@/lib/storage";
-import { createClient } from "@/lib/supabase/client";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -127,17 +126,15 @@ export default function SettingsPage() {
 
       {/* Log out */}
       <section>
-        <button
-          className="t-ui"
-          onClick={async () => {
-            const supabase = createClient();
-            await supabase.auth.signOut();
-            window.location.href = "/auth";
-          }}
-          style={{ width: "100%", padding: "16px", color: "#ba1a1a", border: "1.5px solid rgba(186,26,26,0.2)", borderRadius: "var(--r-sm)", background: "#fff", cursor: "pointer", boxShadow: "var(--shadow-soft)" }}
-        >
-          Log Out
-        </button>
+        <form action="/auth/signout" method="post">
+          <button
+            type="submit"
+            className="t-ui"
+            style={{ width: "100%", padding: "16px", color: "#ba1a1a", border: "1.5px solid rgba(186,26,26,0.2)", borderRadius: "var(--r-sm)", background: "#fff", cursor: "pointer", boxShadow: "var(--shadow-soft)" }}
+          >
+            Log Out
+          </button>
+        </form>
       </section>
 
       <p className="t-caption" style={{ textAlign: "center", color: "var(--c-disabled)" }}>
