@@ -26,22 +26,30 @@ export default function OnboardingPage() {
   const [level, setLevel] = useState<string | null>(null);
   const [goal, setGoal] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const steps = ["Name", "Hand", "Level", "Goal"];
 
   async function finish() {
     setSaving(true);
+    setSaveError(null);
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/auth"); return; }
 
-    await supabase.from("profiles").upsert({
-      id: user.id,
-      display_name: name.trim(),
+    const { error } = await supabase.from("profiles").upsert({
+      id:            user.id,
+      display_name:  name.trim(),
       dominant_hand: hand,
-      play_level: level,
-      overall_goal: goal,
-    });
+      play_level:    level,
+      overall_goal:  goal,
+    }, { onConflict: "id" });
+
+    if (error) {
+      setSaveError(error.message);
+      setSaving(false);
+      return;
+    }
 
     router.push("/home8");
   }
@@ -145,6 +153,10 @@ export default function OnboardingPage() {
       >
         {saving ? "Saving..." : step < 3 ? "Continue" : "Let's go"}
       </button>
+
+      {saveError && (
+        <p style={{ fontSize: 13, color: "var(--c-red)", textAlign: "center", marginTop: 8 }}>{saveError}</p>
+      )}
 
       {step > 0 && (
         <button
