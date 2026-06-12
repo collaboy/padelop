@@ -811,6 +811,11 @@ export default function Home8() {
   }, [matchModalOpen]);
 
   useEffect(() => {
+    if (cardSnap !== 'right') {
+      setBreathPhase(0);
+      setBreathDashOffset(560);
+      return;
+    }
     breathStartRef.current = Date.now();
     const id = setInterval(() => {
       const elapsed = (Date.now() - breathStartRef.current) % 16000;
@@ -818,7 +823,7 @@ export default function Home8() {
       setBreathDashOffset(560 - (elapsed / 16000) * 560);
     }, 50);
     return () => clearInterval(id);
-  }, []);
+  }, [cardSnap]);
 
   const today = new Date().toISOString().slice(0, 10);
   const dayType: "match" | "recovery" | "training" = match?.date === today ? "match" : yesterdayWasMatch ? "recovery" : "training";
