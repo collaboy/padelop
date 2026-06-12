@@ -517,7 +517,10 @@ export default function Home8() {
             const nightDismissed = localStorage.getItem("padelop:night-nudge-dismissed") === todayStr;
             const habits: { date: string }[] = JSON.parse(localStorage.getItem("padelop:habits") || "[]");
             const nightDone = habits.some(h => h.date === todayStr);
-            if (!nightDone && !nightDismissed) setTimeout(() => setNightNudgeOpen(true), 1400);
+            if (!nightDone && !nightDismissed) setTimeout(() => {
+              try { localStorage.setItem("padelop:night-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {}
+              setNightNudgeOpen(true);
+            }, 1400);
           } catch {}
         }
       } catch { setMorningDone(false); }
