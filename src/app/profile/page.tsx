@@ -322,6 +322,9 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
   const [trainingSessions, setTrainingSessions] = useState<TrainingEntry[]>([]);
   const [archiveOpen, setArchiveOpen]         = useState(false);
   const [tagCloudOpen, setTagCloudOpen]       = useState(false);
+  const [partnerCount, setPartnerCount]       = useState(0);
+  const [tournamentCount, setTournamentCount] = useState(0);
+  const [journeyStart, setJourneyStart]       = useState<string | null>(null);
 
   // Insights
   const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65 });
@@ -368,6 +371,26 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
       if (raw) setTrainingSessions((JSON.parse(raw) as TrainingEntry[]).sort((a, b) => b.ts.localeCompare(a.ts)));
       else setTrainingSessions([]);
     } catch { setTrainingSessions([]); }
+
+    // Journey stats
+    try {
+      const allMatches: StoredMatch[] = JSON.parse(localStorage.getItem("padelop:upcoming-matches") || "[]");
+      const partners = new Set(allMatches.map(m => m.player_2).filter(Boolean));
+      setPartnerCount(partners.size);
+    } catch {}
+    try {
+      const t = JSON.parse(localStorage.getItem("padelop:tournaments") || "null");
+      setTournamentCount(typeof t?.count === "number" ? t.count : 0);
+    } catch {}
+    try {
+      const revs: { ts: string }[] = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+      const trns: { ts: string }[] = JSON.parse(localStorage.getItem("padelop:training-logs") || "[]");
+      const all = [...revs, ...trns].map(e => e.ts).filter(Boolean).sort();
+      if (all.length > 0) {
+        const d = new Date(all[0]);
+        setJourneyStart(d.toLocaleDateString("en-US", { month: "short", year: "numeric" }));
+      }
+    } catch {}
 
     // Insights
     const d = loadScoringData();
@@ -581,6 +604,29 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
         </div>
       </section>
 
+      {/* ── Padel Journey ───────────────────────────────────────────────── */}
+      <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
+        <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Padel Journey</p>
+        {journeyStart && (
+          <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 16px", fontWeight: 500 }}>
+            Started {journeyStart}
+          </p>
+        )}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          {[
+            { value: reviews.length,       label: "Matches played",      color: "var(--c-blue)",   bg: "#f0f4ff" },
+            { value: trainingSessions.length, label: "Training sessions", color: "var(--c-green)",  bg: "var(--c-green-bg)" },
+            { value: partnerCount,          label: "Partners played with", color: "var(--c-teal)",   bg: "#f0fdfd" },
+            { value: tournamentCount,       label: "Tournaments entered",  color: "var(--c-orange)", bg: "#fff7f0" },
+          ].map(({ value, label, color, bg }) => (
+            <div key={label} style={{ background: bg, borderRadius: "var(--r-sm)", padding: "14px 12px" }}>
+              <p className="t-stat" style={{ color, margin: 0, lineHeight: 1 }}>{value}</p>
+              <p className="t-caption" style={{ color, margin: "5px 0 0", fontWeight: 600, opacity: 0.8 }}>{label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ── Focus Today ──────────────────────────────────────────────────── */}
       <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
         <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Focus Today</p>
@@ -742,11 +788,11 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
 
       {/* ── My Gear ─────────────────────────────────────────────────────── */}
       <section style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <p className="t-title" style={{ color: "var(--c-text)", margin: 0 }}>My Gear</p>
-          <button onClick={() => setGearEditOpen(o => !o)} className="t-caption" style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 500, color: "var(--c-forest)" }}>{gearEditOpen ? "Done" : "Edit"}</button>
-        </div>
-        <div style={{ background: "#fff", borderRadius: "var(--r-lg)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
+        <div style={{ background: "#fff", borderRadius: "var(--r-lg)", overflow: "hidden", boxShadow: "var(--shadow-card)", border: "1px solid var(--c-line)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px 0" }}>
+            <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>My Gear</p>
+            <button onClick={() => setGearEditOpen(o => !o)} className="t-caption" style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 500, color: "var(--c-forest)" }}>{gearEditOpen ? "Done" : "Edit"}</button>
+          </div>
           <div ref={racketRowRef} style={{ display: "flex", alignItems: "stretch", padding: 12, gap: 14 }}>
             <label htmlFor="racket-img-upload" style={{ cursor: "pointer", flexShrink: 0, width: racketSlotSize, height: racketSlotSize, display: "block" }}>
               <div style={{ width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -809,75 +855,56 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
               </button>
             </div>
           )}
+        {/* Bento: shoes + kit */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "var(--c-line)", borderTop: "1px solid var(--c-line)" }}>
+          {/* My Shoes tile */}
+          <div style={{ background: "#fff", padding: "16px", display: "flex", flexDirection: "column" }}>
+            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 12px" }}>My Shoes</p>
+            <label htmlFor="shoe-img-upload" style={{ cursor: "pointer", display: "block", flex: 1 }}>
+              <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: shoeImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {shoeImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={shoeImage} alt="Shoes" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2 17h20v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-1z"/>
+                    <path d="M2 17c0-3.5 2.5-6 6-6h2l3-2h3c2.2 0 4 1.5 4.5 3.5L21 17"/>
+                  </svg>
+                )}
+              </div>
+            </label>
+            <input id="shoe-img-upload" type="file" accept="image/*" className="hidden" onChange={handleShoeImage} />
+          </div>
+          {/* My Kit tile */}
+          <div style={{ background: "#fff", padding: "16px", display: "flex", flexDirection: "column" }}>
+            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 12px" }}>My Kit</p>
+            <label htmlFor="kit-img-upload" style={{ cursor: "pointer", display: "block", flex: 1 }}>
+              <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: kitImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {kitImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={kitImage} alt="Kit" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/>
+                  </svg>
+                )}
+              </div>
+            </label>
+            <input id="kit-img-upload" type="file" accept="image/*" className="hidden" onChange={handleKitImage} />
+          </div>
         </div>
+      </div>
       </section>
 
-      {/* ── Stats Bento ─────────────────────────────────────────────────── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
 
-        {/* My Shoes tile */}
-        <div style={{ background: "#fff", padding: "20px", borderRadius: "var(--r-lg)", border: "1px solid var(--c-border-card)", boxShadow: "var(--shadow-soft)", display: "flex", flexDirection: "column" }}>
-          <div style={{ marginBottom: "8px" }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--c-forest)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M2 17h20v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-1z"/>
-              <path d="M2 17c0-3.5 2.5-6 6-6h2l3-2h3c2.2 0 4 1.5 4.5 3.5L21 17"/>
-              <path d="M8 11v3M12 9.5v4"/>
-            </svg>
-          </div>
-          <p className="t-caption" style={{ color: "#444748", margin: "0 0 10px" }}>My Shoes</p>
-          <label htmlFor="shoe-img-upload" style={{ cursor: "pointer", display: "block", flex: 1 }}>
-            <div style={{ aspectRatio: "1 / 1", borderRadius: 10, overflow: "hidden", background: "#f4f4f6", border: shoeImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {shoeImage ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={shoeImage} alt="Shoes" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c4c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                  <circle cx="12" cy="13" r="4"/>
-                </svg>
-              )}
-            </div>
-          </label>
-          <input id="shoe-img-upload" type="file" accept="image/*" className="hidden" onChange={handleShoeImage} />
-        </div>
-
-        {/* My Gear tile */}
-        <div style={{ background: "#fff", padding: "20px", borderRadius: "var(--r-lg)", border: "1px solid var(--c-border-card)", boxShadow: "var(--shadow-soft)", display: "flex", flexDirection: "column" }}>
-          <div style={{ marginBottom: "8px" }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--c-forest)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/>
-            </svg>
-          </div>
-          <p className="t-caption" style={{ color: "#444748", margin: "0 0 10px" }}>My Gear</p>
-          <label htmlFor="kit-img-upload" style={{ cursor: "pointer", display: "block", flex: 1 }}>
-            <div style={{ aspectRatio: "1 / 1", borderRadius: 10, overflow: "hidden", background: "#f4f4f6", border: kitImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {kitImage ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={kitImage} alt="Kit" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c4c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                  <circle cx="12" cy="13" r="4"/>
-                </svg>
-              )}
-            </div>
-          </label>
-          <input id="kit-img-upload" type="file" accept="image/*" className="hidden" onChange={handleKitImage} />
-        </div>
-
-      </div>
-
-
-      <div style={{ height: 1, background: "#e8eaed" }} />
-
-      {/* ── Streak banner ────────────────────────────────────────────────── */}
-      <div className="bg-white r-md px-5 py-4 flex items-center gap-4" style={{ boxShadow: "var(--shadow-card)" }}>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: 52 }}>
+      {/* ── Streak ───────────────────────────────────────────────────────── */}
+      <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)", border: "1px solid var(--c-line)", display: "flex", alignItems: "center", gap: 16 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: 56 }}>
           <p className="t-stat" style={{ color: "var(--c-text)", margin: 0, lineHeight: 1 }}>{streak}</p>
-          <p className="t-label" style={{ color: "var(--c-text-dim)", margin: "3px 0 0" }}>Streak</p>
+          <p className="t-label" style={{ color: "var(--c-label)", margin: "4px 0 0" }}>Streak</p>
         </div>
-        <div style={{ width: 1, height: 40, background: "var(--c-line-dim)", flexShrink: 0 }} />
-        <p className="t-body-sm" style={{ color: "var(--c-text-dim)", margin: 0, lineHeight: 1.45 }}>
+        <div style={{ width: 1, height: 40, background: "var(--c-line)", flexShrink: 0 }} />
+        <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: 0, lineHeight: 1.5 }}>
           {streak === 0 && "Log today to start your streak."}
           {streak === 1 && "Good start — log again tomorrow to build momentum."}
           {streak >= 2 && streak < 7 && "Good momentum — don't break the chain."}

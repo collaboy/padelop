@@ -38,23 +38,96 @@ const addMins = (h: number, m: number, delta: number) => {
 };
 const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
 
-type DrillDef = { subtitle: string; court: string; solo: string };
+type DrillDef = { subtitle: string; steps: { step: string; cue: string; reps: string }[] };
 const DRILL_LIBRARY: Record<string, DrillDef> = {
-  "Serve":          { subtitle: "Serve consistency & placement",   court: "Hit 30 serves alternating cross-court and down-the-T. Focus on placement over power — 70% cross-court. Add spin variation in the final set.", solo: "Shadow your serve motion 20× each side. Practice the toss alone until it's consistent — contact point variability is the #1 cause of serve errors." },
-  "Bandeja":        { subtitle: "Bandeja contact point & control", court: "Feed 20 bandejas from mid-court lobs. Focus on getting under the ball, closed racket face, and directing to back corners. Film your shoulder rotation.", solo: "Shadow the bandeja in slow motion — trophy position, shoulder turn, controlled wrist snap. 3 sets of 15 reps each side. Takes 10 minutes anywhere." },
-  "Smash":          { subtitle: "Overhead timing & footwork",      court: "Alternate left/right overhead feeds, 30 reps. Prioritise feet set before contact. Work on vibora and k-smash variations once timing feels clean.", solo: "Jump and reach drill — 3 sets of 10. Time your jump so contact happens at maximum reach. Wall tosses help if you have space." },
-  "Volleys":        { subtitle: "Compact volley technique",        court: "Stand 3m from the wall, volley continuously — 3 sets of 100. No backswing. Wrist locked, punch motion. Progress to alternating forehand/backhand.", solo: "Shadow volley drill — 3 sets of 20 each hand. Elbow up, racket face open, contact point in front. Can be done in any room." },
-  "Defense":        { subtitle: "Defensive positioning & lobs",    court: "Partner smashes from net, you return high defensive lobs to back corners. Focus on reading the ball early and getting low before contact.", solo: "Lateral shuffle + split step — 5 sets of 30 seconds. Defensive positioning is 80% footwork. Quick direction change every 3 shuffles." },
-  "Attack":         { subtitle: "Attacking patterns at net",       court: "Approach-and-finish patterns — feed to mid-court, move to net, volley to finish. Focus on angle and depth, not power.", solo: "Reaction time: drop a ball from shoulder height, catch before the second bounce. 3 sets of 15. Simulates quick hands at net." },
-  "Positioning":    { subtitle: "Court coverage & positioning",    court: "Shadow movement without a ball — coach calls positions (net, mid, back) and you move to the T and recover. 5 sets of 90 seconds.", solo: "Eyes-closed visualisation — 5 min picturing court positions from your last match. Find 3 moments where better positioning changes the point." },
-  "Communication":  { subtitle: "On-court communication habits",   court: "Call every ball in practice — 'mine', 'yours', 'leave'. Make it automatic under low pressure so it's instinct under high pressure.", solo: "Replay your last match mentally. Find 3 moments where a call or no-call cost a point. Rehearse what you would have said." },
-  "Movement":       { subtitle: "Footwork & court coverage",       court: "Cone agility — 5 cones T-shape, 5 sets of lateral shuffle + sprint to net. Split step timing before every direction change.", solo: "Side-to-side shuffle + split step — 5 sets of 20 seconds. Any hallway works. Add a forward lunge at each end." },
-  "Mental strength":{ subtitle: "Focus & pressure management",     court: "Pressure tiebreaks only — start every game at 6-6. Focus on your between-point routine: bounce, breathe, pick a target.", solo: "Box breathing + visualisation — 5 min. In 4, hold 4, out 4, hold 4. Then 3 min visualising winning points under pressure." },
+  "Serve": {
+    subtitle: "Toss rhythm & arm swing — no racket needed",
+    steps: [
+      { step: "Toss arm drill", cue: "Raise your toss arm slowly, release an imaginary ball at eye level, watch it rise. Consistency here eliminates most serve errors.", reps: "20 reps" },
+      { step: "Shadow swing", cue: "Full serve motion in slow motion — trophy position, shoulder turn, pronation at contact. No racket needed.", reps: "15 each side" },
+      { step: "Mental serves", cue: "Eyes closed. Visualise 5 perfect serves — placement, spin, bounce. Feel the rhythm.", reps: "5 mental reps" },
+    ],
+  },
+  "Bandeja": {
+    subtitle: "Shoulder prep & overhead shadow — anywhere",
+    steps: [
+      { step: "Shoulder circles", cue: "Slow full arm circles forward and back. Activates the rotator cuff — the key joint in every overhead.", reps: "10 each direction" },
+      { step: "Closed-face shadow", cue: "Elbow up, wrist firm, simulate the controlled downward snap of a bandeja. No backswing.", reps: "15 each side" },
+      { step: "Placement visualisation", cue: "Picture a high lob, your footwork, contact point, and the ball landing in the back corner.", reps: "5 mental reps" },
+    ],
+  },
+  "Smash": {
+    subtitle: "Jump timing & contact point — no gear",
+    steps: [
+      { step: "Jump reach", cue: "Jump straight up reaching as high as possible. Land softly. Contact point precision starts here.", reps: "3 × 8 reps" },
+      { step: "Trophy position hold", cue: "Shoulder back, elbow up, weight loaded. Hold 3 seconds, release. Builds the muscle memory for timing.", reps: "10 reps" },
+      { step: "Mental overhead", cue: "Visualise 3 smashes — read the lob early, feet set before contact, clean follow-through.", reps: "3 mental reps" },
+    ],
+  },
+  "Volleys": {
+    subtitle: "Compact hand speed — desk or wall",
+    steps: [
+      { step: "Wrist lock tap", cue: "Arm extended, wrist firm, punch your palm against a wall or desk. No swing — just the contact impulse.", reps: "3 × 20 reps" },
+      { step: "Shadow punch volley", cue: "Forehand then backhand, elbow up, contact in front of your body. Slow and deliberate.", reps: "20 each hand" },
+      { step: "Reaction snap", cue: "Close eyes, open and immediately snap into a volley position with compact arm. Trains hand-eye speed.", reps: "10 reps" },
+    ],
+  },
+  "Defense": {
+    subtitle: "Defensive footwork — any corridor or room",
+    steps: [
+      { step: "Lateral shuffle", cue: "3 steps left, 3 right, low centre of gravity. Quick light feet — avoid crossing your legs.", reps: "5 × 20 seconds" },
+      { step: "Split step", cue: "Small soft jump, land feet shoulder-width apart, weight forward. This is your reset between every point.", reps: "20 reps" },
+      { step: "Defensive lob visualisation", cue: "Picture yourself deep in the court, reading a smash early, lifting a high cross-court lob. Calm, not rushed.", reps: "5 mental reps" },
+    ],
+  },
+  "Attack": {
+    subtitle: "Quick hands & pattern recall — no gear",
+    steps: [
+      { step: "Pen drop", cue: "Hold a pen at shoulder height, drop it, catch before it reaches waist. Trains the hand speed you need for net exchanges.", reps: "15 reps" },
+      { step: "Shadow volley finish", cue: "Simulate approach + compact volley finish — step forward, punch to the angle. Weight transfers forward.", reps: "15 reps" },
+      { step: "Pattern recall", cue: "Recall 3 attacking sequences from your last match. What created the opening? What would you repeat?", reps: "3 minutes" },
+    ],
+  },
+  "Positioning": {
+    subtitle: "Court awareness — mental mapping",
+    steps: [
+      { step: "T-recovery shadow", cue: "Split step, move to the imaginary T, recover back. Automatic positioning starts with repetition.", reps: "20 reps" },
+      { step: "Scenario mapping", cue: "Picture 5 common in-game situations and identify your optimal position for each — net, mid, back corner.", reps: "5 scenarios" },
+      { step: "Match replay", cue: "Recall a point from your last match where positioning cost you. Replay it mentally with the correct position.", reps: "3 minutes" },
+    ],
+  },
+  "Communication": {
+    subtitle: "Call habits — build automaticity anywhere",
+    steps: [
+      { step: "Call out loud", cue: "Say 'mine', 'yours', 'leave' out loud 30 times. Building the habit under low pressure makes it instinctive under high pressure.", reps: "30 calls" },
+      { step: "Pre-point routine", cue: "Practice your between-point reset — breathe, walk to position, make your call intention. Repeat until automatic.", reps: "10 reps" },
+      { step: "Replay & rewrite", cue: "Recall 3 moments from your last match where a missing call cost a point. Rehearse what you would have said.", reps: "3 minutes" },
+    ],
+  },
+  "Movement": {
+    subtitle: "Padel footwork — any hallway works",
+    steps: [
+      { step: "Lateral shuffle + split", cue: "Side-to-side shuffle, 3 steps each way, ending with a soft split step. Core padel movement loop.", reps: "5 × 20 seconds" },
+      { step: "Forward lunge", cue: "Step into a deep lunge, back knee near the floor, recover. Works the hip flexors critical for fast first steps.", reps: "3 × 10 each leg" },
+      { step: "Quick feet burst", cue: "Rapid small steps on the spot for 10 seconds, then freeze in a split-step landing.", reps: "8 rounds" },
+    ],
+  },
+  "Mental strength": {
+    subtitle: "Box breathing & pressure visualisation",
+    steps: [
+      { step: "Box breathing", cue: "4 in, 4 hold, 4 out, 4 hold. Activates your parasympathetic system — the same technique used before high-pressure points.", reps: "5 rounds" },
+      { step: "Pressure point visualisation", cue: "Picture yourself at 6-6 tiebreak. Breathe, pick your target, execute. Feel calm, not anxious.", reps: "5 mental reps" },
+      { step: "Between-point routine", cue: "Practice your full routine — bounce, breathe, pick target. Repeat until it is muscle memory.", reps: "10 reps" },
+    ],
+  },
 };
 const DEFAULT_DRILL: DrillDef = {
-  subtitle: "General technical session",
-  court: "General rally practice — focus on consistency over winners. Work on the shot you feel least confident about. 30 minutes of deliberate repetition beats 90 minutes of casual play.",
-  solo: "20 min shadow footwork and stroke mechanics. Then 5 min visualising your strongest patterns and your next match.",
+  subtitle: "Movement & mental prep — no gear needed",
+  steps: [
+    { step: "Lateral shuffle", cue: "Side-to-side with a split step. Core padel footwork.", reps: "5 × 20 seconds" },
+    { step: "Box breathing", cue: "4 in, 4 hold, 4 out, 4 hold. Sharpen focus before your next session.", reps: "5 rounds" },
+    { step: "Mental prep", cue: "Visualise your best performance. Recall the focus, the calm, the execution.", reps: "2 minutes" },
+  ],
 };
 
 function getTopNeedsWorkTag(): string | null {
@@ -98,7 +171,7 @@ function getScheduleData(dayType: "match" | "recovery" | "training", matchTime: 
   const mM = matchTime ? parseInt(matchTime.split(":")[1]) : 30;
   const mt = matchTime ?? "18:30";
   const drill = DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL;
-  const drillTitle = drillTag ? `${drillTag} Drill` : "Training Session";
+  const drillTitle = drillTag ? `${drillTag} Focus` : "Skill Prep";
   const rawSchedules: Record<string, Array<{ time: string; title: string; subtitle?: string; isDrill?: boolean }>> = {
     match: [
       { time: "07:00", title: "Wake up & hydrate",   subtitle: "500ml water before anything else" },
@@ -318,11 +391,10 @@ export default function Home8() {
   const [postMatchOpen, setPostMatchOpen] = useState(false);
   const [postMatchDate, setPostMatchDate] = useState<string | null>(null);
   const [checkinNudgeOpen, setCheckinNudgeOpen] = useState(false);
+  const [nightNudgeOpen, setNightNudgeOpen] = useState(false);
   const [yesterdayWasMatch, setYesterdayWasMatch] = useState(false);
   const [drillTag, setDrillTag] = useState<string | null>(null);
-  const [drillContext, setDrillContext] = useState<"court" | "solo">("court");
   const [drillSteps, setDrillSteps] = useState<{ step: string; cue: string; reps: string }[] | null>(null);
-  const [drillLoading, setDrillLoading] = useState(false);
 
   const [logHydrationMl, setLogHydrationMl] = useState(0);
   const logGaugeRef    = useRef<HTMLDivElement>(null);
@@ -424,6 +496,14 @@ export default function Home8() {
         const hour = new Date().getHours();
         const nudgeDismissed = localStorage.getItem("padelop:checkin-nudge-dismissed") === todayStr;
         if (!done && !nudgeDismissed && hour < 13) setTimeout(() => setCheckinNudgeOpen(true), 1200);
+        if (hour >= 21 && !matchToday) {
+          try {
+            const nightDismissed = localStorage.getItem("padelop:night-nudge-dismissed") === todayStr;
+            const habits: { date: string }[] = JSON.parse(localStorage.getItem("padelop:habits") || "[]");
+            const nightDone = habits.some(h => h.date === todayStr);
+            if (!nightDone && !nightDismissed) setTimeout(() => setNightNudgeOpen(true), 1400);
+          } catch {}
+        }
       } catch { setMorningDone(false); }
     }
     function loadMatch() {
@@ -667,21 +747,10 @@ export default function Home8() {
   useEffect(() => {
     const item = schedule[schedModalIdx ?? currentIdx];
     if (!doModalOpen || !item?.isDrill) { setDrillSteps(null); return; }
-    let cancelled = false;
-    setDrillSteps(null);
-    setDrillLoading(true);
-    fetch("/api/exercise-guide", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: item.title, tag: drillTag, context: drillContext, subtitle: item.subtitle }),
-    })
-      .then(r => r.json())
-      .then(data => { if (!cancelled && data.steps) setDrillSteps(data.steps); })
-      .catch(() => {})
-      .finally(() => { if (!cancelled) setDrillLoading(false); });
-    return () => { cancelled = true; };
+    const def = DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL;
+    setDrillSteps(def.steps);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [doModalOpen, drillContext, schedModalIdx]);
+  }, [doModalOpen, schedModalIdx]);
 
   // Detect when a match has ended (same day or previous day) and prompt review
   useEffect(() => {
@@ -812,8 +881,8 @@ export default function Home8() {
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
               {/* Main card */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", padding: "0 8px" }}>
-                  <div style={{ position: "relative", width: "75%", aspectRatio: "1 / 1" }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                  <div style={{ position: "relative", width: "60%", aspectRatio: "1 / 1" }}>
                     <svg width="100%" height="100%" viewBox="0 0 160 160" style={{ display: "block", overflow: "visible" }}>
                       <path d="M10 150 L10 10 L150 10 L150 150 L10 150" fill="none" stroke="#dce8f8" strokeWidth="5" strokeLinejoin="miter" />
                       <path d="M10 150 L10 10 L150 10 L150 150 L10 150" fill="none" stroke="#3b9eff" strokeWidth="5" strokeLinejoin="miter"
@@ -824,21 +893,23 @@ export default function Home8() {
                       <p style={{ fontSize: "clamp(11px, 3.5vw, 16px)", fontWeight: 500, color: "#9aa5b0", margin: 0, textAlign: "center", lineHeight: 1.3 }}>(4x4 box breath)</p>
                     </div>
                   </div>
-                  {(() => {
-                    const phases = [
-                      { action: "In", detail: "through your nose" },
-                      { action: "Hold", detail: "" },
-                      { action: "Out", detail: "through your mouth" },
-                      { action: "Hold", detail: "" },
-                    ];
-                    const p = phases[breathPhase];
-                    return (
-                      <p key={breathPhase} style={{ fontSize: "clamp(13px, 4vw, 18px)", color: "#3b9eff", margin: "4px 0 0", textAlign: "center", lineHeight: 1.4, fontWeight: 600 }}>
-                        {p.action}{p.detail ? <span style={{ fontWeight: 400, color: "#9aa5b0" }}> {p.detail}</span> : null}
-                      </p>
-                    );
-                  })()}
-                  <p style={{ fontSize: "clamp(13px, 3.5vw, 16px)", color: "#c8cdd3", margin: "10px 0 0", textAlign: "center", lineHeight: 1.4 }}>Skip if you have a respiratory condition</p>
+                  <div style={{ height: "clamp(24px, 6vw, 32px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {(() => {
+                      const phases = [
+                        { label: "In (nose)" },
+                        { label: "Hold" },
+                        { label: "Out (mouth)" },
+                        { label: "Hold" },
+                      ];
+                      const p = phases[breathPhase];
+                      return (
+                        <p key={breathPhase} style={{ fontSize: "clamp(13px, 4vw, 18px)", color: "#3b9eff", margin: 0, lineHeight: 1, fontWeight: 600 }}>
+                          {p.label}
+                        </p>
+                      );
+                    })()}
+                  </div>
+                  <p style={{ fontSize: "clamp(10px, 2.8vw, 13px)", color: "#c8cdd3", margin: 0, textAlign: "center", lineHeight: 1.4 }}>Skip if you have a respiratory condition</p>
                 </div>
               </div>
               {/* Placeholder below */}
@@ -1290,25 +1361,7 @@ export default function Home8() {
               </div>
               {modalItem.isDrill ? (
                 <div className="px-6 py-5">
-                  <p className="text-[17px] font-bold uppercase tracking-widest text-[#8a9096] mb-3">Where are you today?</p>
-                  <div className="flex gap-2 mb-5">
-                    <button onClick={() => setDrillContext("court")} className="flex-1 py-2.5 rounded-xl text-[21px] font-semibold transition-colors" style={{ background: drillContext === "court" ? "#2653d4" : "#f4f4f6", color: drillContext === "court" ? "#fff" : "#4a5050" }}>Court</button>
-                    <button onClick={() => setDrillContext("solo")} className="flex-1 py-2.5 rounded-xl text-[21px] font-semibold transition-colors" style={{ background: drillContext === "solo" ? "#2653d4" : "#f4f4f6", color: drillContext === "solo" ? "#fff" : "#4a5050" }}>Anywhere</button>
-                  </div>
-                  {drillLoading ? (
-                    <div className="flex flex-col gap-4">
-                      {[1,2,3].map(i => (
-                        <div key={i} className="flex items-start gap-3 animate-pulse">
-                          <div className="w-6 h-6 rounded-full bg-[#f0f2f5] flex-shrink-0"/>
-                          <div className="flex-1 space-y-1.5">
-                            <div className="h-3.5 bg-[#f0f2f5] rounded w-3/4"/>
-                            <div className="h-3 bg-[#f0f2f5] rounded w-full"/>
-                            <div className="h-3 bg-[#f0f2f5] rounded w-1/2"/>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : drillSteps ? (
+                  {drillSteps && (
                     <div className="flex flex-col gap-4">
                       {drillSteps.map((s, i) => (
                         <div key={i} className="flex items-start gap-3">
@@ -1323,7 +1376,7 @@ export default function Home8() {
                         </div>
                       ))}
                     </div>
-                  ) : null}
+                  )}
                 </div>
               ) : (() => {
                 const detail = SCHEDULE_DETAILS[modalItem.title];
@@ -1457,6 +1510,35 @@ export default function Home8() {
                 </button>
                 <button
                   onClick={() => { try { localStorage.setItem("padelop:checkin-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {} setCheckinNudgeOpen(false); }}
+                  className="w-full py-3 text-[14px] font-semibold text-[#6b7480]">
+                  Not now
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Night check-in nudge */}
+        {nightNudgeOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { try { localStorage.setItem("padelop:night-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {} setNightNudgeOpen(false); }}>
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
+            <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
+              <div className="px-6 pt-8 pb-6 flex flex-col items-center text-center gap-2">
+                <div className="w-14 h-14 rounded-full flex items-center justify-center mb-2" style={{ background: "#f5f0ff" }}>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </div>
+                <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">Night check-in</p>
+                <p className="text-[15px] text-[#4a5050] mt-1 leading-snug">Wind down well — log your evening habits and tomorrow's bedtime.</p>
+              </div>
+              <div className="px-6 pb-8 flex flex-col gap-3">
+                <button
+                  onClick={() => { setNightNudgeOpen(false); setLogTab("wellbeing"); setLogSheetOpen(true); }}
+                  className="w-full py-3.5 rounded-2xl text-white text-[15px] font-bold active:scale-[0.98] transition-transform"
+                  style={{ background: "#7c3aed" }}>
+                  Start check-in
+                </button>
+                <button
+                  onClick={() => { try { localStorage.setItem("padelop:night-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {} setNightNudgeOpen(false); }}
                   className="w-full py-3 text-[14px] font-semibold text-[#6b7480]">
                   Not now
                 </button>
@@ -1902,16 +1984,9 @@ export default function Home8() {
               {schedDetailOpen.subtitle && <p style={{ fontSize: "clamp(20px, 5.1vw, 24px)", color: "#6b7480", margin: "0 0 12px" }}>{schedDetailOpen.subtitle}</p>}
               <div style={{ height: 1, background: "#dfe3e7", margin: "12px 0" }} />
               {schedDetailOpen.isDrill ? (
-                <div>
-                  <p style={{ fontSize: "clamp(17px, 4.2vw, 21px)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#8a9096", margin: "0 0 10px" }}>Where are you today?</p>
-                  <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-                    <button onClick={() => setDrillContext("court")} style={{ flex: 1, padding: "10px 0", borderRadius: 12, fontSize: "clamp(21px, 5.4vw, 26px)", fontWeight: 600, border: "none", cursor: "pointer", background: drillContext === "court" ? "#2653d4" : "#f4f4f6", color: drillContext === "court" ? "#fff" : "#4a5050" }}>Court</button>
-                    <button onClick={() => setDrillContext("solo")} style={{ flex: 1, padding: "10px 0", borderRadius: 12, fontSize: "clamp(21px, 5.4vw, 26px)", fontWeight: 600, border: "none", cursor: "pointer", background: drillContext === "solo" ? "#2653d4" : "#f4f4f6", color: drillContext === "solo" ? "#fff" : "#4a5050" }}>Anywhere</button>
-                  </div>
-                  <p style={{ fontSize: "clamp(21px, 5.4vw, 26px)", color: "#3a4550", lineHeight: 1.6, margin: 0 }}>
-                    {drillContext === "court" ? (DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).court : (DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).solo}
-                  </p>
-                </div>
+                <p style={{ fontSize: "clamp(21px, 5.4vw, 26px)", color: "#3a4550", lineHeight: 1.6, margin: 0 }}>
+                  {(DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).subtitle}
+                </p>
               ) : (
                 <p style={{ fontSize: "clamp(21px, 5.4vw, 26px)", color: "#3a4550", lineHeight: 1.6, margin: 0 }}>{schedDetailOpen.detail}</p>
               )}
