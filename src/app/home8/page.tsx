@@ -7,6 +7,7 @@ import ReadinessSheet from "@/components/readiness-sheet";
 import PushPrompt from "@/components/push-prompt";
 import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
 import { saveUpcomingMatch } from "@/lib/db";
+import { hydrateFromSupabase } from "@/lib/sync";
 
 // ── Tag cloud (mirrors matches4) ──────────────────────────────────────────
 type ReviewEntry = { ts: string; feeling: string; result: string; opponent: string; energy: string; wellDone: string[]; improved: string[] };
@@ -438,6 +439,8 @@ export default function Home8() {
   const [breathPhase, setBreathPhase] = useState(0);
   const [breathDashOffset, setBreathDashOffset] = useState(560);
   const breathStartRef = useRef(Date.now());
+
+  useEffect(() => { hydrateFromSupabase(); }, []);
 
   useEffect(() => {
     function loadReadiness() {
