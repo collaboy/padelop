@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { saveCheckIn, computeScores, loadScoringData } from "@/lib/scoring";
 import { downloadSnapshot, importData } from "@/lib/storage";
-import { saveMatchReview } from "@/lib/db";
+import { saveMatchReview, saveCheckInToDb, saveHydrationToDb } from "@/lib/db";
 
 const NAV_ITEMS = [
   { href: "/home4",     label: "Home",      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg> },
@@ -171,7 +171,11 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
                 </div>
               </div>
             ))}
-            <button onClick={() => { savePartialCheckIn(recoveryCI); afterSave(); }}
+            <button onClick={() => {
+                savePartialCheckIn(recoveryCI);
+                saveCheckInToDb({ date: new Date().toISOString().slice(0, 10), sleep: recoveryCI.sleep, energy: recoveryCI.energy, hydration: recoveryCI.hydration });
+                afterSave();
+              }}
               className="w-full py-3.5 rounded-2xl t-ui text-white active:scale-[0.98] transition-transform"
               style={{ background: PURPLE }}>
               Save Recovery
@@ -247,6 +251,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
         const hydrationEntry = { ts, litres: hydrationLitres, urine: urineColour, quality: "ok", timing: [] as string[] };
         const prevHydration = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]");
         localStorage.setItem("padelop:hydration-logs", JSON.stringify([hydrationEntry, ...prevHydration].slice(0, 50)));
+        saveHydrationToDb(todayYMD, Math.round(Number(hydrationLitres) * 1000));
 
         const earlyBed = ["9pm","10pm","10:30pm"].includes(bedtime);
         const habitsEntry = {
@@ -484,12 +489,14 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
       } else {
         // Save
         try {
-          savePartialCheckIn({
+          const ci = {
             sleep:      Number(next.sleep)      || 3,
             energy:     Number(next.energy)     || 3,
             soreness:   Number(next.soreness)   || 3,
             motivation: Number(next.motivation) || 3,
-          });
+          };
+          savePartialCheckIn(ci);
+          saveCheckInToDb({ date: todayYMD, sleep: ci.sleep, energy: ci.energy });
           const morningLog = { date: todayYMD, sleepHours: next.sleepHours, waterOnWaking: next.water === "yes" };
           localStorage.setItem("padelop:morning-log", JSON.stringify(morningLog));
         } catch {}
@@ -660,6 +667,8 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
                   const entry = { ...hydrationLog, ts: new Date().toISOString() };
                   const prev = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]");
                   localStorage.setItem("padelop:hydration-logs", JSON.stringify([entry, ...prev].slice(0, 50)));
+                  const ml = Math.round(Number(hydrationLog.litres ?? 0) * 1000);
+                  saveHydrationToDb(entry.ts.slice(0, 10), ml);
                 } catch {}
                 afterSave();
               }}
