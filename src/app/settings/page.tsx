@@ -132,7 +132,7 @@ export default function SettingsPage() {
           onClick={async () => {
             const supabase = createClient();
             await supabase.auth.signOut();
-            router.push("/auth");
+            window.location.href = "/auth";
           }}
           style={{ width: "100%", padding: "16px", color: "#ba1a1a", border: "1.5px solid rgba(186,26,26,0.2)", borderRadius: "var(--r-sm)", background: "#fff", cursor: "pointer", boxShadow: "var(--shadow-soft)" }}
         >
