@@ -1,10 +1,8 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function AuthPage() {
-  const router = useRouter();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,7 +20,7 @@ export default function AuthPage() {
       const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) { setError(error.message); setLoading(false); return; }
       if (data.session) {
-        router.push("/onboarding");
+        window.location.href = "/onboarding";
       } else {
         setCheckEmail(true);
         setLoading(false);
@@ -39,7 +37,7 @@ export default function AuthPage() {
       .eq("id", data.user.id)
       .single();
 
-    router.push(profile?.display_name ? "/home8" : "/onboarding");
+    window.location.href = profile?.display_name ? "/home8" : "/onboarding";
   }
 
   if (checkEmail) {

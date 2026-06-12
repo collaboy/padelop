@@ -126,7 +126,13 @@ export default function SettingsPage() {
 
       {/* Log out */}
       <section>
-        <form action="/auth/signout" method="post">
+        <form
+          action="/auth/signout"
+          method="post"
+          onSubmit={() => {
+            Object.keys(localStorage).filter(k => k.startsWith("padelop:")).forEach(k => localStorage.removeItem(k));
+          }}
+        >
           <button
             type="submit"
             className="t-ui"
