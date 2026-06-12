@@ -37,13 +37,14 @@ export default function OnboardingPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/auth"); return; }
 
-    const { error } = await supabase.from("profiles").upsert({
-      id:            user.id,
-      display_name:  name.trim(),
-      dominant_hand: hand,
-      play_level:    level,
-      overall_goal:  goal,
-    }, { onConflict: "id" });
+    const { error } = await supabase.from("profiles")
+      .update({
+        display_name:  name.trim(),
+        dominant_hand: hand,
+        play_level:    level,
+        overall_goal:  goal,
+      })
+      .eq("id", user.id);
 
     if (error) {
       setSaveError(error.message);

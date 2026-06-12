@@ -440,7 +440,16 @@ export default function Home8() {
   const [breathDashOffset, setBreathDashOffset] = useState(560);
   const breathStartRef = useRef(Date.now());
 
-  useEffect(() => { hydrateFromSupabase(); }, []);
+  useEffect(() => {
+    // Redirect incomplete profiles to onboarding
+    import("@/lib/supabase/client").then(({ createClient }) => {
+      const supabase = createClient();
+      supabase.from("profiles").select("display_name").single().then(({ data }) => {
+        if (data && !data.display_name) router.push("/onboarding");
+      });
+    });
+    hydrateFromSupabase();
+  }, []);
 
   useEffect(() => {
     function loadReadiness() {
