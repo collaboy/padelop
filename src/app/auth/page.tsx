@@ -19,10 +19,14 @@ export default function AuthPage() {
     const supabase = createClient();
 
     if (mode === "signup") {
-      const { error } = await supabase.auth.signUp({ email, password });
+      const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) { setError(error.message); setLoading(false); return; }
-      setCheckEmail(true);
-      setLoading(false);
+      if (data.session) {
+        router.push("/onboarding");
+      } else {
+        setCheckEmail(true);
+        setLoading(false);
+      }
       return;
     }
 
