@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { saveGearToDb } from "@/lib/db";
 import LogSheet from "@/components/log-sheet";
 import AvatarCropModal from "@/components/avatar-crop-modal";
 import {
@@ -861,7 +862,11 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
                 />
               </div>
               <button
-                onClick={() => { localStorage.setItem("padelop:gear", JSON.stringify({ racketName, racketType, racketImage, racketSince })); setGearEditOpen(false); }}
+                onClick={() => {
+                  localStorage.setItem("padelop:gear", JSON.stringify({ racketName, racketType, racketImage, racketSince }));
+                  saveGearToDb({ type: "racket", name: racketName ?? undefined });
+                  setGearEditOpen(false);
+                }}
                 className="t-ui"
                 style={{ padding: "12px", borderRadius: "var(--r-sm)", background: "var(--c-blue)", border: "none", cursor: "pointer", color: "#fff" }}
               >

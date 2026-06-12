@@ -64,6 +64,44 @@ export async function saveCheckInToDb(data: {
   } catch {}
 }
 
+export async function saveNutritionToDb(entry: {
+  date: string;
+  meal_type?: string;
+  description?: string;
+}) {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase.from("nutrition_logs").insert({
+      user_id:     user.id,
+      date:        entry.date,
+      meal_type:   entry.meal_type ?? null,
+      description: entry.description ?? null,
+    });
+  } catch {}
+}
+
+export async function saveGearToDb(item: {
+  type: string;
+  name?: string;
+  photo_url?: string;
+}) {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase.from("gear").upsert({
+      user_id:   user.id,
+      type:      item.type,
+      name:      item.name ?? null,
+      photo_url: item.photo_url ?? null,
+    }, { onConflict: "user_id,type" });
+  } catch {}
+}
+
 export async function saveHydrationToDb(date: string, ml: number) {
   try {
     const supabase = createClient();
