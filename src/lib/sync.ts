@@ -11,14 +11,28 @@ export async function hydrateFromSupabase() {
 
     const today = new Date().toISOString().slice(0, 10);
 
-    const [matchesRes, checkInsRes, hydrationRes, nutritionRes, sessionsRes, gearRes] = await Promise.all([
+    const [matchesRes, checkInsRes, hydrationRes, nutritionRes, sessionsRes, gearRes, profileRes] = await Promise.all([
       supabase.from("matches").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(50),
       supabase.from("check_ins").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(30),
       supabase.from("hydration_logs").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(50),
       supabase.from("nutrition_logs").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(50),
       supabase.from("sessions").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(50),
       supabase.from("gear").select("*").eq("user_id", user.id),
+      supabase.from("profiles").select("display_name, avatar_url, dominant_hand, play_level").eq("id", user.id).single(),
     ]);
+
+    // ── Profile ──────────────────────────────────────────────────────────
+    const dbProfile = profileRes.data;
+    if (dbProfile?.display_name) {
+      const existing = JSON.parse(localStorage.getItem("padelop:profile") || "{}");
+      localStorage.setItem("padelop:profile", JSON.stringify({
+        ...existing,
+        name:   dbProfile.display_name,
+        hand:   dbProfile.dominant_hand ?? existing.hand ?? "",
+        level:  dbProfile.play_level ?? existing.level ?? "",
+        avatar: dbProfile.avatar_url ?? existing.avatar ?? "",
+      }));
+    }
 
     // ── Matches ──────────────────────────────────────────────────────────
     const matches = matchesRes.data ?? [];
