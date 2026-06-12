@@ -686,11 +686,14 @@ export default function Home8() {
     let prevT = 0;
     let vel = 0; // px/ms, positive = finger moving downward
 
+    let reachedTop = false; // true once scrollTop hits 0 during this gesture
+
     const onStart = (e: TouchEvent) => {
       prevY = e.touches[0].clientY;
       prevT = e.timeStamp;
       vel = 0;
       hitTopYRef.current = null;
+      reachedTop = div.scrollTop === 0;
     };
 
     const onMove = (e: TouchEvent) => {
@@ -703,6 +706,9 @@ export default function Home8() {
       prevY = y;
       prevT = t;
       lastTouchYRef.current = y;
+
+      if (div.scrollTop === 0) reachedTop = true;
+
       if (div.scrollTop === 0 && movingDown) {
         if (hitTopYRef.current === null) hitTopYRef.current = y;
         e.preventDefault(); // block rubber-band / touchcancel
@@ -712,14 +718,17 @@ export default function Home8() {
     const trigger = (endY: number, isCancel = false) => {
       const atTop = hitTopYRef.current !== null;
       const dist  = atTop ? endY - hitTopYRef.current! : 0;
-      // primary path: user was at scrollTop=0 and dragged or flicked downward
+      // primary path: downward drag/flick from scrollTop=0
       if (atTop && (dist > 30 || vel > 0.3))
         setDoIdx(i => Math.max(i - 1, -1));
-      // cancel path: iOS claimed the gesture for rubber-band before our handler
-      // could set hitTopYRef, but scrollTop===0 and downward vel confirm intent
+      // upward-flick path: user scrolled up to top then continued flicking up
+      else if (reachedTop && div.scrollTop === 0 && vel < -0.2)
+        setDoIdx(i => Math.max(i - 1, -1));
+      // cancel path: iOS rubber-band stole gesture but intent was downward
       else if (isCancel && div.scrollTop === 0 && vel > 0.2)
         setDoIdx(i => Math.max(i - 1, -1));
       hitTopYRef.current = null;
+      reachedTop = false;
       vel = 0;
       swipeDirRef.current = null;
       touchStartYRef.current = endY;
@@ -1206,93 +1215,43 @@ export default function Home8() {
                       </div>
                     </div>
                     <div style={{ height: 1, background: "#dfe3e7", flexShrink: 0 }} />
-                    {/* ── Drum picker ── */}
-                    {(() => {
-                      const ITEM_H = 80;
-                      const nowMins = now.getHours() * 60 + now.getMinutes();
-                      const dragging = drumDragRef.current !== null;
-                      const liveOff = dragging ? drumLiveOffset : 0;
-                      const activeItem = schedule[drumIdx];
-                      return (
-                        <div
-                          style={{ flex: 1, position: "relative", overflow: "hidden", cursor: "grab", userSelect: "none" }}
-                          onTouchStart={e => {
-                            drumDragRef.current = { startY: e.touches[0].clientY, startIdx: drumIdx };
-                            setDrumLiveOffset(0);
-                          }}
-                          onTouchMove={e => {
-                            if (!drumDragRef.current) return;
-                            setDrumLiveOffset(e.touches[0].clientY - drumDragRef.current.startY);
-                          }}
-                          onTouchEnd={e => {
-                            if (!drumDragRef.current) return;
-                            const delta = e.changedTouches[0].clientY - drumDragRef.current.startY;
-                            const steps = -Math.round(delta / ITEM_H);
-                            const startIdx = drumDragRef.current.startIdx;
-                            drumDragRef.current = null;
-                            setDrumLiveOffset(0);
-                            setDrumIdx(Math.max(0, Math.min(schedule.length - 1, startIdx + steps)));
-                          }}
-                          onTouchCancel={() => { drumDragRef.current = null; setDrumLiveOffset(0); }}
-                        >
-                          {/* Top fade */}
-                          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "22%", background: "linear-gradient(to bottom, #fff 30%, transparent)", pointerEvents: "none", zIndex: 10 }} />
-                          {/* Bottom fade */}
-                          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "22%", background: "linear-gradient(to top, #fff 30%, transparent)", pointerEvents: "none", zIndex: 10 }} />
-                          {/* Scroll hint arrows */}
-                          <div style={{ position: "absolute", top: 6, left: 0, right: 0, display: "flex", justifyContent: "center", pointerEvents: "none", zIndex: 11 }}>
-                            <svg width="16" height="10" viewBox="0 0 16 10" fill="none"><path d="M1 8l7-6 7 6" stroke="#d0d3d6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                          </div>
-                          <div style={{ position: "absolute", bottom: 6, left: 0, right: 0, display: "flex", justifyContent: "center", pointerEvents: "none", zIndex: 11 }}>
-                            <svg width="16" height="10" viewBox="0 0 16 10" fill="none"><path d="M1 2l7 6 7-6" stroke="#d0d3d6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                          </div>
-                          {/* Items */}
-                          {schedule.map((item, i) => {
-                            const rawD = (i - drumIdx) * ITEM_H + liveOff;
-                            const dSteps = rawD / ITEM_H;
-                            if (Math.abs(dSteps) > 2.6) return null;
-                            const abs = Math.abs(dSteps);
-                            const scale = Math.max(0.82, 1 - abs * 0.07);
-                            const opacity = Math.max(0.12, 1 - abs * 0.3);
-                            const rotX = -dSteps * 16;
-                            const isCur = i === currentIdx;
-                            const isPast = nowMins > toMins(item.time) && !isCur;
-                            const isCenter = i === drumIdx;
-                            const detail4 = SCHEDULE_DETAILS[item.title];
+                    <div ref={schedScrollRef} style={{ flex: 1, overflowY: "auto", minHeight: 0, overscrollBehavior: "none" }}>
+                      <div style={{ padding: "12px 16px 28px" }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          {schedule.map((s4, i) => {
+                            const isCur4 = i === currentIdx;
+                            const nowMins4 = now.getHours() * 60 + now.getMinutes();
+                            const isPast4 = !isCur4 && nowMins4 > toMins(s4.time);
+                            const isFuture4 = !isCur4 && !isPast4;
+                            const detail4 = SCHEDULE_DETAILS[s4.title];
                             return (
                               <div
                                 key={i}
+                                ref={isCur4 ? schedCurrentRef : undefined}
                                 style={{
-                                  position: "absolute",
-                                  top: "50%", left: 16, right: 16,
-                                  height: ITEM_H,
-                                  marginTop: -ITEM_H / 2,
-                                  transform: `translateY(${rawD}px) perspective(500px) rotateX(${rotX}deg) scale(${scale})`,
-                                  opacity,
-                                  transition: dragging ? "none" : "transform 0.32s cubic-bezier(0.4,0,0.2,1), opacity 0.32s",
                                   display: "flex", alignItems: "center", gap: 12,
-                                  padding: "0 12px 0 14px",
-                                  borderRadius: 16,
-                                  background: "#fff",
-                                  boxShadow: isCenter ? `0 0 0 2px ${item.color}` : "0 0 0 1px #f0f0f0",
-                                  cursor: isCenter && detail4 ? "pointer" : "default",
-                                  zIndex: isCenter ? 6 : 4,
+                                  borderRadius: 14,
+                                  padding: isCur4 ? "14px 14px 14px 16px" : "9px 10px 9px 14px",
+                                  cursor: detail4 ? "pointer" : "default",
+                                  background: isCur4 ? `${s4.color}0e` : "#fff",
+                                  boxShadow: isCur4 ? `0 0 0 2px ${s4.color}, 0 2px 12px ${s4.color}22` : "0 0 0 1px #f0f0f0",
+                                  transition: "box-shadow 0.2s, padding 0.2s",
                                 }}
-                                onClick={() => isCenter && detail4 && (() => { setSchedModalIdx(i); setDoModalOpen(true); })()}
+                                onClick={() => detail4 && (() => { setSchedModalIdx(i); setDoModalOpen(true); })()}
                               >
-                                <div style={{ width: 34, height: 34, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: isPast ? "#f0f0f0" : `${item.color}18` }}>
-                                  {isCur
-                                    ? <div className="animate-breathe" style={{ width: 11, height: 11, borderRadius: "50%", background: item.color, ["--glow" as string]: item.color } as React.CSSProperties} />
-                                    : <div style={{ width: 11, height: 11, borderRadius: "50%", background: isPast ? "#d0d3d6" : item.color }} />
+                                <div style={{ width: isCur4 ? 40 : 32, height: isCur4 ? 40 : 32, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: isPast4 ? "#f0f0f0" : `${s4.color}22`, transition: "width 0.2s, height 0.2s" }}>
+                                  {isCur4
+                                    ? <div className="animate-breathe" style={{ width: 13, height: 13, borderRadius: "50%", background: s4.color, ["--glow" as string]: s4.color } as React.CSSProperties} />
+                                    : <div style={{ width: 10, height: 10, borderRadius: "50%", background: isPast4 ? "#d0d3d6" : s4.color }} />
                                   }
                                 </div>
                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                  <p style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", margin: "0 0 2px", color: isPast ? "#c4c7c7" : item.color }}>{item.time}</p>
-                                  <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 600, margin: 0, lineHeight: 1.2, color: isPast ? "#a0a5aa" : "#1a1c1c", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.title}</p>
-                                  {item.subtitle && <p style={{ fontSize: "clamp(12px, 3.1vw, 14px)", margin: "1px 0 0", color: isPast ? "#c4c7c7" : "#6b7480", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.subtitle}</p>}
+                                  <p style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", margin: "0 0 2px", color: isPast4 ? "#c4c7c7" : s4.color }}>{s4.time}</p>
+                                  <p style={{ fontSize: isCur4 ? "clamp(17px, 4.4vw, 20px)" : "clamp(15px, 3.9vw, 18px)", fontWeight: isCur4 ? 700 : 600, margin: 0, lineHeight: 1.25, color: isPast4 ? "#a0a5aa" : "#1a1c1c" }}>{s4.title}</p>
+                                  {s4.subtitle && <p style={{ fontSize: "clamp(12px, 3.1vw, 14px)", margin: "2px 0 0", color: isPast4 ? "#c4c7c7" : "#6b7480" }}>{s4.subtitle}</p>}
                                 </div>
-                                {isCenter && detail4 && (
-                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                                {detail4 && (
+                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={isCur4 ? s4.color : "#c4c7c7"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                                     <path d="M9 18l6-6-6-6"/>
                                   </svg>
                                 )}
@@ -1300,8 +1259,8 @@ export default function Home8() {
                             );
                           })}
                         </div>
-                      );
-                    })()}
+                      </div>
+                    </div>
                   </div>
                 );
               })()}
