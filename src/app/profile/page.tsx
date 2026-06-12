@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { saveGearToDb } from "@/lib/db";
+import { saveGearToDb, saveProfileToDb } from "@/lib/db";
 import LogSheet from "@/components/log-sheet";
 import AvatarCropModal from "@/components/avatar-crop-modal";
 import {
@@ -512,11 +512,13 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
     const updated = { ...profile, avatar: croppedDataUrl };
     localStorage.setItem(PROFILE_KEY, JSON.stringify(updated));
     window.dispatchEvent(new Event("storage"));
+    saveProfileToDb({ display_name: updated.name, avatar_url: croppedDataUrl });
     setSaved(true);
   };
   const save = () => {
     localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
     window.dispatchEvent(new Event("storage"));
+    saveProfileToDb({ display_name: profile.name });
     setSaved(true);
   };
   const canSave = profile.name.trim().length > 0;

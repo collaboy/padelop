@@ -3,6 +3,52 @@
 
 import { createClient } from "@/lib/supabase/client";
 
+export async function saveTrainingToDb(entry: {
+  date: string;
+  drill_focus?: string;
+  duration_mins?: number;
+  notes?: string;
+}) {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase.from("sessions").insert({
+      user_id:      user.id,
+      date:         entry.date,
+      drill_focus:  entry.drill_focus ?? null,
+      duration_mins: entry.duration_mins ?? null,
+      notes:        entry.notes ?? null,
+    });
+  } catch {}
+}
+
+export async function saveProfileToDb(profile: {
+  display_name?: string;
+  avatar_url?: string;
+  dominant_hand?: string;
+  play_level?: string;
+  overall_goal?: string;
+  club?: string;
+}) {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase.from("profiles").upsert({
+      id:            user.id,
+      display_name:  profile.display_name ?? null,
+      avatar_url:    profile.avatar_url ?? null,
+      dominant_hand: profile.dominant_hand ?? null,
+      play_level:    profile.play_level ?? null,
+      overall_goal:  profile.overall_goal ?? null,
+      club:          profile.club ?? null,
+    });
+  } catch {}
+}
+
 export async function saveUpcomingMatch(match: {
   date: string;
   time: string;
