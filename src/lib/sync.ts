@@ -80,6 +80,11 @@ export async function hydrateFromSupabase() {
         stress:     todayCI.stress ?? 3,
         motivation: 3,
       }));
+      // Mark night check-in as done so nudge doesn't re-trigger
+      const habitsExisting: { date: string }[] = JSON.parse(localStorage.getItem("padelop:habits") || "[]");
+      if (!habitsExisting.some(h => h.date === today)) {
+        localStorage.setItem("padelop:habits", JSON.stringify([{ date: today }, ...habitsExisting].slice(0, 50)));
+      }
     }
 
     // ── Hydration ────────────────────────────────────────────────────────
