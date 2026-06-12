@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { saveCheckIn, computeScores, loadScoringData } from "@/lib/scoring";
 import { downloadSnapshot, importData } from "@/lib/storage";
+import { saveMatchReview } from "@/lib/db";
 
 const NAV_ITEMS = [
   { href: "/home4",     label: "Home",      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg> },
@@ -984,6 +985,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
                   const entry = { ...matchReview, resultImage: matchResultImage ?? undefined, ts: new Date().toISOString() };
                   const prev = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
                   localStorage.setItem("padelop:match-reviews", JSON.stringify([entry, ...prev].slice(0, 50)));
+                  saveMatchReview(entry);
                 } catch {}
                 afterSave();
               }}
