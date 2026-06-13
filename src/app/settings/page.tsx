@@ -29,6 +29,7 @@ export default function SettingsPage() {
   const importRef = useRef<HTMLInputElement>(null);
   const [importDone, setImportDone] = useState(false);
   const [notifStatus, setNotifStatus] = useState<NotifStatus>("off");
+  const [notifLoading, setNotifLoading] = useState(false);
 
   useEffect(() => {
     if (typeof Notification === "undefined" || !("PushManager" in window)) {
@@ -43,18 +44,28 @@ export default function SettingsPage() {
   }, []);
 
   async function handleNotifications() {
-    if (notifStatus === "unsupported") return;
+    if (notifStatus === "unsupported") {
+      alert("To enable notifications on iPhone, add padla to your Home Screen first:\n\nSafari → Share button → Add to Home Screen\n\nThen open the app from the home screen icon and try again.");
+      return;
+    }
     if (notifStatus === "denied") {
-      alert("Notifications are blocked. Go to your browser/phone settings to re-enable them for this site.");
+      alert("Notifications are blocked. Go to Settings → Safari → padla and allow notifications.");
       return;
     }
     if (notifStatus === "enabled") return;
-    const result = await Notification.requestPermission();
-    if (result === "granted") {
-      await subscribeAndSave().catch(() => {});
-      setNotifStatus("enabled");
-    } else {
-      setNotifStatus("denied");
+    setNotifLoading(true);
+    try {
+      const result = await Notification.requestPermission();
+      if (result === "granted") {
+        await subscribeAndSave();
+        setNotifStatus("enabled");
+      } else {
+        setNotifStatus("denied");
+      }
+    } catch (e) {
+      alert("Could not enable notifications: " + String(e));
+    } finally {
+      setNotifLoading(false);
     }
   }
 
@@ -109,7 +120,7 @@ export default function SettingsPage() {
               <div style={{ textAlign: "left" }}>
                 <span className="t-ui" style={{ color: "var(--c-text)", display: "block" }}>Notifications</span>
                 <span className="t-caption" style={{ color: notifStatus === "enabled" ? "var(--c-green)" : notifStatus === "denied" ? "var(--c-red, #ba1a1a)" : "var(--c-hint)" }}>
-                  {notifSub[notifStatus]}
+                  {notifLoading ? "Enabling…" : notifSub[notifStatus]}
                 </span>
               </div>
             </div>
