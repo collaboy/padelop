@@ -13,34 +13,34 @@ const OUTPUT_SIZE = 400;
 
 export default function AvatarCropModal({ imageSrc, onSave, onClose }: Props) {
   const imgRef = useRef<HTMLImageElement>(null);
-  const [loaded, setLoaded] = useState(false);
+  // Store natural dimensions in state so they're available synchronously at render time
+  const [naturalSize, setNaturalSize] = useState<{ w: number; h: number } | null>(null);
   const [userScale, setUserScale] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const dragStart = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
 
-  const getBaseScale = useCallback(() => {
-    const img = imgRef.current;
-    if (!img || !img.naturalWidth) return 1;
-    return Math.max(CROP_SIZE / img.naturalWidth, CROP_SIZE / img.naturalHeight);
-  }, []);
+  const baseScale = naturalSize
+    ? Math.max(CROP_SIZE / naturalSize.w, CROP_SIZE / naturalSize.h)
+    : 1;
+  const ts = baseScale * userScale;
 
-  const getTotalScale = useCallback(() => getBaseScale() * userScale, [getBaseScale, userScale]);
-
-  const clampOffset = useCallback((ox: number, oy: number) => {
-    const img = imgRef.current;
-    if (!img) return { x: ox, y: oy };
-    const ts = getBaseScale() * userScale;
-    const maxX = Math.max(0, (img.naturalWidth * ts) / 2 - CROP_SIZE / 2);
-    const maxY = Math.max(0, (img.naturalHeight * ts) / 2 - CROP_SIZE / 2);
-    return {
-      x: Math.max(-maxX, Math.min(maxX, ox)),
-      y: Math.max(-maxY, Math.min(maxY, oy)),
-    };
-  }, [getBaseScale, userScale]);
+  const clampOffset = useCallback(
+    (ox: number, oy: number) => {
+      if (!naturalSize) return { x: ox, y: oy };
+      const scale = Math.max(CROP_SIZE / naturalSize.w, CROP_SIZE / naturalSize.h) * userScale;
+      const maxX = Math.max(0, (naturalSize.w * scale) / 2 - CROP_SIZE / 2);
+      const maxY = Math.max(0, (naturalSize.h * scale) / 2 - CROP_SIZE / 2);
+      return {
+        x: Math.max(-maxX, Math.min(maxX, ox)),
+        y: Math.max(-maxY, Math.min(maxY, oy)),
+      };
+    },
+    [naturalSize, userScale],
+  );
 
   useEffect(() => {
-    if (loaded) setOffset(o => clampOffset(o.x, o.y));
-  }, [userScale, loaded, clampOffset]);
+    setOffset(o => clampOffset(o.x, o.y));
+  }, [userScale, clampOffset]);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -56,10 +56,9 @@ export default function AvatarCropModal({ imageSrc, onSave, onClose }: Props) {
 
   const handleSave = () => {
     const img = imgRef.current;
-    if (!img) return;
-    const ts = getTotalScale();
-    const sourceX = img.naturalWidth / 2 - (CROP_SIZE / 2 + offset.x) / ts;
-    const sourceY = img.naturalHeight / 2 - (CROP_SIZE / 2 + offset.y) / ts;
+    if (!img || !naturalSize) return;
+    const sourceX = naturalSize.w / 2 - (CROP_SIZE / 2 + offset.x) / ts;
+    const sourceY = naturalSize.h / 2 - (CROP_SIZE / 2 + offset.y) / ts;
     const sourceW = CROP_SIZE / ts;
     const sourceH = CROP_SIZE / ts;
 
@@ -76,10 +75,11 @@ export default function AvatarCropModal({ imageSrc, onSave, onClose }: Props) {
     onSave(canvas.toDataURL("image/jpeg", 0.9));
   };
 
-  const ts = loaded ? getTotalScale() : 1;
-  const img = imgRef.current;
-  const rW = img ? img.naturalWidth * ts : CROP_SIZE;
-  const rH = img ? img.naturalHeight * ts : CROP_SIZE;
+  // Rendered image dimensions and position
+  const imgW = naturalSize ? naturalSize.w * ts : CROP_SIZE;
+  const imgH = naturalSize ? naturalSize.h * ts : CROP_SIZE;
+  const imgLeft = (CROP_SIZE - imgW) / 2 + offset.x;
+  const imgTop  = (CROP_SIZE - imgH) / 2 + offset.y;
 
   return (
     <div
@@ -125,14 +125,17 @@ export default function AvatarCropModal({ imageSrc, onSave, onClose }: Props) {
               ref={imgRef}
               src={imageSrc}
               alt="crop preview"
-              onLoad={() => setLoaded(true)}
+              onLoad={e => {
+                const img = e.currentTarget;
+                setNaturalSize({ w: img.naturalWidth, h: img.naturalHeight });
+              }}
               draggable={false}
               style={{
                 position: "absolute",
-                width: loaded ? rW : "100%",
-                height: loaded ? rH : "100%",
-                left: CROP_SIZE / 2 + offset.x - rW / 2,
-                top: CROP_SIZE / 2 + offset.y - rH / 2,
+                width: imgW,
+                height: imgH,
+                left: imgLeft,
+                top: imgTop,
                 userSelect: "none",
                 pointerEvents: "none",
               }}

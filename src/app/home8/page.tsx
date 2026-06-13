@@ -8,6 +8,7 @@ import PushPrompt from "@/components/push-prompt";
 import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
 import { saveUpcomingMatch } from "@/lib/db";
 import { hydrateFromSupabase } from "@/lib/sync";
+import { downloadSnapshot, importData } from "@/lib/storage";
 
 // ── Tag cloud (mirrors matches4) ──────────────────────────────────────────
 type ReviewEntry = { ts: string; feeling: string; result: string; opponent: string; energy: string; wellDone: string[]; improved: string[] };
@@ -358,7 +359,7 @@ export default function Home8() {
   const [upcomingCount, setUpcomingCount] = useState(0);
   const [now, setNow] = useState(new Date());
   const lastDateRef = useRef(new Date().toISOString().slice(0, 10));
-  const [doIdx, setDoIdx] = useState(0); // -1 = top holder, 0 = do-this-now, 1 = see schedule
+  const [doIdx, setDoIdx] = useState(-1); // -1 = top holder, 0 = do-this-now, 1 = see schedule
   const [completed, setCompleted] = useState<Set<number>>(new Set());
   const [readiness, setReadiness] = useState(65);
   const [readinessDone, setReadinessDone] = useState(0);
@@ -367,6 +368,8 @@ export default function Home8() {
   const [logPickerExpanded, setLogPickerExpanded] = useState<string | null>(null);
   const [logPickerSub, setLogPickerSub] = useState<"nutrition" | "matchreview" | null>(null);
   const [extrasOpen, setExtrasOpen] = useState(false);
+  const [importDone, setImportDone] = useState(false);
+  const importPickerRef = useRef<HTMLInputElement>(null);
   const [checkInData, setCheckInData]     = useState<DailyCheckIn | null>(null);
   const [hydrationData, setHydrationData] = useState<HydrationEntry | null>(null);
   const [nutritionData, setNutritionData] = useState<NutritionEntry | null>(null);
@@ -460,7 +463,15 @@ export default function Home8() {
       try {
         const todayKey = new Date().toISOString().slice(0, 10);
         const hq = JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null");
-        const hml = hq?.date === todayKey ? (hq.ml ?? 0) : 0;
+        let hml = hq?.date === todayKey ? (hq.ml ?? 0) : 0;
+        // If the quick key has no today value, fall back to hydration-logs entry
+        if (!hml) {
+          const logEntry = (JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]") as Array<{ ts: string; litres: string }>)[0];
+          if (logEntry?.ts?.slice(0, 10) === todayKey) {
+            const litreMap: Record<string, number> = { "<1L": 750, "1–1.5L": 1250, "1.5–2L": 1750, "2–2.5L": 2250, "2.5–3L": 2750, "3L+": 3000 };
+            hml = litreMap[logEntry.litres] ?? 0;
+          }
+        }
         setLogHydrationMl(hml);
         const ri = [!!d.checkIn, hml >= 2500, !!d.nutrition, !!d.training];
         setReadinessDone(ri.filter(Boolean).length);
@@ -977,7 +988,7 @@ export default function Home8() {
                 const coachTip = hasLow ? 'Focus on recovery today.' : hasOk ? 'Keep your habits consistent today.' : allNL ? 'Log your check-ins to track readiness.' : 'You\'re in great shape. Stay sharp.';
 
                 return (
-                  <div style={{ width: "100%", flexShrink: 0, height: "calc(95dvh - 4rem - 60px)", borderRadius: 24, background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px", opacity: cardSnap === 'none' && doIdx === -1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === -1 ? 2 : 1, pointerEvents: doIdx === -1 ? "auto" : "none" }}>
+                  <div style={{ width: "100%", flexShrink: 0, height: "calc(100dvh - 4rem - 100px)", borderRadius: 24, background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px", opacity: cardSnap === 'none' && doIdx === -1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === -1 ? 2 : 1, pointerEvents: doIdx === -1 ? "auto" : "none" }}>
                     {match ? (() => {
                       const matchDate = new Date(match.date + "T12:00");
                       const todayDate = new Date(today + "T12:00");
@@ -1052,7 +1063,7 @@ export default function Home8() {
                 const nextSlide = schedule[currentIdx + 1];
                 const secsUntilNext = nextSlide ? toMins(nextSlide.time) * 60 - (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) : 0;
                 const fmtTime = (s: number) => { if (s <= 0) return "a moment"; const h = Math.floor(s / 3600), rem = s % 3600, m = Math.floor(rem / 60), sec = rem % 60; if (h > 0) return `${h}h ${m}m ${sec}s`; return m > 0 ? `${m}m ${sec}s` : `${sec}s`; };
-                const cardStyle: React.CSSProperties = { position: "relative", width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", opacity: 1, zIndex: 3, boxShadow: "none" };
+                const cardStyle: React.CSSProperties = { position: "relative", width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", zIndex: 3, boxShadow: "none" };
                 const textureOverlay = <div style={{ position: "absolute", inset: 0, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E")`, backgroundSize: "200px 200px", pointerEvents: "none", mixBlendMode: "overlay" as React.CSSProperties["mixBlendMode"] }} />;
                 const isSleepytime = now.getHours() < 7;
                 const contentOpacity = doIdx === 0 ? 1 : 0.2;
@@ -1065,7 +1076,7 @@ export default function Home8() {
                   </div>
                 ) : null;
                 if (isDone) return (
-                  <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => setDoModalOpen(true)}>
+                  <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
                     {textureOverlay}
                     {sleepOverlay}
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
@@ -1083,7 +1094,7 @@ export default function Home8() {
                   </div>
                 );
                 return (
-                  <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => setDoModalOpen(true)}>
+                  <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
                     {textureOverlay}
                     {sleepOverlay}
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
@@ -1473,10 +1484,10 @@ export default function Home8() {
         <button
           onClick={() => setLogPickerOpen(true)}
           className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
-          style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.25rem", width: 56, height: 56, borderRadius: 28, background: doItem?.color ?? "#2653d4", boxShadow: `0 4px 16px ${doItem?.color ?? "#2653d4"}55` }}
+          style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.25rem", width: 56, height: 56, borderRadius: 28, background: doIdx === -1 ? "#ffffff" : (doItem?.color ?? "#2653d4"), boxShadow: doIdx === -1 ? "0 4px 20px rgba(0,0,0,0.18)" : `0 4px 16px ${doItem?.color ?? "#2653d4"}55` }}
           aria-label="Log activity"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={doIdx === -1 ? "#1a1c1c" : "#fff"} strokeWidth="2.5" strokeLinecap="round">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
         </button>
@@ -1660,6 +1671,31 @@ export default function Home8() {
                   </button>
                 </div>
 
+                {/* More section */}
+                <div style={{ paddingTop: 4, borderTop: "1px solid #f0f0f0", marginTop: 2 }}>
+                  <p style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 600, color: "#b0b8c1", textTransform: "uppercase", letterSpacing: "0.06em", margin: "10px 0 6px" }}>More</p>
+                  <div style={{ background: "#f8f9fa", borderRadius: 16, overflow: "hidden" }}>
+                    {[
+                      { label: "My Profile", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>, action: () => { setLogPickerOpen(false); router.push("/profile"); } },
+                      { label: "Weekly Shopping List", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>, action: () => { setLogPickerOpen(false); router.push("/shopping-list"); } },
+                      { label: "Export my data", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>, action: () => { downloadSnapshot(); setLogPickerOpen(false); } },
+                      { label: importDone ? "Data restored ✓" : "Import backup", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>, action: () => importPickerRef.current?.click() },
+                    ].map((item, i, arr) => (
+                      <button key={item.label} onClick={item.action}
+                        style={{ display: "flex", alignItems: "center", gap: 16, padding: "14px 18px", borderBottom: i < arr.length - 1 ? "1px solid #ebebeb" : "none", background: "none", border: i < arr.length - 1 ? undefined : "none", borderTop: "none", borderLeft: "none", borderRight: "none", cursor: "pointer", width: "100%", textAlign: "left" }}>
+                        <span style={{ color: "#9aa5b0" }}>{item.icon}</span>
+                        <span style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 600, color: "#1a1c1c" }}>{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <input ref={importPickerRef} type="file" accept="application/json,.json" className="hidden" onChange={e => {
+                  const file = e.target.files?.[0]; if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = () => { try { importData(JSON.parse(reader.result as string)); setImportDone(true); setLogPickerOpen(false); window.location.reload(); } catch { alert("Couldn't read that file."); } };
+                  reader.readAsText(file); e.target.value = "";
+                }} />
+
               </div>
 
               {/* Food & Snacks sub-modal */}
@@ -1669,19 +1705,29 @@ export default function Home8() {
                   <div className="relative w-full bg-white rounded-t-[24px] shadow-2xl" style={{ paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
                     <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-[#e0e0e0]" /></div>
                     <div style={{ padding: "12px 20px 4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <p style={{ fontSize: "clamp(18px, 4.6vw, 22px)", fontWeight: 800, color: "#1a1c1c", margin: 0 }}>Food &amp; Snacks</p>
-                      <button onClick={() => setLogPickerSub(null)} style={{ background: "rgba(0,0,0,0.06)", border: "none", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <p style={{ fontSize: "clamp(18px, 4.6vw, 22px)", fontWeight: 800, color: "#1a1c1c", margin: 0 }}>Food &amp; Snacks</p>
+                        <input type="time" value={mealTime || nowTimeStr()} onChange={e => setMealTime(e.target.value)} onClick={() => { if (!mealTime) setMealTime(nowTimeStr()); }} style={{ padding: "4px 8px", borderRadius: 8, border: "1.5px solid #e8eaed", fontSize: "clamp(13px, 3.4vw, 15px)", color: "#6b7480", outline: "none", background: "#f8f9fa" }} />
+                      </div>
+                      <button onClick={() => setLogPickerSub(null)} style={{ background: "rgba(0,0,0,0.06)", border: "none", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                       </button>
                     </div>
                     <div style={{ padding: "12px 20px 20px" }}>
-                      <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-                        <input type="time" value={mealTime || nowTimeStr()} onChange={e => setMealTime(e.target.value)} onClick={() => { if (!mealTime) setMealTime(nowTimeStr()); }} style={{ width: 90, padding: "7px 10px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: "clamp(16px, 4.1vw, 19px)", color: "#1a1c1c", outline: "none", flexShrink: 0 }} />
-                        <input type="text" placeholder="What are you eating?" value={mealText} onChange={e => setMealText(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && mealText.trim()) saveMealEntry(mealTime || nowTimeStr(), mealText); }} style={{ flex: 1, padding: "7px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: "clamp(16px, 4.1vw, 19px)", color: "#1a1c1c", outline: "none" }} />
-                        <button onClick={() => saveMealEntry(mealTime || nowTimeStr(), mealText)} style={{ padding: "7px 14px", borderRadius: 10, background: mealText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: mealText.trim() ? "pointer" : "default", fontSize: "clamp(12px, 3.1vw, 15px)", fontWeight: 700, color: mealText.trim() ? "#fff" : "#b0b8c1", flexShrink: 0 }}>Save</button>
-                      </div>
+                      <textarea
+                        value={mealText}
+                        onChange={e => setMealText(e.target.value)}
+                        placeholder="What are you actually eating?"
+                        rows={4}
+                        autoFocus
+                        style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: "clamp(16px, 4.1vw, 19px)", color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box" }}
+                      />
+                      <button
+                        onClick={() => saveMealEntry(mealTime || nowTimeStr(), mealText)}
+                        style={{ marginTop: 8, padding: "10px 22px", borderRadius: 999, background: mealText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: mealText.trim() ? "pointer" : "default", fontSize: "clamp(14px, 3.6vw, 17px)", fontWeight: 700, color: mealText.trim() ? "#fff" : "#b0b8c1" }}
+                      >Save</button>
                       {mealsToday.length > 0 && (
-                        <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 5, marginTop: 16 }}>
                           {mealsToday.map(m => (
                             <div key={m.id} style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
                               <span style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 600, color: "#b0b8c1", flexShrink: 0 }}>{m.time}</span>
@@ -1748,7 +1794,7 @@ export default function Home8() {
 
         {/* Add / Edit Match modal */}
         {matchModalOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { setMatchModalOpen(false); setMatchModalTab('pick'); setLiveX(0); setLiveY(0); setUploadError(null); setUploadExtracting(false); }}>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { setMatchModalOpen(false); setMatchModalTab('pick'); setLiveX(0); setLiveY(0); setUploadError(null); setUploadExtracting(false); }} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
             <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
               {/* Header */}

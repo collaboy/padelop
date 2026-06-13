@@ -37,15 +37,15 @@ export async function saveProfileToDb(profile: {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    await supabase.from("profiles").upsert({
-      id:            user.id,
-      display_name:  profile.display_name ?? null,
-      avatar_url:    profile.avatar_url ?? null,
-      dominant_hand: profile.dominant_hand ?? null,
-      play_level:    profile.play_level ?? null,
-      overall_goal:  profile.overall_goal ?? null,
-      club:          profile.club ?? null,
-    });
+    // Only include fields that were explicitly provided — never null-out existing data
+    const fields: Record<string, unknown> = { id: user.id };
+    if (profile.display_name  !== undefined) fields.display_name  = profile.display_name;
+    if (profile.avatar_url    !== undefined) fields.avatar_url    = profile.avatar_url;
+    if (profile.dominant_hand !== undefined) fields.dominant_hand = profile.dominant_hand;
+    if (profile.play_level    !== undefined) fields.play_level    = profile.play_level;
+    if (profile.overall_goal  !== undefined) fields.overall_goal  = profile.overall_goal;
+    if (profile.club          !== undefined) fields.club          = profile.club;
+    await supabase.from("profiles").upsert(fields);
   } catch {}
 }
 

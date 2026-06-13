@@ -23,11 +23,11 @@ export async function hydrateFromSupabase() {
 
     // ── Profile ──────────────────────────────────────────────────────────
     const dbProfile = profileRes.data;
-    if (dbProfile?.display_name) {
+    if (dbProfile) {
       const existing = JSON.parse(localStorage.getItem("padelop:profile") || "{}");
       localStorage.setItem("padelop:profile", JSON.stringify({
         ...existing,
-        name:   dbProfile.display_name,
+        ...(dbProfile.display_name ? { name: dbProfile.display_name } : {}),
         hand:   dbProfile.dominant_hand ?? existing.hand ?? "",
         level:  dbProfile.play_level ?? existing.level ?? "",
         avatar: dbProfile.avatar_url ?? existing.avatar ?? "",

@@ -668,8 +668,11 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
                   const entry = { ...hydrationLog, ts: new Date().toISOString() };
                   const prev = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]");
                   localStorage.setItem("padelop:hydration-logs", JSON.stringify([entry, ...prev].slice(0, 50)));
-                  const ml = Math.round(Number(hydrationLog.litres ?? 0) * 1000);
-                  saveHydrationToDb(entry.ts.slice(0, 10), ml);
+                  const litreMap: Record<string, number> = { "<1L": 750, "1–1.5L": 1250, "1.5–2L": 1750, "2–2.5L": 2250, "2.5–3L": 2750, "3L+": 3000 };
+                  const ml = litreMap[hydrationLog.litres] ?? 0;
+                  const todayKey = entry.ts.slice(0, 10);
+                  if (ml) localStorage.setItem("padelop:hydration-quick", JSON.stringify({ date: todayKey, ml }));
+                  saveHydrationToDb(todayKey, ml);
                 } catch {}
                 afterSave();
               }}

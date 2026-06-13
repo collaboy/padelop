@@ -22,6 +22,21 @@ async function subscribeAndSave() {
   });
 }
 
+async function unsubscribeAndRemove() {
+  const reg = await navigator.serviceWorker.getRegistration("/sw.js");
+  if (reg) {
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) {
+      await fetch("/api/push/subscribe", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ endpoint: sub.endpoint }),
+      });
+      await sub.unsubscribe();
+    }
+  }
+}
+
 type NotifStatus = "unsupported" | "denied" | "enabled" | "off";
 
 export default function SettingsPage() {
@@ -30,6 +45,7 @@ export default function SettingsPage() {
   const [importDone, setImportDone] = useState(false);
   const [notifStatus, setNotifStatus] = useState<NotifStatus>("off");
   const [notifLoading, setNotifLoading] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     if (typeof Notification === "undefined" || !("PushManager" in window)) {
@@ -52,7 +68,18 @@ export default function SettingsPage() {
       alert("Notifications are blocked. Go to Settings → Safari → padla and allow notifications.");
       return;
     }
-    if (notifStatus === "enabled") return;
+    if (notifStatus === "enabled") {
+      setNotifLoading(true);
+      try {
+        await unsubscribeAndRemove();
+        setNotifStatus("off");
+      } catch (e) {
+        alert("Could not disable notifications: " + String(e));
+      } finally {
+        setNotifLoading(false);
+      }
+      return;
+    }
     setNotifLoading(true);
     try {
       const result = await Notification.requestPermission();
@@ -71,7 +98,7 @@ export default function SettingsPage() {
 
   const notifSub: Record<NotifStatus, string> = {
     off:         "Tap to enable schedule reminders",
-    enabled:     "Enabled — reminders active",
+    enabled:     "Tap to disable",
     denied:      "Blocked in system settings",
     unsupported: "Open from home screen (iOS) to enable",
   };
@@ -111,7 +138,7 @@ export default function SettingsPage() {
         <div style={{ background: "#fff", borderRadius: "var(--r-md)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
           <button
             onClick={handleNotifications}
-            style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", cursor: notifStatus === "enabled" || notifStatus === "unsupported" ? "default" : "pointer" }}
+            style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", cursor: notifStatus === "unsupported" ? "default" : "pointer" }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
               <span style={{ color: notifStatus === "enabled" ? "var(--c-green)" : "var(--c-text-dim)" }}>
@@ -120,7 +147,7 @@ export default function SettingsPage() {
               <div style={{ textAlign: "left" }}>
                 <span className="t-ui" style={{ color: "var(--c-text)", display: "block" }}>Notifications</span>
                 <span className="t-caption" style={{ color: notifStatus === "enabled" ? "var(--c-green)" : notifStatus === "denied" ? "var(--c-red, #ba1a1a)" : "var(--c-hint)" }}>
-                  {notifLoading ? "Enabling…" : notifSub[notifStatus]}
+                  {notifLoading ? (notifStatus === "enabled" ? "Disabling…" : "Enabling…") : notifSub[notifStatus]}
                 </span>
               </div>
             </div>
@@ -129,6 +156,37 @@ export default function SettingsPage() {
               : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             }
           </button>
+          {[
+            {
+              icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+              label: "Privacy & Security",
+              sub: null,
+            },
+            {
+              icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
+              label: "Language",
+              sub: "English (US)",
+            },
+            {
+              icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+              label: "Support Center",
+              sub: null,
+            },
+          ].map(({ icon, label, sub }) => (
+            <button
+              key={label}
+              style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", borderTop: "1px solid #f4f4f6", cursor: "pointer" }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <span style={{ color: "var(--c-text-dim)" }}>{icon}</span>
+                <div style={{ textAlign: "left" }}>
+                  <span className="t-ui" style={{ color: "var(--c-text)", display: "block" }}>{label}</span>
+                  {sub && <span className="t-caption" style={{ color: "var(--c-hint)" }}>{sub}</span>}
+                </div>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          ))}
         </div>
       </section>
 
@@ -183,15 +241,17 @@ export default function SettingsPage() {
           action="/auth/signout"
           method="post"
           onSubmit={() => {
+            setSigningOut(true);
             Object.keys(localStorage).filter(k => k.startsWith("padelop:")).forEach(k => localStorage.removeItem(k));
           }}
         >
           <button
             type="submit"
             className="t-ui"
-            style={{ width: "100%", padding: "16px", color: "#ba1a1a", border: "1.5px solid rgba(186,26,26,0.2)", borderRadius: "var(--r-sm)", background: "#fff", cursor: "pointer", boxShadow: "var(--shadow-soft)" }}
+            disabled={signingOut}
+            style={{ width: "100%", padding: "16px", color: signingOut ? "#fff" : "#ba1a1a", border: "1.5px solid rgba(186,26,26,0.2)", borderRadius: "var(--r-sm)", background: signingOut ? "#ba1a1a" : "#fff", cursor: signingOut ? "default" : "pointer", boxShadow: "var(--shadow-soft)", transition: "background 0.15s, color 0.15s" }}
           >
-            Log Out
+            {signingOut ? "Signing out…" : "Log Out"}
           </button>
         </form>
       </section>
