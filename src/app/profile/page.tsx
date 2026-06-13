@@ -315,10 +315,7 @@ export default function ProfilePage() {
   const router = useRouter();
 
   // Profile
-  const [profile, setProfile] = useState<Profile>(() => {
-    if (typeof window === "undefined") return EMPTY;
-    try { const raw = localStorage.getItem(PROFILE_KEY); return raw ? JSON.parse(raw) : EMPTY; } catch { return EMPTY; }
-  });
+  const [profile, setProfile] = useState<Profile>(EMPTY);
   const [saved, setSaved]     = useState(false);
 
   // Matches
