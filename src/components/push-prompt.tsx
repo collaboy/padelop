@@ -2,72 +2,38 @@
 
 import { useEffect, useState } from "react";
 
-function msUntilTomorrow8am(): number {
-  const now = new Date();
-  const next = new Date(now);
-  next.setDate(now.getDate() + 1);
-  next.setHours(8, 0, 0, 0);
-  return next.getTime() - now.getTime();
+async function saveSubscription(sub: PushSubscription) {
+  const json = sub.toJSON();
+  await fetch("/api/push/subscribe", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      endpoint: sub.endpoint,
+      p256dh: json.keys?.p256dh ?? "",
+      auth: json.keys?.auth ?? "",
+    }),
+  });
 }
 
-function msUntilToday8am(): number {
-  const now = new Date();
-  const target = new Date(now);
-  target.setHours(8, 0, 0, 0);
-  return target.getTime() - now.getTime();
-}
+async function subscribeToPush(reg: ServiceWorkerRegistration) {
+  const existing = await reg.pushManager.getSubscription();
+  if (existing) { await saveSubscription(existing); return; }
 
-function hasCheckedInToday(): boolean {
-  try {
-    const ci = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null");
-    return ci?.date === new Date().toISOString().slice(0, 10);
-  } catch { return false; }
-}
-
-function hasNotifiedToday(): boolean {
-  try {
-    return localStorage.getItem("padelop:notified-date") === new Date().toISOString().slice(0, 10);
-  } catch { return false; }
-}
-
-function markNotifiedToday(): void {
-  try {
-    localStorage.setItem("padelop:notified-date", new Date().toISOString().slice(0, 10));
-  } catch {}
-}
-
-async function notify(reg: ServiceWorkerRegistration) {
-  if (hasNotifiedToday()) return;
-  markNotifiedToday();
-  await reg.showNotification("padla", {
-    body: "Time for your morning check-in — takes 30 seconds",
-    icon: "/icon-192.png",
-    badge: "/icon-192.png",
-    tag: "daily-checkin",
-    data: { url: "/home8" },
-  } as NotificationOptions);
-}
-
-function scheduleDaily(reg: ServiceWorkerRegistration) {
-  const now = new Date();
-  const past8 = now.getHours() >= 8;
-
-  if (past8) {
-    if (!hasCheckedInToday()) notify(reg);
-    setTimeout(() => { if (!hasCheckedInToday()) notify(reg); scheduleDaily(reg); }, msUntilTomorrow8am());
-  } else {
-    setTimeout(() => { if (!hasCheckedInToday()) notify(reg); scheduleDaily(reg); }, msUntilToday8am());
-  }
+  const sub = await reg.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+  });
+  await saveSubscription(sub);
 }
 
 export default function PushPrompt() {
   const [showing, setShowing] = useState(false);
 
   useEffect(() => {
-    if (typeof Notification === "undefined" || !("serviceWorker" in navigator)) return;
+    if (typeof Notification === "undefined" || !("serviceWorker" in navigator) || !("PushManager" in window)) return;
 
     if (Notification.permission === "granted") {
-      navigator.serviceWorker.register("/sw.js").then(scheduleDaily).catch(() => {});
+      navigator.serviceWorker.register("/sw.js").then(subscribeToPush).catch(() => {});
       return;
     }
 
@@ -81,7 +47,8 @@ export default function PushPrompt() {
     setShowing(false);
     const result = await Notification.requestPermission();
     if (result === "granted") {
-      navigator.serviceWorker.register("/sw.js").then(scheduleDaily).catch(() => {});
+      const reg = await navigator.serviceWorker.register("/sw.js");
+      await subscribeToPush(reg).catch(() => {});
     }
   }
 
@@ -98,8 +65,8 @@ export default function PushPrompt() {
         </svg>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold text-[#1a1c1c]">Daily reminders</p>
-        <p className="text-[11px] text-[#6b7480]">Check-in prompt every morning at 8am</p>
+        <p className="text-[13px] font-semibold text-[#1a1c1c]">Stay on track</p>
+        <p className="text-[11px] text-[#6b7480]">Get reminders for check-ins and matches</p>
       </div>
       <button onClick={() => setShowing(false)} className="px-3 py-1.5 rounded-xl text-[12px] font-semibold flex-shrink-0" style={{ background: "#f4f4f6", color: "#6b7480" }}>Later</button>
       <button onClick={allow} className="px-3 py-1.5 rounded-xl text-[12px] font-semibold text-white flex-shrink-0" style={{ background: "#2653d4" }}>Allow</button>
