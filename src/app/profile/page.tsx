@@ -344,6 +344,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
   const [streak, setStreak] = useState(0);
   const [foodHistory, setFoodHistory] = useState<Array<{ date: string; score: number }>>([]);
   const [todayMeals, setTodayMeals] = useState<MealEntry[]>([]);
+  const [selectedFoodDate, setSelectedFoodDate] = useState<string | null>(null);
 
   function loadAll() {
     // Profile
@@ -758,9 +759,22 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
       {/* ── Food Quality ─────────────────────────────────────────────────── */}
       {(() => {
         const todayStr = new Date().toISOString().slice(0, 10);
-        const analysis = analyzeMeals(todayMeals);
+        const viewDate = selectedFoodDate ?? todayStr;
+        const isToday = viewDate === todayStr;
+
+        // Load meals for the viewed date
+        const viewMeals: MealEntry[] = (() => {
+          if (isToday) return todayMeals;
+          try {
+            const all: MealEntry[] = JSON.parse(localStorage.getItem("padelop:meal-log") || "[]");
+            return all.filter(m => m.date === viewDate);
+          } catch { return []; }
+        })();
+
+        const analysis = analyzeMeals(viewMeals);
         const grade = foodGrade(analysis.score);
-        // Determine day type from match data
+
+        // Determine day type for today (used in coverage dots)
         const matchToday = !!nextMatch && nextMatch.date === todayStr;
         const matchYesterday = (() => {
           try {
@@ -770,38 +784,49 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
           } catch { return false; }
         })();
         const dayType = matchToday ? "match" : matchYesterday ? "recovery" : "training";
-        const coverage = compareMealsToSchedule(todayMeals, dayType);
-        const dayLabel = dayType === "match" ? "Match day" : dayType === "recovery" ? "Recovery day" : "Training day";
+        const coverage = compareMealsToSchedule(viewMeals, dayType);
+
         const barMax = Math.max(...foodHistory.map(d => d.score), 1);
+
+        const dateLabel = isToday
+          ? "Today"
+          : new Date(viewDate + "T12:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+
         return (
           <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
               <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>Food Quality</p>
-              <span className="t-caption" style={{ color: "var(--c-hint)", fontWeight: 500 }}>{dayLabel}</span>
+              <span className="t-caption" style={{ color: isToday ? "var(--c-hint)" : "var(--c-blue)", fontWeight: 600 }}>{dateLabel}</span>
             </div>
 
-            {/* Score + bar chart row */}
+            {/* Score + bar sparkline */}
             <div style={{ display: "flex", alignItems: "flex-end", gap: 16, marginBottom: 16 }}>
               <div style={{ flexShrink: 0 }}>
                 <p className="t-stat" style={{ color: grade.color, margin: 0, lineHeight: 1 }}>{analysis.score}</p>
                 <p className="t-tag" style={{ color: grade.color, margin: "4px 0 0", fontWeight: 700 }}>{grade.label}</p>
               </div>
-              {/* 7-day bar sparkline */}
-              <div style={{ flex: 1, display: "flex", alignItems: "flex-end", gap: 3, height: 36 }}>
+              <div style={{ flex: 1, display: "flex", alignItems: "flex-end", gap: 3, height: 44 }}>
                 {foodHistory.map(({ date, score }) => {
-                  const isToday = date === todayStr;
+                  const isSelected = date === viewDate;
+                  const isT = date === todayStr;
                   const h = barMax > 0 ? Math.max(4, (score / barMax) * 36) : 4;
+                  const barColor = isT ? grade.color : score >= 65 ? "#bbf7d0" : score > 0 ? "#fed7aa" : "#f0f0f0";
                   return (
-                    <div key={date} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", height: 36 }}>
-                      <div style={{ width: "100%", height: h, borderRadius: 3, background: isToday ? grade.color : score >= 65 ? "#bbf7d0" : score > 0 ? "#fed7aa" : "#f0f0f0", transition: "height 0.3s" }} />
-                    </div>
+                    <button
+                      key={date}
+                      onClick={() => setSelectedFoodDate(isSelected && !isT ? null : date)}
+                      style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", height: 44, background: "none", border: "none", cursor: "pointer", padding: "0 0 4px", gap: 3 }}
+                    >
+                      <div style={{ width: "100%", height: h, borderRadius: 3, background: barColor, outline: isSelected ? `2px solid ${barColor === "#f0f0f0" ? "#b0b8c1" : barColor}` : "none", outlineOffset: 2, transition: "height 0.3s" }} />
+                      {isSelected && <div style={{ width: 4, height: 4, borderRadius: "50%", background: barColor === "#f0f0f0" ? "#b0b8c1" : barColor, flexShrink: 0 }} />}
+                    </button>
                   );
                 })}
               </div>
             </div>
 
             {/* Nutrient badges */}
-            <div style={{ display: "flex", gap: 6, marginBottom: todayMeals.length ? 14 : 0, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: 6, marginBottom: 14, flexWrap: "wrap" }}>
               {[
                 { label: "Protein", active: analysis.protein },
                 { label: "Veg",     active: analysis.veg },
@@ -813,28 +838,32 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
               ))}
             </div>
 
-            {/* Suggested meal coverage */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: todayMeals.length ? 14 : 0 }}>
-              {coverage.map(({ title, covered }) => (
-                <div key={title} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0, background: covered ? "#16a34a" : "#e8eaed", border: covered ? "none" : "1.5px solid #c8cdd3" }} />
-                  <span className="t-body-sm" style={{ color: covered ? "var(--c-text)" : "var(--c-hint)", fontWeight: covered ? 600 : 400 }}>{title}</span>
-                  {!covered && <span style={{ fontSize: 11, color: "#b0b8c1", marginLeft: "auto" }}>not logged</span>}
-                </div>
-              ))}
-            </div>
+            {/* Meal coverage dots (today only — we don't know past day types) */}
+            {isToday && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: viewMeals.length ? 14 : 0 }}>
+                {coverage.map(({ title, covered }) => (
+                  <div key={title} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0, background: covered ? "#16a34a" : "#e8eaed", border: covered ? "none" : "1.5px solid #c8cdd3" }} />
+                    <span className="t-body-sm" style={{ color: covered ? "var(--c-text)" : "var(--c-hint)", fontWeight: covered ? 600 : 400 }}>{title}</span>
+                    {!covered && <span style={{ fontSize: 11, color: "#b0b8c1", marginLeft: "auto" }}>not logged</span>}
+                  </div>
+                ))}
+              </div>
+            )}
 
-            {/* Today's meals */}
-            {todayMeals.length > 0 && (
-              <div style={{ borderTop: "1px solid #f4f4f6", paddingTop: 12, display: "flex", flexDirection: "column", gap: 5 }}>
-                {todayMeals.map(m => (
+            {/* Meals list */}
+            {viewMeals.length > 0 ? (
+              <div style={{ borderTop: "1px solid #f4f4f6", paddingTop: 12, display: "flex", flexDirection: "column", gap: 6 }}>
+                {viewMeals.map(m => (
                   <div key={m.id} style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
                     <span style={{ fontSize: 11, fontWeight: 600, color: "#b0b8c1", flexShrink: 0 }}>{m.time}</span>
                     <span className="t-body-sm" style={{ color: "var(--c-text-sub)", lineHeight: 1.4 }}>{m.description}</span>
                   </div>
                 ))}
               </div>
-            )}
+            ) : !isToday ? (
+              <p className="t-body-sm" style={{ color: "var(--c-hint)", margin: 0, borderTop: "1px solid #f4f4f6", paddingTop: 12 }}>Nothing logged this day.</p>
+            ) : null}
           </div>
         );
       })()}
