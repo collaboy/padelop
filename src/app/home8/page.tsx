@@ -1008,12 +1008,12 @@ export default function Home8() {
                           </p>
 
                           {/* Hero date */}
-                          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                          <button onClick={() => setMatchActionOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
                             <p style={{ fontSize: "clamp(34px, 9vw, 44px)", fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1, letterSpacing: "-0.02em" }}>{dateStr}</p>
                             <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 700, color: "#2653d4", margin: 0, lineHeight: 1 }}>{match.time}</p>
                             {match.club && <p style={{ fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 500, color: "#6b7480", margin: "4px 0 0" }}>{match.club}</p>}
                             {playerStr && <p style={{ fontSize: "clamp(13px, 3.4vw, 16px)", color: "#b0b8c1", margin: "3px 0 0", textAlign: "center", lineHeight: 1.4 }}>{playerStr}</p>}
-                          </div>
+                          </button>
 
                           {/* Divider */}
                           <div style={{ width: 48, height: 1, background: "#e8eaed", margin: "24px 0" }} />
@@ -1767,7 +1767,7 @@ export default function Home8() {
 
         {/* Match action sheet */}
         {matchActionOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => setMatchActionOpen(false)}>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => setMatchActionOpen(false)} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
             <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
             <div className="relative w-full max-w-sm bg-white rounded-[24px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
               <button onClick={() => { setMatchActionOpen(false); setIsAddMode(false); setMatchModalTab('pick'); setMatchModalOpen(true); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f4f6ff] transition-colors" style={{ borderBottom: "1px solid #f0f0f0" }}>
