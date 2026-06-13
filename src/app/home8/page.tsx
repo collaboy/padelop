@@ -1019,8 +1019,8 @@ export default function Home8() {
                           <div style={{ width: 48, height: 1, background: "#e8eaed", margin: "24px 0" }} />
 
                           {/* Readiness */}
-                          <p style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 6px" }}>Readiness</p>
-                          <button onClick={() => setReadinessSheetOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                          <p style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 6px", textAlign: "center" }}>Readiness</p>
+                          <button onClick={() => setReadinessSheetOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "center" }}>
                             <span style={{ fontSize: "clamp(32px, 8.2vw, 40px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1, letterSpacing: "-0.02em" }}>
                               {readinessDone}<span style={{ color: "#dde0e4" }}>/4</span>
                             </span>
