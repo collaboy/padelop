@@ -359,7 +359,7 @@ export default function Home8() {
   const [upcomingCount, setUpcomingCount] = useState(0);
   const [now, setNow] = useState(new Date());
   const lastDateRef = useRef(new Date().toISOString().slice(0, 10));
-  const [doIdx, setDoIdx] = useState(-1); // -1 = top holder, 0 = do-this-now, 1 = see schedule
+  const [doIdx, setDoIdx] = useState(0); // -1 = top holder, 0 = do-this-now, 1 = see schedule
   const [completed, setCompleted] = useState<Set<number>>(new Set());
   const [readiness, setReadiness] = useState(65);
   const [readinessDone, setReadinessDone] = useState(0);
@@ -1076,7 +1076,7 @@ export default function Home8() {
                   </div>
                 ) : null;
                 if (isDone) return (
-                  <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
+                  <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => setDoModalOpen(true)}>
                     {textureOverlay}
                     {sleepOverlay}
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
@@ -1094,7 +1094,7 @@ export default function Home8() {
                   </div>
                 );
                 return (
-                  <div key="active" style={cardStyle} onClick={() => setDoModalOpen(true)}>
+                  <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => setDoModalOpen(true)}>
                     {textureOverlay}
                     {sleepOverlay}
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
