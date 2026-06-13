@@ -1008,12 +1008,12 @@ export default function Home8() {
                           </p>
 
                           {/* Hero date */}
-                          <button onClick={() => setMatchActionOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
                             <p style={{ fontSize: "clamp(34px, 9vw, 44px)", fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1, letterSpacing: "-0.02em" }}>{dateStr}</p>
                             <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 700, color: "#2653d4", margin: 0, lineHeight: 1 }}>{match.time}</p>
                             {match.club && <p style={{ fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 500, color: "#6b7480", margin: "4px 0 0" }}>{match.club}</p>}
                             {playerStr && <p style={{ fontSize: "clamp(13px, 3.4vw, 16px)", color: "#b0b8c1", margin: "3px 0 0", textAlign: "center", lineHeight: 1.4 }}>{playerStr}</p>}
-                          </button>
+                          </div>
 
                           {/* Divider */}
                           <div style={{ width: 48, height: 1, background: "#e8eaed", margin: "24px 0" }} />
