@@ -356,6 +356,7 @@ export default function Home8() {
   const [matchActionOpen, setMatchActionOpen] = useState(false);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
   const [isAddMode, setIsAddMode] = useState(false);
+  const [matchActionMode, setMatchActionMode] = useState<null | 'edit' | 'add'>(null);
   const [upcomingCount, setUpcomingCount] = useState(0);
   const [now, setNow] = useState(new Date());
   const lastDateRef = useRef(new Date().toISOString().slice(0, 10));
@@ -1781,27 +1782,126 @@ export default function Home8() {
 
         {/* Match action sheet */}
         {matchActionOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => setMatchActionOpen(false)} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
+          <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => { setMatchActionOpen(false); setMatchActionMode(null); }} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
             <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
-            <div className="relative w-full max-w-sm bg-white rounded-[24px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
-              <button onClick={() => { setMatchActionOpen(false); setIsAddMode(false); setMatchModalTab('pick'); setMatchModalOpen(true); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f4f6ff] transition-colors" style={{ borderBottom: "1px solid #f0f0f0" }}>
+            <div className="relative w-full max-w-sm bg-white shadow-2xl" style={{ borderRadius: "24px 24px 0 0", maxHeight: "calc(100dvh - 4rem - 16px)", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+              {/* Drag handle */}
+              <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+                <div style={{ width: 36, height: 4, borderRadius: 2, background: "#d0d3d6" }} />
+              </div>
+              {/* Edit match */}
+              <button onClick={() => {
+                if (matchActionMode === 'edit') { setMatchActionMode(null); return; }
+                setIsAddMode(false);
+                setMatchForm({ date: match?.date ?? '', time: match?.time ?? '', club: match?.club ?? '', p1: match?.players?.[0] ?? '', p2: match?.players?.[1] ?? '', p3: match?.players?.[2] ?? '', p4: match?.players?.[3] ?? '' });
+                setMatchActionMode('edit');
+              }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f4f6ff] transition-colors" style={{ borderBottom: "1px solid #f0f0f0" }}>
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#2653d418" }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 </div>
-                <span className="text-[15px] font-semibold text-[#1a1c1c]">Edit match</span>
+                <span className="text-[15px] font-semibold text-[#1a1c1c] flex-1 text-left">Edit match</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0b5ba" strokeWidth="2.2" strokeLinecap="round" style={{ transform: matchActionMode === 'edit' ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}><polyline points="6 9 12 15 18 9"/></svg>
               </button>
-              <button onClick={() => { setMatchActionOpen(false); setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('manual'); setMatchModalOpen(true); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors" style={{ borderBottom: "1px solid #f0f0f0" }}>
+              {matchActionMode === 'edit' && (() => {
+                const saveMatch = () => {
+                  if (!matchForm.date || !matchForm.time) return;
+                  const data: StoredMatch = { date: matchForm.date, time: matchForm.time, club: matchForm.club, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
+                  const current = getMatchList();
+                  const replaced = current.map(m => m.date === match?.date && m.time === match?.time ? data : m);
+                  const updated = replaced.some(m => m === data) ? replaced : [data, ...current];
+                  const sorted = saveMatchList(updated);
+                  const next = sorted[0];
+                  if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
+                  saveUpcomingMatch(data);
+                  setMatchActionOpen(false); setMatchActionMode(null); setDoIdx(-1);
+                  window.dispatchEvent(new Event("storage"));
+                };
+                return (
+                  <div className="px-5 pt-4 pb-5 flex flex-col gap-3" style={{ borderBottom: "1px solid #f0f0f0", background: "#fafafa" }}>
+                    <div className="flex gap-3">
+                      <div className="flex-1 flex flex-col gap-1">
+                        <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
+                        <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#fff" }} />
+                      </div>
+                      <div className="flex-1 flex flex-col gap-1">
+                        <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
+                        <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#fff" }} />
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Club</label>
+                      <input type="text" placeholder="e.g. Club Padel BCN" value={matchForm.club} onChange={e => setMatchForm(f => ({ ...f, club: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm.club ? "#2653d4" : "#e2e2e2", background: matchForm.club ? "#f4f6ff" : "#fff" }} />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Players</label>
+                      {(['p1','p2','p3','p4'] as const).map((key, i) => (
+                        <input key={key} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={matchForm[key]} onChange={e => setMatchForm(f => ({ ...f, [key]: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm[key] ? "#2653d4" : "#e2e2e2", background: matchForm[key] ? "#f4f6ff" : "#fff" }} />
+                      ))}
+                    </div>
+                    <button onClick={saveMatch} className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white active:scale-[0.98] transition-transform mt-1" style={{ background: (!matchForm.date || !matchForm.time) ? "#c4c7c7" : "#2653d4" }}>Save match</button>
+                  </div>
+                );
+              })()}
+              {/* Add a match */}
+              <button onClick={() => {
+                if (matchActionMode === 'add') { setMatchActionMode(null); return; }
+                setIsAddMode(true);
+                setMatchForm({ date: '', time: '', club: '', p1: '', p2: '', p3: '', p4: '' });
+                setMatchActionMode('add');
+              }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f4f6ff] transition-colors" style={{ borderBottom: "1px solid #f0f0f0" }}>
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#f0fdf4" }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 </div>
-                <span className="text-[15px] font-semibold text-[#1a1c1c]">Add a match</span>
+                <span className="text-[15px] font-semibold text-[#1a1c1c] flex-1 text-left">Add a match</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0b5ba" strokeWidth="2.2" strokeLinecap="round" style={{ transform: matchActionMode === 'add' ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}><polyline points="6 9 12 15 18 9"/></svg>
               </button>
-              <button onClick={() => { setMatchActionOpen(false); router.push("/matches4"); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
+              {matchActionMode === 'add' && (() => {
+                const saveMatch = () => {
+                  if (!matchForm.date || !matchForm.time) return;
+                  const data: StoredMatch = { date: matchForm.date, time: matchForm.time, club: matchForm.club, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
+                  const current = getMatchList();
+                  const updated = [...current, data];
+                  const sorted = saveMatchList(updated);
+                  const next = sorted[0];
+                  if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
+                  saveUpcomingMatch(data);
+                  setMatchActionOpen(false); setMatchActionMode(null); setDoIdx(-1);
+                  window.dispatchEvent(new Event("storage"));
+                };
+                return (
+                  <div className="px-5 pt-4 pb-5 flex flex-col gap-3" style={{ borderBottom: "1px solid #f0f0f0", background: "#fafafa" }}>
+                    <div className="flex gap-3">
+                      <div className="flex-1 flex flex-col gap-1">
+                        <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
+                        <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#fff" }} />
+                      </div>
+                      <div className="flex-1 flex flex-col gap-1">
+                        <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
+                        <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#fff" }} />
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Club</label>
+                      <input type="text" placeholder="e.g. Club Padel BCN" value={matchForm.club} onChange={e => setMatchForm(f => ({ ...f, club: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm.club ? "#2653d4" : "#e2e2e2", background: matchForm.club ? "#f4f6ff" : "#fff" }} />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Players</label>
+                      {(['p1','p2','p3','p4'] as const).map((key, i) => (
+                        <input key={key} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={matchForm[key]} onChange={e => setMatchForm(f => ({ ...f, [key]: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm[key] ? "#2653d4" : "#e2e2e2", background: matchForm[key] ? "#f4f6ff" : "#fff" }} />
+                      ))}
+                    </div>
+                    <button onClick={saveMatch} className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white active:scale-[0.98] transition-transform mt-1" style={{ background: (!matchForm.date || !matchForm.time) ? "#c4c7c7" : "#16a34a" }}>Save match</button>
+                  </div>
+                );
+              })()}
+              {/* See all matches */}
+              <button onClick={() => { setMatchActionOpen(false); setMatchActionMode(null); router.push("/matches4"); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#f4f4f6" }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 </div>
                 <span className="text-[15px] font-semibold text-[#1a1c1c]">See all matches</span>
               </button>
+              <div style={{ height: "calc(env(safe-area-inset-bottom) + 8px)" }} />
             </div>
           </div>
         )}
