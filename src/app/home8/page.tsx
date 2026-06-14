@@ -436,6 +436,7 @@ export default function Home8() {
   const hitTopYRef = useRef<number | null>(null); // Y when scroll first reached 0
   const handleDragStartY = useRef(0);
   const swipeDirRef = useRef<'h' | 'v' | null>(null);
+  const settlingRef = useRef(false);
   const [cardSnap, setCardSnap] = useState<'none' | 'left' | 'right'>('none');
   const [liveX, setLiveX] = useState(0);
   const [liveY, setLiveY] = useState(0);
@@ -700,8 +701,19 @@ export default function Home8() {
     saveLogHydration(clamped);
   }
 
-  useEffect(() => { setCardSnap('none'); setLiveX(0); setLiveY(0); }, [doIdx]);
+  useEffect(() => {
+    setCardSnap('none'); setLiveX(0); setLiveY(0);
+    settlingRef.current = true;
+    const t = setTimeout(() => { settlingRef.current = false; }, 350);
+    return () => clearTimeout(t);
+  }, [doIdx]);
   useEffect(() => { doIdxRef.current = doIdx; }, [doIdx]);
+  useEffect(() => {
+    if (checkinNudgeOpen || nightNudgeOpen) {
+      setDoIdx(0); setLiveX(0); setLiveY(0); setCardSnap('none');
+      swipeDirRef.current = null;
+    }
+  }, [checkinNudgeOpen, nightNudgeOpen]);
 
   // Overscroll-to-navigate on the schedule scroll div.
   // Tracks direction per-frame so we only intercept when the user is at the
@@ -892,7 +904,7 @@ export default function Home8() {
             if (!swipeDirRef.current && (Math.abs(dx) > 8 || Math.abs(dy) > 8))
               swipeDirRef.current = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
             if (swipeDirRef.current === 'h' && doIdx === 0) setLiveX(dx);
-            if (swipeDirRef.current === 'v' && cardSnap === 'none' && doIdx < 1) setLiveY(dy);
+            if (swipeDirRef.current === 'v' && cardSnap === 'none' && doIdx < 1 && !settlingRef.current) setLiveY(dy);
           }}
           onTouchEnd={e => {
             const endY = e.changedTouches[0].clientY;
@@ -908,8 +920,10 @@ export default function Home8() {
               else if (cardSnap === 'right' && dx < -60) setCardSnap('none');
             } else if (swipeDirRef.current === 'v' && cardSnap === 'none') {
               setLiveY(0);
-              if (dy < -40 && doIdx < 1) goNext();
-              else if (dy > 40) goPrev();
+              if (!settlingRef.current) {
+                if (dy < -40 && doIdx < 1) goNext();
+                else if (dy > 40) goPrev();
+              }
             }
             swipeDirRef.current = null;
           }}
