@@ -1031,14 +1031,7 @@ export default function Home8() {
                             </div>
                           </button>
 
-                          {/* Line 3: Readiness on one line */}
-                          <button onClick={() => setReadinessSheetOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-                            <span style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 600, color: "#6b7480" }}>
-                              Readiness: <span style={{ color: "#1a1c1c", fontWeight: 800 }}>{readinessDone}</span><span style={{ color: "#c8cdd3", fontWeight: 600 }}>/4</span>
-                            </span>
-                          </button>
-
-                          {/* Line 4: Match details — revealed on pill tap */}
+                          {/* Match details — revealed directly below pill on tap */}
                           {matchDetailsOpen && (
                             <button onClick={() => setMatchActionOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
                               <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1, letterSpacing: "-0.02em" }}>{dateStr}</p>
@@ -1046,6 +1039,13 @@ export default function Home8() {
                               {playerStr && <p style={{ fontSize: "clamp(12px, 3.1vw, 15px)", color: "#b0b8c1", margin: "2px 0 0", textAlign: "center", lineHeight: 1.4 }}>{playerStr}</p>}
                             </button>
                           )}
+
+                          {/* Line 3: Readiness on one line */}
+                          <button onClick={() => setReadinessSheetOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                            <span style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 600, color: "#6b7480" }}>
+                              Readiness: <span style={{ color: "#1a1c1c", fontWeight: 800 }}>{readinessDone}</span><span style={{ color: "#c8cdd3", fontWeight: 600 }}>/4</span>
+                            </span>
+                          </button>
                         </div>
                       );
                     })() : (
