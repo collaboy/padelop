@@ -1884,7 +1884,7 @@ export default function Home8() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: "0 16px 32px" }}>
 
                   {/* MATCH INFO CARD */}
-                  <div style={{ background: "#fff", borderRadius: 9, padding: "24px 20px 20px" }}>
+                  <div style={{ background: "#fff", borderRadius: 24, padding: "24px 20px 20px" }}>
                     <p style={{ fontSize: "clamp(22px, 6vw, 27px)", fontWeight: 800, color: "#1a1c1c", margin: "0 0 16px", lineHeight: 1.1, letterSpacing: "-0.02em" }}>{dateStr}</p>
                     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                       <div style={{ display: "flex", gap: 12 }}>
