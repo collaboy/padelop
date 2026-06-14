@@ -1632,20 +1632,6 @@ export default function Home8() {
               <div style={{ overflowY: "auto", minHeight: 0 }}>
               <div style={{ padding: "12px 16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
 
-                {/* Add a match — full width */}
-                <button
-                  onClick={() => { setLogPickerOpen(false); setLogPickerSub(null); setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('pick'); setMatchModalOpen(true); }}
-                  style={{ background: "#eef2ff", border: "none", borderRadius: 16, padding: "16px 18px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, width: "100%" }}
-                >
-                  <div style={{ width: 40, height: 40, borderRadius: 12, background: "#2653d4", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
-                  </div>
-                  <div style={{ textAlign: "left" }}>
-                    <p style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 700, color: "#2653d4", margin: 0, lineHeight: 1.2 }}>Add a match</p>
-                    <p style={{ fontSize: "clamp(12px, 3.1vw, 13px)", fontWeight: 500, color: "#6b7480", margin: "2px 0 0" }}>Schedule your next game</p>
-                  </div>
-                </button>
-
                 {/* Row 1: AM / PM check-in tiles */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                   <button
@@ -1695,6 +1681,20 @@ export default function Home8() {
                     <span style={{ fontSize: "clamp(10px, 2.6vw, 13px)", color: "#c8ccd0" }}>3L+</span>
                   </div>
                 </div>
+
+                {/* Add a match — full width */}
+                <button
+                  onClick={() => { setLogPickerOpen(false); setLogPickerSub(null); setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('pick'); setMatchModalOpen(true); }}
+                  style={{ background: "#eef2ff", border: "none", borderRadius: 16, padding: "16px 18px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, width: "100%" }}
+                >
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: "#2653d4", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
+                  </div>
+                  <div style={{ textAlign: "left" }}>
+                    <p style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 700, color: "#2653d4", margin: 0, lineHeight: 1.2 }}>Add a match</p>
+                    <p style={{ fontSize: "clamp(12px, 3.1vw, 13px)", fontWeight: 500, color: "#6b7480", margin: "2px 0 0" }}>Schedule your next game</p>
+                  </div>
+                </button>
 
                 {/* Row 3: Food & Note tiles */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
