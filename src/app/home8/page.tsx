@@ -1819,7 +1819,7 @@ export default function Home8() {
               <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
               <div
                 className="relative w-full bg-white rounded-t-[28px] flex flex-col"
-                style={{ animation: "miSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)", minHeight: "65vh", maxHeight: "92vh", paddingBottom: "env(safe-area-inset-bottom)" }}
+                style={{ animation: "miSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)", height: "65vh", paddingBottom: "env(safe-area-inset-bottom)" }}
                 onClick={e => e.stopPropagation()}
               >
                 {/* Handle */}
