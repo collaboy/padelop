@@ -354,7 +354,7 @@ export default function Home8() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [pastReviews, setPastReviews] = useState<{ ts: string; result: string; opponentNames: string; wellDone: string[]; improved: string[] }[]>([]);
   const [matchActionOpen, setMatchActionOpen] = useState(false);
-  const [matchDetailsOpen, setMatchDetailsOpen] = useState(false);
+  const [matchInfoOpen, setMatchInfoOpen] = useState(false);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; court?: string; players?: string[] } | null>(null);
   const [isAddMode, setIsAddMode] = useState(false);
   const [matchActionMode, setMatchActionMode] = useState<null | 'edit' | 'add'>(null);
@@ -914,9 +914,7 @@ export default function Home8() {
             const dx = e.changedTouches[0].clientX - touchStartXRef.current;
             if (doIdx >= 1) { swipeDirRef.current = null; return; } // scroll div handles goPrev
             const dy = endY - touchStartYRef.current;
-            if (swipeDirRef.current === 'h' && matchDetailsOpen) {
-              setMatchDetailsOpen(false);
-            } else if (swipeDirRef.current === 'h' && doIdx === 0) {
+            if (swipeDirRef.current === 'h' && doIdx === 0) {
               setLiveX(0);
               if (cardSnap === 'none') {
                 if (dx < -60) setCardSnap('left');
@@ -1025,28 +1023,13 @@ export default function Home8() {
                             Next Match{upcomingCount > 1 && <span style={{ marginLeft: 6, fontWeight: 600, color: "#c8ccd0" }}>+{upcomingCount - 1} more</span>}
                           </p>
 
-                          {/* Line 2: Countdown pill with time inside — tap to toggle details */}
-                          <button onClick={() => setMatchDetailsOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                          {/* Line 2: Countdown pill — tap to open match info modal */}
+                          <button onClick={() => setMatchInfoOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                             <div style={{ background: "#2653d4", borderRadius: 999, padding: "10px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
                               <span style={{ fontSize: "clamp(19px, 5vw, 23px)", fontWeight: 800, color: "rgba(255,255,255,0.9)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{countdownLabel}</span>
                               <span style={{ fontSize: "clamp(22px, 6vw, 28px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.01em" }}>{match.time}</span>
                             </div>
                           </button>
-
-                          {/* Match details — revealed directly below pill on tap */}
-                          {matchDetailsOpen && (
-                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                              <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1, letterSpacing: "-0.02em" }}>{dateStr}</p>
-                              {match.club && <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 500, color: "#6b7480", margin: "4px 0 0" }}>{match.club}</p>}
-                              {match.court && <p style={{ fontSize: "clamp(13px, 3.4vw, 16px)", fontWeight: 500, color: "#8a9096", margin: "2px 0 0" }}>Court {match.court}</p>}
-                              {playerStr && <p style={{ fontSize: "clamp(12px, 3.1vw, 15px)", color: "#b0b8c1", margin: "2px 0 0", textAlign: "center", lineHeight: 1.4 }}>{playerStr}</p>}
-                              <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
-                                <button onClick={() => { setMatchForm({ date: match.date, time: match.time, club: match.club ?? '', court: match.court ?? '', p1: match.players?.[0] ?? '', p2: match.players?.[1] ?? '', p3: match.players?.[2] ?? '', p4: match.players?.[3] ?? '' }); setMatchActionMode('edit'); setMatchActionOpen(true); }} style={{ fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 600, color: "#2653d4", background: "#eef2ff", border: "none", cursor: "pointer", padding: "8px 18px", borderRadius: 999 }}>Edit</button>
-                                <button onClick={() => { setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setIsAddMode(true); setMatchActionMode('add'); setMatchActionOpen(true); }} style={{ fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 600, color: "#16a34a", background: "#f0fdf4", border: "none", cursor: "pointer", padding: "8px 18px", borderRadius: 999 }}>+Add</button>
-                                <button onClick={() => router.push("/matches4")} style={{ fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 600, color: "#4a5050", background: "#f4f4f6", border: "none", cursor: "pointer", padding: "8px 18px", borderRadius: 999 }}>All</button>
-                              </div>
-                            </div>
-                          )}
 
                           {/* Line 3: Readiness on one line */}
                           <button onClick={() => setReadinessSheetOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
@@ -1793,6 +1776,65 @@ export default function Home8() {
             </div>
           </div>
         )}
+
+        {/* Match info modal */}
+        {matchInfoOpen && match && (() => {
+          const matchDate = new Date(match.date + "T12:00");
+          const todayDate = new Date(today + "T12:00");
+          const diffDays = Math.round((matchDate.getTime() - todayDate.getTime()) / 86400000);
+          const countdownLabel = diffDays === 0 ? "TODAY" : diffDays === 1 ? "TOMORROW" : `IN ${diffDays} DAYS`;
+          const dateStr = matchDate.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+          const playerStr = match.players && match.players.length > 0 ? match.players.join(', ') : null;
+          return (
+            <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" onClick={() => setMatchInfoOpen(false)} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
+              <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+              <div className="relative w-full max-w-sm bg-white shadow-2xl" style={{ borderRadius: 24, padding: "28px 24px 24px" }} onClick={e => e.stopPropagation()}>
+                {/* Header */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+                  <span style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1" }}>Next Match</span>
+                  <button onClick={() => setMatchInfoOpen(false)} style={{ background: "rgba(0,0,0,0.06)", border: "none", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+                {/* Countdown */}
+                <p style={{ fontSize: "clamp(12px, 3vw, 14px)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#2653d4", margin: "0 0 4px" }}>{countdownLabel}</p>
+                {/* Date */}
+                <p style={{ fontSize: "clamp(22px, 6vw, 28px)", fontWeight: 800, color: "#1a1c1c", margin: "0 0 16px", lineHeight: 1.1, letterSpacing: "-0.02em" }}>{dateStr}</p>
+                {/* Details */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, borderTop: "1px solid #f0f0f0", paddingTop: 16 }}>
+                  <div style={{ display: "flex", gap: 12, alignItems: "baseline" }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 52, flexShrink: 0 }}>Time</span>
+                    <span style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 600, color: "#1a1c1c" }}>{match.time}</span>
+                  </div>
+                  {match.club && (
+                    <div style={{ display: "flex", gap: 12, alignItems: "baseline" }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 52, flexShrink: 0 }}>Club</span>
+                      <span style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 500, color: "#4a5050" }}>{match.club}</span>
+                    </div>
+                  )}
+                  {match.court && (
+                    <div style={{ display: "flex", gap: 12, alignItems: "baseline" }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 52, flexShrink: 0 }}>Court</span>
+                      <span style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 500, color: "#4a5050" }}>{match.court}</span>
+                    </div>
+                  )}
+                  {playerStr && (
+                    <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 52, flexShrink: 0, paddingTop: 2 }}>With</span>
+                      <span style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 400, color: "#6b7480", lineHeight: 1.5 }}>{playerStr}</span>
+                    </div>
+                  )}
+                </div>
+                {/* Actions */}
+                <div style={{ display: "flex", gap: 8, marginTop: 20 }}>
+                  <button onClick={() => { setMatchInfoOpen(false); setMatchForm({ date: match.date, time: match.time, club: match.club ?? '', court: match.court ?? '', p1: match.players?.[0] ?? '', p2: match.players?.[1] ?? '', p3: match.players?.[2] ?? '', p4: match.players?.[3] ?? '' }); setMatchActionMode('edit'); setMatchActionOpen(true); }} style={{ flex: 1, fontSize: "clamp(13px, 3.4vw, 14px)", fontWeight: 600, color: "#2653d4", background: "#eef2ff", border: "none", cursor: "pointer", padding: "10px 0", borderRadius: 12 }}>Edit</button>
+                  <button onClick={() => { setMatchInfoOpen(false); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setIsAddMode(true); setMatchActionMode('add'); setMatchActionOpen(true); }} style={{ flex: 1, fontSize: "clamp(13px, 3.4vw, 14px)", fontWeight: 600, color: "#16a34a", background: "#f0fdf4", border: "none", cursor: "pointer", padding: "10px 0", borderRadius: 12 }}>+ Add</button>
+                  <button onClick={() => { setMatchInfoOpen(false); router.push("/matches4"); }} style={{ flex: 1, fontSize: "clamp(13px, 3.4vw, 14px)", fontWeight: 600, color: "#4a5050", background: "#f4f4f6", border: "none", cursor: "pointer", padding: "10px 0", borderRadius: 12 }}>All</button>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Match action sheet */}
         {matchActionOpen && (
