@@ -1022,12 +1022,10 @@ export default function Home8() {
                             Next Match{upcomingCount > 1 && <span style={{ marginLeft: 6, fontWeight: 600, color: "#c8ccd0" }}>+{upcomingCount - 1} more</span>}
                           </p>
 
-                          {/* Line 2: Countdown pill + time in same cell */}
-                          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-                            <span style={{ fontSize: "clamp(13px, 3.4vw, 16px)", fontWeight: 700, background: "#2653d4", color: "#fff", padding: "6px 18px", borderRadius: 999, letterSpacing: "0.04em" }}>
-                              {countdownLabel}
-                            </span>
-                            <p style={{ fontSize: "clamp(28px, 7.5vw, 36px)", fontWeight: 800, color: "#2653d4", margin: 0, lineHeight: 1, letterSpacing: "-0.01em" }}>{match.time}</p>
+                          {/* Line 2: Countdown pill with time inside */}
+                          <div style={{ background: "#2653d4", borderRadius: 999, padding: "10px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                            <span style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 700, color: "rgba(255,255,255,0.75)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{countdownLabel}</span>
+                            <span style={{ fontSize: "clamp(22px, 6vw, 28px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.01em" }}>{match.time}</span>
                           </div>
 
                           {/* Line 3: Readiness on one line */}
