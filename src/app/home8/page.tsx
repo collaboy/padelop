@@ -1025,7 +1025,10 @@ export default function Home8() {
                           {/* Line 2: Countdown pill with time inside */}
                           <div style={{ background: "#2653d4", borderRadius: 999, padding: "10px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
                             <span style={{ fontSize: "clamp(15px, 4vw, 18px)", fontWeight: 700, color: "rgba(255,255,255,0.85)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{countdownLabel}</span>
-                            <span style={{ fontSize: "clamp(22px, 6vw, 28px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.01em" }}>{match.time}</span>
+                            <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                              <span style={{ fontSize: "clamp(22px, 6vw, 28px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.01em" }}>{match.time}</span>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                            </span>
                           </div>
 
                           {/* Line 3: Readiness on one line */}
