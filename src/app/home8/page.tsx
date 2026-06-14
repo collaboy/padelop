@@ -1026,7 +1026,7 @@ export default function Home8() {
                           {/* Line 2: Countdown pill with time inside — tap to toggle details */}
                           <button onClick={() => setMatchDetailsOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                             <div style={{ background: "#2653d4", borderRadius: 999, padding: "10px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-                              <span style={{ fontSize: "clamp(15px, 4vw, 18px)", fontWeight: 700, color: "rgba(255,255,255,0.85)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{countdownLabel}</span>
+                              <span style={{ fontSize: "clamp(19px, 5vw, 23px)", fontWeight: 800, color: "rgba(255,255,255,0.9)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{countdownLabel}</span>
                               <span style={{ fontSize: "clamp(22px, 6vw, 28px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.01em" }}>{match.time}</span>
                             </div>
                           </button>
