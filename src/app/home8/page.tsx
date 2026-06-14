@@ -355,6 +355,8 @@ export default function Home8() {
   const [pastReviews, setPastReviews] = useState<{ ts: string; result: string; opponentNames: string; wellDone: string[]; improved: string[] }[]>([]);
   const [matchActionOpen, setMatchActionOpen] = useState(false);
   const [matchInfoOpen, setMatchInfoOpen] = useState(false);
+  const [matchInfoMode, setMatchInfoMode] = useState<null | 'edit' | 'add'>(null);
+  const [matchInfoAddTab, setMatchInfoAddTab] = useState<null | 'upload' | 'manual'>(null);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; court?: string; players?: string[] } | null>(null);
   const [isAddMode, setIsAddMode] = useState(false);
   const [matchActionMode, setMatchActionMode] = useState<null | 'edit' | 'add'>(null);
@@ -1778,6 +1780,7 @@ export default function Home8() {
         )}
 
         {/* Match info modal */}
+        {/* Match info modal — bottom sheet */}
         {matchInfoOpen && match && (() => {
           const matchDate = new Date(match.date + "T12:00");
           const todayDate = new Date(today + "T12:00");
@@ -1785,51 +1788,209 @@ export default function Home8() {
           const countdownLabel = diffDays === 0 ? "TODAY" : diffDays === 1 ? "TOMORROW" : `IN ${diffDays} DAYS`;
           const dateStr = matchDate.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
           const playerStr = match.players && match.players.length > 0 ? match.players.join(', ') : null;
+          const closeSheet = () => { setMatchInfoOpen(false); setMatchInfoMode(null); setMatchInfoAddTab(null); };
+          const saveEdit = () => {
+            if (!matchForm.date || !matchForm.time) return;
+            const data: StoredMatch = { date: matchForm.date, time: matchForm.time, club: matchForm.club, court: matchForm.court, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
+            const current = getMatchList();
+            const replaced = current.map(m => m.date === match?.date && m.time === match?.time ? data : m);
+            const updated = replaced.some(m => m === data) ? replaced : [data, ...current];
+            const sorted = saveMatchList(updated);
+            const next = sorted[0];
+            if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, court: next.court || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
+            saveUpcomingMatch(data);
+            window.dispatchEvent(new Event("storage"));
+            closeSheet();
+          };
+          const saveAdd = () => {
+            if (!matchForm.date || !matchForm.time) return;
+            const data: StoredMatch = { date: matchForm.date, time: matchForm.time, club: matchForm.club, court: matchForm.court, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
+            const current = getMatchList();
+            const sorted = saveMatchList([...current, data]);
+            const next = sorted[0];
+            if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, court: next.court || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
+            saveUpcomingMatch(data);
+            window.dispatchEvent(new Event("storage"));
+            closeSheet();
+          };
           return (
-            <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" onClick={() => setMatchInfoOpen(false)} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
+            <div className="fixed inset-0 z-[200] flex items-end" onClick={closeSheet} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
+              <style>{`@keyframes miSlideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}`}</style>
               <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
-              <div className="relative w-full max-w-sm bg-white shadow-2xl" style={{ borderRadius: 24, padding: "28px 24px 24px" }} onClick={e => e.stopPropagation()}>
-                {/* Header */}
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-                  <span style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1" }}>Next Match</span>
-                  <button onClick={() => setMatchInfoOpen(false)} style={{ background: "rgba(0,0,0,0.06)", border: "none", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                  </button>
-                </div>
-                {/* Countdown */}
-                <p style={{ fontSize: "clamp(12px, 3vw, 14px)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#2653d4", margin: "0 0 4px" }}>{countdownLabel}</p>
-                {/* Date */}
-                <p style={{ fontSize: "clamp(22px, 6vw, 28px)", fontWeight: 800, color: "#1a1c1c", margin: "0 0 16px", lineHeight: 1.1, letterSpacing: "-0.02em" }}>{dateStr}</p>
-                {/* Details */}
-                <div style={{ display: "flex", flexDirection: "column", gap: 10, borderTop: "1px solid #f0f0f0", paddingTop: 16 }}>
-                  <div style={{ display: "flex", gap: 12, alignItems: "baseline" }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 52, flexShrink: 0 }}>Time</span>
-                    <span style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 600, color: "#1a1c1c" }}>{match.time}</span>
+              <div
+                className="relative w-full bg-white rounded-t-[28px] flex flex-col overflow-hidden"
+                style={{ animation: "miSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)", maxHeight: "85vh", paddingBottom: "env(safe-area-inset-bottom)" }}
+                onClick={e => e.stopPropagation()}
+              >
+                {/* Handle */}
+                <div className="w-10 h-1 rounded-full bg-[#e0e0e0] mx-auto mt-3 mb-0 flex-shrink-0" />
+
+                <div className="overflow-y-auto" style={{ overscrollBehavior: "contain" }}>
+                  {/* Header */}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px 0" }}>
+                    <p style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: 0 }}>Next Match</p>
+                    <button onClick={closeSheet} style={{ background: "rgba(0,0,0,0.06)", border: "none", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
                   </div>
-                  {match.club && (
-                    <div style={{ display: "flex", gap: 12, alignItems: "baseline" }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 52, flexShrink: 0 }}>Club</span>
-                      <span style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 500, color: "#4a5050" }}>{match.club}</span>
+
+                  {/* Match summary (read view) */}
+                  {matchInfoMode !== 'edit' && (
+                    <div style={{ padding: "12px 20px 0" }}>
+                      <p style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#2653d4", margin: "0 0 4px" }}>{countdownLabel}</p>
+                      <p style={{ fontSize: "clamp(22px, 6vw, 27px)", fontWeight: 800, color: "#1a1c1c", margin: "0 0 14px", lineHeight: 1.1, letterSpacing: "-0.02em" }}>{dateStr}</p>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8, borderTop: "1px solid #f0f0f0", paddingTop: 14 }}>
+                        <div style={{ display: "flex", gap: 12 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 48, flexShrink: 0, paddingTop: 2 }}>Time</span>
+                          <span style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 600, color: "#1a1c1c" }}>{match.time}</span>
+                        </div>
+                        {match.club && (
+                          <div style={{ display: "flex", gap: 12 }}>
+                            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 48, flexShrink: 0, paddingTop: 2 }}>Club</span>
+                            <span style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 500, color: "#4a5050" }}>{match.club}</span>
+                          </div>
+                        )}
+                        {match.court && (
+                          <div style={{ display: "flex", gap: 12 }}>
+                            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 48, flexShrink: 0, paddingTop: 2 }}>Court</span>
+                            <span style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 500, color: "#4a5050" }}>{match.court}</span>
+                          </div>
+                        )}
+                        {playerStr && (
+                          <div style={{ display: "flex", gap: 12 }}>
+                            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 48, flexShrink: 0, paddingTop: 2 }}>With</span>
+                            <span style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 400, color: "#6b7480", lineHeight: 1.5 }}>{playerStr}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
-                  {match.court && (
-                    <div style={{ display: "flex", gap: 12, alignItems: "baseline" }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 52, flexShrink: 0 }}>Court</span>
-                      <span style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 500, color: "#4a5050" }}>{match.court}</span>
+
+                  {/* Edit form */}
+                  {matchInfoMode === 'edit' && (
+                    <div style={{ padding: "16px 20px 4px" }}>
+                      <p style={{ fontSize: "clamp(16px, 4.2vw, 19px)", fontWeight: 700, color: "#1a1c1c", margin: "0 0 16px" }}>Edit match</p>
+                      <div className="flex flex-col gap-3">
+                        <div className="flex gap-3">
+                          <div className="flex-1 flex flex-col gap-1">
+                            <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
+                            <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#fff" }} />
+                          </div>
+                          <div className="flex-1 flex flex-col gap-1">
+                            <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
+                            <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#fff" }} />
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Club</label>
+                          <input type="text" placeholder="e.g. Club Padel BCN" value={matchForm.club} onChange={e => setMatchForm(f => ({ ...f, club: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm.club ? "#2653d4" : "#e2e2e2", background: matchForm.club ? "#f4f6ff" : "#fff" }} />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Court #</label>
+                          <input type="text" placeholder="e.g. 3" value={matchForm.court} onChange={e => setMatchForm(f => ({ ...f, court: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm.court ? "#2653d4" : "#e2e2e2", background: matchForm.court ? "#f4f6ff" : "#fff" }} />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Players</label>
+                          {(['p1','p2','p3','p4'] as const).map((key, i) => (
+                            <input key={key} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={matchForm[key]} onChange={e => setMatchForm(f => ({ ...f, [key]: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm[key] ? "#2653d4" : "#e2e2e2", background: matchForm[key] ? "#f4f6ff" : "#fff" }} />
+                          ))}
+                        </div>
+                        <button onClick={saveEdit} className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white mt-1" style={{ background: (!matchForm.date || !matchForm.time) ? "#c4c7c7" : "#2653d4" }}>Save changes</button>
+                      </div>
                     </div>
                   )}
-                  {playerStr && (
-                    <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 52, flexShrink: 0, paddingTop: 2 }}>With</span>
-                      <span style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 400, color: "#6b7480", lineHeight: 1.5 }}>{playerStr}</span>
+
+                  {/* Add form */}
+                  {matchInfoMode === 'add' && (
+                    <div style={{ padding: "16px 20px 4px" }}>
+                      <p style={{ fontSize: "clamp(16px, 4.2vw, 19px)", fontWeight: 700, color: "#1a1c1c", margin: "0 0 14px" }}>Add a match</p>
+                      {/* Upload / Manual toggle */}
+                      {!matchInfoAddTab && (
+                        <div className="flex gap-3">
+                          <button onClick={() => { setUploadError(null); setMatchInfoAddTab('upload'); actionUploadRef.current?.click(); }} className="flex-1 flex flex-col items-center gap-2 py-4 rounded-2xl active:opacity-70" style={{ background: "#f4f6ff", border: "1.5px solid #2653d418" }}>
+                            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "#2653d4" }}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            </div>
+                            <span className="text-[13px] font-semibold text-[#2653d4]">Upload screenshot</span>
+                          </button>
+                          <button onClick={() => { setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchInfoAddTab('manual'); }} className="flex-1 flex flex-col items-center gap-2 py-4 rounded-2xl active:opacity-70" style={{ background: "#f4f4f6", border: "1.5px solid #e2e2e2" }}>
+                            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "#e8eaed" }}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            </div>
+                            <span className="text-[13px] font-semibold text-[#4a5050]">Enter manually</span>
+                          </button>
+                        </div>
+                      )}
+                      {/* Hidden file input */}
+                      <input ref={actionUploadRef} type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setUploadError(null); setUploadExtracting(true);
+                        try {
+                          const reader = new FileReader();
+                          const base64 = await new Promise<string>((resolve, reject) => { reader.onload = () => resolve((reader.result as string).split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); });
+                          const res = await fetch('/api/extract-match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: base64, mediaType: file.type }) });
+                          const data = await res.json();
+                          if (!res.ok || data.error) { setUploadError(data.message || 'Could not read the screenshot.'); }
+                          else { setMatchForm({ date: data.date ?? '', time: data.time ?? '', club: data.club ?? '', court: data.court ?? '', p1: data.player_1 ?? '', p2: data.player_2 ?? '', p3: data.player_3 ?? '', p4: data.player_4 ?? '' }); setMatchInfoAddTab('manual'); }
+                        } catch { setUploadError('Upload failed. Please try again.'); }
+                        setUploadExtracting(false);
+                        if (actionUploadRef.current) actionUploadRef.current.value = '';
+                      }} />
+                      {/* Extracting spinner */}
+                      {uploadExtracting && (
+                        <div className="flex items-center gap-3 py-3">
+                          <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                          <span className="text-[14px] font-medium text-[#2653d4]">Reading screenshot…</span>
+                        </div>
+                      )}
+                      {uploadError && <div className="px-3 py-2.5 rounded-xl text-[13px] text-[#c0392b] mt-2" style={{ background: "#fff0f0", border: "1.5px solid #ffd0d0" }}>{uploadError}</div>}
+                      {/* Manual form */}
+                      {matchInfoAddTab === 'manual' && (
+                        <div className="flex flex-col gap-3 mt-3">
+                          <div className="flex gap-3">
+                            <div className="flex-1 flex flex-col gap-1">
+                              <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
+                              <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#fff" }} />
+                            </div>
+                            <div className="flex-1 flex flex-col gap-1">
+                              <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
+                              <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#fff" }} />
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Club</label>
+                            <input type="text" placeholder="e.g. Club Padel BCN" value={matchForm.club} onChange={e => setMatchForm(f => ({ ...f, club: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm.club ? "#2653d4" : "#e2e2e2", background: matchForm.club ? "#f4f6ff" : "#fff" }} />
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Court #</label>
+                            <input type="text" placeholder="e.g. 3" value={matchForm.court} onChange={e => setMatchForm(f => ({ ...f, court: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm.court ? "#2653d4" : "#e2e2e2", background: matchForm.court ? "#f4f6ff" : "#fff" }} />
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Players</label>
+                            {(['p1','p2','p3','p4'] as const).map((key, i) => (
+                              <input key={key} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={matchForm[key]} onChange={e => setMatchForm(f => ({ ...f, [key]: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm[key] ? "#2653d4" : "#e2e2e2", background: matchForm[key] ? "#f4f6ff" : "#fff" }} />
+                            ))}
+                          </div>
+                          <button onClick={saveAdd} className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white mt-1" style={{ background: (!matchForm.date || !matchForm.time) ? "#c4c7c7" : "#16a34a" }}>Save match</button>
+                        </div>
+                      )}
                     </div>
                   )}
-                </div>
-                {/* Actions */}
-                <div style={{ display: "flex", gap: 8, marginTop: 20 }}>
-                  <button onClick={() => { setMatchInfoOpen(false); setMatchForm({ date: match.date, time: match.time, club: match.club ?? '', court: match.court ?? '', p1: match.players?.[0] ?? '', p2: match.players?.[1] ?? '', p3: match.players?.[2] ?? '', p4: match.players?.[3] ?? '' }); setMatchActionMode('edit'); setMatchActionOpen(true); }} style={{ flex: 1, fontSize: "clamp(13px, 3.4vw, 14px)", fontWeight: 600, color: "#2653d4", background: "#eef2ff", border: "none", cursor: "pointer", padding: "10px 0", borderRadius: 12 }}>Edit</button>
-                  <button onClick={() => { setMatchInfoOpen(false); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setIsAddMode(true); setMatchActionMode('add'); setMatchActionOpen(true); }} style={{ flex: 1, fontSize: "clamp(13px, 3.4vw, 14px)", fontWeight: 600, color: "#16a34a", background: "#f0fdf4", border: "none", cursor: "pointer", padding: "10px 0", borderRadius: 12 }}>+ Add</button>
-                  <button onClick={() => { setMatchInfoOpen(false); router.push("/matches4"); }} style={{ flex: 1, fontSize: "clamp(13px, 3.4vw, 14px)", fontWeight: 600, color: "#4a5050", background: "#f4f4f6", border: "none", cursor: "pointer", padding: "10px 0", borderRadius: 12 }}>All</button>
+
+                  {/* Action buttons */}
+                  {matchInfoMode === null && (
+                    <div style={{ display: "flex", gap: 8, padding: "16px 20px 20px" }}>
+                      <button onClick={() => { setMatchForm({ date: match.date, time: match.time, club: match.club ?? '', court: match.court ?? '', p1: match.players?.[0] ?? '', p2: match.players?.[1] ?? '', p3: match.players?.[2] ?? '', p4: match.players?.[3] ?? '' }); setMatchInfoMode('edit'); }} style={{ flex: 1, fontSize: "clamp(13px, 3.4vw, 14px)", fontWeight: 600, color: "#2653d4", background: "#eef2ff", border: "none", cursor: "pointer", padding: "11px 0", borderRadius: 12 }}>Edit</button>
+                      <button onClick={() => { setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchInfoMode('add'); }} style={{ flex: 1, fontSize: "clamp(13px, 3.4vw, 14px)", fontWeight: 600, color: "#16a34a", background: "#f0fdf4", border: "none", cursor: "pointer", padding: "11px 0", borderRadius: 12 }}>+ Add</button>
+                      <button onClick={() => { closeSheet(); router.push("/profile#matches"); }} style={{ flex: 1, fontSize: "clamp(13px, 3.4vw, 14px)", fontWeight: 600, color: "#4a5050", background: "#f4f4f6", border: "none", cursor: "pointer", padding: "11px 0", borderRadius: 12 }}>All</button>
+                    </div>
+                  )}
+                  {matchInfoMode !== null && (
+                    <div style={{ padding: "8px 20px 20px" }}>
+                      <button onClick={() => { setMatchInfoMode(null); setMatchInfoAddTab(null); setUploadError(null); }} style={{ fontSize: "clamp(13px, 3.4vw, 14px)", fontWeight: 600, color: "#8a9096", background: "none", border: "none", cursor: "pointer", padding: "8px 0" }}>← Back</button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
