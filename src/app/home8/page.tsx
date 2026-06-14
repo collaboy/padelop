@@ -354,6 +354,7 @@ export default function Home8() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [pastReviews, setPastReviews] = useState<{ ts: string; result: string; opponentNames: string; wellDone: string[]; improved: string[] }[]>([]);
   const [matchActionOpen, setMatchActionOpen] = useState(false);
+  const [matchDetailsOpen, setMatchDetailsOpen] = useState(false);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
   const [isAddMode, setIsAddMode] = useState(false);
   const [matchActionMode, setMatchActionMode] = useState<null | 'edit' | 'add'>(null);
@@ -1022,14 +1023,13 @@ export default function Home8() {
                             Next Match{upcomingCount > 1 && <span style={{ marginLeft: 6, fontWeight: 600, color: "#c8ccd0" }}>+{upcomingCount - 1} more</span>}
                           </p>
 
-                          {/* Line 2: Countdown pill with time inside */}
-                          <div style={{ background: "#2653d4", borderRadius: 999, padding: "10px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-                            <span style={{ fontSize: "clamp(15px, 4vw, 18px)", fontWeight: 700, color: "rgba(255,255,255,0.85)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{countdownLabel}</span>
-                            <span style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          {/* Line 2: Countdown pill with time inside — tap to toggle details */}
+                          <button onClick={() => setMatchDetailsOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                            <div style={{ background: "#2653d4", borderRadius: 999, padding: "10px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                              <span style={{ fontSize: "clamp(15px, 4vw, 18px)", fontWeight: 700, color: "rgba(255,255,255,0.85)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{countdownLabel}</span>
                               <span style={{ fontSize: "clamp(22px, 6vw, 28px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.01em" }}>{match.time}</span>
-                              <svg style={{ position: "absolute", right: -22 }} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                            </span>
-                          </div>
+                            </div>
+                          </button>
 
                           {/* Line 3: Readiness on one line */}
                           <button onClick={() => setReadinessSheetOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
@@ -1038,12 +1038,14 @@ export default function Home8() {
                             </span>
                           </button>
 
-                          {/* Line 4: Match info */}
-                          <button onClick={() => setMatchActionOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                            <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1, letterSpacing: "-0.02em" }}>{dateStr}</p>
-                            {match.club && <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 500, color: "#6b7480", margin: "4px 0 0" }}>{match.club}</p>}
-                            {playerStr && <p style={{ fontSize: "clamp(12px, 3.1vw, 15px)", color: "#b0b8c1", margin: "2px 0 0", textAlign: "center", lineHeight: 1.4 }}>{playerStr}</p>}
-                          </button>
+                          {/* Line 4: Match details — revealed on pill tap */}
+                          {matchDetailsOpen && (
+                            <button onClick={() => setMatchActionOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                              <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1, letterSpacing: "-0.02em" }}>{dateStr}</p>
+                              {match.club && <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 500, color: "#6b7480", margin: "4px 0 0" }}>{match.club}</p>}
+                              {playerStr && <p style={{ fontSize: "clamp(12px, 3.1vw, 15px)", color: "#b0b8c1", margin: "2px 0 0", textAlign: "center", lineHeight: 1.4 }}>{playerStr}</p>}
+                            </button>
+                          )}
                         </div>
                       );
                     })() : (
