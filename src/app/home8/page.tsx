@@ -1818,58 +1818,69 @@ export default function Home8() {
               <style>{`@keyframes miSlideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}`}</style>
               <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
               <div
-                className="relative w-full bg-white rounded-t-[28px] flex flex-col overflow-hidden"
-                style={{ animation: "miSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)", maxHeight: "85vh", paddingBottom: "env(safe-area-inset-bottom)" }}
+                className="relative w-full bg-white rounded-t-[28px] flex flex-col"
+                style={{ animation: "miSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)", minHeight: "65vh", maxHeight: "92vh", paddingBottom: "env(safe-area-inset-bottom)" }}
                 onClick={e => e.stopPropagation()}
               >
                 {/* Handle */}
                 <div className="w-10 h-1 rounded-full bg-[#e0e0e0] mx-auto mt-3 mb-0 flex-shrink-0" />
 
-                <div className="overflow-y-auto" style={{ overscrollBehavior: "contain" }}>
+                {/* Scrollable content */}
+                <div className="overflow-y-auto flex-1" style={{ overscrollBehavior: "contain" }}>
                   {/* Header */}
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px 0" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px 0" }}>
                     <p style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: 0 }}>Next Match</p>
                     <button onClick={closeSheet} style={{ background: "rgba(0,0,0,0.06)", border: "none", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     </button>
                   </div>
 
-                  {/* Match summary (read view) */}
-                  {matchInfoMode !== 'edit' && (
-                    <div style={{ padding: "12px 20px 0" }}>
-                      <p style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#2653d4", margin: "0 0 4px" }}>{countdownLabel}</p>
-                      <p style={{ fontSize: "clamp(22px, 6vw, 27px)", fontWeight: 800, color: "#1a1c1c", margin: "0 0 14px", lineHeight: 1.1, letterSpacing: "-0.02em" }}>{dateStr}</p>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 8, borderTop: "1px solid #f0f0f0", paddingTop: 14 }}>
-                        <div style={{ display: "flex", gap: 12 }}>
-                          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 48, flexShrink: 0, paddingTop: 2 }}>Time</span>
-                          <span style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 600, color: "#1a1c1c" }}>{match.time}</span>
-                        </div>
-                        {match.club && (
-                          <div style={{ display: "flex", gap: 12 }}>
-                            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 48, flexShrink: 0, paddingTop: 2 }}>Club</span>
-                            <span style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 500, color: "#4a5050" }}>{match.club}</span>
-                          </div>
-                        )}
-                        {match.court && (
-                          <div style={{ display: "flex", gap: 12 }}>
-                            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 48, flexShrink: 0, paddingTop: 2 }}>Court</span>
-                            <span style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 500, color: "#4a5050" }}>{match.court}</span>
-                          </div>
-                        )}
-                        {playerStr && (
-                          <div style={{ display: "flex", gap: 12 }}>
-                            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 48, flexShrink: 0, paddingTop: 2 }}>With</span>
-                            <span style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 400, color: "#6b7480", lineHeight: 1.5 }}>{playerStr}</span>
-                          </div>
-                        )}
+                  {/* Read view — always visible */}
+                  <div style={{ padding: "12px 20px 0" }}>
+                    <p style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#2653d4", margin: "0 0 4px" }}>{countdownLabel}</p>
+                    <p style={{ fontSize: "clamp(22px, 6vw, 27px)", fontWeight: 800, color: "#1a1c1c", margin: "0 0 14px", lineHeight: 1.1, letterSpacing: "-0.02em" }}>{dateStr}</p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8, borderTop: "1px solid #f0f0f0", paddingTop: 14 }}>
+                      <div style={{ display: "flex", gap: 12 }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 48, flexShrink: 0, paddingTop: 2 }}>Time</span>
+                        <span style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 600, color: "#1a1c1c" }}>{match.time}</span>
                       </div>
+                      {match.club && (
+                        <div style={{ display: "flex", gap: 12 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 48, flexShrink: 0, paddingTop: 2 }}>Club</span>
+                          <span style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 500, color: "#4a5050" }}>{match.club}</span>
+                        </div>
+                      )}
+                      {match.court && (
+                        <div style={{ display: "flex", gap: 12 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 48, flexShrink: 0, paddingTop: 2 }}>Court</span>
+                          <span style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 500, color: "#4a5050" }}>{match.court}</span>
+                        </div>
+                      )}
+                      {playerStr && (
+                        <div style={{ display: "flex", gap: 12 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 48, flexShrink: 0, paddingTop: 2 }}>With</span>
+                          <span style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 400, color: "#6b7480", lineHeight: 1.5 }}>{playerStr}</span>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
 
-                  {/* Edit form */}
+                  {/* Action row — always visible */}
+                  <div style={{ display: "flex", gap: 8, padding: "16px 20px 0" }}>
+                    <button
+                      onClick={() => { if (matchInfoMode === 'edit') { setMatchInfoMode(null); } else { setMatchForm({ date: match.date, time: match.time, club: match.club ?? '', court: match.court ?? '', p1: match.players?.[0] ?? '', p2: match.players?.[1] ?? '', p3: match.players?.[2] ?? '', p4: match.players?.[3] ?? '' }); setMatchInfoMode('edit'); setMatchInfoAddTab(null); } }}
+                      style={{ flex: 1, fontSize: "clamp(13px, 3.4vw, 14px)", fontWeight: 600, color: matchInfoMode === 'edit' ? "#fff" : "#2653d4", background: matchInfoMode === 'edit' ? "#2653d4" : "#eef2ff", border: "none", cursor: "pointer", padding: "11px 0", borderRadius: 12 }}
+                    >Edit</button>
+                    <button
+                      onClick={() => { if (matchInfoMode === 'add') { setMatchInfoMode(null); setMatchInfoAddTab(null); } else { setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchInfoMode('add'); setMatchInfoAddTab(null); setUploadError(null); } }}
+                      style={{ flex: 1, fontSize: "clamp(13px, 3.4vw, 14px)", fontWeight: 600, color: matchInfoMode === 'add' ? "#fff" : "#16a34a", background: matchInfoMode === 'add' ? "#16a34a" : "#f0fdf4", border: "none", cursor: "pointer", padding: "11px 0", borderRadius: 12 }}
+                    >+ Add</button>
+                    <button onClick={() => { closeSheet(); router.push("/profile#matches"); }} style={{ flex: 1, fontSize: "clamp(13px, 3.4vw, 14px)", fontWeight: 600, color: "#4a5050", background: "#f4f4f6", border: "none", cursor: "pointer", padding: "11px 0", borderRadius: 12 }}>All</button>
+                  </div>
+
+                  {/* Edit form — expands below button row */}
                   {matchInfoMode === 'edit' && (
-                    <div style={{ padding: "16px 20px 4px" }}>
-                      <p style={{ fontSize: "clamp(16px, 4.2vw, 19px)", fontWeight: 700, color: "#1a1c1c", margin: "0 0 16px" }}>Edit match</p>
+                    <div style={{ padding: "16px 20px 4px", borderTop: "1px solid #f0f0f0", marginTop: 16 }}>
                       <div className="flex flex-col gap-3">
                         <div className="flex gap-3">
                           <div className="flex-1 flex flex-col gap-1">
@@ -1895,16 +1906,15 @@ export default function Home8() {
                             <input key={key} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={matchForm[key]} onChange={e => setMatchForm(f => ({ ...f, [key]: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm[key] ? "#2653d4" : "#e2e2e2", background: matchForm[key] ? "#f4f6ff" : "#fff" }} />
                           ))}
                         </div>
-                        <button onClick={saveEdit} className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white mt-1" style={{ background: (!matchForm.date || !matchForm.time) ? "#c4c7c7" : "#2653d4" }}>Save changes</button>
+                        <button onClick={saveEdit} className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white mt-1 mb-4" style={{ background: (!matchForm.date || !matchForm.time) ? "#c4c7c7" : "#2653d4" }}>Save changes</button>
                       </div>
                     </div>
                   )}
 
-                  {/* Add form */}
+                  {/* Add form — expands below button row */}
                   {matchInfoMode === 'add' && (
-                    <div style={{ padding: "16px 20px 4px" }}>
-                      <p style={{ fontSize: "clamp(16px, 4.2vw, 19px)", fontWeight: 700, color: "#1a1c1c", margin: "0 0 14px" }}>Add a match</p>
-                      {/* Upload / Manual toggle */}
+                    <div style={{ padding: "16px 20px 4px", borderTop: "1px solid #f0f0f0", marginTop: 16 }}>
+                      {/* Upload / Manual picker */}
                       {!matchInfoAddTab && (
                         <div className="flex gap-3">
                           <button onClick={() => { setUploadError(null); setMatchInfoAddTab('upload'); actionUploadRef.current?.click(); }} className="flex-1 flex flex-col items-center gap-2 py-4 rounded-2xl active:opacity-70" style={{ background: "#f4f6ff", border: "1.5px solid #2653d418" }}>
@@ -1921,7 +1931,6 @@ export default function Home8() {
                           </button>
                         </div>
                       )}
-                      {/* Hidden file input */}
                       <input ref={actionUploadRef} type="file" accept="image/*" className="hidden" onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (!file) return;
@@ -1937,17 +1946,10 @@ export default function Home8() {
                         setUploadExtracting(false);
                         if (actionUploadRef.current) actionUploadRef.current.value = '';
                       }} />
-                      {/* Extracting spinner */}
-                      {uploadExtracting && (
-                        <div className="flex items-center gap-3 py-3">
-                          <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                          <span className="text-[14px] font-medium text-[#2653d4]">Reading screenshot…</span>
-                        </div>
-                      )}
+                      {uploadExtracting && <div className="flex items-center gap-3 py-3"><svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg><span className="text-[14px] font-medium text-[#2653d4]">Reading screenshot…</span></div>}
                       {uploadError && <div className="px-3 py-2.5 rounded-xl text-[13px] text-[#c0392b] mt-2" style={{ background: "#fff0f0", border: "1.5px solid #ffd0d0" }}>{uploadError}</div>}
-                      {/* Manual form */}
                       {matchInfoAddTab === 'manual' && (
-                        <div className="flex flex-col gap-3 mt-3">
+                        <div className="flex flex-col gap-3 mt-1">
                           <div className="flex gap-3">
                             <div className="flex-1 flex flex-col gap-1">
                               <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
@@ -1972,25 +1974,14 @@ export default function Home8() {
                               <input key={key} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={matchForm[key]} onChange={e => setMatchForm(f => ({ ...f, [key]: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm[key] ? "#2653d4" : "#e2e2e2", background: matchForm[key] ? "#f4f6ff" : "#fff" }} />
                             ))}
                           </div>
-                          <button onClick={saveAdd} className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white mt-1" style={{ background: (!matchForm.date || !matchForm.time) ? "#c4c7c7" : "#16a34a" }}>Save match</button>
+                          <button onClick={saveAdd} className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white mt-1 mb-4" style={{ background: (!matchForm.date || !matchForm.time) ? "#c4c7c7" : "#16a34a" }}>Save match</button>
                         </div>
                       )}
                     </div>
                   )}
 
-                  {/* Action buttons */}
-                  {matchInfoMode === null && (
-                    <div style={{ display: "flex", gap: 8, padding: "16px 20px 20px" }}>
-                      <button onClick={() => { setMatchForm({ date: match.date, time: match.time, club: match.club ?? '', court: match.court ?? '', p1: match.players?.[0] ?? '', p2: match.players?.[1] ?? '', p3: match.players?.[2] ?? '', p4: match.players?.[3] ?? '' }); setMatchInfoMode('edit'); }} style={{ flex: 1, fontSize: "clamp(13px, 3.4vw, 14px)", fontWeight: 600, color: "#2653d4", background: "#eef2ff", border: "none", cursor: "pointer", padding: "11px 0", borderRadius: 12 }}>Edit</button>
-                      <button onClick={() => { setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchInfoMode('add'); }} style={{ flex: 1, fontSize: "clamp(13px, 3.4vw, 14px)", fontWeight: 600, color: "#16a34a", background: "#f0fdf4", border: "none", cursor: "pointer", padding: "11px 0", borderRadius: 12 }}>+ Add</button>
-                      <button onClick={() => { closeSheet(); router.push("/profile#matches"); }} style={{ flex: 1, fontSize: "clamp(13px, 3.4vw, 14px)", fontWeight: 600, color: "#4a5050", background: "#f4f4f6", border: "none", cursor: "pointer", padding: "11px 0", borderRadius: 12 }}>All</button>
-                    </div>
-                  )}
-                  {matchInfoMode !== null && (
-                    <div style={{ padding: "8px 20px 20px" }}>
-                      <button onClick={() => { setMatchInfoMode(null); setMatchInfoAddTab(null); setUploadError(null); }} style={{ fontSize: "clamp(13px, 3.4vw, 14px)", fontWeight: 600, color: "#8a9096", background: "none", border: "none", cursor: "pointer", padding: "8px 0" }}>← Back</button>
-                    </div>
-                  )}
+                  {/* Bottom padding when no form is open */}
+                  {matchInfoMode === null && <div style={{ height: 24 }} />}
                 </div>
               </div>
             </div>
