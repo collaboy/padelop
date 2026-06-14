@@ -1016,16 +1016,21 @@ export default function Home8() {
                         : null;
 
                       return (
-                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", gap: 18 }}>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", gap: 16 }}>
                           {/* Line 1: Next Match label */}
                           <p style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#b0b8c1", margin: 0 }}>
                             Next Match{upcomingCount > 1 && <span style={{ marginLeft: 6, fontWeight: 600, color: "#c8ccd0" }}>+{upcomingCount - 1} more</span>}
                           </p>
 
-                          {/* Line 2: Countdown pill */}
-                          <span style={{ fontSize: "clamp(13px, 3.4vw, 16px)", fontWeight: 700, background: "#2653d4", color: "#fff", padding: "6px 18px", borderRadius: 999, letterSpacing: "0.04em" }}>
-                            {countdownLabel}
-                          </span>
+                          {/* Line 2: Countdown circle + time directly below */}
+                          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                            <div style={{ width: 96, height: 96, borderRadius: "50%", background: "#2653d4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <span style={{ fontSize: "clamp(11px, 3vw, 14px)", fontWeight: 800, color: "#fff", letterSpacing: "0.06em", textTransform: "uppercase", textAlign: "center", lineHeight: 1.2, padding: "0 8px" }}>
+                                {countdownLabel}
+                              </span>
+                            </div>
+                            <p style={{ fontSize: "clamp(28px, 7.5vw, 36px)", fontWeight: 800, color: "#2653d4", margin: 0, lineHeight: 1, letterSpacing: "-0.01em" }}>{match.time}</p>
+                          </div>
 
                           {/* Line 3: Readiness on one line */}
                           <button onClick={() => setReadinessSheetOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
@@ -1035,10 +1040,9 @@ export default function Home8() {
                           </button>
 
                           {/* Line 4: Match info */}
-                          <button onClick={() => setMatchActionOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
-                            <p style={{ fontSize: "clamp(30px, 8vw, 40px)", fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1, letterSpacing: "-0.02em" }}>{dateStr}</p>
-                            <p style={{ fontSize: "clamp(22px, 6vw, 30px)", fontWeight: 700, color: "#2653d4", margin: 0, lineHeight: 1 }}>{match.time}</p>
-                            {match.club && <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 500, color: "#6b7480", margin: "3px 0 0" }}>{match.club}</p>}
+                          <button onClick={() => setMatchActionOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                            <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1, letterSpacing: "-0.02em" }}>{dateStr}</p>
+                            {match.club && <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 500, color: "#6b7480", margin: "4px 0 0" }}>{match.club}</p>}
                             {playerStr && <p style={{ fontSize: "clamp(12px, 3.1vw, 15px)", color: "#b0b8c1", margin: "2px 0 0", textAlign: "center", lineHeight: 1.4 }}>{playerStr}</p>}
                           </button>
                         </div>
