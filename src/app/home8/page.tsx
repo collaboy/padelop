@@ -1829,7 +1829,7 @@ export default function Home8() {
             closeSheet();
           };
           return (
-            <div className="fixed inset-0 z-[200] flex items-end" onClick={closeSheet} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
+            <div className="fixed inset-0 z-[200] flex items-end" onClick={closeSheet}>
               <style>{`@keyframes miSlideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}`}</style>
               <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
               <div
