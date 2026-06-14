@@ -1027,7 +1027,7 @@ export default function Home8() {
 
                           {/* Line 2: Countdown pill — tap to open match info modal */}
                           <button onClick={() => setMatchInfoOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-                            <div style={{ background: "#2653d4", borderRadius: 999, padding: "10px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                            <div style={{ background: "#2653d4", borderRadius: 9, padding: "10px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
                               <span style={{ fontSize: "clamp(19px, 5vw, 23px)", fontWeight: 800, color: "rgba(255,255,255,0.9)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{countdownLabel}</span>
                               <span style={{ fontSize: "clamp(22px, 6vw, 28px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.01em" }}>{match.time}</span>
                             </div>
@@ -1851,7 +1851,7 @@ export default function Home8() {
                 <div className="overflow-y-auto flex-1 overscroll-contain" style={{ display: "flex", flexDirection: "column", gap: 10, padding: "0 16px 32px" }}>
 
                   {/* MATCH INFO CARD */}
-                  <div style={{ background: "#fff", borderRadius: 24, padding: "24px 20px 20px" }}>
+                  <div style={{ background: "#fff", borderRadius: 9, padding: "24px 20px 20px" }}>
                     <p style={{ fontSize: "clamp(22px, 6vw, 27px)", fontWeight: 800, color: "#1a1c1c", margin: "0 0 16px", lineHeight: 1.1, letterSpacing: "-0.02em" }}>{dateStr}</p>
                     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                       <div style={{ display: "flex", gap: 12 }}>
