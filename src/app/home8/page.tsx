@@ -349,13 +349,13 @@ export default function Home8() {
   const [logWizard, setLogWizard] = useState(false);
   const [matchModalOpen, setMatchModalOpen] = useState(false);
   const [matchModalTab, setMatchModalTab] = useState<'pick' | 'confirm' | 'manual'>('pick');
-  const [matchForm, setMatchForm] = useState({ date: '', time: '', club: '', p1: '', p2: '', p3: '', p4: '' });
+  const [matchForm, setMatchForm] = useState({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' });
   const [uploadExtracting, setUploadExtracting] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [pastReviews, setPastReviews] = useState<{ ts: string; result: string; opponentNames: string; wellDone: string[]; improved: string[] }[]>([]);
   const [matchActionOpen, setMatchActionOpen] = useState(false);
   const [matchDetailsOpen, setMatchDetailsOpen] = useState(false);
-  const [match, setMatch] = useState<{ date: string; time: string; club?: string; players?: string[] } | null>(null);
+  const [match, setMatch] = useState<{ date: string; time: string; club?: string; court?: string; players?: string[] } | null>(null);
   const [isAddMode, setIsAddMode] = useState(false);
   const [matchActionMode, setMatchActionMode] = useState<null | 'edit' | 'add'>(null);
   const [upcomingCount, setUpcomingCount] = useState(0);
@@ -566,7 +566,7 @@ export default function Home8() {
               matchEnded = nowD.getHours() * 60 + nowD.getMinutes() >= mH * 60 + mM + 90;
             }
             if (!matchEnded) {
-              setMatch({ date: m.date, time: m.time, club: m.club || undefined, players: [m.player_1, m.player_2, m.player_3, m.player_4].filter(Boolean) });
+              setMatch({ date: m.date, time: m.time, club: m.club || undefined, court: (m as any).court || undefined, players: [m.player_1, m.player_2, m.player_3, m.player_4].filter(Boolean) });
             } else {
               setMatch(null);
               const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
@@ -617,7 +617,7 @@ export default function Home8() {
     }
   }, [now]);
 
-  type StoredMatch = { date: string; time: string; club: string; player_1: string; player_2: string; player_3: string; player_4: string };
+  type StoredMatch = { date: string; time: string; club: string; court: string; player_1: string; player_2: string; player_3: string; player_4: string };
 
   function getMatchList(): StoredMatch[] {
     try {
@@ -1033,11 +1033,17 @@ export default function Home8() {
 
                           {/* Match details — revealed directly below pill on tap */}
                           {matchDetailsOpen && (
-                            <button onClick={() => setMatchActionOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
                               <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1, letterSpacing: "-0.02em" }}>{dateStr}</p>
                               {match.club && <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 500, color: "#6b7480", margin: "4px 0 0" }}>{match.club}</p>}
+                              {match.court && <p style={{ fontSize: "clamp(13px, 3.4vw, 16px)", fontWeight: 500, color: "#8a9096", margin: "2px 0 0" }}>Court {match.court}</p>}
                               {playerStr && <p style={{ fontSize: "clamp(12px, 3.1vw, 15px)", color: "#b0b8c1", margin: "2px 0 0", textAlign: "center", lineHeight: 1.4 }}>{playerStr}</p>}
-                            </button>
+                              <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+                                <button onClick={() => { setMatchForm({ date: match.date, time: match.time, club: match.club ?? '', court: match.court ?? '', p1: match.players?.[0] ?? '', p2: match.players?.[1] ?? '', p3: match.players?.[2] ?? '', p4: match.players?.[3] ?? '' }); setMatchActionMode('edit'); setMatchActionOpen(true); }} style={{ fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 600, color: "#2653d4", background: "#eef2ff", border: "none", cursor: "pointer", padding: "8px 18px", borderRadius: 999 }}>Edit</button>
+                                <button onClick={() => { setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setIsAddMode(true); setMatchActionMode('add'); setMatchActionOpen(true); }} style={{ fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 600, color: "#16a34a", background: "#f0fdf4", border: "none", cursor: "pointer", padding: "8px 18px", borderRadius: 999 }}>+Add</button>
+                                <button onClick={() => router.push("/matches4")} style={{ fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 600, color: "#4a5050", background: "#f4f4f6", border: "none", cursor: "pointer", padding: "8px 18px", borderRadius: 999 }}>All</button>
+                              </div>
+                            </div>
                           )}
 
                           {/* Line 3: Readiness on one line */}
@@ -1795,7 +1801,7 @@ export default function Home8() {
               <button onClick={() => {
                 if (matchActionMode === 'edit') { setMatchActionMode(null); return; }
                 setIsAddMode(false);
-                setMatchForm({ date: match?.date ?? '', time: match?.time ?? '', club: match?.club ?? '', p1: match?.players?.[0] ?? '', p2: match?.players?.[1] ?? '', p3: match?.players?.[2] ?? '', p4: match?.players?.[3] ?? '' });
+                setMatchForm({ date: match?.date ?? '', time: match?.time ?? '', club: match?.club ?? '', court: match?.court ?? '', p1: match?.players?.[0] ?? '', p2: match?.players?.[1] ?? '', p3: match?.players?.[2] ?? '', p4: match?.players?.[3] ?? '' });
                 setMatchActionMode('edit');
               }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f4f6ff] transition-colors" style={{ borderBottom: "1px solid #f0f0f0" }}>
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#2653d418" }}>
@@ -1807,13 +1813,13 @@ export default function Home8() {
               {matchActionMode === 'edit' && (() => {
                 const saveMatch = () => {
                   if (!matchForm.date || !matchForm.time) return;
-                  const data: StoredMatch = { date: matchForm.date, time: matchForm.time, club: matchForm.club, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
+                  const data: StoredMatch = { date: matchForm.date, time: matchForm.time, club: matchForm.club, court: matchForm.court, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
                   const current = getMatchList();
                   const replaced = current.map(m => m.date === match?.date && m.time === match?.time ? data : m);
                   const updated = replaced.some(m => m === data) ? replaced : [data, ...current];
                   const sorted = saveMatchList(updated);
                   const next = sorted[0];
-                  if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
+                  if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, court: next.court || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
                   saveUpcomingMatch(data);
                   setMatchActionOpen(false); setMatchActionMode(null); setDoIdx(-1);
                   window.dispatchEvent(new Event("storage"));
@@ -1834,6 +1840,10 @@ export default function Home8() {
                       <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Club</label>
                       <input type="text" placeholder="e.g. Club Padel BCN" value={matchForm.club} onChange={e => setMatchForm(f => ({ ...f, club: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm.club ? "#2653d4" : "#e2e2e2", background: matchForm.club ? "#f4f6ff" : "#fff" }} />
                     </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Court #</label>
+                      <input type="text" placeholder="e.g. 3" value={matchForm.court} onChange={e => setMatchForm(f => ({ ...f, court: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm.court ? "#2653d4" : "#e2e2e2", background: matchForm.court ? "#f4f6ff" : "#fff" }} />
+                    </div>
                     <div className="flex flex-col gap-2">
                       <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Players</label>
                       {(['p1','p2','p3','p4'] as const).map((key, i) => (
@@ -1848,7 +1858,7 @@ export default function Home8() {
               <button onClick={() => {
                 if (matchActionMode === 'add') { setMatchActionMode(null); return; }
                 setIsAddMode(true);
-                setMatchForm({ date: '', time: '', club: '', p1: '', p2: '', p3: '', p4: '' });
+                setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' });
                 setMatchActionMode('add');
               }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f4f6ff] transition-colors" style={{ borderBottom: "1px solid #f0f0f0" }}>
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#f0fdf4" }}>
@@ -1860,12 +1870,12 @@ export default function Home8() {
               {matchActionMode === 'add' && (() => {
                 const saveMatch = () => {
                   if (!matchForm.date || !matchForm.time) return;
-                  const data: StoredMatch = { date: matchForm.date, time: matchForm.time, club: matchForm.club, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
+                  const data: StoredMatch = { date: matchForm.date, time: matchForm.time, club: matchForm.club, court: matchForm.court, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
                   const current = getMatchList();
                   const updated = [...current, data];
                   const sorted = saveMatchList(updated);
                   const next = sorted[0];
-                  if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
+                  if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, court: next.court || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
                   saveUpcomingMatch(data);
                   setMatchActionOpen(false); setMatchActionMode(null); setDoIdx(-1);
                   window.dispatchEvent(new Event("storage"));
@@ -1898,7 +1908,7 @@ export default function Home8() {
                         const res = await fetch('/api/extract-match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: base64, mediaType: file.type }) });
                         const data = await res.json();
                         if (!res.ok || data.error) { setUploadError(data.message || 'Could not read the screenshot. Please enter manually.'); }
-                        else { setMatchForm({ date: data.date ?? '', time: data.time ?? '', club: data.club ?? '', p1: data.player_1 ?? '', p2: data.player_2 ?? '', p3: data.player_3 ?? '', p4: data.player_4 ?? '' }); }
+                        else { setMatchForm({ date: data.date ?? '', time: data.time ?? '', club: data.club ?? '', court: data.court ?? '', p1: data.player_1 ?? '', p2: data.player_2 ?? '', p3: data.player_3 ?? '', p4: data.player_4 ?? '' }); }
                       } catch { setUploadError('Upload failed. Please try again or enter manually.'); }
                       setUploadExtracting(false);
                       if (actionUploadRef.current) actionUploadRef.current.value = '';
@@ -1916,6 +1926,10 @@ export default function Home8() {
                     <div className="flex flex-col gap-1">
                       <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Club</label>
                       <input type="text" placeholder="e.g. Club Padel BCN" value={matchForm.club} onChange={e => setMatchForm(f => ({ ...f, club: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm.club ? "#2653d4" : "#e2e2e2", background: matchForm.club ? "#f4f6ff" : "#fff" }} />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Court #</label>
+                      <input type="text" placeholder="e.g. 3" value={matchForm.court} onChange={e => setMatchForm(f => ({ ...f, court: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm.court ? "#2653d4" : "#e2e2e2", background: matchForm.court ? "#f4f6ff" : "#fff" }} />
                     </div>
                     <div className="flex flex-col gap-2">
                       <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Players</label>
