@@ -1622,13 +1622,14 @@ export default function Home8() {
         {logPickerOpen && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogPickerSub(null); setExtrasOpen(false); }} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-            <div className="relative w-full max-w-sm bg-white rounded-[28px] shadow-2xl" style={{ overflow: "hidden", display: "flex", flexDirection: "column" }} onClick={e => e.stopPropagation()}>
+            <div className="relative w-full max-w-sm bg-white rounded-[28px] shadow-2xl" style={{ overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "calc(100dvh - 8rem)" }} onClick={e => e.stopPropagation()}>
               <div className="px-5 pt-6 pb-4 flex-shrink-0 flex items-center justify-between" style={{ borderBottom: "1px solid #f0f0f0" }}>
                 <p style={{ fontSize: "clamp(20px, 5.1vw, 25px)", fontWeight: 800, color: "#1a1c1c", margin: 0 }}>What do you want to log?</p>
                 <button onClick={() => { setLogPickerOpen(false); setLogPickerSub(null); }} style={{ width: 28, height: 28, borderRadius: "50%", background: "#f4f4f6", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
               </div>
+              <div style={{ overflowY: "auto", WebkitOverflowScrolling: "touch" as React.CSSProperties["WebkitOverflowScrolling"], minHeight: 0 }}>
               <div style={{ padding: "12px 16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
 
                 {/* Add a match — full width */}
@@ -1739,7 +1740,8 @@ export default function Home8() {
                   reader.readAsText(file); e.target.value = "";
                 }} />
 
-              </div>
+              </div>{/* end flex col */}
+              </div>{/* end scroll wrapper */}
 
               {/* Food & Snacks sub-modal */}
               {logPickerSub === "nutrition" && (
