@@ -1825,6 +1825,23 @@ export default function Home8() {
                 {/* Handle */}
                 <div className="w-10 h-1 rounded-full bg-[#e0e0e0] mx-auto mt-3 mb-0 flex-shrink-0" />
 
+                {/* Shared hidden file input for both edit and add upload */}
+                <input ref={actionUploadRef} type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setUploadError(null); setUploadExtracting(true);
+                  try {
+                    const reader = new FileReader();
+                    const base64 = await new Promise<string>((resolve, reject) => { reader.onload = () => resolve((reader.result as string).split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); });
+                    const res = await fetch('/api/extract-match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: base64, mediaType: file.type }) });
+                    const data = await res.json();
+                    if (!res.ok || data.error) { setUploadError(data.message || 'Could not read the screenshot.'); }
+                    else { setMatchForm({ date: data.date ?? '', time: data.time ?? '', club: data.club ?? '', court: data.court ?? '', p1: data.player_1 ?? '', p2: data.player_2 ?? '', p3: data.player_3 ?? '', p4: data.player_4 ?? '' }); setMatchInfoAddTab('manual'); }
+                  } catch { setUploadError('Upload failed. Please try again.'); }
+                  setUploadExtracting(false);
+                  if (actionUploadRef.current) actionUploadRef.current.value = '';
+                }} />
+
                 {/* Scrollable content */}
                 <div className="overflow-y-auto flex-1" style={{ overscrollBehavior: "contain" }}>
                   {/* Header */}
@@ -1881,33 +1898,64 @@ export default function Home8() {
                   {/* Edit form — expands below button row */}
                   {matchInfoMode === 'edit' && (
                     <div style={{ padding: "16px 20px 4px", borderTop: "1px solid #f0f0f0", marginTop: 16 }}>
-                      <div className="flex flex-col gap-3">
-                        <div className="flex gap-3">
-                          <div className="flex-1 flex flex-col gap-1">
-                            <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
-                            <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#fff" }} />
+                      {/* Upload / Manual picker */}
+                      {!matchInfoAddTab && (
+                        <div className="flex gap-3 mb-3">
+                          <button onClick={() => { setUploadError(null); setMatchInfoAddTab('upload'); actionUploadRef.current?.click(); }} className="flex-1 flex flex-col items-center gap-2 py-4 rounded-2xl active:opacity-70" style={{ background: "#f4f6ff", border: "1.5px solid #2653d418" }}>
+                            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "#2653d4" }}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            </div>
+                            <span className="text-[13px] font-semibold text-[#2653d4]">Upload screenshot</span>
+                          </button>
+                          <button onClick={() => setMatchInfoAddTab('manual')} className="flex-1 flex flex-col items-center gap-2 py-4 rounded-2xl active:opacity-70" style={{ background: "#f4f4f6", border: "1.5px solid #e2e2e2" }}>
+                            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "#e8eaed" }}>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </div>
+                            <span className="text-[13px] font-semibold text-[#4a5050]">Edit manually</span>
+                          </button>
+                        </div>
+                      )}
+                      {uploadExtracting && <div className="flex items-center gap-3 py-3 mb-2"><svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg><span className="text-[14px] font-medium text-[#2653d4]">Reading screenshot…</span></div>}
+                      {uploadError && <div className="px-3 py-2.5 rounded-xl text-[13px] text-[#c0392b] mb-3" style={{ background: "#fff0f0", border: "1.5px solid #ffd0d0" }}>{uploadError}</div>}
+                      {/* Form fields */}
+                      {matchInfoAddTab === 'manual' && (
+                        <div className="flex flex-col gap-3">
+                          <div className="flex gap-3">
+                            <div className="flex-1 flex flex-col gap-1">
+                              <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
+                              <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#fff" }} />
+                            </div>
+                            <div className="flex-1 flex flex-col gap-1">
+                              <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
+                              <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#fff" }} />
+                            </div>
                           </div>
-                          <div className="flex-1 flex flex-col gap-1">
-                            <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
-                            <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#fff" }} />
+                          <div className="flex flex-col gap-1">
+                            <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Club</label>
+                            <input type="text" placeholder="e.g. Club Padel BCN" value={matchForm.club} onChange={e => setMatchForm(f => ({ ...f, club: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm.club ? "#2653d4" : "#e2e2e2", background: matchForm.club ? "#f4f6ff" : "#fff" }} />
                           </div>
+                          <div className="flex flex-col gap-1">
+                            <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Court #</label>
+                            <input type="text" placeholder="e.g. 3" value={matchForm.court} onChange={e => setMatchForm(f => ({ ...f, court: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm.court ? "#2653d4" : "#e2e2e2", background: matchForm.court ? "#f4f6ff" : "#fff" }} />
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Players</label>
+                            {(['p1','p2','p3','p4'] as const).map((key, i) => (
+                              <input key={key} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={matchForm[key]} onChange={e => setMatchForm(f => ({ ...f, [key]: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm[key] ? "#2653d4" : "#e2e2e2", background: matchForm[key] ? "#f4f6ff" : "#fff" }} />
+                            ))}
+                          </div>
+                          <button onClick={saveEdit} className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white mt-1" style={{ background: (!matchForm.date || !matchForm.time) ? "#c4c7c7" : "#2653d4" }}>Save changes</button>
+                          <button onClick={() => {
+                            const updated = getMatchList().filter(m => !(m.date === match.date && m.time === match.time));
+                            const sorted = saveMatchList(updated);
+                            const next = sorted[0];
+                            if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, court: next.court || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
+                            else setMatch(null);
+                            window.dispatchEvent(new Event("storage"));
+                            closeSheet();
+                          }} className="w-full py-3 rounded-2xl text-[14px] font-semibold mb-4" style={{ background: "#fef2f2", color: "#dc2626", border: "none", cursor: "pointer" }}>Delete match</button>
                         </div>
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Club</label>
-                          <input type="text" placeholder="e.g. Club Padel BCN" value={matchForm.club} onChange={e => setMatchForm(f => ({ ...f, club: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm.club ? "#2653d4" : "#e2e2e2", background: matchForm.club ? "#f4f6ff" : "#fff" }} />
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Court #</label>
-                          <input type="text" placeholder="e.g. 3" value={matchForm.court} onChange={e => setMatchForm(f => ({ ...f, court: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm.court ? "#2653d4" : "#e2e2e2", background: matchForm.court ? "#f4f6ff" : "#fff" }} />
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Players</label>
-                          {(['p1','p2','p3','p4'] as const).map((key, i) => (
-                            <input key={key} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={matchForm[key]} onChange={e => setMatchForm(f => ({ ...f, [key]: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm[key] ? "#2653d4" : "#e2e2e2", background: matchForm[key] ? "#f4f6ff" : "#fff" }} />
-                          ))}
-                        </div>
-                        <button onClick={saveEdit} className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white mt-1 mb-4" style={{ background: (!matchForm.date || !matchForm.time) ? "#c4c7c7" : "#2653d4" }}>Save changes</button>
-                      </div>
+                      )}
                     </div>
                   )}
 
@@ -1931,21 +1979,6 @@ export default function Home8() {
                           </button>
                         </div>
                       )}
-                      <input ref={actionUploadRef} type="file" accept="image/*" className="hidden" onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        setUploadError(null); setUploadExtracting(true);
-                        try {
-                          const reader = new FileReader();
-                          const base64 = await new Promise<string>((resolve, reject) => { reader.onload = () => resolve((reader.result as string).split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); });
-                          const res = await fetch('/api/extract-match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: base64, mediaType: file.type }) });
-                          const data = await res.json();
-                          if (!res.ok || data.error) { setUploadError(data.message || 'Could not read the screenshot.'); }
-                          else { setMatchForm({ date: data.date ?? '', time: data.time ?? '', club: data.club ?? '', court: data.court ?? '', p1: data.player_1 ?? '', p2: data.player_2 ?? '', p3: data.player_3 ?? '', p4: data.player_4 ?? '' }); setMatchInfoAddTab('manual'); }
-                        } catch { setUploadError('Upload failed. Please try again.'); }
-                        setUploadExtracting(false);
-                        if (actionUploadRef.current) actionUploadRef.current.value = '';
-                      }} />
                       {uploadExtracting && <div className="flex items-center gap-3 py-3"><svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg><span className="text-[14px] font-medium text-[#2653d4]">Reading screenshot…</span></div>}
                       {uploadError && <div className="px-3 py-2.5 rounded-xl text-[13px] text-[#c0392b] mt-2" style={{ background: "#fff0f0", border: "1.5px solid #ffd0d0" }}>{uploadError}</div>}
                       {matchInfoAddTab === 'manual' && (
