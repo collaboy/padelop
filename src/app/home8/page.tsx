@@ -1826,7 +1826,7 @@ export default function Home8() {
             const data: StoredMatch = { date: matchForm.date, time: matchForm.time, club: matchForm.club, court: matchForm.court, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
             const current = getMatchList();
             const replaced = current.map(m => m.date === match?.date && m.time === match?.time ? data : m);
-            const updated = replaced.some(m => m === data) ? replaced : [data, ...current];
+            const updated = current.some(m => m.date === match?.date && m.time === match?.time) ? replaced : [data, ...current];
             const sorted = saveMatchList(updated);
             const next = sorted[0];
             if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, court: next.court || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
@@ -2061,7 +2061,7 @@ export default function Home8() {
                   const data: StoredMatch = { date: matchForm.date, time: matchForm.time, club: matchForm.club, court: matchForm.court, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
                   const current = getMatchList();
                   const replaced = current.map(m => m.date === match?.date && m.time === match?.time ? data : m);
-                  const updated = replaced.some(m => m === data) ? replaced : [data, ...current];
+                  const updated = current.some(m => m.date === match?.date && m.time === match?.time) ? replaced : [data, ...current];
                   const sorted = saveMatchList(updated);
                   const next = sorted[0];
                   if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, court: next.court || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
@@ -2339,7 +2339,7 @@ export default function Home8() {
                       let updated: StoredMatch[];
                       if (isAddMode) { updated = [...current, data]; } else {
                         const replaced = current.map(m => m.date === match?.date && m.time === match?.time ? data : m);
-                        updated = replaced.some(m => m === data) ? replaced : [data, ...current];
+                        updated = current.some(m => m.date === match?.date && m.time === match?.time) ? replaced : [data, ...current];
                       }
                       const sorted = saveMatchList(updated);
                       const next = sorted[0];
@@ -2435,7 +2435,7 @@ export default function Home8() {
                       } else {
                         // Replace the current next match (matched by date+time)
                         const replaced = current.map(m => m.date === match?.date && m.time === match?.time ? data : m);
-                        updated = replaced.some(m => m === data) ? replaced : [data, ...current];
+                        updated = current.some(m => m.date === match?.date && m.time === match?.time) ? replaced : [data, ...current];
                       }
                       const sorted = saveMatchList(updated);
                       const next = sorted[0];
