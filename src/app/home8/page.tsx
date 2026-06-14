@@ -545,49 +545,61 @@ export default function Home8() {
     function loadMatch() {
       const todayD = new Date().toISOString().slice(0, 10);
       const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+      let wasYesterday = false;
+
+      // Always prefer the full match list as source of truth (has court + players)
+      let nextMatch: StoredMatch | null = null;
       try {
         const listRaw = localStorage.getItem("padelop:upcoming-matches");
         const list: StoredMatch[] = listRaw ? JSON.parse(listRaw) : [];
         const future = list.filter(m => m.date >= todayD).sort((a, b) => a.date.localeCompare(b.date));
         setUpcomingCount(future.length);
-        if (future.length > 0 && future[0].date !== JSON.parse(localStorage.getItem("padelop:next-match") || "{}").date) {
+        if (future.length > 0) {
+          nextMatch = future[0];
           localStorage.setItem("padelop:next-match", JSON.stringify(future[0]));
         }
       } catch {}
-      let wasYesterday = false;
-      try {
-        const raw = localStorage.getItem("padelop:next-match");
-        if (raw) {
-          const m = JSON.parse(raw);
-          if (m.date && m.time) {
-            // Match is today-or-future: check if it has already ended (today, past end time)
-            const nowD = new Date();
-            let matchEnded = m.date < todayD;
-            if (!matchEnded && m.date === todayD && m.time) {
-              const [mH, mM] = (m.time as string).split(":").map(Number);
-              matchEnded = nowD.getHours() * 60 + nowD.getMinutes() >= mH * 60 + mM + 90;
-            }
-            if (!matchEnded) {
-              setMatch({ date: m.date, time: m.time, club: m.club || undefined, court: (m as any).court || undefined, players: [m.player_1, m.player_2, m.player_3, m.player_4].filter(Boolean) });
-            } else {
-              setMatch(null);
-              const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
-              const alreadyReviewed = reviews.some((r: { ts?: string }) => r.ts?.slice(0, 10) === m.date);
-              const dismissed = localStorage.getItem("padelop:post-match-dismissed") === m.date;
-              if (!alreadyReviewed && !dismissed) {
-                try { localStorage.setItem("padelop:post-match-dismissed", m.date); } catch {}
-                setPostMatchDate(m.date);
-                setPostMatchOpen(true);
-              }
-            }
-          } else {
-            setMatch(null);
+
+      // Fall back to padelop:next-match if list was empty
+      if (!nextMatch) {
+        try {
+          const raw = localStorage.getItem("padelop:next-match");
+          if (raw) {
+            const m = JSON.parse(raw);
+            if (m.date && m.time) nextMatch = m as StoredMatch;
+            if (m.date === yesterday) wasYesterday = true;
           }
-          if (m.date === yesterday) wasYesterday = true;
+        } catch {}
+      }
+
+      if (nextMatch) {
+        const m = nextMatch;
+        const nowD = new Date();
+        let matchEnded = m.date < todayD;
+        if (!matchEnded && m.date === todayD && m.time) {
+          const [mH, mM] = m.time.split(":").map(Number);
+          matchEnded = nowD.getHours() * 60 + nowD.getMinutes() >= mH * 60 + mM + 90;
+        }
+        if (!matchEnded) {
+          setMatch({ date: m.date, time: m.time, club: m.club || undefined, court: m.court || undefined, players: [m.player_1, m.player_2, m.player_3, m.player_4].filter(Boolean) });
         } else {
           setMatch(null);
+          try {
+            const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+            const alreadyReviewed = reviews.some((r: { ts?: string }) => r.ts?.slice(0, 10) === m.date);
+            const dismissed = localStorage.getItem("padelop:post-match-dismissed") === m.date;
+            if (!alreadyReviewed && !dismissed) {
+              try { localStorage.setItem("padelop:post-match-dismissed", m.date); } catch {}
+              setPostMatchDate(m.date);
+              setPostMatchOpen(true);
+            }
+          } catch {}
         }
-      } catch {}
+        if (m.date === yesterday) wasYesterday = true;
+      } else {
+        setMatch(null);
+      }
+
       try {
         const rawReviews = localStorage.getItem("padelop:match-reviews");
         if (rawReviews) {
