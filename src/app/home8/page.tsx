@@ -1889,9 +1889,8 @@ export default function Home8() {
                       >Edit</button>
                       <button
                         onClick={() => { if (matchInfoMode === 'add') { setMatchInfoMode(null); setMatchInfoAddTab(null); } else { setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchInfoMode('add'); setMatchInfoAddTab(null); setUploadError(null); } }}
-                        style={{ flex: 1, fontSize: 14, fontWeight: 600, color: matchInfoMode === 'add' ? "#fff" : "#16a34a", background: matchInfoMode === 'add' ? "#16a34a" : "#f0fdf4", border: "none", cursor: "pointer", padding: "11px 0", borderRadius: 12, marginRight: 8 }}
+                        style={{ flex: 1, fontSize: 14, fontWeight: 600, color: matchInfoMode === 'add' ? "#fff" : "#16a34a", background: matchInfoMode === 'add' ? "#16a34a" : "#f0fdf4", border: "none", cursor: "pointer", padding: "11px 0", borderRadius: 12 }}
                       >+ Add</button>
-                      <button onClick={() => { closeSheet(); router.push("/profile#matches"); }} style={{ flex: 1, fontSize: 14, fontWeight: 600, color: "#4a5050", background: "#f4f4f6", border: "none", cursor: "pointer", padding: "11px 0", borderRadius: 12 }}>All</button>
                     </div>
 
                     {/* Edit form */}
