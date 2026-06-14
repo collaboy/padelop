@@ -424,6 +424,7 @@ export default function Home8() {
   const warmupDurationRef = useRef(0);
 
   const matchUploadRef = useRef<HTMLInputElement>(null);
+  const actionUploadRef = useRef<HTMLInputElement>(null);
   const schedScrollRef = useRef<HTMLDivElement>(null);
   const schedCurrentRef = useRef<HTMLDivElement>(null);
   const [drumIdx, setDrumIdx] = useState(0);
@@ -1782,13 +1783,9 @@ export default function Home8() {
 
         {/* Match action sheet */}
         {matchActionOpen && (
-          <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => { setMatchActionOpen(false); setMatchActionMode(null); }} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" style={{ paddingTop: "10dvh" }} onClick={() => { setMatchActionOpen(false); setMatchActionMode(null); }} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
             <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
-            <div className="relative w-full max-w-sm bg-white shadow-2xl" style={{ borderRadius: "24px 24px 0 0", maxHeight: "calc(100dvh - 4rem - 16px)", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
-              {/* Drag handle */}
-              <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
-                <div style={{ width: 36, height: 4, borderRadius: 2, background: "#d0d3d6" }} />
-              </div>
+            <div className="relative w-full max-w-sm bg-white shadow-2xl" style={{ borderRadius: 24, maxHeight: "calc(85dvh - 4rem)", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
               {/* Edit match */}
               <button onClick={() => {
                 if (matchActionMode === 'edit') { setMatchActionMode(null); return; }
@@ -1870,6 +1867,37 @@ export default function Home8() {
                 };
                 return (
                   <div className="px-5 pt-4 pb-5 flex flex-col gap-3" style={{ borderBottom: "1px solid #f0f0f0", background: "#fafafa" }}>
+                    {/* Upload button */}
+                    <button
+                      disabled={uploadExtracting}
+                      onClick={() => { setUploadError(null); actionUploadRef.current?.click(); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl active:opacity-70 transition-opacity"
+                      style={{ background: "#f4f6ff", border: "1.5px solid #2653d418", opacity: uploadExtracting ? 0.5 : 1 }}
+                    >
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#2653d4" }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                      </div>
+                      <span className="text-[14px] font-semibold text-[#1a1c1c]">
+                        {uploadExtracting ? "Reading screenshot…" : "Upload screenshot"}
+                      </span>
+                      {uploadExtracting && <svg className="animate-spin ml-auto" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>}
+                    </button>
+                    {uploadError && <div className="px-3 py-2.5 rounded-xl text-[13px] text-[#c0392b]" style={{ background: "#fff0f0", border: "1.5px solid #ffd0d0" }}>{uploadError}</div>}
+                    <input ref={actionUploadRef} type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      setUploadError(null); setUploadExtracting(true);
+                      try {
+                        const reader = new FileReader();
+                        const base64 = await new Promise<string>((resolve, reject) => { reader.onload = () => resolve((reader.result as string).split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); });
+                        const res = await fetch('/api/extract-match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: base64, mediaType: file.type }) });
+                        const data = await res.json();
+                        if (!res.ok || data.error) { setUploadError(data.message || 'Could not read the screenshot. Please enter manually.'); }
+                        else { setMatchForm({ date: data.date ?? '', time: data.time ?? '', club: data.club ?? '', p1: data.player_1 ?? '', p2: data.player_2 ?? '', p3: data.player_3 ?? '', p4: data.player_4 ?? '' }); }
+                      } catch { setUploadError('Upload failed. Please try again or enter manually.'); }
+                      setUploadExtracting(false);
+                      if (actionUploadRef.current) actionUploadRef.current.value = '';
+                    }} />
                     <div className="flex gap-3">
                       <div className="flex-1 flex flex-col gap-1">
                         <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
@@ -1901,7 +1929,6 @@ export default function Home8() {
                 </div>
                 <span className="text-[15px] font-semibold text-[#1a1c1c]">See all matches</span>
               </button>
-              <div style={{ height: "calc(env(safe-area-inset-bottom) + 8px)" }} />
             </div>
           </div>
         )}
