@@ -1018,13 +1018,13 @@ export default function Home8() {
                       return (
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", gap: 16 }}>
                           {/* Line 1: Next Match label */}
-                          <p style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#b0b8c1", margin: 0 }}>
+                          <p style={{ fontSize: "clamp(9px, 2.2vw, 11px)", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#b0b8c1", margin: 0 }}>
                             Next Match{upcomingCount > 1 && <span style={{ marginLeft: 6, fontWeight: 600, color: "#c8ccd0" }}>+{upcomingCount - 1} more</span>}
                           </p>
 
                           {/* Line 2: Countdown pill with time inside */}
                           <div style={{ background: "#2653d4", borderRadius: 999, padding: "10px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-                            <span style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 700, color: "rgba(255,255,255,0.75)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{countdownLabel}</span>
+                            <span style={{ fontSize: "clamp(15px, 4vw, 18px)", fontWeight: 700, color: "rgba(255,255,255,0.85)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{countdownLabel}</span>
                             <span style={{ fontSize: "clamp(22px, 6vw, 28px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.01em" }}>{match.time}</span>
                           </div>
 
