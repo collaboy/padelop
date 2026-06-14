@@ -1005,7 +1005,7 @@ export default function Home8() {
                 const coachTip = hasLow ? 'Focus on recovery today.' : hasOk ? 'Keep your habits consistent today.' : allNL ? 'Log your check-ins to track readiness.' : 'You\'re in great shape. Stay sharp.';
 
                 return (
-                  <div style={{ width: "100%", flexShrink: 0, height: "calc(100dvh - 4rem - 100px)", borderRadius: 24, background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px", opacity: cardSnap === 'none' && doIdx === -1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === -1 ? 2 : 1, pointerEvents: doIdx === -1 ? "auto" : "none" }}>
+                  <div style={{ width: "100%", flexShrink: 0, height: "calc(100dvh - 4rem - 100px)", borderRadius: 24, background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: match ? "flex-start" : "center", padding: match ? "calc((100dvh - 4rem - 100px - 116px) / 2) 36px 0" : "0 36px", opacity: cardSnap === 'none' && doIdx === -1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === -1 ? 2 : 1, pointerEvents: doIdx === -1 ? "auto" : "none" }}>
                     {match ? (() => {
                       const matchDate = new Date(match.date + "T12:00");
                       const todayDate = new Date(today + "T12:00");
