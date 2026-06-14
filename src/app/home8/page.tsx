@@ -2285,7 +2285,7 @@ export default function Home8() {
                   <button
                     onClick={() => {
                       if (!matchForm.date || !matchForm.time) return;
-                      const data: StoredMatch = { date: matchForm.date, time: matchForm.time, club: matchForm.club, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
+                      const data: StoredMatch = { date: matchForm.date, time: matchForm.time, club: matchForm.club, court: matchForm.court, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
                       const current = getMatchList();
                       let updated: StoredMatch[];
                       if (isAddMode) { updated = [...current, data]; } else {
@@ -2378,7 +2378,7 @@ export default function Home8() {
                   <button
                     onClick={() => {
                       if (!matchForm.date || !matchForm.time) return;
-                      const data: StoredMatch = { date: matchForm.date, time: matchForm.time, club: matchForm.club, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
+                      const data: StoredMatch = { date: matchForm.date, time: matchForm.time, club: matchForm.club, court: matchForm.court, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
                       const current = getMatchList();
                       let updated: StoredMatch[];
                       if (isAddMode) {
