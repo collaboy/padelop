@@ -1060,7 +1060,7 @@ export default function Home8() {
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
                         <p style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 10px" }}>Next Match</p>
                         <button
-                          onClick={() => { setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('pick'); setMatchModalOpen(true); }}
+                          onClick={() => { setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('pick'); setMatchModalOpen(true); }}
                           style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 600, color: "#2653d4", background: "#eef2ff", border: "none", cursor: "pointer", padding: "10px 24px", borderRadius: 999 }}
                         >
                           + Schedule a match
@@ -2034,6 +2034,7 @@ export default function Home8() {
                         date: data.date ?? '',
                         time: data.time ?? '',
                         club: data.club ?? '',
+                        court: data.court ?? '',
                         p1: data.player_1 ?? '',
                         p2: data.player_2 ?? '',
                         p3: data.player_3 ?? '',
@@ -2049,7 +2050,7 @@ export default function Home8() {
 
                   <button
                     disabled={uploadExtracting}
-                    onClick={() => { setMatchForm({ date: match?.date ?? '', time: match?.time ?? '', club: match?.club ?? '', p1: match?.players?.[0] ?? '', p2: match?.players?.[1] ?? '', p3: match?.players?.[2] ?? '', p4: match?.players?.[3] ?? '' }); setMatchModalTab('manual'); }}
+                    onClick={() => { setMatchForm({ date: match?.date ?? '', time: match?.time ?? '', club: match?.club ?? '', court: match?.court ?? '', p1: match?.players?.[0] ?? '', p2: match?.players?.[1] ?? '', p3: match?.players?.[2] ?? '', p4: match?.players?.[3] ?? '' }); setMatchModalTab('manual'); }}
                     className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl active:opacity-70 transition-opacity"
                     style={{ background: "#f9f9f9", border: "1.5px solid #f0f0f0", opacity: uploadExtracting ? 0.5 : 1 }}
                   >
