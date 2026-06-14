@@ -914,7 +914,9 @@ export default function Home8() {
             const dx = e.changedTouches[0].clientX - touchStartXRef.current;
             if (doIdx >= 1) { swipeDirRef.current = null; return; } // scroll div handles goPrev
             const dy = endY - touchStartYRef.current;
-            if (swipeDirRef.current === 'h' && doIdx === 0) {
+            if (swipeDirRef.current === 'h' && matchDetailsOpen) {
+              setMatchDetailsOpen(false);
+            } else if (swipeDirRef.current === 'h' && doIdx === 0) {
               setLiveX(0);
               if (cardSnap === 'none') {
                 if (dx < -60) setCardSnap('left');
