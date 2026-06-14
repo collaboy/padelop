@@ -1022,13 +1022,11 @@ export default function Home8() {
                             Next Match{upcomingCount > 1 && <span style={{ marginLeft: 6, fontWeight: 600, color: "#c8ccd0" }}>+{upcomingCount - 1} more</span>}
                           </p>
 
-                          {/* Line 2: Countdown circle + time directly below */}
-                          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-                            <div style={{ width: 96, height: 96, borderRadius: "50%", background: "#2653d4", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                              <span style={{ fontSize: "clamp(11px, 3vw, 14px)", fontWeight: 800, color: "#fff", letterSpacing: "0.06em", textTransform: "uppercase", textAlign: "center", lineHeight: 1.2, padding: "0 8px" }}>
-                                {countdownLabel}
-                              </span>
-                            </div>
+                          {/* Line 2: Countdown pill + time in same cell */}
+                          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+                            <span style={{ fontSize: "clamp(13px, 3.4vw, 16px)", fontWeight: 700, background: "#2653d4", color: "#fff", padding: "6px 18px", borderRadius: 999, letterSpacing: "0.04em" }}>
+                              {countdownLabel}
+                            </span>
                             <p style={{ fontSize: "clamp(28px, 7.5vw, 36px)", fontWeight: 800, color: "#2653d4", margin: 0, lineHeight: 1, letterSpacing: "-0.01em" }}>{match.time}</p>
                           </div>
 
