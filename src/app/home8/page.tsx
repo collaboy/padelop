@@ -1018,7 +1018,7 @@ export default function Home8() {
                       return (
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", gap: 16 }}>
                           {/* Line 1: Next Match label */}
-                          <p style={{ fontSize: "clamp(14px, 3.5vw, 17px)", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 -8px" }}>
+                          <p style={{ fontSize: "clamp(14px, 3.5vw, 17px)", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 -12px" }}>
                             Next Match{upcomingCount > 1 && <span style={{ marginLeft: 6, fontWeight: 600, color: "#c8ccd0" }}>+{upcomingCount - 1} more</span>}
                           </p>
 
