@@ -1863,7 +1863,8 @@ export default function Home8() {
                 }} />
 
                 {/* Scrollable cards */}
-                <div className="overflow-y-auto flex-1 overscroll-contain" style={{ display: "flex", flexDirection: "column", gap: 10, padding: "0 16px 32px" }}>
+                <div className="overflow-y-auto flex-1 overscroll-contain" style={{ minHeight: 0 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: "0 16px 32px" }}>
 
                   {/* MATCH INFO CARD */}
                   <div style={{ background: "#fff", borderRadius: 9, padding: "24px 20px 20px" }}>
@@ -2012,7 +2013,8 @@ export default function Home8() {
                     )}
                   </div>
 
-                </div>
+                </div>{/* end flex column */}
+                </div>{/* end scroll container */}
               </div>
             </div>
           );
