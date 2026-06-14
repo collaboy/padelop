@@ -652,6 +652,7 @@ export default function Home8() {
     try {
       localStorage.setItem("padelop:upcoming-matches", JSON.stringify(future));
       if (future.length > 0) localStorage.setItem("padelop:next-match", JSON.stringify(future[0]));
+      else localStorage.removeItem("padelop:next-match");
       window.dispatchEvent(new Event("storage"));
     } catch {}
     setUpcomingCount(future.length);
