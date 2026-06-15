@@ -8,7 +8,7 @@ import PushPrompt from "@/components/push-prompt";
 import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
 import { saveUpcomingMatch, saveNutritionToDb, saveHydrationToDb, saveNoteToDb } from "@/lib/db";
 import { hydrateFromSupabase } from "@/lib/sync";
-import { downloadSnapshot, importData } from "@/lib/storage";
+import { downloadSnapshot } from "@/lib/storage";
 
 // ── Tag cloud (mirrors matches4) ──────────────────────────────────────────
 type ReviewEntry = { ts: string; feeling: string; result: string; opponent: string; energy: string; wellDone: string[]; improved: string[] };
@@ -370,10 +370,17 @@ export default function Home8() {
   const [readinessItems, setReadinessItems] = useState([false, false, false, false]);
   const [logPickerOpen, setLogPickerOpen] = useState(false);
   const [logPickerExpanded, setLogPickerExpanded] = useState<string | null>(null);
-  const [logPickerSub, setLogPickerSub] = useState<"nutrition" | "matchreview" | null>(null);
+  const [logPickerSub, setLogPickerSub] = useState<"nutrition" | "matchreview" | "upload-confirm" | null>(null);
+  const [smartUploadLoading, setSmartUploadLoading] = useState(false);
+  const [smartUploadResult, setSmartUploadResult] = useState<{ category: string; label: string; confidence: string; data: Record<string, string> } | null>(null);
+  const [smartUploadError, setSmartUploadError] = useState<string | null>(null);
+  const [manualPickerOpen, setManualPickerOpen] = useState(false);
+  const [insertUploadCategory, setInsertUploadCategory] = useState<string | null>(null);
+  const [insertUploadLoading, setInsertUploadLoading] = useState(false);
+  const [uploadCategoryPickerOpen, setUploadCategoryPickerOpen] = useState(false);
+  const smartUploadRef = useRef<HTMLInputElement>(null);
+  const insertUploadRef = useRef<HTMLInputElement>(null);
   const [extrasOpen, setExtrasOpen] = useState(false);
-  const [importDone, setImportDone] = useState(false);
-  const importPickerRef = useRef<HTMLInputElement>(null);
   const [checkInData, setCheckInData]     = useState<DailyCheckIn | null>(null);
   const [hydrationData, setHydrationData] = useState<HydrationEntry | null>(null);
   const [nutritionData, setNutritionData] = useState<NutritionEntry | null>(null);
@@ -1611,99 +1618,141 @@ export default function Home8() {
               <div style={{ overflowY: "auto", minHeight: 0 }}>
               <div style={{ padding: "12px 16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
 
-                {/* Row 1: Add a match + Daily Check-in */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                  <button
-                    onClick={() => { setLogPickerOpen(false); setLogPickerSub(null); setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('pick'); setMatchModalOpen(true); }}
-                    style={{ background: "#eef2ff", border: "none", borderRadius: 16, padding: "18px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 24, minHeight: 110 }}
-                  >
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
-                    <div style={{ textAlign: "left" }}>
-                      <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Add a match</p>
-                      <p style={{ fontSize: "clamp(12px, 3.1vw, 15px)", fontWeight: 600, color: "#2653d4", margin: "3px 0 0" }}>Schedule</p>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => { setLogPickerOpen(false); setLogPickerSub(null); setLogTab("checkin"); setLogSheetOpen(true); }}
-                    style={{ background: "#f5f0ff", border: "none", borderRadius: 16, padding: "18px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 24, position: "relative", minHeight: 110 }}
-                  >
-                    {readinessItems[0] && <div style={{ position: "absolute", top: 10, right: 10 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>}
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-                    <div style={{ textAlign: "left" }}>
-                      <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Check-in</p>
-                      <p style={{ fontSize: "clamp(12px, 3.1vw, 15px)", fontWeight: 500, color: "#7c3aed", margin: "3px 0 0" }}>Daily</p>
-                    </div>
-                  </button>
-                </div>
+                {/* Upload card — full width */}
+                <button
+                  onClick={() => { setSmartUploadError(null); smartUploadRef.current?.click(); }}
+                  disabled={smartUploadLoading}
+                  style={{ width: "100%", background: "#eef2ff", border: "none", borderRadius: 16, padding: "18px 16px 14px", cursor: smartUploadLoading ? "default" : "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, opacity: smartUploadLoading ? 0.6 : 1 }}
+                >
+                  {smartUploadLoading ? (
+                    <svg className="animate-spin" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                  ) : (
+                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  )}
+                  <span style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 700, color: "#1a1c1c" }}>{smartUploadLoading ? "Analysing…" : "Upload"}</span>
+                  <span style={{ fontSize: "clamp(12px, 3.1vw, 14px)", fontWeight: 600, color: "#6b8fd4" }}>match · food · gear · results</span>
+                </button>
 
-                {/* Row 2: Hydration gauge full width */}
-                <div style={{ background: "#f0f6ff", borderRadius: 16, padding: "14px 18px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10, alignItems: "center" }}>
-                    <span style={{ fontSize: "clamp(13px, 3.4vw, 16px)", fontWeight: 700, color: "#1a1c1c" }}>
-                      Hydration · {logHydrationMl >= 1000 ? `${+(logHydrationMl / 1000).toFixed(1)}L` : `${logHydrationMl}ml`}
-                      <span style={{ fontWeight: 400, color: "#c8ccd0" }}> / 2.5L</span>
-                    </span>
-                    {logHydrationMl >= LOG_GOAL_ML && <span style={{ fontSize: "clamp(12px, 3.1vw, 15px)", fontWeight: 600, color: "#16a34a" }}>Goal reached</span>}
-                  </div>
-                  <div ref={logGaugeRef} style={{ position: "relative", height: 8, borderRadius: 999, background: "#d0e4f8", marginBottom: 20 }}>
-                    <div style={{ position: "absolute", left: 0, top: 0, height: "100%", borderRadius: 999, background: "#2653d4", width: `${Math.min(100, (logHydrationMl / LOG_MAX_ML) * 100)}%`, transition: "width 0.15s" }} />
-                    <div style={{ position: "absolute", top: -4, left: `${(LOG_GOAL_ML / LOG_MAX_ML) * 100}%`, width: 2, height: 16, background: "#b0b8c1", borderRadius: 1 }} />
-                    <div
-                      onTouchStart={onLogDotTouchStart}
-                      onTouchMove={onLogDotTouchMove}
-                      style={{ position: "absolute", top: "50%", left: `${Math.min(100, (logHydrationMl / LOG_MAX_ML) * 100)}%`, transform: "translate(-50%, -50%)", width: 22, height: 22, borderRadius: "50%", background: "#fff", border: "2.5px solid #2653d4", boxShadow: "0 1px 6px rgba(38,83,212,0.25)", cursor: "grab", touchAction: "none" }}
-                    />
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: "clamp(10px, 2.6vw, 13px)", color: "#c8ccd0" }}>0</span>
-                    <span style={{ fontSize: "clamp(10px, 2.6vw, 13px)", color: "#b0b8c1" }}>2.5L</span>
-                    <span style={{ fontSize: "clamp(10px, 2.6vw, 13px)", color: "#c8ccd0" }}>3L+</span>
-                  </div>
-                </div>
+                {/* Insert card */}
+                <button
+                  onClick={() => setManualPickerOpen(o => !o)}
+                  style={{ width: "100%", background: "#f8f9fa", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  <span style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 600, color: "#1a1c1c" }}>Add Manually</span>
+                </button>
 
-                {/* Row 3: Food & Note tiles */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                  <button
-                    onClick={() => setLogPickerSub("nutrition")}
-                    style={{ background: "#f0fdf4", border: "none", borderRadius: 16, padding: "18px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 24, position: "relative", minHeight: 110 }}
-                  >
-                    {mealsToday.length > 0 && <div style={{ position: "absolute", top: 10, right: 10 }}><span style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, color: "#16a34a" }}>{mealsToday.length}</span></div>}
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-                    <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2, textAlign: "left" }}>Food &amp; Snacks</p>
-                  </button>
-                  <button
-                    onClick={() => setLogPickerSub("matchreview")}
-                    style={{ background: "#f8f9fa", border: "none", borderRadius: 16, padding: "18px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 24, minHeight: 110 }}
-                  >
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                    <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2, textAlign: "left" }}>Add a note</p>
-                  </button>
-                </div>
-
-                {/* More section */}
-                <div style={{ paddingTop: 4, borderTop: "1px solid #f0f0f0", marginTop: 2 }}>
-                  <p style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 600, color: "#b0b8c1", textTransform: "uppercase", letterSpacing: "0.06em", margin: "10px 0 6px" }}>More</p>
-                  <div style={{ background: "#f8f9fa", borderRadius: 16, overflow: "hidden" }}>
-                    {[
-                      { label: "My Profile", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>, action: () => { setLogPickerOpen(false); router.push("/profile"); } },
-                      { label: "Weekly Shopping List", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>, action: () => { setLogPickerOpen(false); router.push("/shopping-list"); } },
-                      { label: "Export my data", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>, action: () => { downloadSnapshot(); setLogPickerOpen(false); } },
-                      { label: importDone ? "Data restored ✓" : "Import backup", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>, action: () => importPickerRef.current?.click() },
-                    ].map((item, i, arr) => (
-                      <button key={item.label} onClick={item.action}
-                        style={{ display: "flex", alignItems: "center", gap: 16, padding: "14px 18px", borderBottom: i < arr.length - 1 ? "1px solid #ebebeb" : "none", background: "none", border: i < arr.length - 1 ? undefined : "none", borderTop: "none", borderLeft: "none", borderRight: "none", cursor: "pointer", width: "100%", textAlign: "left" }}>
-                        <span style={{ color: "#9aa5b0" }}>{item.icon}</span>
-                        <span style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 600, color: "#1a1c1c" }}>{item.label}</span>
+                {manualPickerOpen && (
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                    {([
+                      { label: "Match", sub: "Schedule", bg: "#eef2ff", color: "#2653d4", categoryKey: "match_schedule", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>, action: () => { setManualPickerOpen(false); setLogPickerOpen(false); setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('manual'); setMatchModalOpen(true); } },
+                      { label: "Food", sub: "Meal or snack", bg: "#f0fdf4", color: "#16a34a", categoryKey: "meal", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>, action: () => { setManualPickerOpen(false); setSmartUploadResult({ category: "meal", label: "Add a meal", confidence: "high", data: { description: "", meal_type: "" } }); setLogPickerSub("upload-confirm"); } },
+                      { label: "Gear", sub: "Racket, shoes…", bg: "#f5f0ff", color: "#7c3aed", categoryKey: "gear", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, action: () => { setManualPickerOpen(false); setSmartUploadResult({ category: "gear", label: "Add gear", confidence: "high", data: { type: "", brand: "", name: "" } }); setLogPickerSub("upload-confirm"); } },
+                      { label: "Results", sub: "Match result", bg: "#fff7ed", color: "#ea580c", categoryKey: "match_result", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, action: () => { setManualPickerOpen(false); setSmartUploadResult({ category: "match_result", label: "Add match result", confidence: "high", data: { result: "", score: "", opponent_names: "" } }); setLogPickerSub("upload-confirm"); } },
+                      { label: "Note", sub: "Thoughts or ideas", bg: "#f8f9fa", color: "#6b7480", categoryKey: null, icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>, action: () => { setManualPickerOpen(false); setLogPickerSub("matchreview"); } },
+                    ]).map(({ label, sub, bg, color, icon, action }, i, arr) => (
+                      <button key={label} onClick={action} style={{ background: bg, border: "none", borderRadius: 14, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 16, textAlign: "left", gridColumn: arr.length % 2 !== 0 && i === arr.length - 1 ? "1 / -1" : undefined }}>
+                        {icon}
+                        <div>
+                          <p style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{label}</p>
+                          <p style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 600, color, margin: "2px 0 0" }}>{sub}</p>
+                        </div>
                       </button>
                     ))}
                   </div>
-                </div>
-                <input ref={importPickerRef} type="file" accept="application/json,.json" className="hidden" onChange={e => {
-                  const file = e.target.files?.[0]; if (!file) return;
-                  const reader = new FileReader();
-                  reader.onload = () => { try { importData(JSON.parse(reader.result as string)); setImportDone(true); setLogPickerOpen(false); window.location.reload(); } catch { alert("Couldn't read that file."); } };
-                  reader.readAsText(file); e.target.value = "";
-                }} />
+                )}
+
+                {/* Hidden file input for Insert tile uploads */}
+                <input
+                  ref={insertUploadRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async e => {
+                    const file = e.target.files?.[0];
+                    if (!file || !insertUploadCategory) return;
+                    setInsertUploadLoading(true);
+                    try {
+                      const reader = new FileReader();
+                      const base64 = await new Promise<string>((resolve, reject) => {
+                        reader.onload = () => resolve((reader.result as string).split(",")[1]);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                      });
+                      const res = await fetch("/api/classify-upload", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ image: base64, mediaType: file.type, forceCategory: insertUploadCategory }) });
+                      const result = await res.json();
+                      if (!res.ok || result.error) {
+                        setSmartUploadError(result.message || "Could not read the image.");
+                      } else {
+                        setSmartUploadResult(prev => prev ? { ...prev, label: result.label, data: result.data } : { ...result, category: insertUploadCategory! });
+                      }
+                    } catch {
+                      setSmartUploadError("Upload failed. Please try again.");
+                    }
+                    setInsertUploadLoading(false);
+                    setInsertUploadCategory(null);
+                    if (insertUploadRef.current) insertUploadRef.current.value = "";
+                  }}
+                />
+
+                {smartUploadError && (
+                  <p style={{ fontSize: 13, color: "#c0392b", margin: "-4px 2px 0", lineHeight: 1.4 }}>{smartUploadError}</p>
+                )}
+                <input
+                  ref={smartUploadRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async e => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setSmartUploadError(null);
+                    setSmartUploadLoading(true);
+                    try {
+                      const reader = new FileReader();
+                      const base64 = await new Promise<string>((resolve, reject) => {
+                        reader.onload = () => resolve((reader.result as string).split(",")[1]);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(file);
+                      });
+                      const res = await fetch("/api/classify-upload", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ image: base64, mediaType: file.type }) });
+                      const result = await res.json();
+                      if (!res.ok || result.error) {
+                        setSmartUploadError(result.message || "Could not identify the image.");
+                      } else {
+                        setSmartUploadResult(result);
+                        setLogPickerSub("upload-confirm");
+                      }
+                    } catch {
+                      setSmartUploadError("Upload failed. Please try again.");
+                    }
+                    setSmartUploadLoading(false);
+                    if (smartUploadRef.current) smartUploadRef.current.value = "";
+                  }}
+                />
+
+
+                {/* Bottom expand */}
+                <button
+                  onClick={() => setExtrasOpen(o => !o)}
+                  style={{ width: "100%", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: "2px 0 0" }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d0d3d6" strokeWidth="2" strokeLinecap="round" style={{ transition: "transform 0.2s", transform: extrasOpen ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+
+                {extrasOpen && (
+                  <button
+                    onClick={() => { setLogTab("checkin"); setLogSheetOpen(true); }}
+                    style={{ width: "100%", background: "#f5f0ff", border: "none", borderRadius: 12, padding: "11px 14px", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, textAlign: "left" }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                    <span style={{ flex: 1, fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 600, color: "#1a1c1c" }}>Daily Check-in</span>
+                    {morningDone
+                      ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                      : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#b0b8c1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    }
+                  </button>
+                )}
 
               </div>{/* end flex col */}
               </div>{/* end scroll wrapper */}
@@ -1770,6 +1819,209 @@ export default function Home8() {
                   </div>
                 </div>
               )}
+
+              {/* Smart upload confirm sub-modal */}
+              {logPickerSub === "upload-confirm" && smartUploadResult && (() => {
+                const { category, label, data } = smartUploadResult;
+                const categoryMeta: Record<string, { title: string; color: string }> = {
+                  match_schedule: { title: "Match schedule", color: "#2653d4" },
+                  meal: { title: "Meal detected", color: "#16a34a" },
+                  gear: { title: "Gear identified", color: "#7c3aed" },
+                  match_result: { title: "Match result", color: "#ea580c" },
+                  unknown: { title: "Couldn't identify", color: "#8a9096" },
+                };
+                const meta = categoryMeta[category] ?? categoryMeta.unknown;
+                const updateData = (key: string, val: string) =>
+                  setSmartUploadResult(r => r ? { ...r, data: { ...r.data, [key]: val } } : r);
+                const inputSt: React.CSSProperties = { width: "100%", padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", outline: "none", fontFamily: "inherit", background: "#f8f9fa", boxSizing: "border-box" };
+                const labelSt: React.CSSProperties = { fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#8a9096", marginBottom: 4, display: "block" };
+                const canConfirm = category !== "match_schedule" || (!!data.date && !!data.time);
+
+                const handleConfirm = () => {
+                  if (category === "match_schedule") {
+                    const matchData: StoredMatch = { date: data.date ?? '', time: data.time ?? '', club: data.club ?? '', court: data.court ?? '', player_1: data.player_1 ?? '', player_2: data.player_2 ?? '', player_3: data.player_3 ?? '', player_4: data.player_4 ?? '' };
+                    const sorted = saveMatchList([...getMatchList(), matchData]);
+                    const next = sorted[0];
+                    if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, court: next.court || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
+                    saveUpcomingMatch(matchData);
+                    window.dispatchEvent(new Event("storage"));
+                  } else if (category === "meal") {
+                    saveMealEntry(nowTimeStr(), data.description ?? label);
+                  } else if (category === "match_result") {
+                    const entry = { ts: new Date().toISOString(), feeling: "", result: data.result ?? "", opponent: data.opponent_names ?? "", energy: "", wellDone: [] as string[], improved: [] as string[] };
+                    const prev = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+                    localStorage.setItem("padelop:match-reviews", JSON.stringify([entry, ...prev].slice(0, 50)));
+                    window.dispatchEvent(new Event("storage"));
+                  }
+                  setLogPickerSub(null); setSmartUploadResult(null); setLogPickerOpen(false);
+                };
+
+                const handleEditManually = () => {
+                  if (category === "match_schedule") {
+                    setMatchForm({ date: data.date ?? '', time: data.time ?? '', club: data.club ?? '', court: data.court ?? '', p1: data.player_1 ?? '', p2: data.player_2 ?? '', p3: data.player_3 ?? '', p4: data.player_4 ?? '' });
+                    setIsAddMode(true); setMatchModalTab('manual'); setMatchModalOpen(true);
+                    setLogPickerOpen(false); setLogPickerSub(null); setSmartUploadResult(null);
+                  } else if (category === "meal") {
+                    setMealText(data.description ?? label); setLogPickerSub("nutrition"); setSmartUploadResult(null);
+                  } else if (category === "match_result") {
+                    setLogPickerOpen(false); setLogPickerSub(null); setSmartUploadResult(null);
+                    setLogTab("matchreview"); setLogSheetOpen(true);
+                  } else {
+                    setLogPickerSub(null); setSmartUploadResult(null);
+                  }
+                };
+
+                return (
+                  <div className="fixed inset-0 z-[300] flex items-end" onClick={() => { setLogPickerSub(null); setSmartUploadResult(null); }}>
+                    <div className="absolute inset-0 bg-black/20" />
+                    <div className="relative w-full bg-white rounded-t-[24px] shadow-2xl" style={{ paddingBottom: "env(safe-area-inset-bottom)", maxHeight: "82vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+                      <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-[#e0e0e0]" /></div>
+                      {/* Header */}
+                      <div style={{ padding: "12px 20px 4px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <button
+                            onClick={() => setUploadCategoryPickerOpen(o => !o)}
+                            style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 8px", borderRadius: 6, background: meta.color + "18", border: "none", cursor: "pointer", marginBottom: 6 }}
+                          >
+                            <span style={{ fontSize: 11, fontWeight: 700, color: meta.color, letterSpacing: "0.06em", textTransform: "uppercase" }}>{meta.title}</span>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={meta.color} strokeWidth="2.5" strokeLinecap="round" style={{ transition: "transform 0.15s", transform: uploadCategoryPickerOpen ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
+                          </button>
+                          {uploadCategoryPickerOpen && (() => {
+                            const emptyData: Record<string, Record<string, string>> = {
+                              match_schedule: { date: '', time: '', club: '', court: '', player_1: '', player_2: '', player_3: '', player_4: '' },
+                              meal: { description: '', meal_type: '' },
+                              gear: { type: '', brand: '', name: '' },
+                              match_result: { result: '', score: '', opponent_names: '' },
+                            };
+                            const options = [
+                              { key: "match_schedule", title: "Match schedule", color: "#2653d4" },
+                              { key: "meal", title: "Meal", color: "#16a34a" },
+                              { key: "gear", title: "Gear", color: "#7c3aed" },
+                              { key: "match_result", title: "Match result", color: "#ea580c" },
+                            ];
+                            return (
+                              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+                                {options.map(opt => (
+                                  <button
+                                    key={opt.key}
+                                    onClick={() => { setSmartUploadResult(r => r ? { ...r, category: opt.key, data: emptyData[opt.key] ?? {} } : r); setUploadCategoryPickerOpen(false); }}
+                                    style={{ padding: "4px 10px", borderRadius: 6, border: `1.5px solid ${opt.key === category ? opt.color : "#e8eaed"}`, background: opt.key === category ? opt.color + "18" : "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700, color: opt.key === category ? opt.color : "#6b7480" }}
+                                  >
+                                    {opt.title}
+                                  </button>
+                                ))}
+                              </div>
+                            );
+                          })()}
+                          <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.3 }}>{label}</p>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0, marginTop: 2 }}>
+                          <button
+                            onClick={() => { setInsertUploadCategory(category); insertUploadRef.current?.click(); }}
+                            disabled={insertUploadLoading}
+                            style={{ background: "rgba(0,0,0,0.06)", border: "none", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: insertUploadLoading ? 0.5 : 1 }}
+                          >
+                            {insertUploadLoading ? (
+                              <svg className="animate-spin" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                            ) : (
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                            )}
+                          </button>
+                          <button onClick={() => { setLogPickerSub(null); setSmartUploadResult(null); }} style={{ background: "rgba(0,0,0,0.06)", border: "none", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Editable fields */}
+                      <div style={{ padding: "12px 20px 4px" }}>
+                        {category === "match_schedule" && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                              <div><label style={labelSt}>Date</label><input type="date" value={data.date ?? ''} onChange={e => updateData("date", e.target.value)} style={inputSt} /></div>
+                              <div><label style={labelSt}>Time</label><input type="time" value={data.time ?? ''} onChange={e => updateData("time", e.target.value)} style={inputSt} /></div>
+                            </div>
+                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                              <div><label style={labelSt}>Club</label><input type="text" value={data.club ?? ''} onChange={e => updateData("club", e.target.value)} style={inputSt} placeholder="Club name" /></div>
+                              <div><label style={labelSt}>Court</label><input type="text" value={data.court ?? ''} onChange={e => updateData("court", e.target.value)} style={inputSt} placeholder="Court #" /></div>
+                            </div>
+                            <div>
+                              <label style={labelSt}>Players</label>
+                              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                                {(["player_1","player_2","player_3","player_4"] as const).map((k, i) => (
+                                  <input key={k} type="text" value={data[k] ?? ''} onChange={e => updateData(k, e.target.value)} style={inputSt} placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} />
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        {category === "meal" && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                            <div>
+                              <label style={labelSt}>What you ate</label>
+                              <textarea value={data.description ?? ''} onChange={e => updateData("description", e.target.value)} rows={3} style={{ ...inputSt, resize: "none", lineHeight: 1.5 }} />
+                            </div>
+                            <div>
+                              <label style={labelSt}>Meal type</label>
+                              <select value={data.meal_type ?? ''} onChange={e => updateData("meal_type", e.target.value)} style={inputSt}>
+                                <option value="">Select…</option>
+                                {["breakfast","lunch","dinner","snack","pre-match","post-match"].map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
+                              </select>
+                            </div>
+                          </div>
+                        )}
+                        {category === "gear" && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                            <div>
+                              <label style={labelSt}>Type</label>
+                              <select value={data.type ?? ''} onChange={e => updateData("type", e.target.value)} style={inputSt}>
+                                <option value="">Select…</option>
+                                {["racket","shoes","bag","other"].map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
+                              </select>
+                            </div>
+                            <div><label style={labelSt}>Brand</label><input type="text" value={data.brand ?? ''} onChange={e => updateData("brand", e.target.value)} style={inputSt} placeholder="Brand name" /></div>
+                            <div><label style={labelSt}>Name / Model</label><input type="text" value={data.name ?? ''} onChange={e => updateData("name", e.target.value)} style={inputSt} placeholder="Model or description" /></div>
+                          </div>
+                        )}
+                        {category === "match_result" && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                            <div>
+                              <label style={labelSt}>Result</label>
+                              <select value={data.result ?? ''} onChange={e => updateData("result", e.target.value)} style={inputSt}>
+                                <option value="">Select…</option>
+                                <option value="win">Win</option>
+                                <option value="loss">Loss</option>
+                                <option value="draw">Draw</option>
+                              </select>
+                            </div>
+                            <div><label style={labelSt}>Score</label><input type="text" value={data.score ?? ''} onChange={e => updateData("score", e.target.value)} style={inputSt} placeholder="e.g. 6-3, 7-5" /></div>
+                            <div><label style={labelSt}>Opponents</label><input type="text" value={data.opponent_names ?? ''} onChange={e => updateData("opponent_names", e.target.value)} style={inputSt} placeholder="Opponent names" /></div>
+                          </div>
+                        )}
+                        {category === "unknown" && (
+                          <p style={{ fontSize: "clamp(14px, 3.6vw, 16px)", color: "#6b7480", lineHeight: 1.5, margin: 0 }}>
+                            We couldn&apos;t identify a category for this image. Try uploading a match schedule screenshot, a meal photo, gear, or a match result scoreboard.
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Actions */}
+                      <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
+                        {category !== "unknown" && (
+                          <button onClick={handleConfirm} disabled={!canConfirm} style={{ padding: "13px 20px", borderRadius: 999, background: canConfirm ? meta.color : "#e8eaed", border: "none", cursor: canConfirm ? "pointer" : "default", fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 700, color: canConfirm ? "#fff" : "#b0b8c1", width: "100%" }}>
+                            {category === "match_schedule" ? "Save match" : category === "meal" ? "Log meal" : category === "match_result" ? "Save result" : "Save"}
+                          </button>
+                        )}
+                        {category !== "gear" && (
+                          <button onClick={handleEditManually} style={{ padding: "10px 20px", borderRadius: 999, background: "none", border: "1.5px solid #e8eaed", cursor: "pointer", fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 600, color: "#6b7480", width: "100%" }}>
+                            {category === "unknown" ? "Enter manually" : "Edit manually"}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
 
             </div>
           </div>

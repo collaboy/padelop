@@ -320,6 +320,8 @@ export default function ProfilePage() {
 
   // Matches
   const [logSheetOpen, setLogSheetOpen]       = useState(false);
+  const [logTab, setLogTab]                   = useState<"checkin" | null>(null);
+  const [checkinDone, setCheckinDone]         = useState(false);
 const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null);
   const [reviews, setReviews]                 = useState<ReviewEntry[]>([]);
   const [trainingSessions, setTrainingSessions] = useState<TrainingEntry[]>([]);
@@ -416,6 +418,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
     let m2: { date: string } | null = null;
     try { m2 = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch {}
     setPillarStates(computePillarStates(d.checkIn, d.hydration, d.nutrition, d.habits, d.training, m2?.date === todayStr));
+    try { setCheckinDone(localStorage.getItem("padelop:morning-log") === todayStr); } catch {}
     // Food quality
     try {
       const allMeals: MealEntry[] = JSON.parse(localStorage.getItem("padelop:meal-log") || "[]");
@@ -909,6 +912,15 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
             ) : !isToday ? (
               <p className="t-body-sm" style={{ color: "var(--c-hint)", margin: 0, borderTop: "1px solid #f4f4f6", paddingTop: 12 }}>Nothing logged this day.</p>
             ) : null}
+
+            {/* Shopping list link */}
+            <Link href="/shopping-list" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16, paddingTop: 14, borderTop: "1px solid #f4f4f6", textDecoration: "none" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                <span style={{ fontSize: 14, fontWeight: 600, color: "#16a34a" }}>Weekly Shopping List</span>
+              </div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b0b8c1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            </Link>
           </div>
         );
       })()}
@@ -1102,6 +1114,22 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
         </p>
       </div>
 
+      {/* ── Daily Check-in ───────────────────────────────────────────────── */}
+      <button
+        onClick={() => { setLogTab("checkin"); setLogSheetOpen(true); }}
+        style={{ width: "100%", background: "#f5f0ff", border: "none", borderRadius: "var(--r-lg)", padding: "18px 20px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, textAlign: "left" }}
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <div style={{ flex: 1 }}>
+          <p className="t-body" style={{ fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Daily Check-in</p>
+          <p className="t-body-sm" style={{ color: checkinDone ? "#16a34a" : "#7c3aed", margin: "2px 0 0" }}>{checkinDone ? "Done today" : "Log how you feel today"}</p>
+        </div>
+        {checkinDone
+          ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+          : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0b8c1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        }
+      </button>
+
       {/* ── Activity ─────────────────────────────────────────────────────── */}
 
       <div style={{ height: 1, background: "#e8eaed", margin: "0" }} />
@@ -1208,7 +1236,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
         </svg>
       </button>
 
-      <LogSheet open={logSheetOpen} onClose={() => setLogSheetOpen(false)} />
+      <LogSheet open={logSheetOpen} onClose={() => { setLogSheetOpen(false); setLogTab(null); }} defaultSub={logTab ?? undefined} />
 
       {cropSrc && (
         <AvatarCropModal
