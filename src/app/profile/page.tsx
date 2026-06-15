@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { saveGearToDb, saveProfileToDb } from "@/lib/db";
+import { saveGearToDb, saveProfileToDb, saveNutritionInsightToDb } from "@/lib/db";
 import LogSheet from "@/components/log-sheet";
 import AvatarCropModal from "@/components/avatar-crop-modal";
 import { hydrateFromSupabase } from "@/lib/sync";
@@ -342,6 +342,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
   const [foodHistory, setFoodHistory] = useState<Array<{ date: string; score: number }>>([]);
   const [todayMeals, setTodayMeals] = useState<MealEntry[]>([]);
   const [selectedFoodDate, setSelectedFoodDate] = useState<string | null>(null);
+  const [aiInsight, setAiInsight] = useState<{ score: number; insight: string } | null>(null);
 
   function loadAll() {
     // Profile
@@ -429,6 +430,44 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
     window.addEventListener("storage", loadAll);
     return () => window.removeEventListener("storage", loadAll);
   }, []);
+
+  useEffect(() => {
+    if (!todayMeals.length) { setAiInsight(null); return; }
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const cacheKey = "padelop:nutrition-ai-insight";
+    try {
+      const cached = JSON.parse(localStorage.getItem(cacheKey) || "null");
+      if (cached?.date === todayStr && cached?.mealCount === todayMeals.length) {
+        setAiInsight({ score: cached.score, insight: cached.insight });
+        return;
+      }
+    } catch {}
+    const matchToday = !!nextMatch && nextMatch.date === todayStr;
+    const matchYesterday = (() => {
+      try {
+        const allR: { ts: string }[] = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+        const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+        return allR.some(r => r.ts.slice(0, 10) === yesterday.toISOString().slice(0, 10));
+      } catch { return false; }
+    })();
+    const dayType = matchToday ? "match" : matchYesterday ? "recovery" : "training";
+    fetch("/api/nutrition-analysis", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ meals: todayMeals.map(m => ({ time: m.time, description: m.description })), dayType }),
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.score != null && data?.insight) {
+          setAiInsight(data);
+          try {
+            localStorage.setItem(cacheKey, JSON.stringify({ date: todayStr, mealCount: todayMeals.length, ...data }));
+          } catch {}
+          saveNutritionInsightToDb(todayStr, data.score, data.insight);
+        }
+      })
+      .catch(() => {});
+  }, [todayMeals, nextMatch]);
 
   const [profileOpen, setProfileOpen] = useState(false);
   const [gearEditOpen, setGearEditOpen] = useState(false);
@@ -769,7 +808,8 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
         })();
 
         const analysis = analyzeMeals(viewMeals);
-        const grade = foodGrade(analysis.score);
+        const displayScore = isToday && aiInsight ? aiInsight.score : analysis.score;
+        const grade = foodGrade(displayScore);
 
         // Determine day type for today (used in coverage dots)
         const matchToday = !!nextMatch && nextMatch.date === todayStr;
@@ -799,7 +839,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
             {/* Score + bar sparkline */}
             <div style={{ display: "flex", alignItems: "flex-end", gap: 16, marginBottom: 16 }}>
               <div style={{ flexShrink: 0 }}>
-                <p className="t-stat" style={{ color: grade.color, margin: 0, lineHeight: 1 }}>{analysis.score}</p>
+                <p className="t-stat" style={{ color: grade.color, margin: 0, lineHeight: 1 }}>{displayScore}</p>
                 <p className="t-tag" style={{ color: grade.color, margin: "4px 0 0", fontWeight: 700 }}>{grade.label}</p>
               </div>
               <div style={{ flex: 1, display: "flex", alignItems: "flex-end", gap: 3, height: 44 }}>
@@ -835,8 +875,16 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
               ))}
             </div>
 
+            {/* AI nutrition insight (today only) */}
+            {isToday && aiInsight && (
+              <div style={{ background: "#f0f4ff", borderRadius: 10, padding: "10px 12px", marginBottom: viewMeals.length ? 14 : 0 }}>
+                <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: "#2653d4", marginBottom: 3 }}>AI Assessment</p>
+                <p style={{ margin: 0, fontSize: 13, color: "#2c3235", lineHeight: 1.5 }}>{aiInsight.insight}</p>
+              </div>
+            )}
+
             {/* Meal coverage dots (today only — we don't know past day types) */}
-            {isToday && (
+            {isToday && !aiInsight && (
               <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: viewMeals.length ? 14 : 0 }}>
                 {coverage.map(({ title, covered }) => (
                   <div key={title} style={{ display: "flex", alignItems: "center", gap: 8 }}>

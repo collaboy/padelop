@@ -471,38 +471,111 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
   }
 
   if (sub === "checkin") {
-    const MORNING_STEPS = [
-      { key: "sleep",      type: "scale", question: "How did you sleep?",           lo: "Poorly",    hi: "Excellent" },
-      { key: "sleepHours", type: "opts",  question: "How many hours?",              opts: ["5h","6h","7h","8h","9h+"] },
-      { key: "soreness",   type: "scale", question: "How does your body feel?",     lo: "Very sore", hi: "No soreness" },
-      { key: "energy",     type: "scale", question: "Energy level?",                lo: "Exhausted", hi: "Energised" },
-      { key: "motivation", type: "scale", question: "Motivated today?",             lo: "None",      hi: "Fired up" },
-      { key: "water",      type: "yesno", question: "Did you drink water on waking?" },
-    ] as const;
-    const totalSteps = MORNING_STEPS.length;
-    const step = MORNING_STEPS[morningStep];
+    const NIGHT_COUNT = 8;
+    const MORNING_COUNT = 4;
 
-    function morningPick(key: string, val: string | number) {
+    type CStep =
+      | { key: string; section: "night" | "morning"; type: "scale"; question: string; lo: string; hi: string }
+      | { key: string; section: "night" | "morning"; type: "opts";  question: string; opts: string[] }
+      | { key: string; section: "night" | "morning"; type: "face";  question: string; opts: [string,string][] }
+      | { key: string; section: "night" | "morning"; type: "opts3"; question: string; opts: [string,string][] }
+      | { key: string; section: "night" | "morning"; type: "habits"; question: string }
+      | { key: string; section: "night" | "morning"; type: "yesno"; question: string };
+
+    const COMBINED_STEPS: CStep[] = [
+      // ── Last night ───────────────────────────────────────────────────────
+      { key: "bedtime",          section: "night",   type: "opts",  question: "When did you go to bed last night?", opts: ["9pm","10pm","10:30pm","11pm","After 11"] },
+      { key: "sleep",            section: "night",   type: "scale", question: "How did you sleep?",                 lo: "Poorly",        hi: "Excellent"   },
+      { key: "sleepHours",       section: "night",   type: "opts",  question: "How many hours?",                    opts: ["5h","6h","7h","8h","9h+"]             },
+      { key: "stress",           section: "night",   type: "scale", question: "Stress level yesterday?",            lo: "Very stressed",  hi: "No stress"   },
+      { key: "nutritionQuality", section: "night",   type: "face",  question: "How well did you eat yesterday?",    opts: [["bad","Poorly"],["ok","OK"],["great","Well"]] },
+      { key: "protein",          section: "night",   type: "opts3", question: "Did you hit your protein target?",   opts: [["yes","Yes"],["notSure","Not sure"],["no","No"]] },
+      { key: "hydrationLitres",  section: "night",   type: "opts",  question: "How much did you drink yesterday?",  opts: ["<1L","1–1.5L","1.5–2L","2–2.5L","2.5–3L","3L+"] },
+      { key: "habits",           section: "night",   type: "habits", question: "Which habits did you complete?" },
+      // ── This morning ─────────────────────────────────────────────────────
+      { key: "soreness",         section: "morning", type: "scale", question: "How does your body feel?",           lo: "Very sore",     hi: "No soreness" },
+      { key: "energy",           section: "morning", type: "scale", question: "Energy level?",                      lo: "Exhausted",     hi: "Energised"   },
+      { key: "motivation",       section: "morning", type: "scale", question: "Motivated today?",                   lo: "None",          hi: "Fired up"    },
+      { key: "water",            section: "morning", type: "yesno", question: "Did you drink water on waking?" },
+    ];
+
+    const totalSteps = COMBINED_STEPS.length;
+    const step = COMBINED_STEPS[morningStep];
+    const isNight = step.section === "night";
+    const accent = isNight ? PURPLE : BLUE;
+    const sectionLabel = isNight ? "Last night" : "This morning";
+    const sectionStep = isNight ? morningStep + 1 : morningStep - NIGHT_COUNT + 1;
+    const sectionTotal = isNight ? NIGHT_COUNT : MORNING_COUNT;
+
+    function pick(key: string, val: string | number) {
       const next = { ...morningData, [key]: val };
       setMorningData(next);
       if (morningStep < totalSteps - 1) {
         setTimeout(() => setMorningStep(s => s + 1), 180);
       } else {
-        // Save
-        try {
-          const ci = {
-            sleep:      Number(next.sleep)      || 3,
-            energy:     Number(next.energy)     || 3,
-            soreness:   Number(next.soreness)   || 3,
-            motivation: Number(next.motivation) || 3,
-          };
-          savePartialCheckIn(ci);
-          saveCheckInToDb({ date: todayYMD, sleep: ci.sleep, energy: ci.energy });
-          const morningLog = { date: todayYMD, sleepHours: next.sleepHours, waterOnWaking: next.water === "yes" };
-          localStorage.setItem("padelop:morning-log", JSON.stringify(morningLog));
-        } catch {}
-        afterSave();
+        saveCombined(next);
       }
+    }
+
+    function advance() {
+      if (morningStep < totalSteps - 1) setMorningStep(s => s + 1);
+      else saveCombined(morningData);
+    }
+
+    function saveCombined(next: Record<string, string | number>) {
+      try {
+        const ci = {
+          sleep:      Number(next.sleep)      || 3,
+          energy:     Number(next.energy)     || 3,
+          soreness:   Number(next.soreness)   || 3,
+          motivation: Number(next.motivation) || 3,
+          stress:     Number(next.stress)     || 3,
+        };
+        savePartialCheckIn(ci);
+        saveCheckInToDb({ date: todayYMD, sleep: ci.sleep, energy: ci.energy });
+
+        localStorage.setItem("padelop:morning-log", JSON.stringify({
+          date: todayYMD,
+          sleepHours: next.sleepHours,
+          waterOnWaking: next.water === "yes",
+        }));
+
+        const bedtime = String(next.bedtime ?? "");
+        const earlyBed = ["9pm","10pm","10:30pm"].includes(bedtime);
+        const habitsEntry = {
+          date:         todayYMD,
+          sleep:        earlyBed,
+          mobility:     nightHabits.includes("Mobility"),
+          visualise:    nightHabits.includes("Visualise"),
+          boxBreathing: nightHabits.includes("Box breathing"),
+          foamRoll:     nightHabits.includes("Foam roll"),
+          lightWalk:    nightHabits.includes("Light walk"),
+          coldShower:   nightHabits.includes("Cold shower"),
+        };
+        const prevHabits = JSON.parse(localStorage.getItem("padelop:habits") || "[]");
+        localStorage.setItem("padelop:habits", JSON.stringify([habitsEntry, ...prevHabits].slice(0, 50)));
+
+        const protein = String(next.protein ?? "");
+        const nutritionQuality = String(next.nutritionQuality ?? "ok");
+        const nutritionEntry = {
+          ts: new Date().toISOString(),
+          proteinRating: protein === "yes" ? "high" : protein === "no" ? "low" : "mid",
+          quality: nutritionQuality,
+          foods: [] as string[],
+          postMatch: "no",
+        };
+        const prevNutrition = JSON.parse(localStorage.getItem("padelop:nutrition-logs") || "[]");
+        localStorage.setItem("padelop:nutrition-logs", JSON.stringify([nutritionEntry, ...prevNutrition].slice(0, 50)));
+        saveNutritionToDb({ date: todayYMD, meal_type: "dinner", description: nutritionQuality });
+
+        const hydrationLitres = String(next.hydrationLitres ?? "");
+        if (hydrationLitres) {
+          const hydrationEntry = { ts: new Date().toISOString(), litres: hydrationLitres, urine: "", quality: "ok", timing: [] as string[] };
+          const prevHydration = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]");
+          localStorage.setItem("padelop:hydration-logs", JSON.stringify([hydrationEntry, ...prevHydration].slice(0, 50)));
+        }
+      } catch {}
+      afterSave();
     }
 
     return (
@@ -521,19 +594,19 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
               className="w-8 h-8 rounded-full flex items-center justify-center active:bg-c-bg">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-text-sub)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
-            {/* Progress */}
+            {/* Progress — per-section dots */}
             <div className="flex flex-col items-center gap-1">
-              <span className="text-[12px] font-bold" style={{ color: BLUE }}>{morningStep + 1} of {MORNING_STEPS.length}</span>
+              <span className="text-[12px] font-bold" style={{ color: accent }}>{sectionStep} of {sectionTotal}</span>
               <div className="flex items-center gap-1">
-                {MORNING_STEPS.map((_, i) => (
-                  <div key={i} style={{ width: i === morningStep ? 16 : 4, height: 4, borderRadius: "var(--r-pill)", background: i <= morningStep ? BLUE : "var(--c-line)", transition: "all 0.25s" }}/>
+                {Array.from({ length: sectionTotal }).map((_, i) => (
+                  <div key={i} style={{ width: i === sectionStep - 1 ? 16 : 4, height: 4, borderRadius: "var(--r-pill)", background: i < sectionStep ? accent : "var(--c-line)", transition: "all 0.25s" }}/>
                 ))}
               </div>
             </div>
             <button onClick={handleClose} className="w-8 h-8 rounded-full flex items-center justify-center active:bg-c-bg"><XIcon/></button>
           </div>
-          {/* Label */}
-          <p className="t-label text-center text-c-hint mt-1">Morning Check-in</p>
+          {/* Section label */}
+          <p className="t-label text-center mt-1" style={{ color: accent }}>{sectionLabel}</p>
           {/* Question */}
           <p className="text-center font-bold text-c-text px-6 pt-8 pb-7" style={{ fontSize: "clamp(22px, 6vw, 28px)" }}>
             {step.question}
@@ -546,34 +619,83 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
                   {[1,2,3,4,5].map(v => {
                     const sel = morningData[step.key] === v;
                     return (
-                      <button key={v} onClick={() => morningPick(step.key, v)}
+                      <button key={v} onClick={() => pick(step.key, v)}
                         className="flex-1 rounded-2xl text-[20px] font-bold transition-all active:scale-95"
-                        style={{ height: 48, background: sel ? BLUE : "var(--c-bg)", color: sel ? "#fff" : "var(--c-text-sub)" }}>
+                        style={{ height: 48, background: sel ? accent : "var(--c-bg)", color: sel ? "#fff" : "var(--c-text-sub)" }}>
                         {v}
                       </button>
                     );
                   })}
                 </div>
-                {"lo" in step && (
-                  <div className="flex justify-between mt-2">
-                    <span className="text-[11px] text-c-label">{step.lo}</span>
-                    <span className="text-[11px] text-c-label">{step.hi}</span>
-                  </div>
-                )}
+                <div className="flex justify-between mt-2">
+                  <span className="text-[11px] text-c-label">{step.lo}</span>
+                  <span className="text-[11px] text-c-label">{step.hi}</span>
+                </div>
+              </div>
+            )}
+            {step.type === "face" && (
+              <div className="flex gap-3">
+                {step.opts.map(([v, label]) => {
+                  const sel = morningData[step.key] === v;
+                  return (
+                    <button key={v} onClick={() => pick(step.key, v)}
+                      className="flex-1 flex flex-col items-center gap-2 py-3 rounded-2xl border-2 transition-all active:scale-95"
+                      style={{ borderColor: sel ? accent : "var(--c-line)", background: sel ? (isNight ? "#f5f3ff" : "#eff6ff") : "var(--c-bg-input)" }}>
+                      <Face v={v} sel={sel} color={accent}/>
+                      <span className="text-[13px] font-bold" style={{ color: sel ? accent : "var(--c-text-sub)" }}>{label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            {step.type === "opts3" && (
+              <div className="flex gap-2">
+                {step.opts.map(([v, label]) => {
+                  const sel = morningData[step.key] === v;
+                  return (
+                    <button key={v} onClick={() => pick(step.key, v)}
+                      className="flex-1 rounded-2xl text-[16px] font-bold transition-all active:scale-95"
+                      style={{ height: 48, background: sel ? accent : "var(--c-bg)", color: sel ? "#fff" : "var(--c-text-sub)" }}>
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
             )}
             {step.type === "opts" && (
               <div className="flex flex-wrap gap-2">
-                {"opts" in step && step.opts.map((o: string) => {
+                {step.opts.map((o: string) => {
                   const sel = morningData[step.key] === o;
                   return (
-                    <button key={o} onClick={() => morningPick(step.key, o)}
+                    <button key={o} onClick={() => pick(step.key, o)}
                       className="rounded-2xl text-[16px] font-bold transition-all active:scale-95 px-5"
-                      style={{ height: 48, background: sel ? BLUE : "var(--c-bg)", color: sel ? "#fff" : "var(--c-text-sub)" }}>
+                      style={{ height: 48, background: sel ? accent : "var(--c-bg)", color: sel ? "#fff" : "var(--c-text-sub)" }}>
                       {o}
                     </button>
                   );
                 })}
+              </div>
+            )}
+            {step.type === "habits" && (
+              <div>
+                <div className="grid grid-cols-2 gap-2 mb-4">
+                  {["Foam roll","Cold shower","Mobility","Box breathing","Light walk","Visualise"].map(habit => {
+                    const sel = nightHabits.includes(habit);
+                    return (
+                      <button key={habit} onClick={() => setNightHabits(h => sel ? h.filter(x => x !== habit) : [...h, habit])}
+                        className="flex items-center gap-2 px-4 rounded-2xl text-[14px] font-bold transition-all active:scale-95"
+                        style={{ height: 48, background: sel ? accent : "var(--c-bg)", color: sel ? "#fff" : "var(--c-text-sub)" }}>
+                        {sel && <span>✓</span>}
+                        {habit}
+                      </button>
+                    );
+                  })}
+                </div>
+                <button onClick={advance}
+                  className="w-full rounded-2xl text-white text-[16px] font-bold transition-all active:scale-95"
+                  style={{ height: 52, background: accent }}>
+                  Done →
+                </button>
               </div>
             )}
             {step.type === "yesno" && (
@@ -581,7 +703,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
                 {[{ v: "yes", label: "Yes", color: "var(--c-green)" }, { v: "no", label: "No", color: "var(--c-red)" }].map(({ v, label, color }) => {
                   const sel = morningData[step.key] === v;
                   return (
-                    <button key={v} onClick={() => morningPick(step.key, v)}
+                    <button key={v} onClick={() => pick(step.key, v)}
                       className="w-full rounded-2xl text-[20px] font-bold transition-all active:scale-95"
                       style={{ height: 56, background: sel ? color : "var(--c-bg)", color: sel ? "#fff" : "var(--c-text-sub)" }}>
                       {label}

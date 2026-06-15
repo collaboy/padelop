@@ -7,11 +7,11 @@ export async function hydrateFromSupabase() {
   try {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) { window.dispatchEvent(new Event("padelop:sync-done")); return; }
 
     const today = new Date().toISOString().slice(0, 10);
 
-    const [matchesRes, checkInsRes, hydrationRes, nutritionRes, sessionsRes, gearRes, profileRes] = await Promise.all([
+    const [matchesRes, checkInsRes, hydrationRes, nutritionRes, sessionsRes, gearRes, profileRes, notesRes] = await Promise.all([
       supabase.from("matches").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(50),
       supabase.from("check_ins").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(30),
       supabase.from("hydration_logs").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(50),
@@ -19,6 +19,7 @@ export async function hydrateFromSupabase() {
       supabase.from("sessions").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(50),
       supabase.from("gear").select("*").eq("user_id", user.id),
       supabase.from("profiles").select("display_name, avatar_url, dominant_hand, play_level").eq("id", user.id).single(),
+      supabase.from("notes").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(200),
     ]);
 
     // ── Profile ──────────────────────────────────────────────────────────
@@ -39,7 +40,16 @@ export async function hydrateFromSupabase() {
 
     const upcoming = matches
       .filter(m => m.date >= today && m.time)
-      .map(m => ({ date: m.date, time: m.time, club: m.location ?? "", player_1: "", player_2: "", player_3: "", player_4: "" }))
+      .map(m => ({
+        date:     m.date,
+        time:     m.time,
+        club:     m.location ?? "",
+        court:    m.court    ?? "",
+        player_1: m.player_1 ?? "",
+        player_2: m.player_2 ?? "",
+        player_3: m.player_3 ?? "",
+        player_4: m.player_4 ?? "",
+      }))
       .sort((a, b) => a.date.localeCompare(b.date));
 
     const reviews = matches
@@ -70,6 +80,22 @@ export async function hydrateFromSupabase() {
     // ── Check-ins ────────────────────────────────────────────────────────
     const checkIns = checkInsRes.data ?? [];
     const todayCI = checkIns.find(c => c.date === today);
+    if (todayCI?.nutrition_ai_score != null && todayCI?.nutrition_ai_insight) {
+      const cacheKey = "padelop:nutrition-ai-insight";
+      try {
+        const existing = JSON.parse(localStorage.getItem(cacheKey) || "null");
+        // Only overwrite if we don't already have a fresher local result
+        if (!existing || existing.date !== today) {
+          localStorage.setItem(cacheKey, JSON.stringify({
+            date:       today,
+            mealCount:  0,
+            score:      todayCI.nutrition_ai_score,
+            insight:    todayCI.nutrition_ai_insight,
+          }));
+        }
+      } catch {}
+    }
+
     if (todayCI) {
       localStorage.setItem("padelop:daily-checkin", JSON.stringify({
         date:       todayCI.date,
@@ -81,7 +107,8 @@ export async function hydrateFromSupabase() {
         motivation: 3,
       }));
       // Mark morning log done so the nudge doesn't re-fire
-      if (!localStorage.getItem("padelop:morning-log")) {
+      const existingML = JSON.parse(localStorage.getItem("padelop:morning-log") || "null");
+      if (!existingML || existingML.date !== today) {
         localStorage.setItem("padelop:morning-log", JSON.stringify({ date: today }));
       }
       // Mark night check-in as done so nudge doesn't re-trigger
@@ -92,19 +119,32 @@ export async function hydrateFromSupabase() {
     }
 
     // ── Hydration ────────────────────────────────────────────────────────
-    const hydrationLogs = (hydrationRes.data ?? []).map(h => ({
+    const mlToRange = (ml: number) =>
+      ml < 1000 ? "<1L" :
+      ml < 1500 ? "1–1.5L" :
+      ml < 2000 ? "1.5–2L" :
+      ml < 2500 ? "2–2.5L" :
+      ml < 3000 ? "2.5–3L" : "3L+";
+
+    const hydrationData = hydrationRes.data ?? [];
+    const hydrationLogs = hydrationData.map(h => ({
       ts:      h.date + "T12:00:00.000Z",
-      litres:  h.ml / 1000,
+      litres:  mlToRange(h.ml),
       urine:   "",
-      quality: "ok",
+      quality: h.ml >= 2500 ? "great" : h.ml >= 1500 ? "ok" : "bad",
       timing:  [],
     }));
     if (hydrationLogs.length) {
       localStorage.setItem("padelop:hydration-logs", JSON.stringify(hydrationLogs));
     }
+    const todayHydration = hydrationData.find(h => h.date === today);
+    if (todayHydration) {
+      localStorage.setItem("padelop:hydration-quick", JSON.stringify({ date: today, ml: todayHydration.ml }));
+    }
 
     // ── Nutrition ────────────────────────────────────────────────────────
-    const nutritionLogs = (nutritionRes.data ?? []).map(n => ({
+    const nutritionData = nutritionRes.data ?? [];
+    const nutritionLogs = nutritionData.map(n => ({
       ts:            n.date + "T12:00:00.000Z",
       quality:       n.description ?? "",
       proteinRating: "",
@@ -113,6 +153,16 @@ export async function hydrateFromSupabase() {
     }));
     if (nutritionLogs.length) {
       localStorage.setItem("padelop:nutrition-logs", JSON.stringify(nutritionLogs));
+    }
+    // Also populate the meal-log format that home8 uses for "Meals today"
+    const mealLog = nutritionData.map(n => ({
+      id:          String(n.id ?? n.created_at ?? n.date),
+      date:        n.date,
+      time:        n.meal_type ?? "12:00",
+      description: n.description ?? "",
+    }));
+    if (mealLog.length) {
+      localStorage.setItem("padelop:meal-log", JSON.stringify(mealLog));
     }
 
     // ── Training sessions ────────────────────────────────────────────────
@@ -139,6 +189,21 @@ export async function hydrateFromSupabase() {
       localStorage.setItem("padelop:gear", JSON.stringify(merged));
     }
 
+    // ── Notes ─────────────────────────────────────────────────────────────
+    const notesData = notesRes.data ?? [];
+    if (notesData.length) {
+      const notes = notesData.map(n => ({
+        id:   n.id,
+        date: n.date,
+        ts:   n.created_at,
+        text: n.body ?? "",
+      }));
+      localStorage.setItem("padelop:notes", JSON.stringify(notes));
+    }
+
     window.dispatchEvent(new Event("storage"));
-  } catch {}
+    window.dispatchEvent(new Event("padelop:sync-done"));
+  } catch {
+    window.dispatchEvent(new Event("padelop:sync-done"));
+  }
 }

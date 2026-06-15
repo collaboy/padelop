@@ -53,6 +53,7 @@ export async function saveUpcomingMatch(match: {
   date: string;
   time: string;
   club?: string;
+  court?: string;
   player_1?: string;
   player_2?: string;
   player_3?: string;
@@ -68,6 +69,11 @@ export async function saveUpcomingMatch(match: {
       date:     match.date,
       time:     match.time,
       location: match.club ?? null,
+      court:    match.court    ?? null,
+      player_1: match.player_1 ?? null,
+      player_2: match.player_2 ?? null,
+      player_3: match.player_3 ?? null,
+      player_4: match.player_4 ?? null,
     }, { onConflict: "user_id,date,time" });
   } catch {}
 }
@@ -168,6 +174,35 @@ export async function saveGearToDb(item: {
       name:      item.name ?? null,
       photo_url: item.photo_url ?? null,
     }, { onConflict: "user_id,type" });
+  } catch {}
+}
+
+export async function saveNutritionInsightToDb(date: string, score: number, insight: string) {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase.from("check_ins").upsert({
+      user_id:               user.id,
+      date,
+      nutrition_ai_score:    score,
+      nutrition_ai_insight:  insight,
+    }, { onConflict: "user_id,date" });
+  } catch {}
+}
+
+export async function saveNoteToDb(entry: { date: string; body: string }) {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase.from("notes").insert({
+      user_id: user.id,
+      date:    entry.date,
+      body:    entry.body,
+    });
   } catch {}
 }
 

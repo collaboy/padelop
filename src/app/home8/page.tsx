@@ -6,7 +6,7 @@ import LogSheet from "@/components/log-sheet";
 import ReadinessSheet from "@/components/readiness-sheet";
 import PushPrompt from "@/components/push-prompt";
 import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
-import { saveUpcomingMatch } from "@/lib/db";
+import { saveUpcomingMatch, saveNutritionToDb, saveHydrationToDb, saveNoteToDb } from "@/lib/db";
 import { hydrateFromSupabase } from "@/lib/sync";
 import { downloadSnapshot, importData } from "@/lib/storage";
 
@@ -400,7 +400,6 @@ export default function Home8() {
   const [postMatchOpen, setPostMatchOpen] = useState(false);
   const [postMatchDate, setPostMatchDate] = useState<string | null>(null);
   const [checkinNudgeOpen, setCheckinNudgeOpen] = useState(false);
-  const [nightNudgeOpen, setNightNudgeOpen] = useState(false);
   const [yesterdayWasMatch, setYesterdayWasMatch] = useState(false);
   const [drillTag, setDrillTag] = useState<string | null>(null);
   const [drillSteps, setDrillSteps] = useState<{ step: string; cue: string; reps: string }[] | null>(null);
@@ -442,6 +441,7 @@ export default function Home8() {
   const handleDragStartY = useRef(0);
   const swipeDirRef = useRef<'h' | 'v' | null>(null);
   const settlingRef = useRef(false);
+  const checkinNudgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [cardSnap, setCardSnap] = useState<'none' | 'left' | 'right'>('none');
   const [liveX, setLiveX] = useState(0);
   const [liveY, setLiveY] = useState(0);
@@ -528,17 +528,8 @@ export default function Home8() {
         setMorningDone(done);
         const hour = new Date().getHours();
         const nudgeDismissed = localStorage.getItem("padelop:checkin-nudge-dismissed") === todayStr;
-        if (!done && !nudgeDismissed && hour < 13) setTimeout(() => setCheckinNudgeOpen(true), 1200);
-        if (hour >= 21 && !matchToday) {
-          try {
-            const nightDismissed = localStorage.getItem("padelop:night-nudge-dismissed") === todayStr;
-            const habits: { date: string }[] = JSON.parse(localStorage.getItem("padelop:habits") || "[]");
-            const nightDone = habits.some(h => h.date === todayStr);
-            if (!nightDone && !nightDismissed) setTimeout(() => {
-              try { localStorage.setItem("padelop:night-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {}
-              setNightNudgeOpen(true);
-            }, 1400);
-          } catch {}
+        if (done) {
+          setCheckinNudgeOpen(false);
         }
       } catch { setMorningDone(false); }
     }
@@ -620,9 +611,19 @@ export default function Home8() {
     function handleToggleLogSheet() { setLogSheetOpen(v => !v); }
     window.addEventListener("padelop:open-log-sheet", handleOpenLogSheet);
     window.addEventListener("padelop:toggle-log-sheet", handleToggleLogSheet);
+    // Only show the morning nudge AFTER sync finishes — avoids false positives when sync hasn't loaded yet
+    function handleSyncDone() {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null");
+      const done = ml?.date === todayStr;
+      const nudgeDismissed = localStorage.getItem("padelop:checkin-nudge-dismissed") === todayStr;
+      const hour = new Date().getHours();
+      if (!done && !nudgeDismissed && hour < 13) setCheckinNudgeOpen(true);
+    }
+    window.addEventListener("padelop:sync-done", handleSyncDone);
     setDrillTag(getTopNeedsWorkTag());
     const id = setInterval(() => setNow(new Date()), 1_000);
-    return () => { clearInterval(id); window.removeEventListener("storage", handleStorage); window.removeEventListener("padelop:open-log-sheet", handleOpenLogSheet); window.removeEventListener("padelop:toggle-log-sheet", handleToggleLogSheet); };
+    return () => { clearInterval(id); window.removeEventListener("storage", handleStorage); window.removeEventListener("padelop:open-log-sheet", handleOpenLogSheet); window.removeEventListener("padelop:toggle-log-sheet", handleToggleLogSheet); window.removeEventListener("padelop:sync-done", handleSyncDone); };
   }, []);
 
   // Reset hydration counter when date rolls over midnight
@@ -667,17 +668,20 @@ export default function Home8() {
       const existing = JSON.parse(localStorage.getItem("padelop:meal-log") || "[]");
       localStorage.setItem("padelop:meal-log", JSON.stringify([...existing, entry]));
     } catch {}
+    saveNutritionToDb({ date: todayKey, meal_type: time, description: description.trim() });
     setMealsToday(prev => [...prev, entry]);
     setMealText("");
   }
 
   function saveNote(text: string) {
     if (!text.trim()) return;
-    const entry = { id: Date.now().toString(), date: new Date().toISOString().slice(0, 10), ts: new Date().toISOString(), text: text.trim() };
+    const date = new Date().toISOString().slice(0, 10);
+    const entry = { id: Date.now().toString(), date, ts: new Date().toISOString(), text: text.trim() };
     try {
       const existing = JSON.parse(localStorage.getItem("padelop:notes") || "[]");
       localStorage.setItem("padelop:notes", JSON.stringify([entry, ...existing].slice(0, 200)));
     } catch {}
+    saveNoteToDb({ date, body: text.trim() });
     setNoteText("");
   }
 
@@ -689,6 +693,7 @@ export default function Home8() {
   function saveLogHydration(ml: number) {
     const todayKey = new Date().toISOString().slice(0, 10);
     try { localStorage.setItem("padelop:hydration-quick", JSON.stringify({ date: todayKey, ml })); } catch {}
+    saveHydrationToDb(todayKey, ml);
     // Keep hydration-logs in sync so the scoring engine picks up the quick counter
     try {
       const litres =
@@ -730,11 +735,11 @@ export default function Home8() {
   }, [doIdx]);
   useEffect(() => { doIdxRef.current = doIdx; }, [doIdx]);
   useEffect(() => {
-    if (checkinNudgeOpen || nightNudgeOpen) {
+    if (checkinNudgeOpen) {
       setDoIdx(0); setLiveX(0); setLiveY(0); setCardSnap('none');
       swipeDirRef.current = null;
     }
-  }, [checkinNudgeOpen, nightNudgeOpen]);
+  }, [checkinNudgeOpen]);
 
   // Overscroll-to-navigate on the schedule scroll div.
   // Tracks direction per-frame so we only intercept when the user is at the
@@ -1591,33 +1596,6 @@ export default function Home8() {
         )}
 
         {/* Night check-in nudge */}
-        {nightNudgeOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { try { localStorage.setItem("padelop:night-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {} setNightNudgeOpen(false); }} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
-            <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
-              <div className="px-6 pt-8 pb-6 flex flex-col items-center text-center gap-2">
-                <div className="w-14 h-14 rounded-full flex items-center justify-center mb-2" style={{ background: "#f5f0ff" }}>
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                </div>
-                <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">Night check-in</p>
-                <p className="text-[15px] text-[#4a5050] mt-1 leading-snug">Wind down well — log your evening habits and tomorrow's bedtime.</p>
-              </div>
-              <div className="px-6 pb-8 flex flex-col gap-3">
-                <button
-                  onClick={() => { setNightNudgeOpen(false); setLogTab("wellbeing"); setLogSheetOpen(true); }}
-                  className="w-full py-3.5 rounded-2xl text-white text-[15px] font-bold active:scale-[0.98] transition-transform"
-                  style={{ background: "#7c3aed" }}>
-                  Start check-in
-                </button>
-                <button
-                  onClick={() => { try { localStorage.setItem("padelop:night-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {} setNightNudgeOpen(false); }}
-                  className="w-full py-3 text-[14px] font-semibold text-[#6b7480]">
-                  Not now
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Log picker */}
         {logPickerOpen && (
@@ -1633,22 +1611,18 @@ export default function Home8() {
               <div style={{ overflowY: "auto", minHeight: 0 }}>
               <div style={{ padding: "12px 16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
 
-                {/* Add a match — full width */}
-                <button
-                  onClick={() => { setLogPickerOpen(false); setLogPickerSub(null); setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('pick'); setMatchModalOpen(true); }}
-                  style={{ background: "#eef2ff", border: "none", borderRadius: 16, padding: "16px 18px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, width: "100%" }}
-                >
-                  <div style={{ width: 40, height: 40, borderRadius: 12, background: "#2653d4", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
-                  </div>
-                  <div style={{ textAlign: "left" }}>
-                    <p style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 700, color: "#2653d4", margin: 0, lineHeight: 1.2 }}>Add a match</p>
-                    <p style={{ fontSize: "clamp(12px, 3.1vw, 13px)", fontWeight: 500, color: "#6b7480", margin: "2px 0 0" }}>Schedule your next game</p>
-                  </div>
-                </button>
-
-                {/* Row 1: AM / PM check-in tiles */}
+                {/* Row 1: Add a match + Daily Check-in */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <button
+                    onClick={() => { setLogPickerOpen(false); setLogPickerSub(null); setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('pick'); setMatchModalOpen(true); }}
+                    style={{ background: "#eef2ff", border: "none", borderRadius: 16, padding: "18px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 24, minHeight: 110 }}
+                  >
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
+                    <div style={{ textAlign: "left" }}>
+                      <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Add a match</p>
+                      <p style={{ fontSize: "clamp(12px, 3.1vw, 15px)", fontWeight: 600, color: "#2653d4", margin: "3px 0 0" }}>Schedule</p>
+                    </div>
+                  </button>
                   <button
                     onClick={() => { setLogPickerOpen(false); setLogPickerSub(null); setLogTab("checkin"); setLogSheetOpen(true); }}
                     style={{ background: "#f5f0ff", border: "none", borderRadius: 16, padding: "18px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 24, position: "relative", minHeight: 110 }}
@@ -1657,17 +1631,7 @@ export default function Home8() {
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
                     <div style={{ textAlign: "left" }}>
                       <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Check-in</p>
-                      <p style={{ fontSize: "clamp(12px, 3.1vw, 15px)", fontWeight: 600, color: "#7c3aed", margin: "3px 0 0" }}>AM</p>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => { setLogPickerOpen(false); setLogPickerSub(null); setLogTab("wellbeing" as Parameters<typeof setLogTab>[0]); setLogSheetOpen(true); }}
-                    style={{ background: "#fff0f8", border: "none", borderRadius: 16, padding: "18px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 24, position: "relative", minHeight: 110 }}
-                  >
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                    <div style={{ textAlign: "left" }}>
-                      <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Check-in</p>
-                      <p style={{ fontSize: "clamp(12px, 3.1vw, 15px)", fontWeight: 600, color: "#ec4899", margin: "3px 0 0" }}>PM</p>
+                      <p style={{ fontSize: "clamp(12px, 3.1vw, 15px)", fontWeight: 500, color: "#7c3aed", margin: "3px 0 0" }}>Daily</p>
                     </div>
                   </button>
                 </div>
@@ -1851,7 +1815,7 @@ export default function Home8() {
               <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
               <div
                 className="relative w-full bg-[#f0f2f5] rounded-t-[28px] flex flex-col overflow-hidden"
-                style={{ animation: "miSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)", height: "65vh", paddingBottom: "env(safe-area-inset-bottom)" }}
+                style={{ animation: "miSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)", height: "82vh", paddingBottom: "env(safe-area-inset-bottom)" }}
                 onClick={e => e.stopPropagation()}
               >
                 {/* Handle */}
@@ -1884,7 +1848,7 @@ export default function Home8() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: "0 16px 32px" }}>
 
                   {/* MATCH INFO CARD */}
-                  <div style={{ background: "#fff", borderRadius: 24, padding: "24px 20px 20px" }}>
+                  <div style={{ position: "relative", background: "#fff", borderRadius: 24, padding: "24px 20px 20px" }}>
                     <p style={{ fontSize: "clamp(22px, 6vw, 27px)", fontWeight: 800, color: "#1a1c1c", margin: "0 0 16px", lineHeight: 1.1, letterSpacing: "-0.02em" }}>{dateStr}</p>
                     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                       <div style={{ display: "flex", gap: 12 }}>
@@ -1910,25 +1874,11 @@ export default function Home8() {
                         </div>
                       )}
                     </div>
-                  </div>
 
-                  {/* ACTIONS CARD */}
-                  <div style={{ background: "#fff", borderRadius: 24, overflow: "hidden" }}>
-                    {/* Button row */}
-                    <div style={{ display: "flex", gap: 0, padding: "16px 16px 16px" }}>
-                      <button
-                        onClick={() => { if (matchInfoMode === 'edit') { setMatchInfoMode(null); } else { setMatchForm({ date: match.date, time: match.time, club: match.club ?? '', court: match.court ?? '', p1: match.players?.[0] ?? '', p2: match.players?.[1] ?? '', p3: match.players?.[2] ?? '', p4: match.players?.[3] ?? '' }); setMatchInfoMode('edit'); setMatchInfoAddTab(null); } }}
-                        style={{ flex: 1, fontSize: 14, fontWeight: 600, color: matchInfoMode === 'edit' ? "#fff" : "#2653d4", background: matchInfoMode === 'edit' ? "#2653d4" : "#eef2ff", border: "none", cursor: "pointer", padding: "11px 0", borderRadius: 12, marginRight: 8 }}
-                      >Edit</button>
-                      <button
-                        onClick={() => { if (matchInfoMode === 'add') { setMatchInfoMode(null); setMatchInfoAddTab(null); } else { setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchInfoMode('add'); setMatchInfoAddTab(null); setUploadError(null); } }}
-                        style={{ flex: 1, fontSize: 14, fontWeight: 600, color: matchInfoMode === 'add' ? "#fff" : "#16a34a", background: matchInfoMode === 'add' ? "#16a34a" : "#f0fdf4", border: "none", cursor: "pointer", padding: "11px 0", borderRadius: 12 }}
-                      >+ Add</button>
-                    </div>
-
-                    {/* Edit form */}
+                    {/* Inline edit form — expands below info rows */}
                     {matchInfoMode === 'edit' && (
-                      <div style={{ borderTop: "1px solid #f0f0f0", padding: "16px 16px 20px" }}>
+                      <div style={{ marginTop: 20 }}>
+                        <div style={{ height: 1, background: "#f0f0f0", marginBottom: 16 }} />
                         <div className="flex flex-col gap-3">
                           <button onClick={() => { setUploadError(null); actionUploadRef.current?.click(); }} disabled={uploadExtracting} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl active:opacity-70" style={{ background: "#f4f6ff", border: "1.5px solid #2653d418", opacity: uploadExtracting ? 0.5 : 1 }}>
                             <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#2653d4" }}>
@@ -1975,6 +1925,32 @@ export default function Home8() {
                         </div>
                       </div>
                     )}
+
+                    {/* Edit icon — bottom-left of card */}
+                    <button
+                      onClick={() => {
+                        if (matchInfoMode === 'edit') { setMatchInfoMode(null); }
+                        else { const fresh = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); const src = fresh ?? match; setMatchForm({ date: src.date ?? '', time: src.time ?? '', club: src.club ?? src.location ?? '', court: src.court ?? '', p1: src.player_1 ?? src.players?.[0] ?? '', p2: src.player_2 ?? src.players?.[1] ?? '', p3: src.player_3 ?? src.players?.[2] ?? '', p4: src.player_4 ?? src.players?.[3] ?? '' }); setMatchInfoMode('edit'); setMatchInfoAddTab(null); }
+                      }}
+                      style={{ position: "absolute", top: 20, right: 16, background: "none", border: "none", cursor: "pointer", padding: 6, color: matchInfoMode === 'edit' ? "#2653d4" : "#c8cdd3" }}
+                    >
+                      {matchInfoMode === 'edit' ? (
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      ) : (
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* ACTIONS CARD */}
+                  <div style={{ background: "#fff", borderRadius: 24, overflow: "hidden" }}>
+                    {/* Button row */}
+                    <div style={{ display: "flex", gap: 0, padding: "16px 16px 16px" }}>
+                      <button
+                        onClick={() => { if (matchInfoMode === 'add') { setMatchInfoMode(null); setMatchInfoAddTab(null); } else { setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchInfoMode('add'); setMatchInfoAddTab(null); setUploadError(null); } }}
+                        style={{ flex: 1, fontSize: 14, fontWeight: 600, color: matchInfoMode === 'add' ? "#fff" : "#16a34a", background: matchInfoMode === 'add' ? "#16a34a" : "#f0fdf4", border: "none", cursor: "pointer", padding: "11px 0", borderRadius: 12 }}
+                      >+ Add match</button>
+                    </div>
 
                     {/* Add form */}
                     {matchInfoMode === 'add' && (
@@ -2046,7 +2022,8 @@ export default function Home8() {
               <button onClick={() => {
                 if (matchActionMode === 'edit') { setMatchActionMode(null); return; }
                 setIsAddMode(false);
-                setMatchForm({ date: match?.date ?? '', time: match?.time ?? '', club: match?.club ?? '', court: match?.court ?? '', p1: match?.players?.[0] ?? '', p2: match?.players?.[1] ?? '', p3: match?.players?.[2] ?? '', p4: match?.players?.[3] ?? '' });
+                const fresh = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); const src = fresh ?? match;
+                setMatchForm({ date: src?.date ?? '', time: src?.time ?? '', club: src?.club ?? src?.location ?? '', court: src?.court ?? '', p1: src?.player_1 ?? src?.players?.[0] ?? '', p2: src?.player_2 ?? src?.players?.[1] ?? '', p3: src?.player_3 ?? src?.players?.[2] ?? '', p4: src?.player_4 ?? src?.players?.[3] ?? '' });
                 setMatchActionMode('edit');
               }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f4f6ff] transition-colors" style={{ borderBottom: "1px solid #f0f0f0" }}>
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#2653d418" }}>
@@ -2187,7 +2164,7 @@ export default function Home8() {
                 );
               })()}
               {/* See all matches */}
-              <button onClick={() => { setMatchActionOpen(false); setMatchActionMode(null); router.push("/matches4"); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
+              <button onClick={() => { setMatchActionOpen(false); setMatchActionMode(null); router.push("/matches"); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#f4f4f6" }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 </div>
@@ -2344,7 +2321,7 @@ export default function Home8() {
                       const sorted = saveMatchList(updated);
                       const next = sorted[0];
                       if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
-                      saveUpcomingMatch({ date: data.date, time: data.time, club: data.club, player_1: data.player_1, player_2: data.player_2, player_3: data.player_3, player_4: data.player_4 });
+                      saveUpcomingMatch({ date: data.date, time: data.time, club: data.club, court: data.court, player_1: data.player_1, player_2: data.player_2, player_3: data.player_3, player_4: data.player_4 });
                       setMatchModalOpen(false); setMatchModalTab('pick'); setLiveX(0); setLiveY(0); setCardSnap('none'); setDoIdx(-1);
                       window.dispatchEvent(new Event("storage"));
                     }}
@@ -2440,7 +2417,7 @@ export default function Home8() {
                       const sorted = saveMatchList(updated);
                       const next = sorted[0];
                       if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
-                      saveUpcomingMatch({ date: data.date, time: data.time, club: data.club, player_1: data.player_1, player_2: data.player_2, player_3: data.player_3, player_4: data.player_4 });
+                      saveUpcomingMatch({ date: data.date, time: data.time, club: data.club, court: data.court, player_1: data.player_1, player_2: data.player_2, player_3: data.player_3, player_4: data.player_4 });
                       setMatchModalOpen(false);
                       setMatchModalTab('pick');
                       setLiveX(0);
