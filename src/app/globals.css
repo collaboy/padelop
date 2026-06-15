@@ -141,6 +141,18 @@
 
 * { box-sizing: border-box; }
 
+/* Prevent iOS long-press text selection across the whole app */
+html, body {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+/* Re-enable selection for actual text inputs */
+input, textarea, [contenteditable] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 /* ── Type scale ──────────────────────────────────────────────────────────
    t-label    11/16  700  UPPERCASE wide  — section eyebrows, headers
    t-tag      11/16  700                 — badge / pill text
