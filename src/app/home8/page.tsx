@@ -1572,7 +1572,7 @@ export default function Home8() {
             <style>{`@keyframes fadeInUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}`}</style>
             <div style={{ background: "#1a1c1c", borderRadius: 12, padding: "10px 14px", maxWidth: 190, boxShadow: "0 4px 20px rgba(0,0,0,0.22)" }}>
               <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#fff", lineHeight: 1.5 }}>
-                <span style={{ color: "#a8c4ff" }}>Tap</span> to scan a photo<br />
+                <span style={{ color: "#a8c4ff" }}>Tap</span> to upload a match, meal, results or gear photo<br />
                 <span style={{ color: "#a8c4ff" }}>Hold</span> to add manually
               </p>
               <div style={{ position: "absolute", bottom: -6, right: 24, width: 12, height: 12, background: "#1a1c1c", transform: "rotate(45deg)", borderRadius: 2 }} />
