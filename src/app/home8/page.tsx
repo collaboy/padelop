@@ -1619,48 +1619,28 @@ export default function Home8() {
               <div style={{ padding: "12px 16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
 
                 {/* Upload card — full width */}
-                <button
-                  onClick={() => { setSmartUploadError(null); smartUploadRef.current?.click(); }}
-                  disabled={smartUploadLoading}
-                  style={{ width: "100%", background: "#eef2ff", border: "none", borderRadius: 16, padding: "18px 16px 14px", cursor: smartUploadLoading ? "default" : "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, opacity: smartUploadLoading ? 0.6 : 1 }}
-                >
-                  {smartUploadLoading ? (
-                    <svg className="animate-spin" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                  ) : (
-                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                  )}
-                  <span style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 700, color: "#1a1c1c" }}>{smartUploadLoading ? "Analysing…" : "Upload"}</span>
-                  <span style={{ fontSize: "clamp(12px, 3.1vw, 14px)", fontWeight: 600, color: "#6b8fd4" }}>match · food · gear · results</span>
-                </button>
-
-                {/* Insert card */}
-                <button
-                  onClick={() => setManualPickerOpen(o => !o)}
-                  style={{ width: "100%", background: "#f8f9fa", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                  <span style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 600, color: "#1a1c1c" }}>Add Manually</span>
-                </button>
-
-                {manualPickerOpen && (
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                    {([
-                      { label: "Match", sub: "Schedule", bg: "#eef2ff", color: "#2653d4", categoryKey: "match_schedule", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>, action: () => { setManualPickerOpen(false); setLogPickerOpen(false); setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('manual'); setMatchModalOpen(true); } },
-                      { label: "Food", sub: "Meal or snack", bg: "#f0fdf4", color: "#16a34a", categoryKey: "meal", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>, action: () => { setManualPickerOpen(false); setSmartUploadResult({ category: "meal", label: "Add a meal", confidence: "high", data: { description: "", meal_type: "" } }); setLogPickerSub("upload-confirm"); } },
-                      { label: "Gear", sub: "Racket, shoes…", bg: "#f5f0ff", color: "#7c3aed", categoryKey: "gear", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, action: () => { setManualPickerOpen(false); setSmartUploadResult({ category: "gear", label: "Add gear", confidence: "high", data: { type: "", brand: "", name: "" } }); setLogPickerSub("upload-confirm"); } },
-                      { label: "Results", sub: "Match result", bg: "#fff7ed", color: "#ea580c", categoryKey: "match_result", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, action: () => { setManualPickerOpen(false); setSmartUploadResult({ category: "match_result", label: "Add match result", confidence: "high", data: { result: "", score: "", opponent_names: "" } }); setLogPickerSub("upload-confirm"); } },
-                      { label: "Note", sub: "Thoughts or ideas", bg: "#f8f9fa", color: "#6b7480", categoryKey: null, icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>, action: () => { setManualPickerOpen(false); setLogPickerSub("matchreview"); } },
-                    ]).map(({ label, sub, bg, color, icon, action }, i, arr) => (
-                      <button key={label} onClick={action} style={{ background: bg, border: "none", borderRadius: 14, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 16, textAlign: "left", gridColumn: arr.length % 2 !== 0 && i === arr.length - 1 ? "1 / -1" : undefined }}>
-                        {icon}
-                        <div>
-                          <p style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{label}</p>
-                          <p style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 600, color, margin: "2px 0 0" }}>{sub}</p>
-                        </div>
-                      </button>
-                    ))}
+                <div style={{ position: "relative" }}>
+                  <button
+                    onClick={() => { setSmartUploadError(null); smartUploadRef.current?.click(); }}
+                    disabled={smartUploadLoading}
+                    style={{ width: "100%", background: "#eef2ff", border: "none", borderRadius: 16, padding: "18px 16px 14px", cursor: smartUploadLoading ? "default" : "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, opacity: smartUploadLoading ? 0.6 : 1 }}
+                  >
+                    {smartUploadLoading ? (
+                      <svg className="animate-spin" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                    ) : (
+                      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    )}
+                    <span style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 700, color: "#1a1c1c" }}>{smartUploadLoading ? "Analysing…" : "Upload"}</span>
+                    <span style={{ fontSize: "clamp(12px, 3.1vw, 14px)", fontWeight: 600, color: "#6b8fd4" }}>match · food · gear · results</span>
+                  </button>
+                  <div
+                    role="button"
+                    onClick={e => { e.stopPropagation(); setManualPickerOpen(o => !o); }}
+                    style={{ position: "absolute", top: 10, right: 10, width: 28, height: 28, borderRadius: "50%", background: "rgba(38,83,212,0.08)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                   </div>
-                )}
+                </div>
 
                 {/* Hidden file input for Insert tile uploads */}
                 <input
@@ -1752,6 +1732,26 @@ export default function Home8() {
                       : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#b0b8c1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                     }
                   </button>
+                )}
+
+                {manualPickerOpen && (
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                    {([
+                      { label: "Match", sub: "Schedule", bg: "#eef2ff", color: "#2653d4", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>, action: () => { setManualPickerOpen(false); setLogPickerOpen(false); setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('manual'); setMatchModalOpen(true); } },
+                      { label: "Food", sub: "Meal or snack", bg: "#f0fdf4", color: "#16a34a", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>, action: () => { setManualPickerOpen(false); setSmartUploadResult({ category: "meal", label: "Add a meal", confidence: "high", data: { description: "", meal_type: "" } }); setLogPickerSub("upload-confirm"); } },
+                      { label: "Gear", sub: "Racket, shoes…", bg: "#f5f0ff", color: "#7c3aed", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, action: () => { setManualPickerOpen(false); setSmartUploadResult({ category: "gear", label: "Add gear", confidence: "high", data: { type: "", brand: "", name: "" } }); setLogPickerSub("upload-confirm"); } },
+                      { label: "Results", sub: "Match result", bg: "#fff7ed", color: "#ea580c", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, action: () => { setManualPickerOpen(false); setSmartUploadResult({ category: "match_result", label: "Add match result", confidence: "high", data: { result: "", score: "", opponent_names: "" } }); setLogPickerSub("upload-confirm"); } },
+                      { label: "Note", sub: "Thoughts or ideas", bg: "#f8f9fa", color: "#6b7480", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>, action: () => { setManualPickerOpen(false); setLogPickerSub("matchreview"); } },
+                    ]).map(({ label, sub, bg, color, icon, action }, i, arr) => (
+                      <button key={label} onClick={action} style={{ background: bg, border: "none", borderRadius: 14, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 16, textAlign: "left", gridColumn: arr.length % 2 !== 0 && i === arr.length - 1 ? "1 / -1" : undefined }}>
+                        {icon}
+                        <div>
+                          <p style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{label}</p>
+                          <p style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 600, color, margin: "2px 0 0" }}>{sub}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 )}
 
               </div>{/* end flex col */}
