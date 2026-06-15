@@ -1537,7 +1537,26 @@ export default function Home8() {
         )}
 
 
-        {/* FAB — tap = camera, long press = manual add modal */}
+        {/* First-visit tooltip */}
+        {fabTooltipVisible && (
+          <div className="fixed z-50 pointer-events-none" style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom) + 68px)", right: "1.25rem", animation: "fabTipIn 0.25s ease" }}>
+            <style>{`@keyframes fabTipIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}`}</style>
+            <div style={{ background: "#fff", borderRadius: 14, padding: "12px 16px", boxShadow: "0 4px 24px rgba(0,0,0,0.13)", border: "1px solid #eaecef", width: 210 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: "#fff", background: "#2653d4", borderRadius: 5, padding: "2px 7px", letterSpacing: "0.02em" }}>TAP</span>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: "#1a1c1c" }}>upload match, meal or gear</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: "#fff", background: "#6b7480", borderRadius: 5, padding: "2px 7px", letterSpacing: "0.02em" }}>HOLD</span>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: "#1a1c1c" }}>add manually</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* FAB — tap = upload, long press = manual add modal */}
         <button
           onPointerDown={() => {
             fabWasLongPress.current = false;
@@ -1553,8 +1572,9 @@ export default function Home8() {
           onPointerCancel={() => {
             if (fabLongPressTimer.current) { clearTimeout(fabLongPressTimer.current); fabLongPressTimer.current = null; }
           }}
+          onContextMenu={e => e.preventDefault()}
           className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
-          style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.25rem", width: 56, height: 56, borderRadius: 28, background: doIdx === -1 ? "#ffffff" : (doItem?.color ?? "#2653d4"), boxShadow: doIdx === -1 ? "0 4px 20px rgba(0,0,0,0.18)" : `0 4px 16px ${doItem?.color ?? "#2653d4"}55` }}
+          style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.25rem", width: 56, height: 56, borderRadius: 28, background: doIdx === -1 ? "#ffffff" : (doItem?.color ?? "#2653d4"), boxShadow: doIdx === -1 ? "0 4px 20px rgba(0,0,0,0.18)" : `0 4px 16px ${doItem?.color ?? "#2653d4"}55`, userSelect: "none", WebkitUserSelect: "none" } as React.CSSProperties}
           aria-label="Add"
         >
           {smartUploadLoading
@@ -1562,23 +1582,6 @@ export default function Home8() {
             : <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={doIdx === -1 ? "#1a1c1c" : "#fff"} strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           }
         </button>
-
-        {/* First-visit tooltip */}
-        {fabTooltipVisible && (
-          <div
-            className="fixed z-50 pointer-events-none"
-            style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom) + 68px)", right: "0.75rem", animation: "fadeInUp 0.3s ease" }}
-          >
-            <style>{`@keyframes fadeInUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}`}</style>
-            <div style={{ background: "#1a1c1c", borderRadius: 12, padding: "10px 14px", maxWidth: 190, boxShadow: "0 4px 20px rgba(0,0,0,0.22)" }}>
-              <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#fff", lineHeight: 1.5 }}>
-                <span style={{ color: "#a8c4ff" }}>Tap</span> to upload a match, meal, results or gear photo<br />
-                <span style={{ color: "#a8c4ff" }}>Hold</span> to add manually
-              </p>
-              <div style={{ position: "absolute", bottom: -6, right: 24, width: 12, height: 12, background: "#1a1c1c", transform: "rotate(45deg)", borderRadius: 2 }} />
-            </div>
-          </div>
-        )}
 
         <LogSheet open={logSheetOpen} onClose={() => { setLogSheetOpen(false); setLogTab(null); setLogWizard(false); }} defaultSub={logTab} startWizard={logWizard} />
         <ReadinessSheet open={readinessSheetOpen} onClose={() => setReadinessSheetOpen(false)} onOpenLog={tab => { setLogTab(tab as Parameters<typeof setLogTab>[0]); setLogSheetOpen(true); }} onOpenLogScreen={() => { setReadinessSheetOpen(false); setLogPickerOpen(true); }} />
