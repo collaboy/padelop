@@ -383,6 +383,7 @@ export default function Home8() {
   const heroUploadRef = useRef<HTMLInputElement>(null);
   const fabLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fabWasLongPress = useRef(false);
+  const [fabTooltipVisible, setFabTooltipVisible] = useState(false);
   const [extrasOpen, setExtrasOpen] = useState(false);
   const [checkInData, setCheckInData]     = useState<DailyCheckIn | null>(null);
   const [hydrationData, setHydrationData] = useState<HydrationEntry | null>(null);
@@ -468,6 +469,14 @@ export default function Home8() {
       });
     });
     hydrateFromSupabase();
+    // Show FAB tooltip once
+    try {
+      if (!localStorage.getItem("padelop:fab-tooltip-seen")) {
+        setFabTooltipVisible(true);
+        setTimeout(() => setFabTooltipVisible(false), 4000);
+        localStorage.setItem("padelop:fab-tooltip-seen", "1");
+      }
+    } catch {}
   }, []);
 
   useEffect(() => {
@@ -1546,13 +1555,30 @@ export default function Home8() {
           }}
           className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
           style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.25rem", width: 56, height: 56, borderRadius: 28, background: doIdx === -1 ? "#ffffff" : (doItem?.color ?? "#2653d4"), boxShadow: doIdx === -1 ? "0 4px 20px rgba(0,0,0,0.18)" : `0 4px 16px ${doItem?.color ?? "#2653d4"}55` }}
-          aria-label="Upload photo"
+          aria-label="Add"
         >
           {smartUploadLoading
             ? <svg className="animate-spin" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={doIdx === -1 ? "#1a1c1c" : "#fff"} strokeWidth="2.5" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-            : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={doIdx === -1 ? "#1a1c1c" : "#fff"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            : <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={doIdx === -1 ? "#1a1c1c" : "#fff"} strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           }
         </button>
+
+        {/* First-visit tooltip */}
+        {fabTooltipVisible && (
+          <div
+            className="fixed z-50 pointer-events-none"
+            style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom) + 68px)", right: "0.75rem", animation: "fadeInUp 0.3s ease" }}
+          >
+            <style>{`@keyframes fadeInUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}`}</style>
+            <div style={{ background: "#1a1c1c", borderRadius: 12, padding: "10px 14px", maxWidth: 190, boxShadow: "0 4px 20px rgba(0,0,0,0.22)" }}>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#fff", lineHeight: 1.5 }}>
+                <span style={{ color: "#a8c4ff" }}>Tap</span> to scan a photo<br />
+                <span style={{ color: "#a8c4ff" }}>Hold</span> to add manually
+              </p>
+              <div style={{ position: "absolute", bottom: -6, right: 24, width: 12, height: 12, background: "#1a1c1c", transform: "rotate(45deg)", borderRadius: 2 }} />
+            </div>
+          </div>
+        )}
 
         <LogSheet open={logSheetOpen} onClose={() => { setLogSheetOpen(false); setLogTab(null); setLogWizard(false); }} defaultSub={logTab} startWizard={logWizard} />
         <ReadinessSheet open={readinessSheetOpen} onClose={() => setReadinessSheetOpen(false)} onOpenLog={tab => { setLogTab(tab as Parameters<typeof setLogTab>[0]); setLogSheetOpen(true); }} onOpenLogScreen={() => { setReadinessSheetOpen(false); setLogPickerOpen(true); }} />
