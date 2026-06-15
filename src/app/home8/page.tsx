@@ -381,6 +381,8 @@ export default function Home8() {
   const smartUploadRef = useRef<HTMLInputElement>(null);
   const insertUploadRef = useRef<HTMLInputElement>(null);
   const heroUploadRef = useRef<HTMLInputElement>(null);
+  const fabLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fabWasLongPress = useRef(false);
   const [extrasOpen, setExtrasOpen] = useState(false);
   const [checkInData, setCheckInData]     = useState<DailyCheckIn | null>(null);
   const [hydrationData, setHydrationData] = useState<HydrationEntry | null>(null);
@@ -1268,21 +1270,6 @@ export default function Home8() {
                 );
               })()}
 
-              {/* Camera pill — visible below green ball at doIdx=0 */}
-              <div style={{ display: "flex", justifyContent: "center", flexShrink: 0, opacity: doIdx === 0 ? 1 : 0, pointerEvents: doIdx === 0 ? "auto" : "none", transition: "opacity 0.2s" }}>
-                <button
-                  onClick={() => { setSmartUploadError(null); heroUploadRef.current?.click(); }}
-                  disabled={smartUploadLoading}
-                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 22px", borderRadius: 999, background: "#fff", border: "1.5px solid #e8eaed", cursor: smartUploadLoading ? "default" : "pointer", boxShadow: "0 2px 10px rgba(0,0,0,0.09)", opacity: smartUploadLoading ? 0.6 : 1 }}
-                >
-                  {smartUploadLoading
-                    ? <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.2" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                    : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                  }
-                  <span style={{ fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 600, color: "#1a1c1c" }}>{smartUploadLoading ? "Analysing…" : "Upload"}</span>
-                </button>
-              </div>
-
               {/* Card 2: today's schedule */}
               {(() => {
                 return (
@@ -1541,16 +1528,30 @@ export default function Home8() {
         )}
 
 
-        {/* FAB */}
+        {/* FAB — tap = camera, long press = manual add modal */}
         <button
-          onClick={() => setLogPickerOpen(true)}
+          onPointerDown={() => {
+            fabWasLongPress.current = false;
+            fabLongPressTimer.current = setTimeout(() => {
+              fabWasLongPress.current = true;
+              setLogPickerOpen(true);
+            }, 400);
+          }}
+          onPointerUp={() => {
+            if (fabLongPressTimer.current) { clearTimeout(fabLongPressTimer.current); fabLongPressTimer.current = null; }
+            if (!fabWasLongPress.current) { setSmartUploadError(null); heroUploadRef.current?.click(); }
+          }}
+          onPointerCancel={() => {
+            if (fabLongPressTimer.current) { clearTimeout(fabLongPressTimer.current); fabLongPressTimer.current = null; }
+          }}
           className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
           style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.25rem", width: 56, height: 56, borderRadius: 28, background: doIdx === -1 ? "#ffffff" : (doItem?.color ?? "#2653d4"), boxShadow: doIdx === -1 ? "0 4px 20px rgba(0,0,0,0.18)" : `0 4px 16px ${doItem?.color ?? "#2653d4"}55` }}
-          aria-label="Log activity"
+          aria-label="Upload photo"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={doIdx === -1 ? "#1a1c1c" : "#fff"} strokeWidth="2.5" strokeLinecap="round">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
+          {smartUploadLoading
+            ? <svg className="animate-spin" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={doIdx === -1 ? "#1a1c1c" : "#fff"} strokeWidth="2.5" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={doIdx === -1 ? "#1a1c1c" : "#fff"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          }
         </button>
 
         <LogSheet open={logSheetOpen} onClose={() => { setLogSheetOpen(false); setLogTab(null); setLogWizard(false); }} defaultSub={logTab} startWizard={logWizard} />
@@ -1629,7 +1630,7 @@ export default function Home8() {
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
             <div className="relative w-full max-w-sm bg-white rounded-[28px] shadow-2xl" style={{ overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "calc(100dvh - 8rem)" }} onClick={e => e.stopPropagation()}>
               <div className="px-5 pt-6 pb-4 flex-shrink-0 flex items-center justify-between" style={{ borderBottom: "1px solid #f0f0f0" }}>
-                <p style={{ fontSize: "clamp(20px, 5.1vw, 25px)", fontWeight: 800, color: "#1a1c1c", margin: 0 }}>What do you want to log?</p>
+                <p style={{ fontSize: "clamp(20px, 5.1vw, 25px)", fontWeight: 800, color: "#1a1c1c", margin: 0 }}>Add manually</p>
                 <button onClick={() => { setLogPickerOpen(false); setLogPickerSub(null); }} style={{ width: 28, height: 28, borderRadius: "50%", background: "#f4f4f6", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
@@ -1637,31 +1638,7 @@ export default function Home8() {
               <div style={{ overflowY: "auto", minHeight: 0 }}>
               <div style={{ padding: "12px 16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
 
-                {/* Upload card — full width */}
-                <div style={{ position: "relative" }}>
-                  <button
-                    onClick={() => { setSmartUploadError(null); smartUploadRef.current?.click(); }}
-                    disabled={smartUploadLoading}
-                    style={{ width: "100%", background: "#eef2ff", border: "none", borderRadius: 16, padding: "18px 16px 14px", cursor: smartUploadLoading ? "default" : "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, opacity: smartUploadLoading ? 0.6 : 1 }}
-                  >
-                    {smartUploadLoading ? (
-                      <svg className="animate-spin" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                    ) : (
-                      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                    )}
-                    <span style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 700, color: "#1a1c1c" }}>{smartUploadLoading ? "Analysing…" : "Upload"}</span>
-                    <span style={{ fontSize: "clamp(12px, 3.1vw, 14px)", fontWeight: 600, color: "#6b8fd4" }}>match · food · gear · results</span>
-                  </button>
-                  <div
-                    role="button"
-                    onClick={e => { e.stopPropagation(); setManualPickerOpen(o => !o); }}
-                    style={{ position: "absolute", top: 10, right: 10, width: 28, height: 28, borderRadius: "50%", background: "rgba(38,83,212,0.08)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
-                  >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                  </div>
-                </div>
-
-                {/* Hidden file input for Insert tile uploads */}
+                {/* Hidden file input for confirm-panel re-upload */}
                 <input
                   ref={insertUploadRef}
                   type="file"
@@ -1694,84 +1671,24 @@ export default function Home8() {
                   }}
                 />
 
-                {smartUploadError && (
-                  <p style={{ fontSize: 13, color: "#c0392b", margin: "-4px 2px 0", lineHeight: 1.4 }}>{smartUploadError}</p>
-                )}
-                <input
-                  ref={smartUploadRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={async e => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    setSmartUploadError(null);
-                    setSmartUploadLoading(true);
-                    try {
-                      const reader = new FileReader();
-                      const base64 = await new Promise<string>((resolve, reject) => {
-                        reader.onload = () => resolve((reader.result as string).split(",")[1]);
-                        reader.onerror = reject;
-                        reader.readAsDataURL(file);
-                      });
-                      const res = await fetch("/api/classify-upload", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ image: base64, mediaType: file.type }) });
-                      const result = await res.json();
-                      if (!res.ok || result.error) {
-                        setSmartUploadError(result.message || "Could not identify the image.");
-                      } else {
-                        setSmartUploadResult(result);
-                        setLogPickerSub("upload-confirm");
-                      }
-                    } catch {
-                      setSmartUploadError("Upload failed. Please try again.");
-                    }
-                    setSmartUploadLoading(false);
-                    if (smartUploadRef.current) smartUploadRef.current.value = "";
-                  }}
-                />
-
-
-                {/* Bottom expand */}
-                <button
-                  onClick={() => setExtrasOpen(o => !o)}
-                  style={{ width: "100%", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: "2px 0 0" }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d0d3d6" strokeWidth="2" strokeLinecap="round" style={{ transition: "transform 0.2s", transform: extrasOpen ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
-                </button>
-
-                {extrasOpen && (
-                  <button
-                    onClick={() => { setLogTab("checkin"); setLogSheetOpen(true); }}
-                    style={{ width: "100%", background: "#f5f0ff", border: "none", borderRadius: 12, padding: "11px 14px", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, textAlign: "left" }}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-                    <span style={{ flex: 1, fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 600, color: "#1a1c1c" }}>Daily Check-in</span>
-                    {morningDone
-                      ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-                      : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#b0b8c1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                    }
-                  </button>
-                )}
-
-                {manualPickerOpen && (
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                    {([
-                      { label: "Match", sub: "Schedule", bg: "#eef2ff", color: "#2653d4", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>, action: () => { setManualPickerOpen(false); setLogPickerOpen(false); setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('manual'); setMatchModalOpen(true); } },
-                      { label: "Food", sub: "Meal or snack", bg: "#f0fdf4", color: "#16a34a", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>, action: () => { setManualPickerOpen(false); setSmartUploadResult({ category: "meal", label: "Add a meal", confidence: "high", data: { description: "", meal_type: "" } }); setLogPickerSub("upload-confirm"); } },
-                      { label: "Gear", sub: "Racket, shoes…", bg: "#f5f0ff", color: "#7c3aed", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, action: () => { setManualPickerOpen(false); setSmartUploadResult({ category: "gear", label: "Add gear", confidence: "high", data: { type: "", brand: "", name: "" } }); setLogPickerSub("upload-confirm"); } },
-                      { label: "Results", sub: "Match result", bg: "#fff7ed", color: "#ea580c", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, action: () => { setManualPickerOpen(false); setSmartUploadResult({ category: "match_result", label: "Add match result", confidence: "high", data: { result: "", score: "", opponent_names: "" } }); setLogPickerSub("upload-confirm"); } },
-                      { label: "Note", sub: "Thoughts or ideas", bg: "#f8f9fa", color: "#6b7480", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>, action: () => { setManualPickerOpen(false); setLogPickerSub("matchreview"); } },
-                    ]).map(({ label, sub, bg, color, icon, action }, i, arr) => (
-                      <button key={label} onClick={action} style={{ background: bg, border: "none", borderRadius: 14, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 16, textAlign: "left", gridColumn: arr.length % 2 !== 0 && i === arr.length - 1 ? "1 / -1" : undefined }}>
-                        {icon}
-                        <div>
-                          <p style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{label}</p>
-                          <p style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 600, color, margin: "2px 0 0" }}>{sub}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
+                {/* Tile grid — always visible */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                  {([
+                    { label: "Match", sub: "Schedule", bg: "#eef2ff", color: "#2653d4", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>, action: () => { setLogPickerOpen(false); setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('manual'); setMatchModalOpen(true); } },
+                    { label: "Food", sub: "Meal or snack", bg: "#f0fdf4", color: "#16a34a", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>, action: () => { setSmartUploadResult({ category: "meal", label: "Add a meal", confidence: "high", data: { description: "", meal_type: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
+                    { label: "Gear", sub: "Racket, shoes…", bg: "#f5f0ff", color: "#7c3aed", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, action: () => { setSmartUploadResult({ category: "gear", label: "Add gear", confidence: "high", data: { type: "", brand: "", name: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
+                    { label: "Results", sub: "Match result", bg: "#fff7ed", color: "#ea580c", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, action: () => { setSmartUploadResult({ category: "match_result", label: "Add match result", confidence: "high", data: { result: "", score: "", opponent_names: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
+                    { label: "Note", sub: "Thoughts or ideas", bg: "#f8f9fa", color: "#6b7480", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>, action: () => { setLogPickerSub("matchreview"); } },
+                  ]).map(({ label, sub, bg, color, icon, action }, i, arr) => (
+                    <button key={label} onClick={action} style={{ background: bg, border: "none", borderRadius: 14, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 16, textAlign: "left", gridColumn: arr.length % 2 !== 0 && i === arr.length - 1 ? "1 / -1" : undefined }}>
+                      {icon}
+                      <div>
+                        <p style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{label}</p>
+                        <p style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 600, color, margin: "2px 0 0" }}>{sub}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
 
               </div>{/* end flex col */}
               </div>{/* end scroll wrapper */}
