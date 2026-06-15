@@ -758,14 +758,16 @@ export default function Home8() {
     let prevT = 0;
     let vel = 0; // px/ms, positive = finger moving downward
 
-    let reachedTop = false; // true once scrollTop hits 0 during this gesture
+    let reachedTop = false; // true only if scrollTop hit 0 DURING this gesture (not at start)
+    let startScrollTop = 0;
 
     const onStart = (e: TouchEvent) => {
       prevY = e.touches[0].clientY;
       prevT = e.timeStamp;
       vel = 0;
       hitTopYRef.current = null;
-      reachedTop = div.scrollTop === 0;
+      startScrollTop = div.scrollTop;
+      reachedTop = false; // only mark true if we reach 0 during the gesture
     };
 
     const onMove = (e: TouchEvent) => {
@@ -779,7 +781,8 @@ export default function Home8() {
       prevT = t;
       lastTouchYRef.current = y;
 
-      if (div.scrollTop === 0) reachedTop = true;
+      // Only mark reachedTop if we actually scrolled to 0 from a non-zero position
+      if (div.scrollTop === 0 && startScrollTop > 0) reachedTop = true;
 
       if (div.scrollTop === 0 && movingDown) {
         if (hitTopYRef.current === null) hitTopYRef.current = y;
@@ -790,14 +793,14 @@ export default function Home8() {
     const trigger = (endY: number, isCancel = false) => {
       const atTop = hitTopYRef.current !== null;
       const dist  = atTop ? endY - hitTopYRef.current! : 0;
-      // primary path: downward drag/flick from scrollTop=0
-      if (atTop && (dist > 30 || vel > 0.3))
+      // primary path: intentional pull-down from scrollTop=0 (70px required to avoid accidents)
+      if (atTop && (dist > 70 || vel > 0.5))
         setDoIdx(i => Math.max(i - 1, -1));
-      // upward-flick path: user scrolled up to top then continued flicking up
-      else if (reachedTop && div.scrollTop === 0 && vel < -0.2)
+      // upward-flick path: user scrolled up to top FROM within the list, then continued up
+      else if (reachedTop && div.scrollTop === 0 && vel < -0.3)
         setDoIdx(i => Math.max(i - 1, -1));
       // cancel path: iOS rubber-band stole gesture but intent was downward
-      else if (isCancel && div.scrollTop === 0 && vel > 0.2)
+      else if (isCancel && div.scrollTop === 0 && vel > 0.4)
         setDoIdx(i => Math.max(i - 1, -1));
       hitTopYRef.current = null;
       reachedTop = false;

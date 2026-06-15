@@ -418,7 +418,7 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
     let m2: { date: string } | null = null;
     try { m2 = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch {}
     setPillarStates(computePillarStates(d.checkIn, d.hydration, d.nutrition, d.habits, d.training, m2?.date === todayStr));
-    try { setCheckinDone(localStorage.getItem("padelop:morning-log") === todayStr); } catch {}
+    try { const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null"); setCheckinDone(ml?.date === todayStr); } catch {}
     // Food quality
     try {
       const allMeals: MealEntry[] = JSON.parse(localStorage.getItem("padelop:meal-log") || "[]");
