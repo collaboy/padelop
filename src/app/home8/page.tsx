@@ -1645,6 +1645,43 @@ export default function Home8() {
 
         {/* Night check-in nudge */}
 
+        {/* Always-mounted file input — shared by FAB modal upload card and upload-confirm camera button */}
+        <input
+          ref={insertUploadRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={async e => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            setInsertUploadLoading(true);
+            try {
+              const reader = new FileReader();
+              const base64 = await new Promise<string>((resolve, reject) => {
+                reader.onload = () => resolve((reader.result as string).split(",")[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+              });
+              const body: Record<string, string> = { image: base64, mediaType: file.type };
+              if (insertUploadCategory) body.forceCategory = insertUploadCategory;
+              const res = await fetch("/api/classify-upload", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+              const result = await res.json();
+              if (!res.ok || result.error) {
+                setSmartUploadError(result.message || "Could not read the image.");
+              } else {
+                setSmartUploadResult(result);
+                setLogPickerSub("upload-confirm");
+                setLogPickerOpen(false);
+              }
+            } catch {
+              setSmartUploadError("Upload failed. Please try again.");
+            }
+            setInsertUploadLoading(false);
+            setInsertUploadCategory(null);
+            if (insertUploadRef.current) insertUploadRef.current.value = "";
+          }}
+        />
+
         {/* Log picker */}
         {logPickerOpen && (
           <div className="fixed inset-0 z-[200] flex items-start justify-center px-5" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogPickerSub(null); setExtrasOpen(false); setFabExpanded(false); }} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
@@ -1658,43 +1695,6 @@ export default function Home8() {
               </div>
               <div style={{ overflowY: "auto", minHeight: 0 }}>
               <div style={{ padding: "12px 16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
-
-                {/* Hidden file input for confirm-panel re-upload */}
-                <input
-                  ref={insertUploadRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={async e => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    setInsertUploadLoading(true);
-                    try {
-                      const reader = new FileReader();
-                      const base64 = await new Promise<string>((resolve, reject) => {
-                        reader.onload = () => resolve((reader.result as string).split(",")[1]);
-                        reader.onerror = reject;
-                        reader.readAsDataURL(file);
-                      });
-                      const body: Record<string, string> = { image: base64, mediaType: file.type };
-                      if (insertUploadCategory) body.forceCategory = insertUploadCategory;
-                      const res = await fetch("/api/classify-upload", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-                      const result = await res.json();
-                      if (!res.ok || result.error) {
-                        setSmartUploadError(result.message || "Could not read the image.");
-                      } else {
-                        setSmartUploadResult(result);
-                        setLogPickerSub("upload-confirm");
-                        setLogPickerOpen(false);
-                      }
-                    } catch {
-                      setSmartUploadError("Upload failed. Please try again.");
-                    }
-                    setInsertUploadLoading(false);
-                    setInsertUploadCategory(null);
-                    if (insertUploadRef.current) insertUploadRef.current.value = "";
-                  }}
-                />
 
                 {/* Upload screenshot — big primary action */}
                 <button
