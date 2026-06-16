@@ -6,7 +6,7 @@ import LogSheet from "@/components/log-sheet";
 import ReadinessSheet from "@/components/readiness-sheet";
 import PushPrompt from "@/components/push-prompt";
 import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
-import { saveUpcomingMatch, saveNutritionToDb, saveHydrationToDb, saveNoteToDb } from "@/lib/db";
+import { saveUpcomingMatch, saveNutritionToDb, saveHydrationToDb, saveNoteToDb, saveMatchReview, saveGearToDb } from "@/lib/db";
 import { hydrateFromSupabase } from "@/lib/sync";
 import { downloadSnapshot } from "@/lib/storage";
 
@@ -470,6 +470,15 @@ export default function Home8() {
       });
     });
     hydrateFromSupabase();
+    // Re-sync when user switches back to this tab/app
+    let lastSync = Date.now();
+    const onVisible = () => {
+      if (document.visibilityState === "visible" && Date.now() - lastSync > 30_000) {
+        lastSync = Date.now();
+        hydrateFromSupabase();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
     // Show FAB tooltip once
     try {
       if (!localStorage.getItem("padelop:fab-tooltip-seen")) {
@@ -478,6 +487,7 @@ export default function Home8() {
         localStorage.setItem("padelop:fab-tooltip-seen", "1");
       }
     } catch {}
+    return () => document.removeEventListener("visibilitychange", onVisible);
   }, []);
 
   useEffect(() => {
@@ -1861,6 +1871,9 @@ export default function Home8() {
               const prev = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
               localStorage.setItem("padelop:match-reviews", JSON.stringify([entry, ...prev].slice(0, 50)));
               window.dispatchEvent(new Event("storage"));
+              saveMatchReview({ ts: entry.ts, result: entry.result, opponentNames: entry.opponent });
+            } else if (category === "gear") {
+              saveGearToDb({ type: data.type || "other", name: data.name || data.brand || "" });
             }
             setLogPickerSub(null); setSmartUploadResult(null); setLogPickerOpen(false);
           };
