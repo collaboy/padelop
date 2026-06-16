@@ -101,10 +101,6 @@ export default function Home8() {
   const [readinessDone, setReadinessDone] = useState(0);
   const [readinessItems, setReadinessItems] = useState([false, false, false, false]);
   const [extrasOpen, setExtrasOpen] = useState(false);
-  const [pepText, setPepText] = useState<string | null>(null);
-  const [pepLoading, setPepLoading] = useState(false);
-  const [pepPlaying, setPepPlaying] = useState(false);
-  const [pepError, setPepError] = useState(false);
   const [checkInData, setCheckInData]     = useState<DailyCheckIn | null>(null);
   const [hydrationData, setHydrationData] = useState<HydrationEntry | null>(null);
   const [nutritionData, setNutritionData] = useState<NutritionEntry | null>(null);
@@ -916,87 +912,13 @@ export default function Home8() {
                 );
               })()}
 
-              {/* Card 2: pep talk */}
-              {(() => {
-                const playPepTalk = async () => {
-                  window.speechSynthesis.cancel();
-                  if (pepText) {
-                    const utt = new SpeechSynthesisUtterance(pepText);
-                    utt.rate = 0.92; utt.pitch = 1.05;
-                    utt.onend = () => setPepPlaying(false);
-                    utt.onerror = () => setPepPlaying(false);
-                    setPepPlaying(true);
-                    window.speechSynthesis.speak(utt);
-                    return;
-                  }
-                  setPepLoading(true); setPepError(false);
-                  try {
-                    const strengths = [...new Set(reviews.flatMap(r => r.wellDone))].slice(0, 3);
-                    const weaknesses = [...new Set(reviews.flatMap(r => r.improved))].slice(0, 3);
-                    const recentResults = reviews.slice(0, 5).map(r => r.result).filter(Boolean);
-                    const res = await fetch("/api/pep-talk", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ dayType, drillTag, matchTime: match?.time, matchClub: match?.club, recentResults, strengths, weaknesses }),
-                    });
-                    const data = await res.json();
-                    if (!res.ok || !data.text) { setPepError(true); setPepLoading(false); return; }
-                    setPepText(data.text);
-                    const utt = new SpeechSynthesisUtterance(data.text);
-                    utt.rate = 0.92; utt.pitch = 1.05;
-                    utt.onend = () => setPepPlaying(false);
-                    utt.onerror = () => setPepPlaying(false);
-                    setPepPlaying(true);
-                    window.speechSynthesis.speak(utt);
-                  } catch { setPepError(true); }
-                  setPepLoading(false);
-                };
-
-                const stopPep = () => { window.speechSynthesis.cancel(); setPepPlaying(false); };
-
-                return (
-                  <div
-                    key="pep"
-                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#0f1623", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 28, padding: "0 32px 15%", zIndex: doIdx === 1 ? 2 : 1, height: "calc(100dvh - 4rem - 44px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", position: "relative" }}
-                    onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
-                    onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
-                  >
-                    {/* Label */}
-                    <div style={{ textAlign: "center" }}>
-                      <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#4169e1", marginBottom: 6 }}>
-                        {dayType === "match" ? "Match Day" : dayType === "recovery" ? "Recovery Day" : "Training Day"}
-                      </p>
-                      <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#fff", lineHeight: 1.2 }}>Your Pep Talk</p>
-                    </div>
-
-                    {/* Play / stop button */}
-                    <button
-                      onClick={pepPlaying ? stopPep : playPepTalk}
-                      disabled={pepLoading}
-                      style={{ width: 80, height: 80, borderRadius: "50%", background: pepPlaying ? "#ef4444" : "#4169e1", border: "none", cursor: pepLoading ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 0 0 16px ${pepPlaying ? "#ef44441a" : "#4169e11a"}`, flexShrink: 0, transition: "background 0.2s" }}
-                    >
-                      {pepLoading ? (
-                        <svg className="animate-spin" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                      ) : pepPlaying ? (
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
-                      ) : (
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><polygon points="5,3 19,12 5,21"/></svg>
-                      )}
-                    </button>
-
-                    {/* Text */}
-                    {pepText && (
-                      <p style={{ margin: 0, fontSize: "clamp(14px, 3.6vw, 16px)", color: pepPlaying ? "#e2e8f0" : "#64748b", lineHeight: 1.65, textAlign: "center", transition: "color 0.4s" }}>
-                        {pepText}
-                      </p>
-                    )}
-                    {pepError && <p style={{ margin: 0, fontSize: 13, color: "#ef4444", textAlign: "center" }}>Couldn&apos;t load pep talk. Tap to retry.</p>}
-                    {!pepText && !pepLoading && !pepError && (
-                      <p style={{ margin: 0, fontSize: 14, color: "#475569", textAlign: "center", lineHeight: 1.5 }}>Tap play for your personalised pre-session pep talk.</p>
-                    )}
-                  </div>
-                );
-              })()}
+              {/* Card 2: placeholder */}
+              <div
+                key="card2"
+                style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "white", display: "flex", alignItems: "center", justifyContent: "center", zIndex: doIdx === 1 ? 2 : 1, height: "calc(100dvh - 4rem - 44px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none" }}
+                onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
+                onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
+              />
             </div>
           </div>
 
