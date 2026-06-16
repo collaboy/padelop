@@ -1072,7 +1072,7 @@ export default function Home8() {
                           <button onClick={() => setMatchInfoOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                             <div style={{ background: "#2653d4", borderRadius: 9, padding: "10px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
                               <span style={{ fontSize: "clamp(19px, 5vw, 23px)", fontWeight: 800, color: "rgba(255,255,255,0.9)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{countdownLabel}</span>
-                              <span style={{ fontSize: "clamp(22px, 6vw, 28px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.01em" }}>{match.time}</span>
+                              <span style={{ fontSize: "clamp(18px, 4.8vw, 22px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.01em" }}>{match.time}</span>
                             </div>
                           </button>
 
@@ -2000,7 +2000,7 @@ export default function Home8() {
           const todayDate = new Date(today + "T12:00");
           const diffDays = Math.round((matchDate.getTime() - todayDate.getTime()) / 86400000);
           const countdownLabel = diffDays === 0 ? "TODAY" : diffDays === 1 ? "TOMORROW" : `IN ${diffDays} DAYS`;
-          const dateStr = matchDate.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+          const dateStr = matchDate.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" });
           const playerStr = match.players && match.players.length > 0 ? match.players.join(', ') : null;
           const closeSheet = () => { setMatchInfoOpen(false); setMatchInfoMode(null); setMatchInfoAddTab(null); };
           const saveEdit = () => {
@@ -2067,7 +2067,7 @@ export default function Home8() {
 
                   {/* MATCH INFO CARD */}
                   <div style={{ position: "relative", background: "#fff", borderRadius: 24, padding: "24px 20px 20px" }}>
-                    <p style={{ fontSize: "clamp(22px, 6vw, 27px)", fontWeight: 800, color: "#1a1c1c", margin: "0 0 16px", lineHeight: 1.1, letterSpacing: "-0.02em" }}>{dateStr}</p>
+                    <p style={{ fontSize: "clamp(17px, 4.5vw, 21px)", fontWeight: 800, color: "#1a1c1c", margin: "0 0 16px", lineHeight: 1.2, letterSpacing: "-0.01em", overflowWrap: "break-word" }}>{dateStr}</p>
                     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                       <div style={{ display: "flex", gap: 12 }}>
                         <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", width: 48, flexShrink: 0, paddingTop: 2 }}>Time</span>
@@ -2106,12 +2106,12 @@ export default function Home8() {
                             {uploadExtracting && <svg className="animate-spin ml-auto flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>}
                           </button>
                           {uploadError && <div className="px-3 py-2.5 rounded-xl text-[13px] text-[#c0392b]" style={{ background: "#fff0f0", border: "1.5px solid #ffd0d0" }}>{uploadError}</div>}
-                          <div className="flex gap-3">
-                            <div className="flex-1 flex flex-col gap-1">
+                          <div className="flex flex-col gap-3">
+                            <div className="flex flex-col gap-1">
                               <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
                               <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#f8f9fa" }} />
                             </div>
-                            <div className="flex-1 flex flex-col gap-1">
+                            <div className="flex flex-col gap-1">
                               <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
                               <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#f8f9fa" }} />
                             </div>
@@ -2193,12 +2193,12 @@ export default function Home8() {
                         {uploadError && <div className="px-3 py-2.5 rounded-xl text-[13px] text-[#c0392b] mt-2" style={{ background: "#fff0f0", border: "1.5px solid #ffd0d0" }}>{uploadError}</div>}
                         {matchInfoAddTab === 'manual' && (
                           <div className="flex flex-col gap-3">
-                            <div className="flex gap-3">
-                              <div className="flex-1 flex flex-col gap-1">
+                            <div className="flex flex-col gap-3">
+                              <div className="flex flex-col gap-1">
                                 <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
                                 <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#f8f9fa" }} />
                               </div>
-                              <div className="flex-1 flex flex-col gap-1">
+                              <div className="flex flex-col gap-1">
                                 <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
                                 <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#f8f9fa" }} />
                               </div>
@@ -2266,12 +2266,12 @@ export default function Home8() {
                 };
                 return (
                   <div className="px-5 pt-4 pb-5 flex flex-col gap-3" style={{ borderBottom: "1px solid #f0f0f0", background: "#fafafa" }}>
-                    <div className="flex gap-3">
-                      <div className="flex-1 flex flex-col gap-1">
+                    <div className="flex flex-col gap-3">
+                      <div className="flex flex-col gap-1">
                         <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
                         <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#fff" }} />
                       </div>
-                      <div className="flex-1 flex flex-col gap-1">
+                      <div className="flex flex-col gap-1">
                         <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
                         <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#fff" }} />
                       </div>
@@ -2353,12 +2353,12 @@ export default function Home8() {
                       setUploadExtracting(false);
                       if (actionUploadRef.current) actionUploadRef.current.value = '';
                     }} />
-                    <div className="flex gap-3">
-                      <div className="flex-1 flex flex-col gap-1">
+                    <div className="flex flex-col gap-3">
+                      <div className="flex flex-col gap-1">
                         <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
                         <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#fff" }} />
                       </div>
-                      <div className="flex-1 flex flex-col gap-1">
+                      <div className="flex flex-col gap-1">
                         <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
                         <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#fff" }} />
                       </div>
@@ -2560,14 +2560,14 @@ export default function Home8() {
 
               {matchModalTab === 'manual' && (
                 <div className="px-6 py-5 flex flex-col gap-4 max-h-[70vh] overflow-y-auto">
-                  <div className="flex gap-3">
-                    <div className="flex-1 flex flex-col gap-1">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-1">
                       <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
                       <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))}
                         className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none"
                         style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#f9f9f9" }} />
                     </div>
-                    <div className="flex-1 flex flex-col gap-1">
+                    <div className="flex flex-col gap-1">
                       <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
                       <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))}
                         className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none"
