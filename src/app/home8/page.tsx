@@ -1686,6 +1686,30 @@ export default function Home8() {
                   }}
                 />
 
+                {/* Upload screenshot — big primary action */}
+                <button
+                  onClick={() => insertUploadRef.current?.click()}
+                  disabled={insertUploadLoading}
+                  style={{ width: "100%", background: "#f4f6ff", border: "2px dashed #c7d2fe", borderRadius: 18, padding: "24px 20px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, textAlign: "center", opacity: insertUploadLoading ? 0.6 : 1 }}
+                >
+                  {insertUploadLoading ? (
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                  ) : (
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  )}
+                  <div>
+                    <p style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 700, color: "#2653d4", margin: 0 }}>{insertUploadLoading ? "Analysing…" : "Upload a screenshot"}</p>
+                    <p style={{ fontSize: "clamp(12px, 3.1vw, 14px)", fontWeight: 500, color: "#6b7480", margin: "3px 0 0" }}>Match booking · Food · Results · Gear</p>
+                  </div>
+                </button>
+
+                {/* Divider */}
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ flex: 1, height: 1, background: "#f0f0f0" }} />
+                  <span style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 600, color: "#b0b5ba", textTransform: "uppercase", letterSpacing: "0.06em" }}>or add manually</span>
+                  <div style={{ flex: 1, height: 1, background: "#f0f0f0" }} />
+                </div>
+
                 {/* Tile grid */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                   {([
