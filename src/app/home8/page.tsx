@@ -688,7 +688,7 @@ export default function Home8() {
           </div>
 
           {/* Carousel center — all schedule cards, doIdx in transform */}
-          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingLeft: 10, paddingRight: 10, position: "relative", zIndex: 2 }}>
+          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingLeft: 10, paddingRight: 10, position: "relative", zIndex: 2, overflow: "hidden" }}>
             <div style={{
               display: "flex", flexDirection: "column", gap: 10,
               transform: doIdx >= 1
@@ -713,7 +713,7 @@ export default function Home8() {
                 const coachTip = hasLow ? 'Focus on recovery today.' : hasOk ? 'Keep your habits consistent today.' : allNL ? 'Log your check-ins to track readiness.' : 'You\'re in great shape. Stay sharp.';
 
                 return (
-                  <div style={{ width: "100%", flexShrink: 0, height: "calc(100dvh - 4rem - 100px)", borderRadius: 24, background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: match ? "flex-start" : "center", padding: match ? "calc((100dvh - 4rem - 100px - 116px) / 2) 36px 0" : "0 36px", opacity: cardSnap === 'none' && doIdx === -1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === -1 ? 2 : 1, pointerEvents: doIdx === -1 ? "auto" : "none" }}>
+                  <div style={{ width: "100%", flexShrink: 0, height: "calc(100dvh - 4rem - 100px)", borderRadius: 24, background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px 20%", zIndex: doIdx === -1 ? 2 : 1, pointerEvents: doIdx === -1 ? "auto" : "none" }}>
                     {match ? (() => {
                       const matchDate = new Date(match.date + "T12:00");
                       const todayDate = new Date(today + "T12:00");
@@ -725,24 +725,26 @@ export default function Home8() {
                         : null;
 
                       return (
-                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", gap: 16 }}>
-                          {/* Line 1: Next Match label */}
-                          <p style={{ fontSize: "clamp(14px, 3.5vw, 17px)", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 -12px" }}>
-                            Next Match{upcomingCount > 1 && <span style={{ marginLeft: 6, fontWeight: 600, color: "#c8ccd0" }}>+{upcomingCount - 1} more</span>}
-                          </p>
-
-                          {/* Line 2: Countdown ball — tap to open match info modal */}
-                          <button onClick={() => setMatchInfoOpen(true)} style={{ width: "calc((100vw - 40px) * 0.5)", height: "calc((100vw - 40px) * 0.5)", borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, boxShadow: "0 4px 20px #2653d455", flexShrink: 0 }}>
-                            <span style={{ fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 800, color: "rgba(255,255,255,0.85)", letterSpacing: "0.08em", textTransform: "uppercase", lineHeight: 1 }}>{countdownLabel}</span>
-                            <span style={{ fontSize: "clamp(30px, 7.7vw, 37px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.02em" }}>{match.time}</span>
-                          </button>
-
-                          {/* Line 3: Readiness on one line */}
-                          <button onClick={() => setReadinessSheetOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-                            <span style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 600, color: "#6b7480" }}>
-                              Readiness: <span style={{ color: "#1a1c1c", fontWeight: 800 }}>{readinessDone}</span><span style={{ color: "#c8cdd3", fontWeight: 600 }}>/4</span>
-                            </span>
-                          </button>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+                          {/* Countdown ball with curved labels */}
+                          <div style={{ position: "relative", width: "calc((100vw - 40px) * 0.5)", height: "calc((100vw - 40px) * 0.5)", flexShrink: 0 }}>
+                            <button onClick={() => setMatchInfoOpen(true)} style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, boxShadow: "0 4px 20px #2653d455" }}>
+                              <span style={{ fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 800, color: "rgba(255,255,255,0.85)", letterSpacing: "0.08em", textTransform: "uppercase", lineHeight: 1 }}>{countdownLabel}</span>
+                              <span style={{ fontSize: "clamp(30px, 7.7vw, 37px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.02em" }}>{match.time}</span>
+                            </button>
+                            <svg viewBox="0 0 100 100" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
+                              <defs>
+                                <path id="matchArc" d="M 12 50 A 38 38 0 0 1 88 50" />
+                                <path id="readinessArc" d="M 5 50 A 45 45 0 0 0 95 50" />
+                              </defs>
+                              <text fill="rgba(255,255,255,0.7)" fontSize="9.5" fontWeight="700" letterSpacing="2.5" fontFamily="inherit">
+                                <textPath href="#matchArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
+                              </text>
+                              <text fill="rgba(255,255,255,0.7)" fontSize="9.5" fontWeight="700" letterSpacing="2" fontFamily="inherit">
+                                <textPath href="#readinessArc" startOffset="50%" textAnchor="middle">{`${readinessDone}/4`}</textPath>
+                              </text>
+                            </svg>
+                          </div>
                         </div>
                       );
                     })() : (
@@ -937,16 +939,14 @@ export default function Home8() {
 
               {/* Card 2: add to log */}
               {(() => {
-                const ballSize = "calc((100vw - 40px) * 0.25)";
+                const ballSize = "calc((100vw - 40px) * 0.33)";
                 return (
                   <div
                     key="upload"
-                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === 1 ? 2 : 1, height: "calc(100dvh - 4rem - 44px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", position: "relative" }}
+                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 0 20%", zIndex: doIdx === 1 ? 2 : 1, height: "calc(100dvh - 4rem - 44px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", position: "relative" }}
                     onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
                     onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
                   >
-                    {/* Drag hint pill */}
-                    <div style={{ position: "absolute", top: 14, left: "50%", transform: "translateX(-50%)", width: 36, height: 4, borderRadius: 2, background: "#d0d3d6" }} />
                     {/* Blue ball */}
                     <button
                       onClick={() => { setSmartUploadError(null); setLogPickerOpen(true); }}
@@ -1694,22 +1694,14 @@ export default function Home8() {
             closeSheet();
           };
           return (
-            <div className="fixed inset-0 z-[200] flex items-end" onClick={closeSheet}>
-              <style>{`@keyframes miSlideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}`}</style>
+            <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" onClick={closeSheet}>
+              <style>{`@keyframes miScaleIn{from{transform:scale(0.95);opacity:0}to{transform:scale(1);opacity:1}}`}</style>
               <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
               <div
-                className="relative w-full bg-[#f0f2f5] rounded-t-[28px] flex flex-col overflow-hidden"
-                style={{ animation: "miSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)", height: "82vh", paddingBottom: "env(safe-area-inset-bottom)" }}
+                className="relative w-full bg-[#f0f2f5] rounded-[28px] flex flex-col overflow-hidden"
+                style={{ animation: "miScaleIn 0.2s cubic-bezier(0.22,1,0.36,1)", maxHeight: "80dvh" }}
                 onClick={e => e.stopPropagation()}
               >
-                {/* Handle */}
-                <div className="w-10 h-1 rounded-full bg-[#d0d3d6] mx-auto mt-4 mb-3 flex-shrink-0" />
-
-                {/* Header */}
-                <div style={{ padding: "0 20px 12px", flexShrink: 0 }}>
-                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0, textAlign: "center" }}>Next Match · {countdownLabel}</p>
-                </div>
-
                 {/* Shared hidden file input for both edit and add upload */}
                 <input ref={actionUploadRef} type="file" accept="image/*" className="hidden" onChange={async (e) => {
                   const file = e.target.files?.[0];
@@ -1729,7 +1721,7 @@ export default function Home8() {
 
                 {/* Scrollable cards */}
                 <div className="overflow-y-auto flex-1 overscroll-contain" style={{ minHeight: 0 }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: "0 16px 32px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: "16px 16px 32px" }}>
 
                   {/* MATCH INFO CARD */}
                   <div style={{ position: "relative", background: "#fff", borderRadius: 24, padding: "24px 20px 20px" }}>
@@ -1832,75 +1824,38 @@ export default function Home8() {
                     </button>
                   </div>
 
-                  {/* ACTIONS CARD */}
-                  <div style={{ background: "#fff", borderRadius: 24, overflow: "hidden" }}>
-                    {/* Button row */}
-                    <div style={{ display: "flex", gap: 0, padding: "16px 16px 16px" }}>
-                      <button
-                        onClick={() => { if (matchInfoMode === 'add') { setMatchInfoMode(null); setMatchInfoAddTab(null); } else { setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchInfoMode('add'); setMatchInfoAddTab(null); setUploadError(null); } }}
-                        style={{ flex: 1, fontSize: 14, fontWeight: 600, color: matchInfoMode === 'add' ? "#fff" : "#16a34a", background: matchInfoMode === 'add' ? "#16a34a" : "#f0fdf4", border: "none", cursor: "pointer", padding: "11px 0", borderRadius: 12 }}
-                      >+ Add match</button>
-                    </div>
-
-                    {/* Add form */}
-                    {matchInfoMode === 'add' && (
-                      <div style={{ borderTop: "1px solid #f0f0f0", padding: "16px 16px 20px" }}>
-                        {!matchInfoAddTab && (
-                          <div className="flex gap-3 mb-2">
-                            <button onClick={() => { setUploadError(null); setMatchInfoAddTab('upload'); actionUploadRef.current?.click(); }} className="flex-1 flex flex-col items-center gap-2 py-4 rounded-2xl active:opacity-70" style={{ background: "#f4f6ff", border: "1.5px solid #2653d418" }}>
-                              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "#2653d4" }}>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  {/* READINESS CARD */}
+                  {(() => {
+                    const pillars = [
+                      { label: "Check-in", done: readinessItems[0], reason: pillarStates.recovery?.reason },
+                      { label: "Hydration", done: readinessItems[1], reason: readinessItems[1] ? "≥2.5L logged" : "Under target" },
+                      { label: "Nutrition", done: readinessItems[2], reason: pillarStates.nutrition?.reason },
+                      { label: "Training", done: readinessItems[3], reason: pillarStates.training?.reason },
+                    ];
+                    return (
+                      <div style={{ background: "#fff", borderRadius: 24, padding: "20px 20px 16px" }}>
+                        <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 14 }}>
+                          <span style={{ fontSize: 22, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{readinessDone}</span>
+                          <span style={{ fontSize: 14, fontWeight: 600, color: "#c8cdd3" }}>/4</span>
+                          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", marginLeft: 4 }}>Readiness</span>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                          {pillars.map(p => (
+                            <div key={p.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                              <div style={{ width: 20, height: 20, borderRadius: "50%", flexShrink: 0, background: p.done ? "#f0fdf4" : "#f4f4f6", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                {p.done
+                                  ? <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                  : <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#c8cdd3" }} />
+                                }
                               </div>
-                              <span className="text-[13px] font-semibold text-[#2653d4]">Upload screenshot</span>
-                            </button>
-                            <button onClick={() => { setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchInfoAddTab('manual'); }} className="flex-1 flex flex-col items-center gap-2 py-4 rounded-2xl active:opacity-70" style={{ background: "#f4f4f6", border: "1.5px solid #e2e2e2" }}>
-                              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "#e8eaed" }}>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                              </div>
-                              <span className="text-[13px] font-semibold text-[#4a5050]">Enter manually</span>
-                            </button>
-                          </div>
-                        )}
-                        {uploadExtracting && <div className="flex items-center gap-3 py-3"><svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg><span className="text-[14px] font-medium text-[#2653d4]">Reading screenshot…</span></div>}
-                        {uploadError && <div className="px-3 py-2.5 rounded-xl text-[13px] text-[#c0392b] mt-2" style={{ background: "#fff0f0", border: "1.5px solid #ffd0d0" }}>{uploadError}</div>}
-                        {matchInfoAddTab === 'manual' && (
-                          <div className="flex flex-col gap-3">
-                            <div className="flex flex-col gap-3">
-                              <div className="flex flex-col gap-1">
-                                <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
-                                <div style={{ position: "relative" }}>
-                                  <div className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#f8f9fa", color: matchForm.date ? "#1a1c1c" : "#b0b5ba", minHeight: 44, display: "flex", alignItems: "center" }}>{matchForm.date ? new Date(matchForm.date + "T12:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Pick a date"}</div>
-                                  <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
-                                </div>
-                              </div>
-                              <div className="flex flex-col gap-1">
-                                <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
-                                <div style={{ position: "relative" }}>
-                                  <div className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#f8f9fa", color: matchForm.time ? "#1a1c1c" : "#b0b5ba", minHeight: 44, display: "flex", alignItems: "center" }}>{matchForm.time || "Pick a time"}</div>
-                                  <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
-                                </div>
-                              </div>
+                              <span style={{ fontSize: 14, fontWeight: 600, color: p.done ? "#1a1c1c" : "#9aa0a6", flex: 1 }}>{p.label}</span>
+                              {p.reason && <span style={{ fontSize: 12, color: "#b0b8c1", fontWeight: 500 }}>{p.reason}</span>}
                             </div>
-                            <div className="flex flex-col gap-1">
-                              <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Club</label>
-                              <input type="text" placeholder="e.g. Club Padel BCN" value={matchForm.club} onChange={e => setMatchForm(f => ({ ...f, club: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm.club ? "#2653d4" : "#e2e2e2", background: matchForm.club ? "#f4f6ff" : "#f8f9fa" }} />
-                            </div>
-                            <div className="flex flex-col gap-1">
-                              <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Court #</label>
-                              <input type="text" placeholder="e.g. 3" value={matchForm.court} onChange={e => setMatchForm(f => ({ ...f, court: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm.court ? "#2653d4" : "#e2e2e2", background: matchForm.court ? "#f4f6ff" : "#f8f9fa" }} />
-                            </div>
-                            <div className="flex flex-col gap-2">
-                              <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Players</label>
-                              {(['p1','p2','p3','p4'] as const).map((key, i) => (
-                                <input key={key} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={matchForm[key]} onChange={e => setMatchForm(f => ({ ...f, [key]: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm[key] ? "#2653d4" : "#e2e2e2", background: matchForm[key] ? "#f4f6ff" : "#f8f9fa" }} />
-                              ))}
-                            </div>
-                            <button onClick={saveAdd} className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white" style={{ background: (!matchForm.date || !matchForm.time) ? "#c4c7c7" : "#16a34a" }}>Save match</button>
-                          </div>
-                        )}
+                          ))}
+                        </div>
                       </div>
-                    )}
-                  </div>
+                    );
+                  })()}
 
                 </div>{/* end flex column */}
                 </div>{/* end scroll container */}
