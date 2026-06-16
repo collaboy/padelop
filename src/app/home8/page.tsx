@@ -1087,19 +1087,13 @@ export default function Home8() {
                       );
                     })() : (
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", gap: 16 }}>
-                        <p style={{ fontSize: "clamp(14px, 3.5vw, 17px)", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#b0b8c1", margin: 0 }}>Next Match</p>
+                        <p style={{ fontSize: "clamp(14px, 3.5vw, 17px)", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 -12px" }}>Next Match</p>
                         <button
                           onClick={() => { setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('pick'); setMatchModalOpen(true); }}
-                          style={{ background: "none", border: "none", cursor: "pointer", padding: 0, width: "100%" }}
+                          style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
                         >
-                          <div style={{ background: "#eef2ff", borderRadius: 16, padding: "16px 18px", display: "flex", alignItems: "center", gap: 14, textAlign: "left", width: "100%" }}>
-                            <div style={{ background: "#dbeafe", borderRadius: 12, width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
-                            </div>
-                            <div>
-                              <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Schedule a match</p>
-                              <p style={{ fontSize: "clamp(12px, 3.1vw, 14px)", fontWeight: 600, color: "#2653d4", margin: "3px 0 0" }}>Upload or add manually</p>
-                            </div>
+                          <div style={{ background: "#eef2ff", borderRadius: 9, padding: "10px 24px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <span style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: "#2653d4" }}>+ Schedule a match</span>
                           </div>
                         </button>
                         <button onClick={() => setReadinessSheetOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
@@ -1732,7 +1726,7 @@ export default function Home8() {
                 {/* Manual tile grid */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                   {([
-                    { label: "Match", sub: "Schedule", bg: "#eef2ff", color: "#2653d4", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>, action: () => { setLogPickerOpen(false); setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('manual'); setMatchModalOpen(true); } },
+                    { label: "Match", sub: "Schedule", bg: "#eef2ff", color: "#2653d4", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>, action: () => { setSmartUploadResult({ category: "match_schedule", label: "Schedule a match", confidence: "high", data: { date: '', time: '', club: '', court: '', player_1: '', player_2: '', player_3: '', player_4: '' } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
                     { label: "Food", sub: "Meal or snack", bg: "#f0fdf4", color: "#16a34a", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>, action: () => { setSmartUploadResult({ category: "meal", label: "Add a meal", confidence: "high", data: { description: "", meal_type: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
                     { label: "Gear", sub: "Racket, shoes…", bg: "#f5f0ff", color: "#7c3aed", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, action: () => { setSmartUploadResult({ category: "gear", label: "Add gear", confidence: "high", data: { type: "", brand: "", name: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
                     { label: "Results", sub: "Match result", bg: "#fff7ed", color: "#ea580c", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, action: () => { setSmartUploadResult({ category: "match_result", label: "Add match result", confidence: "high", data: { result: "", score: "", opponent_names: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
@@ -1966,8 +1960,20 @@ export default function Home8() {
                   {category === "match_schedule" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                        <div><label style={labelSt}>Date</label><input type="date" value={data.date ?? ''} onChange={e => updateData("date", e.target.value)} style={inputSt} /></div>
-                        <div><label style={labelSt}>Time</label><input type="time" value={data.time ?? ''} onChange={e => updateData("time", e.target.value)} style={inputSt} /></div>
+                        <div>
+                          <label style={labelSt}>Date</label>
+                          <div style={{ position: "relative" }}>
+                            <div style={{ ...inputSt, color: data.date ? "#1a1c1c" : "#b0b5ba", minHeight: 38, display: "flex", alignItems: "center" }}>{data.date ? new Date(data.date + "T12:00").toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "Pick date"}</div>
+                            <input type="date" value={data.date ?? ''} onChange={e => updateData("date", e.target.value)} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
+                          </div>
+                        </div>
+                        <div>
+                          <label style={labelSt}>Time</label>
+                          <div style={{ position: "relative" }}>
+                            <div style={{ ...inputSt, color: data.time ? "#1a1c1c" : "#b0b5ba", minHeight: 38, display: "flex", alignItems: "center" }}>{data.time || "Pick time"}</div>
+                            <input type="time" value={data.time ?? ''} onChange={e => updateData("time", e.target.value)} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
+                          </div>
+                        </div>
                       </div>
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                         <div><label style={labelSt}>Club</label><input type="text" value={data.club ?? ''} onChange={e => updateData("club", e.target.value)} style={inputSt} placeholder="Club name" /></div>
