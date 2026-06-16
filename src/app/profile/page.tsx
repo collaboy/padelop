@@ -360,7 +360,7 @@ export default function ProfilePage() {
   const router = useRouter();
 
   // Tab
-  const [activeTab, setActiveTab] = useState<'me' | 'today' | 'matches' | 'stats'>('me');
+  const [activeTab, setActiveTab] = useState<'me' | 'today' | 'matches' | 'stats'>('today');
 
   // Profile
   const [profile, setProfile] = useState<Profile>(EMPTY);
@@ -1028,6 +1028,13 @@ export default function ProfilePage() {
       {activeTab === 'today' && (
         <div className="pt-5 flex flex-col gap-5">
 
+          {/* Match info — only on match day, pinned to top */}
+          {dayType === 'match' && nextMatch && (
+            <div style={{ margin: "0 20px" }}>
+              <NextMatchCard match={nextMatch} />
+            </div>
+          )}
+
           {/* Daily Check-in */}
           <button onClick={() => { setLogTab("checkin"); setLogSheetOpen(true); }}
             style={{ width: "calc(100% - 40px)", margin: "0 20px", background: "#f5f0ff", border: "none", borderRadius: "var(--r-lg)", padding: "18px 20px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, textAlign: "left" }}>
@@ -1055,8 +1062,9 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Day type + schedule */}
+          {/* Today's Schedule */}
           <div style={{ padding: "0 20px" }}>
+            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 12px" }}>Today&apos;s Schedule</p>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
               <span style={{ fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 99, background: `${dayColor}18`, color: dayColor }}>{dayLabel}</span>
               <span style={{ fontSize: 13, color: "#b0b8c1", fontWeight: 500 }}>{now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</span>
@@ -1087,9 +1095,17 @@ export default function ProfilePage() {
             </div>
           </div>
 
+
+
+        </div>
+      )}
+
+      {/* ── Tab: Matches ─────────────────────────────────────────────────── */}
+      {activeTab === 'matches' && (
+        <div style={{ padding: "16px 16px 0", display: "flex", flexDirection: "column", gap: 10 }}>
+
           {/* Calendar */}
-          <div style={{ margin: "0 20px" }}>
-            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 10px" }}>Your Calendar</p>
+          <div style={{ margin: "0 4px" }}>
             <div className="bg-white r-lg border border-c-line overflow-hidden" style={card}>
               <div style={{ padding: "16px 14px 20px" }}>
                 <p className="t-caption" style={{ fontWeight: 600, color: "var(--c-text-sub)", marginBottom: "10px", textTransform: "capitalize" }}>{monthLabel}</p>
@@ -1142,21 +1158,6 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
-
-          {/* Next match */}
-          {nextMatch && (
-            <div style={{ margin: "0 20px" }}>
-              <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 10px" }}>Next Match</p>
-              <NextMatchCard match={nextMatch} />
-            </div>
-          )}
-
-        </div>
-      )}
-
-      {/* ── Tab: Matches ─────────────────────────────────────────────────── */}
-      {activeTab === 'matches' && (
-        <div style={{ padding: "16px 16px 0", display: "flex", flexDirection: "column", gap: 10 }}>
 
           {/* Add button */}
           <div style={{ display: "flex", justifyContent: "flex-end" }}>

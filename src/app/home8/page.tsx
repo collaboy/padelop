@@ -1344,23 +1344,15 @@ export default function Home8() {
                   </div>
                 </div>
 
-                {/* Nav links — always visible below "Add manually" */}
-                {([
-                  { label: "My Profile", href: "/profile", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg> },
-                  { label: "Today's Schedule", href: "/schedule", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
-                  { label: "Matches", href: "/matches", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg> },
-                  { label: "Settings", href: "/settings", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
-                ]).map(({ label, href, icon }) => (
-                  <button
-                    key={href}
-                    onClick={() => { setLogPickerOpen(false); setFabExpanded(false); router.push(href); }}
-                    style={{ width: "100%", background: "none", border: "none", borderRadius: 12, padding: "11px 4px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, textAlign: "left" }}
-                  >
-                    {icon}
-                    <span style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 600, color: "#1a1c1c" }}>{label}</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" style={{ marginLeft: "auto" }}><polyline points="9 18 15 12 9 6"/></svg>
-                  </button>
-                ))}
+                {/* My Profile link */}
+                <button
+                  onClick={() => { setLogPickerOpen(false); setFabExpanded(false); router.push("/profile"); }}
+                  style={{ width: "100%", background: "none", border: "none", borderRadius: 12, padding: "11px 4px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, textAlign: "left" }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>
+                  <span style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 600, color: "#1a1c1c" }}>My Profile</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" style={{ marginLeft: "auto" }}><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
 
               </div>{/* end flex col */}
               </div>{/* end scroll wrapper */}
