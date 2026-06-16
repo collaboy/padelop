@@ -86,9 +86,14 @@ export async function hydrateFromSupabase() {
         const existing = JSON.parse(localStorage.getItem(cacheKey) || "null");
         // Only overwrite if we don't already have a fresher local result
         if (!existing || existing.date !== today) {
+          // Count actual meal entries for today (non-quality-marker descriptions)
+          const QM = new Set(["great", "ok", "bad", "good", "poor"]);
+          const todayMealCount = (nutritionRes.data ?? []).filter(n =>
+            n.date === today && !QM.has((n.description ?? "").toLowerCase()) && n.description
+          ).length;
           localStorage.setItem(cacheKey, JSON.stringify({
             date:       today,
-            mealCount:  0,
+            mealCount:  todayMealCount,
             score:      todayCI.nutrition_ai_score,
             insight:    todayCI.nutrition_ai_insight,
           }));
@@ -144,7 +149,11 @@ export async function hydrateFromSupabase() {
 
     // ── Nutrition ────────────────────────────────────────────────────────
     const nutritionData = nutritionRes.data ?? [];
-    const nutritionLogs = nutritionData.map(n => ({
+
+    // Quality ratings saved by the checkin flow (description is "great"/"ok"/"bad")
+    const QUALITY_MARKERS = new Set(["great", "ok", "bad", "good", "poor"]);
+    const qualityEntries = nutritionData.filter(n => QUALITY_MARKERS.has((n.description ?? "").toLowerCase()));
+    const nutritionLogs = qualityEntries.map(n => ({
       ts:            n.date + "T12:00:00.000Z",
       quality:       n.description ?? "",
       proteinRating: "",
@@ -154,8 +163,10 @@ export async function hydrateFromSupabase() {
     if (nutritionLogs.length) {
       localStorage.setItem("padelop:nutrition-logs", JSON.stringify(nutritionLogs));
     }
-    // Also populate the meal-log format that home8 uses for "Meals today"
-    const mealLog = nutritionData.map(n => ({
+
+    // Actual meal entries saved by saveMealEntry (description is food text, not a quality word)
+    const mealEntries = nutritionData.filter(n => !QUALITY_MARKERS.has((n.description ?? "").toLowerCase()) && n.description);
+    const mealLog = mealEntries.map(n => ({
       id:          String(n.id ?? n.created_at ?? n.date),
       date:        n.date,
       time:        n.meal_type ?? "12:00",

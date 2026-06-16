@@ -6,6 +6,7 @@ import LogSheet from "@/components/log-sheet";
 import ReadinessSheet from "@/components/readiness-sheet";
 import PushPrompt from "@/components/push-prompt";
 import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
+import { pad, addMins, toMins, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag, ITEM_COLORS, type ScheduleItem, getScheduleData, SCHEDULE_DETAILS } from "@/lib/schedule-data";
 import { saveUpcomingMatch, saveNutritionToDb, saveHydrationToDb, saveNoteToDb, saveMatchReview, saveGearToDb } from "@/lib/db";
 import { hydrateFromSupabase } from "@/lib/sync";
 import { downloadSnapshot } from "@/lib/storage";
@@ -34,276 +35,7 @@ function hashStr(s: string) {
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
-const pad = (n: number) => String(n).padStart(2, "0");
-const addMins = (h: number, m: number, delta: number) => {
-  const total = h * 60 + m + delta;
-  return `${pad(Math.floor(total / 60) % 24)}:${pad(total % 60)}`;
-};
-const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
 
-type DrillDef = { subtitle: string; steps: { step: string; cue: string; reps: string }[] };
-const DRILL_LIBRARY: Record<string, DrillDef> = {
-  "Serve": {
-    subtitle: "Toss rhythm & arm swing — no racket needed",
-    steps: [
-      { step: "Toss arm drill", cue: "Raise your toss arm slowly, release an imaginary ball at eye level, watch it rise. Consistency here eliminates most serve errors.", reps: "20 reps" },
-      { step: "Shadow swing", cue: "Full serve motion in slow motion — trophy position, shoulder turn, pronation at contact. No racket needed.", reps: "15 each side" },
-      { step: "Mental serves", cue: "Eyes closed. Visualise 5 perfect serves — placement, spin, bounce. Feel the rhythm.", reps: "5 mental reps" },
-    ],
-  },
-  "Bandeja": {
-    subtitle: "Shoulder prep & overhead shadow — anywhere",
-    steps: [
-      { step: "Shoulder circles", cue: "Slow full arm circles forward and back. Activates the rotator cuff — the key joint in every overhead.", reps: "10 each direction" },
-      { step: "Closed-face shadow", cue: "Elbow up, wrist firm, simulate the controlled downward snap of a bandeja. No backswing.", reps: "15 each side" },
-      { step: "Placement visualisation", cue: "Picture a high lob, your footwork, contact point, and the ball landing in the back corner.", reps: "5 mental reps" },
-    ],
-  },
-  "Smash": {
-    subtitle: "Jump timing & contact point — no gear",
-    steps: [
-      { step: "Jump reach", cue: "Jump straight up reaching as high as possible. Land softly. Contact point precision starts here.", reps: "3 × 8 reps" },
-      { step: "Trophy position hold", cue: "Shoulder back, elbow up, weight loaded. Hold 3 seconds, release. Builds the muscle memory for timing.", reps: "10 reps" },
-      { step: "Mental overhead", cue: "Visualise 3 smashes — read the lob early, feet set before contact, clean follow-through.", reps: "3 mental reps" },
-    ],
-  },
-  "Volleys": {
-    subtitle: "Compact hand speed — desk or wall",
-    steps: [
-      { step: "Wrist lock tap", cue: "Arm extended, wrist firm, punch your palm against a wall or desk. No swing — just the contact impulse.", reps: "3 × 20 reps" },
-      { step: "Shadow punch volley", cue: "Forehand then backhand, elbow up, contact in front of your body. Slow and deliberate.", reps: "20 each hand" },
-      { step: "Reaction snap", cue: "Close eyes, open and immediately snap into a volley position with compact arm. Trains hand-eye speed.", reps: "10 reps" },
-    ],
-  },
-  "Defense": {
-    subtitle: "Defensive footwork — any corridor or room",
-    steps: [
-      { step: "Lateral shuffle", cue: "3 steps left, 3 right, low centre of gravity. Quick light feet — avoid crossing your legs.", reps: "5 × 20 seconds" },
-      { step: "Split step", cue: "Small soft jump, land feet shoulder-width apart, weight forward. This is your reset between every point.", reps: "20 reps" },
-      { step: "Defensive lob visualisation", cue: "Picture yourself deep in the court, reading a smash early, lifting a high cross-court lob. Calm, not rushed.", reps: "5 mental reps" },
-    ],
-  },
-  "Attack": {
-    subtitle: "Quick hands & pattern recall — no gear",
-    steps: [
-      { step: "Pen drop", cue: "Hold a pen at shoulder height, drop it, catch before it reaches waist. Trains the hand speed you need for net exchanges.", reps: "15 reps" },
-      { step: "Shadow volley finish", cue: "Simulate approach + compact volley finish — step forward, punch to the angle. Weight transfers forward.", reps: "15 reps" },
-      { step: "Pattern recall", cue: "Recall 3 attacking sequences from your last match. What created the opening? What would you repeat?", reps: "3 minutes" },
-    ],
-  },
-  "Positioning": {
-    subtitle: "Court awareness — mental mapping",
-    steps: [
-      { step: "T-recovery shadow", cue: "Split step, move to the imaginary T, recover back. Automatic positioning starts with repetition.", reps: "20 reps" },
-      { step: "Scenario mapping", cue: "Picture 5 common in-game situations and identify your optimal position for each — net, mid, back corner.", reps: "5 scenarios" },
-      { step: "Match replay", cue: "Recall a point from your last match where positioning cost you. Replay it mentally with the correct position.", reps: "3 minutes" },
-    ],
-  },
-  "Communication": {
-    subtitle: "Call habits — build automaticity anywhere",
-    steps: [
-      { step: "Call out loud", cue: "Say 'mine', 'yours', 'leave' out loud 30 times. Building the habit under low pressure makes it instinctive under high pressure.", reps: "30 calls" },
-      { step: "Pre-point routine", cue: "Practice your between-point reset — breathe, walk to position, make your call intention. Repeat until automatic.", reps: "10 reps" },
-      { step: "Replay & rewrite", cue: "Recall 3 moments from your last match where a missing call cost a point. Rehearse what you would have said.", reps: "3 minutes" },
-    ],
-  },
-  "Movement": {
-    subtitle: "Padel footwork — any hallway works",
-    steps: [
-      { step: "Lateral shuffle + split", cue: "Side-to-side shuffle, 3 steps each way, ending with a soft split step. Core padel movement loop.", reps: "5 × 20 seconds" },
-      { step: "Forward lunge", cue: "Step into a deep lunge, back knee near the floor, recover. Works the hip flexors critical for fast first steps.", reps: "3 × 10 each leg" },
-      { step: "Quick feet burst", cue: "Rapid small steps on the spot for 10 seconds, then freeze in a split-step landing.", reps: "8 rounds" },
-    ],
-  },
-  "Mental strength": {
-    subtitle: "Box breathing & pressure visualisation",
-    steps: [
-      { step: "Box breathing", cue: "4 in, 4 hold, 4 out, 4 hold. Activates your parasympathetic system — the same technique used before high-pressure points.", reps: "5 rounds" },
-      { step: "Pressure point visualisation", cue: "Picture yourself at 6-6 tiebreak. Breathe, pick your target, execute. Feel calm, not anxious.", reps: "5 mental reps" },
-      { step: "Between-point routine", cue: "Practice your full routine — bounce, breathe, pick target. Repeat until it is muscle memory.", reps: "10 reps" },
-    ],
-  },
-};
-const DEFAULT_DRILL: DrillDef = {
-  subtitle: "Movement & mental prep — no gear needed",
-  steps: [
-    { step: "Lateral shuffle", cue: "Side-to-side with a split step. Core padel footwork.", reps: "5 × 20 seconds" },
-    { step: "Box breathing", cue: "4 in, 4 hold, 4 out, 4 hold. Sharpen focus before your next session.", reps: "5 rounds" },
-    { step: "Mental prep", cue: "Visualise your best performance. Recall the focus, the calm, the execution.", reps: "2 minutes" },
-  ],
-};
-
-function getTopNeedsWorkTag(): string | null {
-  try {
-    const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
-    const counts: Record<string, number> = {};
-    for (const r of reviews) for (const tag of (r.improved ?? [])) counts[tag] = (counts[tag] ?? 0) + 1;
-    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-    return sorted[0]?.[0] ?? null;
-  } catch { return null; }
-}
-
-const ITEM_COLORS: Record<string, string> = {
-  "Wake up & hydrate": "#0e7490", "Light breakfast": "#16a34a", "Breakfast": "#16a34a",
-  "Morning mobility": "#64748b", "Light mobility": "#64748b",
-  "Pre-game meal": "#16a34a", "Warmup & activation": "#d97706",
-  "Match": "#2653d4", "Post-match cool down": "#64748b",
-  "Recovery meal": "#16a34a", "Recovery walk": "#0e7490",
-  "Foam roll & stretch": "#64748b", "Protein-rich lunch": "#16a34a",
-  "Cold shower": "#0e7490", "Dinner": "#16a34a",
-  "Early wind down": "#64748b", "Balanced lunch": "#16a34a",
-  "Active recovery": "#0e7490", "Visualisation": "#64748b",
-  "Wind down": "#64748b",
-};
-
-type ScheduleItem = { time: string; title: string; subtitle?: string; color: string; isDrill?: boolean };
-
-function improveTips(states: PillarStates): string[] {
-  const tips: string[] = [];
-  if (states.nutrition.status === "low")        tips.push(states.nutrition.reason);
-  if (states.recovery.status === "low")         tips.push(states.recovery.reason);
-  if (states.wellbeing.status === "low")        tips.push(states.wellbeing.reason);
-  if (states.training.status === "not_logged")  tips.push("Log a session — even 30 min of drills counts");
-  if (states.nutrition.status === "not_logged") tips.push("Complete your night check-in to track nutrition");
-  if (tips.length === 0) tips.push("You're in great shape — keep the habits going");
-  return tips.slice(0, 3);
-}
-
-function getScheduleData(dayType: "match" | "recovery" | "training", matchTime: string | null, drillTag: string | null): { schedule: ScheduleItem[]; currentIdx: number } {
-  const mH = matchTime ? parseInt(matchTime.split(":")[0]) : 18;
-  const mM = matchTime ? parseInt(matchTime.split(":")[1]) : 30;
-  const mt = matchTime ?? "18:30";
-  const drill = DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL;
-  const drillTitle = drillTag ? `${drillTag} Focus` : "Skill Prep";
-  const rawSchedules: Record<string, Array<{ time: string; title: string; subtitle?: string; isDrill?: boolean }>> = {
-    match: [
-      { time: "07:00", title: "Wake up & hydrate",   subtitle: "500ml water before anything else" },
-      { time: "07:30", title: "Breakfast",            subtitle: "Oats, eggs, fruit" },
-      { time: "09:00", title: "Morning mobility",     subtitle: "Foam roll & light stretching" },
-      { time: addMins(mH, mM, -360), title: "Pre-game meal",       subtitle: "Chicken, rice, light salad" },
-      { time: addMins(mH, mM, -60),  title: "Warmup & activation", subtitle: "Dynamic drills, 30 min" },
-      { time: mt,                    title: "Match",                subtitle: "Game time" },
-      { time: addMins(mH, mM, 90),   title: "Post-match cool down", subtitle: "Stretch & mobility, 15 min" },
-      { time: addMins(mH, mM, 120),  title: "Recovery meal",       subtitle: "Protein + carbs within 30 min" },
-      { time: "22:30", title: "Wind down", subtitle: "No screens, light reading" },
-    ],
-    recovery: [
-      { time: "07:30", title: "Wake up & hydrate",  subtitle: "500ml water — rehydrate after yesterday" },
-      { time: "08:00", title: "Light breakfast",     subtitle: "Eggs, fruit, Greek yogurt" },
-      { time: "09:30", title: "Recovery walk",       subtitle: "20 min easy — flush out lactic acid" },
-      { time: "10:30", title: "Foam roll & stretch", subtitle: "Quads, hip flexors, calves, shoulders" },
-      { time: "13:00", title: "Protein-rich lunch",  subtitle: "Chicken, salmon or legumes + veg" },
-      { time: "15:30", title: "Cold shower",         subtitle: "2 min cold — reduces inflammation" },
-      { time: "19:00", title: "Dinner",              subtitle: "Anti-inflammatory focus — fish, greens" },
-      { time: "21:30", title: "Early wind down",     subtitle: "Sleep is your best recovery tool tonight" },
-    ],
-    training: [
-      { time: "07:00", title: "Wake up & hydrate", subtitle: "500ml water before coffee" },
-      { time: "07:30", title: "Breakfast",          subtitle: "High protein — eggs, yogurt, fruit" },
-      { time: "09:30", title: "Light mobility",     subtitle: "Hip flexors, thoracic spine, ankles" },
-      { time: "11:00", title: drillTitle,           subtitle: drill.subtitle, isDrill: true },
-      { time: "12:30", title: "Balanced lunch",     subtitle: "Carbs + protein + greens" },
-      { time: "15:00", title: "Active recovery",    subtitle: "Walk, swim or light cycling" },
-      { time: "19:00", title: "Dinner",             subtitle: "Focus on variety and micronutrients" },
-      { time: "21:00", title: "Visualisation",      subtitle: "5 min mental rehearsal of key patterns" },
-      { time: "22:30", title: "Wind down",          subtitle: "No screens, consistent bedtime" },
-    ],
-  };
-  const schedule: ScheduleItem[] = rawSchedules[dayType].map(item => ({
-    ...item,
-    color: item.isDrill ? "#2653d4" : (ITEM_COLORS[item.title] ?? "#8a9096"),
-  }));
-  const curMins = new Date().getHours() * 60 + new Date().getMinutes();
-  let idx = 0;
-  if (curMins >= toMins(schedule[schedule.length - 1].time)) {
-    idx = schedule.length - 1;
-  } else {
-    for (let i = 0; i < schedule.length - 1; i++) {
-      if (curMins >= toMins(schedule[i].time) && curMins < toMins(schedule[i + 1].time)) { idx = i; break; }
-    }
-  }
-  return { schedule, currentIdx: idx };
-}
-
-type DetailMeal     = { type: 'meal';     focus: string; options: [string, string, string] };
-type DetailExercise = { type: 'exercise'; focus: string; steps: { step: string; cue: string; reps: string }[] };
-type DetailInfo     = { type: 'info';     text: string };
-type ScheduleDetail = DetailMeal | DetailExercise | DetailInfo;
-
-const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
-  "Wake up & hydrate": { type: 'info', text: "Starting your day with 500 ml of water re-hydrates you after 7–8 hours without fluids. Do this before coffee — caffeine is a mild diuretic and amplifies morning dehydration." },
-  "Breakfast": { type: 'meal', focus: "High protein · slow-release carbs", options: [
-    "Scrambled eggs + oats with banana and almond butter",
-    "Greek yogurt bowl with granola, mixed berries and honey",
-    "Whole grain toast + 3-egg omelette with spinach and feta",
-  ]},
-  "Light breakfast": { type: 'meal', focus: "Light · easily digestible", options: [
-    "2 poached eggs on sourdough with sliced avocado",
-    "Greek yogurt with a small handful of granola and fruit",
-    "Banana with almond butter and a boiled egg",
-  ]},
-  "Morning mobility": { type: 'exercise', focus: "Hip flexors · thoracic spine · ankles", steps: [
-    { step: "Hip flexor lunge hold", cue: "Step into a deep lunge, front knee at 90°. Push hips gently forward and hold.", reps: "60 sec each side" },
-    { step: "Thoracic rotation", cue: "Sit back on heels, hands behind head. Rotate your upper back slowly left and right.", reps: "10 reps each direction" },
-    { step: "Ankle circles", cue: "Stand on one foot and draw slow controlled circles with your raised ankle.", reps: "10 each direction, each ankle" },
-  ]},
-  "Light mobility": { type: 'exercise', focus: "Joints · hip flexors · thoracic rotation", steps: [
-    { step: "Cat-cow", cue: "On hands and knees, alternate arching and rounding your back. Breathe with each rep.", reps: "10 slow reps" },
-    { step: "Hip flexor lunge hold", cue: "Low lunge — hold gently, no bouncing. Let the hip ease open.", reps: "45 sec each side" },
-    { step: "Thoracic opener", cue: "Arms crossed on chest, rotate torso slowly side to side keeping hips still.", reps: "8 reps each direction" },
-  ]},
-  "Pre-game meal": { type: 'meal', focus: "Easily digestible · energy without heaviness", options: [
-    "Grilled chicken breast + white rice + cucumber salad",
-    "Pasta with light tomato sauce and lean mince",
-    "Jacket potato + tuna + a small mixed salad",
-  ]},
-  "Warmup & activation": { type: 'exercise', focus: "Neuromuscular activation · movement prep", steps: [
-    { step: "Leg swings", cue: "Hold a wall for balance. Swing each leg forward and back, then laterally. Stay controlled.", reps: "15 reps each direction, each leg" },
-    { step: "Lateral shuffle", cue: "Stay low, weight on balls of feet. Shuffle 5 metres left and right. Explode off each plant.", reps: "3 sets of 10 metres" },
-    { step: "Shadow groundstrokes", cue: "20 forehand + 20 backhand shadow swings, building from 60% to 80% intensity. Focus on footwork first.", reps: "20 each side" },
-  ]},
-  "Match": { type: 'info', text: "Match time. Focus on early rhythm — the first two games set the tone. Communicate constantly with your partner. Stay hydrated between sets." },
-  "Post-match cool down": { type: 'exercise', focus: "Heart rate reduction · static stretching", steps: [
-    { step: "Standing quad stretch", cue: "Hold your ankle behind you against your glute. Keep the knee pointing straight down.", reps: "45 sec each leg" },
-    { step: "Seated hamstring stretch", cue: "Legs straight out in front, hinge from the hips and reach towards your feet.", reps: "45 sec" },
-    { step: "Shoulder cross-body stretch", cue: "Pull one arm across your chest. Keep your shoulder pressed down away from your ear.", reps: "30 sec each side" },
-  ]},
-  "Recovery meal": { type: 'meal', focus: "Protein + carbs · 30-min window", options: [
-    "Grilled salmon + sweet potato mash + wilted spinach",
-    "Chicken stir-fry with rice noodles and broccoli",
-    "Protein shake + banana + peanut butter on whole grain toast",
-  ]},
-  "Recovery walk": { type: 'info', text: "Walk at a pace where you can hold a full conversation. Low-intensity movement flushes metabolic waste from fatigued muscles without adding stress. 20 minutes is enough." },
-  "Foam roll & stretch": { type: 'exercise', focus: "Quads · IT band · hip flexors · calves", steps: [
-    { step: "IT band roll", cue: "Side-lying, roll slowly from hip to knee on the outer thigh. Pause and breathe on tight spots.", reps: "60–90 sec each leg" },
-    { step: "Quad roll", cue: "Face down, forearms supporting you. Roll from hip to knee on the front of the thigh.", reps: "60 sec each leg" },
-    { step: "Hip flexor lunge stretch", cue: "Low lunge, back knee down, slight backward lean. Feel the stretch in the front of the back hip.", reps: "60 sec each side" },
-  ]},
-  "Protein-rich lunch": { type: 'meal', focus: "30–40g protein · muscle repair", options: [
-    "Grilled chicken breast + quinoa + roasted courgette and peppers",
-    "Tuna nicoise salad with boiled eggs, green beans and olives",
-    "Salmon fillet + brown rice + steamed broccoli with olive oil",
-  ]},
-  "Cold shower": { type: 'info', text: "Two minutes of cold water constricts blood vessels, reduces inflammation, and blunts delayed onset muscle soreness. Start warm, finish cold for the last 90–120 seconds." },
-  "Dinner": { type: 'meal', focus: "Anti-inflammatory · high micronutrient", options: [
-    "Baked salmon + roasted sweet potato + wilted spinach with garlic",
-    "Grilled sea bass + brown rice + stir-fried kale and broccoli",
-    "Chicken thighs + roasted Mediterranean veg + a small portion of couscous",
-  ]},
-  "Early wind down": { type: 'info', text: "Dim lights by 9pm and avoid screens. Sleep is the highest-impact recovery tool available — aim for 8 hours tonight. A consistent bedtime rhythm compounds over weeks." },
-  "Balanced lunch": { type: 'meal', focus: "Variety · antioxidants · sustained energy", options: [
-    "Buddha bowl: brown rice, roasted veg, chickpeas and tahini dressing",
-    "Chicken wrap with avocado, spinach, cucumber and hummus",
-    "Lentil soup with whole grain bread and a large side salad",
-  ]},
-  "Active recovery": { type: 'info', text: "Walk, swim, or cycle at a pace where you can hold a full conversation. Keep heart rate below 130 bpm. Light aerobic activity maintains cardiovascular fitness without accumulating fatigue." },
-  "Visualisation": { type: 'exercise', focus: "Mental rehearsal · pattern reinforcement", steps: [
-    { step: "Replay a key moment", cue: "Pick one point from your last match that you lost. Replay it slowly in your mind — what would you change?", reps: "2 min" },
-    { step: "Strongest pattern", cue: "Visualise your best attacking sequence in full detail: footwork → position → shot → result. Make it vivid.", reps: "2 min" },
-    { step: "Next session intent", cue: "Walk through your next session mentally and set one specific technical focus before you begin.", reps: "1 min" },
-  ]},
-  "Wind down": { type: 'info', text: "Blue light from screens suppresses melatonin by up to 50%. In the 60 minutes before bed: dim lights, avoid screens, and keep the room cool for deeper sleep." },
-};
 
 const S: React.CSSProperties = { fontFamily: "Inter, sans-serif", fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 400, color: "#111", lineHeight: 1.6 };
 
@@ -439,8 +171,6 @@ export default function Home8() {
 
   const matchUploadRef = useRef<HTMLInputElement>(null);
   const actionUploadRef = useRef<HTMLInputElement>(null);
-  const schedScrollRef = useRef<HTMLDivElement>(null);
-  const schedCurrentRef = useRef<HTMLDivElement>(null);
   const [drumIdx, setDrumIdx] = useState(0);
   const drumDragRef = useRef<{ startY: number; startIdx: number } | null>(null);
   const [drumLiveOffset, setDrumLiveOffset] = useState(0);
@@ -771,85 +501,7 @@ export default function Home8() {
     }
   }, [checkinNudgeOpen]);
 
-  // Overscroll-to-navigate on the schedule scroll div.
-  // Tracks direction per-frame so we only intercept when the user is at the
-  // top AND actively moving downward — never interferes with normal scrolling.
   useEffect(() => {
-    const div = schedScrollRef.current;
-    if (!div) return;
-    let prevY = 0;
-    let prevT = 0;
-    let vel = 0; // px/ms, positive = finger moving downward
-
-    let reachedTop = false; // true only if scrollTop hit 0 DURING this gesture (not at start)
-    let startScrollTop = 0;
-
-    const onStart = (e: TouchEvent) => {
-      prevY = e.touches[0].clientY;
-      prevT = e.timeStamp;
-      vel = 0;
-      hitTopYRef.current = null;
-      startScrollTop = div.scrollTop;
-      reachedTop = false; // only mark true if we reach 0 during the gesture
-    };
-
-    const onMove = (e: TouchEvent) => {
-      if (doIdxRef.current < 1) return;
-      const y = e.touches[0].clientY;
-      const t = e.timeStamp;
-      const dt = t - prevT;
-      if (dt > 0) vel = (y - prevY) / dt;
-      const movingDown = y > prevY;
-      prevY = y;
-      prevT = t;
-      lastTouchYRef.current = y;
-
-      // Only mark reachedTop if we actually scrolled to 0 from a non-zero position
-      if (div.scrollTop === 0 && startScrollTop > 0) reachedTop = true;
-
-      if (div.scrollTop === 0 && movingDown) {
-        if (hitTopYRef.current === null) hitTopYRef.current = y;
-        e.preventDefault(); // block rubber-band / touchcancel
-      }
-    };
-
-    const trigger = (endY: number, isCancel = false) => {
-      const atTop = hitTopYRef.current !== null;
-      const dist  = atTop ? endY - hitTopYRef.current! : 0;
-      // primary path: intentional pull-down from scrollTop=0 (70px required to avoid accidents)
-      if (atTop && (dist > 70 || vel > 0.5))
-        setDoIdx(i => Math.max(i - 1, -1));
-      // upward-flick path: user scrolled up to top FROM within the list, then continued up
-      else if (reachedTop && div.scrollTop === 0 && vel < -0.3)
-        setDoIdx(i => Math.max(i - 1, -1));
-      // cancel path: iOS rubber-band stole gesture but intent was downward
-      else if (isCancel && div.scrollTop === 0 && vel > 0.4)
-        setDoIdx(i => Math.max(i - 1, -1));
-      hitTopYRef.current = null;
-      reachedTop = false;
-      vel = 0;
-      swipeDirRef.current = null;
-      touchStartYRef.current = endY;
-    };
-
-    const onEnd    = (e: TouchEvent) => { if (doIdxRef.current >= 1) trigger(e.changedTouches[0].clientY); };
-    const onCancel = ()              => { if (doIdxRef.current >= 1) trigger(lastTouchYRef.current, true); };
-
-    div.addEventListener('touchstart',  onStart,   { passive: true });
-    div.addEventListener('touchmove',   onMove,    { passive: false });
-    div.addEventListener('touchend',    onEnd,     { passive: true });
-    div.addEventListener('touchcancel', onCancel,  { passive: true });
-    return () => {
-      div.removeEventListener('touchstart',  onStart);
-      div.removeEventListener('touchmove',   onMove);
-      div.removeEventListener('touchend',    onEnd);
-      div.removeEventListener('touchcancel', onCancel);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (schedScrollRef.current) schedScrollRef.current.scrollTop = 0;
     if (doIdx === 1) setDrumIdx(currentIdx);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [doIdx]);
@@ -1079,12 +731,10 @@ export default function Home8() {
                             Next Match{upcomingCount > 1 && <span style={{ marginLeft: 6, fontWeight: 600, color: "#c8ccd0" }}>+{upcomingCount - 1} more</span>}
                           </p>
 
-                          {/* Line 2: Countdown pill — tap to open match info modal */}
-                          <button onClick={() => setMatchInfoOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-                            <div style={{ background: "#2653d4", borderRadius: 9, padding: "10px 24px", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-                              <span style={{ fontSize: "clamp(19px, 5vw, 23px)", fontWeight: 800, color: "rgba(255,255,255,0.9)", letterSpacing: "0.06em", textTransform: "uppercase" }}>{countdownLabel}</span>
-                              <span style={{ fontSize: "clamp(18px, 4.8vw, 22px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.01em" }}>{match.time}</span>
-                            </div>
+                          {/* Line 2: Countdown ball — tap to open match info modal */}
+                          <button onClick={() => setMatchInfoOpen(true)} style={{ width: "calc((100vw - 40px) * 0.5)", height: "calc((100vw - 40px) * 0.5)", borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, boxShadow: "0 4px 20px #2653d455", flexShrink: 0 }}>
+                            <span style={{ fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 800, color: "rgba(255,255,255,0.85)", letterSpacing: "0.08em", textTransform: "uppercase", lineHeight: 1 }}>{countdownLabel}</span>
+                            <span style={{ fontSize: "clamp(30px, 7.7vw, 37px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.02em" }}>{match.time}</span>
                           </button>
 
                           {/* Line 3: Readiness on one line */}
@@ -1100,11 +750,12 @@ export default function Home8() {
                         <p style={{ fontSize: "clamp(14px, 3.5vw, 17px)", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 -12px" }}>Next Match</p>
                         <button
                           onClick={() => { setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('pick'); setMatchModalOpen(true); }}
-                          style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                          style={{ width: "calc((100vw - 40px) * 0.25)", height: "calc((100vw - 40px) * 0.25)", borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 20px #2653d455", flexShrink: 0 }}
                         >
-                          <div style={{ background: "#eef2ff", borderRadius: 9, padding: "10px 24px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <span style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: "#2653d4" }}>+ Schedule a match</span>
-                          </div>
+                          <svg width="36%" height="36%" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                          </svg>
                         </button>
                         <button onClick={() => setReadinessSheetOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
                           <span style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 600, color: "#6b7480" }}>
@@ -1284,77 +935,28 @@ export default function Home8() {
                 );
               })()}
 
-              {/* Card 2: today's schedule */}
+              {/* Card 2: add to log */}
               {(() => {
+                const ballSize = "calc((100vw - 40px) * 0.25)";
                 return (
-                  <div key="sched" style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "white", display: "flex", flexDirection: "column", opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === 1 ? 2 : 1, height: "calc(100dvh - 4rem - 44px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none" }}>
-                    {/* Entire header is the drag zone — easy to swipe down back to hero */}
-                    <div
-                      style={{ flexShrink: 0, touchAction: "none", cursor: "grab", userSelect: "none" }}
-                      onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
-                      onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
+                  <div
+                    key="upload"
+                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", opacity: cardSnap === 'none' && doIdx === 1 ? 1 : 0, transition: "opacity 0s cubic-bezier(0.4,0,0.2,1)", zIndex: doIdx === 1 ? 2 : 1, height: "calc(100dvh - 4rem - 44px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", position: "relative" }}
+                    onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
+                    onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
+                  >
+                    {/* Drag hint pill */}
+                    <div style={{ position: "absolute", top: 14, left: "50%", transform: "translateX(-50%)", width: 36, height: 4, borderRadius: 2, background: "#d0d3d6" }} />
+                    {/* Blue ball */}
+                    <button
+                      onClick={() => { setSmartUploadError(null); setLogPickerOpen(true); }}
+                      style={{ width: ballSize, height: ballSize, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 20px #2653d455", flexShrink: 0 }}
                     >
-                      <div style={{ padding: "14px 0 10px", display: "flex", justifyContent: "center" }}>
-                        <div style={{ width: 36, height: 4, borderRadius: 2, background: "#d0d3d6" }} />
-                      </div>
-                      <div style={{ padding: "0 20px 16px", textAlign: "center" }}>
-                        <p style={{ fontSize: "clamp(18px, 4.6vw, 22px)", fontWeight: 700, color: "#1a1c1c", margin: "0 0 4px" }}>Today&apos;s Schedule</p>
-                        <span style={{
-                          fontSize: "clamp(12px, 3.1vw, 15px)", fontWeight: 700, padding: "3px 12px", borderRadius: 99,
-                          background: dayType === "match" ? "#2653d418" : dayType === "recovery" ? "#7c3aed18" : "#16a34a18",
-                          color: dayType === "match" ? "#2653d4" : dayType === "recovery" ? "#7c3aed" : "#16a34a",
-                        }}>
-                          {dayType === "match" ? "Match Day" : dayType === "recovery" ? "Recovery Day" : "Training Day"}
-                        </span>
-                      </div>
-                    </div>
-                    <div style={{ height: 1, background: "#dfe3e7", flexShrink: 0 }} />
-                    <div ref={schedScrollRef} style={{ flex: 1, overflowY: "auto", minHeight: 0, overscrollBehavior: "none" }}>
-                      <div style={{ padding: "12px 16px 28px" }}>
-                        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                          {schedule.map((s4, i) => {
-                            const isCur4 = i === currentIdx;
-                            const nowMins4 = now.getHours() * 60 + now.getMinutes();
-                            const isPast4 = !isCur4 && nowMins4 > toMins(s4.time);
-                            const isFuture4 = !isCur4 && !isPast4;
-                            const detail4 = SCHEDULE_DETAILS[s4.title];
-                            return (
-                              <div
-                                key={i}
-                                ref={isCur4 ? schedCurrentRef : undefined}
-                                style={{
-                                  display: "flex", alignItems: "center", gap: 12,
-                                  borderRadius: 14,
-                                  padding: isCur4 ? "14px 14px 14px 16px" : "9px 10px 9px 14px",
-                                  cursor: detail4 ? "pointer" : "default",
-                                  background: isCur4 ? `${s4.color}0e` : "#fff",
-                                  boxShadow: isCur4 ? `0 0 0 2px ${s4.color}, 0 2px 12px ${s4.color}22` : "0 0 0 1px #f0f0f0",
-                                  transition: "box-shadow 0.2s, padding 0.2s",
-                                }}
-                                onClick={() => detail4 && (() => { setSchedModalIdx(i); setDoModalOpen(true); })()}
-                              >
-                                <div style={{ width: isCur4 ? 40 : 32, height: isCur4 ? 40 : 32, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: isPast4 ? "#f0f0f0" : `${s4.color}22`, transition: "width 0.2s, height 0.2s" }}>
-                                  {isCur4
-                                    ? <div className="animate-breathe" style={{ width: 13, height: 13, borderRadius: "50%", background: s4.color, ["--glow" as string]: s4.color } as React.CSSProperties} />
-                                    : <div style={{ width: 10, height: 10, borderRadius: "50%", background: isPast4 ? "#d0d3d6" : s4.color }} />
-                                  }
-                                </div>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                  <p style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", margin: "0 0 2px", color: isPast4 ? "#c4c7c7" : s4.color }}>{s4.time}</p>
-                                  <p style={{ fontSize: isCur4 ? "clamp(17px, 4.4vw, 20px)" : "clamp(15px, 3.9vw, 18px)", fontWeight: isCur4 ? 700 : 600, margin: 0, lineHeight: 1.25, color: isPast4 ? "#a0a5aa" : "#1a1c1c" }}>{s4.title}</p>
-                                  {s4.subtitle && <p style={{ fontSize: "clamp(12px, 3.1vw, 14px)", margin: "2px 0 0", color: isPast4 ? "#c4c7c7" : "#6b7480" }}>{s4.subtitle}</p>}
-                                </div>
-                                {detail4 && (
-                                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={isCur4 ? s4.color : "#c4c7c7"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                                    <path d="M9 18l6-6-6-6"/>
-                                  </svg>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
+                      <svg width="36%" height="36%" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                      </svg>
+                    </button>
                   </div>
                 );
               })()}

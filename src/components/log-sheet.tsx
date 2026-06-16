@@ -7,6 +7,15 @@ import { saveCheckIn, computeScores, loadScoringData } from "@/lib/scoring";
 import { downloadSnapshot, importData } from "@/lib/storage";
 import { saveMatchReview, saveCheckInToDb, saveHydrationToDb, saveNutritionToDb, saveTrainingToDb } from "@/lib/db";
 
+function rangeToMl(range: string): number {
+  if (range === "<1L")    return 750;
+  if (range === "1–1.5L") return 1250;
+  if (range === "1.5–2L") return 1750;
+  if (range === "2–2.5L") return 2250;
+  if (range === "2.5–3L") return 2750;
+  return 3000;
+}
+
 const NAV_ITEMS = [
   { href: "/home4",     label: "Home",      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg> },
   { href: "/today4",    label: "Today",     icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg> },
@@ -252,7 +261,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
         const hydrationEntry = { ts, litres: hydrationLitres, urine: urineColour, quality: "ok", timing: [] as string[] };
         const prevHydration = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]");
         localStorage.setItem("padelop:hydration-logs", JSON.stringify([hydrationEntry, ...prevHydration].slice(0, 50)));
-        saveHydrationToDb(todayYMD, Math.round(Number(hydrationLitres) * 1000));
+        if (hydrationLitres) saveHydrationToDb(todayYMD, rangeToMl(hydrationLitres));
 
         const earlyBed = ["9pm","10pm","10:30pm"].includes(bedtime);
         const habitsEntry = {
@@ -454,6 +463,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
                       const todayIdx = prev.findIndex(e => e.ts.slice(0, 10) === today);
                       if (todayIdx >= 0) prev[todayIdx] = entry; else prev.unshift(entry);
                       localStorage.setItem("padelop:hydration-logs", JSON.stringify(prev.slice(0, 50)));
+                      saveHydrationToDb(today, nightQuickMl);
                       window.dispatchEvent(new Event("storage"));
                     } catch {}
                     nightAdvance();
@@ -573,6 +583,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
           const hydrationEntry = { ts: new Date().toISOString(), litres: hydrationLitres, urine: "", quality: "ok", timing: [] as string[] };
           const prevHydration = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]");
           localStorage.setItem("padelop:hydration-logs", JSON.stringify([hydrationEntry, ...prevHydration].slice(0, 50)));
+          saveHydrationToDb(todayYMD, rangeToMl(hydrationLitres));
         }
       } catch {}
       afterSave();
