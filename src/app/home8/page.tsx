@@ -912,13 +912,35 @@ export default function Home8() {
                 );
               })()}
 
-              {/* Card 2: placeholder */}
-              <div
-                key="card2"
-                style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "white", display: "flex", alignItems: "center", justifyContent: "center", zIndex: doIdx === 1 ? 2 : 1, height: "calc(100dvh - 4rem - 44px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none" }}
-                onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
-                onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
-              />
+              {/* Card 2: encouragement */}
+              {(() => {
+                const title =
+                  dayType === "match"    ? "Game on." :
+                  dayType === "recovery" ? "Well played." :
+                  "Keep going.";
+                const sub =
+                  dayType === "match"
+                    ? `Trust your game and enjoy every point.${match?.time ? ` Match at ${match.time}${match.club ? ` · ${match.club}` : ""}.` : ""}`
+                    : dayType === "recovery"
+                    ? "Rest is part of training. Let your body recover and come back stronger."
+                    : drillTag
+                    ? `Today focus on ${drillTag}. Small improvements compound into big gains.`
+                    : "Every session counts. Show up, put in the work, and trust the process.";
+                return (
+                  <div
+                    key="card2"
+                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#0f1623", display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "flex-end", padding: "0 32px calc(15% + 24px)", zIndex: doIdx === 1 ? 2 : 1, height: "calc(100dvh - 4rem - 44px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none" }}
+                    onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
+                    onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
+                  >
+                    <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#4169e1" }}>
+                      {dayType === "match" ? "Match Day" : dayType === "recovery" ? "Recovery Day" : "Training Day"}
+                    </p>
+                    <p style={{ margin: "0 0 16px", fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 800, color: "#fff", lineHeight: 1.1 }}>{title}</p>
+                    <p style={{ margin: 0, fontSize: "clamp(15px, 3.8vw, 18px)", color: "#94a3b8", lineHeight: 1.6 }}>{sub}</p>
+                  </div>
+                );
+              })()}
             </div>
           </div>
 
