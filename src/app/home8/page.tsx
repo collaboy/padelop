@@ -1553,20 +1553,7 @@ export default function Home8() {
 
         {/* FAB — tap = upload, long press = manual add modal */}
         <button
-          onPointerDown={() => {
-            fabWasLongPress.current = false;
-            fabLongPressTimer.current = setTimeout(() => {
-              fabWasLongPress.current = true;
-              setLogPickerOpen(true);
-            }, 400);
-          }}
-          onPointerUp={() => {
-            if (fabLongPressTimer.current) { clearTimeout(fabLongPressTimer.current); fabLongPressTimer.current = null; }
-            if (!fabWasLongPress.current) { setSmartUploadError(null); heroUploadRef.current?.click(); }
-          }}
-          onPointerCancel={() => {
-            if (fabLongPressTimer.current) { clearTimeout(fabLongPressTimer.current); fabLongPressTimer.current = null; }
-          }}
+          onClick={() => { setSmartUploadError(null); setLogPickerOpen(true); }}
           onContextMenu={e => e.preventDefault()}
           className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
           style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.25rem", width: 56, height: 56, borderRadius: 28, background: doIdx === -1 ? "#ffffff" : (doItem?.color ?? "#2653d4"), boxShadow: doIdx === -1 ? "0 4px 20px rgba(0,0,0,0.18)" : `0 4px 16px ${doItem?.color ?? "#2653d4"}55` }}
@@ -1699,31 +1686,7 @@ export default function Home8() {
                   }}
                 />
 
-                {/* Upload screenshot — big primary action */}
-                <button
-                  onClick={() => insertUploadRef.current?.click()}
-                  disabled={insertUploadLoading}
-                  style={{ width: "100%", background: "#f4f6ff", border: "2px dashed #c7d2fe", borderRadius: 18, padding: "24px 20px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, textAlign: "center", opacity: insertUploadLoading ? 0.6 : 1 }}
-                >
-                  {insertUploadLoading ? (
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                  ) : (
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                  )}
-                  <div>
-                    <p style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 700, color: "#2653d4", margin: 0 }}>{insertUploadLoading ? "Analysing…" : "Upload a screenshot"}</p>
-                    <p style={{ fontSize: "clamp(12px, 3.1vw, 14px)", fontWeight: 500, color: "#6b7480", margin: "3px 0 0" }}>Match booking · Food · Results · Gear</p>
-                  </div>
-                </button>
-
-                {/* Divider */}
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ flex: 1, height: 1, background: "#f0f0f0" }} />
-                  <span style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 600, color: "#b0b5ba", textTransform: "uppercase", letterSpacing: "0.06em" }}>or add manually</span>
-                  <div style={{ flex: 1, height: 1, background: "#f0f0f0" }} />
-                </div>
-
-                {/* Manual tile grid */}
+                {/* Tile grid */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                   {([
                     { label: "Match", sub: "Schedule", bg: "#eef2ff", color: "#2653d4", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>, action: () => { setSmartUploadResult({ category: "match_schedule", label: "Schedule a match", confidence: "high", data: { date: '', time: '', club: '', court: '', player_1: '', player_2: '', player_3: '', player_4: '' } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
