@@ -375,6 +375,7 @@ export default function Home8() {
   const [smartUploadResult, setSmartUploadResult] = useState<{ category: string; label: string; confidence: string; data: Record<string, string> } | null>(null);
   const [smartUploadError, setSmartUploadError] = useState<string | null>(null);
   const [manualPickerOpen, setManualPickerOpen] = useState(false);
+  const [fabMode, setFabMode] = useState<'screenshot' | 'manual'>('screenshot');
   const [insertUploadCategory, setInsertUploadCategory] = useState<string | null>(null);
   const [insertUploadLoading, setInsertUploadLoading] = useState(false);
   const [uploadCategoryPickerOpen, setUploadCategoryPickerOpen] = useState(false);
@@ -1085,27 +1086,21 @@ export default function Home8() {
                         </div>
                       );
                     })() : (
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-                        <p style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 10px" }}>Next Match</p>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", gap: 16 }}>
+                        <p style={{ fontSize: "clamp(14px, 3.5vw, 17px)", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 -12px" }}>Next Match</p>
                         <button
                           onClick={() => { setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('pick'); setMatchModalOpen(true); }}
-                          style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 600, color: "#2653d4", background: "#eef2ff", border: "none", cursor: "pointer", padding: "10px 24px", borderRadius: 999 }}
+                          style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
                         >
-                          + Schedule a match
+                          <div style={{ background: "#eef2ff", borderRadius: 9, padding: "10px 24px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <span style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: "#2653d4" }}>+ Schedule a match</span>
+                          </div>
                         </button>
-
-                        <div style={{ width: 48, height: 1, background: "#e8eaed", margin: "24px 0" }} />
-
-                        <p style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 16px" }}>Today&apos;s Checklist</p>
-                        <button onClick={() => setReadinessSheetOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-                          <span style={{ fontSize: "clamp(48px, 14vw, 64px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1, letterSpacing: "-0.03em" }}>
-                            {readinessDone}<span style={{ color: "#dde0e4", fontSize: "0.55em" }}>/4</span>
+                        <button onClick={() => setReadinessSheetOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                          <span style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 600, color: "#6b7480" }}>
+                            Readiness: <span style={{ color: "#1a1c1c", fontWeight: 800 }}>{readinessDone}</span><span style={{ color: "#c8cdd3", fontWeight: 600 }}>/4</span>
                           </span>
-                          {readinessLabel && (
-                            <span style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: readinessColor }}>{readinessLabel}</span>
-                          )}
                         </button>
-                        <p style={{ fontSize: "clamp(14px, 3.6vw, 17px)", color: "#8a9096", margin: "12px 0 0", textAlign: "center", lineHeight: 1.5 }}>{coachTip}</p>
                       </div>
                     )}
                   </div>
@@ -1658,9 +1653,18 @@ export default function Home8() {
           <div className="fixed inset-0 z-[200] flex items-start justify-center px-5" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogPickerSub(null); setExtrasOpen(false); }} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
             <div className="relative w-full max-w-sm bg-white rounded-[28px] shadow-2xl" style={{ overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "calc(100dvh - 8rem)" }} onClick={e => e.stopPropagation()}>
-              <div className="px-5 pt-6 pb-4 flex-shrink-0 flex items-center justify-between" style={{ borderBottom: "1px solid #f0f0f0" }}>
-                <p style={{ fontSize: "clamp(20px, 5.1vw, 25px)", fontWeight: 800, color: "#1a1c1c", margin: 0 }}>Add manually</p>
-                <button onClick={() => { setLogPickerOpen(false); setLogPickerSub(null); }} style={{ width: 28, height: 28, borderRadius: "50%", background: "#f4f4f6", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div className="px-5 pt-5 pb-4 flex-shrink-0 flex items-center gap-3" style={{ borderBottom: "1px solid #f0f0f0" }}>
+                <div style={{ flex: 1, display: "flex", gap: 4, background: "#f4f4f6", borderRadius: 12, padding: 4 }}>
+                  <button
+                    onClick={() => setFabMode('screenshot')}
+                    style={{ flex: 1, padding: "9px 0", borderRadius: 9, border: "none", cursor: "pointer", fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 700, background: fabMode === 'screenshot' ? "#fff" : "transparent", color: fabMode === 'screenshot' ? "#1a1c1c" : "#8a9096", boxShadow: fabMode === 'screenshot' ? "0 1px 4px rgba(0,0,0,0.08)" : "none", transition: "all 0.15s" }}
+                  >+ Screenshot</button>
+                  <button
+                    onClick={() => setFabMode('manual')}
+                    style={{ flex: 1, padding: "9px 0", borderRadius: 9, border: "none", cursor: "pointer", fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 700, background: fabMode === 'manual' ? "#fff" : "transparent", color: fabMode === 'manual' ? "#1a1c1c" : "#8a9096", boxShadow: fabMode === 'manual' ? "0 1px 4px rgba(0,0,0,0.08)" : "none", transition: "all 0.15s" }}
+                  >+ Manually</button>
+                </div>
+                <button onClick={() => { setLogPickerOpen(false); setLogPickerSub(null); }} style={{ width: 30, height: 30, borderRadius: "50%", background: "#f4f4f6", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
               </div>
@@ -1690,6 +1694,8 @@ export default function Home8() {
                         setSmartUploadError(result.message || "Could not read the image.");
                       } else {
                         setSmartUploadResult(prev => prev ? { ...prev, label: result.label, data: result.data } : { ...result, category: insertUploadCategory! });
+                        setLogPickerSub("upload-confirm");
+                        setLogPickerOpen(false);
                       }
                     } catch {
                       setSmartUploadError("Upload failed. Please try again.");
@@ -1703,10 +1709,10 @@ export default function Home8() {
                 {/* Tile grid — always visible */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                   {([
-                    { label: "Match", sub: "Schedule", bg: "#eef2ff", color: "#2653d4", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>, action: () => { setLogPickerOpen(false); setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('manual'); setMatchModalOpen(true); } },
-                    { label: "Food", sub: "Meal or snack", bg: "#f0fdf4", color: "#16a34a", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>, action: () => { setSmartUploadResult({ category: "meal", label: "Add a meal", confidence: "high", data: { description: "", meal_type: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
-                    { label: "Gear", sub: "Racket, shoes…", bg: "#f5f0ff", color: "#7c3aed", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, action: () => { setSmartUploadResult({ category: "gear", label: "Add gear", confidence: "high", data: { type: "", brand: "", name: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
-                    { label: "Results", sub: "Match result", bg: "#fff7ed", color: "#ea580c", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, action: () => { setSmartUploadResult({ category: "match_result", label: "Add match result", confidence: "high", data: { result: "", score: "", opponent_names: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
+                    { label: "Match", sub: "Schedule", bg: "#eef2ff", color: "#2653d4", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>, action: () => { if (fabMode === 'screenshot') { setInsertUploadCategory("match_schedule"); insertUploadRef.current?.click(); } else { setLogPickerOpen(false); setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('manual'); setMatchModalOpen(true); } } },
+                    { label: "Food", sub: "Meal or snack", bg: "#f0fdf4", color: "#16a34a", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>, action: () => { if (fabMode === 'screenshot') { setInsertUploadCategory("meal"); insertUploadRef.current?.click(); } else { setSmartUploadResult({ category: "meal", label: "Add a meal", confidence: "high", data: { description: "", meal_type: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } } },
+                    { label: "Gear", sub: "Racket, shoes…", bg: "#f5f0ff", color: "#7c3aed", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, action: () => { if (fabMode === 'screenshot') { setInsertUploadCategory("gear"); insertUploadRef.current?.click(); } else { setSmartUploadResult({ category: "gear", label: "Add gear", confidence: "high", data: { type: "", brand: "", name: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } } },
+                    { label: "Results", sub: "Match result", bg: "#fff7ed", color: "#ea580c", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, action: () => { if (fabMode === 'screenshot') { setInsertUploadCategory("match_result"); insertUploadRef.current?.click(); } else { setSmartUploadResult({ category: "match_result", label: "Add match result", confidence: "high", data: { result: "", score: "", opponent_names: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } } },
                     { label: "Note", sub: "Thoughts or ideas", bg: "#f8f9fa", color: "#6b7480", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>, action: () => { setLogPickerSub("matchreview"); } },
                   ]).map(({ label, sub, bg, color, icon, action }, i, arr) => (
                     <button key={label} onClick={action} style={{ background: bg, border: "none", borderRadius: 14, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 16, textAlign: "left", gridColumn: arr.length % 2 !== 0 && i === arr.length - 1 ? "1 / -1" : undefined }}>
