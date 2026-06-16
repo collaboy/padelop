@@ -1226,15 +1226,6 @@ const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null)
         )
       )}
 
-      {/* FAB */}
-      <button onClick={() => setLogSheetOpen(true)}
-        className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
-        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.25rem", width: 56, height: 56, borderRadius: "50%", background: "var(--c-forest)", boxShadow: "0 4px 16px #49664055" }}
-        aria-label="Log activity">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round">
-          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-      </button>
 
       <LogSheet open={logSheetOpen} onClose={() => { setLogSheetOpen(false); setLogTab(null); }} defaultSub={logTab ?? undefined} />
 

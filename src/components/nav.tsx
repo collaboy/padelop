@@ -12,7 +12,6 @@ export default function Nav() {
   const [notifications, setNotifications] = useState<Notif[]>([]);
   const [profileAvatar, setProfileAvatar] = useState<string>("");
   const [profileName, setProfileName] = useState<string>("");
-
   useEffect(() => {
     function refreshProfile() {
       try {
@@ -58,6 +57,7 @@ export default function Nav() {
           </button>
         </div>
       </header>
+
 
       {/* Notifications modal */}
       {notifOpen && (
@@ -120,36 +120,34 @@ export default function Nav() {
         </div>
       )}
 
-      {/* Hamburger menu */}
+      {/* Sidebar */}
       {menuOpen && (
-        <div className="fixed inset-0 z-[80] flex items-end" onClick={() => setMenuOpen(false)}>
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+        <div className="fixed inset-0 z-[80]" onClick={() => setMenuOpen(false)}>
+          <style>{`@keyframes sidebarIn{from{transform:translateX(100%)}to{transform:translateX(0)}}`}</style>
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
           <div
-            className="relative w-full bg-[#1c1f23] rounded-t-[28px] overflow-hidden"
-            style={{ fontFamily: "var(--font-hanken)", paddingBottom: "env(safe-area-inset-bottom)" }}
+            className="absolute top-0 right-0 h-full bg-white flex flex-col"
+            style={{ width: 280, animation: "sidebarIn 0.25s cubic-bezier(0.22,1,0.36,1)", paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}
             onClick={e => e.stopPropagation()}
           >
-            <div className="flex justify-center pt-3 pb-1">
-              <div className="w-10 h-1 rounded-full bg-[#3a3f45]" />
-            </div>
             {/* Profile header */}
-            <div className="flex items-center gap-3 px-6 pt-4 pb-5">
-              <div className="w-11 h-11 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0" style={{ background: "#2a2f35" }}>
+            <div className="flex items-center gap-3 px-6 pt-8 pb-6">
+              <div className="w-11 h-11 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0" style={{ background: "#f4f4f6" }}>
                 {profileAvatar ? (
                   <img src={profileAvatar} alt="" className="w-full h-full object-cover" />
                 ) : profileName ? (
-                  <span style={{ fontSize: 18, fontWeight: 700, color: "#fff" }}>{profileName.trim()[0].toUpperCase()}</span>
+                  <span style={{ fontSize: 18, fontWeight: 700, color: "#1a1c1c" }}>{profileName.trim()[0].toUpperCase()}</span>
                 ) : (
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.4" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="9" r="3"/><path d="M6 20c0-3 2.7-5 6-5s6 2 6 5"/></svg>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" strokeWidth="1.4" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="9" r="3"/><path d="M6 20c0-3 2.7-5 6-5s6 2 6 5"/></svg>
                 )}
               </div>
               <div>
-                <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#fff", lineHeight: 1.2 }}>{profileName || "Player"}</p>
-                <p style={{ margin: 0, fontSize: 13, color: "#6b7480" }}>padla</p>
+                <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1a1c1c", lineHeight: 1.2 }}>{profileName || "Player"}</p>
+                <p style={{ margin: 0, fontSize: 13, color: "#9aa0a6" }}>padla</p>
               </div>
             </div>
-            <div style={{ height: 1, background: "#272b30", margin: "0 0 8px" }} />
-            {/* Menu links */}
+            <div style={{ height: 1, background: "#f0f0f0", margin: "0 24px 8px" }} />
+            {/* Links */}
             {[
               { label: "My Profile", href: "/profile", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg> },
               { label: "Today's Schedule", href: "/schedule", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
@@ -160,15 +158,13 @@ export default function Nav() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-4 px-6 py-4 active:bg-[#272b30] transition-colors"
+                className="flex items-center gap-4 px-6 py-4 active:bg-[#f4f4f6] transition-colors"
                 style={{ textDecoration: "none" }}
               >
                 <span style={{ color: "#9aa0a6" }}>{item.icon}</span>
-                <span style={{ fontSize: 17, fontWeight: 600, color: "#fff" }}>{item.label}</span>
-                <svg className="ml-auto" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3a3f45" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+                <span style={{ fontSize: 16, fontWeight: 600, color: "#1a1c1c" }}>{item.label}</span>
               </Link>
             ))}
-            <div style={{ height: 16 }} />
           </div>
         </div>
       )}

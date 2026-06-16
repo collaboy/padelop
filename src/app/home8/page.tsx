@@ -1145,36 +1145,16 @@ export default function Home8() {
 
 
         {/* First-visit tooltip */}
-        {fabTooltipVisible && (
-          <div className="fixed z-50 pointer-events-none" style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom) + 68px)", right: "1.25rem", animation: "fabTipIn 0.25s ease" }}>
-            <style>{`@keyframes fabTipIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}`}</style>
-            <div style={{ background: "#fff", borderRadius: 14, padding: "12px 16px", boxShadow: "0 4px 24px rgba(0,0,0,0.13)", border: "1px solid #eaecef", width: 210 }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: "#fff", background: "#2653d4", borderRadius: 5, padding: "2px 7px", letterSpacing: "0.02em" }}>TAP</span>
-                  <span style={{ fontSize: 13, fontWeight: 500, color: "#1a1c1c" }}>upload match, meal or gear</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: "#fff", background: "#6b7480", borderRadius: 5, padding: "2px 7px", letterSpacing: "0.02em" }}>HOLD</span>
-                  <span style={{ fontSize: 13, fontWeight: 500, color: "#1a1c1c" }}>add manually</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
-        {/* FAB — tap = upload, long press = manual add modal */}
+        {/* FAB */}
         <button
           onClick={() => { setSmartUploadError(null); setLogPickerOpen(true); }}
           onContextMenu={e => e.preventDefault()}
           className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
-          style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.25rem", width: 56, height: 56, borderRadius: 28, background: doIdx === -1 ? "#ffffff" : (doItem?.color ?? "#2653d4"), boxShadow: doIdx === -1 ? "0 4px 20px rgba(0,0,0,0.18)" : `0 4px 16px ${doItem?.color ?? "#2653d4"}55` }}
+          style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.25rem", width: 56, height: 56, borderRadius: 28, background: "#2653d4", boxShadow: "0 4px 16px #2653d455" }}
           aria-label="Add"
         >
-          {smartUploadLoading
-            ? <svg className="animate-spin" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={doIdx === -1 ? "#1a1c1c" : "#fff"} strokeWidth="2.5" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-            : <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={doIdx === -1 ? "#1a1c1c" : "#fff"} strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          }
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
 
         <LogSheet open={logSheetOpen} onClose={() => { setLogSheetOpen(false); setLogTab(null); setLogWizard(false); }} defaultSub={logTab} startWizard={logWizard} />
@@ -1286,9 +1266,10 @@ export default function Home8() {
 
         {/* Log picker */}
         {logPickerOpen && (
-          <div className="fixed inset-0 z-[200] flex items-start justify-center px-5" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogPickerSub(null); setExtrasOpen(false); setFabExpanded(false); }} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
+          <div className="fixed inset-0 z-[200] flex items-end" onClick={() => { setLogPickerOpen(false); setLogPickerExpanded(null); setLogPickerSub(null); setExtrasOpen(false); setFabExpanded(false); }} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
+            <style>{`@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-            <div className="relative w-full max-w-sm bg-white rounded-[28px] shadow-2xl" style={{ overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "calc(100dvh - 8rem)" }} onClick={e => e.stopPropagation()}>
+            <div className="relative w-full bg-white rounded-t-[28px] shadow-2xl" style={{ animation: "sheetUp 0.3s cubic-bezier(0.22,1,0.36,1)", overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "85dvh", paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
               <div className="px-5 pt-5 pb-4 flex-shrink-0 flex items-center justify-between" style={{ borderBottom: "1px solid #f0f0f0" }}>
                 <p style={{ fontSize: "clamp(17px, 4.4vw, 20px)", fontWeight: 800, color: "#1a1c1c", margin: 0 }}>Add to log</p>
                 <button onClick={() => { setLogPickerOpen(false); setLogPickerSub(null); setFabExpanded(false); }} style={{ width: 30, height: 30, borderRadius: "50%", background: "#f4f4f6", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -1298,7 +1279,7 @@ export default function Home8() {
               <div style={{ overflowY: "auto", minHeight: 0 }}>
               <div style={{ padding: "12px 16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
 
-                {/* Upload screenshot — big primary action */}
+                {/* Upload — big primary action */}
                 <button
                   onClick={() => insertUploadRef.current?.click()}
                   disabled={insertUploadLoading}
@@ -1307,53 +1288,46 @@ export default function Home8() {
                   {insertUploadLoading ? (
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
                   ) : (
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
                   )}
                   <div>
-                    <p style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 700, color: "#2653d4", margin: 0 }}>{insertUploadLoading ? "Analysing…" : "Upload a screenshot"}</p>
+                    <p style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 700, color: "#2653d4", margin: 0 }}>{insertUploadLoading ? "Analysing…" : "Upload"}</p>
                     <p style={{ fontSize: "clamp(12px, 3.1vw, 14px)", fontWeight: 500, color: "#6b7480", margin: "3px 0 0" }}>Match booking · Food · Results · Gear</p>
                   </div>
                 </button>
 
-                {/* Divider */}
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ flex: 1, height: 1, background: "#f0f0f0" }} />
-                  <span style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 600, color: "#b0b5ba", textTransform: "uppercase", letterSpacing: "0.06em" }}>or add manually</span>
-                  <div style={{ flex: 1, height: 1, background: "#f0f0f0" }} />
-                </div>
-
-                {/* Tile grid */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                  {([
-                    { label: "Match", sub: "Schedule", bg: "#eef2ff", color: "#2653d4", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>, action: () => { setSmartUploadResult({ category: "match_schedule", label: "Schedule a match", confidence: "high", data: { date: '', time: '', club: '', court: '', player_1: '', player_2: '', player_3: '', player_4: '' } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
-                    { label: "Food", sub: "Meal or snack", bg: "#f0fdf4", color: "#16a34a", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>, action: () => { setSmartUploadResult({ category: "meal", label: "Add a meal", confidence: "high", data: { description: "", meal_type: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
-                    { label: "Gear", sub: "Racket, shoes…", bg: "#f5f0ff", color: "#7c3aed", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, action: () => { setSmartUploadResult({ category: "gear", label: "Add gear", confidence: "high", data: { type: "", brand: "", name: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
-                    { label: "Results", sub: "Match result", bg: "#fff7ed", color: "#ea580c", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, action: () => { setSmartUploadResult({ category: "match_result", label: "Add match result", confidence: "high", data: { result: "", score: "", opponent_names: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
-                  ]).map(({ label, sub, bg, color, icon, action }) => (
-                    <button key={label} onClick={action} style={{ background: bg, border: "none", borderRadius: 14, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 16, textAlign: "left" }}>
-                      {icon}
-                      <div>
-                        <p style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{label}</p>
-                        <p style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 600, color, margin: "2px 0 0" }}>{sub}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-
-                {/* Chevron expand toggle */}
+                {/* Add manually — chevron toggle */}
                 <button
                   onClick={() => setFabExpanded(v => !v)}
-                  style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: "100%", padding: "4px 0 2px", gap: 6 }}
+                  style={{ width: "100%", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, padding: "6px 4px" }}
                 >
-                  <span style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 600, color: "#b0b5ba", letterSpacing: "0.04em" }}>{fabExpanded ? "less" : "more"}</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: fabExpanded ? "rotate(180deg)" : "rotate(0deg)" }}>
+                  <div style={{ flex: 1, height: 1, background: "#f0f0f0" }} />
+                  <span style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 600, color: "#b0b5ba", textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>Add manually</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: fabExpanded ? "rotate(180deg)" : "rotate(0deg)", flexShrink: 0 }}>
                     <polyline points="6 9 12 15 18 9"/>
                   </svg>
+                  <div style={{ flex: 1, height: 1, background: "#f0f0f0" }} />
                 </button>
 
-                {/* Expanded section */}
-                <div style={{ overflow: "hidden", maxHeight: fabExpanded ? 200 : 0, transition: "max-height 0.25s ease", marginTop: fabExpanded ? 0 : -10 }}>
-                  <div style={{ paddingTop: 4 }}>
+                {/* Tile grid + extras — hidden until expanded */}
+                <div style={{ overflow: "hidden", maxHeight: fabExpanded ? 600 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingTop: 2 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                      {([
+                        { label: "Match", sub: "Schedule", bg: "#eef2ff", color: "#2653d4", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>, action: () => { setSmartUploadResult({ category: "match_schedule", label: "Schedule a match", confidence: "high", data: { date: '', time: '', club: '', court: '', player_1: '', player_2: '', player_3: '', player_4: '' } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
+                        { label: "Food", sub: "Meal or snack", bg: "#f0fdf4", color: "#16a34a", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>, action: () => { setSmartUploadResult({ category: "meal", label: "Add a meal", confidence: "high", data: { description: "", meal_type: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
+                        { label: "Gear", sub: "Racket, shoes…", bg: "#f5f0ff", color: "#7c3aed", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, action: () => { setSmartUploadResult({ category: "gear", label: "Add gear", confidence: "high", data: { type: "", brand: "", name: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
+                        { label: "Results", sub: "Match result", bg: "#fff7ed", color: "#ea580c", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, action: () => { setSmartUploadResult({ category: "match_result", label: "Add match result", confidence: "high", data: { result: "", score: "", opponent_names: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
+                      ]).map(({ label, sub, bg, color, icon, action }) => (
+                        <button key={label} onClick={action} style={{ background: bg, border: "none", borderRadius: 14, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 16, textAlign: "left" }}>
+                          {icon}
+                          <div>
+                            <p style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{label}</p>
+                            <p style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 600, color, margin: "2px 0 0" }}>{sub}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
                     <button
                       onClick={() => { setLogPickerSub("matchreview"); }}
                       style={{ width: "100%", background: "#f8f9fa", border: "none", borderRadius: 14, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, textAlign: "left" }}
