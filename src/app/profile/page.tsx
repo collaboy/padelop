@@ -1104,60 +1104,6 @@ export default function ProfilePage() {
       {activeTab === 'matches' && (
         <div style={{ padding: "16px 16px 0", display: "flex", flexDirection: "column", gap: 10 }}>
 
-          {/* Calendar */}
-          <div style={{ margin: "0 4px" }}>
-            <div className="bg-white r-lg border border-c-line overflow-hidden" style={card}>
-              <div style={{ padding: "16px 14px 20px" }}>
-                <p className="t-caption" style={{ fontWeight: 600, color: "var(--c-text-sub)", marginBottom: "10px", textTransform: "capitalize" }}>{monthLabel}</p>
-                <div style={{ display: "grid", gridTemplateColumns: "12px repeat(7, 1fr)", marginBottom: 2 }}>
-                  <div />
-                  {["M","T","W","T","F","S","S"].map((d, i) => (
-                    <div key={i} style={{ textAlign: "center", fontSize: 10, fontWeight: 700, color: "#9aab96", paddingBottom: "4px" }}>{d}</div>
-                  ))}
-                </div>
-                {rows.map((rowCells, rowIdx) => (
-                  <div key={rowIdx} style={{ display: "grid", gridTemplateColumns: "12px repeat(7, 1fr)", alignItems: "center" }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", alignSelf: "center", marginBottom: 5 }}>
-                      {rowIdx === currentWeekRow && <svg width="6" height="9" viewBox="0 0 6 9"><polygon points="0,0 6,4.5 0,9" fill="var(--c-blue)"/></svg>}
-                    </div>
-                    {rowCells.map((day, colIdx) => {
-                      if (day === null) return <div key={colIdx} style={{ height: 34 }} />;
-                      const ymd = `${yr}-${String(mo + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-                      const isToday2   = ymd === todayYMD;
-                      const isMatch    = matchDates.has(ymd);
-                      const isRecovery = !isMatch && recoveryDates.has(ymd);
-                      const isPast     = ymd < todayYMD;
-                      const dotColor   = isMatch ? "#22c55e" : isRecovery ? "#f97316" : "var(--c-blue)";
-                      const hasDot     = (isMatch || isRecovery) && !isPast;
-                      return (
-                        <div key={colIdx} style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingBottom: 2 }}>
-                          <div style={{ width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: isToday2 ? "var(--c-blue)" : "transparent", opacity: isPast ? 0.35 : 1 }}>
-                            <span className="t-caption" style={{ fontWeight: isToday2 ? 700 : 400, color: isToday2 ? "#fff" : "var(--c-text)" }}>{day}</span>
-                          </div>
-                          <div style={{ height: 4, width: 4, borderRadius: "50%", background: hasDot ? dotColor : "transparent", marginTop: 1 }} />
-                        </div>
-                      );
-                    })}
-                  </div>
-                ))}
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "12px repeat(7, 1fr)", borderTop: "1px solid #f4f4f6", marginTop: "4px", paddingTop: "12px", paddingBottom: "8px" }}>
-                <div />
-                <div style={{ gridColumn: "2 / span 7", display: "flex", gap: 14 }}>
-                  {[
-                    { color: "#22c55e", label: "Match", border: false },
-                    { color: "#f97316", label: "Recovery", border: false },
-                    { color: "transparent", label: "Rest", border: true },
-                  ].map(({ color, label, border }) => (
-                    <div key={label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <div style={{ width: 7, height: 7, borderRadius: "50%", background: color, flexShrink: 0, border: border ? "1.5px solid #c0c4c8" : "none" }} />
-                      <span className="t-tag" style={{ fontWeight: 600, color: "var(--c-hint)" }}>{label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Add button */}
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
