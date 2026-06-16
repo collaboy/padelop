@@ -7,6 +7,7 @@ import Nav from "@/components/nav";
 import BottomNav from "@/components/bottom-nav";
 import SwipeNav from "@/components/swipe-nav";
 import WeekPlanModal from "@/components/week-plan-modal";
+import Fab from "@/components/fab";
 
 const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const hanken = Hanken_Grotesk({ variable: "--font-hanken", subsets: ["latin"], weight: ["400", "500", "600", "700"] });
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </main>
         </SwipeNav>
         <BottomNav />
+        <Fab />
         <WeekPlanModal />
         <Analytics />
       </body>
