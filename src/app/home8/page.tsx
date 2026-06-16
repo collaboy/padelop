@@ -2109,11 +2109,17 @@ export default function Home8() {
                           <div className="flex flex-col gap-3">
                             <div className="flex flex-col gap-1">
                               <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
-                              <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#f8f9fa" }} />
+                              <div style={{ position: "relative" }}>
+                                <div className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#f8f9fa", color: matchForm.date ? "#1a1c1c" : "#b0b5ba", minHeight: 44, display: "flex", alignItems: "center" }}>{matchForm.date ? new Date(matchForm.date + "T12:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Pick a date"}</div>
+                                <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
+                              </div>
                             </div>
                             <div className="flex flex-col gap-1">
                               <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
-                              <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#f8f9fa" }} />
+                              <div style={{ position: "relative" }}>
+                                <div className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#f8f9fa", color: matchForm.time ? "#1a1c1c" : "#b0b5ba", minHeight: 44, display: "flex", alignItems: "center" }}>{matchForm.time || "Pick a time"}</div>
+                                <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
+                              </div>
                             </div>
                           </div>
                           <div className="flex flex-col gap-1">
@@ -2196,11 +2202,17 @@ export default function Home8() {
                             <div className="flex flex-col gap-3">
                               <div className="flex flex-col gap-1">
                                 <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
-                                <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#f8f9fa" }} />
+                                <div style={{ position: "relative" }}>
+                                  <div className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#f8f9fa", color: matchForm.date ? "#1a1c1c" : "#b0b5ba", minHeight: 44, display: "flex", alignItems: "center" }}>{matchForm.date ? new Date(matchForm.date + "T12:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Pick a date"}</div>
+                                  <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
+                                </div>
                               </div>
                               <div className="flex flex-col gap-1">
                                 <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
-                                <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#f8f9fa" }} />
+                                <div style={{ position: "relative" }}>
+                                  <div className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#f8f9fa", color: matchForm.time ? "#1a1c1c" : "#b0b5ba", minHeight: 44, display: "flex", alignItems: "center" }}>{matchForm.time || "Pick a time"}</div>
+                                  <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
+                                </div>
                               </div>
                             </div>
                             <div className="flex flex-col gap-1">
@@ -2269,11 +2281,17 @@ export default function Home8() {
                     <div className="flex flex-col gap-3">
                       <div className="flex flex-col gap-1">
                         <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
-                        <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#fff" }} />
+                        <div style={{ position: "relative" }}>
+                          <div className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#fff", color: matchForm.date ? "#1a1c1c" : "#b0b5ba", minHeight: 44, display: "flex", alignItems: "center" }}>{matchForm.date ? new Date(matchForm.date + "T12:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Pick a date"}</div>
+                          <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
+                        </div>
                       </div>
                       <div className="flex flex-col gap-1">
                         <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
-                        <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#fff" }} />
+                        <div style={{ position: "relative" }}>
+                          <div className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#fff", color: matchForm.time ? "#1a1c1c" : "#b0b5ba", minHeight: 44, display: "flex", alignItems: "center" }}>{matchForm.time || "Pick a time"}</div>
+                          <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
+                        </div>
                       </div>
                     </div>
                     <div className="flex flex-col gap-1">
@@ -2356,11 +2374,17 @@ export default function Home8() {
                     <div className="flex flex-col gap-3">
                       <div className="flex flex-col gap-1">
                         <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
-                        <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#fff" }} />
+                        <div style={{ position: "relative" }}>
+                          <div className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#fff", color: matchForm.date ? "#1a1c1c" : "#b0b5ba", minHeight: 44, display: "flex", alignItems: "center" }}>{matchForm.date ? new Date(matchForm.date + "T12:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Pick a date"}</div>
+                          <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
+                        </div>
                       </div>
                       <div className="flex flex-col gap-1">
                         <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
-                        <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#fff" }} />
+                        <div style={{ position: "relative" }}>
+                          <div className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#fff", color: matchForm.time ? "#1a1c1c" : "#b0b5ba", minHeight: 44, display: "flex", alignItems: "center" }}>{matchForm.time || "Pick a time"}</div>
+                          <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
+                        </div>
                       </div>
                     </div>
                     <div className="flex flex-col gap-1">
@@ -2563,15 +2587,17 @@ export default function Home8() {
                   <div className="flex flex-col gap-3">
                     <div className="flex flex-col gap-1">
                       <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
-                      <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))}
-                        className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none"
-                        style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#f9f9f9" }} />
+                      <div style={{ position: "relative" }}>
+                        <div className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#f9f9f9", color: matchForm.date ? "#1a1c1c" : "#b0b5ba", minHeight: 44, display: "flex", alignItems: "center" }}>{matchForm.date ? new Date(matchForm.date + "T12:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Pick a date"}</div>
+                        <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
+                      </div>
                     </div>
                     <div className="flex flex-col gap-1">
                       <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
-                      <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))}
-                        className="w-full px-3 py-2.5 rounded-xl border text-[16px] font-medium text-[#1a1c1c] outline-none"
-                        style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#f9f9f9" }} />
+                      <div style={{ position: "relative" }}>
+                        <div className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#f9f9f9", color: matchForm.time ? "#1a1c1c" : "#b0b5ba", minHeight: 44, display: "flex", alignItems: "center" }}>{matchForm.time || "Pick a time"}</div>
+                        <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
+                      </div>
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
