@@ -1087,13 +1087,19 @@ export default function Home8() {
                       );
                     })() : (
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", gap: 16 }}>
-                        <p style={{ fontSize: "clamp(14px, 3.5vw, 17px)", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 -12px" }}>Next Match</p>
+                        <p style={{ fontSize: "clamp(14px, 3.5vw, 17px)", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#b0b8c1", margin: 0 }}>Next Match</p>
                         <button
                           onClick={() => { setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('pick'); setMatchModalOpen(true); }}
-                          style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                          style={{ background: "none", border: "none", cursor: "pointer", padding: 0, width: "100%" }}
                         >
-                          <div style={{ background: "#eef2ff", borderRadius: 9, padding: "10px 24px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <span style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: "#2653d4" }}>+ Schedule a match</span>
+                          <div style={{ background: "#eef2ff", borderRadius: 16, padding: "16px 18px", display: "flex", alignItems: "center", gap: 14, textAlign: "left", width: "100%" }}>
+                            <div style={{ background: "#dbeafe", borderRadius: 12, width: 44, height: 44, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
+                            </div>
+                            <div>
+                              <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Schedule a match</p>
+                              <p style={{ fontSize: "clamp(12px, 3.1vw, 14px)", fontWeight: 600, color: "#2653d4", margin: "3px 0 0" }}>Upload or add manually</p>
+                            </div>
                           </div>
                         </button>
                         <button onClick={() => setReadinessSheetOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
