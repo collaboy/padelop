@@ -116,11 +116,12 @@ export async function hydrateFromSupabase() {
       if (!existingML || existingML.date !== today) {
         localStorage.setItem("padelop:morning-log", JSON.stringify({ date: today }));
       }
-      // Mark night check-in as done so nudge doesn't re-trigger
-      const habitsExisting: { date: string }[] = JSON.parse(localStorage.getItem("padelop:habits") || "[]");
-      if (!habitsExisting.some(h => h.date === today)) {
-        localStorage.setItem("padelop:habits", JSON.stringify([{ date: today }, ...habitsExisting].slice(0, 50)));
-      }
+    }
+
+    // ── Habits (full history from all check-ins) ──────────────────────────
+    if (checkIns.length) {
+      const habitDates = checkIns.map(c => ({ date: c.date as string }));
+      localStorage.setItem("padelop:habits", JSON.stringify(habitDates));
     }
 
     // ── Hydration ────────────────────────────────────────────────────────
@@ -191,13 +192,14 @@ export async function hydrateFromSupabase() {
     // ── Gear ─────────────────────────────────────────────────────────────
     const gear = gearRes.data ?? [];
     const racket = gear.find(g => g.type === "racket");
-    const existing = JSON.parse(localStorage.getItem("padelop:gear") || "{}");
-    const merged = {
-      ...existing,
-      ...(racket ? { racketName: racket.name ?? "" } : {}),
-    };
-    if (gear.length) {
-      localStorage.setItem("padelop:gear", JSON.stringify(merged));
+    if (racket) {
+      const existing = JSON.parse(localStorage.getItem("padelop:gear") || "{}");
+      localStorage.setItem("padelop:gear", JSON.stringify({
+        ...existing,
+        ...(racket.name        ? { racketName:  racket.name }        : {}),
+        ...(racket.racket_type ? { racketType:  racket.racket_type } : {}),
+        ...(racket.racket_since? { racketSince: racket.racket_since }: {}),
+      }));
     }
 
     // ── Notes ─────────────────────────────────────────────────────────────

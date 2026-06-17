@@ -162,6 +162,8 @@ export async function saveGearToDb(item: {
   type: string;
   name?: string;
   photo_url?: string;
+  racket_type?: string;
+  racket_since?: string;
 }) {
   try {
     const supabase = createClient();
@@ -169,10 +171,12 @@ export async function saveGearToDb(item: {
     if (!user) return;
 
     await supabase.from("gear").upsert({
-      user_id:   user.id,
-      type:      item.type,
-      name:      item.name ?? null,
-      photo_url: item.photo_url ?? null,
+      user_id:      user.id,
+      type:         item.type,
+      name:         item.name ?? null,
+      photo_url:    item.photo_url ?? null,
+      racket_type:  item.racket_type ?? null,
+      racket_since: item.racket_since ?? null,
     }, { onConflict: "user_id,type" });
   } catch {}
 }

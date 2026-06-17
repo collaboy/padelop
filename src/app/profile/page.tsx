@@ -1168,7 +1168,7 @@ export default function ProfilePage() {
                     <input type="month" value={racketSince} onChange={e => setRacketSince(e.target.value)} className="t-body"
                       style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--r-sm)", border: "2px solid #e2e2e2", fontWeight: 500, color: "var(--c-text)", outline: "none", background: "var(--c-bg-input)" }} />
                   </div>
-                  <button onClick={() => { localStorage.setItem("padelop:gear", JSON.stringify({ racketName, racketType, racketImage, racketSince })); saveGearToDb({ type: "racket", name: racketName ?? undefined }); setGearEditOpen(false); }}
+                  <button onClick={() => { localStorage.setItem("padelop:gear", JSON.stringify({ racketName, racketType, racketImage, racketSince })); saveGearToDb({ type: "racket", name: racketName ?? undefined, racket_type: racketType ?? undefined, racket_since: racketSince ?? undefined }); setGearEditOpen(false); }}
                     className="t-ui" style={{ padding: "12px", borderRadius: "var(--r-sm)", background: "var(--c-blue)", border: "none", cursor: "pointer", color: "#fff" }}>
                     Save
                   </button>
