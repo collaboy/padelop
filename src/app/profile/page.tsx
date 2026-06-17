@@ -598,7 +598,8 @@ export default function ProfilePage() {
     saveScoreSnapshot(s);
     const hist = loadScoreHistory();
     setHistory(hist);
-    const dateset = new Set(hist.map((h: ScoreSnapshot) => h.date));
+    const habits: { date: string }[] = JSON.parse(localStorage.getItem("padelop:habits") || "[]");
+    const dateset = new Set(habits.map(h => h.date));
     const cur = new Date();
     if (!dateset.has(cur.toISOString().slice(0, 10))) cur.setDate(cur.getDate() - 1);
     let streakCount = 0;
