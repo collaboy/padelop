@@ -37,9 +37,6 @@ type TrainingEntry = {
   duration: string; intensity: string;
 };
 
-type ActivityItem =
-  | { kind: "match"; ts: string; data: ReviewEntry }
-  | { kind: "training"; ts: string; data: TrainingEntry };
 
 // ── Insights config ───────────────────────────────────────────────────────
 
@@ -58,6 +55,22 @@ const STATUS_META: Record<PillarStatus, { label: string; bg: string; text: strin
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────
+
+function Sparkline({ data, color }: { data: number[]; color: string }) {
+  if (data.length < 2) return null;
+  const W = 56, H = 24;
+  const min = Math.min(...data), max = Math.max(...data);
+  const range = Math.max(max - min, 3);
+  const x = (i: number) => (i / (data.length - 1)) * W;
+  const y = (v: number) => H - ((v - min) / range) * (H - 4) - 2;
+  const d = data.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  return (
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ flexShrink: 0 }}>
+      <path d={d} fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
+      <circle cx={x(data.length - 1)} cy={y(data[data.length - 1])} r="2.5" fill={color}/>
+    </svg>
+  );
+}
 
 function initials(name: string) {
   if (!name) return "?";
@@ -278,10 +291,21 @@ function TrainingCard({ entry }: { entry: TrainingEntry }) {
 
 function improveTips(states: PillarStates): string[] {
   const tips: string[] = [];
-  if (states.nutrition.status === "low")        tips.push(states.nutrition.reason);
-  if (states.recovery.status === "low")         tips.push(states.recovery.reason);
-  if (states.wellbeing.status === "low")        tips.push(states.wellbeing.reason);
-  if (states.training.status === "not_logged")  tips.push("Log a session — even 30 min of drills counts");
+  if (states.recovery.status === "low") {
+    const r = states.recovery.reason;
+    tips.push(r.includes("sleep") ? "Poor sleep last night — try a short nap or wind down early tonight" : "High soreness — prioritise stretching and take it easy today");
+  }
+  if (states.nutrition.status === "low") {
+    const r = states.nutrition.reason;
+    if (r.includes("dark") || r.includes("fluids")) tips.push("Hydration low — aim for 2+ litres before end of day");
+    else if (r.includes("Protein")) tips.push("Protein low — add eggs, chicken, or a shake to your next meal");
+    else tips.push("Nutrition off today — aim for a balanced meal with veg and protein");
+  }
+  if (states.wellbeing.status === "low") {
+    const r = states.wellbeing.reason;
+    tips.push(r.includes("stress") ? "Feeling stressed — try 5 minutes of box breathing or a short walk" : "Low motivation — keep it simple, even a short session counts");
+  }
+  if (states.training.status === "not_logged")  tips.push("No session logged — even 30 min of drills counts");
   if (states.nutrition.status === "not_logged") tips.push("Complete your night check-in to track nutrition");
   if (tips.length === 0) tips.push("You're in great shape — keep the habits going");
   return tips.slice(0, 3);
@@ -354,13 +378,92 @@ function MatchFormWidget({ form, onChange, onSave, onDelete, saveLabel, saveColo
   );
 }
 
+// ── PrevDaysList ──────────────────────────────────────────────────────────
+
+function PrevDaysList({ days, schedDone, deduped, getScheduleData, loadScoringData, getTopNeedsWorkTag, pctColor }: {
+  days: string[];
+  schedDone: Record<string, string[]>;
+  deduped: import("@/lib/scoring").ScoreSnapshot[];
+  getScheduleData: typeof import("@/lib/schedule-data").getScheduleData;
+  loadScoringData: typeof import("@/lib/scoring").loadScoringData;
+  getTopNeedsWorkTag: typeof import("@/lib/schedule-data").getTopNeedsWorkTag;
+  pctColor: (p: number | null) => string;
+}) {
+  const [expanded, setExpanded] = useState<string | null>(null);
+
+  const rows = days.map(dateStr => {
+    const snap = deduped.find(s => s.date === dateStr);
+    const doneTitles = schedDone[dateStr] ?? [];
+    let schedTotal = 0;
+    let schedDoneCount = 0;
+    try {
+      const d = loadScoringData();
+      const tag = getTopNeedsWorkTag();
+      const items = getScheduleData("training", null, tag).schedule;
+      schedTotal = items.length;
+      schedDoneCount = items.filter(s => doneTitles.includes(s.title)).length;
+    } catch {}
+    const schedPct = schedTotal ? Math.round((schedDoneCount / schedTotal) * 100) : null;
+    let meals: MealEntry[] = [];
+    try { meals = (JSON.parse(localStorage.getItem("padelop:meal-log") || "[]") as MealEntry[]).filter(m => m.date === dateStr); } catch {}
+    const hasData = doneTitles.length > 0 || snap || meals.length > 0;
+    if (!hasData) return null;
+    const label = new Date(dateStr + "T12:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+    const isOpen = expanded === dateStr;
+    return (
+      <div key={dateStr}>
+        <button onClick={() => setExpanded(isOpen ? null : dateStr)}
+          style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, background: "none", border: "none", cursor: "pointer", padding: "10px 0", textAlign: "left" }}>
+          <div style={{ flex: 1 }}>
+            <span className="t-body-sm" style={{ fontWeight: 600, color: "var(--c-text)" }}>{label}</span>
+          </div>
+          {schedPct !== null && (
+            <span style={{ fontSize: 11, fontWeight: 700, color: pctColor(schedPct), background: `${pctColor(schedPct)}18`, padding: "2px 8px", borderRadius: 99 }}>{schedPct}%</span>
+          )}
+          {snap && <span style={{ fontSize: 11, fontWeight: 600, color: "var(--c-hint)" }}>Score {snap.overall}</span>}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--c-hint)" strokeWidth="2.5" strokeLinecap="round" style={{ transition: "transform 0.2s", transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", flexShrink: 0 }}><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        {isOpen && (
+          <div style={{ paddingBottom: 10, display: "flex", flexDirection: "column", gap: 8 }}>
+            {schedTotal > 0 && (
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                  <span className="t-caption" style={{ color: "var(--c-text-sub)" }}>Schedule</span>
+                  <span className="t-caption" style={{ fontWeight: 700, color: pctColor(schedPct) }}>{schedDoneCount}/{schedTotal} tasks</span>
+                </div>
+                <div style={{ height: 5, borderRadius: 99, background: "#f0f0f0", overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${schedPct ?? 0}%`, borderRadius: 99, background: pctColor(schedPct) }} />
+                </div>
+              </div>
+            )}
+            {meals.length > 0 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                {meals.map(m => (
+                  <div key={m.id} style={{ display: "flex", gap: 8 }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "#b0b8c1", flexShrink: 0 }}>{m.time}</span>
+                    <span className="t-caption" style={{ color: "var(--c-text-sub)", lineHeight: 1.4 }}>{m.description}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        <div style={{ height: 1, background: "#f4f4f6" }} />
+      </div>
+    );
+  }).filter(Boolean);
+
+  if (!rows.length) return null;
+  return <div>{rows}</div>;
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
   const router = useRouter();
 
   // Tab
-  const [activeTab, setActiveTab] = useState<'me' | 'today' | 'matches' | 'stats'>('today');
+  const [activeTab, setActiveTab] = useState<'me' | 'today' | 'matches' | 'stats'>('me');
 
   // Profile
   const [profile, setProfile] = useState<Profile>(EMPTY);
@@ -369,12 +472,12 @@ export default function ProfilePage() {
   // Matches
   const [logSheetOpen, setLogSheetOpen]       = useState(false);
   const [logTab, setLogTab]                   = useState<"checkin" | null>(null);
-  const [checkinDone, setCheckinDone]         = useState(false);
+  const [checkinDone, setCheckinDone]         = useState(() => {
+    try { const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null"); return ml?.date === new Date().toISOString().slice(0, 10); } catch { return false; }
+  });
   const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null);
   const [reviews, setReviews]                 = useState<ReviewEntry[]>([]);
   const [trainingSessions, setTrainingSessions] = useState<TrainingEntry[]>([]);
-  const [archiveOpen, setArchiveOpen]         = useState(false);
-  const [tagCloudOpen, setTagCloudOpen]       = useState(false);
   const [partnerCount, setPartnerCount]       = useState(0);
   const [tournamentCount, setTournamentCount] = useState(0);
   const [journeyStart, setJourneyStart]       = useState<string | null>(null);
@@ -409,6 +512,20 @@ export default function ProfilePage() {
   const [drillTag, setDrillTag] = useState<string | null>(null);
   const [schedMatchTime, setSchedMatchTime] = useState<string | null>(null);
   const [schedModalIdx, setSchedModalIdx] = useState<number | null>(null);
+  const [prevDaysOpen, setPrevDaysOpen] = useState(false);
+  const todayKey = new Date().toISOString().slice(0, 10);
+  const [schedDone, setSchedDone] = useState<Record<string, string[]>>(() => {
+    try { return JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}"); } catch { return {}; }
+  });
+  function toggleSchedDone(date: string, title: string) {
+    setSchedDone(prev => {
+      const titles = prev[date] ?? [];
+      const next = titles.includes(title) ? titles.filter(t => t !== title) : [...titles, title];
+      const updated = { ...prev, [date]: next };
+      localStorage.setItem("padelop:schedule-done", JSON.stringify(updated));
+      return updated;
+    });
+  }
 
   function loadAll() {
     // Profile
@@ -727,17 +844,19 @@ export default function ProfilePage() {
     history.reduce((acc, s) => { acc[s.date] = s; return acc; }, {} as Record<string, ScoreSnapshot>)
   ).sort((a, b) => a.date.localeCompare(b.date));
 
-  const wins      = reviews.filter(r => r.result === "win").length;
-  const losses    = reviews.filter(r => r.result === "loss").length;
-  const winRate   = wins + losses > 0 ? Math.round((wins / (wins + losses)) * 100) : null;
-  const topStrength = topTag(reviews.flatMap(r => r.wellDone ?? []));
-  const topWeakness = topTag(reviews.flatMap(r => r.improved ?? []));
-  const tips = improveTips(pillarStates);
+  const last14 = deduped.slice(-14);
+  const dow = (new Date().getDay() + 6) % 7;
+  const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - dow);
+  const lastWeekStart = new Date(weekStart); lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+  const weekStartStr = weekStart.toISOString().slice(0, 10);
+  const lastWeekStartStr = lastWeekStart.toISOString().slice(0, 10);
+  const thisWeekSnaps = deduped.filter(s => s.date >= weekStartStr);
+  const lastWeekSnaps = deduped.filter(s => s.date >= lastWeekStartStr && s.date < weekStartStr);
+  const avgSnap = (arr: ScoreSnapshot[]) => arr.length ? Math.round(arr.reduce((s, x) => s + x.overall, 0) / arr.length) : null;
+  const thisWeekAvg = avgSnap(thisWeekSnaps);
+  const lastWeekAvg = avgSnap(lastWeekSnaps);
 
-  const feed: ActivityItem[] = [
-    ...reviews.map(r => ({ kind: "match" as const, ts: r.ts, data: r })),
-    ...trainingSessions.map(t => ({ kind: "training" as const, ts: t.ts, data: t })),
-  ].sort((a, b) => b.ts.localeCompare(a.ts));
+  const tips = improveTips(pillarStates);
 
   // Calendar
   const now = new Date();
@@ -886,8 +1005,24 @@ export default function ProfilePage() {
         </div>
       </div>
 
+      {/* ── Daily Check-in + Focus Today (header area) ───────────────────── */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "16px 20px 4px" }}>
+        {!checkinDone && (
+          <button onClick={() => { setLogTab("checkin"); setLogSheetOpen(true); }}
+            style={{ width: "100%", background: "#f5f0ff", border: "none", borderRadius: "var(--r-lg)", padding: "18px 20px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, textAlign: "left" }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            <div style={{ flex: 1 }}>
+              <p className="t-body" style={{ fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Daily Check-in</p>
+              <p className="t-body-sm" style={{ color: "#7c3aed", margin: "2px 0 0" }}>Log how you feel today</p>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0b8c1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        )}
+
+      </div>
+
       {/* ── Tab bar ──────────────────────────────────────────────────────── */}
-      <div style={{ position: "sticky", top: "4rem", zIndex: 10, background: "#fff", borderBottom: "1px solid #f0f0f0", marginTop: 20 }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#fff", borderBottom: "1px solid #f0f0f0", marginTop: 20 }}>
         <div style={{ display: "flex", padding: "0 20px" }}>
           {TABS.map(tab => (
             <button
@@ -908,6 +1043,51 @@ export default function ProfilePage() {
       {activeTab === 'me' && (
         <div className="px-5 pt-5 flex flex-col gap-5">
 
+          {/* Streak */}
+          {(() => {
+            const TIERS = [
+              { min: 0,  label: "Beginner",    color: "#9aa0a6", grad: ["#f4f4f6", "#eaecee"] },
+              { min: 5,  label: "Starter",     color: "#2653d4", grad: ["#eef2ff", "#dbe4ff"] },
+              { min: 15, label: "Grinder",     color: "#059669", grad: ["#ecfdf5", "#d1fae5"] },
+              { min: 30, label: "Dedicated",   color: "#d97706", grad: ["#fffbeb", "#fde68a"] },
+              { min: 60, label: "Elite",       color: "#7c3aed", grad: ["#faf5ff", "#ede9fe"] },
+              { min: 100,label: "Legend",      color: "#0ea5e9", grad: ["#f0f9ff", "#bae6fd"] },
+            ];
+            const tier = [...TIERS].reverse().find(t => streak >= t.min) ?? TIERS[0];
+            const nextTier = TIERS[TIERS.indexOf(tier) + 1];
+            const message =
+              streak === 0   ? "Log your first check-in to start your streak." :
+              streak === 1   ? "Day one. Come back tomorrow to keep it going." :
+              !nextTier      ? "Legend status. You're in a league of your own." :
+              `${nextTier.min - streak} day${nextTier.min - streak === 1 ? "" : "s"} to ${nextTier.label}.`;
+            return (
+              <div style={{ borderRadius: "var(--r-lg)", overflow: "hidden", boxShadow: "var(--shadow-card)" }}>
+                {/* Hero */}
+                <div style={{ background: `linear-gradient(145deg, ${tier.grad[0]}, ${tier.grad[1]})`, padding: "32px 24px 24px", textAlign: "center" }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: tier.color }}>{tier.label}</span>
+                  <p style={{ margin: "8px 0 4px", fontSize: "clamp(56px, 14vw, 72px)", fontWeight: 800, color: tier.color, lineHeight: 1 }}>{streak}</p>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: tier.color, opacity: 0.7 }}>day streak</p>
+                  <p style={{ margin: "14px 0 0", fontSize: 14, fontWeight: 500, color: "#4b5563", lineHeight: 1.5 }}>{message}</p>
+                </div>
+                {/* Tier ladder */}
+                <div style={{ background: "#fff", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 4 }}>
+                  {TIERS.map((t, i) => {
+                    const active = t.label === tier.label;
+                    const unlocked = streak >= t.min;
+                    return (
+                      <div key={t.label} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                        <div style={{ width: "100%", height: 3, borderRadius: 99, background: unlocked ? t.color : "#e5e7eb", opacity: unlocked ? 1 : 0.4 }} />
+                        <span style={{ fontSize: 9, fontWeight: active ? 800 : 600, color: active ? t.color : "#9aa0a6", textAlign: "center", lineHeight: 1.2, letterSpacing: "0.04em" }}>{t.label}</span>
+                        <span style={{ fontSize: 9, color: "#b0b8c1", fontWeight: 500 }}>{t.min === 0 ? "0" : `${t.min}d`}</span>
+                        {i < TIERS.length - 1 && <div style={{ position: "absolute" }} />}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Padel Journey */}
           <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
             <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Padel Journey</p>
@@ -927,22 +1107,6 @@ export default function ProfilePage() {
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* Streak */}
-          <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)", border: "1px solid var(--c-line)", display: "flex", alignItems: "center", gap: 16 }}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: 56 }}>
-              <p className="t-stat" style={{ color: "var(--c-text)", margin: 0, lineHeight: 1 }}>{streak}</p>
-              <p className="t-label" style={{ color: "var(--c-label)", margin: "4px 0 0" }}>Streak</p>
-            </div>
-            <div style={{ width: 1, height: 40, background: "var(--c-line)", flexShrink: 0 }} />
-            <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: 0, lineHeight: 1.5 }}>
-              {streak === 0 && "Log today to start your streak."}
-              {streak === 1 && "Good start — log again tomorrow to build momentum."}
-              {streak >= 2 && streak < 7 && "Good momentum — don't break the chain."}
-              {streak >= 7 && streak < 14 && "Incredible consistency — keep it up!"}
-              {streak >= 14 && "Elite habit. You're in the top tier of consistency."}
-            </p>
           </div>
 
           {/* My Gear */}
@@ -1035,39 +1199,23 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* Daily Check-in */}
-          <button onClick={() => { setLogTab("checkin"); setLogSheetOpen(true); }}
-            style={{ width: "calc(100% - 40px)", margin: "0 20px", background: "#f5f0ff", border: "none", borderRadius: "var(--r-lg)", padding: "18px 20px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, textAlign: "left" }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-            <div style={{ flex: 1 }}>
-              <p className="t-body" style={{ fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Daily Check-in</p>
-              <p className="t-body-sm" style={{ color: checkinDone ? "#16a34a" : "#7c3aed", margin: "2px 0 0" }}>{checkinDone ? "Done today" : "Log how you feel today"}</p>
-            </div>
-            {checkinDone
-              ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-              : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0b8c1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-            }
-          </button>
-
-          {/* Focus Today */}
-          <div style={{ background: "#fff", margin: "0 20px", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
-            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Focus Today</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-              {tips.map(tip => (
-                <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--c-blue)", flexShrink: 0, marginTop: 5 }}/>
-                  <span className="t-body-sm" style={{ fontWeight: 500, color: "var(--c-text)", lineHeight: 1.4 }}>{tip}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* Today's Schedule */}
           <div style={{ padding: "0 20px" }}>
-            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 12px" }}>Today&apos;s Schedule</p>
+            <p style={{ margin: "0 0 12px", fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>Today&apos;s Schedule</p>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
               <span style={{ fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 99, background: `${dayColor}18`, color: dayColor }}>{dayLabel}</span>
               <span style={{ fontSize: 13, color: "#b0b8c1", fontWeight: 500 }}>{now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</span>
+            </div>
+            <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)", marginBottom: 12 }}>
+              <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Focus Today</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {tips.map(tip => (
+                  <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
+                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--c-blue)", flexShrink: 0, marginTop: 5 }}/>
+                    <span className="t-body-sm" style={{ fontWeight: 500, color: "var(--c-text)", lineHeight: 1.4 }}>{tip}</span>
+                  </div>
+                ))}
+              </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {schedule.map((s, i) => {
@@ -1076,19 +1224,21 @@ export default function ProfilePage() {
                 const toMins = (t: string) => t.split(":").reduce((a: number, b: string, j: number) => a + (j === 0 ? Number(b) * 60 : Number(b)), 0);
                 const isPast = !isCur && nowMins > toMins(s.time);
                 const hasDetail = !!SCHEDULE_DETAILS[s.title] || s.isDrill;
+                const isDone = (schedDone[todayKey] ?? []).includes(s.title);
                 return (
-                  <div key={i} onClick={() => hasDetail && setSchedModalIdx(i)}
-                    style={{ display: "flex", alignItems: "center", gap: 12, borderRadius: 14, padding: isCur ? "14px 14px 14px 16px" : "10px 10px 10px 14px", cursor: hasDetail ? "pointer" : "default", background: isCur ? `${s.color}0e` : "#fff", boxShadow: isCur ? `0 0 0 2px ${s.color}, 0 2px 12px ${s.color}22` : "0 0 0 1px #f0f0f0" }}
-                  >
-                    <div style={{ width: isCur ? 40 : 32, height: isCur ? 40 : 32, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: isPast ? "#f0f0f0" : `${s.color}22` }}>
-                      <div style={{ width: isCur ? 13 : 10, height: isCur ? 13 : 10, borderRadius: "50%", background: isPast ? "#d0d3d6" : s.color }} />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", margin: "0 0 2px", color: isPast ? "#c4c7c7" : s.color }}>{s.time}</p>
-                      <p style={{ fontSize: isCur ? "clamp(17px,4.4vw,20px)" : "clamp(15px,3.9vw,18px)", fontWeight: isCur ? 700 : 600, margin: 0, lineHeight: 1.25, color: isPast ? "#a0a5aa" : "#1a1c1c" }}>{s.title}</p>
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, borderRadius: 14, padding: isCur ? "14px 14px 14px 16px" : "10px 10px 10px 14px", background: isDone ? "#f0fdf4" : isCur ? `${s.color}0e` : "#fff", boxShadow: isDone ? "0 0 0 1.5px #bbf7d0" : isCur ? `0 0 0 2px ${s.color}, 0 2px 12px ${s.color}22` : "0 0 0 1px #f0f0f0" }}>
+                    <button onClick={() => toggleSchedDone(todayKey, s.title)} style={{ width: isCur ? 40 : 32, height: isCur ? 40 : 32, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: isDone ? "#16a34a" : isPast ? "#f0f0f0" : `${s.color}22`, border: "none", cursor: "pointer", padding: 0 }}>
+                      {isDone
+                        ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                        : <div style={{ width: isCur ? 13 : 10, height: isCur ? 13 : 10, borderRadius: "50%", background: isPast ? "#d0d3d6" : s.color }} />
+                      }
+                    </button>
+                    <div onClick={() => hasDetail && setSchedModalIdx(i)} style={{ flex: 1, minWidth: 0, cursor: hasDetail ? "pointer" : "default" }}>
+                      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", margin: "0 0 2px", color: isDone ? "#16a34a" : isPast ? "#c4c7c7" : s.color }}>{s.time}</p>
+                      <p style={{ fontSize: isCur ? "clamp(17px,4.4vw,20px)" : "clamp(15px,3.9vw,18px)", fontWeight: isCur ? 700 : 600, margin: 0, lineHeight: 1.25, color: isDone ? "#16a34a" : isPast ? "#a0a5aa" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none", opacity: isDone ? 0.7 : 1 }}>{s.title}</p>
                       {s.subtitle && <p style={{ fontSize: "clamp(12px,3.1vw,14px)", margin: "2px 0 0", color: isPast ? "#c4c7c7" : "#6b7480" }}>{s.subtitle}</p>}
                     </div>
-                    {hasDetail && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={isCur ? s.color : "#c4c7c7"} strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>}
+                    {hasDetail && !isDone && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={isCur ? s.color : "#c4c7c7"} strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>}
                   </div>
                 );
               })}
@@ -1214,6 +1364,292 @@ export default function ProfilePage() {
       {activeTab === 'stats' && (
         <div className="px-5 pt-5 flex flex-col gap-5">
 
+          {/* Daily Summaries */}
+          {(() => {
+            const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().slice(0, 10);
+
+            function buildSummary(dateStr: string) {
+              // Schedule completion
+              let schedItems: ReturnType<typeof getScheduleData>["schedule"] = [];
+              try {
+                const d = loadScoringData();
+                let m: { date: string; time?: string } | null = null;
+                try { m = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch {}
+                const dt = m?.date === dateStr ? "match" : (() => {
+                  try {
+                    const allR: { ts: string }[] = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+                    const prev = new Date(dateStr); prev.setDate(prev.getDate() - 1);
+                    return allR.some(r => r.ts.slice(0, 10) === prev.toISOString().slice(0, 10)) ? "recovery" : "training";
+                  } catch { return "training"; }
+                })() as "match" | "recovery" | "training";
+                const tag = getTopNeedsWorkTag();
+                schedItems = getScheduleData(dt, m?.date === dateStr ? (m.time ?? null) : null, tag).schedule;
+              } catch {}
+              const doneTitles = schedDone[dateStr] ?? [];
+              const schedTotal = schedItems.length;
+              const schedDoneCount = schedItems.filter(s => doneTitles.includes(s.title)).length;
+              const schedPct = schedTotal ? Math.round((schedDoneCount / schedTotal) * 100) : null;
+
+              // Meals
+              let meals: MealEntry[] = [];
+              try { meals = (JSON.parse(localStorage.getItem("padelop:meal-log") || "[]") as MealEntry[]).filter(m => m.date === dateStr); } catch {}
+
+              // Score snapshot for the day
+              const snap = deduped.find(s => s.date === dateStr);
+
+              // Match review for the day
+              let matchReview: ReviewEntry | null = null;
+              try { matchReview = (JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]") as ReviewEntry[]).find(r => r.ts.slice(0, 10) === dateStr) ?? null; } catch {}
+
+              return { schedTotal, schedDoneCount, schedPct, meals, snap, matchReview, doneTitles };
+            }
+
+            const ySummary = buildSummary(yesterdayStr);
+            const hasYData = ySummary.schedTotal > 0 || ySummary.meals.length > 0 || ySummary.snap;
+            if (!hasYData) return null;
+
+            const pctColor = (p: number | null) => p === null ? "var(--c-hint)" : p >= 75 ? "var(--c-green)" : p >= 40 ? "var(--c-blue)" : "var(--c-red)";
+
+            // Previous days (last 8 days excluding yesterday, only days with any data)
+            const prevDays: string[] = [];
+            for (let i = 2; i <= 9; i++) {
+              const d = new Date(); d.setDate(d.getDate() - i);
+              prevDays.push(d.toISOString().slice(0, 10));
+            }
+
+            return (
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {/* Yesterday's summary */}
+                <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                    <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>Yesterday's Summary</p>
+                    <span className="t-caption" style={{ color: "var(--c-hint)" }}>{yesterday.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}</span>
+                  </div>
+
+                  {/* Schedule completion */}
+                  {ySummary.schedTotal > 0 && (
+                    <div style={{ marginBottom: 14 }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                        <span className="t-body-sm" style={{ fontWeight: 600, color: "var(--c-text)" }}>Schedule</span>
+                        <span className="t-body-sm" style={{ fontWeight: 700, color: pctColor(ySummary.schedPct) }}>{ySummary.schedDoneCount}/{ySummary.schedTotal} tasks{ySummary.schedPct !== null ? ` · ${ySummary.schedPct}%` : ""}</span>
+                      </div>
+                      <div style={{ height: 6, borderRadius: 99, background: "#f0f0f0", overflow: "hidden" }}>
+                        <div style={{ height: "100%", width: `${ySummary.schedPct ?? 0}%`, borderRadius: 99, background: pctColor(ySummary.schedPct), transition: "width 0.4s" }} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Meals */}
+                  {ySummary.meals.length > 0 && (
+                    <div style={{ marginBottom: 14 }}>
+                      <span className="t-body-sm" style={{ fontWeight: 600, color: "var(--c-text)" }}>Food</span>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 6 }}>
+                        {ySummary.meals.map(m => (
+                          <div key={m.id} style={{ display: "flex", gap: 8, alignItems: "baseline" }}>
+                            <span style={{ fontSize: 11, fontWeight: 600, color: "#b0b8c1", flexShrink: 0 }}>{m.time}</span>
+                            <span className="t-caption" style={{ color: "var(--c-text-sub)", lineHeight: 1.4 }}>{m.description}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* What went well / could improve */}
+                  {(ySummary.matchReview || ySummary.snap) && (
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <div style={{ flex: 1, background: "var(--c-green-bg)", borderRadius: "var(--r-sm)", padding: "10px 12px" }}>
+                        <p style={{ margin: "0 0 4px", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--c-green)" }}>Went well</p>
+                        <p className="t-caption" style={{ color: "var(--c-text)", margin: 0, lineHeight: 1.4, fontWeight: 500 }}>
+                          {ySummary.matchReview?.wellDone?.[0]
+                            ? ySummary.matchReview.wellDone[0]
+                            : ySummary.snap
+                              ? (() => { const best = (["recovery","training","nutrition","wellbeing"] as const).reduce((a, b) => (ySummary.snap![a] ?? 0) > (ySummary.snap![b] ?? 0) ? a : b); return `${best.charAt(0).toUpperCase() + best.slice(1)} was strong`; })()
+                              : "—"}
+                        </p>
+                      </div>
+                      <div style={{ flex: 1, background: "#fffbeb", borderRadius: "var(--r-sm)", padding: "10px 12px" }}>
+                        <p style={{ margin: "0 0 4px", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#d97706" }}>To improve</p>
+                        <p className="t-caption" style={{ color: "var(--c-text)", margin: 0, lineHeight: 1.4, fontWeight: 500 }}>
+                          {ySummary.matchReview?.improved?.[0]
+                            ? ySummary.matchReview.improved[0]
+                            : ySummary.snap
+                              ? (() => {
+                                  const pillars = ["recovery","training","nutrition","wellbeing"] as const;
+                                  const best = pillars.reduce((a, b) => (ySummary.snap![a] ?? 0) > (ySummary.snap![b] ?? 0) ? a : b);
+                                  const others = pillars.filter(p => p !== best);
+                                  const worst = others.reduce((a, b) => (ySummary.snap![a] ?? 100) < (ySummary.snap![b] ?? 100) ? a : b);
+                                  return `${worst.charAt(0).toUpperCase() + worst.slice(1)} could be better`;
+                                })()
+                              : "—"}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Prev days toggle */}
+                  {prevDays.some(d => schedDone[d]?.length || deduped.find(s => s.date === d)) && (
+                    <>
+                      <button onClick={() => setPrevDaysOpen(o => !o)}
+                        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%", background: "none", border: "none", cursor: "pointer", marginTop: 16, paddingTop: 14, borderTop: "1px solid #f0f0f0" }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--c-hint)" }}>Prev days</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--c-hint)" strokeWidth="2.5" strokeLinecap="round" style={{ transition: "transform 0.2s", transform: prevDaysOpen ? "rotate(180deg)" : "rotate(0deg)" }}><path d="M6 9l6 6 6-6"/></svg>
+                      </button>
+                      {prevDaysOpen && (
+                        <div style={{ marginTop: 8 }}>
+                          <PrevDaysList days={prevDays} schedDone={schedDone} deduped={deduped} getScheduleData={getScheduleData} loadScoringData={loadScoringData} getTopNeedsWorkTag={getTopNeedsWorkTag} pctColor={pctColor} />
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Pillar States */}
+          <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
+            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Your State Today</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {PILLARS.map(row => {
+                const state = pillarStates[row.key as keyof PillarStates];
+                const meta = STATUS_META[state.status];
+                const sparkData = last14.map(s => s[row.key]);
+                return (
+                  <div key={row.key} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                        <span className="t-body-sm" style={{ fontWeight: 600, color: "var(--c-text)" }}>{row.label}</span>
+                        <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 99, background: meta.bg, color: meta.text }}>{meta.label}</span>
+                      </div>
+                      <p className="t-caption" style={{ color: "var(--c-text-sub)", margin: 0, lineHeight: 1.3 }}>{state.reason}</p>
+                    </div>
+                    <Sparkline data={sparkData} color={row.color} />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Week Comparison */}
+          {(thisWeekAvg !== null || lastWeekAvg !== null) && (
+            <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
+              <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Week Comparison</p>
+              <div style={{ display: "flex", gap: 10 }}>
+                <div style={{ flex: 1, background: "#f4f6ff", borderRadius: "var(--r-sm)", padding: "14px 16px" }}>
+                  <p className="t-caption" style={{ color: "var(--c-text-sub)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>This week</p>
+                  <p className="t-stat" style={{ color: "var(--c-blue)", margin: 0, lineHeight: 1 }}>{thisWeekAvg ?? "–"}</p>
+                  <p className="t-caption" style={{ color: "var(--c-hint)", margin: "4px 0 0" }}>{thisWeekSnaps.length} day{thisWeekSnaps.length !== 1 ? "s" : ""} logged</p>
+                </div>
+                <div style={{ flex: 1, background: "var(--c-bg)", borderRadius: "var(--r-sm)", padding: "14px 16px" }}>
+                  <p className="t-caption" style={{ color: "var(--c-text-sub)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>Last week</p>
+                  <p className="t-stat" style={{ color: "var(--c-text)", margin: 0, lineHeight: 1 }}>{lastWeekAvg ?? "–"}</p>
+                  <p className="t-caption" style={{ color: "var(--c-hint)", margin: "4px 0 0" }}>{lastWeekSnaps.length} day{lastWeekSnaps.length !== 1 ? "s" : ""} logged</p>
+                </div>
+              </div>
+              {thisWeekAvg !== null && lastWeekAvg !== null && (
+                <p className="t-body-sm" style={{ fontWeight: 600, color: thisWeekAvg >= lastWeekAvg ? "var(--c-green)" : "var(--c-red)", margin: "12px 0 0", textAlign: "center" }}>
+                  {thisWeekAvg >= lastWeekAvg ? "▲" : "▼"} {Math.abs(thisWeekAvg - lastWeekAvg)} pts {thisWeekAvg >= lastWeekAvg ? "up" : "down"} from last week
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Strengths & Focus Areas */}
+          {reviews.length > 0 && (() => {
+            const countTags = (tags: string[]) => {
+              const counts: Record<string, number> = {};
+              tags.forEach(t => { counts[t] = (counts[t] ?? 0) + 1; });
+              return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+            };
+            const strengths = countTags(reviews.flatMap(r => r.wellDone ?? [])).slice(0, 6);
+            const focusAreas = countTags(reviews.flatMap(r => r.improved ?? [])).slice(0, 6);
+            if (!strengths.length && !focusAreas.length) return null;
+            const maxS = strengths[0]?.[1] ?? 1;
+            const maxF = focusAreas[0]?.[1] ?? 1;
+            return (
+              <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
+                <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Game Profile</p>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  {/* Strengths */}
+                  <div>
+                    <p style={{ margin: "0 0 10px", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--c-green)" }}>Strengths</p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+                      {strengths.length ? strengths.map(([tag, count]) => (
+                        <div key={tag}>
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--c-text)" }}>{tag}</span>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: "var(--c-green)", opacity: 0.7 }}>{count}×</span>
+                          </div>
+                          <div style={{ height: 4, borderRadius: 99, background: "#f0f0f0", overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${(count / maxS) * 100}%`, borderRadius: 99, background: "var(--c-green)" }} />
+                          </div>
+                        </div>
+                      )) : <p className="t-caption" style={{ color: "var(--c-hint)" }}>None logged yet</p>}
+                    </div>
+                  </div>
+                  {/* Focus Areas */}
+                  <div>
+                    <p style={{ margin: "0 0 10px", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--c-amber)" }}>Focus Areas</p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+                      {focusAreas.length ? focusAreas.map(([tag, count]) => (
+                        <div key={tag}>
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                            <span style={{ fontSize: 12, fontWeight: 600, color: "var(--c-text)" }}>{tag}</span>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: "var(--c-amber)", opacity: 0.7 }}>{count}×</span>
+                          </div>
+                          <div style={{ height: 4, borderRadius: 99, background: "#f0f0f0", overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${(count / maxF) * 100}%`, borderRadius: 99, background: "var(--c-amber)" }} />
+                          </div>
+                        </div>
+                      )) : <p className="t-caption" style={{ color: "var(--c-hint)" }}>None logged yet</p>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Hydration Averages */}
+          {(() => {
+            const LITRE_MID: Record<string, number> = {
+              "<1L": 0.75, "1–1.5L": 1.25, "1.5–2L": 1.75,
+              "2–2.5L": 2.25, "2.5–3L": 2.75, "3L+": 3.25,
+            };
+            let logs: { ts: string; litres: string }[] = [];
+            try { logs = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch {}
+            if (!logs.length) return null;
+            const now = Date.now();
+            const avg = (entries: typeof logs) => {
+              const vals = entries.map(e => LITRE_MID[e.litres]).filter(v => v !== undefined);
+              return vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : null;
+            };
+            const last7  = logs.filter(e => now - new Date(e.ts).getTime() < 7  * 864e5);
+            const last30 = logs.filter(e => now - new Date(e.ts).getTime() < 30 * 864e5);
+            const avg7   = avg(last7);
+            const avg30  = avg(last30);
+            const avgAll = avg(logs);
+            const color  = (v: string | null) => !v ? "var(--c-hint)" : parseFloat(v) >= 2 ? "var(--c-teal)" : parseFloat(v) >= 1.5 ? "var(--c-blue)" : "var(--c-red)";
+            return (
+              <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
+                <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Hydration Average</p>
+                <div style={{ display: "flex", gap: 10 }}>
+                  {[
+                    { label: "7 days", value: avg7,  n: last7.length },
+                    { label: "Month",  value: avg30, n: last30.length },
+                    { label: "All time", value: avgAll, n: logs.length },
+                  ].map(({ label, value, n }) => (
+                    <div key={label} style={{ flex: 1, background: "var(--c-bg)", borderRadius: "var(--r-sm)", padding: "14px 12px", textAlign: "center" }}>
+                      <p className="t-caption" style={{ color: "var(--c-text-sub)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</p>
+                      <p className="t-stat" style={{ color: color(value), margin: 0, lineHeight: 1, fontSize: "clamp(22px,6vw,28px)" }}>{value ?? "–"}<span style={{ fontSize: 13, fontWeight: 600, marginLeft: 2 }}>{value ? "L" : ""}</span></p>
+                      <p className="t-caption" style={{ color: "var(--c-hint)", margin: "4px 0 0" }}>{n} log{n !== 1 ? "s" : ""}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Food Quality */}
           {(() => {
             const todayStr = new Date().toISOString().slice(0, 10);
@@ -1315,79 +1751,6 @@ export default function ProfilePage() {
             );
           })()}
 
-          {/* Match Record */}
-          {reviews.length > 0 && (
-            <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
-              <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Match Record</p>
-              <div style={{ display: "flex", gap: "10px", marginBottom: topStrength || topWeakness ? 16 : 0 }}>
-                <div style={{ flex: 1, textAlign: "center", background: "var(--c-green-bg)", borderRadius: "var(--r-sm)", padding: "12px 8px" }}>
-                  <p className="t-stat" style={{ color: "var(--c-green)", margin: 0, lineHeight: 1 }}>{wins}</p>
-                  <p className="t-tag" style={{ color: "var(--c-green)", margin: "4px 0 0", fontWeight: 600 }}>Wins</p>
-                </div>
-                <div style={{ flex: 1, textAlign: "center", background: "var(--c-red-bg)", borderRadius: "var(--r-sm)", padding: "12px 8px" }}>
-                  <p className="t-stat" style={{ color: "var(--c-red)", margin: 0, lineHeight: 1 }}>{losses}</p>
-                  <p className="t-tag" style={{ color: "var(--c-red)", margin: "4px 0 0", fontWeight: 600 }}>Losses</p>
-                </div>
-                {winRate !== null && (
-                  <div style={{ flex: 1, textAlign: "center", background: "#f4f6ff", borderRadius: "var(--r-sm)", padding: "12px 8px" }}>
-                    <p className="t-stat" style={{ color: "var(--c-blue)", margin: 0, lineHeight: 1 }}>{winRate}%</p>
-                    <p className="t-tag" style={{ color: "var(--c-blue)", margin: "4px 0 0", fontWeight: 600 }}>Win rate</p>
-                  </div>
-                )}
-              </div>
-              {(topStrength || topWeakness) && (
-                <button onClick={() => setTagCloudOpen(o => !o)}
-                  style={{ display: "flex", flexDirection: "column", gap: "8px", background: "none", border: "none", cursor: "pointer", padding: 0, width: "100%", textAlign: "left" }}>
-                  {topStrength && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--c-green)", flexShrink: 0 }}/>
-                      <span className="t-body-sm" style={{ color: "var(--c-text)" }}>Strongest: <strong>{topStrength}</strong></span>
-                      {!topWeakness && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: "auto", flexShrink: 0, transition: "transform 0.2s", transform: tagCloudOpen ? "rotate(180deg)" : "rotate(0deg)" }}><path d="M6 9l6 6 6-6"/></svg>}
-                    </div>
-                  )}
-                  {topWeakness && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--c-amber)", flexShrink: 0 }}/>
-                      <span className="t-body-sm" style={{ color: "var(--c-text)" }}>Focus area: <strong>{topWeakness}</strong></span>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: "auto", flexShrink: 0, transition: "transform 0.2s", transform: tagCloudOpen ? "rotate(180deg)" : "rotate(0deg)" }}><path d="M6 9l6 6 6-6"/></svg>
-                    </div>
-                  )}
-                </button>
-              )}
-              {tagCloudOpen && reviews.length > 0 && (
-                <div style={{ marginTop: 16 }}>
-                  <TagCloud reviews={reviews} />
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Activity Archive */}
-          <button onClick={() => setArchiveOpen(o => !o)}
-            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", cursor: "pointer", padding: 0, width: "100%" }}>
-            <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>Activity Archive</p>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-label)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
-              style={{ transition: "transform 0.2s", transform: archiveOpen ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}>
-              <path d="M9 18l6-6-6-6"/>
-            </svg>
-          </button>
-          {archiveOpen && (
-            feed.length > 0 ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {feed.map(item =>
-                  item.kind === "match"
-                    ? <MatchCard key={item.ts + "m"} review={item.data as ReviewEntry} />
-                    : <TrainingCard key={item.ts + "t"} entry={item.data as TrainingEntry} />
-                )}
-              </div>
-            ) : (
-              <div className="bg-white r-md border border-c-line px-5 py-8 text-center" style={card}>
-                <p className="t-body font-medium text-c-text-sub">No activity logged yet</p>
-                <p className="t-body-sm text-[#9aab96] mt-1">Tap + to log your first session</p>
-              </div>
-            )
-          )}
-
         </div>
       )}
 
@@ -1447,7 +1810,11 @@ export default function ProfilePage() {
         </div>
       )}
 
-      <LogSheet open={logSheetOpen} onClose={() => { setLogSheetOpen(false); setLogTab(null); }} defaultSub={logTab ?? undefined} />
+      <LogSheet open={logSheetOpen} onClose={() => {
+        setLogSheetOpen(false);
+        setLogTab(null);
+        try { const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null"); setCheckinDone(ml?.date === new Date().toISOString().slice(0, 10)); } catch {}
+      }} defaultSub={logTab ?? undefined} />
 
       {cropSrc && (
         <AvatarCropModal

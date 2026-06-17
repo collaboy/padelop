@@ -94,7 +94,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
   const [trainingLog, setTrainingLog] = useState({ sessionType: [] as string[], drillFocus: [] as string[], duration: "", intensity: "" });
   const [hydrationLog, setHydrationLog] = useState({ litres: "", timing: [] as string[], quality: "", urine: "" });
   const [nutritionLog, setNutritionLog] = useState({ proteinRating: "", foods: [] as string[], postMatch: "", quality: "" });
-  const [matchReview, setMatchReview] = useState({ feeling: "", result: "", opponent: "", opponentNames: "", energy: "", injury: "", wellDone: [] as string[], improved: [] as string[], mentalBefore: "", mentalDuring: "", mentalAfter: "", warmup: "" });
+  const [matchReview, setMatchReview] = useState({ feeling: "", result: "", opponent: "", opponentNames: "", energy: "", injury: "", wellDone: [] as string[], improved: [] as string[], mentalBefore: "", mentalDuring: "", mentalAfter: "", warmup: "", notes: "" });
   const [matchResultImage, setMatchResultImage] = useState<string | null>(null);
 
   const [morningStep, setMorningStep] = useState(0);
@@ -1127,6 +1127,16 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
                     style={{ borderColor: sel ? "var(--c-red)" : "var(--c-line)", background: sel ? "var(--c-red-bg)" : "var(--c-bg-input)", color: sel ? "var(--c-red)" : "var(--c-text-sub)" }}>{tag}</button>;
                 })}
               </div>
+            </div>
+            <div>
+              <p className="t-label text-c-text-sub mb-3">Match notes</p>
+              <textarea
+                value={matchReview.notes ?? ""}
+                onChange={e => setMatchReview(r => ({ ...r, notes: e.target.value }))}
+                placeholder="How did the game go? Describe the players, key moments, tactics…"
+                rows={3}
+                style={{ width: "100%", padding: "12px 14px", borderRadius: 14, border: "1.5px solid var(--c-line)", background: "var(--c-bg-input)", fontSize: 14, color: "var(--c-text)", outline: "none", fontFamily: "inherit", resize: "none", lineHeight: 1.5, boxSizing: "border-box" }}
+              />
             </div>
             <button onClick={() => {
                 try {

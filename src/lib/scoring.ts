@@ -24,6 +24,7 @@ export type ReviewEntry = {
   injury: string;   // "yes" | "no" | "minor"
   mentalBefore: string; mentalDuring: string; mentalAfter: string;
   wellDone: string[]; improved: string[];
+  notes?: string;
   [key: string]: unknown;
 };
 

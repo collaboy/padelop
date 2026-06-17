@@ -563,7 +563,7 @@ export default function Home8() {
 
   return (
     <>
-      <main style={{ ...S, position: "fixed", inset: 0, paddingTop: "4rem", paddingLeft: 10, paddingRight: 10, paddingBottom: 0, overflow: "hidden", background: "#ffffff", zIndex: 60 }}>
+      <main style={{ ...S, position: "fixed", inset: 0, paddingTop: 0, paddingLeft: 10, paddingRight: 10, paddingBottom: 0, overflow: "hidden", background: "#ffffff", zIndex: 60 }}>
 
         {/* Horizontal strip: [readiness | carousel | log] */}
         <div
@@ -790,7 +790,7 @@ export default function Home8() {
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
                       <p className="text-[14px] tracking-wide leading-none" style={{ color: "#000", fontWeight: 600 }}>Now</p>
                       <p className="font-bold text-center" style={{ color: "#000", fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1 }}>{s.title}</p>
-                      <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-1.5 font-semibold px-3 py-1 rounded-full flex items-center gap-1" style={{ background: isSleepytime ? "transparent" : "#fff", color: "#0000ff", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me</button>
+                      <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-4 font-semibold px-3 py-1 rounded-full flex items-center gap-1" style={{ background: isSleepytime ? "transparent" : "#fff", color: "#1a1c1c", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me</button>
                       {dayType === "match" && match && (() => { const [mH, mM] = match.time.split(":").map(Number); return now.getHours() * 60 + now.getMinutes() >= mH * 60 + mM - 60; })() && (
                         <div onClick={e => e.stopPropagation()} style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 12, width: "100%" }}>
                           <button
