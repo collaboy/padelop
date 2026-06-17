@@ -11,15 +11,17 @@ export async function hydrateFromSupabase() {
 
     const today = new Date().toISOString().slice(0, 10);
 
-    const [matchesRes, checkInsRes, hydrationRes, nutritionRes, sessionsRes, gearRes, profileRes, notesRes] = await Promise.all([
+    const [matchesRes, checkInsRes, hydrationRes, nutritionRes, sessionsRes, gearRes, profileRes, notesRes, schedDoneRes, scoreSnapsRes] = await Promise.all([
       supabase.from("matches").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(50),
-      supabase.from("check_ins").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(30),
+      supabase.from("check_ins").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(90),
       supabase.from("hydration_logs").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(50),
       supabase.from("nutrition_logs").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(50),
       supabase.from("sessions").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(50),
       supabase.from("gear").select("*").eq("user_id", user.id),
-      supabase.from("profiles").select("display_name, avatar_url, dominant_hand, play_level").eq("id", user.id).single(),
+      supabase.from("profiles").select("display_name, avatar_url, dominant_hand, play_level, position, tournament_count").eq("id", user.id).single(),
       supabase.from("notes").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(200),
+      supabase.from("schedule_done").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(30),
+      supabase.from("score_snapshots").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(90),
     ]);
 
     // ── Profile ──────────────────────────────────────────────────────────
@@ -29,10 +31,14 @@ export async function hydrateFromSupabase() {
       localStorage.setItem("padelop:profile", JSON.stringify({
         ...existing,
         ...(dbProfile.display_name ? { name: dbProfile.display_name } : {}),
-        hand:   dbProfile.dominant_hand ?? existing.hand ?? "",
-        level:  dbProfile.play_level ?? existing.level ?? "",
-        avatar: dbProfile.avatar_url ?? existing.avatar ?? "",
+        hand:     dbProfile.dominant_hand  ?? existing.hand     ?? "",
+        level:    dbProfile.play_level     ?? existing.level    ?? "",
+        position: dbProfile.position       ?? existing.position ?? "",
+        avatar:   dbProfile.avatar_url     ?? existing.avatar   ?? "",
       }));
+      if (dbProfile.tournament_count != null) {
+        localStorage.setItem("padelop:tournaments", JSON.stringify({ count: dbProfile.tournament_count }));
+      }
     }
 
     // ── Matches ──────────────────────────────────────────────────────────
@@ -67,6 +73,7 @@ export async function hydrateFromSupabase() {
         mentalDuring: m.mental_during ?? "",
         mentalAfter:  m.mental_after ?? "",
         warmup:       m.warmup ?? "",
+        notes:        m.notes ?? "",
       }));
 
     if (upcoming.length) {
@@ -212,6 +219,34 @@ export async function hydrateFromSupabase() {
         text: n.body ?? "",
       }));
       localStorage.setItem("padelop:notes", JSON.stringify(notes));
+    }
+
+    // ── Schedule done ────────────────────────────────────────────────────
+    const schedDoneData = schedDoneRes.data ?? [];
+    if (schedDoneData.length) {
+      const schedDone: Record<string, string[]> = {};
+      schedDoneData.forEach(row => { schedDone[row.date as string] = row.tasks ?? []; });
+      localStorage.setItem("padelop:schedule-done", JSON.stringify(schedDone));
+    }
+
+    // ── Score snapshots ──────────────────────────────────────────────────
+    const snapData = scoreSnapsRes.data ?? [];
+    if (snapData.length) {
+      const history = snapData.map(s => ({
+        date:      s.date as string,
+        overall:   s.overall   ?? 0,
+        recovery:  s.recovery  ?? 0,
+        nutrition: s.nutrition ?? 0,
+        training:  s.training  ?? 0,
+        wellbeing: s.wellbeing ?? 0,
+      }));
+      localStorage.setItem("padelop:score-history", JSON.stringify(history));
+    }
+
+    // ── Game days (derived from match dates) ─────────────────────────────
+    const matchDates = (matchesRes.data ?? []).map(m => m.date as string).filter(Boolean);
+    if (matchDates.length) {
+      localStorage.setItem("padelop:game-days", JSON.stringify(matchDates));
     }
 
     window.dispatchEvent(new Event("storage"));

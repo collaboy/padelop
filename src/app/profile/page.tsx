@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { saveGearToDb, saveProfileToDb, saveNutritionInsightToDb, saveUpcomingMatch } from "@/lib/db";
+import { saveGearToDb, saveProfileToDb, saveNutritionInsightToDb, saveUpcomingMatch, saveScheduleDoneToDb, saveScoreSnapshotToDb } from "@/lib/db";
 import LogSheet from "@/components/log-sheet";
 import AvatarCropModal from "@/components/avatar-crop-modal";
 import { hydrateFromSupabase } from "@/lib/sync";
@@ -512,15 +512,14 @@ export default function ProfilePage() {
   const [schedModalIdx, setSchedModalIdx] = useState<number | null>(null);
   const [prevDaysOpen, setPrevDaysOpen] = useState(false);
   const todayKey = new Date().toISOString().slice(0, 10);
-  const [schedDone, setSchedDone] = useState<Record<string, string[]>>(() => {
-    try { return JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}"); } catch { return {}; }
-  });
+  const [schedDone, setSchedDone] = useState<Record<string, string[]>>({});
   function toggleSchedDone(date: string, title: string) {
     setSchedDone(prev => {
       const titles = prev[date] ?? [];
       const next = titles.includes(title) ? titles.filter(t => t !== title) : [...titles, title];
       const updated = { ...prev, [date]: next };
       localStorage.setItem("padelop:schedule-done", JSON.stringify(updated));
+      saveScheduleDoneToDb(date, next);
       return updated;
     });
   }
@@ -591,11 +590,18 @@ export default function ProfilePage() {
       }
     } catch {}
 
+    // Schedule done
+    try {
+      const sd = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
+      setSchedDone(sd);
+    } catch {}
+
     // Insights
     const d = loadScoringData();
     const s = computeScores(d.checkIn, d.hydration, d.review, d.nutrition, d.gameDaysThisWeek, d.habits, d.training);
     setScores(s);
     saveScoreSnapshot(s);
+    saveScoreSnapshotToDb(new Date().toISOString().slice(0, 10), s);
     const hist = loadScoreHistory();
     setHistory(hist);
     const habits: { date: string }[] = JSON.parse(localStorage.getItem("padelop:habits") || "[]");
@@ -800,7 +806,12 @@ export default function ProfilePage() {
   const save = () => {
     localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
     window.dispatchEvent(new Event("storage"));
-    saveProfileToDb({ display_name: profile.name });
+    saveProfileToDb({
+      display_name:  profile.name,
+      dominant_hand: profile.hand   || undefined,
+      play_level:    profile.level  || undefined,
+      position:      profile.position || undefined,
+    });
     setSaved(true);
   };
   const canSave = profile.name.trim().length > 0;

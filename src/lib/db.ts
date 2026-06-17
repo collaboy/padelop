@@ -29,22 +29,25 @@ export async function saveProfileToDb(profile: {
   avatar_url?: string;
   dominant_hand?: string;
   play_level?: string;
+  position?: string;
   overall_goal?: string;
   club?: string;
+  tournament_count?: number;
 }) {
   try {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Only include fields that were explicitly provided — never null-out existing data
     const fields: Record<string, unknown> = { id: user.id };
-    if (profile.display_name  !== undefined) fields.display_name  = profile.display_name;
-    if (profile.avatar_url    !== undefined) fields.avatar_url    = profile.avatar_url;
-    if (profile.dominant_hand !== undefined) fields.dominant_hand = profile.dominant_hand;
-    if (profile.play_level    !== undefined) fields.play_level    = profile.play_level;
-    if (profile.overall_goal  !== undefined) fields.overall_goal  = profile.overall_goal;
-    if (profile.club          !== undefined) fields.club          = profile.club;
+    if (profile.display_name     !== undefined) fields.display_name     = profile.display_name;
+    if (profile.avatar_url       !== undefined) fields.avatar_url       = profile.avatar_url;
+    if (profile.dominant_hand    !== undefined) fields.dominant_hand    = profile.dominant_hand;
+    if (profile.play_level       !== undefined) fields.play_level       = profile.play_level;
+    if (profile.position         !== undefined) fields.position         = profile.position;
+    if (profile.overall_goal     !== undefined) fields.overall_goal     = profile.overall_goal;
+    if (profile.club             !== undefined) fields.club             = profile.club;
+    if (profile.tournament_count !== undefined) fields.tournament_count = profile.tournament_count;
     await supabase.from("profiles").upsert(fields);
   } catch {}
 }
@@ -91,6 +94,7 @@ export async function saveMatchReview(entry: {
   warmup?: string;
   wellDone?: string[];
   improved?: string[];
+  notes?: string;
 }) {
   try {
     const supabase = createClient();
@@ -110,7 +114,32 @@ export async function saveMatchReview(entry: {
       warmup:        entry.warmup ?? null,
       well_done:     entry.wellDone ?? [],
       improved:      entry.improved ?? [],
+      notes:         entry.notes ?? null,
     });
+  } catch {}
+}
+
+export async function saveScheduleDoneToDb(date: string, tasks: string[]) {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("schedule_done").upsert(
+      { user_id: user.id, date, tasks },
+      { onConflict: "user_id,date" }
+    );
+  } catch {}
+}
+
+export async function saveScoreSnapshotToDb(date: string, scores: { overall: number; recovery: number; nutrition: number; training: number; wellbeing: number }) {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("score_snapshots").upsert(
+      { user_id: user.id, date, ...scores },
+      { onConflict: "user_id,date" }
+    );
   } catch {}
 }
 
