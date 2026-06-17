@@ -2,19 +2,24 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { computeNotifications } from "@/lib/notifications";
 
 export default function Nav() {
+  const pathname = usePathname();
+
   useEffect(() => {
     const id = setInterval(() => computeNotifications(), 60_000);
     return () => clearInterval(id);
   }, []);
 
+  if (pathname === "/profile") return null;
+
   return (
     <div className="fixed top-4 left-4 z-[70]">
       <Link href="/" style={{ textDecoration: "none" }}>
-        <div style={{ background: "#fff", borderRadius: "50%", width: 44, height: 44, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-          <span className="font-semibold tracking-tight text-[var(--text)]" style={{ fontFamily: "Inter, sans-serif", fontSize: 13 }}>
+        <div style={{ background: "#fff", borderRadius: "50%", width: 56, height: 56, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+          <span className="font-semibold tracking-tight text-[var(--text)]" style={{ fontFamily: "Inter, sans-serif", fontSize: 15 }}>
             {(["p","a","d","l","a"] as const).map((ch, i) => (
               <span key={i} style={{ display: "inline-block", transform: `translateY(${5 - i}px)` }}>{ch}</span>
             ))}

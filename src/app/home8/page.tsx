@@ -570,7 +570,7 @@ export default function Home8() {
           ref={outerRef}
           style={{
             display: "flex", width: "300%", marginLeft: "-100%",
-            height: "calc(100dvh - 4rem)", touchAction: doIdx >= 1 ? "pan-y" : "manipulation",
+            height: "100dvh", touchAction: doIdx >= 1 ? "pan-y" : "manipulation",
             transform: cardSnap === 'right' ? `translateX(calc(33.333% - 50px + ${liveX}px))` : cardSnap === 'left' ? `translateX(calc(-33.333% + 50px + ${liveX}px))` : `translateX(${liveX}px)`,
             transition: liveX !== 0 ? "none" : "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
           }}
@@ -621,7 +621,7 @@ export default function Home8() {
         >
           {/* Log panel */}
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingRight: 20, paddingLeft: 20 }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, transform: `translateX(${cardSnap === 'right' ? 50 : 0}px) translateY(calc(45dvh - 4rem - 3 * (100vw - 40px) / 2 - 10px))`, transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, transform: `translateX(${cardSnap === 'right' ? 50 : 0}px) translateY(calc(45dvh - 3 * (100vw - 40px) / 2 - 10px))`, transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
               {/* Placeholder above */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
               {/* Main card */}
@@ -667,7 +667,7 @@ export default function Home8() {
             <div style={{
               display: "flex", flexDirection: "column", gap: 10,
               transform: doIdx >= 1
-                ? `translateY(calc(84px + 4rem - 2 * (100vw - 30px) - 95dvh))`
+                ? `translateY(calc(84px - 2 * (100vw - 30px) - 95dvh))`
                 : doIdx === -1
                   ? `translateY(calc(10px - (100vw - 30px) + ${liveY}px))`
                   : `translateY(calc(-50dvh - 150vw + 100px + ${liveY}px))`,
@@ -688,7 +688,7 @@ export default function Home8() {
                 const coachTip = hasLow ? 'Focus on recovery today.' : hasOk ? 'Keep your habits consistent today.' : allNL ? 'Log your check-ins to track readiness.' : 'You\'re in great shape. Stay sharp.';
 
                 return (
-                  <div style={{ width: "100%", flexShrink: 0, height: "calc(100dvh - 4rem - 100px)", borderRadius: 24, background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px 20%", zIndex: doIdx === -1 ? 2 : 1, pointerEvents: doIdx === -1 ? "auto" : "none" }}>
+                  <div style={{ width: "100%", flexShrink: 0, height: "calc(100dvh - 100px)", borderRadius: 24, background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px 20%", zIndex: doIdx === -1 ? 2 : 1, pointerEvents: doIdx === -1 ? "auto" : "none" }}>
                     {match ? (() => {
                       const matchDate = new Date(match.date + "T12:00");
                       const todayDate = new Date(today + "T12:00");
@@ -929,7 +929,7 @@ export default function Home8() {
                 return (
                   <div
                     key="card2"
-                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px 20%", gap: 14, zIndex: doIdx === 1 ? 2 : 1, height: "calc(100dvh - 4rem - 44px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none" }}
+                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px 20%", gap: 14, zIndex: doIdx === 1 ? 2 : 1, height: "100dvh", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none" }}
                     onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
                     onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
                   >
@@ -945,7 +945,7 @@ export default function Home8() {
           </div>
 
           {/* Profile panel */}
-          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 40, paddingTop: "calc(45dvh - 4rem - (100vw - 40px) / 2)" }}>
+          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 40, paddingTop: "calc(45dvh - (100vw - 40px) / 2)" }}>
             <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, padding: "16px 12px", marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
               {/* Hydration teardrop meter */}
               {(() => {
@@ -1035,7 +1035,7 @@ export default function Home8() {
 
         {/* Complete modal */}
         {doModalOpen && modalItem && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { setDoModalOpen(false); setSchedModalIdx(null); }} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" style={{ paddingTop: "24px", paddingBottom: "24px" }} onClick={() => { setDoModalOpen(false); setSchedModalIdx(null); }} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
             <div className="relative w-full bg-white rounded-[28px] overflow-hidden overflow-y-auto" style={{ maxHeight: "80vh", boxShadow: "0 8px 40px rgba(0,0,0,0.18)" }} onClick={e => e.stopPropagation()}>
               <div className="px-6 pt-5 pb-4" style={{ background: `${modalItem.color}18` }}>
@@ -1133,7 +1133,7 @@ export default function Home8() {
 
         {/* Post-match prompt */}
         {postMatchOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => setPostMatchOpen(false)} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "24px", paddingBottom: "24px" }} onClick={() => setPostMatchOpen(false)} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
             <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
               <div className="px-6 pt-8 pb-6 flex flex-col items-center text-center gap-2">
@@ -1168,7 +1168,7 @@ export default function Home8() {
 
         {/* Morning check-in nudge */}
         {checkinNudgeOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { try { localStorage.setItem("padelop:checkin-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {} setCheckinNudgeOpen(false); }} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "24px", paddingBottom: "24px" }} onClick={() => { try { localStorage.setItem("padelop:checkin-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {} setCheckinNudgeOpen(false); }} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
             <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
               <div className="px-6 pt-8 pb-6 flex flex-col items-center text-center gap-2">
@@ -1579,7 +1579,7 @@ export default function Home8() {
 
         {/* Add / Edit Match modal */}
         {matchModalOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => { setMatchModalOpen(false); setMatchModalTab('pick'); setLiveX(0); setLiveY(0); setUploadError(null); setUploadExtracting(false); }} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" style={{ paddingTop: "24px", paddingBottom: "24px" }} onClick={() => { setMatchModalOpen(false); setMatchModalTab('pick'); setLiveX(0); setLiveY(0); setUploadError(null); setUploadExtracting(false); }} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
             <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
               {/* Header */}

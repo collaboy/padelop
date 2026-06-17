@@ -472,9 +472,7 @@ export default function ProfilePage() {
   // Matches
   const [logSheetOpen, setLogSheetOpen]       = useState(false);
   const [logTab, setLogTab]                   = useState<"checkin" | null>(null);
-  const [checkinDone, setCheckinDone]         = useState(() => {
-    try { const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null"); return ml?.date === new Date().toISOString().slice(0, 10); } catch { return false; }
-  });
+  const [checkinDone, setCheckinDone]         = useState<boolean | null>(null);
   const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null);
   const [reviews, setReviews]                 = useState<ReviewEntry[]>([]);
   const [trainingSessions, setTrainingSessions] = useState<TrainingEntry[]>([]);
@@ -899,6 +897,20 @@ export default function ProfilePage() {
   return (
     <div className="max-w-lg mx-auto pb-20">
 
+      {/* ── Inline logo — scrolls with content ───────────────────────────── */}
+      <div style={{ padding: "16px 16px 0" }}>
+        <Link href="/" style={{ textDecoration: "none" }}>
+          <div style={{ background: "#fff", borderRadius: "50%", width: 56, height: 56, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+            <span className="font-semibold tracking-tight text-[var(--text)]" style={{ fontFamily: "Inter, sans-serif", fontSize: 15 }}>
+              {(["p","a","d","l","a"] as const).map((ch, i) => (
+                <span key={i} style={{ display: "inline-block", transform: `translateY(${5 - i}px)` }}>{ch}</span>
+              ))}
+              <span style={{ display: "inline-block", width: "0.55em", height: "0.55em", borderRadius: "50%", background: "#22c55e", verticalAlign: "middle", margin: "0 0.02em 0.05em", transform: "translateY(-1px)" }} />
+            </span>
+          </div>
+        </Link>
+      </div>
+
       {/* ── Profile Header (always visible) ─────────────────────────────── */}
       <div className="px-5 pt-6 flex flex-col items-center text-center gap-4">
         <div style={{ position: "relative", width: "100%" }}>
@@ -1007,7 +1019,7 @@ export default function ProfilePage() {
 
       {/* ── Daily Check-in + Focus Today (header area) ───────────────────── */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "16px 20px 4px" }}>
-        {!checkinDone && (
+        {checkinDone === false && (
           <button onClick={() => { setLogTab("checkin"); setLogSheetOpen(true); }}
             style={{ width: "100%", background: "#f5f0ff", border: "none", borderRadius: "var(--r-lg)", padding: "18px 20px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, textAlign: "left" }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
