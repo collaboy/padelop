@@ -310,7 +310,7 @@ export function computePillarStates(
   } else if (habits && (habits.lightWalk || habits.mobility)) {
     trainingState = { status: "ok", reason: "Light activity logged" };
   } else {
-    trainingState = { status: "not_logged", reason: "No session logged today" };
+    trainingState = { status: "not_logged", reason: "Log via +" };
   }
 
   // ── Wellbeing ─────────────────────────────────────────────────────────────

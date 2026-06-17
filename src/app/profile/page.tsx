@@ -501,6 +501,7 @@ export default function ProfilePage() {
   const [matchAddOpen, setMatchAddOpen] = useState(false);
   const [matchEditForms, setMatchEditForms] = useState<Record<number, MatchForm>>({});
   const [matchAddForm, setMatchAddForm] = useState<MatchForm>(EMPTY_FORM);
+  const [selectedReview, setSelectedReview] = useState<ReviewEntry | null>(null);
 
   // Schedule state
   const [schedNow, setSchedNow] = useState(new Date());
@@ -909,31 +910,23 @@ export default function ProfilePage() {
   return (
     <div className="max-w-lg mx-auto pb-20">
 
-      {/* ── Inline logo — scrolls with content ───────────────────────────── */}
-      <div style={{ padding: "16px 16px 0" }}>
-        <Link href="/" style={{ textDecoration: "none" }}>
-          <div style={{ background: "#fff", borderRadius: "50%", width: 56, height: 56, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-            <span className="font-semibold tracking-tight text-[var(--text)]" style={{ fontFamily: "Inter, sans-serif", fontSize: 15 }}>
-              {(["p","a","d","l","a"] as const).map((ch, i) => (
-                <span key={i} style={{ display: "inline-block", transform: `translateY(${2 - i}px)` }}>{ch}</span>
-              ))}
-              <span style={{ display: "inline-block", width: "0.55em", height: "0.55em", borderRadius: "50%", background: "#22c55e", verticalAlign: "middle", margin: "0 0.02em 0.05em", transform: "translateY(-1px)" }} />
-            </span>
-          </div>
-        </Link>
-      </div>
-
       {/* ── Profile Header (always visible) ─────────────────────────────── */}
-      <div className="px-5 pt-6 flex flex-col items-center text-center gap-4">
-        <div style={{ position: "relative", width: "100%" }}>
-          <Link href="/settings" style={{ position: "absolute", top: 0, right: 0, width: 36, height: 36, borderRadius: "50%", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--c-text-dim)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-            </svg>
+      <div className="flex flex-col items-center text-center gap-2">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "16px 20px 0" }}>
+          {/* Logo left */}
+          <Link href="/" style={{ textDecoration: "none" }}>
+            <div style={{ background: "#fff", borderRadius: "50%", width: 44, height: 44, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+              <span className="font-semibold tracking-tight text-[var(--text)]" style={{ fontFamily: "Inter, sans-serif", fontSize: 13 }}>
+                {(["p","a","d","l","a"] as const).map((ch, i) => (
+                  <span key={i} style={{ display: "inline-block", transform: `translateY(${2 - i}px)` }}>{ch}</span>
+                ))}
+                <span style={{ display: "inline-block", width: "0.55em", height: "0.55em", borderRadius: "50%", background: "#22c55e", verticalAlign: "middle", margin: "0 0.02em 0.05em", transform: "translateY(-1px)" }} />
+              </span>
+            </div>
           </Link>
 
-          <button onClick={() => setProfileOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, position: "relative", display: "inline-block" }}>
+          {/* Avatar center */}
+          <button onClick={() => setProfileOpen(o => !o)} className="active:opacity-70 transition-opacity" style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "inline-block" }}>
             <div style={{ width: 80, height: 80, borderRadius: "50%", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "3px solid #fff", background: profile.avatar ? "transparent" : "var(--c-blue)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               {profile.avatar ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -944,12 +937,15 @@ export default function ProfilePage() {
                 </span>
               )}
             </div>
-            <div style={{ position: "absolute", bottom: 1, right: 1, width: 22, height: 22, borderRadius: "50%", background: "#fff", boxShadow: "0 1px 4px rgba(0,0,0,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--c-blue)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </div>
           </button>
+
+          {/* Settings right */}
+          <Link href="/settings" style={{ width: 44, height: 44, borderRadius: "50%", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--c-text-dim)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </Link>
         </div>
 
         {profileOpen && (
@@ -1030,7 +1026,7 @@ export default function ProfilePage() {
       </div>
 
       {/* ── Daily Check-in + Focus Today (header area) ───────────────────── */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "16px 20px 4px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "8px 20px 0px" }}>
         {checkinDone === false && (
           <button onClick={() => { setLogTab("checkin"); setLogSheetOpen(true); }}
             style={{ width: "100%", background: "#f5f0ff", border: "none", borderRadius: "var(--r-lg)", padding: "18px 20px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, textAlign: "left" }}>
@@ -1046,7 +1042,7 @@ export default function ProfilePage() {
       </div>
 
       {/* ── Tab bar ──────────────────────────────────────────────────────── */}
-      <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#fff", borderBottom: "1px solid #f0f0f0", marginTop: 20 }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#fff", borderBottom: "1px solid #f0f0f0", marginTop: 8 }}>
         <div style={{ display: "flex", padding: "0 20px" }}>
           {TABS.map(tab => (
             <button
@@ -1355,14 +1351,19 @@ export default function ProfilePage() {
               {[...reviews].sort((a, b) => b.ts.localeCompare(a.ts)).map((r, i) => {
                 const resultColor = r.result === "win" ? "#16a34a" : r.result === "loss" ? "#ef4444" : "#8a9096";
                 const resultBg   = r.result === "win" ? "#f0fdf4" : r.result === "loss" ? "#fff5f5" : "#f4f6f8";
+                const opponentNames = typeof (r as ReviewEntry & { opponentNames?: string }).opponentNames === "string" && (r as ReviewEntry & { opponentNames?: string }).opponentNames ? (r as ReviewEntry & { opponentNames?: string }).opponentNames : null;
                 return (
-                  <div key={i} style={{ background: "#fff", borderRadius: 16, padding: "14px 16px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", display: "flex", alignItems: "center", gap: 12 }}>
+                  <button key={i} onClick={() => setSelectedReview(r)} style={{ width: "100%", background: "#fff", borderRadius: 16, padding: "14px 16px", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", display: "flex", alignItems: "center", gap: 12, border: "none", cursor: "pointer", textAlign: "left" }}>
                     <div style={{ flexShrink: 0, width: 44, textAlign: "center", background: "#f4f6f8", borderRadius: 11, padding: "7px 4px" }}>
                       <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: "#8a9096" }}>{new Date(r.ts.slice(0, 10) + "T12:00").toLocaleDateString("en-GB", { month: "short" }).toUpperCase()}</p>
                       <p style={{ margin: "1px 0 0", fontSize: 20, fontWeight: 900, color: "#1a1c1c", lineHeight: 1 }}>{new Date(r.ts.slice(0, 10) + "T12:00").getDate()}</p>
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      {r.feeling && <p style={{ margin: "0 0 2px", fontSize: 13, color: "#8a9096" }}>{r.feeling}</p>}
+                      {opponentNames ? (
+                        <p style={{ margin: "0 0 2px", fontSize: 14, fontWeight: 700, color: "#1a1c1c", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>vs {opponentNames}</p>
+                      ) : (
+                        r.feeling && <p style={{ margin: "0 0 2px", fontSize: 13, color: "#8a9096" }}>{r.feeling}</p>
+                      )}
                       {(r.wellDone?.length > 0 || r.improved?.length > 0) && (
                         <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
                           {r.wellDone?.slice(0, 2).map(t => <span key={t} style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 999, background: "#f0fdf4", color: "#16a34a" }}>{t}</span>)}
@@ -1370,12 +1371,15 @@ export default function ProfilePage() {
                         </div>
                       )}
                     </div>
-                    {r.result && (
-                      <span style={{ flexShrink: 0, fontSize: 12, fontWeight: 800, padding: "4px 10px", borderRadius: 999, background: resultBg, color: resultColor }}>
-                        {r.result.charAt(0).toUpperCase() + r.result.slice(1)}
-                      </span>
-                    )}
-                  </div>
+                    <div style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 6 }}>
+                      {r.result && (
+                        <span style={{ fontSize: 12, fontWeight: 800, padding: "4px 10px", borderRadius: 999, background: resultBg, color: resultColor }}>
+                          {r.result.charAt(0).toUpperCase() + r.result.slice(1)}
+                        </span>
+                      )}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    </div>
+                  </button>
                 );
               })}
             </div>
@@ -1383,6 +1387,107 @@ export default function ProfilePage() {
 
         </div>
       )}
+
+      {/* ── Match detail bottom sheet ─────────────────────────────────────── */}
+      {selectedReview && (() => {
+        const r = selectedReview;
+        const opponentNames = typeof (r as ReviewEntry & { opponentNames?: string }).opponentNames === "string" ? (r as ReviewEntry & { opponentNames?: string }).opponentNames : "";
+        const resultColor = r.result === "win" ? "#16a34a" : r.result === "loss" ? "#ef4444" : "#8a9096";
+        const resultBg    = r.result === "win" ? "#f0fdf4"  : r.result === "loss" ? "#fff5f5"  : "#f4f6f8";
+        const dateStr = new Date(r.ts.slice(0, 10) + "T12:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+        const FEELING_LABEL: Record<string, string> = { great: "Felt great", ok: "Felt OK", bad: "Felt rough" };
+        const ENERGY_LABEL:  Record<string, string> = { high: "High energy", mid: "Medium energy", low: "Low energy" };
+        const MENTAL_LABEL:  Record<string, string> = { calm: "Calm", focused: "Focused", nervous: "Nervous", overwhelmed: "Overwhelmed", confident: "Confident" };
+        return (
+          <div
+            className="fixed inset-0 z-[300] flex items-end"
+            onClick={() => setSelectedReview(null)}
+            onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}
+          >
+            <style>{`@keyframes reviewUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+            <div
+              className="relative w-full bg-white flex flex-col"
+              style={{ borderRadius: "28px 28px 0 0", maxHeight: "88dvh", animation: "reviewUp 0.32s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -4px 40px rgba(0,0,0,0.18)" }}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Drag handle */}
+              <div className="flex justify-center pt-3 pb-2 flex-shrink-0">
+                <div className="w-10 h-1 rounded-full bg-[#e2e2e2]" />
+              </div>
+
+              {/* Header */}
+              <div className="px-6 pb-5 flex-shrink-0">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-[#9aa5b0]">{dateStr}</p>
+                    {opponentNames && <p className="text-[22px] font-bold text-[#1a1c1c] mt-0.5 leading-tight">vs {opponentNames}</p>}
+                    {!opponentNames && <p className="text-[22px] font-bold text-[#1a1c1c] mt-0.5 leading-tight">Match</p>}
+                  </div>
+                  {r.result && (
+                    <span className="flex-shrink-0 text-[14px] font-black px-4 py-2 rounded-full" style={{ background: resultBg, color: resultColor }}>
+                      {r.result.charAt(0).toUpperCase() + r.result.slice(1)}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Scrollable body */}
+              <div className="overflow-y-auto flex-1 px-6 pb-8 flex flex-col gap-5" style={{ overscrollBehavior: "contain" }}>
+
+                {/* Notes */}
+                {r.notes && (
+                  <div className="p-4 rounded-2xl" style={{ background: "#f8f9fa", borderLeft: "3px solid #2653d4" }}>
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Notes</p>
+                    <p className="text-[15px] text-[#1a1c1c] leading-relaxed">{r.notes}</p>
+                  </div>
+                )}
+
+                {/* Tags */}
+                {(r.wellDone?.length > 0 || r.improved?.length > 0) && (
+                  <div className="flex flex-col gap-3">
+                    {r.wellDone?.length > 0 && (
+                      <div>
+                        <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Went well</p>
+                        <div className="flex flex-wrap gap-2">
+                          {r.wellDone.map(t => (
+                            <span key={t} className="text-[13px] font-bold px-3 py-1.5 rounded-full" style={{ background: "#f0fdf4", color: "#16a34a" }}>{t}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {r.improved?.length > 0 && (
+                      <div>
+                        <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Work on</p>
+                        <div className="flex flex-wrap gap-2">
+                          {r.improved.map(t => (
+                            <span key={t} className="text-[13px] font-bold px-3 py-1.5 rounded-full" style={{ background: "#fff5f5", color: "#ef4444" }}>{t}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Feel / Energy / Mental */}
+                {(r.feeling || r.energy || r.mentalBefore || r.mentalDuring || r.mentalAfter) && (
+                  <div className="flex flex-col gap-2">
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0]">On the day</p>
+                    <div className="flex flex-wrap gap-2">
+                      {r.feeling && <span className="text-[13px] font-semibold px-3 py-1.5 rounded-full bg-[#f4f6f8] text-[#4a5050]">{FEELING_LABEL[r.feeling] ?? r.feeling}</span>}
+                      {r.energy  && <span className="text-[13px] font-semibold px-3 py-1.5 rounded-full bg-[#f4f6f8] text-[#4a5050]">{ENERGY_LABEL[r.energy]  ?? r.energy}</span>}
+                      {r.mentalBefore && <span className="text-[13px] font-semibold px-3 py-1.5 rounded-full bg-[#f4f6f8] text-[#4a5050]">Before: {MENTAL_LABEL[r.mentalBefore] ?? r.mentalBefore}</span>}
+                      {r.mentalDuring && <span className="text-[13px] font-semibold px-3 py-1.5 rounded-full bg-[#f4f6f8] text-[#4a5050]">During: {MENTAL_LABEL[r.mentalDuring] ?? r.mentalDuring}</span>}
+                      {r.mentalAfter  && <span className="text-[13px] font-semibold px-3 py-1.5 rounded-full bg-[#f4f6f8] text-[#4a5050]">After: {MENTAL_LABEL[r.mentalAfter]  ?? r.mentalAfter}</span>}
+                      {r.injury && r.injury !== "no" && <span className="text-[13px] font-semibold px-3 py-1.5 rounded-full" style={{ background: "#fff7ed", color: "#c2410c" }}>Injury: {r.injury}</span>}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── Tab: Stats ───────────────────────────────────────────────────── */}
       {activeTab === 'stats' && (
@@ -1555,26 +1660,19 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Week Comparison */}
+          {/* Week Comparison — compact banner */}
           {(thisWeekAvg !== null || lastWeekAvg !== null) && (
-            <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
-              <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Week Comparison</p>
-              <div style={{ display: "flex", gap: 10 }}>
-                <div style={{ flex: 1, background: "#f4f6ff", borderRadius: "var(--r-sm)", padding: "14px 16px" }}>
-                  <p className="t-caption" style={{ color: "var(--c-text-sub)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>This week</p>
-                  <p className="t-stat" style={{ color: "var(--c-blue)", margin: 0, lineHeight: 1 }}>{thisWeekAvg ?? "–"}</p>
-                  <p className="t-caption" style={{ color: "var(--c-hint)", margin: "4px 0 0" }}>{thisWeekSnaps.length} day{thisWeekSnaps.length !== 1 ? "s" : ""} logged</p>
-                </div>
-                <div style={{ flex: 1, background: "var(--c-bg)", borderRadius: "var(--r-sm)", padding: "14px 16px" }}>
-                  <p className="t-caption" style={{ color: "var(--c-text-sub)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>Last week</p>
-                  <p className="t-stat" style={{ color: "var(--c-text)", margin: 0, lineHeight: 1 }}>{lastWeekAvg ?? "–"}</p>
-                  <p className="t-caption" style={{ color: "var(--c-hint)", margin: "4px 0 0" }}>{lastWeekSnaps.length} day{lastWeekSnaps.length !== 1 ? "s" : ""} logged</p>
-                </div>
+            <div style={{ background: "#fff", borderRadius: "var(--r-md)", padding: "12px 16px", boxShadow: "var(--shadow-card)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                <span className="t-label" style={{ color: "var(--c-label)" }}>This week</span>
+                <span style={{ fontSize: 20, fontWeight: 900, color: "var(--c-blue)", lineHeight: 1 }}>{thisWeekAvg ?? "–"}</span>
               </div>
-              {thisWeekAvg !== null && lastWeekAvg !== null && (
-                <p className="t-body-sm" style={{ fontWeight: 600, color: thisWeekAvg >= lastWeekAvg ? "var(--c-green)" : "var(--c-red)", margin: "12px 0 0", textAlign: "center" }}>
-                  {thisWeekAvg >= lastWeekAvg ? "▲" : "▼"} {Math.abs(thisWeekAvg - lastWeekAvg)} pts {thisWeekAvg >= lastWeekAvg ? "up" : "down"} from last week
-                </p>
+              {thisWeekAvg !== null && lastWeekAvg !== null ? (
+                <span className="t-body-sm" style={{ fontWeight: 700, color: thisWeekAvg >= lastWeekAvg ? "var(--c-green)" : "var(--c-red)" }}>
+                  {thisWeekAvg >= lastWeekAvg ? "▲" : "▼"} {Math.abs(thisWeekAvg - lastWeekAvg)} pts vs last week
+                </span>
+              ) : (
+                <span className="t-caption" style={{ color: "var(--c-hint)" }}>last week: {lastWeekAvg ?? "–"}</span>
               )}
             </div>
           )}
@@ -1634,47 +1732,7 @@ export default function ProfilePage() {
             );
           })()}
 
-          {/* Hydration Averages */}
-          {(() => {
-            const LITRE_MID: Record<string, number> = {
-              "<1L": 0.75, "1–1.5L": 1.25, "1.5–2L": 1.75,
-              "2–2.5L": 2.25, "2.5–3L": 2.75, "3L+": 3.25,
-            };
-            let logs: { ts: string; litres: string }[] = [];
-            try { logs = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch {}
-            if (!logs.length) return null;
-            const now = Date.now();
-            const avg = (entries: typeof logs) => {
-              const vals = entries.map(e => LITRE_MID[e.litres]).filter(v => v !== undefined);
-              return vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : null;
-            };
-            const last7  = logs.filter(e => now - new Date(e.ts).getTime() < 7  * 864e5);
-            const last30 = logs.filter(e => now - new Date(e.ts).getTime() < 30 * 864e5);
-            const avg7   = avg(last7);
-            const avg30  = avg(last30);
-            const avgAll = avg(logs);
-            const color  = (v: string | null) => !v ? "var(--c-hint)" : parseFloat(v) >= 2 ? "var(--c-teal)" : parseFloat(v) >= 1.5 ? "var(--c-blue)" : "var(--c-red)";
-            return (
-              <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
-                <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Hydration Average</p>
-                <div style={{ display: "flex", gap: 10 }}>
-                  {[
-                    { label: "7 days", value: avg7,  n: last7.length },
-                    { label: "Month",  value: avg30, n: last30.length },
-                    { label: "All time", value: avgAll, n: logs.length },
-                  ].map(({ label, value, n }) => (
-                    <div key={label} style={{ flex: 1, background: "var(--c-bg)", borderRadius: "var(--r-sm)", padding: "14px 12px", textAlign: "center" }}>
-                      <p className="t-caption" style={{ color: "var(--c-text-sub)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</p>
-                      <p className="t-stat" style={{ color: color(value), margin: 0, lineHeight: 1, fontSize: "clamp(22px,6vw,28px)" }}>{value ?? "–"}<span style={{ fontSize: 13, fontWeight: 600, marginLeft: 2 }}>{value ? "L" : ""}</span></p>
-                      <p className="t-caption" style={{ color: "var(--c-hint)", margin: "4px 0 0" }}>{n} log{n !== 1 ? "s" : ""}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* Food Quality */}
+          {/* Food Quality + Hydration */}
           {(() => {
             const todayStr = new Date().toISOString().slice(0, 10);
             const viewDate = selectedFoodDate ?? todayStr;
@@ -1701,10 +1759,23 @@ export default function ProfilePage() {
             const coverage = compareMealsToSchedule(viewMeals, dayTypeLocal);
             const barMax = Math.max(...foodHistory.map(d => d.score), 1);
             const dateLabel = isToday ? "Today" : new Date(viewDate + "T12:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+
+            // Hydration inline
+            const LITRE_MID: Record<string, number> = { "<1L": 0.75, "1–1.5L": 1.25, "1.5–2L": 1.75, "2–2.5L": 2.25, "2.5–3L": 2.75, "3L+": 3.25 };
+            let hydLogs: { ts: string; litres: string }[] = [];
+            try { hydLogs = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch {}
+            const hydAvg = (entries: typeof hydLogs) => {
+              const vals = entries.map(e => LITRE_MID[e.litres]).filter(v => v !== undefined);
+              return vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : null;
+            };
+            const now = Date.now();
+            const hyd7 = hydAvg(hydLogs.filter(e => now - new Date(e.ts).getTime() < 7 * 864e5));
+            const hydColor = (v: string | null) => !v ? "var(--c-hint)" : parseFloat(v) >= 2 ? "var(--c-teal)" : parseFloat(v) >= 1.5 ? "var(--c-blue)" : "var(--c-red)";
+
             return (
               <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
-                  <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>Food Quality</p>
+                  <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>Food & Hydration</p>
                   <span className="t-caption" style={{ color: isToday ? "var(--c-hint)" : "var(--c-blue)", fontWeight: 600 }}>{dateLabel}</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "flex-end", gap: 16, marginBottom: 16 }}>
@@ -1736,13 +1807,13 @@ export default function ProfilePage() {
                   ))}
                 </div>
                 {isToday && aiInsight && (
-                  <div style={{ background: "#f0f4ff", borderRadius: 10, padding: "10px 12px", marginBottom: viewMeals.length ? 14 : 0 }}>
+                  <div style={{ background: "#f0f4ff", borderRadius: 10, padding: "10px 12px", marginBottom: 14 }}>
                     <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: "#2653d4", marginBottom: 3 }}>AI Assessment</p>
                     <p style={{ margin: 0, fontSize: 13, color: "#2c3235", lineHeight: 1.5 }}>{aiInsight.insight}</p>
                   </div>
                 )}
                 {isToday && !aiInsight && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: viewMeals.length ? 14 : 0 }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 14 }}>
                     {coverage.map(({ title, covered }) => (
                       <div key={title} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <div style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0, background: covered ? "#16a34a" : "#e8eaed", border: covered ? "none" : "1.5px solid #c8cdd3" }} />
@@ -1752,19 +1823,14 @@ export default function ProfilePage() {
                     ))}
                   </div>
                 )}
-                {viewMeals.length > 0 ? (
-                  <div style={{ borderTop: "1px solid #f4f4f6", paddingTop: 12, display: "flex", flexDirection: "column", gap: 6 }}>
-                    {viewMeals.map(m => (
-                      <div key={m.id} style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: "#b0b8c1", flexShrink: 0 }}>{m.time}</span>
-                        <span className="t-body-sm" style={{ color: "var(--c-text-sub)", lineHeight: 1.4 }}>{m.description}</span>
-                      </div>
-                    ))}
+                {/* Hydration inline row */}
+                {hydLogs.length > 0 && (
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderTop: "1px solid #f4f4f6" }}>
+                    <span className="t-body-sm" style={{ color: "var(--c-text-sub)", fontWeight: 600 }}>Hydration (7d avg)</span>
+                    <span style={{ fontSize: 15, fontWeight: 800, color: hydColor(hyd7) }}>{hyd7 ? `${hyd7}L` : "–"}</span>
                   </div>
-                ) : !isToday ? (
-                  <p className="t-body-sm" style={{ color: "var(--c-hint)", margin: 0, borderTop: "1px solid #f4f4f6", paddingTop: 12 }}>Nothing logged this day.</p>
-                ) : null}
-                <Link href="/shopping-list" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16, paddingTop: 14, borderTop: "1px solid #f4f4f6", textDecoration: "none" }}>
+                )}
+                <Link href="/shopping-list" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 12, borderTop: "1px solid #f4f4f6", textDecoration: "none" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                     <span style={{ fontSize: 14, fontWeight: 600, color: "#16a34a" }}>Weekly Shopping List</span>

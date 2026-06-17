@@ -99,10 +99,10 @@ export default function Fab() {
       <button
         onClick={() => { setSmartUploadError(null); setLogPickerOpen(true); }}
         className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
-        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.25rem", width: 56, height: 56, borderRadius: 28, background: "#2653d4", boxShadow: "0 4px 16px #2653d455" }}
+        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "2rem", width: 56, height: 56, borderRadius: 28, background: "#ffffff", boxShadow: "0 2px 12px rgba(0,0,0,0.14), 0 0 0 1px rgba(0,0,0,0.06)" }}
         aria-label="Add"
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
 
       {/* Always-mounted file input */}
@@ -146,7 +146,7 @@ export default function Fab() {
       {logPickerOpen && (
         <div className="fixed inset-0 z-[200] flex items-end" onClick={closeAll} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
           <style>{`@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" />
           <div className="relative w-full bg-white rounded-t-[28px] shadow-2xl" style={{ animation: "sheetUp 0.3s cubic-bezier(0.22,1,0.36,1)", overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "85dvh", paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
 
             {/* Header: Home + My Profile */}
@@ -249,7 +249,7 @@ export default function Fab() {
             {/* Food sub-modal */}
             {logPickerSub === "nutrition" && (
               <div className="fixed inset-0 z-[300] flex items-end" onClick={() => setLogPickerSub(null)}>
-                <div className="absolute inset-0 bg-black/20" />
+                <div className="fixed inset-0 bg-black/20" />
                 <div className="relative w-full bg-white rounded-t-[24px] shadow-2xl" style={{ paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
                   <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-[#e0e0e0]" /></div>
                   <div style={{ padding: "12px 20px 4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -282,7 +282,7 @@ export default function Fab() {
             {/* Note sub-modal */}
             {logPickerSub === "matchreview" && (
               <div className="fixed inset-0 z-[300] flex items-end" onClick={() => setLogPickerSub(null)}>
-                <div className="absolute inset-0 bg-black/20" />
+                <div className="fixed inset-0 bg-black/20" />
                 <div className="relative w-full bg-white rounded-t-[24px] shadow-2xl" style={{ paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
                   <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-[#e0e0e0]" /></div>
                   <div style={{ padding: "12px 20px 4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -347,7 +347,7 @@ export default function Fab() {
 
         return (
           <div className="fixed inset-0 z-[300] flex items-end" onClick={() => { setLogPickerSub(null); setSmartUploadResult(null); }}>
-            <div className="absolute inset-0 bg-black/20" />
+            <div className="fixed inset-0 bg-black/20" />
             <div className="relative w-full bg-white rounded-t-[24px] shadow-2xl" style={{ paddingBottom: "env(safe-area-inset-bottom)", maxHeight: "82vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
               <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-[#e0e0e0]" /></div>
               <div style={{ padding: "12px 20px 4px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>

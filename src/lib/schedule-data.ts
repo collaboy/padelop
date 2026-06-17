@@ -137,7 +137,7 @@ export function getScheduleData(dayType: "match" | "recovery" | "training", matc
       { time: "07:30", title: "Breakfast",            subtitle: "Oats, eggs, fruit" },
       { time: "09:00", title: "Morning mobility",     subtitle: "Foam roll & light stretching" },
       { time: addMins(mH, mM, -360), title: "Pre-game meal",       subtitle: "Chicken, rice, light salad" },
-      { time: addMins(mH, mM, -60),  title: "Warmup & activation", subtitle: "Dynamic drills, 30 min" },
+      { time: addMins(mH, mM, -60),  title: "Warmup & activation", subtitle: "Get loose — dynamic movement" },
       { time: mt,                    title: "Match",                subtitle: "Game time" },
       { time: addMins(mH, mM, 90),   title: "Post-match cool down", subtitle: "Stretch & mobility, 15 min" },
       { time: addMins(mH, mM, 120),  title: "Recovery meal",       subtitle: "Protein + carbs within 30 min" },
@@ -159,7 +159,7 @@ export function getScheduleData(dayType: "match" | "recovery" | "training", matc
       { time: "09:30", title: "Light mobility",     subtitle: "Hip flexors, thoracic spine, ankles" },
       { time: "11:00", title: drillTitle,           subtitle: drill.subtitle, isDrill: true },
       { time: "12:30", title: "Balanced lunch",     subtitle: "Carbs + protein + greens" },
-      { time: "15:00", title: "Active recovery",    subtitle: "Walk, swim or light cycling" },
+      { time: "15:00", title: "Active recovery",    subtitle: "Light walk or gentle movement" },
       { time: "19:00", title: "Dinner",             subtitle: "Focus on variety and micronutrients" },
       { time: "21:00", title: "Visualisation",      subtitle: "5 min mental rehearsal of key patterns" },
       { time: "22:30", title: "Wind down",          subtitle: "No screens, consistent bedtime" },
@@ -216,7 +216,7 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
   "Warmup & activation": { type: 'exercise', focus: "Neuromuscular activation · movement prep", steps: [
     { step: "Leg swings", cue: "Hold a wall for balance. Swing each leg forward and back, then laterally. Stay controlled.", reps: "15 reps each direction, each leg" },
     { step: "Lateral shuffle", cue: "Stay low, weight on balls of feet. Shuffle 5 metres left and right. Explode off each plant.", reps: "3 sets of 10 metres" },
-    { step: "Shadow groundstrokes", cue: "20 forehand + 20 backhand shadow swings, building from 60% to 80% intensity. Focus on footwork first.", reps: "20 each side" },
+    { step: "Shadow swings", cue: "20 forehand + 20 backhand shadow swings, building from 60% to 80% intensity. Focus on footwork and contact point.", reps: "20 each side" },
   ]},
   "Match": { type: 'info', text: "Match time. Focus on early rhythm — the first two games set the tone. Communicate constantly with your partner. Stay hydrated between sets." },
   "Post-match cool down": { type: 'exercise', focus: "Heart rate reduction · static stretching", steps: [
