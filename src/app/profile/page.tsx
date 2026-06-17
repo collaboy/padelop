@@ -915,7 +915,7 @@ export default function ProfilePage() {
           <div style={{ background: "#fff", borderRadius: "50%", width: 56, height: 56, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
             <span className="font-semibold tracking-tight text-[var(--text)]" style={{ fontFamily: "Inter, sans-serif", fontSize: 15 }}>
               {(["p","a","d","l","a"] as const).map((ch, i) => (
-                <span key={i} style={{ display: "inline-block", transform: `translateY(${5 - i}px)` }}>{ch}</span>
+                <span key={i} style={{ display: "inline-block", transform: `translateY(${2 - i}px)` }}>{ch}</span>
               ))}
               <span style={{ display: "inline-block", width: "0.55em", height: "0.55em", borderRadius: "50%", background: "#22c55e", verticalAlign: "middle", margin: "0 0.02em 0.05em", transform: "translateY(-1px)" }} />
             </span>
