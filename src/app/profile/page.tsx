@@ -908,7 +908,7 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="max-w-lg mx-auto pb-20">
+    <div className="w-full pb-20">
 
       {/* ── Profile Header (always visible) ─────────────────────────────── */}
       <div className="flex flex-col items-center text-center gap-2">

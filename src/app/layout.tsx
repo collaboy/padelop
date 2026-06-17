@@ -40,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <p style={{ fontSize: 22, fontWeight: 700, color: "#1a1c1c" }}>Open on your phone</p>
           <p style={{ fontSize: 15, color: "#6b7480", lineHeight: 1.6 }}>padla is designed for mobile.<br />Scan the QR code or visit on your phone.</p>
         </div>
-        <div className="mx-auto w-full max-w-[375px] flex flex-col min-h-full">
+        <div className="mx-auto w-full max-w-[480px] flex flex-col min-h-full">
           <Nav />
           <SwipeNav>
             <main className="vt-page-content flex-1 pb-24">
