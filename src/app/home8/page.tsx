@@ -667,7 +667,7 @@ export default function Home8() {
             <div style={{
               display: "flex", flexDirection: "column", gap: 10,
               transform: doIdx >= 1
-                ? `translateY(calc(84px - 2 * (100vw - 30px) - 95dvh))`
+                ? `translateY(calc(120px - 2 * (100vw - 30px) - 95dvh))`
                 : doIdx === -1
                   ? `translateY(calc(10px - (100vw - 30px) + ${liveY}px))`
                   : `translateY(calc(-50dvh - 150vw + 100px + ${liveY}px))`,
