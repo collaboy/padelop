@@ -162,13 +162,13 @@ export default function Fab() {
                 <button
                   onClick={() => insertUploadRef.current?.click()}
                   disabled={insertUploadLoading}
-                  style={{ width: "100%", background: "#eef2ff", border: "none", borderRadius: 18, padding: "22px 20px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, textAlign: "center", opacity: insertUploadLoading ? 0.6 : 1, aspectRatio: "1" }}
+                  style={{ width: "100%", background: "#eef2ff", border: "none", borderRadius: 18, padding: "22px 20px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, textAlign: "center", opacity: insertUploadLoading ? 0.6 : 1, aspectRatio: "1" }}
                 >
-                  <div style={{ width: 52, height: 52, borderRadius: 14, background: "#2653d4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: 64, height: 64, borderRadius: 18, background: "#2653d4", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     {insertUploadLoading ? (
-                      <svg className="animate-spin" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                      <svg className="animate-spin" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
                     ) : (
-                      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
                     )}
                   </div>
                   <div>
