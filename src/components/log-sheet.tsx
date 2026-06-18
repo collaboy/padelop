@@ -517,13 +517,13 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
     const sectionStep = isNight ? morningStep + 1 : morningStep - NIGHT_COUNT + 1;
     const sectionTotal = isNight ? NIGHT_COUNT : MORNING_COUNT;
 
+    const isLastStep = morningStep === totalSteps - 1;
+
     function pick(key: string, val: string | number) {
       const next = { ...morningData, [key]: val };
       setMorningData(next);
-      if (morningStep < totalSteps - 1) {
+      if (!isLastStep) {
         setTimeout(() => setMorningStep(s => s + 1), 180);
-      } else {
-        saveCombined(next);
       }
     }
 
@@ -705,7 +705,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
                 <button onClick={advance}
                   className="w-full rounded-2xl text-white text-[16px] font-bold transition-all active:scale-95"
                   style={{ height: 52, background: accent }}>
-                  Done →
+                  Next →
                 </button>
               </div>
             )}
@@ -721,6 +721,13 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
                     </button>
                   );
                 })}
+                {isLastStep && morningData[step.key] !== undefined && (
+                  <button onClick={() => saveCombined(morningData)}
+                    className="w-full rounded-2xl text-white text-[16px] font-bold transition-all active:scale-95 mt-2"
+                    style={{ height: 52, background: accent }}>
+                    Save check-in
+                  </button>
+                )}
               </div>
             )}
           </div>

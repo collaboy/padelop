@@ -913,17 +913,7 @@ export default function ProfilePage() {
       {/* ── Profile Header (always visible) ─────────────────────────────── */}
       <div className="flex flex-col items-center text-center gap-2">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "16px 20px 0" }}>
-          {/* Logo left */}
-          <Link href="/" style={{ textDecoration: "none" }}>
-            <div style={{ background: "#fff", borderRadius: "50%", width: 44, height: 44, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-              <span className="font-semibold tracking-tight text-[var(--text)]" style={{ fontFamily: "Inter, sans-serif", fontSize: 13 }}>
-                {(["p","a","d","l","a"] as const).map((ch, i) => (
-                  <span key={i} style={{ display: "inline-block", transform: `translateY(${2 - i}px)` }}>{ch}</span>
-                ))}
-                <span style={{ display: "inline-block", width: "0.55em", height: "0.55em", borderRadius: "50%", background: "#22c55e", verticalAlign: "middle", margin: "0 0.02em 0.05em", transform: "translateY(-1px)" }} />
-              </span>
-            </div>
-          </Link>
+          <div style={{ width: 44 }} />
 
           {/* Avatar center */}
           <button onClick={() => setProfileOpen(o => !o)} className="active:opacity-70 transition-opacity" style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "inline-block" }}>
@@ -1212,31 +1202,35 @@ export default function ProfilePage() {
       {activeTab === 'today' && (
         <div className="pt-5 flex flex-col gap-5">
 
-          {/* Match info — only on match day, pinned to top */}
-          {dayType === 'match' && nextMatch && (
-            <div style={{ margin: "0 20px" }}>
-              <NextMatchCard match={nextMatch} />
-            </div>
-          )}
+          {/* Day hero card */}
+          {(() => {
+            const dayGrad = dayType === "match"
+              ? ["#eef2ff", "#dbe4ff"]
+              : dayType === "recovery"
+              ? ["#faf5ff", "#ede9fe"]
+              : ["#ecfdf5", "#d1fae5"];
+            return (
+              <div style={{ margin: "0 20px", borderRadius: "var(--r-lg)", overflow: "hidden", boxShadow: "var(--shadow-card)" }}>
+                <div style={{ background: `linear-gradient(145deg, ${dayGrad[0]}, ${dayGrad[1]})`, padding: "32px 24px 24px", textAlign: "center" }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: dayColor }}>Today</span>
+                  <p style={{ margin: "8px 0 6px", fontSize: "clamp(32px, 8vw, 40px)", fontWeight: 800, color: dayColor, lineHeight: 1.1 }}>{dayLabel}</p>
+                  <span style={{ fontSize: 13, color: "#8a9096", fontWeight: 500 }}>{now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</span>
+                </div>
+                <div style={{ background: "#fff", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+                  {tips.map(tip => (
+                    <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                      <div style={{ width: 7, height: 7, borderRadius: "50%", background: dayColor, flexShrink: 0, marginTop: 5 }} />
+                      <span style={{ fontSize: 13, fontWeight: 500, color: "#2c3235", lineHeight: 1.4 }}>{tip}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Today's Schedule */}
           <div style={{ padding: "0 20px" }}>
-            <p style={{ margin: "0 0 12px", fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>Today&apos;s Schedule</p>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 99, background: `${dayColor}18`, color: dayColor }}>{dayLabel}</span>
-              <span style={{ fontSize: 13, color: "#b0b8c1", fontWeight: 500 }}>{now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</span>
-            </div>
-            <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)", marginBottom: 12 }}>
-              <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Focus Today</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {tips.map(tip => (
-                  <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--c-blue)", flexShrink: 0, marginTop: 5 }}/>
-                    <span className="t-body-sm" style={{ fontWeight: 500, color: "var(--c-text)", lineHeight: 1.4 }}>{tip}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <p style={{ margin: "0 0 10px", fontSize: 18, fontWeight: 800, color: "#1a1c1c", textAlign: "left" }}>Today&apos;s Schedule</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {schedule.map((s, i) => {
                 const isCur = i === schedCurrentIdx;

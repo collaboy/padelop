@@ -99,10 +99,10 @@ export default function Fab() {
       <button
         onClick={() => { setSmartUploadError(null); setLogPickerOpen(true); }}
         className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
-        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "2rem", width: 56, height: 56, borderRadius: 28, background: "#ffffff", boxShadow: "0 2px 12px rgba(0,0,0,0.14), 0 0 0 1px rgba(0,0,0,0.06)" }}
+        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "2rem", width: 40, height: 40, borderRadius: 20, background: "#ffffff", boxShadow: "0 2px 12px rgba(0,0,0,0.14), 0 0 0 1px rgba(0,0,0,0.06)" }}
         aria-label="Add"
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b0b5ba" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
 
       {/* Always-mounted file input */}

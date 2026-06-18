@@ -3,7 +3,6 @@ import { Geist } from "next/font/google";
 import { Hanken_Grotesk } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
-import Nav from "@/components/nav";
 import BottomNav from "@/components/bottom-nav";
 import SwipeNav from "@/components/swipe-nav";
 import WeekPlanModal from "@/components/week-plan-modal";
@@ -41,7 +40,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <p style={{ fontSize: 15, color: "#6b7480", lineHeight: 1.6 }}>padla is designed for mobile.<br />Scan the QR code or visit on your phone.</p>
         </div>
         <div className="mx-auto w-full max-w-[480px] flex flex-col min-h-full">
-          <Nav />
           <SwipeNav>
             <main className="vt-page-content flex-1 pb-24">
               {children}
