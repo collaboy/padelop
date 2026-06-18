@@ -162,16 +162,18 @@ export default function Fab() {
                 <button
                   onClick={() => insertUploadRef.current?.click()}
                   disabled={insertUploadLoading}
-                  style={{ width: "100%", background: "#f4f6ff", border: "2px dashed #c7d2fe", borderRadius: 18, padding: "24px 20px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, textAlign: "center", opacity: insertUploadLoading ? 0.6 : 1 }}
+                  style={{ width: "100%", background: "#eef2ff", border: "none", borderRadius: 18, padding: "22px 20px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, textAlign: "center", opacity: insertUploadLoading ? 0.6 : 1 }}
                 >
-                  {insertUploadLoading ? (
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                  ) : (
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
-                  )}
+                  <div style={{ width: 52, height: 52, borderRadius: 14, background: "#2653d4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {insertUploadLoading ? (
+                      <svg className="animate-spin" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                    ) : (
+                      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                    )}
+                  </div>
                   <div>
-                    <p style={{ fontSize: "clamp(15px, 3.9vw, 17px)", fontWeight: 700, color: "#2653d4", margin: 0 }}>{insertUploadLoading ? "Analysing…" : "Upload"}</p>
-                    <p style={{ fontSize: "clamp(12px, 3.1vw, 14px)", fontWeight: 500, color: "#6b7480", margin: "3px 0 0" }}>Match booking · Food · Results · Gear</p>
+                    <p style={{ fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>{insertUploadLoading ? "Analysing…" : "Upload a photo"}</p>
+                    <p style={{ fontSize: 13, fontWeight: 500, color: "#6b7480", margin: "3px 0 0" }}>Match booking · Food · Results · Gear</p>
                   </div>
                 </button>
 
@@ -227,16 +229,16 @@ export default function Fab() {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, paddingTop: 0, marginTop: -4 }}>
                   <button
                     onClick={() => { closeAll(); router.push("/home8"); }}
-                    style={{ background: "#f4f4f6", border: "none", borderRadius: 14, padding: "12px 8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, aspectRatio: "1" }}
+                    style={{ background: "#eef2ff", border: "none", borderRadius: 14, padding: "12px 8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, aspectRatio: "1" }}
                   >
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                     <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
                   </button>
                   <button
                     onClick={() => { closeAll(); router.push("/profile"); }}
-                    style={{ background: "#f4f4f6", border: "none", borderRadius: 14, padding: "12px 8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, aspectRatio: "1" }}
+                    style={{ background: "#eef2ff", border: "none", borderRadius: 14, padding: "12px 8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, aspectRatio: "1" }}
                   >
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>
                     <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>My Profile</span>
                   </button>
                 </div>
