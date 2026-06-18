@@ -466,6 +466,7 @@ export default function ProfilePage() {
   // Tab
   const [activeTab, setActiveTab] = useState<'today' | 'progress' | 'archive'>('today');
   const [progressPanel, setProgressPanel] = useState<'consistency' | 'preparedness' | null>(null);
+  const [schedOpen, setSchedOpen] = useState(false);
 
   // Profile
   const [profile, setProfile] = useState<Profile>(EMPTY);
@@ -1471,7 +1472,15 @@ export default function ProfilePage() {
 
           {/* Today's Schedule */}
           <div style={{ padding: "0 20px" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <button
+              onClick={() => setSchedOpen(o => !o)}
+              style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: "#fff", border: "none", borderRadius: "var(--r-lg)", padding: "14px 18px", boxShadow: "var(--shadow-card)", cursor: "pointer", marginBottom: schedOpen ? 10 : 0 }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>Today&apos;s schedule</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: schedOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
+                <path d="M6 9l6 6 6-6"/>
+              </svg>
+            </button>
+            {schedOpen && <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {schedule.map((s, i) => {
                 const isCur = i === schedCurrentIdx;
                 const nowMins = schedNow.getHours() * 60 + schedNow.getMinutes();
@@ -1496,7 +1505,7 @@ export default function ProfilePage() {
                   </div>
                 );
               })}
-            </div>
+            </div>}
           </div>
 
 
