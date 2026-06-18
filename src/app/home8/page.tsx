@@ -889,7 +889,7 @@ export default function Home8() {
                   <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => setDoModalOpen(true)}>
                     {textureOverlay}
                     {sleepOverlay}
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.25s" }}>
                       <p className="font-bold leading-none text-center" style={{ color: "#fff", fontSize: "clamp(26px, 8vw, 36px)" }}>Good Job!</p>
                       <p className="font-semibold mt-1 leading-none text-center" style={{ color: "#fff", fontSize: "clamp(15px, 4.8vw, 22px)" }}>{s.title} complete</p>
                       <div className="w-10 h-10 rounded-full flex items-center justify-center mt-3" style={{ background: "rgba(255,255,255,0.25)" }}>
@@ -982,8 +982,8 @@ export default function Home8() {
                     {sleepOverlay}
 
                     {/* INFO STATE: fades out when playing */}
-                    <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: warmupPlaying ? 0 : contentOpacity, transition: "opacity 0.35s", pointerEvents: warmupPlaying ? "none" : "auto" }}>
-                      <p className="text-[14px] tracking-wide leading-none" style={{ color: "#000", fontWeight: 600 }}>Now</p>
+                    <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: warmupPlaying ? 0 : isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.35s", pointerEvents: warmupPlaying ? "none" : "auto" }}>
+                      {!isSleepytime && <p className="text-[14px] tracking-wide leading-none" style={{ color: "#000", fontWeight: 600 }}>Now</p>}
                       <p className="font-bold text-center" style={{ color: "#000", fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1 }}>{s.title}</p>
                       {isAudioAvailable
                         ? (
