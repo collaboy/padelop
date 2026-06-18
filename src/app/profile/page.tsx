@@ -2142,57 +2142,78 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* ── Schedule detail modal ────────────────────────────────────────── */}
+      {/* ── Schedule detail bottom sheet ─────────────────────────────────── */}
       {schedModalItem && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" style={{ paddingTop: "calc(4rem + 24px)", paddingBottom: "calc(4rem + 24px)" }} onClick={() => setSchedModalIdx(null)}>
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-          <div className="relative w-full bg-white rounded-[28px] overflow-hidden overflow-y-auto" style={{ maxHeight: "80vh", boxShadow: "0 8px 40px rgba(0,0,0,0.18)" }} onClick={e => e.stopPropagation()}>
-            <div className="px-6 pt-5 pb-4" style={{ background: `${schedModalItem.color}18` }}>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ background: schedModalItem.color }} />
-                <p className="text-[17px] font-bold tracking-widest uppercase" style={{ color: schedModalItem.color }}>Today&apos;s Schedule</p>
-              </div>
-              <h3 className="text-[28px] font-bold text-[#1a1c1c] leading-tight">{schedModalItem.title}</h3>
-              {schedModalItem.subtitle && <p className="text-[20px] text-[#6b7480] mt-0.5">{schedModalItem.subtitle}</p>}
+        <div className="fixed inset-0 z-[200] flex items-end" onClick={() => setSchedModalIdx(null)}>
+          <style>{`@keyframes schedUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+          <div
+            className="relative w-full bg-white flex flex-col"
+            style={{ borderRadius: "28px 28px 0 0", maxHeight: "88dvh", animation: "schedUp 0.32s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -4px 40px rgba(0,0,0,0.18)" }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Drag handle */}
+            <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
+              <div className="w-10 h-1 rounded-full bg-[#e2e2e2]" />
             </div>
-            {schedDetail && (
-              <div className="px-6 py-5">
-                {schedDetail.type === 'info' && <p className="text-[18px] text-[#2c3235] leading-relaxed">{schedDetail.text}</p>}
-                {schedDetail.type === 'meal' && (
-                  <>
-                    <p className="text-[15px] font-bold uppercase tracking-widest text-[#8a9096] mb-4">{schedDetail.focus}</p>
-                    <div className="flex flex-col gap-3">
-                      {schedDetail.options.map((meal, i) => (
-                        <div key={i} className="flex items-start gap-3">
-                          <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-1" style={{ background: `${schedModalItem.color}18` }}>
-                            <span className="text-[13px] font-bold" style={{ color: schedModalItem.color }}>{i + 1}</span>
-                          </div>
-                          <p className="text-[18px] text-[#2c3235] leading-snug">{meal}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-                {schedDetail.type === 'exercise' && (
-                  <div className="flex flex-col gap-4">
-                    {(schedDrillSteps ?? schedDetail.steps).map((s, i) => (
-                      <div key={i} className="flex items-start gap-3">
-                        <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: `${schedModalItem.color}18` }}>
-                          <span className="text-[15px] font-bold" style={{ color: schedModalItem.color }}>{i + 1}</span>
-                        </div>
-                        <div>
-                          <p className="text-[17px] font-semibold text-[#1a1c1c]">{s.step}</p>
-                          <p className="text-[16px] text-[#6b7480] mt-0.5 leading-snug">{s.cue}</p>
-                          <p className="text-[15px] font-semibold mt-1" style={{ color: schedModalItem.color }}>{s.reps}</p>
+            {/* Header */}
+            <div className="px-6 pt-3 pb-5 flex-shrink-0">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: schedModalItem.color }} />
+                <p className="text-[12px] font-bold tracking-[0.1em] uppercase" style={{ color: schedModalItem.color }}>{schedModalItem.time}</p>
+              </div>
+              <h3 className="text-[26px] font-bold text-[#1a1c1c] leading-tight">{schedModalItem.title}</h3>
+              {schedModalItem.subtitle && <p className="text-[15px] text-[#9aa5b0] mt-1 font-medium">{schedModalItem.subtitle}</p>}
+            </div>
+            {/* Scrollable content */}
+            <div className="overflow-y-auto flex-1 px-6 pb-4" style={{ minHeight: 0 }}>
+              {schedDetail && (() => {
+                const renderSteps = (stepList: { step: string; cue: string; reps: string }[]) => (
+                  <div className="flex flex-col gap-3">
+                    {stepList.map((s, i) => (
+                      <div key={i} className="flex gap-4 p-4 rounded-2xl" style={{ background: "#f8f9fa" }}>
+                        <span className="text-[13px] font-bold flex-shrink-0 mt-0.5" style={{ color: schedModalItem.color, minWidth: 16 }}>{i + 1}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[15px] font-semibold text-[#1a1c1c] leading-snug">{s.step}</p>
+                          <p className="text-[13px] text-[#6b7480] mt-1 leading-relaxed">{s.cue}</p>
+                          <span className="inline-block mt-2 px-2.5 py-0.5 rounded-full text-[12px] font-bold" style={{ background: `${schedModalItem.color}15`, color: schedModalItem.color }}>{s.reps}</span>
                         </div>
                       </div>
                     ))}
                   </div>
-                )}
-              </div>
-            )}
-            <div className="px-6 pb-6">
-              <button onClick={() => setSchedModalIdx(null)} className="w-full py-3.5 rounded-2xl font-bold text-white" style={{ background: schedModalItem.color }}>Done</button>
+                );
+                if (schedDetail.type === 'info') return (
+                  <div className="p-4 rounded-2xl" style={{ borderLeft: `3px solid ${schedModalItem.color}`, background: "#f8f9fa" }}>
+                    <p className="text-[15px] text-[#2c3235] leading-relaxed">{schedDetail.text}</p>
+                  </div>
+                );
+                if (schedDetail.type === 'meal') return (
+                  <div className="flex flex-col gap-3">
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-1">{schedDetail.focus}</p>
+                    {schedDetail.options.map((meal, i) => (
+                      <div key={i} className="flex items-start gap-3 p-4 rounded-2xl" style={{ background: "#f8f9fa" }}>
+                        <div className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style={{ background: schedModalItem.color }} />
+                        <p className="text-[14px] text-[#2c3235] leading-snug">{meal}</p>
+                      </div>
+                    ))}
+                  </div>
+                );
+                if (schedDetail.type === 'exercise') return (
+                  <div className="flex flex-col gap-4">
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0]">{schedDetail.focus}</p>
+                    {renderSteps(schedDrillSteps ?? schedDetail.steps)}
+                  </div>
+                );
+                return null;
+              })()}
+            </div>
+            {/* Footer */}
+            <div className="px-6 pt-4 pb-8 flex-shrink-0" style={{ borderTop: "1px solid #f0f0f0" }}>
+              <button
+                onClick={() => setSchedModalIdx(null)}
+                className="w-full py-4 rounded-2xl text-[16px] font-bold text-white"
+                style={{ background: schedModalItem.color }}
+              >Done</button>
             </div>
           </div>
         </div>
