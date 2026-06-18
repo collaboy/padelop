@@ -827,22 +827,30 @@ export default function Home8() {
                         </div>
                       );
                     })() : (
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", gap: 16 }}>
-                        <p style={{ fontSize: "clamp(14px, 3.5vw, 17px)", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#b0b8c1", margin: "0 0 -12px" }}>Next Match</p>
-                        <button
-                          onClick={() => { setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('pick'); setMatchModalOpen(true); }}
-                          style={{ width: "calc((100vw - 40px) * 0.25)", height: "calc((100vw - 40px) * 0.25)", borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 20px #2653d455", flexShrink: 0 }}
-                        >
-                          <svg width="36%" height="36%" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
-                            <line x1="12" y1="5" x2="12" y2="19"/>
-                            <line x1="5" y1="12" x2="19" y2="12"/>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+                        <div style={{ position: "relative", width: "calc((100vw - 40px) * 0.65)", height: "calc((100vw - 40px) * 0.65)", flexShrink: 0 }}>
+                          <button
+                            onClick={() => window.dispatchEvent(new Event("padelop:add-match"))}
+                            style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 20px #2653d455" }}
+                          >
+                            <svg width="18%" height="18%" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="2.5" strokeLinecap="round">
+                              <line x1="12" y1="5" x2="12" y2="19"/>
+                              <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                          </button>
+                          <svg viewBox="0 0 100 100" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
+                            <defs>
+                              <path id="noMatchArc" d="M 12 50 A 38 38 0 0 1 88 50" />
+                              <path id="noMatchReadinessArc" d="M 5 50 A 45 45 0 0 0 95 50" />
+                            </defs>
+                            <text fill="rgba(255,255,255,0.7)" fontSize="9.5" fontWeight="700" letterSpacing="2.5" fontFamily="inherit">
+                              <textPath href="#noMatchArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
+                            </text>
+                            <text fill="rgba(255,255,255,0.7)" fontSize="9.5" fontWeight="700" letterSpacing="2" fontFamily="inherit">
+                              <textPath href="#noMatchReadinessArc" startOffset="50%" textAnchor="middle">{`${readinessDone}/4`}</textPath>
+                            </text>
                           </svg>
-                        </button>
-                        <button onClick={() => setReadinessSheetOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-                          <span style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 600, color: "#6b7480" }}>
-                            Readiness: <span style={{ color: "#1a1c1c", fontWeight: 800 }}>{readinessDone}</span><span style={{ color: "#c8cdd3", fontWeight: 600 }}>/4</span>
-                          </span>
-                        </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -1237,7 +1245,7 @@ export default function Home8() {
                     );
 
                     return (
-                      <div className="p-4 rounded-2xl" style={{ borderLeft: `3px solid ${modalItem.color}`, background: "#f8f9fa" }}>
+                      <div className="p-4 rounded-2xl" style={{ background: "#f8f9fa" }}>
                         <p className="text-[15px] text-[#2c3235] leading-relaxed">{detail.text}</p>
                       </div>
                     );

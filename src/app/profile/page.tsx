@@ -1735,7 +1735,7 @@ export default function ProfilePage() {
 
                 {/* Notes */}
                 {r.notes && (
-                  <div className="p-4 rounded-2xl" style={{ background: "#f8f9fa", borderLeft: "3px solid #2653d4" }}>
+                  <div className="p-4 rounded-2xl" style={{ background: "#f8f9fa" }}>
                     <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Notes</p>
                     <p className="text-[15px] text-[#1a1c1c] leading-relaxed">{r.notes}</p>
                   </div>
@@ -2183,7 +2183,7 @@ export default function ProfilePage() {
                   </div>
                 );
                 if (schedDetail.type === 'info') return (
-                  <div className="p-4 rounded-2xl" style={{ borderLeft: `3px solid ${schedModalItem.color}`, background: "#f8f9fa" }}>
+                  <div className="p-4 rounded-2xl" style={{ background: "#f8f9fa" }}>
                     <p className="text-[15px] text-[#2c3235] leading-relaxed">{schedDetail.text}</p>
                   </div>
                 );

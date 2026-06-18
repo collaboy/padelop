@@ -51,9 +51,14 @@ export default function Fab() {
   const insertUploadRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    function handleOpen() { setSmartUploadError(null); setLogPickerOpen(true); }
+    function handleOpen() { setSmartUploadError(null); setFabExpanded(false); setLogPickerOpen(true); }
+    function handleAddMatch() {
+      setSmartUploadResult({ category: "match_schedule", label: "Schedule a match", confidence: "high", data: { date: "", time: "", club: "", court: "", player_1: "", player_2: "", player_3: "", player_4: "" } });
+      setLogPickerSub("upload-confirm");
+    }
     window.addEventListener("padelop:open-fab", handleOpen);
-    return () => window.removeEventListener("padelop:open-fab", handleOpen);
+    window.addEventListener("padelop:add-match", handleAddMatch);
+    return () => { window.removeEventListener("padelop:open-fab", handleOpen); window.removeEventListener("padelop:add-match", handleAddMatch); };
   }, []);
 
   function saveMealEntry(time: string, description: string) {
@@ -97,7 +102,7 @@ export default function Fab() {
     <>
       {/* FAB button */}
       <button
-        onClick={() => { setSmartUploadError(null); setLogPickerOpen(true); }}
+        onClick={() => { setSmartUploadError(null); setFabExpanded(false); setLogPickerOpen(true); }}
         className="fixed z-40 flex items-center justify-center active:scale-95 transition-transform"
         style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "2rem", width: 40, height: 40, borderRadius: 20, background: "#ffffff", boxShadow: "0 2px 12px rgba(0,0,0,0.14), 0 0 0 1px rgba(0,0,0,0.06)" }}
         aria-label="Add"
@@ -150,7 +155,7 @@ export default function Fab() {
           <div className="relative w-full bg-white rounded-t-[28px] shadow-2xl" style={{ animation: "sheetUp 0.3s cubic-bezier(0.22,1,0.36,1)", overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "85dvh", paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
 
             <div style={{ overflowY: "auto", minHeight: 0 }}>
-              <div style={{ padding: "12px 16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ padding: "16px 16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
 
                 {smartUploadError && (
                   <div style={{ background: "#fff5f5", border: "1.5px solid #fecaca", borderRadius: 12, padding: "10px 14px" }}>
