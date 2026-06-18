@@ -131,6 +131,18 @@ export async function hydrateFromSupabase() {
       localStorage.setItem("padelop:habits", JSON.stringify(habitDates));
     }
 
+    // ── Check-in history (for trend enrichment) ───────────────────────────
+    if (checkIns.length) {
+      const ciHistory = checkIns.map(c => ({
+        date:      c.date      as string,
+        sleep:     c.sleep     ?? 3,
+        energy:    c.energy    ?? 3,
+        hydration: c.hydration ?? 3,
+        stress:    c.stress    ?? 3,
+      }));
+      localStorage.setItem("padelop:checkin-history", JSON.stringify(ciHistory));
+    }
+
     // ── Hydration ────────────────────────────────────────────────────────
     const mlToRange = (ml: number) =>
       ml < 1000 ? "<1L" :

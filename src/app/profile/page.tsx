@@ -1068,6 +1068,18 @@ export default function ProfilePage() {
             const recentScores = scoreHistory.filter(s => last30Dates.includes(s.date));
             const prevScores   = scoreHistory.filter(s => prev30Dates.includes(s.date));
 
+            // Fill gaps using raw check-in history (sleep/energy/stress/hydration → proxy score)
+            type CIHistoryEntry = { date: string; sleep: number; energy: number; hydration: number; stress: number };
+            const ciHistory: CIHistoryEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:checkin-history") || "[]"); } catch { return []; } })();
+            const ciProxyScore = (c: CIHistoryEntry) => Math.max(65, Math.min(100, Math.round(65 + ((c.sleep + c.energy + c.stress + c.hydration - 12) / 8) * 35)));
+            const enrichedScores: Array<{ date: string; overall: number }> = last30Dates.map(date => {
+              const snap = scoreHistory.find(s => s.date === date);
+              if (snap) return { date, overall: snap.overall };
+              const ci = ciHistory.find(c => c.date === date);
+              if (ci) return { date, overall: ciProxyScore(ci) };
+              return null;
+            }).filter((x): x is { date: string; overall: number } => x !== null);
+
             const habitsArr: HabitsEntry[] = (() => {
               try {
                 const raw = localStorage.getItem("padelop:habits");
@@ -1079,7 +1091,7 @@ export default function ProfilePage() {
             const recentHabits = habitsArr.filter(h => last30Dates.includes(h.date));
             const prevHabits   = habitsArr.filter(h => prev30Dates.includes(h.date));
 
-            const schedDoneMap: Record<string, string[]> = (() => { try { return JSON.parse(localStorage.getItem("padelop:sched-done") || "{}"); } catch { return {}; } })();
+            const schedDoneMap: Record<string, string[]> = (() => { try { return JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}"); } catch { return {}; } })();
             const schedActiveDays = last30Dates.filter(d => (schedDoneMap[d] ?? []).length > 0).length;
 
             const hydLogs: HydrationEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch { return []; } })();
@@ -1140,7 +1152,7 @@ export default function ProfilePage() {
             ];
 
             // ── Trend ────────────────────────────────────────────────────────
-            const sorted = [...recentScores].sort((a, b) => a.date.localeCompare(b.date));
+            const sorted = [...enrichedScores].sort((a, b) => a.date.localeCompare(b.date));
             const recentHalf = sorted.slice(Math.floor(sorted.length / 2));
             const olderHalf  = sorted.slice(0, Math.floor(sorted.length / 2));
             const recentAvg  = avg(recentHalf.map(s => s.overall));
@@ -1191,6 +1203,32 @@ export default function ProfilePage() {
 
             return (
               <>
+                {/* ── 30-day Trend ──────────────────────────────────────── */}
+                <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)" }}>
+                  <p style={{ margin: "0 0 12px", fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>30-day trend</p>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <div style={{ width: 52, height: 52, borderRadius: "50%", background: `${trendColor}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <span style={{ fontSize: 26, lineHeight: 1, color: trendColor }}>{trendArrow}</span>
+                    </div>
+                    <div>
+                      <p style={{ margin: 0, fontSize: 20, fontWeight: 800, color: trendColor }}>{trendLabel}</p>
+                      <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9aa0a6", fontWeight: 500 }}>
+                        {enrichedScores.length < 4
+                          ? "Log more days to see your trend"
+                          : `${Math.abs(Math.round(trendDelta))}% ${trendDelta >= 0 ? "above" : "below"} your earlier baseline`}
+                      </p>
+                    </div>
+                  </div>
+                  {enrichedScores.length >= 4 && (
+                    <div style={{ marginTop: 14, display: "flex", alignItems: "flex-end", gap: 3, height: 40 }}>
+                      {sorted.map((s, i) => {
+                        const h = Math.max(4, Math.round(((s.overall - 65) / 35) * 36));
+                        return <div key={i} style={{ flex: 1, height: h, borderRadius: 3, background: i >= Math.floor(sorted.length / 2) ? trendColor : `${trendColor}55` }} />;
+                      })}
+                    </div>
+                  )}
+                </div>
+
                 {/* ── Scores row ────────────────────────────────────────── */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <button onClick={() => setProgressPanel(p => p === 'consistency' ? null : 'consistency')}
@@ -1238,32 +1276,6 @@ export default function ProfilePage() {
                     </div>
                   </div>
                 )}
-
-                {/* ── 30-day Trend ──────────────────────────────────────── */}
-                <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)" }}>
-                  <p style={{ margin: "0 0 12px", fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>30-day trend</p>
-                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                    <div style={{ width: 52, height: 52, borderRadius: "50%", background: `${trendColor}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <span style={{ fontSize: 26, lineHeight: 1, color: trendColor }}>{trendArrow}</span>
-                    </div>
-                    <div>
-                      <p style={{ margin: 0, fontSize: 20, fontWeight: 800, color: trendColor }}>{trendLabel}</p>
-                      <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9aa0a6", fontWeight: 500 }}>
-                        {recentScores.length < 4
-                          ? "Log more days to see your trend"
-                          : `${Math.abs(Math.round(trendDelta))}% ${trendDelta >= 0 ? "above" : "below"} your earlier baseline`}
-                      </p>
-                    </div>
-                  </div>
-                  {recentScores.length >= 4 && (
-                    <div style={{ marginTop: 14, display: "flex", alignItems: "flex-end", gap: 3, height: 40 }}>
-                      {sorted.map((s, i) => {
-                        const h = Math.max(4, Math.round(((s.overall - 65) / 35) * 36));
-                        return <div key={i} style={{ flex: 1, height: h, borderRadius: 3, background: i >= Math.floor(sorted.length / 2) ? trendColor : `${trendColor}55` }} />;
-                      })}
-                    </div>
-                  )}
-                </div>
 
                 {/* ── Biggest Improvement ───────────────────────────────── */}
                 <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)" }}>
