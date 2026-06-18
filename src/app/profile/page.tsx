@@ -1230,7 +1230,6 @@ export default function ProfilePage() {
 
           {/* Today's Schedule */}
           <div style={{ padding: "0 20px" }}>
-            <p style={{ margin: "0 0 10px", fontSize: 18, fontWeight: 800, color: "#1a1c1c", textAlign: "left" }}>Today&apos;s Schedule</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {schedule.map((s, i) => {
                 const isCur = i === schedCurrentIdx;
