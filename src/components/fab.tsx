@@ -149,26 +149,6 @@ export default function Fab() {
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" />
           <div className="relative w-full bg-white rounded-t-[28px] shadow-2xl" style={{ animation: "sheetUp 0.3s cubic-bezier(0.22,1,0.36,1)", overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "85dvh", paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
 
-            {/* Header: Home + My Profile */}
-            <div className="px-5 pt-5 pb-4 flex-shrink-0" style={{ borderBottom: "1px solid #f0f0f0" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                <button
-                  onClick={() => { closeAll(); router.push("/"); }}
-                  style={{ background: "#f4f4f6", border: "none", borderRadius: 14, padding: "12px 8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
-                </button>
-                <button
-                  onClick={() => { closeAll(); router.push("/profile"); }}
-                  style={{ background: "#f4f4f6", border: "none", borderRadius: 14, padding: "12px 8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>My Profile</span>
-                </button>
-              </div>
-            </div>
-
             <div style={{ overflowY: "auto", minHeight: 0 }}>
               <div style={{ padding: "12px 16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
 
@@ -241,6 +221,24 @@ export default function Fab() {
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: "auto" }}><polyline points="9 18 15 12 9 6"/></svg>
                     </button>
                   </div>
+                </div>
+
+                {/* Home + My Profile */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, paddingTop: 0, marginTop: -4 }}>
+                  <button
+                    onClick={() => { closeAll(); router.push("/home8"); }}
+                    style={{ background: "#f4f4f6", border: "none", borderRadius: 14, padding: "12px 8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, aspectRatio: "1" }}
+                  >
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
+                  </button>
+                  <button
+                    onClick={() => { closeAll(); router.push("/profile"); }}
+                    style={{ background: "#f4f4f6", border: "none", borderRadius: 14, padding: "12px 8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, aspectRatio: "1" }}
+                  >
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>My Profile</span>
+                  </button>
                 </div>
 
               </div>

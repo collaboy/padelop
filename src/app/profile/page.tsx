@@ -909,13 +909,35 @@ export default function ProfilePage() {
     { key: 'archive' as const,  label: 'Archive' },
   ];
 
+  const swipeStartX = useRef(0);
+  const swipeStartY = useRef(0);
+
+  function onSwipeStart(e: React.TouchEvent) {
+    swipeStartX.current = e.touches[0].clientX;
+    swipeStartY.current = e.touches[0].clientY;
+  }
+
+  function onSwipeEnd(e: React.TouchEvent) {
+    const dx = e.changedTouches[0].clientX - swipeStartX.current;
+    const dy = e.changedTouches[0].clientY - swipeStartY.current;
+    if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.8) return;
+    const idx = TABS.findIndex(t => t.key === activeTab);
+    if (dx < 0 && idx < TABS.length - 1) setActiveTab(TABS[idx + 1].key);
+    if (dx > 0 && idx > 0) setActiveTab(TABS[idx - 1].key);
+  }
+
   return (
     <div className="w-full pb-20">
 
       {/* ── Profile Header (always visible) ─────────────────────────────── */}
       <div className="flex flex-col items-center text-center gap-2">
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "16px 20px 0" }}>
-          <div style={{ width: 44 }} />
+          <Link href="/home8" style={{ width: 44, height: 44, borderRadius: "50%", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--c-text-sub)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/>
+              <path d="M9 21V12h6v9"/>
+            </svg>
+          </Link>
 
           {/* Avatar center */}
           <button onClick={() => setProfileOpen(o => !o)} className="active:opacity-70 transition-opacity" style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "inline-block" }}>
@@ -1050,6 +1072,8 @@ export default function ProfilePage() {
           ))}
         </div>
       </div>
+
+      <div onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
 
       {/* ── Tab: Me ──────────────────────────────────────────────────────── */}
       {activeTab === 'progress' && (
@@ -2154,6 +2178,8 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
+
+      </div>{/* end swipe wrapper */}
 
       <LogSheet open={logSheetOpen} onClose={() => {
         setLogSheetOpen(false);
