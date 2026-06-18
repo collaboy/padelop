@@ -12,6 +12,7 @@ import {
   computeScores, loadScoringData, saveScoreSnapshot, loadScoreHistory,
   computePillarStates,
   type Scores, type ScoreSnapshot, type ReviewEntry, type PillarStates, type PillarStatus,
+  type HydrationEntry, type NutritionEntry, type HabitsEntry,
 } from "@/lib/scoring";
 import { getScheduleData, SCHEDULE_DETAILS, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag } from "@/lib/schedule-data";
 
@@ -464,6 +465,7 @@ export default function ProfilePage() {
 
   // Tab
   const [activeTab, setActiveTab] = useState<'today' | 'progress' | 'archive'>('today');
+  const [progressPanel, setProgressPanel] = useState<'consistency' | 'preparedness' | null>(null);
 
   // Profile
   const [profile, setProfile] = useState<Profile>(EMPTY);
@@ -1050,8 +1052,242 @@ export default function ProfilePage() {
 
       {/* ── Tab: Me ──────────────────────────────────────────────────────── */}
       {activeTab === 'progress' && (
-        <div className="px-5 pt-5 flex flex-col gap-5" style={{ minHeight: 200 }}>
-          {/* Coming soon */}
+        <div className="px-5 pt-5 flex flex-col gap-4 pb-4">
+          {(() => {
+            const last30Dates = Array.from({ length: 30 }, (_, i) => {
+              const d = new Date(); d.setDate(d.getDate() - i);
+              return d.toISOString().slice(0, 10);
+            });
+            const prev30Dates = Array.from({ length: 30 }, (_, i) => {
+              const d = new Date(); d.setDate(d.getDate() - 30 - i);
+              return d.toISOString().slice(0, 10);
+            });
+
+            const scoreHistory: ScoreSnapshot[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:score-history") || "[]"); } catch { return []; } })();
+            const recentScores = scoreHistory.filter(s => last30Dates.includes(s.date));
+            const prevScores   = scoreHistory.filter(s => prev30Dates.includes(s.date));
+
+            const habitsArr: HabitsEntry[] = (() => {
+              try {
+                const raw = localStorage.getItem("padelop:habits");
+                if (!raw) return [];
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : [];
+              } catch { return []; }
+            })();
+            const recentHabits = habitsArr.filter(h => last30Dates.includes(h.date));
+            const prevHabits   = habitsArr.filter(h => prev30Dates.includes(h.date));
+
+            const schedDoneMap: Record<string, string[]> = (() => { try { return JSON.parse(localStorage.getItem("padelop:sched-done") || "{}"); } catch { return {}; } })();
+            const schedActiveDays = last30Dates.filter(d => (schedDoneMap[d] ?? []).length > 0).length;
+
+            const hydLogs: HydrationEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch { return []; } })();
+            const recentHyd = hydLogs.filter(h => last30Dates.includes(h.ts.slice(0, 10)));
+            const prevHyd   = hydLogs.filter(h => prev30Dates.includes(h.ts.slice(0, 10)));
+
+            const nutLogs: NutritionEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:nutrition-logs") || "[]"); } catch { return []; } })();
+            const recentNut = nutLogs.filter(n => last30Dates.includes(n.ts.slice(0, 10)));
+
+            const upcomingMatches: StoredMatch[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:upcoming-matches") || "[]"); } catch { return []; } })();
+            const recentMatches = upcomingMatches.filter(m => last30Dates.includes(m.date));
+
+            const avg = (arr: number[]) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+            const qualNum = (q: string) => q === "great" ? 1 : q === "ok" ? 0.6 : 0.3;
+
+            // ── Consistency ──────────────────────────────────────────────────
+            const checkinRate  = Math.min(recentScores.length / 30, 1);
+            const daysActiveRate = Math.min(
+              last30Dates.filter(d =>
+                recentScores.some(s => s.date === d) ||
+                recentHabits.some(h => h.date === d) ||
+                (schedDoneMap[d] ?? []).length > 0
+              ).length / 30, 1
+            );
+            const tasksRate    = schedActiveDays / 30;
+            const recoveryRate = recentHabits.length > 0 ? recentHabits.filter(h => h.foamRoll || h.lightWalk || h.coldShower).length / recentHabits.length : 0;
+            const mobilityRate = recentHabits.length > 0 ? recentHabits.filter(h => h.mobility).length / recentHabits.length : 0;
+
+            const consistencyScore = +((checkinRate + daysActiveRate + tasksRate + recoveryRate + mobilityRate) / 5 * 10).toFixed(1);
+
+            const consistencyFactors = [
+              { label: "Check-ins",  rate: checkinRate },
+              { label: "Days active", rate: daysActiveRate },
+              { label: "Tasks done", rate: tasksRate },
+              { label: "Recovery",   rate: recoveryRate },
+              { label: "Mobility",   rate: mobilityRate },
+            ];
+
+            // ── Preparedness ─────────────────────────────────────────────────
+            const hydPct   = recentHyd.length  > 0 ? avg(recentHyd.map(h => qualNum(h.quality))) : 0.5;
+            const sleepPct = recentScores.length > 0 ? Math.max(0, avg(recentScores.map(s => (s.recovery - 65) / 35))) : 0.5;
+            const nutPct   = recentNut.length  > 0 ? avg(recentNut.map(n => qualNum(n.quality))) : 0.5;
+            const mobPct   = mobilityRate > 0 ? mobilityRate : 0.5;
+            const recPct   = recoveryRate > 0 ? recoveryRate : 0.5;
+            const matchPct = recentMatches.length === 0 ? 0.4 : recentMatches.length <= 4 ? 0.9 : recentMatches.length <= 8 ? 0.7 : 0.5;
+
+            const preparednessScore = +(Math.max(0, Math.min(10,
+              (hydPct * 0.20 + sleepPct * 0.20 + nutPct * 0.20 + mobPct * 0.15 + recPct * 0.15 + matchPct * 0.10) * 10
+            )).toFixed(1));
+
+            const prepFactors = [
+              { label: "Hydration",   pct: hydPct,   weight: "20%" },
+              { label: "Sleep",       pct: sleepPct, weight: "20%" },
+              { label: "Nutrition",   pct: nutPct,   weight: "20%" },
+              { label: "Mobility",    pct: mobPct,   weight: "15%" },
+              { label: "Recovery",    pct: recPct,   weight: "15%" },
+              { label: "Match load",  pct: matchPct, weight: "10%" },
+            ];
+
+            // ── Trend ────────────────────────────────────────────────────────
+            const sorted = [...recentScores].sort((a, b) => a.date.localeCompare(b.date));
+            const recentHalf = sorted.slice(Math.floor(sorted.length / 2));
+            const olderHalf  = sorted.slice(0, Math.floor(sorted.length / 2));
+            const recentAvg  = avg(recentHalf.map(s => s.overall));
+            const olderAvg   = avg(olderHalf.map(s => s.overall));
+            const trendDelta = olderAvg > 0 ? ((recentAvg - olderAvg) / olderAvg) * 100 : 0;
+            const trendLabel = trendDelta > 3 ? "Improving" : trendDelta < -3 ? "Declining" : "Stable";
+            const trendColor = trendDelta > 3 ? "#16a34a" : trendDelta < -3 ? "#dc2626" : "#d97706";
+            const trendArrow = trendDelta > 3 ? "↑" : trendDelta < -3 ? "↓" : "→";
+
+            // ── Biggest Improvement ──────────────────────────────────────────
+            const prevHydPct = prevHyd.length > 0 ? avg(prevHyd.map(h => qualNum(h.quality))) : null;
+            const prevMobRate = prevHabits.length > 0 ? prevHabits.filter(h => h.mobility).length / prevHabits.length : null;
+            const prevRecRate = prevHabits.length > 0 ? prevHabits.filter(h => h.foamRoll || h.lightWalk || h.coldShower).length / prevHabits.length : null;
+            const prevSleepPct = prevScores.length > 0 ? Math.max(0, avg(prevScores.map(s => (s.recovery - 65) / 35))) : null;
+
+            const candidates = [
+              prevHydPct  !== null ? { label: "Hydration consistency", delta: (hydPct   - prevHydPct)  * 100 } : null,
+              prevMobRate !== null ? { label: "Mobility consistency",   delta: (mobilityRate - prevMobRate) * 100 } : null,
+              prevRecRate !== null ? { label: "Recovery habits",        delta: (recoveryRate - prevRecRate) * 100 } : null,
+              prevSleepPct !== null ? { label: "Sleep quality",         delta: (sleepPct - prevSleepPct) * 100 } : null,
+            ].filter((c): c is { label: string; delta: number } => c !== null && c.delta > 0)
+              .sort((a, b) => b.delta - a.delta);
+            const topImprovement = candidates[0] ?? null;
+
+            // ── Helpers ──────────────────────────────────────────────────────
+            function ScoreArc({ score, color }: { score: number; color: string }) {
+              const r = 34, circ = Math.PI * r;
+              const filled = Math.min(score / 10, 1) * circ;
+              return (
+                <svg width="84" height="52" viewBox="0 0 84 52" style={{ overflow: "visible" }}>
+                  <path d={`M8,50 A${r},${r} 0 0,1 76,50`} fill="none" stroke="#f0f0f0" strokeWidth="7" strokeLinecap="round"/>
+                  <path d={`M8,50 A${r},${r} 0 0,1 76,50`} fill="none" stroke={color} strokeWidth="7" strokeLinecap="round"
+                    strokeDasharray={`${filled} ${circ}`} style={{ transition: "stroke-dasharray 0.6s ease" }}/>
+                </svg>
+              );
+            }
+
+            function MiniBar({ pct, color = "#2653d4" }: { pct: number; color?: string }) {
+              return (
+                <div style={{ flex: 1, height: 4, borderRadius: 99, background: "#f0f0f0", overflow: "hidden" }}>
+                  <div style={{ width: `${Math.round(pct * 100)}%`, height: "100%", borderRadius: 99, background: color, transition: "width 0.5s ease" }}/>
+                </div>
+              );
+            }
+
+            const cColor = consistencyScore >= 7 ? "#16a34a" : consistencyScore >= 4 ? "#d97706" : "#dc2626";
+            const pColor = preparednessScore >= 7 ? "#2653d4" : preparednessScore >= 4 ? "#d97706" : "#dc2626";
+
+            return (
+              <>
+                {/* ── Scores row ────────────────────────────────────────── */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  <button onClick={() => setProgressPanel(p => p === 'consistency' ? null : 'consistency')}
+                    style={{ background: progressPanel === 'consistency' ? `${cColor}12` : "#fff", borderRadius: "var(--r-lg)", padding: "18px 14px 14px", boxShadow: progressPanel === 'consistency' ? `0 0 0 2px ${cColor}` : "var(--shadow-card)", display: "flex", flexDirection: "column", alignItems: "center", border: "none", cursor: "pointer" }}>
+                    <ScoreArc score={consistencyScore} color={cColor} />
+                    <p style={{ margin: "-4px 0 2px", fontSize: 30, fontWeight: 800, color: cColor, lineHeight: 1 }}>{consistencyScore}</p>
+                    <p style={{ margin: "2px 0 0", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Consistency</p>
+                  </button>
+                  <button onClick={() => setProgressPanel(p => p === 'preparedness' ? null : 'preparedness')}
+                    style={{ background: progressPanel === 'preparedness' ? `${pColor}12` : "#fff", borderRadius: "var(--r-lg)", padding: "18px 14px 14px", boxShadow: progressPanel === 'preparedness' ? `0 0 0 2px ${pColor}` : "var(--shadow-card)", display: "flex", flexDirection: "column", alignItems: "center", border: "none", cursor: "pointer" }}>
+                    <ScoreArc score={preparednessScore} color={pColor} />
+                    <p style={{ margin: "-4px 0 2px", fontSize: 30, fontWeight: 800, color: pColor, lineHeight: 1 }}>{preparednessScore}</p>
+                    <p style={{ margin: "2px 0 0", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Preparedness</p>
+                  </button>
+                </div>
+
+                {/* ── Consistency breakdown (expandable) ───────────────── */}
+                {progressPanel === 'consistency' && (
+                  <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)" }}>
+                    <p style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>Consistency breakdown</p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                      {consistencyFactors.map(f => (
+                        <div key={f.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <span style={{ width: 88, fontSize: 12, fontWeight: 500, color: "#6b7480", flexShrink: 0 }}>{f.label}</span>
+                          <MiniBar pct={f.rate} color={cColor} />
+                          <span style={{ width: 32, fontSize: 12, fontWeight: 700, color: "#1a1c1c", textAlign: "right" }}>{Math.round(f.rate * 100)}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Preparedness breakdown (expandable) ──────────────── */}
+                {progressPanel === 'preparedness' && (
+                  <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)" }}>
+                    <p style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>Preparedness breakdown</p>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                      {prepFactors.map(f => (
+                        <div key={f.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <span style={{ width: 74, fontSize: 12, fontWeight: 500, color: "#6b7480", flexShrink: 0 }}>{f.label}</span>
+                          <MiniBar pct={f.pct} color={pColor} />
+                          <span style={{ width: 32, fontSize: 11, fontWeight: 500, color: "#9aa0a6", textAlign: "right" }}>{f.weight}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── 30-day Trend ──────────────────────────────────────── */}
+                <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)" }}>
+                  <p style={{ margin: "0 0 12px", fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>30-day trend</p>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <div style={{ width: 52, height: 52, borderRadius: "50%", background: `${trendColor}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <span style={{ fontSize: 26, lineHeight: 1, color: trendColor }}>{trendArrow}</span>
+                    </div>
+                    <div>
+                      <p style={{ margin: 0, fontSize: 20, fontWeight: 800, color: trendColor }}>{trendLabel}</p>
+                      <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9aa0a6", fontWeight: 500 }}>
+                        {recentScores.length < 4
+                          ? "Log more days to see your trend"
+                          : `${Math.abs(Math.round(trendDelta))}% ${trendDelta >= 0 ? "above" : "below"} your earlier baseline`}
+                      </p>
+                    </div>
+                  </div>
+                  {recentScores.length >= 4 && (
+                    <div style={{ marginTop: 14, display: "flex", alignItems: "flex-end", gap: 3, height: 40 }}>
+                      {sorted.map((s, i) => {
+                        const h = Math.max(4, Math.round(((s.overall - 65) / 35) * 36));
+                        return <div key={i} style={{ flex: 1, height: h, borderRadius: 3, background: i >= Math.floor(sorted.length / 2) ? trendColor : `${trendColor}55` }} />;
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* ── Biggest Improvement ───────────────────────────────── */}
+                <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)" }}>
+                  <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>Biggest improvement</p>
+                  {topImprovement ? (
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: 15, fontWeight: 600, color: "#2c3235" }}>{topImprovement.label}</span>
+                      <span style={{ fontSize: 15, fontWeight: 800, color: "#16a34a" }}>+{Math.round(topImprovement.delta)}%</span>
+                    </div>
+                  ) : (
+                    <p style={{ margin: 0, fontSize: 13, color: "#b0b8c1", fontWeight: 500 }}>Keep logging to compare your progress week over week.</p>
+                  )}
+                </div>
+
+                {/* ── AI Observation placeholder ────────────────────────── */}
+                <div style={{ background: "linear-gradient(135deg, #eef2ff, #f5f3ff)", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                    <span style={{ fontSize: 16 }}>✦</span>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#2653d4" }}>AI observation</p>
+                  </div>
+                  <p style={{ margin: 0, fontSize: 13, color: "#6b7480", fontWeight: 500, lineHeight: 1.5 }}>Personalised insights coming soon. Keep logging your check-ins to unlock pattern analysis.</p>
+                </div>
+              </>
+            );
+          })()}
         </div>
       )}
 
