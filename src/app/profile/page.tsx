@@ -463,7 +463,7 @@ export default function ProfilePage() {
   const router = useRouter();
 
   // Tab
-  const [activeTab, setActiveTab] = useState<'me' | 'today' | 'matches' | 'stats'>('me');
+  const [activeTab, setActiveTab] = useState<'today' | 'progress' | 'archive'>('today');
 
   // Profile
   const [profile, setProfile] = useState<Profile>(EMPTY);
@@ -901,10 +901,9 @@ export default function ProfilePage() {
   const dayColor = dayType === "match" ? "#2653d4" : dayType === "recovery" ? "#7c3aed" : "#16a34a";
 
   const TABS = [
-    { key: 'me' as const,      label: 'Me' },
-    { key: 'today' as const,   label: 'Today' },
-    { key: 'matches' as const, label: 'Matches' },
-    { key: 'stats' as const,   label: 'Stats' },
+    { key: 'today' as const,    label: 'Today' },
+    { key: 'progress' as const, label: 'Progress' },
+    { key: 'archive' as const,  label: 'Archive' },
   ];
 
   return (
@@ -1050,7 +1049,13 @@ export default function ProfilePage() {
       </div>
 
       {/* ── Tab: Me ──────────────────────────────────────────────────────── */}
-      {activeTab === 'me' && (
+      {activeTab === 'progress' && (
+        <div className="px-5 pt-5 flex flex-col gap-5" style={{ minHeight: 200 }}>
+          {/* Coming soon */}
+        </div>
+      )}
+
+      {activeTab === 'archive' && (
         <div className="px-5 pt-5 flex flex-col gap-5">
 
           {/* Streak */}
@@ -1263,8 +1268,8 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* ── Tab: Matches ─────────────────────────────────────────────────── */}
-      {activeTab === 'matches' && (
+      {/* ── Tab: Archive — Matches ───────────────────────────────────────── */}
+      {activeTab === 'archive' && (
         <div style={{ padding: "16px 16px 0", display: "flex", flexDirection: "column", gap: 10 }}>
 
 
@@ -1482,8 +1487,8 @@ export default function ProfilePage() {
         );
       })()}
 
-      {/* ── Tab: Stats ───────────────────────────────────────────────────── */}
-      {activeTab === 'stats' && (
+      {/* ── Tab: Archive — Stats ─────────────────────────────────────────── */}
+      {activeTab === 'archive' && (
         <div className="px-5 pt-5 flex flex-col gap-5">
 
           {/* Daily Summaries */}
