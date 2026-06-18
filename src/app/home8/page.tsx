@@ -446,6 +446,14 @@ export default function Home8() {
     loadMatch();
     function handleStorage() { loadReadiness(); loadMatch(); }
     window.addEventListener("storage", handleStorage);
+    function handleMatchAdded(e: Event) {
+      const m = (e as CustomEvent<{ date: string; time: string; club?: string; court?: string; player_1?: string; player_2?: string; player_3?: string; player_4?: string }>).detail;
+      if (m?.date && m?.time) {
+        setMatch({ date: m.date, time: m.time, club: m.club || undefined, court: m.court || undefined, players: [m.player_1, m.player_2, m.player_3, m.player_4].filter(Boolean) as string[] });
+        setDoIdx(-1);
+      }
+    }
+    window.addEventListener("padelop:match-added", handleMatchAdded);
     function handleOpenLogSheet() { setLogSheetOpen(true); }
     function handleToggleLogSheet() { setLogSheetOpen(v => !v); }
     window.addEventListener("padelop:open-log-sheet", handleOpenLogSheet);
@@ -462,7 +470,7 @@ export default function Home8() {
     window.addEventListener("padelop:sync-done", handleSyncDone);
     setDrillTag(getTopNeedsWorkTag());
     const id = setInterval(() => setNow(new Date()), 1_000);
-    return () => { clearInterval(id); window.removeEventListener("storage", handleStorage); window.removeEventListener("padelop:open-log-sheet", handleOpenLogSheet); window.removeEventListener("padelop:toggle-log-sheet", handleToggleLogSheet); window.removeEventListener("padelop:sync-done", handleSyncDone); };
+    return () => { clearInterval(id); window.removeEventListener("storage", handleStorage); window.removeEventListener("padelop:match-added", handleMatchAdded); window.removeEventListener("padelop:open-log-sheet", handleOpenLogSheet); window.removeEventListener("padelop:toggle-log-sheet", handleToggleLogSheet); window.removeEventListener("padelop:sync-done", handleSyncDone); };
   }, []);
 
   // Reset hydration counter when date rolls over midnight

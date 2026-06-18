@@ -328,6 +328,7 @@ export default function Fab() {
             const matchData: StoredMatch = { date: data.date ?? "", time: data.time ?? "", club: data.club ?? "", court: data.court ?? "", player_1: data.player_1 ?? "", player_2: data.player_2 ?? "", player_3: data.player_3 ?? "", player_4: data.player_4 ?? "" };
             saveMatchListLocal([...getMatchList(), matchData]);
             saveUpcomingMatch(matchData);
+            window.dispatchEvent(new CustomEvent("padelop:match-added", { detail: matchData }));
           } else if (category === "meal") {
             saveMealEntry(nowTimeStr(), data.description ?? label);
           } else if (category === "match_result") {
