@@ -465,8 +465,18 @@ export default function ProfilePage() {
 
   // Tab
   const [activeTab, setActiveTab] = useState<'today' | 'progress' | 'archive'>('today');
+  const [tabAnimKey, setTabAnimKey] = useState(0);
+  const tabDir = useRef<1 | -1>(1);
   const [progressPanel, setProgressPanel] = useState<'consistency' | 'preparedness' | null>(null);
   const [schedOpen, setSchedOpen] = useState(false);
+
+  const TAB_ORDER = ['today', 'progress', 'archive'] as const;
+  function goTab(key: typeof activeTab) {
+    if (key === activeTab) return;
+    tabDir.current = TAB_ORDER.indexOf(key) > TAB_ORDER.indexOf(activeTab) ? 1 : -1;
+    setActiveTab(key);
+    setTabAnimKey(k => k + 1);
+  }
 
   // Profile
   const [profile, setProfile] = useState<Profile>(EMPTY);
@@ -922,8 +932,8 @@ export default function ProfilePage() {
     const dy = e.changedTouches[0].clientY - swipeStartY.current;
     if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.8) return;
     const idx = TABS.findIndex(t => t.key === activeTab);
-    if (dx < 0 && idx < TABS.length - 1) setActiveTab(TABS[idx + 1].key);
-    if (dx > 0 && idx > 0) setActiveTab(TABS[idx - 1].key);
+    if (dx < 0 && idx < TABS.length - 1) goTab(TABS[idx + 1].key);
+    if (dx > 0 && idx > 0) goTab(TABS[idx - 1].key);
   }
 
   return (
@@ -1061,7 +1071,7 @@ export default function ProfilePage() {
           {TABS.map(tab => (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => goTab(tab.key)}
               style={{ flex: 1, background: "none", border: "none", cursor: "pointer", padding: "12px 0", fontSize: 15, fontWeight: activeTab === tab.key ? 700 : 500, color: activeTab === tab.key ? "#1a1c1c" : "#9aa0a6", position: "relative" }}
             >
               {tab.label}
@@ -1073,7 +1083,16 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
+      <style>{`
+        @keyframes tabSlideInRight { from { transform: translateX(48px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes tabSlideInLeft  { from { transform: translateX(-48px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+      `}</style>
+      <div
+        key={tabAnimKey}
+        onTouchStart={onSwipeStart}
+        onTouchEnd={onSwipeEnd}
+        style={{ animation: `${tabDir.current === 1 ? 'tabSlideInRight' : 'tabSlideInLeft'} 0.26s cubic-bezier(0.4,0,0.2,1)` }}
+      >
 
       {/* ── Tab: Me ──────────────────────────────────────────────────────── */}
       {activeTab === 'progress' && (
