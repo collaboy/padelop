@@ -1239,19 +1239,19 @@ export default function ProfilePage() {
                 const hasDetail = !!SCHEDULE_DETAILS[s.title] || s.isDrill;
                 const isDone = (schedDone[todayKey] ?? []).includes(s.title);
                 return (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, borderRadius: 14, padding: isCur ? "14px 14px 14px 16px" : "10px 10px 10px 14px", background: isDone ? "#f0fdf4" : isCur ? `${s.color}0e` : "#fff", boxShadow: isDone ? "0 0 0 1.5px #bbf7d0" : isCur ? `0 0 0 2px ${s.color}, 0 2px 12px ${s.color}22` : "0 0 0 1px #f0f0f0" }}>
-                    <button onClick={() => toggleSchedDone(todayKey, s.title)} style={{ width: isCur ? 40 : 32, height: isCur ? 40 : 32, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: isDone ? "#16a34a" : isPast ? "#f0f0f0" : `${s.color}22`, border: "none", cursor: "pointer", padding: 0 }}>
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, borderRadius: 14, padding: isCur ? "14px 14px 14px 16px" : "10px 10px 10px 14px", background: isDone ? "#f0fdf4" : isCur ? `${s.color}0e` : "transparent", boxShadow: isDone ? "0 0 0 1.5px #bbf7d0" : isCur ? `0 0 0 2px ${s.color}, 0 2px 12px ${s.color}22` : "none" }}>
+                    <button onClick={() => toggleSchedDone(todayKey, s.title)} style={{ width: isCur ? 40 : 28, height: isCur ? 40 : 28, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: isDone ? "#16a34a" : isCur ? `${s.color}22` : "transparent", border: isDone || isCur ? "none" : `1.5px solid ${isPast ? "#e0e0e0" : s.color}44`, cursor: "pointer", padding: 0 }}>
                       {isDone
                         ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-                        : <div style={{ width: isCur ? 13 : 10, height: isCur ? 13 : 10, borderRadius: "50%", background: isPast ? "#d0d3d6" : s.color }} />
+                        : <div style={{ width: isCur ? 13 : 8, height: isCur ? 13 : 8, borderRadius: "50%", background: isPast ? "#d0d3d6" : s.color, opacity: isCur ? 1 : 0.5 }} />
                       }
                     </button>
                     <div onClick={() => hasDetail && setSchedModalIdx(i)} style={{ flex: 1, minWidth: 0, cursor: hasDetail ? "pointer" : "default" }}>
-                      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", margin: "0 0 2px", color: isDone ? "#16a34a" : isPast ? "#c4c7c7" : s.color }}>{s.time}</p>
-                      <p style={{ fontSize: isCur ? "clamp(17px,4.4vw,20px)" : "clamp(15px,3.9vw,18px)", fontWeight: isCur ? 700 : 600, margin: 0, lineHeight: 1.25, color: isDone ? "#16a34a" : isPast ? "#a0a5aa" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none", opacity: isDone ? 0.7 : 1 }}>{s.title}</p>
-                      {s.subtitle && <p style={{ fontSize: "clamp(12px,3.1vw,14px)", margin: "2px 0 0", color: isPast ? "#c4c7c7" : "#6b7480" }}>{s.subtitle}</p>}
+                      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", margin: "0 0 2px", color: isDone ? "#16a34a" : isPast ? "#c4c7c7" : isCur ? s.color : "#b0b8c1" }}>{s.time}</p>
+                      <p style={{ fontSize: isCur ? "clamp(17px,4.4vw,20px)" : "clamp(14px,3.6vw,16px)", fontWeight: isCur ? 700 : 500, margin: 0, lineHeight: 1.25, color: isDone ? "#16a34a" : isPast ? "#c4c7c7" : isCur ? "#1a1c1c" : "#4b5563", textDecoration: isDone ? "line-through" : "none", opacity: isDone ? 0.6 : 1 }}>{s.title}</p>
+                      {s.subtitle && isCur && <p style={{ fontSize: "clamp(12px,3.1vw,14px)", margin: "2px 0 0", color: "#6b7480" }}>{s.subtitle}</p>}
                     </div>
-                    {hasDetail && !isDone && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={isCur ? s.color : "#c4c7c7"} strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>}
+                    {hasDetail && !isDone && isCur && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>}
                   </div>
                 );
               })}
