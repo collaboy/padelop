@@ -162,7 +162,7 @@ export default function Fab() {
                 <button
                   onClick={() => insertUploadRef.current?.click()}
                   disabled={insertUploadLoading}
-                  style={{ width: "100%", background: "#eef2ff", border: "none", borderRadius: 18, padding: "22px 20px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, textAlign: "center", opacity: insertUploadLoading ? 0.6 : 1 }}
+                  style={{ width: "100%", background: "#eef2ff", border: "none", borderRadius: 18, padding: "22px 20px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, textAlign: "center", opacity: insertUploadLoading ? 0.6 : 1, aspectRatio: "1" }}
                 >
                   <div style={{ width: 52, height: 52, borderRadius: 14, background: "#2653d4", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     {insertUploadLoading ? (
