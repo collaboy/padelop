@@ -1522,7 +1522,8 @@ export default function Home8() {
                       </button>
                       {/* Hero text */}
                       <div style={{ textAlign: "center", marginBottom: 6 }} onClick={closeSheet}>
-                        <p style={{ margin: "0 0 8px", fontSize: "clamp(32px, 8vw, 42px)", fontWeight: 800, color: "#fff", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{countdownLabel}</p>
+                        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)" }}>Next Match</span>
+                        <p style={{ margin: "6px 0 8px", fontSize: "clamp(32px, 8vw, 42px)", fontWeight: 800, color: "#fff", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{countdownLabel}</p>
                         <span style={{ fontSize: 14, color: "rgba(255,255,255,0.65)", fontWeight: 500, lineHeight: 1 }}>{dateStr} · {match.time}</span>
                       </div>
                       {/* Detail rows */}
@@ -1584,13 +1585,16 @@ export default function Home8() {
                     </div>{/* end gradient section */}
                   </div>
 
-                  {/* CONDITIONING TIPS LINK */}
-                  <Link href="/profile?tab=today" onClick={closeSheet} style={{ textDecoration: "none", display: "block" }}>
-                    <div style={{ background: dayColor, borderRadius: 24, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
-                      <span style={{ fontSize: 15, fontWeight: 600, color: "#fff" }}>{improveTips(pillarStates).length} Recommendations</span>
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                    </div>
-                  </Link>
+                  {/* TODAY SECTION */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: dayColor, paddingLeft: 4 }}>{dayLabel}</span>
+                    <Link href="/profile?tab=today" onClick={closeSheet} style={{ textDecoration: "none", display: "block" }}>
+                      <div style={{ background: dayColor, borderRadius: 24, padding: "18px 20px", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                        <span style={{ fontSize: 18, fontWeight: 700, color: "#fff" }}>{improveTips(pillarStates).length} Recommendations</span>
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                      </div>
+                    </Link>
+                  </div>
 
                 </div>{/* end flex column */}
                 </div>{/* end scroll container */}
