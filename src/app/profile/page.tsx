@@ -314,7 +314,7 @@ function fmtCountdown(date: string, time: string) {
 }
 
 function mfInputStyle(filled: boolean): React.CSSProperties {
-  return { width: "100%", padding: "10px 12px", borderRadius: 12, border: `1.5px solid ${filled ? "#2653d4" : "#e2e2e2"}`, background: filled ? "#f4f6ff" : "#f8f9fa", fontSize: 16, color: "#1a1c1c", outline: "none", fontFamily: "inherit", boxSizing: "border-box" };
+  return { width: "100%", padding: "10px 12px", borderRadius: 12, border: `1.5px solid ${filled ? "#2653d4" : "#e2e2e2"}`, background: filled ? "#f4f6ff" : "#fff", fontSize: 16, color: "#1a1c1c", outline: "none", fontFamily: "inherit", boxSizing: "border-box" };
 }
 
 function MatchFormWidget({ form, onChange, onSave, onDelete, saveLabel, saveColor }: {
@@ -1410,7 +1410,7 @@ export default function ProfilePage() {
                   <span style={{ fontSize: 13, color: "#8a9096", fontWeight: 500 }}>{now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</span>
                 </div>
                 <div style={{ background: "#fff", padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
-                  {(() => { const n = tips.length; const c = n === 0 ? "#22c55e" : n <= 2 ? "#eab308" : n <= 4 ? "#f97316" : "#ef4444"; return <div style={{ borderRadius: 24, padding: "12px 16px", background: c, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}><span style={{ fontSize: 15, fontWeight: 600, color: "#fff" }}>{n} Recommendations</span></div>; })()}
+                  <div style={{ borderRadius: 24, padding: "12px 16px", background: dayColor, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 15, fontWeight: 600, color: "#fff" }}>{tips.length} Recommendations</span></div>
                   {tips.map(tip => (
                     <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
                       <div style={{ width: 8, height: 8, borderRadius: "50%", background: dayColor, flexShrink: 0, marginTop: 6 }} />
@@ -1632,7 +1632,7 @@ export default function ProfilePage() {
 
                 {/* Notes */}
                 {r.notes && (
-                  <div className="p-4 rounded-2xl" style={{ background: "#f8f9fa" }}>
+                  <div className="p-4 rounded-2xl" style={{ background: "#fff" }}>
                     <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Notes</p>
                     <p className="text-[15px] text-[#1a1c1c] leading-relaxed">{r.notes}</p>
                   </div>
@@ -2094,7 +2094,7 @@ export default function ProfilePage() {
                 const renderSteps = (stepList: { step: string; cue: string; reps: string }[]) => (
                   <div className="flex flex-col gap-3">
                     {stepList.map((s, i) => (
-                      <div key={i} className="flex gap-4 p-4 rounded-2xl" style={{ background: "#f8f9fa" }}>
+                      <div key={i} className="flex gap-4 p-4 rounded-2xl" style={{ background: "#fff" }}>
                         <span className="text-[13px] font-bold flex-shrink-0 mt-0.5" style={{ color: schedModalItem.color, minWidth: 16 }}>{i + 1}</span>
                         <div className="flex-1 min-w-0">
                           <p className="text-[15px] font-semibold text-[#1a1c1c] leading-snug">{s.step}</p>
@@ -2106,7 +2106,7 @@ export default function ProfilePage() {
                   </div>
                 );
                 if (schedDetail.type === 'info') return (
-                  <div className="p-4 rounded-2xl" style={{ background: "#f8f9fa" }}>
+                  <div className="p-4 rounded-2xl" style={{ background: "#fff" }}>
                     <p className="text-[15px] text-[#2c3235] leading-relaxed">{schedDetail.text}</p>
                   </div>
                 );
@@ -2114,7 +2114,7 @@ export default function ProfilePage() {
                   <div className="flex flex-col gap-3">
                     <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-1">{schedDetail.focus}</p>
                     {schedDetail.options.map((meal, i) => (
-                      <div key={i} className="flex items-start gap-3 p-4 rounded-2xl" style={{ background: "#f8f9fa" }}>
+                      <div key={i} className="flex items-start gap-3 p-4 rounded-2xl" style={{ background: "#fff" }}>
                         <div className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style={{ background: schedModalItem.color }} />
                         <p className="text-[14px] text-[#2c3235] leading-snug">{meal}</p>
                       </div>

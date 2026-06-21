@@ -750,6 +750,7 @@ export default function Home8() {
 
   const today = new Date().toISOString().slice(0, 10);
   const dayType: "match" | "recovery" | "training" = match?.date === today ? "match" : yesterdayWasMatch ? "recovery" : "training";
+  const dayColor = dayType === "match" ? "#2653d4" : dayType === "recovery" ? "#7c3aed" : "#16a34a";
   const { schedule, currentIdx } = getScheduleData(dayType, match?.time ?? null, drillTag);
   const doItem = schedule[currentIdx];
   const modalIdx = schedModalIdx ?? currentIdx;
@@ -898,7 +899,7 @@ export default function Home8() {
                               <text fill="rgba(255,255,255,0.7)" fontSize="9.5" fontWeight="700" letterSpacing="2.5" fontFamily="inherit">
                                 <textPath href="#matchArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
                               </text>
-                              {(() => { const n = improveTips(pillarStates).length; const c = n === 0 ? "#22c55e" : n <= 2 ? "#eab308" : n <= 4 ? "#f97316" : "#ef4444"; return <circle cx="50" cy="91" r="4" fill={c} />; })()}
+                              <circle cx="50" cy="91" r="4" fill={dayColor} />
                             </svg>
                           </div>
                         </div>
@@ -1277,7 +1278,7 @@ export default function Home8() {
                     const renderSteps = (stepList: { step: string; cue: string; reps: string }[]) => (
                       <div className="flex flex-col gap-3">
                         {stepList.map((s, i) => (
-                          <div key={i} className="flex gap-4 p-4 rounded-2xl" style={{ background: "#f8f9fa" }}>
+                          <div key={i} className="flex gap-4 p-4 rounded-2xl" style={{ background: "#fff" }}>
                             <span className="text-[13px] font-bold flex-shrink-0 mt-0.5" style={{ color: modalItem.color, minWidth: 16 }}>{i + 1}</span>
                             <div className="flex-1 min-w-0">
                               <p className="text-[15px] font-semibold text-[#1a1c1c] leading-snug">{s.step}</p>
@@ -1304,7 +1305,7 @@ export default function Home8() {
                       <div className="flex flex-col gap-3">
                         <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-1">{detail.focus}</p>
                         {detail.options.map((meal, i) => (
-                          <div key={i} className="flex items-start gap-3 p-4 rounded-2xl" style={{ background: "#f8f9fa" }}>
+                          <div key={i} className="flex items-start gap-3 p-4 rounded-2xl" style={{ background: "#fff" }}>
                             <div className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style={{ background: modalItem.color }} />
                             <p className="text-[14px] text-[#2c3235] leading-snug">{meal}</p>
                           </div>
@@ -1320,7 +1321,7 @@ export default function Home8() {
                     );
 
                     return (
-                      <div className="p-4 rounded-2xl" style={{ background: "#f8f9fa" }}>
+                      <div className="p-4 rounded-2xl" style={{ background: "#fff" }}>
                         <p className="text-[15px] text-[#2c3235] leading-relaxed">{detail.text}</p>
                       </div>
                     );
@@ -1546,25 +1547,25 @@ export default function Home8() {
                           <div className="flex flex-col gap-3">
                             <div className="flex flex-col gap-1">
                               <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
-                              <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#f8f9fa", color: matchForm.date ? "#1a1c1c" : "#b0b5ba", minHeight: 44, cursor: "pointer" }} />
+                              <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#fff", color: matchForm.date ? "#1a1c1c" : "#b0b5ba", minHeight: 44, cursor: "pointer" }} />
                             </div>
                             <div className="flex flex-col gap-1">
                               <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
-                              <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#f8f9fa", color: matchForm.time ? "#1a1c1c" : "#b0b5ba", minHeight: 44, cursor: "pointer" }} />
+                              <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#fff", color: matchForm.time ? "#1a1c1c" : "#b0b5ba", minHeight: 44, cursor: "pointer" }} />
                             </div>
                           </div>
                           <div className="flex flex-col gap-1">
                             <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Club</label>
-                            <input type="text" placeholder="e.g. Club Padel BCN" value={matchForm.club} onChange={e => setMatchForm(f => ({ ...f, club: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm.club ? "#2653d4" : "#e2e2e2", background: matchForm.club ? "#f4f6ff" : "#f8f9fa" }} />
+                            <input type="text" placeholder="e.g. Club Padel BCN" value={matchForm.club} onChange={e => setMatchForm(f => ({ ...f, club: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm.club ? "#2653d4" : "#e2e2e2", background: matchForm.club ? "#f4f6ff" : "#fff" }} />
                           </div>
                           <div className="flex flex-col gap-1">
                             <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Court #</label>
-                            <input type="text" placeholder="e.g. 3" value={matchForm.court} onChange={e => setMatchForm(f => ({ ...f, court: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm.court ? "#2653d4" : "#e2e2e2", background: matchForm.court ? "#f4f6ff" : "#f8f9fa" }} />
+                            <input type="text" placeholder="e.g. 3" value={matchForm.court} onChange={e => setMatchForm(f => ({ ...f, court: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm.court ? "#2653d4" : "#e2e2e2", background: matchForm.court ? "#f4f6ff" : "#fff" }} />
                           </div>
                           <div className="flex flex-col gap-2">
                             <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Players</label>
                             {(['p1','p2','p3','p4'] as const).map((key, i) => (
-                              <input key={key} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={matchForm[key]} onChange={e => setMatchForm(f => ({ ...f, [key]: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm[key] ? "#2653d4" : "#e2e2e2", background: matchForm[key] ? "#f4f6ff" : "#f8f9fa" }} />
+                              <input key={key} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={matchForm[key]} onChange={e => setMatchForm(f => ({ ...f, [key]: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: matchForm[key] ? "#2653d4" : "#e2e2e2", background: matchForm[key] ? "#f4f6ff" : "#fff" }} />
                             ))}
                           </div>
                           <button onClick={saveEdit} className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white" style={{ background: (!matchForm.date || !matchForm.time) ? "#c4c7c7" : "#2653d4" }}>Save changes</button>
@@ -1584,14 +1585,12 @@ export default function Home8() {
                   </div>
 
                   {/* CONDITIONING TIPS LINK */}
-                  {(() => { const n = improveTips(pillarStates).length; const c = n === 0 ? "#22c55e" : n <= 2 ? "#eab308" : n <= 4 ? "#f97316" : "#ef4444"; return (
                   <Link href="/profile?tab=today" onClick={closeSheet} style={{ textDecoration: "none", display: "block" }}>
-                    <div style={{ background: c, borderRadius: 24, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
-                      <span style={{ fontSize: 15, fontWeight: 600, color: "#fff" }}>{n} Recommendations</span>
+                    <div style={{ background: dayColor, borderRadius: 24, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+                      <span style={{ fontSize: 15, fontWeight: 600, color: "#fff" }}>{improveTips(pillarStates).length} Recommendations</span>
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                     </div>
                   </Link>
-                  ); })()}
 
                 </div>{/* end flex column */}
                 </div>{/* end scroll container */}
@@ -1634,7 +1633,7 @@ export default function Home8() {
                   window.dispatchEvent(new Event("storage"));
                 };
                 return (
-                  <div className="px-5 pt-4 pb-5 flex flex-col gap-3" style={{ borderBottom: "1px solid #f0f0f0", background: "#fafafa" }}>
+                  <div className="px-5 pt-4 pb-5 flex flex-col gap-3" style={{ borderBottom: "1px solid #f0f0f0", background: "#fff" }}>
                     <div className="flex flex-col gap-3">
                       <div className="flex flex-col gap-1">
                         <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
@@ -1690,7 +1689,7 @@ export default function Home8() {
                   window.dispatchEvent(new Event("storage"));
                 };
                 return (
-                  <div className="px-5 pt-4 pb-5 flex flex-col gap-3" style={{ borderBottom: "1px solid #f0f0f0", background: "#fafafa" }}>
+                  <div className="px-5 pt-4 pb-5 flex flex-col gap-3" style={{ borderBottom: "1px solid #f0f0f0", background: "#fff" }}>
                     {/* Upload button */}
                     <button
                       disabled={uploadExtracting}
