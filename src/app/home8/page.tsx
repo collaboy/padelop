@@ -1584,12 +1584,14 @@ export default function Home8() {
                   </div>
 
                   {/* CONDITIONING TIPS LINK */}
+                  {(() => { const n = improveTips(pillarStates).length; const c = n === 0 ? "#22c55e" : n <= 2 ? "#eab308" : n <= 4 ? "#f97316" : "#ef4444"; return (
                   <Link href="/profile?tab=today" onClick={closeSheet} style={{ textDecoration: "none", display: "block" }}>
-                    <div style={{ background: "#fff", borderRadius: 24, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
-                      <span style={{ fontSize: 15, fontWeight: 600, color: "#1a1c1c" }}>Recommendations</span>
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#b0b5ba" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    <div style={{ background: c, borderRadius: 24, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+                      <span style={{ fontSize: 15, fontWeight: 600, color: "#fff" }}>{n} Recommendations</span>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                     </div>
                   </Link>
+                  ); })()}
 
                 </div>{/* end flex column */}
                 </div>{/* end scroll container */}
