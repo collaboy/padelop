@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { saveGearToDb, saveProfileToDb, saveNutritionInsightToDb, saveUpcomingMatch, saveScheduleDoneToDb, saveScoreSnapshotToDb } from "@/lib/db";
 import LogSheet from "@/components/log-sheet";
 import AvatarCropModal from "@/components/avatar-crop-modal";
@@ -10,7 +10,8 @@ import { hydrateFromSupabase } from "@/lib/sync";
 import { analyzeMeals, compareMealsToSchedule, foodGrade, loadFoodHistory, type MealEntry } from "@/lib/food-scoring";
 import {
   computeScores, loadScoringData, saveScoreSnapshot, loadScoreHistory,
-  computePillarStates,
+  computePillarStates, computeMatchReadiness, loadMorningLog, improveTips,
+  type MatchReadinessResult,
   type Scores, type ScoreSnapshot, type ReviewEntry, type PillarStates, type PillarStatus,
   type HydrationEntry, type NutritionEntry, type HabitsEntry,
 } from "@/lib/scoring";
@@ -290,27 +291,6 @@ function TrainingCard({ entry }: { entry: TrainingEntry }) {
   );
 }
 
-function improveTips(states: PillarStates): string[] {
-  const tips: string[] = [];
-  if (states.recovery.status === "low") {
-    const r = states.recovery.reason;
-    tips.push(r.includes("sleep") ? "Poor sleep last night — try a short nap or wind down early tonight" : "High soreness — prioritise stretching and take it easy today");
-  }
-  if (states.nutrition.status === "low") {
-    const r = states.nutrition.reason;
-    if (r.includes("dark") || r.includes("fluids")) tips.push("Hydration low — aim for 2+ litres before end of day");
-    else if (r.includes("Protein")) tips.push("Protein low — add eggs, chicken, or a shake to your next meal");
-    else tips.push("Nutrition off today — aim for a balanced meal with veg and protein");
-  }
-  if (states.wellbeing.status === "low") {
-    const r = states.wellbeing.reason;
-    tips.push(r.includes("stress") ? "Feeling stressed — try 5 minutes of box breathing or a short walk" : "Low motivation — keep it simple, even a short session counts");
-  }
-  if (states.training.status === "not_logged")  tips.push("No session logged — even 30 min of drills counts");
-  if (states.nutrition.status === "not_logged") tips.push("Complete your night check-in to track nutrition");
-  if (tips.length === 0) tips.push("You're in great shape — keep the habits going");
-  return tips.slice(0, 3);
-}
 
 function topTag(tags: string[]): string | null {
   if (!tags.length) return null;
@@ -462,12 +442,15 @@ function PrevDaysList({ days, schedDone, deduped, getScheduleData, loadScoringDa
 
 export default function ProfilePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Tab
-  const [activeTab, setActiveTab] = useState<'today' | 'progress' | 'archive'>('today');
+  const [activeTab, setActiveTab] = useState<'today' | 'progress' | 'archive'>(() => {
+    const t = searchParams.get('tab');
+    return (t === 'progress' || t === 'archive') ? t : 'today';
+  });
   const [tabAnimKey, setTabAnimKey] = useState(0);
   const tabDir = useRef<1 | -1>(1);
-  const [progressPanel, setProgressPanel] = useState<'consistency' | 'preparedness' | null>(null);
   const [schedOpen, setSchedOpen] = useState(false);
 
   const TAB_ORDER = ['today', 'progress', 'archive'] as const;
@@ -494,6 +477,7 @@ export default function ProfilePage() {
   const [journeyStart, setJourneyStart]       = useState<string | null>(null);
 
   // Insights
+  const [matchReadiness, setMatchReadiness] = useState<MatchReadinessResult | null>(null);
   const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65 });
   const [pillarStates, setPillarStates] = useState<PillarStates>({
     recovery:  { status: "not_logged", reason: "Morning check-in not done" },
@@ -614,6 +598,15 @@ export default function ProfilePage() {
     const d = loadScoringData();
     const s = computeScores(d.checkIn, d.hydration, d.review, d.nutrition, d.gameDaysThisWeek, d.habits, d.training);
     setScores(s);
+    const morningLog = loadMorningLog();
+    setMatchReadiness(computeMatchReadiness(d.checkIn, morningLog, false, d.review));
+    const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayYMD = yesterday.toISOString().slice(0, 10);
+    import("@/lib/supabase/client").then(({ createClient }) => {
+      createClient().from("matches").select("date").eq("date", yesterdayYMD).limit(1).maybeSingle().then(({ data }) => {
+        setMatchReadiness(computeMatchReadiness(d.checkIn, morningLog, !!data, d.review));
+      });
+    });
     saveScoreSnapshot(s);
     saveScoreSnapshotToDb(new Date().toISOString().slice(0, 10), s);
     const hist = loadScoreHistory();
@@ -1111,7 +1104,6 @@ export default function ProfilePage() {
             const recentScores = scoreHistory.filter(s => last30Dates.includes(s.date));
             const prevScores   = scoreHistory.filter(s => prev30Dates.includes(s.date));
 
-            // Fill gaps using raw check-in history (sleep/energy/stress/hydration → proxy score)
             type CIHistoryEntry = { date: string; sleep: number; energy: number; hydration: number; stress: number };
             const ciHistory: CIHistoryEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:checkin-history") || "[]"); } catch { return []; } })();
             const ciProxyScore = (c: CIHistoryEntry) => Math.max(65, Math.min(100, Math.round(65 + ((c.sleep + c.energy + c.stress + c.hydration - 12) / 8) * 35)));
@@ -1122,6 +1114,10 @@ export default function ProfilePage() {
               if (ci) return { date, overall: ciProxyScore(ci) };
               return null;
             }).filter((x): x is { date: string; overall: number } => x !== null);
+
+            const hydLogs: HydrationEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch { return []; } })();
+            const recentHyd = hydLogs.filter(h => last30Dates.includes(h.ts.slice(0, 10)));
+            const prevHyd   = hydLogs.filter(h => prev30Dates.includes(h.ts.slice(0, 10)));
 
             const habitsArr: HabitsEntry[] = (() => {
               try {
@@ -1134,65 +1130,13 @@ export default function ProfilePage() {
             const recentHabits = habitsArr.filter(h => last30Dates.includes(h.date));
             const prevHabits   = habitsArr.filter(h => prev30Dates.includes(h.date));
 
-            const schedDoneMap: Record<string, string[]> = (() => { try { return JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}"); } catch { return {}; } })();
-            const schedActiveDays = last30Dates.filter(d => (schedDoneMap[d] ?? []).length > 0).length;
-
-            const hydLogs: HydrationEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch { return []; } })();
-            const recentHyd = hydLogs.filter(h => last30Dates.includes(h.ts.slice(0, 10)));
-            const prevHyd   = hydLogs.filter(h => prev30Dates.includes(h.ts.slice(0, 10)));
-
-            const nutLogs: NutritionEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:nutrition-logs") || "[]"); } catch { return []; } })();
-            const recentNut = nutLogs.filter(n => last30Dates.includes(n.ts.slice(0, 10)));
-
-            const upcomingMatches: StoredMatch[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:upcoming-matches") || "[]"); } catch { return []; } })();
-            const recentMatches = upcomingMatches.filter(m => last30Dates.includes(m.date));
-
             const avg = (arr: number[]) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
             const qualNum = (q: string) => q === "great" ? 1 : q === "ok" ? 0.6 : 0.3;
 
-            // ── Consistency ──────────────────────────────────────────────────
-            const checkinRate  = Math.min(recentScores.length / 30, 1);
-            const daysActiveRate = Math.min(
-              last30Dates.filter(d =>
-                recentScores.some(s => s.date === d) ||
-                recentHabits.some(h => h.date === d) ||
-                (schedDoneMap[d] ?? []).length > 0
-              ).length / 30, 1
-            );
-            const tasksRate    = schedActiveDays / 30;
             const recoveryRate = recentHabits.length > 0 ? recentHabits.filter(h => h.foamRoll || h.lightWalk || h.coldShower).length / recentHabits.length : 0;
             const mobilityRate = recentHabits.length > 0 ? recentHabits.filter(h => h.mobility).length / recentHabits.length : 0;
-
-            const consistencyScore = +((checkinRate + daysActiveRate + tasksRate + recoveryRate + mobilityRate) / 5 * 10).toFixed(1);
-
-            const consistencyFactors = [
-              { label: "Check-ins",  rate: checkinRate },
-              { label: "Days active", rate: daysActiveRate },
-              { label: "Tasks done", rate: tasksRate },
-              { label: "Recovery",   rate: recoveryRate },
-              { label: "Mobility",   rate: mobilityRate },
-            ];
-
-            // ── Preparedness ─────────────────────────────────────────────────
-            const hydPct   = recentHyd.length  > 0 ? avg(recentHyd.map(h => qualNum(h.quality))) : 0.5;
+            const hydPct   = recentHyd.length > 0 ? avg(recentHyd.map(h => qualNum(h.quality))) : 0.5;
             const sleepPct = recentScores.length > 0 ? Math.max(0, avg(recentScores.map(s => (s.recovery - 65) / 35))) : 0.5;
-            const nutPct   = recentNut.length  > 0 ? avg(recentNut.map(n => qualNum(n.quality))) : 0.5;
-            const mobPct   = mobilityRate > 0 ? mobilityRate : 0.5;
-            const recPct   = recoveryRate > 0 ? recoveryRate : 0.5;
-            const matchPct = recentMatches.length === 0 ? 0.4 : recentMatches.length <= 4 ? 0.9 : recentMatches.length <= 8 ? 0.7 : 0.5;
-
-            const preparednessScore = +(Math.max(0, Math.min(10,
-              (hydPct * 0.20 + sleepPct * 0.20 + nutPct * 0.20 + mobPct * 0.15 + recPct * 0.15 + matchPct * 0.10) * 10
-            )).toFixed(1));
-
-            const prepFactors = [
-              { label: "Hydration",   pct: hydPct,   weight: "20%" },
-              { label: "Sleep",       pct: sleepPct, weight: "20%" },
-              { label: "Nutrition",   pct: nutPct,   weight: "20%" },
-              { label: "Mobility",    pct: mobPct,   weight: "15%" },
-              { label: "Recovery",    pct: recPct,   weight: "15%" },
-              { label: "Match load",  pct: matchPct, weight: "10%" },
-            ];
 
             // ── Trend ────────────────────────────────────────────────────────
             const sorted = [...enrichedScores].sort((a, b) => a.date.localeCompare(b.date));
@@ -1206,46 +1150,45 @@ export default function ProfilePage() {
             const trendArrow = trendDelta > 3 ? "↑" : trendDelta < -3 ? "↓" : "→";
 
             // ── Biggest Improvement ──────────────────────────────────────────
-            const prevHydPct = prevHyd.length > 0 ? avg(prevHyd.map(h => qualNum(h.quality))) : null;
-            const prevMobRate = prevHabits.length > 0 ? prevHabits.filter(h => h.mobility).length / prevHabits.length : null;
-            const prevRecRate = prevHabits.length > 0 ? prevHabits.filter(h => h.foamRoll || h.lightWalk || h.coldShower).length / prevHabits.length : null;
+            const prevHydPct   = prevHyd.length > 0 ? avg(prevHyd.map(h => qualNum(h.quality))) : null;
+            const prevMobRate  = prevHabits.length > 0 ? prevHabits.filter(h => h.mobility).length / prevHabits.length : null;
+            const prevRecRate  = prevHabits.length > 0 ? prevHabits.filter(h => h.foamRoll || h.lightWalk || h.coldShower).length / prevHabits.length : null;
             const prevSleepPct = prevScores.length > 0 ? Math.max(0, avg(prevScores.map(s => (s.recovery - 65) / 35))) : null;
 
             const candidates = [
-              prevHydPct  !== null ? { label: "Hydration consistency", delta: (hydPct   - prevHydPct)  * 100 } : null,
-              prevMobRate !== null ? { label: "Mobility consistency",   delta: (mobilityRate - prevMobRate) * 100 } : null,
-              prevRecRate !== null ? { label: "Recovery habits",        delta: (recoveryRate - prevRecRate) * 100 } : null,
-              prevSleepPct !== null ? { label: "Sleep quality",         delta: (sleepPct - prevSleepPct) * 100 } : null,
+              prevHydPct   !== null ? { label: "Hydration consistency", delta: (hydPct       - prevHydPct)  * 100 } : null,
+              prevMobRate  !== null ? { label: "Mobility consistency",   delta: (mobilityRate - prevMobRate) * 100 } : null,
+              prevRecRate  !== null ? { label: "Recovery habits",        delta: (recoveryRate - prevRecRate) * 100 } : null,
+              prevSleepPct !== null ? { label: "Sleep quality",          delta: (sleepPct     - prevSleepPct) * 100 } : null,
             ].filter((c): c is { label: string; delta: number } => c !== null && c.delta > 0)
               .sort((a, b) => b.delta - a.delta);
             const topImprovement = candidates[0] ?? null;
 
-            // ── Helpers ──────────────────────────────────────────────────────
-            function ScoreArc({ score, color }: { score: number; color: string }) {
-              const r = 34, circ = Math.PI * r;
-              const filled = Math.min(score / 10, 1) * circ;
-              return (
-                <svg width="84" height="52" viewBox="0 0 84 52" style={{ overflow: "visible" }}>
-                  <path d={`M8,50 A${r},${r} 0 0,1 76,50`} fill="none" stroke="#f0f0f0" strokeWidth="7" strokeLinecap="round"/>
-                  <path d={`M8,50 A${r},${r} 0 0,1 76,50`} fill="none" stroke={color} strokeWidth="7" strokeLinecap="round"
-                    strokeDasharray={`${filled} ${circ}`} style={{ transition: "stroke-dasharray 0.6s ease" }}/>
-                </svg>
-              );
-            }
-
-            function MiniBar({ pct, color = "#2653d4" }: { pct: number; color?: string }) {
-              return (
-                <div style={{ flex: 1, height: 4, borderRadius: 99, background: "#f0f0f0", overflow: "hidden" }}>
-                  <div style={{ width: `${Math.round(pct * 100)}%`, height: "100%", borderRadius: 99, background: color, transition: "width 0.5s ease" }}/>
-                </div>
-              );
-            }
-
-            const cColor = consistencyScore >= 7 ? "#16a34a" : consistencyScore >= 4 ? "#d97706" : "#dc2626";
-            const pColor = preparednessScore >= 7 ? "#2653d4" : preparednessScore >= 4 ? "#d97706" : "#dc2626";
+            const r = matchReadiness;
+            const dotColor = !r ? "#eab308" : r.color === "green" ? "#22c55e" : r.color === "yellow" ? "#eab308" : r.color === "orange" ? "#f97316" : "#ef4444";
 
             return (
               <>
+                {/* ── Readiness Status ──────────────────────────────────── */}
+                <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)", display: "flex", flexDirection: "column", gap: 14 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 12, height: 12, borderRadius: "50%", background: dotColor, flexShrink: 0 }} />
+                    <span style={{ fontSize: 16, fontWeight: 800, color: "#1a1c1c" }}>{r?.label ?? "Manage"}</span>
+                    {r?.limiter && <span style={{ fontSize: 13, color: "#6b7480", fontWeight: 500 }}>· {r.limiter} is your limiter</span>}
+                  </div>
+                  {r && r.actions.length > 0 && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", margin: 0 }}>Today&apos;s adjustments</p>
+                      {r.actions.slice(0, 3).map((a, i) => (
+                        <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                          <div style={{ width: 4, height: 4, borderRadius: "50%", background: dotColor, flexShrink: 0, marginTop: 7 }} />
+                          <span style={{ fontSize: 13, color: "#3a4040", lineHeight: 1.5 }}>{a}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 {/* ── 30-day Trend ──────────────────────────────────────── */}
                 <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)" }}>
                   <p style={{ margin: "0 0 12px", fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>30-day trend</p>
@@ -1271,54 +1214,6 @@ export default function ProfilePage() {
                     </div>
                   )}
                 </div>
-
-                {/* ── Scores row ────────────────────────────────────────── */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  <button onClick={() => setProgressPanel(p => p === 'consistency' ? null : 'consistency')}
-                    style={{ background: progressPanel === 'consistency' ? `${cColor}12` : "#fff", borderRadius: "var(--r-lg)", padding: "18px 14px 14px", boxShadow: progressPanel === 'consistency' ? `0 0 0 2px ${cColor}` : "var(--shadow-card)", display: "flex", flexDirection: "column", alignItems: "center", border: "none", cursor: "pointer" }}>
-                    <ScoreArc score={consistencyScore} color={cColor} />
-                    <p style={{ margin: "-4px 0 2px", fontSize: 30, fontWeight: 800, color: cColor, lineHeight: 1 }}>{consistencyScore}</p>
-                    <p style={{ margin: "2px 0 0", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Consistency</p>
-                  </button>
-                  <button onClick={() => setProgressPanel(p => p === 'preparedness' ? null : 'preparedness')}
-                    style={{ background: progressPanel === 'preparedness' ? `${pColor}12` : "#fff", borderRadius: "var(--r-lg)", padding: "18px 14px 14px", boxShadow: progressPanel === 'preparedness' ? `0 0 0 2px ${pColor}` : "var(--shadow-card)", display: "flex", flexDirection: "column", alignItems: "center", border: "none", cursor: "pointer" }}>
-                    <ScoreArc score={preparednessScore} color={pColor} />
-                    <p style={{ margin: "-4px 0 2px", fontSize: 30, fontWeight: 800, color: pColor, lineHeight: 1 }}>{preparednessScore}</p>
-                    <p style={{ margin: "2px 0 0", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Preparedness</p>
-                  </button>
-                </div>
-
-                {/* ── Consistency breakdown (expandable) ───────────────── */}
-                {progressPanel === 'consistency' && (
-                  <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)" }}>
-                    <p style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>Consistency breakdown</p>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                      {consistencyFactors.map(f => (
-                        <div key={f.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          <span style={{ width: 88, fontSize: 12, fontWeight: 500, color: "#6b7480", flexShrink: 0 }}>{f.label}</span>
-                          <MiniBar pct={f.rate} color={cColor} />
-                          <span style={{ width: 32, fontSize: 12, fontWeight: 700, color: "#1a1c1c", textAlign: "right" }}>{Math.round(f.rate * 100)}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* ── Preparedness breakdown (expandable) ──────────────── */}
-                {progressPanel === 'preparedness' && (
-                  <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)" }}>
-                    <p style={{ margin: "0 0 14px", fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>Preparedness breakdown</p>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                      {prepFactors.map(f => (
-                        <div key={f.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          <span style={{ width: 74, fontSize: 12, fontWeight: 500, color: "#6b7480", flexShrink: 0 }}>{f.label}</span>
-                          <MiniBar pct={f.pct} color={pColor} />
-                          <span style={{ width: 32, fontSize: 11, fontWeight: 500, color: "#9aa0a6", textAlign: "right" }}>{f.weight}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
                 {/* ── Biggest Improvement ───────────────────────────────── */}
                 <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)" }}>
@@ -1513,11 +1408,11 @@ export default function ProfilePage() {
                   <p style={{ margin: "8px 0 6px", fontSize: "clamp(32px, 8vw, 40px)", fontWeight: 800, color: dayColor, lineHeight: 1.1 }}>{dayLabel}</p>
                   <span style={{ fontSize: 13, color: "#8a9096", fontWeight: 500 }}>{now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</span>
                 </div>
-                <div style={{ background: "#fff", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+                <div style={{ background: "#fff", padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
                   {tips.map(tip => (
                     <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                      <div style={{ width: 7, height: 7, borderRadius: "50%", background: dayColor, flexShrink: 0, marginTop: 5 }} />
-                      <span style={{ fontSize: 13, fontWeight: 500, color: "#2c3235", lineHeight: 1.4 }}>{tip}</span>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: dayColor, flexShrink: 0, marginTop: 6 }} />
+                      <span style={{ fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.45 }}>{tip}</span>
                     </div>
                   ))}
                 </div>
@@ -1930,6 +1825,32 @@ export default function ProfilePage() {
                     </>
                   )}
                 </div>
+              </div>
+            );
+          })()}
+
+          {/* Readiness Status */}
+          {(() => {
+            const r = matchReadiness;
+            const dotColor = !r ? "#eab308" : r.color === "green" ? "#22c55e" : r.color === "yellow" ? "#eab308" : r.color === "orange" ? "#f97316" : "#ef4444";
+            return (
+              <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)", display: "flex", flexDirection: "column", gap: 14 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 11, height: 11, borderRadius: "50%", background: dotColor, flexShrink: 0 }} />
+                  <span style={{ fontSize: 15, fontWeight: 800, color: "#1a1c1c" }}>{r?.label ?? "Manage"}</span>
+                  {r?.limiter && <span style={{ fontSize: 13, color: "#6b7480", fontWeight: 500 }}>· {r.limiter} is your limiter</span>}
+                </div>
+                {r && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", margin: 0 }}>Today&apos;s adjustments</p>
+                    {r.actions.map((a, i) => (
+                      <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                        <div style={{ width: 4, height: 4, borderRadius: "50%", background: dotColor, flexShrink: 0, marginTop: 7 }} />
+                        <span style={{ fontSize: 13, color: "#3a4040", lineHeight: 1.5 }}>{a}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })()}

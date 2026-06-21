@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import LogSheet from "@/components/log-sheet";
 import ReadinessSheet from "@/components/readiness-sheet";
 import PushPrompt from "@/components/push-prompt";
-import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
+import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, computeMatchReadiness, loadMorningLog, improveTips, type MatchReadinessResult, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
 import { pad, addMins, toMins, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag, ITEM_COLORS, type ScheduleItem, getScheduleData, SCHEDULE_DETAILS } from "@/lib/schedule-data";
 import { saveUpcomingMatch, saveNutritionToDb, saveHydrationToDb, saveNoteToDb, saveMatchReview, saveGearToDb } from "@/lib/db";
 import { hydrateFromSupabase } from "@/lib/sync";
@@ -174,6 +175,75 @@ function getDayMsg(match: { date: string; time: string } | null, now: Date): str
   return "Rest day. Hydrate, eat well, and take it easy.";
 }
 
+function getMatchTips(
+  match: { date: string; time: string } | null,
+  now: Date,
+  limiterTip: string | null,
+): string[] {
+  if (!match) return [];
+  const today = now.toISOString().slice(0, 10);
+  const tomorrow = new Date(now.getTime() + 864e5).toISOString().slice(0, 10);
+  const isToday = match.date === today;
+  const isTomorrow = match.date === tomorrow;
+  const extra = limiterTip ? [limiterTip] : [];
+
+  if (isToday) {
+    const [mH, mM] = match.time.split(":").map(Number);
+    const diffMins = mH * 60 + mM - now.getHours() * 60 - now.getMinutes();
+    if (diffMins <= 0) return [
+      "Stretch now while muscles are still warm.",
+      "Eat protein within 45 min — eggs, chicken, or Greek yoghurt.",
+      "Rehydrate: 500ml water in the next hour.",
+    ];
+    if (diffMins < 45) return [
+      "Breathe. Trust your prep.",
+      "Sip water, but don't overdrink now.",
+      "Focus on your first two shots, not the whole match.",
+    ];
+    if (diffMins < 90) return [
+      "Start your warm-up — 10 min mobility then hitting.",
+      "Sip 200–300ml water in this window.",
+      ...extra.slice(0, 1),
+    ];
+    if (diffMins < 180) return [
+      `${Math.round(diffMins / 60)}h to go — light snack now if hungry: banana or toast.`,
+      "Drink 400–500ml water and sip steadily until warm-up.",
+      ...extra.slice(0, 1),
+    ];
+    if (diffMins < 360) {
+      const hrs = Math.floor(diffMins / 60);
+      return [
+        `Pre-match meal window — eat within the next hour (${hrs}h before play).`,
+        "Hydrate steadily: 500–750ml between now and warm-up.",
+        ...extra.slice(0, 1),
+      ];
+    }
+    return [
+      "Main fuelling window — eat a proper meal with carbs and protein.",
+      "Hit your hydration target before evening.",
+      ...extra.slice(0, 1),
+    ];
+  }
+
+  if (isTomorrow) return [
+    "Carb-rich dinner tonight — pasta, rice, or potatoes.",
+    "Aim for 8h sleep — it's your biggest performance lever.",
+    ...extra.slice(0, 1),
+  ];
+
+  const diffDays = Math.round((new Date(match.date + "T12:00").getTime() - new Date(today + "T12:00").getTime()) / 86400000);
+  if (diffDays <= 3) return [
+    `${diffDays} days out — sharpening window. Keep sessions short and sharp.`,
+    "Consistent sleep and hydration matter more than extra training.",
+    ...extra.slice(0, 1),
+  ];
+  return [
+    `${diffDays} days to go — maintain normal training load.`,
+    "Sleep and hydration are the biggest levers right now.",
+    ...extra.slice(0, 1),
+  ];
+}
+
 export default function Home8() {
   const router = useRouter();
   const [doModalOpen, setDoModalOpen] = useState(false);
@@ -203,6 +273,7 @@ export default function Home8() {
   const [readiness, setReadiness] = useState(65);
   const [readinessDone, setReadinessDone] = useState(0);
   const [readinessItems, setReadinessItems] = useState([false, false, false, false]);
+  const [matchReadiness, setMatchReadiness] = useState<MatchReadinessResult | null>(null);
   const [extrasOpen, setExtrasOpen] = useState(false);
   const [checkInData, setCheckInData]     = useState<DailyCheckIn | null>(null);
   const [hydrationData, setHydrationData] = useState<HydrationEntry | null>(null);
@@ -302,7 +373,9 @@ export default function Home8() {
   useEffect(() => {
     function loadReadiness() {
       const d = loadScoringData();
+      const morningLog = loadMorningLog();
       setReadiness(computeScores(d.checkIn, d.hydration, d.review, d.nutrition, d.gameDaysThisWeek, d.habits, d.training).overall);
+      setMatchReadiness(computeMatchReadiness(d.checkIn, morningLog, false, d.review));
       setCheckInData(d.checkIn);
       setHydrationData(d.hydration);
       try {
@@ -589,7 +662,7 @@ export default function Home8() {
   }, [checkinNudgeOpen]);
 
   useEffect(() => {
-    if (doIdx === 1) setDrumIdx(currentIdx);
+    if (doIdx === 0) setDrumIdx(currentIdx);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [doIdx]);
 
@@ -629,6 +702,19 @@ export default function Home8() {
       }
     } catch {}
   }, [now]);
+
+  useEffect(() => {
+    if (!matchInfoOpen) return;
+    const d = loadScoringData();
+    const morningLog = loadMorningLog();
+    const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayYMD = yesterday.toISOString().slice(0, 10);
+    import("@/lib/supabase/client").then(({ createClient }) => {
+      createClient().from("matches").select("date").eq("date", yesterdayYMD).limit(1).maybeSingle().then(({ data }) => {
+        setMatchReadiness(computeMatchReadiness(d.checkIn, morningLog, !!data, d.review));
+      });
+    });
+  }, [matchInfoOpen]);
 
   useEffect(() => {
     if (!matchModalOpen) return;
@@ -675,7 +761,7 @@ export default function Home8() {
 
   return (
     <>
-      <main style={{ ...S, position: "fixed", inset: 0, paddingTop: 0, paddingLeft: 10, paddingRight: 10, paddingBottom: 0, overflow: "hidden", background: "#ffffff", zIndex: 60 }}>
+      <main style={{ ...S, position: "fixed", inset: 0, paddingTop: 0, paddingLeft: 10, paddingRight: 10, paddingBottom: 0, overflow: "hidden", background: "#fff", zIndex: 60 }}>
 
         {/* Horizontal strip: [readiness | carousel | log] */}
         <div
@@ -696,7 +782,7 @@ export default function Home8() {
           onTouchMove={e => {
             const y = e.touches[0].clientY;
             lastTouchYRef.current = y;
-            if (doIdx >= 1) return; // scroll div's native listeners own goPrev logic
+            if (doIdx >= 1) return;
             const dx = e.touches[0].clientX - touchStartXRef.current;
             const dy = e.touches[0].clientY - touchStartYRef.current;
             if (!swipeDirRef.current && (Math.abs(dx) > 8 || Math.abs(dy) > 8))
@@ -707,7 +793,7 @@ export default function Home8() {
           onTouchEnd={e => {
             const endY = e.changedTouches[0].clientY;
             const dx = e.changedTouches[0].clientX - touchStartXRef.current;
-            if (doIdx >= 1) { swipeDirRef.current = null; return; } // scroll div handles goPrev
+            if (doIdx >= 1) { swipeDirRef.current = null; return; }
             const dy = endY - touchStartYRef.current;
             if (swipeDirRef.current === 'h' && doIdx === 0) {
               setLiveX(0);
@@ -735,9 +821,9 @@ export default function Home8() {
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingRight: 20, paddingLeft: 20 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, transform: `translateX(${cardSnap === 'right' ? 50 : 0}px) translateY(calc(45dvh - 3 * (100vw - 40px) / 2 - 10px))`, transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
               {/* Placeholder above */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "#fff", opacity: 0 }} />
               {/* Main card */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "white", borderRadius: 24, marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "#fff", borderRadius: 24, marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
                   <div style={{ position: "relative", width: "60%", aspectRatio: "1 / 1" }}>
                     <svg width="100%" height="100%" viewBox="0 0 160 160" style={{ display: "block", overflow: "visible" }}>
@@ -770,7 +856,7 @@ export default function Home8() {
                 </div>
               </div>
               {/* Placeholder below */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "white", opacity: 0 }} />
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "#fff", opacity: 0 }} />
             </div>
           </div>
 
@@ -779,10 +865,10 @@ export default function Home8() {
             <div style={{
               display: "flex", flexDirection: "column", gap: 10,
               transform: doIdx >= 1
-                ? `translateY(calc(16px - 2 * (100vw - 30px) - 100dvh))`
+                ? `translateY(calc(270px - 200vw - 100dvh))`
                 : doIdx === -1
-                  ? `translateY(calc(10px - (100vw - 30px) + ${liveY}px))`
-                  : `translateY(calc(-50dvh - 150vw + 100px + ${liveY}px))`,
+                  ? `translateY(calc(60px - 100vw + ${liveY}px))`
+                  : `translateY(calc(160px - 150vw - 55dvh + ${liveY}px))`,
               transition: liveY !== 0 ? "none" : "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
             }}>
               {/* Structural spacer — keeps transform geometry intact */}
@@ -791,29 +877,15 @@ export default function Home8() {
               {/* Card 0: next match */}
               {(() => {
                 const today = now.toISOString().slice(0, 10);
-                const vals = Object.values(pillarStates);
-                const allNL = vals.every(v => v.status === 'not_logged');
-                const hasLow = vals.some(v => v.status === 'low');
-                const hasOk  = vals.some(v => v.status === 'ok');
-                const readinessLabel = allNL ? null : hasLow ? 'LOW READINESS' : hasOk ? 'OK READINESS' : 'GOOD READINESS';
-                const readinessColor = hasLow ? '#dc2626' : hasOk ? '#d97706' : '#16a34a';
-                const coachTip = hasLow ? 'Focus on recovery today.' : hasOk ? 'Keep your habits consistent today.' : allNL ? 'Log your check-ins to track readiness.' : 'You\'re in great shape. Stay sharp.';
-
                 return (
-                  <div style={{ width: "100%", flexShrink: 0, height: "calc(100dvh - 100px)", borderRadius: 24, background: "white", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px 20%", zIndex: doIdx === -1 ? 2 : 1, pointerEvents: doIdx === -1 ? "auto" : "none" }}>
+                  <div style={{ width: "100%", flexShrink: 0, height: "calc(100dvh - 120px)", borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px", zIndex: doIdx === -1 ? 2 : 1, pointerEvents: doIdx === -1 ? "auto" : "none", opacity: doIdx === -1 ? 1 : 0, transition: "opacity 0.3s" }}>
                     {match ? (() => {
                       const matchDate = new Date(match.date + "T12:00");
                       const todayDate = new Date(today + "T12:00");
                       const diffDays = Math.round((matchDate.getTime() - todayDate.getTime()) / 86400000);
                       const countdownLabel = diffDays === 0 ? "TODAY" : diffDays === 1 ? "TOMORROW" : `IN ${diffDays} DAYS`;
-                      const dateStr = matchDate.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
-                      const playerStr = match.players && match.players.length > 0
-                        ? `with ${match.players.join(', ')}`
-                        : null;
-
                       return (
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-                          {/* Countdown ball with curved labels */}
                           <div style={{ position: "relative", width: "calc((100vw - 40px) * 0.65)", height: "calc((100vw - 40px) * 0.65)", flexShrink: 0 }}>
                             <button onClick={() => setMatchInfoOpen(true)} style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, boxShadow: "0 4px 20px #2653d455" }}>
                               <span style={{ fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 800, color: "rgba(255,255,255,0.85)", letterSpacing: "0.08em", textTransform: "uppercase", lineHeight: 1 }}>{countdownLabel}</span>
@@ -827,9 +899,7 @@ export default function Home8() {
                               <text fill="rgba(255,255,255,0.7)" fontSize="9.5" fontWeight="700" letterSpacing="2.5" fontFamily="inherit">
                                 <textPath href="#matchArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
                               </text>
-                              <text fill="rgba(255,255,255,0.7)" fontSize="9.5" fontWeight="700" letterSpacing="2" fontFamily="inherit">
-                                <textPath href="#readinessArc" startOffset="50%" textAnchor="middle">{`${readinessDone}/4`}</textPath>
-                              </text>
+                              <circle cx="50" cy="91" r="4" fill={matchReadiness?.color === "green" ? "#22c55e" : matchReadiness?.color === "yellow" ? "#eab308" : matchReadiness?.color === "orange" ? "#f97316" : matchReadiness?.color === "red" ? "#ef4444" : "#eab308"} />
                             </svg>
                           </div>
                         </div>
@@ -854,9 +924,7 @@ export default function Home8() {
                             <text fill="rgba(255,255,255,0.7)" fontSize="9.5" fontWeight="700" letterSpacing="2.5" fontFamily="inherit">
                               <textPath href="#noMatchArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
                             </text>
-                            <text fill="rgba(255,255,255,0.7)" fontSize="9.5" fontWeight="700" letterSpacing="2" fontFamily="inherit">
-                              <textPath href="#noMatchReadinessArc" startOffset="50%" textAnchor="middle">{`${readinessDone}/4`}</textPath>
-                            </text>
+                            <circle cx="50" cy="91" r="4" fill={matchReadiness?.color === "green" ? "#22c55e" : matchReadiness?.color === "yellow" ? "#eab308" : matchReadiness?.color === "orange" ? "#f97316" : matchReadiness?.color === "red" ? "#ef4444" : "#eab308"} />
                           </svg>
                         </div>
                       </div>
@@ -983,7 +1051,7 @@ export default function Home8() {
 
                     {/* INFO STATE: fades out when playing */}
                     <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: warmupPlaying ? 0 : isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.35s", pointerEvents: warmupPlaying ? "none" : "auto" }}>
-                      {!isSleepytime && <p className="text-[14px] tracking-wide leading-none" style={{ color: "#000", fontWeight: 600 }}>Now</p>}
+                      {!isSleepytime && <p className="text-[14px] tracking-wide leading-none" style={{ color: "#000", fontWeight: 600 }}>Do this now</p>}
                       <p className="font-bold text-center" style={{ color: "#000", fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1 }}>{s.title}</p>
                       {isAudioAvailable
                         ? (
@@ -1068,7 +1136,7 @@ export default function Home8() {
                 return (
                   <div
                     key="card2"
-                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px 20%", gap: 14, zIndex: doIdx === 1 ? 2 : 1, height: "100dvh", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none" }}
+                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px", gap: 14, zIndex: doIdx === 1 ? 2 : 1, height: "calc(100vw - 40px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", opacity: doIdx >= 1 ? 1 : 0, transition: "opacity 0.3s" }}
                     onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
                     onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
                   >
@@ -1080,12 +1148,13 @@ export default function Home8() {
                   </div>
                 );
               })()}
+
             </div>
           </div>
 
           {/* Profile panel */}
-          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 40, paddingTop: "calc(45dvh - (100vw - 40px) / 2)" }}>
-            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "white", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, padding: "16px 12px", marginLeft: cardSnap === 'left' ? 0 : -40, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 20, paddingRight: 20, paddingTop: "calc(45dvh - (100vw - 40px) / 2)" }}>
+            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "#fff", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, padding: "16px 12px", marginLeft: cardSnap === 'left' ? 0 : -20, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
               {/* Hydration teardrop meter */}
               {(() => {
                 const MAX = 3000;
@@ -1478,17 +1547,11 @@ export default function Home8() {
                           <div className="flex flex-col gap-3">
                             <div className="flex flex-col gap-1">
                               <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
-                              <div style={{ position: "relative" }}>
-                                <div className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#f8f9fa", color: matchForm.date ? "#1a1c1c" : "#b0b5ba", minHeight: 44, display: "flex", alignItems: "center" }}>{matchForm.date ? new Date(matchForm.date + "T12:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Pick a date"}</div>
-                                <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
-                              </div>
+                              <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#f8f9fa", color: matchForm.date ? "#1a1c1c" : "#b0b5ba", minHeight: 44, cursor: "pointer" }} />
                             </div>
                             <div className="flex flex-col gap-1">
                               <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
-                              <div style={{ position: "relative" }}>
-                                <div className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#f8f9fa", color: matchForm.time ? "#1a1c1c" : "#b0b5ba", minHeight: 44, display: "flex", alignItems: "center" }}>{matchForm.time || "Pick a time"}</div>
-                                <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
-                              </div>
+                              <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#f8f9fa", color: matchForm.time ? "#1a1c1c" : "#b0b5ba", minHeight: 44, cursor: "pointer" }} />
                             </div>
                           </div>
                           <div className="flex flex-col gap-1">
@@ -1537,33 +1600,46 @@ export default function Home8() {
 
                   {/* READINESS CARD */}
                   {(() => {
-                    const pillars = [
-                      { label: "Check-in", done: readinessItems[0], reason: pillarStates.recovery?.reason },
-                      { label: "Hydration", done: readinessItems[1], reason: readinessItems[1] ? "≥2.5L logged" : "Under target" },
-                      { label: "Nutrition", done: readinessItems[2], reason: pillarStates.nutrition?.reason },
-                      { label: "Training", done: readinessItems[3], reason: pillarStates.training?.reason },
+                    const r = matchReadiness;
+                    const steps = [
+                      { color: "#ef4444", label: "red" },
+                      { color: "#f97316", label: "orange" },
+                      { color: "#eab308", label: "yellow" },
+                      { color: "#22c55e", label: "green" },
                     ];
+                    const activeIdx = !r ? 2 : r.color === "red" ? 0 : r.color === "orange" ? 1 : r.color === "yellow" ? 2 : 3;
+                    const dotColor = steps[activeIdx].color;
+                    const statusLabel = !r ? "No data" : r.color === "green" ? "Good readiness" : r.color === "yellow" ? "OK readiness" : r.color === "orange" ? "Moderate readiness" : "Low readiness";
                     return (
-                      <div style={{ background: "#fff", borderRadius: 24, padding: "20px 20px 16px" }}>
-                        <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 14 }}>
-                          <span style={{ fontSize: 22, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{readinessDone}</span>
-                          <span style={{ fontSize: 14, fontWeight: 600, color: "#c8cdd3" }}>/4</span>
-                          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", marginLeft: 4 }}>Readiness</span>
-                        </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                          {pillars.map(p => (
-                            <div key={p.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                              <div style={{ width: 20, height: 20, borderRadius: "50%", flexShrink: 0, background: p.done ? "#f0fdf4" : "#f4f4f6", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                {p.done
-                                  ? <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                  : <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#c8cdd3" }} />
-                                }
+                      <div style={{ background: "#fff", borderRadius: 24, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 14 }}>
+
+                        {/* Spectrum row */}
+                        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "#b0b8c1" }}>Health status</span>
+                          {/* Dots + line */}
+                          <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            <div style={{ position: "absolute", top: "50%", left: 6, right: 6, height: 2, background: "#e8eaed", transform: "translateY(-50%)", zIndex: 0 }} />
+                            {steps.map(s => (
+                              <div key={s.label} style={{ width: 12, height: 12, borderRadius: "50%", background: s.color, zIndex: 1, flexShrink: 0 }} />
+                            ))}
+                          </div>
+                          {/* Triangles row — invisible placeholders keep spacing */}
+                          <div style={{ display: "flex", justifyContent: "space-between" }}>
+                            {steps.map((s, i) => (
+                              <div key={s.label} style={{ width: 12, display: "flex", justifyContent: "center", visibility: i === activeIdx ? "visible" : "hidden" }}>
+                                <div style={{ width: 0, height: 0, borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderBottom: "8px solid #1a1c1c" }} />
                               </div>
-                              <span style={{ fontSize: 14, fontWeight: 600, color: p.done ? "#1a1c1c" : "#9aa0a6", flex: 1 }}>{p.label}</span>
-                              {p.reason && <span style={{ fontSize: 12, color: "#b0b8c1", fontWeight: 500 }}>{p.reason}</span>}
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
+
+                        {/* Status row */}
+                        <span style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>{statusLabel}</span>
+
+                        <Link href="/profile?tab=progress" onClick={closeSheet} style={{ display: "flex", alignItems: "center", gap: 4, textDecoration: "none", marginTop: -8 }}>
+                          <span style={{ fontSize: 14, fontWeight: 600, color: "#2653d4" }}>See details</span>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                        </Link>
                       </div>
                     );
                   })()}
@@ -1613,17 +1689,11 @@ export default function Home8() {
                     <div className="flex flex-col gap-3">
                       <div className="flex flex-col gap-1">
                         <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
-                        <div style={{ position: "relative" }}>
-                          <div className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#fff", color: matchForm.date ? "#1a1c1c" : "#b0b5ba", minHeight: 44, display: "flex", alignItems: "center" }}>{matchForm.date ? new Date(matchForm.date + "T12:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Pick a date"}</div>
-                          <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
-                        </div>
+                        <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#fff", color: matchForm.date ? "#1a1c1c" : "#b0b5ba", minHeight: 44, cursor: "pointer" }} />
                       </div>
                       <div className="flex flex-col gap-1">
                         <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
-                        <div style={{ position: "relative" }}>
-                          <div className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#fff", color: matchForm.time ? "#1a1c1c" : "#b0b5ba", minHeight: 44, display: "flex", alignItems: "center" }}>{matchForm.time || "Pick a time"}</div>
-                          <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
-                        </div>
+                        <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#fff", color: matchForm.time ? "#1a1c1c" : "#b0b5ba", minHeight: 44, cursor: "pointer" }} />
                       </div>
                     </div>
                     <div className="flex flex-col gap-1">
@@ -1706,17 +1776,11 @@ export default function Home8() {
                     <div className="flex flex-col gap-3">
                       <div className="flex flex-col gap-1">
                         <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
-                        <div style={{ position: "relative" }}>
-                          <div className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#fff", color: matchForm.date ? "#1a1c1c" : "#b0b5ba", minHeight: 44, display: "flex", alignItems: "center" }}>{matchForm.date ? new Date(matchForm.date + "T12:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Pick a date"}</div>
-                          <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
-                        </div>
+                        <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#fff", color: matchForm.date ? "#1a1c1c" : "#b0b5ba", minHeight: 44, cursor: "pointer" }} />
                       </div>
                       <div className="flex flex-col gap-1">
                         <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
-                        <div style={{ position: "relative" }}>
-                          <div className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#fff", color: matchForm.time ? "#1a1c1c" : "#b0b5ba", minHeight: 44, display: "flex", alignItems: "center" }}>{matchForm.time || "Pick a time"}</div>
-                          <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
-                        </div>
+                        <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#fff", color: matchForm.time ? "#1a1c1c" : "#b0b5ba", minHeight: 44, cursor: "pointer" }} />
                       </div>
                     </div>
                     <div className="flex flex-col gap-1">
@@ -1919,17 +1983,11 @@ export default function Home8() {
                   <div className="flex flex-col gap-3">
                     <div className="flex flex-col gap-1">
                       <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
-                      <div style={{ position: "relative" }}>
-                        <div className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#f9f9f9", color: matchForm.date ? "#1a1c1c" : "#b0b5ba", minHeight: 44, display: "flex", alignItems: "center" }}>{matchForm.date ? new Date(matchForm.date + "T12:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "Pick a date"}</div>
-                        <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
-                      </div>
+                      <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#f9f9f9", color: matchForm.date ? "#1a1c1c" : "#b0b5ba", minHeight: 44, cursor: "pointer" }} />
                     </div>
                     <div className="flex flex-col gap-1">
                       <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
-                      <div style={{ position: "relative" }}>
-                        <div className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#f9f9f9", color: matchForm.time ? "#1a1c1c" : "#b0b5ba", minHeight: 44, display: "flex", alignItems: "center" }}>{matchForm.time || "Pick a time"}</div>
-                        <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
-                      </div>
+                      <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#f9f9f9", color: matchForm.time ? "#1a1c1c" : "#b0b5ba", minHeight: 44, cursor: "pointer" }} />
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">

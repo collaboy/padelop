@@ -111,14 +111,13 @@ export function getTopNeedsWorkTag(): string | null {
 }
 
 export const ITEM_COLORS: Record<string, string> = {
-  "Wake up & hydrate": "#0e7490", "Light breakfast": "#16a34a", "Breakfast": "#16a34a",
-  "Morning mobility": "#64748b", "Light mobility": "#64748b",
-  "Pre-game meal": "#16a34a", "Warmup & activation": "#d97706",
-  "Match": "#2653d4", "Post-match cool down": "#64748b",
-  "Recovery meal": "#16a34a", "Recovery walk": "#0e7490",
-  "Foam roll & stretch": "#64748b", "Protein-rich lunch": "#16a34a",
+  "Wake up": "#0e7490", "Breakfast": "#16a34a",
+  "Mobility Exercise": "#64748b",
+  "Pre-match meal": "#16a34a", "Warm up": "#d97706",
+  "Match": "#2653d4", "Cool down": "#64748b",
+  "Recovery meal": "#16a34a", "Short walk": "#0e7490",
+  "Stretch": "#64748b", "Lunch": "#16a34a",
   "Cold shower": "#0e7490", "Dinner": "#16a34a",
-  "Early wind down": "#64748b", "Balanced lunch": "#16a34a",
   "Active recovery": "#0e7490", "Visualisation": "#64748b",
   "Wind down": "#64748b",
 };
@@ -133,36 +132,36 @@ export function getScheduleData(dayType: "match" | "recovery" | "training", matc
   const drillTitle = drillTag ? `${drillTag} Focus` : "Skill Prep";
   const rawSchedules: Record<string, Array<{ time: string; title: string; subtitle?: string; isDrill?: boolean }>> = {
     match: [
-      { time: "07:00", title: "Wake up & hydrate",   subtitle: "500ml water before anything else" },
-      { time: "07:30", title: "Breakfast",            subtitle: "Oats, eggs, fruit" },
-      { time: "09:00", title: "Morning mobility",     subtitle: "Foam roll & light stretching" },
-      { time: addMins(mH, mM, -360), title: "Pre-game meal",       subtitle: "Chicken, rice, light salad" },
-      { time: addMins(mH, mM, -60),  title: "Warmup & activation", subtitle: "Get loose — dynamic movement" },
-      { time: mt,                    title: "Match",                subtitle: "Game time" },
-      { time: addMins(mH, mM, 90),   title: "Post-match cool down", subtitle: "Stretch & mobility, 15 min" },
-      { time: addMins(mH, mM, 120),  title: "Recovery meal",       subtitle: "Protein + carbs within 30 min" },
-      { time: "22:30", title: "Wind down", subtitle: "No screens, light reading" },
+      { time: "07:00", title: "Wake up",        subtitle: "500ml water before anything else" },
+      { time: "07:30", title: "Breakfast",       subtitle: "Oats, eggs, fruit" },
+      { time: "09:00", title: "Mobility Exercise",        subtitle: "Foam roll & light stretching" },
+      { time: addMins(mH, mM, -360), title: "Pre-match meal", subtitle: "Chicken, rice, light salad" },
+      { time: addMins(mH, mM, -60),  title: "Warm up",        subtitle: "Get loose — dynamic movement" },
+      { time: mt,                    title: "Match",           subtitle: "Game time" },
+      { time: addMins(mH, mM, 90),   title: "Cool down",      subtitle: "Stretch & mobility, 15 min" },
+      { time: addMins(mH, mM, 120),  title: "Recovery meal",  subtitle: "Protein + carbs within 30 min" },
+      { time: "22:30", title: "Wind down",       subtitle: "No screens, light reading" },
     ],
     recovery: [
-      { time: "07:30", title: "Wake up & hydrate",  subtitle: "500ml water — rehydrate after yesterday" },
-      { time: "08:00", title: "Light breakfast",     subtitle: "Eggs, fruit, Greek yogurt" },
-      { time: "09:30", title: "Recovery walk",       subtitle: "20 min easy — flush out lactic acid" },
-      { time: "10:30", title: "Foam roll & stretch", subtitle: "Quads, hip flexors, calves, shoulders" },
-      { time: "13:00", title: "Protein-rich lunch",  subtitle: "Chicken, salmon or legumes + veg" },
-      { time: "15:30", title: "Cold shower",         subtitle: "2 min cold — reduces inflammation" },
-      { time: "19:00", title: "Dinner",              subtitle: "Anti-inflammatory focus — fish, greens" },
-      { time: "21:30", title: "Early wind down",     subtitle: "Sleep is your best recovery tool tonight" },
+      { time: "07:30", title: "Wake up",     subtitle: "500ml water — rehydrate after yesterday" },
+      { time: "08:00", title: "Breakfast",   subtitle: "Eggs, fruit, Greek yogurt" },
+      { time: "09:30", title: "Short walk",  subtitle: "20 min easy — flush out lactic acid" },
+      { time: "10:30", title: "Stretch",     subtitle: "Quads, hip flexors, calves, shoulders" },
+      { time: "13:00", title: "Lunch",       subtitle: "Chicken, salmon or legumes + veg" },
+      { time: "15:30", title: "Cold shower", subtitle: "2 min cold — reduces inflammation" },
+      { time: "19:00", title: "Dinner",      subtitle: "Anti-inflammatory focus — fish, greens" },
+      { time: "21:30", title: "Wind down",   subtitle: "Sleep is your best recovery tool tonight" },
     ],
     training: [
-      { time: "07:00", title: "Wake up & hydrate", subtitle: "500ml water before coffee" },
-      { time: "07:30", title: "Breakfast",          subtitle: "High protein — eggs, yogurt, fruit" },
-      { time: "09:30", title: "Light mobility",     subtitle: "Hip flexors, thoracic spine, ankles" },
-      { time: "11:00", title: drillTitle,           subtitle: drill.subtitle, isDrill: true },
-      { time: "12:30", title: "Balanced lunch",     subtitle: "Carbs + protein + greens" },
-      { time: "15:00", title: "Active recovery",    subtitle: "Light walk or gentle movement" },
-      { time: "19:00", title: "Dinner",             subtitle: "Focus on variety and micronutrients" },
-      { time: "21:00", title: "Visualisation",      subtitle: "5 min mental rehearsal of key patterns" },
-      { time: "22:30", title: "Wind down",          subtitle: "No screens, consistent bedtime" },
+      { time: "07:00", title: "Wake up",          subtitle: "500ml water before coffee" },
+      { time: "07:30", title: "Breakfast",         subtitle: "High protein — eggs, yogurt, fruit" },
+      { time: "09:30", title: "Mobility Exercise",          subtitle: "Hip flexors, thoracic spine, ankles" },
+      { time: "11:00", title: drillTitle,          subtitle: drill.subtitle, isDrill: true },
+      { time: "12:30", title: "Lunch",             subtitle: "Carbs + protein + greens" },
+      { time: "15:00", title: "Active recovery",   subtitle: "Light walk or gentle movement" },
+      { time: "19:00", title: "Dinner",            subtitle: "Focus on variety and micronutrients" },
+      { time: "21:00", title: "Visualisation",     subtitle: "5 min mental rehearsal of key patterns" },
+      { time: "22:30", title: "Wind down",         subtitle: "No screens, consistent bedtime" },
     ],
   };
   const schedule: ScheduleItem[] = rawSchedules[dayType].map(item => ({
@@ -187,39 +186,29 @@ export type DetailInfo     = { type: 'info';     text: string };
 export type ScheduleDetail = DetailMeal | DetailExercise | DetailInfo;
 
 export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
-  "Wake up & hydrate": { type: 'info', text: "Starting your day with 500 ml of water re-hydrates you after 7–8 hours without fluids. Do this before coffee — caffeine is a mild diuretic and amplifies morning dehydration." },
+  "Wake up": { type: 'info', text: "Starting your day with 500 ml of water re-hydrates you after 7–8 hours without fluids. Do this before coffee — caffeine is a mild diuretic and amplifies morning dehydration." },
   "Breakfast": { type: 'meal', focus: "High protein · slow-release carbs", options: [
     "Scrambled eggs + oats with banana and almond butter",
     "Greek yogurt bowl with granola, mixed berries and honey",
     "Whole grain toast + 3-egg omelette with spinach and feta",
   ]},
-  "Light breakfast": { type: 'meal', focus: "Light · easily digestible", options: [
-    "2 poached eggs on sourdough with sliced avocado",
-    "Greek yogurt with a small handful of granola and fruit",
-    "Banana with almond butter and a boiled egg",
-  ]},
-  "Morning mobility": { type: 'exercise', focus: "Hip flexors · thoracic spine · ankles", steps: [
+  "Mobility Exercise": { type: 'exercise', focus: "Hip flexors · thoracic spine · ankles", steps: [
     { step: "Hip flexor lunge hold", cue: "Step into a deep lunge, front knee at 90°. Push hips gently forward and hold.", reps: "60 sec each side" },
     { step: "Thoracic rotation", cue: "Sit back on heels, hands behind head. Rotate your upper back slowly left and right.", reps: "10 reps each direction" },
     { step: "Ankle circles", cue: "Stand on one foot and draw slow controlled circles with your raised ankle.", reps: "10 each direction, each ankle" },
   ]},
-  "Light mobility": { type: 'exercise', focus: "Joints · hip flexors · thoracic rotation", steps: [
-    { step: "Cat-cow", cue: "On hands and knees, alternate arching and rounding your back. Breathe with each rep.", reps: "10 slow reps" },
-    { step: "Hip flexor lunge hold", cue: "Low lunge — hold gently, no bouncing. Let the hip ease open.", reps: "45 sec each side" },
-    { step: "Thoracic opener", cue: "Arms crossed on chest, rotate torso slowly side to side keeping hips still.", reps: "8 reps each direction" },
-  ]},
-  "Pre-game meal": { type: 'meal', focus: "Easily digestible · energy without heaviness", options: [
+  "Pre-match meal": { type: 'meal', focus: "Easily digestible · energy without heaviness", options: [
     "Grilled chicken breast + white rice + cucumber salad",
     "Pasta with light tomato sauce and lean mince",
     "Jacket potato + tuna + a small mixed salad",
   ]},
-  "Warmup & activation": { type: 'exercise', focus: "Neuromuscular activation · movement prep", steps: [
+  "Warm up": { type: 'exercise', focus: "Neuromuscular activation · movement prep", steps: [
     { step: "Leg swings", cue: "Hold a wall for balance. Swing each leg forward and back, then laterally. Stay controlled.", reps: "15 reps each direction, each leg" },
     { step: "Lateral shuffle", cue: "Stay low, weight on balls of feet. Shuffle 5 metres left and right. Explode off each plant.", reps: "3 sets of 10 metres" },
     { step: "Shadow swings", cue: "20 forehand + 20 backhand shadow swings, building from 60% to 80% intensity. Focus on footwork and contact point.", reps: "20 each side" },
   ]},
   "Match": { type: 'info', text: "Match time. Focus on early rhythm — the first two games set the tone. Communicate constantly with your partner. Stay hydrated between sets." },
-  "Post-match cool down": { type: 'exercise', focus: "Heart rate reduction · static stretching", steps: [
+  "Cool down": { type: 'exercise', focus: "Heart rate reduction · static stretching", steps: [
     { step: "Standing quad stretch", cue: "Hold your ankle behind you against your glute. Keep the knee pointing straight down.", reps: "45 sec each leg" },
     { step: "Seated hamstring stretch", cue: "Legs straight out in front, hinge from the hips and reach towards your feet.", reps: "45 sec" },
     { step: "Shoulder cross-body stretch", cue: "Pull one arm across your chest. Keep your shoulder pressed down away from your ear.", reps: "30 sec each side" },
@@ -229,13 +218,13 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
     "Chicken stir-fry with rice noodles and broccoli",
     "Protein shake + banana + peanut butter on whole grain toast",
   ]},
-  "Recovery walk": { type: 'info', text: "Walk at a pace where you can hold a full conversation. Low-intensity movement flushes metabolic waste from fatigued muscles without adding stress. 20 minutes is enough." },
-  "Foam roll & stretch": { type: 'exercise', focus: "Quads · IT band · hip flexors · calves", steps: [
+  "Short walk": { type: 'info', text: "Walk at a pace where you can hold a full conversation. Low-intensity movement flushes metabolic waste from fatigued muscles without adding stress. 20 minutes is enough." },
+  "Stretch": { type: 'exercise', focus: "Quads · IT band · hip flexors · calves", steps: [
     { step: "IT band roll", cue: "Side-lying, roll slowly from hip to knee on the outer thigh. Pause and breathe on tight spots.", reps: "60–90 sec each leg" },
     { step: "Quad roll", cue: "Face down, forearms supporting you. Roll from hip to knee on the front of the thigh.", reps: "60 sec each leg" },
     { step: "Hip flexor lunge stretch", cue: "Low lunge, back knee down, slight backward lean. Feel the stretch in the front of the back hip.", reps: "60 sec each side" },
   ]},
-  "Protein-rich lunch": { type: 'meal', focus: "30–40g protein · muscle repair", options: [
+  "Lunch": { type: 'meal', focus: "Protein · carbs · greens", options: [
     "Grilled chicken breast + quinoa + roasted courgette and peppers",
     "Tuna nicoise salad with boiled eggs, green beans and olives",
     "Salmon fillet + brown rice + steamed broccoli with olive oil",
@@ -245,12 +234,6 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
     "Baked salmon + roasted sweet potato + wilted spinach with garlic",
     "Grilled sea bass + brown rice + stir-fried kale and broccoli",
     "Chicken thighs + roasted Mediterranean veg + a small portion of couscous",
-  ]},
-  "Early wind down": { type: 'info', text: "Dim lights by 9pm and avoid screens. Sleep is the highest-impact recovery tool available — aim for 8 hours tonight. A consistent bedtime rhythm compounds over weeks." },
-  "Balanced lunch": { type: 'meal', focus: "Variety · antioxidants · sustained energy", options: [
-    "Buddha bowl: brown rice, roasted veg, chickpeas and tahini dressing",
-    "Chicken wrap with avocado, spinach, cucumber and hummus",
-    "Lentil soup with whole grain bread and a large side salad",
   ]},
   "Active recovery": { type: 'info', text: "Walk, swim, or cycle at a pace where you can hold a full conversation. Keep heart rate below 130 bpm. Light aerobic activity maintains cardiovascular fitness without accumulating fatigue." },
   "Visualisation": { type: 'exercise', focus: "Mental rehearsal · pattern reinforcement", steps: [

@@ -335,6 +335,190 @@ export function saveCheckIn(ci: Omit<DailyCheckIn, "date">): void {
   localStorage.setItem("padelop:daily-checkin", JSON.stringify(entry));
 }
 
+export type MorningLog = {
+  date?: string;
+  sleepHours?: string; // "5h"|"6h"|"7h"|"8h"|"9h+"
+  pain?: string;       // "none"|"minor"|"yes"
+  waterOnWaking?: boolean;
+};
+
+export type MatchReadinessResult = {
+  color: "green" | "yellow" | "orange" | "red";
+  label: "Ready" | "Manage" | "Limited" | "Protect";
+  limiter: string | null;
+  actions: string[];
+  riskScore: number;
+};
+
+export function loadMorningLog(): MorningLog | null {
+  try {
+    const todayYMD = new Date().toISOString().slice(0, 10);
+    const raw = localStorage.getItem("padelop:morning-log");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as MorningLog;
+    if (parsed.date !== todayYMD) return null;
+    return parsed;
+  } catch { return null; }
+}
+
+export function computeMatchReadiness(
+  checkIn: DailyCheckIn | null,
+  morningLog: MorningLog | null,
+  hadMatchYesterday: boolean,
+  review: ReviewEntry | null = null,
+): MatchReadinessResult {
+  if (!checkIn && !morningLog) {
+    return {
+      color: "yellow",
+      label: "Manage",
+      limiter: "No check-in logged",
+      actions: ["Log your morning check-in to get personalised readiness guidance."],
+      riskScore: 0,
+    };
+  }
+
+  let sleepPts = 0;
+  let energyPts = 0;
+  let sorenessPts = 0;
+  let stressPts = 0;
+  let trainingPts = 0;
+
+  // Sleep hours
+  const sh = morningLog?.sleepHours;
+  if (sh === "6h") sleepPts += 1;
+  else if (sh === "5h") sleepPts += 2;
+
+  // Sleep quality (1–5, 5 = excellent)
+  const sq = checkIn?.sleep ?? 3;
+  if (sq === 3) sleepPts += 1;
+  else if (sq <= 2) sleepPts += 2;
+
+  // Energy (1–5, 5 = high)
+  const en = checkIn?.energy ?? 3;
+  if (en === 5) energyPts += 0;
+  else if (en === 4) energyPts += 1;
+  else if (en === 3) energyPts += 2;
+  else energyPts += 3;
+
+  // Soreness / pain (1–5, 5 = no soreness; pain field overrides)
+  const pain = morningLog?.pain ?? (review?.injury === "yes" ? "yes" : review?.injury === "minor" ? "minor" : "none");
+  if (pain === "yes") {
+    sorenessPts = 4;
+  } else if (pain === "minor") {
+    sorenessPts = 2;
+  } else {
+    const so = checkIn?.soreness ?? 3;
+    if (so <= 1) sorenessPts = 4;
+    else if (so === 2) sorenessPts = 2;
+    else if (so === 3) sorenessPts = 1;
+  }
+
+  // Stress (1–5, 5 = low stress)
+  const st = checkIn?.stress ?? 3;
+  if (st <= 2) stressPts = 2;
+  else if (st === 3) stressPts = 1;
+
+  // Yesterday's match
+  const poorSleep = (checkIn?.sleep ?? 3) <= 2;
+  if (hadMatchYesterday && poorSleep) trainingPts = 2;
+  else if (hadMatchYesterday) trainingPts = 1;
+
+  const riskScore = sleepPts + energyPts + sorenessPts + stressPts + trainingPts;
+
+  const color: MatchReadinessResult["color"] =
+    riskScore <= 2 ? "green" : riskScore <= 5 ? "yellow" : riskScore <= 8 ? "orange" : "red";
+  const label: MatchReadinessResult["label"] =
+    color === "green" ? "Ready" : color === "yellow" ? "Manage" : color === "orange" ? "Limited" : "Protect";
+
+  const buckets: [string, number][] = [
+    ["sleep", sleepPts],
+    ["energy", energyPts],
+    ["soreness", sorenessPts],
+    ["stress", stressPts],
+    ["training load", trainingPts],
+  ];
+  const topLimiter = [...buckets].sort((a, b) => b[1] - a[1])[0];
+  const limiter = topLimiter[1] > 0 ? topLimiter[0] : null;
+
+  const actionMap: Record<string, string[]> = {
+    sleep: [
+      "Drink 500–750ml water before noon — fatigue worsens with dehydration",
+      "Take a 20-minute nap before 3pm if you can",
+      "Extend your warm-up by 10 minutes — your nervous system needs more time today",
+      "Avoid explosive or max-intensity drills",
+      "Eat a proper meal 2–3 hours before play",
+    ],
+    energy: [
+      "Have a carb-rich snack 90 minutes before play — banana, toast, or rice",
+      "Drink 500ml of water now and keep sipping through the day",
+      "Avoid skipping meals — small regular fuelling beats one big meal",
+      "Use your warm-up to find your rhythm, not to push intensity",
+      "A short walk before court time can lift energy levels",
+    ],
+    soreness: [
+      "Foam roll quads, hips, and calves before warming up",
+      "Add 10 minutes of light mobility before hitting",
+      "Reduce intensity in the first 20 minutes — let your body ease in",
+      "Prioritise protein in your next meal to support repair",
+      "Ice or cold water on sore areas post-match",
+    ],
+    stress: [
+      "5 minutes of box breathing before court (4 in – 4 hold – 4 out – 4 hold)",
+      "Write down 3 things you can control today — focus only on those",
+      "Keep your pre-match routine simple — familiar beats perfect",
+      "Play your patterns, not the scoreboard",
+      "Reset after every point — one rally at a time",
+    ],
+    "training load": [
+      "Start warm-up at 50% and build slowly — don't rush the first 15 minutes",
+      "Focus on control and placement today, not power or speed",
+      "Avoid consecutive explosive sessions — manage the load",
+      "Stretch for an extra 10 minutes after the match",
+      "Prioritise sleep and protein tonight to recover before next session",
+    ],
+  };
+
+  const actions = limiter
+    ? actionMap[limiter]
+    : [
+        "You're well recovered — stick to your normal routine",
+        "Stay hydrated during warm-up and throughout play",
+        "Trust your preparation and focus on execution",
+      ];
+
+  const limiterLabels: Record<string, string> = {
+    sleep: "Sleep",
+    energy: "Energy",
+    soreness: "Soreness",
+    stress: "Stress",
+    "training load": "Training load",
+  };
+
+  return { color, label, limiter: limiter ? limiterLabels[limiter] : null, actions, riskScore };
+}
+
+export function improveTips(states: PillarStates): string[] {
+  const tips: string[] = [];
+  if (states.recovery.status === "low") {
+    const r = states.recovery.reason;
+    tips.push(r.includes("sleep") ? "Poor sleep last night — try a short nap or wind down early tonight" : "High soreness — prioritise stretching and take it easy today");
+  }
+  if (states.nutrition.status === "low") {
+    const r = states.nutrition.reason;
+    if (r.includes("dark") || r.includes("fluids")) tips.push("Hydration low — aim for 2+ litres before end of day");
+    else if (r.includes("Protein")) tips.push("Protein low — add eggs, chicken, or a shake to your next meal");
+    else tips.push("Nutrition off today — aim for a balanced meal with veg and protein");
+  }
+  if (states.wellbeing.status === "low") {
+    const r = states.wellbeing.reason;
+    tips.push(r.includes("stress") ? "Feeling stressed — try 5 minutes of box breathing or a short walk" : "Low motivation — keep it simple, even a short session counts");
+  }
+  if (states.training.status === "not_logged")  tips.push("No session logged — even 30 min of drills counts");
+  if (states.nutrition.status === "not_logged") tips.push("Complete your night check-in to track nutrition");
+  if (tips.length === 0) tips.push("You're in great shape — keep the habits going");
+  return tips.slice(0, 3);
+}
+
 export function computeAllTimeScores(): Scores {
   try {
     const hydLogs = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]") as HydrationEntry[];
