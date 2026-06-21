@@ -894,12 +894,11 @@ export default function Home8() {
                             <svg viewBox="0 0 100 100" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
                               <defs>
                                 <path id="matchArc" d="M 12 50 A 38 38 0 0 1 88 50" />
-                                <path id="readinessArc" d="M 5 50 A 45 45 0 0 0 95 50" />
                               </defs>
                               <text fill="rgba(255,255,255,0.7)" fontSize="9.5" fontWeight="700" letterSpacing="2.5" fontFamily="inherit">
                                 <textPath href="#matchArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
                               </text>
-                              <circle cx="50" cy="91" r="4" fill={matchReadiness?.color === "green" ? "#22c55e" : matchReadiness?.color === "yellow" ? "#eab308" : matchReadiness?.color === "orange" ? "#f97316" : matchReadiness?.color === "red" ? "#ef4444" : "#eab308"} />
+                              {(() => { const n = improveTips(pillarStates).length; const c = n === 0 ? "#22c55e" : n <= 2 ? "#eab308" : n <= 4 ? "#f97316" : "#ef4444"; return <circle cx="50" cy="91" r="4" fill={c} />; })()}
                             </svg>
                           </div>
                         </div>
@@ -919,12 +918,11 @@ export default function Home8() {
                           <svg viewBox="0 0 100 100" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
                             <defs>
                               <path id="noMatchArc" d="M 12 50 A 38 38 0 0 1 88 50" />
-                              <path id="noMatchReadinessArc" d="M 5 50 A 45 45 0 0 0 95 50" />
                             </defs>
                             <text fill="rgba(255,255,255,0.7)" fontSize="9.5" fontWeight="700" letterSpacing="2.5" fontFamily="inherit">
                               <textPath href="#noMatchArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
                             </text>
-                            <circle cx="50" cy="91" r="4" fill={matchReadiness?.color === "green" ? "#22c55e" : matchReadiness?.color === "yellow" ? "#eab308" : matchReadiness?.color === "orange" ? "#f97316" : matchReadiness?.color === "red" ? "#ef4444" : "#eab308"} />
+                            {(() => { const n = improveTips(pillarStates).length; const c = n === 0 ? "#22c55e" : n <= 2 ? "#eab308" : n <= 4 ? "#f97316" : "#ef4444"; return <circle cx="50" cy="91" r="4" fill={c} />; })()}
                           </svg>
                         </div>
                       </div>
@@ -1585,51 +1583,13 @@ export default function Home8() {
                     </div>{/* end gradient section */}
                   </div>
 
-                  {/* READINESS CARD */}
-                  {(() => {
-                    const r = matchReadiness;
-                    const steps = [
-                      { color: "#ef4444", label: "red" },
-                      { color: "#f97316", label: "orange" },
-                      { color: "#eab308", label: "yellow" },
-                      { color: "#22c55e", label: "green" },
-                    ];
-                    const activeIdx = !r ? 2 : r.color === "red" ? 0 : r.color === "orange" ? 1 : r.color === "yellow" ? 2 : 3;
-                    const dotColor = steps[activeIdx].color;
-                    const statusLabel = !r ? "No data" : r.color === "green" ? "Good readiness" : r.color === "yellow" ? "OK readiness" : r.color === "orange" ? "Moderate readiness" : "Low readiness";
-                    return (
-                      <div style={{ background: "#fff", borderRadius: 24, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 14 }}>
-
-                        {/* Spectrum row */}
-                        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: "#b0b8c1" }}>Health status</span>
-                          {/* Dots + line */}
-                          <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                            <div style={{ position: "absolute", top: "50%", left: 6, right: 6, height: 2, background: "#e8eaed", transform: "translateY(-50%)", zIndex: 0 }} />
-                            {steps.map(s => (
-                              <div key={s.label} style={{ width: 12, height: 12, borderRadius: "50%", background: s.color, zIndex: 1, flexShrink: 0 }} />
-                            ))}
-                          </div>
-                          {/* Triangles row — invisible placeholders keep spacing */}
-                          <div style={{ display: "flex", justifyContent: "space-between" }}>
-                            {steps.map((s, i) => (
-                              <div key={s.label} style={{ width: 12, display: "flex", justifyContent: "center", visibility: i === activeIdx ? "visible" : "hidden" }}>
-                                <div style={{ width: 0, height: 0, borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderBottom: "8px solid #1a1c1c" }} />
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Status row */}
-                        <span style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>{statusLabel}</span>
-
-                        <Link href="/profile?tab=progress" onClick={closeSheet} style={{ display: "flex", alignItems: "center", gap: 4, textDecoration: "none", marginTop: -8 }}>
-                          <span style={{ fontSize: 14, fontWeight: 600, color: "#2653d4" }}>See details</span>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                        </Link>
-                      </div>
-                    );
-                  })()}
+                  {/* CONDITIONING TIPS LINK */}
+                  <Link href="/profile?tab=today" onClick={closeSheet} style={{ textDecoration: "none", display: "block" }}>
+                    <div style={{ background: "#fff", borderRadius: 24, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+                      <span style={{ fontSize: 15, fontWeight: 600, color: "#1a1c1c" }}>Recommendations</span>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#b0b5ba" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    </div>
+                  </Link>
 
                 </div>{/* end flex column */}
                 </div>{/* end scroll container */}

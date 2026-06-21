@@ -1410,6 +1410,7 @@ export default function ProfilePage() {
                   <span style={{ fontSize: 13, color: "#8a9096", fontWeight: 500 }}>{now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</span>
                 </div>
                 <div style={{ background: "#fff", padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+                  <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1" }}>Recommendations</p>
                   {tips.map(tip => (
                     <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
                       <div style={{ width: 8, height: 8, borderRadius: "50%", background: dayColor, flexShrink: 0, marginTop: 6 }} />
