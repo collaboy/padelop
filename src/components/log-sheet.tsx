@@ -482,7 +482,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
 
   if (sub === "checkin") {
     const NIGHT_COUNT = 8;
-    const MORNING_COUNT = 4;
+    const MORNING_COUNT = 5;
 
     type CStep =
       | { key: string; section: "night" | "morning"; type: "scale"; question: string; lo: string; hi: string }
@@ -504,6 +504,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
       { key: "habits",           section: "night",   type: "habits", question: "Which habits did you complete?" },
       // ── This morning ─────────────────────────────────────────────────────
       { key: "soreness",         section: "morning", type: "scale", question: "How does your body feel?",           lo: "Very sore",     hi: "No soreness" },
+      { key: "pain",             section: "morning", type: "opts3", question: "Any pain or injury today?",           opts: [["none","None"],["minor","Minor"],["yes","Yes"]] },
       { key: "energy",           section: "morning", type: "scale", question: "Energy level?",                      lo: "Exhausted",     hi: "Energised"   },
       { key: "motivation",       section: "morning", type: "scale", question: "Motivated today?",                   lo: "None",          hi: "Fired up"    },
       { key: "water",            section: "morning", type: "yesno", question: "Did you drink water on waking?" },
@@ -547,6 +548,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
         localStorage.setItem("padelop:morning-log", JSON.stringify({
           date: todayYMD,
           sleepHours: next.sleepHours,
+          pain: next.pain ?? "none",
           waterOnWaking: next.water === "yes",
         }));
 
@@ -580,10 +582,12 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
 
         const hydrationLitres = String(next.hydrationLitres ?? "");
         if (hydrationLitres) {
-          const hydrationEntry = { ts: new Date().toISOString(), litres: hydrationLitres, urine: "", quality: "ok", timing: [] as string[] };
+          const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+          const hydrationEntry = { ts: yesterday.toISOString(), litres: hydrationLitres, urine: "", quality: "ok", timing: [] as string[] };
           const prevHydration = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]");
           localStorage.setItem("padelop:hydration-logs", JSON.stringify([hydrationEntry, ...prevHydration].slice(0, 50)));
-          saveHydrationToDb(todayYMD, rangeToMl(hydrationLitres));
+          const yesterdayYMD = yesterday.toISOString().slice(0, 10);
+          saveHydrationToDb(yesterdayYMD, rangeToMl(hydrationLitres));
         }
       } catch {}
       afterSave();

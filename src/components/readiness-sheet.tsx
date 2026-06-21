@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   computeScores, loadScoringData, saveScoreSnapshot,
+  computeMatchReadiness, loadMorningLog,
+  type MatchReadinessResult,
   type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry, type HabitsEntry,
 } from "@/lib/scoring";
 
@@ -27,6 +29,7 @@ export default function ReadinessSheet({ open, onClose, onOpenLog: _onOpenLog, o
   const [matchDate, setMatchDate] = useState<string | null>(null);
   const [matchTime, setMatchTime] = useState<string | null>(null);
   const [hydrationMl, setHydrationMl] = useState(0);
+  const [matchReadiness, setMatchReadiness] = useState<MatchReadinessResult | null>(null);
 
   const GOAL_ML  = 2500;
   const todayKey = new Date().toISOString().slice(0, 10);
@@ -35,6 +38,7 @@ export default function ReadinessSheet({ open, onClose, onOpenLog: _onOpenLog, o
     const d = loadScoringData();
     const s = computeScores(d.checkIn, d.hydration, d.review, d.nutrition, d.gameDaysThisWeek, d.habits, d.training);
     saveScoreSnapshot(s);
+    setMatchReadiness(computeMatchReadiness(d.checkIn, loadMorningLog(), false, d.review));
     setCheckIn(d.checkIn);
     setHydration(d.hydration);
     setNutrition(d.nutrition);
@@ -224,55 +228,41 @@ export default function ReadinessSheet({ open, onClose, onOpenLog: _onOpenLog, o
         <div className="overflow-y-auto flex-1 overscroll-contain" style={{ display: "flex", flexDirection: "column", gap: 10, padding: "0 16px 32px" }}>
 
           {/* STATUS CARD */}
-          <div style={{ background: "#fff", borderRadius: 24, padding: "36px 24px 32px", textAlign: "center" }}>
-            <p style={{ fontSize: 28, fontWeight: 800, color: "#1a1c1c", margin: "0 0 20px", lineHeight: 1.1 }}>
-              {stateLabel}
-            </p>
+          {(() => {
+            const r = matchReadiness;
+            const dotColor = !r ? "#eab308" : r.color === "green" ? "#22c55e" : r.color === "yellow" ? "#eab308" : r.color === "orange" ? "#f97316" : "#ef4444";
+            return (
+              <div style={{ background: "#fff", borderRadius: 24, padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096", margin: 0, textAlign: "center" }}>Today · {dayTypeLabel}</p>
 
-            {(state === "readiness" || state === "match-day") && (
-              <>
-                <p style={{ fontSize: "clamp(64px, 20vw, 80px)", fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1, letterSpacing: "-0.03em" }}>
-                  {done}<span style={{ color: "#e2e5e9" }}>/{total}</span>
-                </p>
-                {state === "match-day" ? (
-                  <p style={{ fontSize: 15, fontWeight: 600, color: progressColor, margin: "16px 0 0" }}>
-                    {done === total ? "You're ready — go play your best" : progressText}
-                  </p>
-                ) : (
-                  <p style={{ fontSize: 15, fontWeight: 600, color: progressColor, margin: "16px 0 0" }}>{progressText}</p>
+                {/* Dot + label */}
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 12, height: 12, borderRadius: "50%", background: dotColor, flexShrink: 0 }} />
+                  <span style={{ fontSize: 16, fontWeight: 800, color: "#1a1c1c" }}>{r?.label ?? "Manage"}</span>
+                  {r?.limiter && (
+                    <span style={{ fontSize: 13, color: "#6b7480", fontWeight: 500 }}>· {r.limiter} is your limiter</span>
+                  )}
+                </div>
+
+                {/* Actions */}
+                {r && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", margin: 0 }}>Today&apos;s adjustments</p>
+                    {r.actions.map((a, i) => (
+                      <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                        <div style={{ width: 4, height: 4, borderRadius: "50%", background: dotColor, flexShrink: 0, marginTop: 7 }} />
+                        <span style={{ fontSize: 13, color: "#3a4040", lineHeight: 1.5 }}>{a}</span>
+                      </div>
+                    ))}
+                  </div>
                 )}
-              </>
-            )}
 
-            {state === "preparation" && daysToMatch !== null && (
-              <>
-                <p style={{ fontSize: "clamp(56px, 18vw, 72px)", fontWeight: 800, color: "#1a1c1c", margin: 0, lineHeight: 1, letterSpacing: "-0.03em" }}>
-                  {daysToMatch}<span style={{ fontSize: "clamp(28px, 9vw, 36px)", color: "#b0b8c1", marginLeft: 6 }}>day{daysToMatch === 1 ? "" : "s"}</span>
-                </p>
-                <p style={{ fontSize: 13, fontWeight: 500, color: "#8a9096", margin: "16px 0 0", lineHeight: 1.5, maxWidth: 260, marginLeft: "auto", marginRight: "auto" }}>
-                  {prepCoachNote}
-                </p>
-              </>
-            )}
-
-            {state === "match-active" && (
-              <>
-                <p style={{ fontSize: "clamp(64px, 20vw, 80px)", fontWeight: 800, color: "#2653d4", margin: 0, lineHeight: 1, letterSpacing: "-0.03em" }}>
-                  {done}<span style={{ color: "#c7d3f7" }}>/{total}</span>
-                </p>
-                <p style={{ fontSize: 14, color: "#9aa5b0", margin: "16px 0 0", lineHeight: 1.5 }}>Warmup, hydrate, stay loose between sets.</p>
-              </>
-            )}
-
-            {state === "recovery" && (
-              <>
-                <p style={{ fontSize: "clamp(64px, 20vw, 80px)", fontWeight: 800, color: "#7c3aed", margin: 0, lineHeight: 1, letterSpacing: "-0.03em" }}>
-                  {done}<span style={{ color: "#ddd6fe" }}>/{total}</span>
-                </p>
-                <p style={{ fontSize: 15, fontWeight: 600, color: "#7c3aed", margin: "16px 0 0" }}>Hydrate, foam roll, sleep well tonight.</p>
-              </>
-            )}
-          </div>
+                {state === "preparation" && daysToMatch !== null && (
+                  <p style={{ fontSize: 13, color: "#8a9096", margin: 0, lineHeight: 1.5 }}>{prepCoachNote}</p>
+                )}
+              </div>
+            );
+          })()}
 
           {/* CHECKLIST */}
           <div style={{ background: "#fff", borderRadius: 24, padding: "4px 20px 16px" }}>
