@@ -931,7 +931,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="w-full pb-20">
+    <div className="w-full pb-20" style={{ background: "#fff" }}>
 
       {/* ── Profile Header (always visible) ─────────────────────────────── */}
       <div className="flex flex-col items-center text-center gap-2">

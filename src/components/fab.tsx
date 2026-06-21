@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { saveUpcomingMatch, saveNutritionToDb, saveNoteToDb, saveMatchReview, saveGearToDb } from "@/lib/db";
 
 type StoredMatch = { date: string; time: string; club: string; court: string; player_1: string; player_2: string; player_3: string; player_4: string };
@@ -34,6 +34,8 @@ function nowTimeStr() {
 
 export default function Fab() {
   const router = useRouter();
+  const pathname = usePathname();
+  const prevPathnameRef = useRef(pathname);
 
   const [logPickerOpen, setLogPickerOpen] = useState(false);
   const [logPickerSub, setLogPickerSub] = useState<"nutrition" | "matchreview" | "upload-confirm" | null>(null);
@@ -49,6 +51,13 @@ export default function Fab() {
   const [noteText, setNoteText] = useState("");
 
   const insertUploadRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (pathname !== prevPathnameRef.current) {
+      prevPathnameRef.current = pathname;
+      closeAll();
+    }
+  }, [pathname]);
 
   useEffect(() => {
     function handleOpen() { setSmartUploadError(null); setFabExpanded(false); setLogPickerOpen(true); }
@@ -233,14 +242,14 @@ export default function Fab() {
                 {/* Home + My Profile */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, paddingTop: 0, marginTop: -4 }}>
                   <button
-                    onClick={() => { closeAll(); router.push("/home8"); }}
+                    onClick={() => router.push("/home8")}
                     style={{ background: "#eef2ff", border: "none", borderRadius: 14, padding: "12px 8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, aspectRatio: "1" }}
                   >
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                     <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
                   </button>
                   <button
-                    onClick={() => { closeAll(); router.push("/profile"); }}
+                    onClick={() => router.push("/profile")}
                     style={{ background: "#eef2ff", border: "none", borderRadius: 14, padding: "12px 8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, aspectRatio: "1" }}
                   >
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>
