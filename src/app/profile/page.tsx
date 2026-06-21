@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { saveGearToDb, saveProfileToDb, saveNutritionInsightToDb, saveUpcomingMatch, saveScheduleDoneToDb, saveScoreSnapshotToDb } from "@/lib/db";
 import LogSheet from "@/components/log-sheet";
 import AvatarCropModal from "@/components/avatar-crop-modal";
@@ -442,13 +442,14 @@ function PrevDaysList({ days, schedDone, deduped, getScheduleData, loadScoringDa
 
 export default function ProfilePage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   // Tab
-  const [activeTab, setActiveTab] = useState<'today' | 'progress' | 'archive'>(() => {
-    const t = searchParams.get('tab');
-    return (t === 'progress' || t === 'archive') ? t : 'today';
-  });
+  const [activeTab, setActiveTab] = useState<'today' | 'progress' | 'archive'>('today');
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get('tab');
+    if (t === 'progress' || t === 'archive') goTab(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [tabAnimKey, setTabAnimKey] = useState(0);
   const tabDir = useRef<1 | -1>(1);
   const [schedOpen, setSchedOpen] = useState(false);
