@@ -751,6 +751,7 @@ export default function Home8() {
   const today = new Date().toISOString().slice(0, 10);
   const dayType: "match" | "recovery" | "training" = match?.date === today ? "match" : yesterdayWasMatch ? "recovery" : "training";
   const dayColor = dayType === "match" ? "#2653d4" : dayType === "recovery" ? "#7c3aed" : "#16a34a";
+  const dayLabel = dayType === "match" ? "Match Day" : dayType === "recovery" ? "Recovery Day" : "Training Day";
   const { schedule, currentIdx } = getScheduleData(dayType, match?.time ?? null, drillTag);
   const doItem = schedule[currentIdx];
   const modalIdx = schedModalIdx ?? currentIdx;
