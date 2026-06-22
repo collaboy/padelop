@@ -1480,7 +1480,7 @@ export default function Home8() {
               <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
               <div
                 className="relative w-full bg-white rounded-[28px] flex flex-col overflow-hidden"
-                style={{ animation: "miScaleIn 0.2s cubic-bezier(0.22,1,0.36,1)", maxHeight: "80dvh" }}
+                style={{ animation: "miScaleIn 0.2s cubic-bezier(0.22,1,0.36,1)", height: "80dvh" }}
                 onClick={e => e.stopPropagation()}
               >
                 {/* Shared hidden file input for both edit and add upload */}
