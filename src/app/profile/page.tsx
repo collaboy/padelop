@@ -1035,7 +1035,7 @@ export default function ProfilePage() {
         )}
 
         <div>
-          <h1 className="t-heading" style={{ color: "var(--c-text)", margin: 0 }}>{profile.name || "Add your name"}</h1>
+          <h1 style={{ fontSize: 17, fontWeight: 700, color: "var(--c-text)", margin: 0 }}>{profile.name || "Add your name"}</h1>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginTop: "4px" }}>
             {profile.level && <span className="t-caption" style={{ background: "var(--c-blue-light)", color: "var(--c-blue)", padding: "2px 12px", borderRadius: "var(--r-pill)" }}>Level {profile.level}</span>}
             {profile.position && <span className="t-caption" style={{ color: "#444748" }}>• {profile.position}</span>}
