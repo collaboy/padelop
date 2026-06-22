@@ -1609,7 +1609,7 @@ export default function Home8() {
                                 <span style={{ fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.45 }}>{tip}</span>
                               </div>
                             ))}
-                            <Link href="/profile?tab=today" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 3, marginTop: -4 }}>
+                            <Link href="/profile?tab=today" style={{ textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 3, marginTop: -4, marginBottom: -6 }}>
                               <span style={{ fontSize: 13, fontWeight: 600, color: dayColor, lineHeight: 1 }}>See more</span>
                               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={dayColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                             </Link>
