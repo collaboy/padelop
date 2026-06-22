@@ -1200,7 +1200,7 @@ export default function ProfilePage() {
             return (
               <div style={{ background: "#fff", borderRadius: 18, padding: "18px 20px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
                 <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>
-                  {pct === 100 ? "All tasks done today ✓" : `${done} of ${total} tasks completed`}
+                  {pct === 100 ? "Today's Scheduled Tasks ✓" : `Today's Scheduled Tasks — ${done} of ${total} done`}
                 </p>
                 <div style={{ height: 5, borderRadius: 3, background: "#f0f2f5", overflow: "hidden", marginBottom: 16 }}>
                   <div style={{ height: "100%", width: `${pct}%`, borderRadius: 3, background: barColor, transition: "width 0.4s" }} />

@@ -445,6 +445,27 @@ export default function Home8() {
           setCheckinNudgeOpen(false);
         }
       } catch { setMorningDone(false); }
+      // Seed completed Set from padelop:schedule-done
+      try {
+        const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
+        const doneTitles = sd[todayStr] ?? [];
+        if (doneTitles.length > 0) {
+          let dt: "match" | "recovery" | "training" = "training";
+          try {
+            const nm = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
+            if (nm?.date === todayStr) { dt = "match"; }
+            else {
+              const yest = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+              const revs: { ts?: string }[] = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+              if (revs.some(r => r.ts?.slice(0, 10) === yest)) dt = "recovery";
+            }
+          } catch {}
+          const sched = getScheduleData(dt, null, getTopNeedsWorkTag()).schedule;
+          const indices = new Set<number>();
+          sched.forEach((item, i) => { if (doneTitles.includes(item.title)) indices.add(i); });
+          setCompleted(indices);
+        }
+      } catch {}
     }
     function loadMatch() {
       const todayD = new Date().toISOString().slice(0, 10);
@@ -1352,6 +1373,16 @@ export default function Home8() {
                         }
                         return n;
                       });
+                      try {
+                        const todayKey = new Date().toISOString().slice(0, 10);
+                        const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
+                        const titles = sd[todayKey] ?? [];
+                        sd[todayKey] = isComplete
+                          ? titles.filter(t => t !== modalItem.title)
+                          : [...titles.filter(t => t !== modalItem.title), modalItem.title];
+                        localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
+                        window.dispatchEvent(new Event("storage"));
+                      } catch {}
                     }}
                     className="w-full py-4 rounded-2xl text-[16px] font-bold active:scale-[0.98] transition-transform"
                     style={isComplete ? { background: `${modalItem.color}15`, color: modalItem.color } : { background: modalItem.color, color: "#fff" }}
