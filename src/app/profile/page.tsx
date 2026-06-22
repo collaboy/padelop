@@ -2073,7 +2073,7 @@ export default function ProfilePage() {
       <LogSheet open={logSheetOpen} onClose={() => {
         setLogSheetOpen(false);
         setLogTab(null);
-        try { const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null"); setCheckinDone(ml?.date === new Date().toISOString().slice(0, 10)); } catch {}
+        loadAll();
       }} defaultSub={logTab ?? undefined} />
 
       {cropSrc && (
