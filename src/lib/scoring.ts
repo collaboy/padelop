@@ -187,7 +187,7 @@ export function loadScoringData(): {
   try {
     const logs = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]") as HydrationEntry[];
     const recent = logs[0];
-    if (recent && Date.now() - new Date(recent.ts).getTime() < 36 * 3600_000) hydration = recent;
+    if (recent && new Date(recent.ts).toISOString().slice(0, 10) === todayYMD) hydration = recent;
   } catch {}
 
   let review: ReviewEntry | null = null;
@@ -200,7 +200,7 @@ export function loadScoringData(): {
   try {
     const logs = JSON.parse(localStorage.getItem("padelop:nutrition-logs") || "[]") as NutritionEntry[];
     const recent = logs[0];
-    if (recent && Date.now() - new Date(recent.ts).getTime() < 24 * 3600_000) nutrition = recent;
+    if (recent && new Date(recent.ts).toISOString().slice(0, 10) === todayYMD) nutrition = recent;
   } catch {}
 
   let training: TrainingEntry | null = null;
@@ -503,18 +503,24 @@ export function improveTips(states: PillarStates): string[] {
   else if (states.recovery.status === "low") {
     const r = states.recovery.reason;
     tips.push(r.includes("sleep") ? "Poor sleep last night — try a short nap or wind down early tonight" : "High soreness — prioritise stretching and take it easy today");
+  } else if (states.recovery.status === "ok") {
+    tips.push("Sleep was decent but not ideal — aim for 8 hours tonight");
   }
   if (states.wellbeing.status === "not_logged") tips.push("Log how you're feeling today — energy and stress levels matter");
   else if (states.wellbeing.status === "low") {
     const r = states.wellbeing.reason;
     tips.push(r.includes("stress") ? "Feeling stressed — try 5 minutes of box breathing or a short walk" : "Low motivation — keep it simple, even a short session counts");
+  } else if (states.wellbeing.status === "ok") {
+    tips.push("Energy or motivation not at peak — a short warm-up can help get you going");
   }
-  if (states.nutrition.status === "not_logged") tips.push("Complete your night check-in to track nutrition");
+  if (states.nutrition.status === "not_logged") tips.push("Log your nutrition today — fuelling matters on a " + (states.training.reason?.includes("Match") ? "match" : "training") + " day");
   else if (states.nutrition.status === "low") {
     const r = states.nutrition.reason;
     if (r.includes("dark") || r.includes("fluids")) tips.push("Hydration low — aim for 2+ litres before end of day");
     else if (r.includes("Protein")) tips.push("Protein low — add eggs, chicken, or a shake to your next meal");
     else tips.push("Nutrition off today — aim for a balanced meal with veg and protein");
+  } else if (states.nutrition.status === "ok") {
+    tips.push("Nutrition is adequate — push for better hydration and protein to peak today");
   }
   if (states.training.status === "not_logged") tips.push("No session logged — even 30 min of drills counts");
   return tips.slice(0, 3);
