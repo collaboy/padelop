@@ -172,24 +172,43 @@ export default function Fab() {
                   </div>
                 )}
 
-                {/* Upload */}
-                <button
-                  onClick={() => insertUploadRef.current?.click()}
-                  disabled={insertUploadLoading}
-                  style={{ width: "100%", background: "#eef2ff", border: "none", borderRadius: 18, padding: "22px 20px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, textAlign: "center", opacity: insertUploadLoading ? 0.6 : 1, aspectRatio: "1" }}
-                >
-                  <div style={{ width: 64, height: 64, borderRadius: 18, background: "#2653d4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {/* 2×2 nav grid */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <button
+                    onClick={() => router.push("/home8")}
+                    style={{ background: "#eef2ff", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1" }}
+                  >
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
+                  </button>
+                  <button
+                    onClick={() => insertUploadRef.current?.click()}
+                    disabled={insertUploadLoading}
+                    style={{ background: "#eef2ff", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1", opacity: insertUploadLoading ? 0.6 : 1, position: "relative" }}
+                  >
                     {insertUploadLoading ? (
-                      <svg className="animate-spin" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                      <svg className="animate-spin" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="2.2" strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
                     ) : (
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
                     )}
-                  </div>
-                  <div>
-                    <p style={{ fontSize: 16, fontWeight: 700, color: "#1a1c1c", margin: 0 }}>{insertUploadLoading ? "Analysing…" : "Upload a photo"}</p>
-                    <p style={{ fontSize: 13, fontWeight: 500, color: "#6b7480", margin: "3px 0 0" }}>Match booking · Food · Results · Gear</p>
-                  </div>
-                </button>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>{insertUploadLoading ? "Analysing…" : "Upload a photo"}</span>
+                    {!insertUploadLoading && <p style={{ position: "absolute", bottom: 12, left: 0, right: 0, textAlign: "center", fontSize: 10, fontWeight: 500, color: "#6b7480", margin: 0, lineHeight: 1.4 }}>Match · Food · Results · Gear</p>}
+                  </button>
+                  <button
+                    onClick={() => { closeAll(); router.push("/settings"); }}
+                    style={{ background: "#eef2ff", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1" }}
+                  >
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>Settings</span>
+                  </button>
+                  <button
+                    onClick={() => { closeAll(); router.push("/profile?tab=profile"); }}
+                    style={{ background: "#eef2ff", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1" }}
+                  >
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>My Profile</span>
+                  </button>
+                </div>
 
                 {/* Add manually toggle */}
                 <button
@@ -237,31 +256,6 @@ export default function Fab() {
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: "auto" }}><polyline points="9 18 15 12 9 6"/></svg>
                     </button>
                   </div>
-                </div>
-
-                {/* Home + My Profile + Settings */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, paddingTop: 0, marginTop: -4 }}>
-                  <button
-                    onClick={() => router.push("/home8")}
-                    style={{ background: "#eef2ff", border: "none", borderRadius: 14, padding: "12px 8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, aspectRatio: "1" }}
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
-                  </button>
-                  <button
-                    onClick={() => { closeAll(); router.push("/settings"); }}
-                    style={{ background: "#eef2ff", border: "none", borderRadius: 14, padding: "12px 8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, aspectRatio: "1" }}
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Settings</span>
-                  </button>
-                  <button
-                    onClick={() => { closeAll(); router.push("/profile?tab=profile"); }}
-                    style={{ background: "#eef2ff", border: "none", borderRadius: 14, padding: "12px 8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, aspectRatio: "1" }}
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>My Profile</span>
-                  </button>
                 </div>
 
               </div>
