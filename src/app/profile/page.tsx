@@ -1395,41 +1395,32 @@ export default function ProfilePage() {
       {activeTab === 'today' && (
         <div className="pt-5 flex flex-col gap-5">
 
-          {/* Day hero card */}
-          {(() => {
-            const dayGrad = dayType === "match"
-              ? ["#eef2ff", "#dbe4ff"]
-              : dayType === "recovery"
-              ? ["#faf5ff", "#ede9fe"]
-              : ["#ecfdf5", "#d1fae5"];
-            return (
-              <div style={{ margin: "0 20px", borderRadius: "var(--r-lg)", overflow: "hidden", boxShadow: "var(--shadow-card)" }}>
-                <div style={{ background: `linear-gradient(145deg, ${dayGrad[0]}, ${dayGrad[1]})`, padding: "32px 24px 24px", textAlign: "center" }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: dayColor }}>Today</span>
-                  <p style={{ margin: "8px 0 6px", fontSize: "clamp(32px, 8vw, 40px)", fontWeight: 800, color: dayColor, lineHeight: 1.1 }}>{dayLabel}</p>
-                  <span style={{ fontSize: 13, color: "#8a9096", fontWeight: 500 }}>{now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</span>
-                </div>
-                <div style={{ background: "#fff", padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
-                  {tips.length === 0 ? (
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e", flexShrink: 0 }} />
-                      <span style={{ fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.45 }}>All pillars on track today</span>
-                    </div>
-                  ) : (
-                    <>
-                      <div style={{ borderRadius: 24, padding: "12px 16px", background: dayColor, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 15, fontWeight: 600, color: "#fff" }}>{tips.length} Recommendation{tips.length > 1 ? "s" : ""}</span></div>
-                      {tips.map(tip => (
-                        <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                          <div style={{ width: 8, height: 8, borderRadius: "50%", background: dayColor, flexShrink: 0, marginTop: 6 }} />
-                          <span style={{ fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.45 }}>{tip}</span>
-                        </div>
-                      ))}
-                    </>
-                  )}
-                </div>
+          {/* Day type card */}
+          <div style={{ margin: "0 20px", borderRadius: "var(--r-lg)", background: dayColor, padding: "32px 24px", textAlign: "center", boxShadow: "var(--shadow-card)" }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)" }}>Today</span>
+            <p style={{ margin: "8px 0 6px", fontSize: "clamp(32px, 8vw, 40px)", fontWeight: 800, color: "#fff", lineHeight: 1.1 }}>{dayLabel}</p>
+            <span style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", fontWeight: 500 }}>{now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</span>
+          </div>
+
+          {/* Recommendations card */}
+          <div style={{ margin: "0 20px", borderRadius: "var(--r-lg)", background: "#fff", padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12, boxShadow: "var(--shadow-card)" }}>
+            {tips.length === 0 ? (
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e", flexShrink: 0 }} />
+                <span style={{ fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.45 }}>All pillars on track today</span>
               </div>
-            );
-          })()}
+            ) : (
+              <>
+                <div style={{ borderRadius: 24, padding: "12px 16px", background: dayColor, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 15, fontWeight: 600, color: "#fff" }}>{tips.length} Recommendation{tips.length > 1 ? "s" : ""}</span></div>
+                {tips.map(tip => (
+                  <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: dayColor, flexShrink: 0, marginTop: 6 }} />
+                    <span style={{ fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.45 }}>{tip}</span>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
 
           {/* Today's Schedule */}
           <div style={{ padding: "0 20px" }}>
