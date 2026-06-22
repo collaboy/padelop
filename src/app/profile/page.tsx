@@ -1039,16 +1039,6 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Recommendations */}
-          <div style={{ margin: "0 20px", borderRadius: "var(--r-lg)", background: "#fff", boxShadow: "var(--shadow-card)", padding: "20px" }}>
-            <p style={{ margin: "0 0 14px", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: dayColor }}>
-              {dayLabel}
-            </p>
-            <p style={{ margin: 0, fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>
-              {buildInsightParagraph(pillarStates)}
-            </p>
-          </div>
-
         </div>
       )}
 
