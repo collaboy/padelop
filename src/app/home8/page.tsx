@@ -1597,7 +1597,7 @@ export default function Home8() {
                           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: matchInfoTipsOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }}><path d="M9 18l6-6-6-6"/></svg>
                         </button>
                         {matchInfoTipsOpen && (
-                          <div style={{ background: "#fff", borderRadius: 20, padding: "16px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+                          <div style={{ background: "#fff", borderRadius: 20, padding: "16px 20px 10px", display: "flex", flexDirection: "column", gap: 12 }}>
                             {tips.length === 0 ? (
                               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e", flexShrink: 0 }} />
