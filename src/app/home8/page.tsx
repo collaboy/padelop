@@ -260,6 +260,7 @@ export default function Home8() {
   const [pastReviews, setPastReviews] = useState<{ ts: string; result: string; opponentNames: string; wellDone: string[]; improved: string[] }[]>([]);
   const [matchActionOpen, setMatchActionOpen] = useState(false);
   const [matchInfoOpen, setMatchInfoOpen] = useState(false);
+  const [matchInfoTipsOpen, setMatchInfoTipsOpen] = useState(false);
   const [matchInfoMode, setMatchInfoMode] = useState<null | 'edit' | 'add'>(null);
   const [matchInfoAddTab, setMatchInfoAddTab] = useState<null | 'upload' | 'manual'>(null);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; court?: string; players?: string[] } | null>(null);
@@ -1448,7 +1449,7 @@ export default function Home8() {
           const countdownLabel = diffDays === 0 ? "TODAY" : diffDays === 1 ? "TOMORROW" : `IN ${diffDays} DAYS`;
           const dateStr = matchDate.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" });
           const playerStr = match.players && match.players.length > 0 ? match.players.map(p => p.slice(0, 2)).join(' · ') : null;
-          const closeSheet = () => { setMatchInfoOpen(false); setMatchInfoMode(null); setMatchInfoAddTab(null); };
+          const closeSheet = () => { setMatchInfoOpen(false); setMatchInfoMode(null); setMatchInfoAddTab(null); setMatchInfoTipsOpen(false); };
           const saveEdit = () => {
             if (!matchForm.date || !matchForm.time) return;
             const data: StoredMatch = { date: matchForm.date, time: matchForm.time, club: matchForm.club, court: matchForm.court, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
@@ -1587,14 +1588,32 @@ export default function Home8() {
                   </div>
 
                   {/* TODAY SECTION */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    <Link href="/profile?tab=today" style={{ textDecoration: "none", display: "block" }}>
-                      <div style={{ background: dayColor, borderRadius: 24, padding: "18px 20px", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-                        <span style={{ fontSize: 18, fontWeight: 700, color: "#fff" }}>{improveTips(pillarStates).length} Recommendations</span>
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                  {(() => {
+                    const tips = improveTips(pillarStates);
+                    return (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                        <button onClick={() => setMatchInfoTipsOpen(o => !o)} style={{ background: dayColor, borderRadius: 24, padding: "18px 20px", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, border: "none", cursor: "pointer", width: "100%" }}>
+                          <span style={{ fontSize: 18, fontWeight: 700, color: "#fff" }}>{tips.length} Recommendation{tips.length !== 1 ? "s" : ""}</span>
+                          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: matchInfoTipsOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }}><path d="M9 18l6-6-6-6"/></svg>
+                        </button>
+                        {matchInfoTipsOpen && (
+                          <div style={{ background: "#fff", borderRadius: 20, padding: "16px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+                            {tips.length === 0 ? (
+                              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e", flexShrink: 0 }} />
+                                <span style={{ fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.45 }}>All pillars on track today</span>
+                              </div>
+                            ) : tips.map(tip => (
+                              <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                                <div style={{ width: 8, height: 8, borderRadius: "50%", background: dayColor, flexShrink: 0, marginTop: 6 }} />
+                                <span style={{ fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.45 }}>{tip}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                    </Link>
-                  </div>
+                    );
+                  })()}
 
                 </div>{/* end flex column */}
                 </div>{/* end scroll container */}
