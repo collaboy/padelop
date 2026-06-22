@@ -1410,13 +1410,22 @@ export default function ProfilePage() {
                   <span style={{ fontSize: 13, color: "#8a9096", fontWeight: 500 }}>{now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</span>
                 </div>
                 <div style={{ background: "#fff", padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
-                  <div style={{ borderRadius: 24, padding: "12px 16px", background: dayColor, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 15, fontWeight: 600, color: "#fff" }}>{tips.length} Recommendations</span></div>
-                  {tips.map(tip => (
-                    <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: dayColor, flexShrink: 0, marginTop: 6 }} />
-                      <span style={{ fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.45 }}>{tip}</span>
+                  {tips.length === 0 ? (
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e", flexShrink: 0 }} />
+                      <span style={{ fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.45 }}>All pillars on track today</span>
                     </div>
-                  ))}
+                  ) : (
+                    <>
+                      <div style={{ borderRadius: 24, padding: "12px 16px", background: dayColor, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 15, fontWeight: 600, color: "#fff" }}>{tips.length} Recommendation{tips.length > 1 ? "s" : ""}</span></div>
+                      {tips.map(tip => (
+                        <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                          <div style={{ width: 8, height: 8, borderRadius: "50%", background: dayColor, flexShrink: 0, marginTop: 6 }} />
+                          <span style={{ fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.45 }}>{tip}</span>
+                        </div>
+                      ))}
+                    </>
+                  )}
                 </div>
               </div>
             );

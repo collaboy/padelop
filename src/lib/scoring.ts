@@ -515,7 +515,6 @@ export function improveTips(states: PillarStates): string[] {
   }
   if (states.training.status === "not_logged")  tips.push("No session logged — even 30 min of drills counts");
   if (states.nutrition.status === "not_logged") tips.push("Complete your night check-in to track nutrition");
-  if (tips.length === 0) tips.push("You're in great shape — keep the habits going");
   return tips.slice(0, 3);
 }
 
