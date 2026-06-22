@@ -1177,14 +1177,17 @@ export default function ProfilePage() {
                     const pillarNames: Record<string, string> = { recovery: "Recovery", nutrition: "Nutrition", training: "Training", wellbeing: "Wellbeing" };
                     const deltas = pillars.map(p => ({ p, delta: avgPillar(thisWeekSnaps, p) - avgPillar(lastWeekSnaps, p) }));
                     const biggest = deltas.reduce((a, b) => Math.abs(b.delta) > Math.abs(a.delta) ? b : a);
-                    const driver = Math.abs(biggest.delta) > 2
-                      ? `, mainly driven by ${biggest.delta > 0 ? "stronger" : "weaker"} ${pillarNames[biggest.p].toLowerCase()}`
-                      : "";
+                    const bestGain = deltas.filter(d => d.delta > 2).reduce((a, b) => b.delta > a.delta ? b : a, { p: "", delta: -Infinity });
+                    const worstDrop = deltas.filter(d => d.delta < -2).reduce((a, b) => b.delta < a.delta ? b : a, { p: "", delta: Infinity });
                     const body = thisLabel === lastLabel
-                      ? `You're ${thisLabel} again this week — consistent form${driver}. ${thisLabel === "Strong" ? "That's elite territory." : "Push one pillar to move up a band."}`
+                      ? thisWeekAvg > lastWeekAvg
+                        ? `Still ${thisLabel} — you improved slightly this week${bestGain.p ? `, with ${pillarNames[bestGain.p].toLowerCase()} leading the way` : ""}. You're close to breaking into ${band(thisWeekAvg + 5)} territory.`
+                        : thisWeekAvg < lastWeekAvg
+                          ? `Still ${thisLabel}, but your scores dipped slightly this week${worstDrop.p ? ` — ${pillarNames[worstDrop.p].toLowerCase()} was the weakest area` : ""}. Nothing alarming, but worth keeping an eye on.`
+                          : `Exactly the same as last week — your routine is holding steady. ${thisLabel === "Strong" ? "That's a great place to be." : "Improving your sleep or hydration consistency is usually the quickest way to move forward."}`
                       : thisWeekAvg > lastWeekAvg
-                        ? `You moved from ${lastLabel} to ${thisLabel} this week${driver}. Keep doing what's working.`
-                        : `You slipped from ${lastLabel} to ${thisLabel} this week${driver}. A dip is normal — focus on sleep and hydration to recover quickly.`;
+                        ? `You moved from ${lastLabel} to ${thisLabel} this week${bestGain.p ? ` — ${pillarNames[bestGain.p].toLowerCase()} improved the most` : ""}. That's real progress.`
+                        : `Your scores dropped from ${lastLabel} to ${thisLabel} this week${worstDrop.p ? ` — ${pillarNames[worstDrop.p].toLowerCase()} took the biggest hit` : ""}. A dip happens; focus on getting your sleep and recovery back on track.`;
                     return { label: "Week on week", body };
                   })()
                 : null,
