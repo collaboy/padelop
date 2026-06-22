@@ -1142,26 +1142,12 @@ export default function ProfilePage() {
 
           {/* Main insight phrase */}
           {(() => {
-            const tip = tips[0] ?? null;
-            const r = matchReadiness;
-            let phrase = "";
-            let sub = "";
-            if (tip) {
-              phrase = tip;
-              sub = dayType === "match" ? "Focus on this today before your match." : dayType === "recovery" ? "Give your body what it needs to bounce back." : "Small wins compound. Keep logging.";
-            } else if (r) {
-              phrase = r.label === "Ready" ? "You're ready to perform." : r.label === "Manage" ? "Manage your load carefully today." : "Take it easy and prioritise recovery.";
-              sub = r.limiter ? `${r.limiter} is your main limiter right now.` : "All pillars are tracking well.";
-            } else {
-              phrase = "Keep showing up.";
-              sub = "Log your check-ins to unlock personalised insights.";
-            }
             const accentColor = dayType === "match" ? "#2653d4" : dayType === "recovery" ? "#7c3aed" : "#16a34a";
             const bgColor = dayType === "match" ? "#f0f4ff" : dayType === "recovery" ? "#faf5ff" : "#f0fdf4";
             return (
               <div style={{ background: bgColor, borderRadius: "var(--r-md)", padding: "18px 20px" }}>
-                <p style={{ margin: "0 0 6px", fontSize: "clamp(16px, 4.2vw, 19px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.25 }}>{phrase}</p>
-                <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: accentColor, lineHeight: 1.4 }}>{sub}</p>
+                <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: accentColor }}>{dayLabel}</p>
+                <p style={{ margin: 0, fontSize: "clamp(14px, 3.8vw, 16px)", fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{buildInsightParagraph(pillarStates)}</p>
               </div>
             );
           })()}
