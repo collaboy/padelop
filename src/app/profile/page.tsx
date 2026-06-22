@@ -1211,7 +1211,12 @@ export default function ProfilePage() {
                 <p style={{ margin: 0, fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.15 }}>
                   {firstName ? <>{greetingWord}<br />{firstName}.</> : <>{greetingWord}</>}
                 </p>
-                <p style={{ margin: "14px 0 0", fontSize: 14, fontWeight: 500, color: "#5a6270", lineHeight: 1.6 }}>{palaMessage}</p>
+                <div style={{ margin: "18px 0 16px", paddingTop: 18, borderTop: "1px solid #f0f2f5" }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: dayColor }}>Today</span>
+                  <p style={{ margin: "4px 0 4px", fontSize: "clamp(28px, 7vw, 36px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{dayLabel}</p>
+                  <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500 }}>{new Date().toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" })}</span>
+                </div>
+                <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "#5a6270", lineHeight: 1.6 }}>{palaMessage}</p>
               </div>
             );
           })()}
