@@ -730,6 +730,7 @@ export default function ProfilePage() {
   const [profileInsightsOpen, setProfileInsightsOpen] = useState(false);
   const [profileMatchesOpen, setProfileMatchesOpen] = useState(false);
   const [trendOpen, setTrendOpen] = useState(false);
+  const [featuredIdx, setFeaturedIdx] = useState(() => Math.floor(Math.random() * 8));
   const [gearEditOpen, setGearEditOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [racketName, setRacketName] = useState("Wilson Carbon Pro v2");
@@ -1127,6 +1128,77 @@ export default function ProfilePage() {
             {saved ? "Saved ✓" : "Save profile"}
           </button>
           </>)}
+
+          {/* Featured insight */}
+          {(() => {
+            const wins   = reviews.filter(r => r.result === "win").length;
+            const losses = reviews.filter(r => r.result === "loss").length;
+            const last5  = [...reviews].sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 5);
+            const last5Wins = last5.filter(r => r.result === "win").length;
+            const topWellDone = (() => {
+              const counts: Record<string, number> = {};
+              reviews.flatMap(r => r.wellDone ?? []).forEach(t => { counts[t] = (counts[t] ?? 0) + 1; });
+              return Object.entries(counts).sort((a, b) => b[1] - a[1])[0] ?? null;
+            })();
+            const topImprove = (() => {
+              const counts: Record<string, number> = {};
+              reviews.flatMap(r => r.improved ?? []).forEach(t => { counts[t] = (counts[t] ?? 0) + 1; });
+              return Object.entries(counts).sort((a, b) => b[1] - a[1])[0] ?? null;
+            })();
+            const pool: { label: string; body: string }[] = [
+              reviews.length >= 3 && wins + losses > 0
+                ? { label: "Win rate", body: `You've won ${wins} out of ${wins + losses} recorded matches — a ${Math.round((wins / (wins + losses)) * 100)}% win rate. ${wins > losses ? "Keep it going." : "Every loss is data. Use it."}` }
+                : null,
+              last5.length >= 3
+                ? { label: "Recent form", body: `In your last ${last5.length} matches you won ${last5Wins}. ${last5Wins >= 3 ? "Strong run — confidence should be high going into your next game." : last5Wins === 0 ? "Tough stretch. Look back at what you improved on and build from there." : "Mixed results — small consistency gains will tip the balance."}` }
+                : null,
+              topWellDone
+                ? { label: "Your strength", body: `"${topWellDone[0]}" is the thing you've done well in most often — flagged across ${topWellDone[1]} match${topWellDone[1] > 1 ? "es" : ""}. That's your weapon. Keep sharpening it.` }
+                : null,
+              topImprove
+                ? { label: "Your focus area", body: `"${topImprove[0]}" is the area you've logged as needing work most — ${topImprove[1]} time${topImprove[1] > 1 ? "s" : ""}. Targeted practice on this one will move your game the fastest.` }
+                : null,
+              streak > 0
+                ? { label: "Streak", body: streak >= 7 ? `${streak} days and counting. A week-plus streak means habits are forming — that's where real gains live.` : streak >= 3 ? `${streak}-day streak. You're building momentum. Don't break the chain.` : `${streak} day${streak > 1 ? "s" : ""} in a row. Small start, big potential — log tomorrow and keep it going.` }
+                : null,
+              partnerCount >= 2
+                ? { label: "Partners", body: `You've played with ${partnerCount} different partners. Variety in partners exposes you to different styles and speeds up your adaptability on court.` }
+                : null,
+              trainingSessions.length > 0
+                ? { label: "Training", body: `${trainingSessions.length} training session${trainingSessions.length > 1 ? "s" : ""} logged so far. Players who train consistently between matches typically improve 2–3× faster than those who only play.` }
+                : null,
+              thisWeekAvg !== null && lastWeekAvg !== null
+                ? { label: "Week on week", body: thisWeekAvg >= lastWeekAvg ? `Your overall score this week (${thisWeekAvg}) is up ${thisWeekAvg - lastWeekAvg} points on last week. You're heading in the right direction.` : `This week's score (${thisWeekAvg}) is ${lastWeekAvg - thisWeekAvg} points below last week. Check your recovery and sleep entries — those tend to move the needle fastest.` }
+                : null,
+              tournamentCount > 0
+                ? { label: "Tournaments", body: `You've entered ${tournamentCount} tournament${tournamentCount > 1 ? "s" : ""}. Competitive pressure is one of the best accelerators — the nerves, the intensity, the opponents. Keep entering.` }
+                : null,
+            ].filter((x): x is { label: string; body: string } => x !== null);
+
+            if (pool.length === 0) return null;
+            const idx = featuredIdx % pool.length;
+            const insight = pool[idx];
+            return (
+              <div>
+                <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px" }}>Featured insight</p>
+                <button
+                  onClick={() => setFeaturedIdx(i => (i + 1) % pool.length)}
+                  style={{ width: "100%", background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)", border: "none", cursor: "pointer", textAlign: "left" }}
+                >
+                  <p style={{ margin: "0 0 8px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-blue)" }}>{insight.label}</p>
+                  <p style={{ margin: "0 0 14px", fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{insight.body}</p>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", gap: 5 }}>
+                      {pool.map((_, i) => (
+                        <div key={i} style={{ width: i === idx ? 16 : 6, height: 6, borderRadius: 3, background: i === idx ? "var(--c-blue)" : "#e2e5ea", transition: "width 0.2s" }} />
+                      ))}
+                    </div>
+                    <span style={{ fontSize: 12, color: "var(--c-hint)", fontWeight: 500 }}>Tap for next</span>
+                  </div>
+                </button>
+              </div>
+            );
+          })()}
 
           {/* 30-day trend */}
           {(() => {
