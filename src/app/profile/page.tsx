@@ -1053,9 +1053,9 @@ export default function ProfilePage() {
               <p style={{ margin: 0, fontSize: "clamp(24px, 6vw, 30px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1 }}>
                 {(() => {
                   const h = new Date().getHours();
-                  const greeting = h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+                  const greeting = h < 12 ? "Good morning," : h < 18 ? "Good afternoon," : "Good evening,";
                   const firstName = profile.name ? profile.name.trim().split(" ")[0] : "";
-                  return firstName ? `${greeting}, ${firstName}.` : `${greeting}.`;
+                  return firstName ? <>{greeting}<br />{firstName}.</> : <>{greeting}</>;
                 })()}
               </p>
             </button>
