@@ -1200,10 +1200,31 @@ export default function ProfilePage() {
             return (
               <div style={{ background: "#fff", borderRadius: 18, padding: "18px 20px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
                 <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>
-                  {pct === 100 ? "All tasks done today ✓" : `You've completed ${done} of ${total} scheduled tasks today`}
+                  {pct === 100 ? "All tasks done today ✓" : `${done} of ${total} tasks completed`}
                 </p>
-                <div style={{ height: 6, borderRadius: 3, background: "#f0f2f5", overflow: "hidden" }}>
+                <div style={{ height: 5, borderRadius: 3, background: "#f0f2f5", overflow: "hidden", marginBottom: 16 }}>
                   <div style={{ height: "100%", width: `${pct}%`, borderRadius: 3, background: barColor, transition: "width 0.4s" }} />
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  {schedule.map(item => {
+                    const isDone = doneTitles.includes(item.title);
+                    return (
+                      <button
+                        key={item.title}
+                        onClick={() => toggleSchedDone(todayKey, item.title)}
+                        style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", background: "none", border: "none", cursor: "pointer", textAlign: "left", borderBottom: "1px solid #f4f4f6" }}
+                      >
+                        <div style={{ width: 22, height: 22, borderRadius: 6, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s" }}>
+                          {isDone && <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none" }}>{item.title}</p>
+                          {item.subtitle && <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9aa0a6", fontWeight: 500 }}>{item.subtitle}</p>}
+                        </div>
+                        <span style={{ fontSize: 12, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             );
