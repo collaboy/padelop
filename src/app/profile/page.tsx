@@ -444,17 +444,17 @@ export default function ProfilePage() {
   const router = useRouter();
 
   // Tab
-  const [activeTab, setActiveTab] = useState<'today' | 'progress' | 'archive' | 'profile'>('today');
+  const [activeTab, setActiveTab] = useState<'today' | 'archive' | 'profile'>('today');
   useEffect(() => {
     const t = new URLSearchParams(window.location.search).get('tab');
-    if (t === 'progress' || t === 'archive') goTab(t);
+    if (t === 'archive') goTab(t);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [tabAnimKey, setTabAnimKey] = useState(0);
   const tabDir = useRef<1 | -1>(1);
   const [schedOpen, setSchedOpen] = useState(false);
 
-  const TAB_ORDER = ['today', 'progress', 'archive', 'profile'] as const;
+  const TAB_ORDER = ['today', 'archive', 'profile'] as const;
   function goTab(key: typeof activeTab) {
     if (key === activeTab) return;
     tabDir.current = TAB_ORDER.indexOf(key) > TAB_ORDER.indexOf(activeTab) ? 1 : -1;
@@ -726,6 +726,7 @@ export default function ProfilePage() {
 
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileTabEditOpen, setProfileTabEditOpen] = useState(false);
+  const [profileTipsOpen, setProfileTipsOpen] = useState(false);
   const [gearEditOpen, setGearEditOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [racketName, setRacketName] = useState("Wilson Carbon Pro v2");
@@ -909,9 +910,8 @@ export default function ProfilePage() {
   const dayColor = dayType === "match" ? "#2653d4" : dayType === "recovery" ? "#7c3aed" : "#16a34a";
 
   const TABS = [
-    { key: 'today' as const,    label: 'Today' },
-    { key: 'progress' as const, label: 'Progress' },
-    { key: 'archive' as const,  label: 'Archive' },
+    { key: 'today' as const,   label: 'Today' },
+    { key: 'archive' as const, label: 'Archive' },
   ];
 
   const swipeStartX = useRef(0);
@@ -936,8 +936,8 @@ export default function ProfilePage() {
 
       {/* ── Tab bar ──────────────────────────────────────────────────────── */}
       <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#fff", borderBottom: "1px solid #f0f0f0", marginTop: 8 }}>
-        <div style={{ display: "flex", alignItems: "center", padding: "0 20px" }}>
-          <Link href="/home8" style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "12px 12px 12px 0", color: "#9aa0a6", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <Link href="/home8" style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "12px 0", color: "#9aa0a6" }}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
           </Link>
           {TABS.map(tab => (
@@ -952,9 +952,9 @@ export default function ProfilePage() {
               )}
             </button>
           ))}
-          <button onClick={() => goTab('profile')} style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "12px 0 12px 12px", color: activeTab === 'profile' ? "#1a1c1c" : "#9aa0a6", background: "none", border: "none", cursor: "pointer", flexShrink: 0, position: "relative" }}>
+          <button onClick={() => goTab('profile')} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "12px 0", color: activeTab === 'profile' ? "#1a1c1c" : "#9aa0a6", background: "none", border: "none", cursor: "pointer", position: "relative" }}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={activeTab === 'profile' ? 2.8 : 2.2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-            {activeTab === 'profile' && <div style={{ position: "absolute", bottom: 0, left: "15%", right: "15%", height: 2, borderRadius: 2, background: "#1a1c1c" }} />}
+            {activeTab === 'profile' && <div style={{ position: "absolute", bottom: 0, left: "20%", right: "20%", height: 2, borderRadius: 2, background: "#1a1c1c" }} />}
           </button>
         </div>
       </div>
@@ -971,159 +971,6 @@ export default function ProfilePage() {
       >
 
       {/* ── Tab: Me ──────────────────────────────────────────────────────── */}
-      {activeTab === 'progress' && (
-        <div className="px-5 pt-5 flex flex-col gap-4 pb-4">
-          {(() => {
-            const last30Dates = Array.from({ length: 30 }, (_, i) => {
-              const d = new Date(); d.setDate(d.getDate() - i);
-              return d.toISOString().slice(0, 10);
-            });
-            const prev30Dates = Array.from({ length: 30 }, (_, i) => {
-              const d = new Date(); d.setDate(d.getDate() - 30 - i);
-              return d.toISOString().slice(0, 10);
-            });
-
-            const scoreHistory: ScoreSnapshot[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:score-history") || "[]"); } catch { return []; } })();
-            const recentScores = scoreHistory.filter(s => last30Dates.includes(s.date));
-            const prevScores   = scoreHistory.filter(s => prev30Dates.includes(s.date));
-
-            type CIHistoryEntry = { date: string; sleep: number; energy: number; hydration: number; stress: number };
-            const ciHistory: CIHistoryEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:checkin-history") || "[]"); } catch { return []; } })();
-            const ciProxyScore = (c: CIHistoryEntry) => Math.max(65, Math.min(100, Math.round(65 + ((c.sleep + c.energy + c.stress + c.hydration - 12) / 8) * 35)));
-            const enrichedScores: Array<{ date: string; overall: number }> = last30Dates.map(date => {
-              const snap = scoreHistory.find(s => s.date === date);
-              if (snap) return { date, overall: snap.overall };
-              const ci = ciHistory.find(c => c.date === date);
-              if (ci) return { date, overall: ciProxyScore(ci) };
-              return null;
-            }).filter((x): x is { date: string; overall: number } => x !== null);
-
-            const hydLogs: HydrationEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch { return []; } })();
-            const recentHyd = hydLogs.filter(h => last30Dates.includes(h.ts.slice(0, 10)));
-            const prevHyd   = hydLogs.filter(h => prev30Dates.includes(h.ts.slice(0, 10)));
-
-            const habitsArr: HabitsEntry[] = (() => {
-              try {
-                const raw = localStorage.getItem("padelop:habits");
-                if (!raw) return [];
-                const parsed = JSON.parse(raw);
-                return Array.isArray(parsed) ? parsed : [];
-              } catch { return []; }
-            })();
-            const recentHabits = habitsArr.filter(h => last30Dates.includes(h.date));
-            const prevHabits   = habitsArr.filter(h => prev30Dates.includes(h.date));
-
-            const avg = (arr: number[]) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
-            const qualNum = (q: string) => q === "great" ? 1 : q === "ok" ? 0.6 : 0.3;
-
-            const recoveryRate = recentHabits.length > 0 ? recentHabits.filter(h => h.foamRoll || h.lightWalk || h.coldShower).length / recentHabits.length : 0;
-            const mobilityRate = recentHabits.length > 0 ? recentHabits.filter(h => h.mobility).length / recentHabits.length : 0;
-            const hydPct   = recentHyd.length > 0 ? avg(recentHyd.map(h => qualNum(h.quality))) : 0.5;
-            const sleepPct = recentScores.length > 0 ? Math.max(0, avg(recentScores.map(s => (s.recovery - 65) / 35))) : 0.5;
-
-            // ── Trend ────────────────────────────────────────────────────────
-            const sorted = [...enrichedScores].sort((a, b) => a.date.localeCompare(b.date));
-            const recentHalf = sorted.slice(Math.floor(sorted.length / 2));
-            const olderHalf  = sorted.slice(0, Math.floor(sorted.length / 2));
-            const recentAvg  = avg(recentHalf.map(s => s.overall));
-            const olderAvg   = avg(olderHalf.map(s => s.overall));
-            const trendDelta = olderAvg > 0 ? ((recentAvg - olderAvg) / olderAvg) * 100 : 0;
-            const trendLabel = trendDelta > 3 ? "Improving" : trendDelta < -3 ? "Declining" : "Stable";
-            const trendColor = trendDelta > 3 ? "#16a34a" : trendDelta < -3 ? "#dc2626" : "#d97706";
-            const trendArrow = trendDelta > 3 ? "↑" : trendDelta < -3 ? "↓" : "→";
-
-            // ── Biggest Improvement ──────────────────────────────────────────
-            const prevHydPct   = prevHyd.length > 0 ? avg(prevHyd.map(h => qualNum(h.quality))) : null;
-            const prevMobRate  = prevHabits.length > 0 ? prevHabits.filter(h => h.mobility).length / prevHabits.length : null;
-            const prevRecRate  = prevHabits.length > 0 ? prevHabits.filter(h => h.foamRoll || h.lightWalk || h.coldShower).length / prevHabits.length : null;
-            const prevSleepPct = prevScores.length > 0 ? Math.max(0, avg(prevScores.map(s => (s.recovery - 65) / 35))) : null;
-
-            const candidates = [
-              prevHydPct   !== null ? { label: "Hydration consistency", delta: (hydPct       - prevHydPct)  * 100 } : null,
-              prevMobRate  !== null ? { label: "Mobility consistency",   delta: (mobilityRate - prevMobRate) * 100 } : null,
-              prevRecRate  !== null ? { label: "Recovery habits",        delta: (recoveryRate - prevRecRate) * 100 } : null,
-              prevSleepPct !== null ? { label: "Sleep quality",          delta: (sleepPct     - prevSleepPct) * 100 } : null,
-            ].filter((c): c is { label: string; delta: number } => c !== null && c.delta > 0)
-              .sort((a, b) => b.delta - a.delta);
-            const topImprovement = candidates[0] ?? null;
-
-            const r = matchReadiness;
-            const dotColor = !r ? "#eab308" : r.color === "green" ? "#22c55e" : r.color === "yellow" ? "#eab308" : r.color === "orange" ? "#f97316" : "#ef4444";
-
-            return (
-              <>
-                {/* ── Readiness Status ──────────────────────────────────── */}
-                <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)", display: "flex", flexDirection: "column", gap: 14 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 12, height: 12, borderRadius: "50%", background: dotColor, flexShrink: 0 }} />
-                    <span style={{ fontSize: 16, fontWeight: 800, color: "#1a1c1c" }}>{r?.label ?? "Manage"}</span>
-                    {r?.limiter && <span style={{ fontSize: 13, color: "#6b7480", fontWeight: 500 }}>· {r.limiter} is your limiter</span>}
-                  </div>
-                  {r && r.actions.length > 0 && (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", margin: 0 }}>Today&apos;s adjustments</p>
-                      {r.actions.slice(0, 3).map((a, i) => (
-                        <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                          <div style={{ width: 4, height: 4, borderRadius: "50%", background: dotColor, flexShrink: 0, marginTop: 7 }} />
-                          <span style={{ fontSize: 13, color: "#3a4040", lineHeight: 1.5 }}>{a}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* ── 30-day Trend ──────────────────────────────────────── */}
-                <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)" }}>
-                  <p style={{ margin: "0 0 12px", fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>30-day trend</p>
-                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                    <div style={{ width: 52, height: 52, borderRadius: "50%", background: `${trendColor}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <span style={{ fontSize: 26, lineHeight: 1, color: trendColor }}>{trendArrow}</span>
-                    </div>
-                    <div>
-                      <p style={{ margin: 0, fontSize: 20, fontWeight: 800, color: trendColor }}>{trendLabel}</p>
-                      <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9aa0a6", fontWeight: 500 }}>
-                        {enrichedScores.length < 4
-                          ? "Log more days to see your trend"
-                          : `${Math.abs(Math.round(trendDelta))}% ${trendDelta >= 0 ? "above" : "below"} your earlier baseline`}
-                      </p>
-                    </div>
-                  </div>
-                  {enrichedScores.length >= 4 && (
-                    <div style={{ marginTop: 14, display: "flex", alignItems: "flex-end", gap: 3, height: 40 }}>
-                      {sorted.map((s, i) => {
-                        const h = Math.max(4, Math.round(((s.overall - 65) / 35) * 36));
-                        return <div key={i} style={{ flex: 1, height: h, borderRadius: 3, background: i >= Math.floor(sorted.length / 2) ? trendColor : `${trendColor}55` }} />;
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {/* ── Biggest Improvement ───────────────────────────────── */}
-                <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)" }}>
-                  <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>Biggest improvement</p>
-                  {topImprovement ? (
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <span style={{ fontSize: 15, fontWeight: 600, color: "#2c3235" }}>{topImprovement.label}</span>
-                      <span style={{ fontSize: 15, fontWeight: 800, color: "#16a34a" }}>+{Math.round(topImprovement.delta)}%</span>
-                    </div>
-                  ) : (
-                    <p style={{ margin: 0, fontSize: 13, color: "#b0b8c1", fontWeight: 500 }}>Keep logging to compare your progress week over week.</p>
-                  )}
-                </div>
-
-                {/* ── AI Observation placeholder ────────────────────────── */}
-                <div style={{ background: "linear-gradient(135deg, #eef2ff, #f5f3ff)", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                    <span style={{ fontSize: 16 }}>✦</span>
-                    <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#2653d4" }}>AI observation</p>
-                  </div>
-                  <p style={{ margin: 0, fontSize: 13, color: "#6b7480", fontWeight: 500, lineHeight: 1.5 }}>Personalised insights coming soon. Keep logging your check-ins to unlock pattern analysis.</p>
-                </div>
-              </>
-            );
-          })()}
-        </div>
-      )}
 
       {activeTab === 'archive' && (
         <div className="px-5 pt-5 flex flex-col gap-5">
@@ -1278,79 +1125,75 @@ export default function ProfilePage() {
         <div className="pt-5 flex flex-col gap-5">
 
           {/* Day type card */}
-          {(() => {
-            const dayGrad = dayType === "match" ? ["#eef2ff", "#dbe4ff"] : dayType === "recovery" ? ["#faf5ff", "#ede9fe"] : ["#ecfdf5", "#d1fae5"];
-            return (
-              <div style={{ margin: "0 20px", borderRadius: "var(--r-lg)", background: `linear-gradient(145deg, ${dayGrad[0]}, ${dayGrad[1]})`, padding: "32px 24px", textAlign: "center", boxShadow: "var(--shadow-card)" }}>
-                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: dayColor }}>Today</span>
-                <p style={{ margin: "8px 0 6px", fontSize: "clamp(32px, 8vw, 40px)", fontWeight: 800, color: dayColor, lineHeight: 1.1 }}>{dayLabel}</p>
-                <span style={{ fontSize: 13, color: "#8a9096", fontWeight: 500 }}>{now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</span>
-              </div>
-            );
-          })()}
+          <div style={{ margin: "0 20px", borderRadius: 24, overflow: "hidden", boxShadow: "var(--shadow-card)" }}>
+            <div style={{ background: "#fff", padding: "28px 20px 28px", textAlign: "center" }}>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: dayColor }}>Today</span>
+              <p style={{ margin: "6px 0 8px", fontSize: "clamp(32px, 8vw, 42px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{dayLabel}</p>
+              <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500, lineHeight: 1 }}>{now.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" })}</span>
+            </div>
+          </div>
 
-          {/* Recommendations card */}
-          <div style={{ margin: "0 20px", borderRadius: "var(--r-lg)", background: "#fff", padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12, boxShadow: "var(--shadow-card)" }}>
+          {/* Today's Schedule */}
+          <div style={{ margin: "0 20px", borderRadius: "var(--r-lg)", background: "#fff", padding: "20px", boxShadow: "var(--shadow-card)" }}>
+            <p style={{ margin: "0 0 16px", fontSize: 17, fontWeight: 700, color: "#1a1c1c", textAlign: "center" }}>Today&apos;s schedule</p>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+              {schedule.map((s, i) => {
+                const isCur = i === schedCurrentIdx;
+                const nowMins = schedNow.getHours() * 60 + schedNow.getMinutes();
+                const toMinsLocal = (t: string) => t.split(":").reduce((a: number, b: string, j: number) => a + (j === 0 ? Number(b) * 60 : Number(b)), 0);
+                const isPast = !isCur && nowMins > toMinsLocal(s.time);
+                const hasDetail = !!SCHEDULE_DETAILS[s.title] || s.isDrill;
+                const dotColor = isPast ? "#d1d5db" : s.color;
+                return (
+                  <React.Fragment key={i}>
+                    {i > 0 && <div style={{ width: 2, height: 36, background: "#e5e7eb", flexShrink: 0 }} />}
+                    <div
+                      onClick={() => hasDetail && setSchedModalIdx(i)}
+                      style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, cursor: hasDetail ? "pointer" : "default" }}
+                    >
+                      {/* Dot */}
+                      <div style={{
+                        width: isCur ? 22 : 16,
+                        height: isCur ? 22 : 16,
+                        borderRadius: "50%",
+                        background: dotColor,
+                        flexShrink: 0,
+                        boxShadow: isCur ? `0 0 0 6px ${s.color}28` : "none",
+                      }} />
+                      {/* Info below dot */}
+                      <div style={{ textAlign: "center" }}>
+                        <p style={{ margin: 0, fontSize: isCur ? 17 : 15, fontWeight: isCur ? 800 : 600, color: isPast ? "#9ca3af" : "#1a1c1c", lineHeight: 1.2 }}>{s.title}</p>
+                        <span style={{ fontSize: 13, fontWeight: 500, color: isPast ? "#c4c7c7" : "#8a9096" }}>{s.time}</span>
+                        {s.subtitle && isCur && <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6b7480", lineHeight: 1.4 }}>{s.subtitle}</p>}
+                      </div>
+                    </div>
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Recommendations */}
+          <div style={{ margin: "0 20px", borderRadius: "var(--r-lg)", background: "#fff", boxShadow: "var(--shadow-card)", padding: "20px" }}>
+            <p style={{ margin: "0 0 16px", fontSize: 17, fontWeight: 700, color: "#1a1c1c", textAlign: "center" }}>
+              {tips.length} Recommendation{tips.length !== 1 ? "s" : ""}
+            </p>
             {tips.length === 0 ? (
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e", flexShrink: 0 }} />
                 <span style={{ fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.45 }}>All pillars on track today</span>
               </div>
             ) : (
-              <>
-                <div style={{ borderRadius: 24, padding: "12px 16px", background: dayColor, display: "flex", alignItems: "center", justifyContent: "center" }}><span style={{ fontSize: 15, fontWeight: 600, color: "#fff" }}>{tips.length} Recommendation{tips.length > 1 ? "s" : ""}</span></div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {tips.map(tip => (
                   <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: dayColor, flexShrink: 0, marginTop: 6 }} />
+                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: dayColor, flexShrink: 0, marginTop: 5 }} />
                     <span style={{ fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.45 }}>{tip}</span>
                   </div>
                 ))}
-              </>
-            )}
-          </div>
-
-          {/* Today's Schedule */}
-          <div style={{ padding: "0 20px" }}>
-            <button
-              onClick={() => setSchedOpen(o => !o)}
-              style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: "#fff", border: "none", borderRadius: "var(--r-lg)", padding: "14px 18px", boxShadow: "var(--shadow-card)", cursor: "pointer", marginBottom: schedOpen ? 10 : 0 }}>
-              <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>Today&apos;s schedule</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: schedOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
-                <path d="M6 9l6 6 6-6"/>
-              </svg>
-            </button>
-            {schedOpen && (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 8 }}>
-                {schedule.map((s, i) => {
-                  const isCur = i === schedCurrentIdx;
-                  const nowMins = schedNow.getHours() * 60 + schedNow.getMinutes();
-                  const toMinsLocal = (t: string) => t.split(":").reduce((a: number, b: string, j: number) => a + (j === 0 ? Number(b) * 60 : Number(b)), 0);
-                  const isPast = !isCur && nowMins > toMinsLocal(s.time);
-                  const hasDetail = !!SCHEDULE_DETAILS[s.title] || s.isDrill;
-                  const ballColor = isPast ? "#c4c7c7" : s.color;
-                  return (
-                    <React.Fragment key={i}>
-                      {i > 0 && <div style={{ width: 2, height: 24, background: "#e0e0e0", flexShrink: 0 }} />}
-                      {isCur ? (
-                        <div onClick={() => hasDetail && setSchedModalIdx(i)} style={{ width: "100%", aspectRatio: "1 / 1", borderRadius: "50%", background: s.color, cursor: hasDetail ? "pointer" : "default", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: `0 4px 20px ${s.color}44`, textAlign: "center", padding: "10%" }}>
-                          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)" }}>{s.time}</span>
-                          <p style={{ margin: 0, fontSize: "clamp(22px,5.5vw,26px)", fontWeight: 800, color: "#fff", lineHeight: 1.1 }}>{s.title}</p>
-                          {s.subtitle && <p style={{ margin: 0, fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.4 }}>{s.subtitle}</p>}
-                        </div>
-                      ) : (
-                        <div onClick={() => hasDetail && setSchedModalIdx(i)} style={{ width: "75%", aspectRatio: "1 / 1", borderRadius: "50%", background: ballColor, opacity: isPast ? 0.45 : 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: hasDetail ? "pointer" : "default", padding: "8%", flexShrink: 0, boxShadow: isPast ? "none" : `0 2px 10px ${s.color}33` }}>
-                          <span style={{ fontSize: "clamp(16px,4.5vw,22px)", fontWeight: 700, color: "#fff", textAlign: "center", lineHeight: 1.2 }}>{s.title}</span>
-                          <span style={{ fontSize: "clamp(13px,3.5vw,17px)", color: "rgba(255,255,255,0.8)", marginTop: 5, textAlign: "center" }}>{s.time}</span>
-                        </div>
-                      )}
-                    </React.Fragment>
-                  );
-                })}
               </div>
             )}
           </div>
-
-
 
         </div>
       )}
@@ -1439,6 +1282,151 @@ export default function ProfilePage() {
             {saved ? "Saved ✓" : "Save profile"}
           </button>
           </>)}
+
+          {/* ── Progress content ─────────────────────────────────────────── */}
+          {(() => {
+            const last30Dates = Array.from({ length: 30 }, (_, i) => {
+              const d = new Date(); d.setDate(d.getDate() - i);
+              return d.toISOString().slice(0, 10);
+            });
+            const prev30Dates = Array.from({ length: 30 }, (_, i) => {
+              const d = new Date(); d.setDate(d.getDate() - 30 - i);
+              return d.toISOString().slice(0, 10);
+            });
+
+            const scoreHistory: ScoreSnapshot[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:score-history") || "[]"); } catch { return []; } })();
+            const recentScores = scoreHistory.filter(s => last30Dates.includes(s.date));
+            const prevScores   = scoreHistory.filter(s => prev30Dates.includes(s.date));
+
+            type CIHistoryEntry = { date: string; sleep: number; energy: number; hydration: number; stress: number };
+            const ciHistory: CIHistoryEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:checkin-history") || "[]"); } catch { return []; } })();
+            const ciProxyScore = (c: CIHistoryEntry) => Math.max(65, Math.min(100, Math.round(65 + ((c.sleep + c.energy + c.stress + c.hydration - 12) / 8) * 35)));
+            const enrichedScores: Array<{ date: string; overall: number }> = last30Dates.map(date => {
+              const snap = scoreHistory.find(s => s.date === date);
+              if (snap) return { date, overall: snap.overall };
+              const ci = ciHistory.find(c => c.date === date);
+              if (ci) return { date, overall: ciProxyScore(ci) };
+              return null;
+            }).filter((x): x is { date: string; overall: number } => x !== null);
+
+            const hydLogs: HydrationEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch { return []; } })();
+            const recentHyd = hydLogs.filter(h => last30Dates.includes(h.ts.slice(0, 10)));
+            const prevHyd   = hydLogs.filter(h => prev30Dates.includes(h.ts.slice(0, 10)));
+
+            const habitsArr: HabitsEntry[] = (() => {
+              try {
+                const raw = localStorage.getItem("padelop:habits");
+                if (!raw) return [];
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : [];
+              } catch { return []; }
+            })();
+            const recentHabits = habitsArr.filter(h => last30Dates.includes(h.date));
+            const prevHabits   = habitsArr.filter(h => prev30Dates.includes(h.date));
+
+            const avg = (arr: number[]) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+            const qualNum = (q: string) => q === "great" ? 1 : q === "ok" ? 0.6 : 0.3;
+
+            const recoveryRate = recentHabits.length > 0 ? recentHabits.filter(h => h.foamRoll || h.lightWalk || h.coldShower).length / recentHabits.length : 0;
+            const mobilityRate = recentHabits.length > 0 ? recentHabits.filter(h => h.mobility).length / recentHabits.length : 0;
+            const hydPct   = recentHyd.length > 0 ? avg(recentHyd.map(h => qualNum(h.quality))) : 0.5;
+            const sleepPct = recentScores.length > 0 ? Math.max(0, avg(recentScores.map(s => (s.recovery - 65) / 35))) : 0.5;
+
+            const sorted = [...enrichedScores].sort((a, b) => a.date.localeCompare(b.date));
+            const recentHalf = sorted.slice(Math.floor(sorted.length / 2));
+            const olderHalf  = sorted.slice(0, Math.floor(sorted.length / 2));
+            const recentAvg  = avg(recentHalf.map(s => s.overall));
+            const olderAvg   = avg(olderHalf.map(s => s.overall));
+            const trendDelta = olderAvg > 0 ? ((recentAvg - olderAvg) / olderAvg) * 100 : 0;
+            const trendLabel = trendDelta > 3 ? "Improving" : trendDelta < -3 ? "Declining" : "Stable";
+            const trendColor = trendDelta > 3 ? "#16a34a" : trendDelta < -3 ? "#dc2626" : "#d97706";
+            const trendArrow = trendDelta > 3 ? "↑" : trendDelta < -3 ? "↓" : "→";
+
+            const prevHydPct   = prevHyd.length > 0 ? avg(prevHyd.map(h => qualNum(h.quality))) : null;
+            const prevMobRate  = prevHabits.length > 0 ? prevHabits.filter(h => h.mobility).length / prevHabits.length : null;
+            const prevRecRate  = prevHabits.length > 0 ? prevHabits.filter(h => h.foamRoll || h.lightWalk || h.coldShower).length / prevHabits.length : null;
+            const prevSleepPct = prevScores.length > 0 ? Math.max(0, avg(prevScores.map(s => (s.recovery - 65) / 35))) : null;
+
+            const candidates = [
+              prevHydPct   !== null ? { label: "Hydration consistency", delta: (hydPct       - prevHydPct)  * 100 } : null,
+              prevMobRate  !== null ? { label: "Mobility consistency",   delta: (mobilityRate - prevMobRate) * 100 } : null,
+              prevRecRate  !== null ? { label: "Recovery habits",        delta: (recoveryRate - prevRecRate) * 100 } : null,
+              prevSleepPct !== null ? { label: "Sleep quality",          delta: (sleepPct     - prevSleepPct) * 100 } : null,
+            ].filter((c): c is { label: string; delta: number } => c !== null && c.delta > 0)
+              .sort((a, b) => b.delta - a.delta);
+            const topImprovement = candidates[0] ?? null;
+
+            const r = matchReadiness;
+            const rdotColor = !r ? "#eab308" : r.color === "green" ? "#22c55e" : r.color === "yellow" ? "#eab308" : r.color === "orange" ? "#f97316" : "#ef4444";
+
+            return (
+              <>
+                <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)", display: "flex", flexDirection: "column", gap: 14 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 12, height: 12, borderRadius: "50%", background: rdotColor, flexShrink: 0 }} />
+                    <span style={{ fontSize: 16, fontWeight: 800, color: "#1a1c1c" }}>{r?.label ?? "Manage"}</span>
+                    {r?.limiter && <span style={{ fontSize: 13, color: "#6b7480", fontWeight: 500 }}>· {r.limiter} is your limiter</span>}
+                  </div>
+                  {r && r.actions.length > 0 && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", margin: 0 }}>Today&apos;s adjustments</p>
+                      {r.actions.slice(0, 3).map((a, i) => (
+                        <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                          <div style={{ width: 4, height: 4, borderRadius: "50%", background: rdotColor, flexShrink: 0, marginTop: 7 }} />
+                          <span style={{ fontSize: 13, color: "#3a4040", lineHeight: 1.5 }}>{a}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)" }}>
+                  <p style={{ margin: "0 0 12px", fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>30-day trend</p>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <div style={{ width: 52, height: 52, borderRadius: "50%", background: `${trendColor}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <span style={{ fontSize: 26, lineHeight: 1, color: trendColor }}>{trendArrow}</span>
+                    </div>
+                    <div>
+                      <p style={{ margin: 0, fontSize: 20, fontWeight: 800, color: trendColor }}>{trendLabel}</p>
+                      <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9aa0a6", fontWeight: 500 }}>
+                        {enrichedScores.length < 4
+                          ? "Log more days to see your trend"
+                          : `${Math.abs(Math.round(trendDelta))}% ${trendDelta >= 0 ? "above" : "below"} your earlier baseline`}
+                      </p>
+                    </div>
+                  </div>
+                  {enrichedScores.length >= 4 && (
+                    <div style={{ marginTop: 14, display: "flex", alignItems: "flex-end", gap: 3, height: 40 }}>
+                      {sorted.map((s, i) => {
+                        const h = Math.max(4, Math.round(((s.overall - 65) / 35) * 36));
+                        return <div key={i} style={{ flex: 1, height: h, borderRadius: 3, background: i >= Math.floor(sorted.length / 2) ? trendColor : `${trendColor}55` }} />;
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)" }}>
+                  <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>Biggest improvement</p>
+                  {topImprovement ? (
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: 15, fontWeight: 600, color: "#2c3235" }}>{topImprovement.label}</span>
+                      <span style={{ fontSize: 15, fontWeight: 800, color: "#16a34a" }}>+{Math.round(topImprovement.delta)}%</span>
+                    </div>
+                  ) : (
+                    <p style={{ margin: 0, fontSize: 13, color: "#b0b8c1", fontWeight: 500 }}>Keep logging to compare your progress week over week.</p>
+                  )}
+                </div>
+
+                <div style={{ background: "linear-gradient(135deg, #eef2ff, #f5f3ff)", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                    <span style={{ fontSize: 16 }}>✦</span>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#2653d4" }}>AI observation</p>
+                  </div>
+                  <p style={{ margin: 0, fontSize: 13, color: "#6b7480", fontWeight: 500, lineHeight: 1.5 }}>Personalised insights coming soon. Keep logging your check-ins to unlock pattern analysis.</p>
+                </div>
+              </>
+            );
+          })()}
         </div>
       )}
 
