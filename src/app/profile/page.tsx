@@ -1450,7 +1450,7 @@ export default function ProfilePage() {
                     <React.Fragment key={i}>
                       {i > 0 && <div style={{ width: 2, height: 24, background: "#e0e0e0", flexShrink: 0 }} />}
                       {isCur ? (
-                        <div onClick={() => hasDetail && setSchedModalIdx(i)} style={{ width: "100%", borderRadius: 24, background: s.color, padding: "22px 24px", cursor: hasDetail ? "pointer" : "default", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, boxShadow: `0 4px 20px ${s.color}44`, textAlign: "center" }}>
+                        <div onClick={() => hasDetail && setSchedModalIdx(i)} style={{ width: "100%", aspectRatio: "1 / 1", borderRadius: "50%", background: s.color, cursor: hasDetail ? "pointer" : "default", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, boxShadow: `0 4px 20px ${s.color}44`, textAlign: "center", padding: "10%" }}>
                           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)" }}>{s.time}</span>
                           <p style={{ margin: 0, fontSize: "clamp(22px,5.5vw,26px)", fontWeight: 800, color: "#fff", lineHeight: 1.1 }}>{s.title}</p>
                           {s.subtitle && <p style={{ margin: 0, fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.4 }}>{s.subtitle}</p>}
