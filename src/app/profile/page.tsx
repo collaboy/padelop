@@ -1451,9 +1451,9 @@ export default function ProfilePage() {
                       {i > 0 && <div style={{ width: 2, height: 24, background: "#e0e0e0", flexShrink: 0 }} />}
                       {isCur ? (
                         <div onClick={() => hasDetail && setSchedModalIdx(i)} style={{ width: "100%", aspectRatio: "1 / 1", borderRadius: "50%", background: s.color, cursor: hasDetail ? "pointer" : "default", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, boxShadow: `0 4px 20px ${s.color}44`, textAlign: "center", padding: "10%" }}>
-                          <span style={{ fontSize: "clamp(14px,4.5vw,20px)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)" }}>{s.time}</span>
-                          <p style={{ margin: 0, fontSize: "clamp(28px,8vw,38px)", fontWeight: 800, color: "#fff", lineHeight: 1.05 }}>{s.title}</p>
-                          {s.subtitle && <p style={{ margin: 0, fontSize: "clamp(14px,4vw,18px)", color: "rgba(255,255,255,0.75)", lineHeight: 1.4 }}>{s.subtitle}</p>}
+                          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)" }}>{s.time}</span>
+                          <p style={{ margin: 0, fontSize: "clamp(22px,5.5vw,26px)", fontWeight: 800, color: "#fff", lineHeight: 1.1 }}>{s.title}</p>
+                          {s.subtitle && <p style={{ margin: 0, fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.4 }}>{s.subtitle}</p>}
                         </div>
                       ) : (
                         <div onClick={() => hasDetail && setSchedModalIdx(i)} style={{ width: "75%", aspectRatio: "1 / 1", borderRadius: "50%", background: ballColor, opacity: isPast ? 0.45 : 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: hasDetail ? "pointer" : "default", padding: "8%", flexShrink: 0, boxShadow: isPast ? "none" : `0 2px 10px ${s.color}33` }}>
