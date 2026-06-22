@@ -1047,6 +1047,25 @@ export default function ProfilePage() {
       {/* ── Tab: Profile ─────────────────────────────────────────────────── */}
       {activeTab === 'profile' && (
         <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
+          {/* Profile avatar card */}
+          <div style={{ background: "#fff", borderRadius: 18, padding: "20px 24px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+            <label htmlFor="avatar-upload-top" style={{ cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 72, height: 72, borderRadius: "50%", background: "var(--c-blue)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                {profile.avatar
+                  ? <img src={profile.avatar} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  : <span style={{ fontSize: 24, fontWeight: 800, color: "#fff" }}>{initials(profile.name)}</span>
+                }
+              </div>
+              <input id="avatar-upload-top" type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
+              <span style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>{profile.name || "Set your name"}</span>
+            </label>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
+              {profile.level && <span style={{ fontSize: 12, fontWeight: 700, color: "var(--c-blue)", background: "var(--c-blue-tint)", padding: "4px 10px", borderRadius: 20 }}>{profile.level}</span>}
+              {profile.position && <span style={{ fontSize: 12, fontWeight: 700, color: "var(--c-teal)", background: "#f0fdfd", padding: "4px 10px", borderRadius: 20 }}>{profile.position}</span>}
+              {profile.hand && <span style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text-sub)", background: "#f4f6f8", padding: "4px 10px", borderRadius: 20 }}>{profile.hand}-handed</span>}
+            </div>
+          </div>
+
           {/* Profile header — greeting + Pala message card */}
           {(() => {
             const statusScore = (s: PillarStatus) => s === "good" ? 3 : s === "ok" ? 2 : s === "low" ? 1 : 0;
