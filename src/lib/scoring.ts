@@ -499,30 +499,63 @@ export function computeMatchReadiness(
 
 export function improveTips(states: PillarStates): string[] {
   const tips: string[] = [];
-  if (states.recovery.status === "not_logged") tips.push("Log your morning check-in to track sleep and soreness");
-  else if (states.recovery.status === "low") {
+  const isMatchDay = states.training.reason?.includes("Match");
+
+  if (states.recovery.status === "not_logged") {
+    tips.push("Log your morning check-in so we can tailor today's recommendations");
+  } else if (states.recovery.status === "low") {
     const r = states.recovery.reason;
-    tips.push(r.includes("sleep") ? "Poor sleep last night — try a short nap or wind down early tonight" : "High soreness — prioritise stretching and take it easy today");
+    if (r.includes("sleep")) {
+      tips.push(isMatchDay
+        ? "Short on sleep — take a 20-min nap before your match and avoid caffeine after 2pm"
+        : "Poor sleep last night — a 20-min nap now restores alertness better than caffeine");
+    } else {
+      tips.push(isMatchDay
+        ? "Soreness going into your match — do a thorough warm-up and stay loose between sets"
+        : "High soreness — 10 min of foam rolling or a cold shower will speed up recovery today");
+    }
   } else if (states.recovery.status === "ok") {
-    tips.push("Sleep was decent but not ideal — aim for 8 hours tonight");
+    tips.push(isMatchDay
+      ? "Not fully rested — keep your warm-up dynamic and sip water consistently to stay sharp"
+      : "Not fully rested — cap today's intensity and get to bed 30 min earlier than usual");
   }
-  if (states.wellbeing.status === "not_logged") tips.push("Log how you're feeling today — energy and stress levels matter");
-  else if (states.wellbeing.status === "low") {
+
+  if (states.wellbeing.status === "not_logged") {
+    tips.push("Check in on your energy and stress — it shapes what training is right for today");
+  } else if (states.wellbeing.status === "low") {
     const r = states.wellbeing.reason;
-    tips.push(r.includes("stress") ? "Feeling stressed — try 5 minutes of box breathing or a short walk" : "Low motivation — keep it simple, even a short session counts");
+    tips.push(r.includes("stress")
+      ? "Stress is high — try 5 minutes of box breathing before your next session"
+      : isMatchDay
+        ? "Motivation is low — stick to your warm-up routine and let the match energy carry you"
+        : "Low motivation — commit to just 15 minutes; most of the time that's enough to get going");
   } else if (states.wellbeing.status === "ok") {
-    tips.push("Energy or motivation not at peak — a short warm-up can help get you going");
+    tips.push("Energy not at peak — start with a dynamic warm-up to get your body into gear");
   }
-  if (states.nutrition.status === "not_logged") tips.push("Log your nutrition today — fuelling matters on a " + (states.training.reason?.includes("Match") ? "match" : "training") + " day");
-  else if (states.nutrition.status === "low") {
+
+  if (states.nutrition.status === "not_logged") {
+    tips.push(`Log what you eat today — fuelling matters on a ${isMatchDay ? "match" : "training"} day`);
+  } else if (states.nutrition.status === "low") {
     const r = states.nutrition.reason;
-    if (r.includes("dark") || r.includes("fluids")) tips.push("Hydration low — aim for 2+ litres before end of day");
-    else if (r.includes("Protein")) tips.push("Protein low — add eggs, chicken, or a shake to your next meal");
-    else tips.push("Nutrition off today — aim for a balanced meal with veg and protein");
+    if (r.includes("dark") || r.includes("fluids")) {
+      tips.push("Hydration is low — drink 500ml now and keep a bottle with you for the rest of the day");
+    } else if (r.includes("Protein")) {
+      tips.push("Protein is low — add eggs, chicken, or a shake to your next meal before you train");
+    } else {
+      tips.push(isMatchDay
+        ? "Nutrition is light — have a carb-rich snack 60–90 min before your match"
+        : "Nutrition is light — a meal with veg, protein, and carbs will fuel your session better");
+    }
   } else if (states.nutrition.status === "ok") {
-    tips.push("Nutrition is adequate — push for better hydration and protein to peak today");
+    tips.push(isMatchDay
+      ? "Nutrition is adequate — top up with a banana or rice cakes 60 min before kick-off"
+      : "Nutrition is adequate — add another glass of water and a protein source at your next meal");
   }
-  if (states.training.status === "not_logged") tips.push("No session logged — even 30 min of drills counts");
+
+  if (states.training.status === "not_logged") {
+    tips.push("No session logged yet — even 30 min of focused drills moves the needle");
+  }
+
   return tips.slice(0, 3);
 }
 

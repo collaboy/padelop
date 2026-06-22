@@ -727,7 +727,6 @@ export default function ProfilePage() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileTabEditOpen, setProfileTabEditOpen] = useState(false);
   const [profileTipsOpen, setProfileTipsOpen] = useState(false);
-  const [profileScheduleOpen, setProfileScheduleOpen] = useState(false);
   const [profileInsightsOpen, setProfileInsightsOpen] = useState(false);
   const [profileMatchesOpen, setProfileMatchesOpen] = useState(false);
   const [gearEditOpen, setGearEditOpen] = useState(false);
@@ -1153,48 +1152,39 @@ export default function ProfilePage() {
           </button>
           </>)}
 
+          {/* Main insight phrase */}
+          {(() => {
+            const tip = tips[0] ?? null;
+            const r = matchReadiness;
+            let phrase = "";
+            let sub = "";
+            if (tip) {
+              phrase = tip;
+              sub = dayType === "match" ? "Focus on this today before your match." : dayType === "recovery" ? "Give your body what it needs to bounce back." : "Small wins compound. Keep logging.";
+            } else if (r) {
+              phrase = r.label === "Ready" ? "You're ready to perform." : r.label === "Manage" ? "Manage your load carefully today." : "Take it easy and prioritise recovery.";
+              sub = r.limiter ? `${r.limiter} is your main limiter right now.` : "All pillars are tracking well.";
+            } else {
+              phrase = "Keep showing up.";
+              sub = "Log your check-ins to unlock personalised insights.";
+            }
+            const accentColor = dayType === "match" ? "#2653d4" : dayType === "recovery" ? "#7c3aed" : "#16a34a";
+            const bgColor = dayType === "match" ? "#f0f4ff" : dayType === "recovery" ? "#faf5ff" : "#f0fdf4";
+            return (
+              <div style={{ background: bgColor, borderRadius: "var(--r-md)", padding: "18px 20px" }}>
+                <p style={{ margin: "0 0 6px", fontSize: "clamp(16px, 4.2vw, 19px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.25 }}>{phrase}</p>
+                <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: accentColor, lineHeight: 1.4 }}>{sub}</p>
+              </div>
+            );
+          })()}
+
           {/* Info section */}
           <div>
             <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px" }}>Info</p>
             <div style={{ background: "#fff", borderRadius: "var(--r-md)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
               <button
-                onClick={() => setProfileScheduleOpen(o => !o)}
+                onClick={() => { setProfileInsightsOpen(o => !o); setProfileMatchesOpen(false); }}
                 style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", cursor: "pointer" }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  <span style={{ color: "var(--c-text-dim)" }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                  </span>
-                  <span className="t-ui" style={{ color: "var(--c-text)" }}>Today&apos;s schedule</span>
-                </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: profileScheduleOpen ? "rotate(90deg)" : "rotate(0deg)" }}><polyline points="9 18 15 12 9 6"/></svg>
-              </button>
-              {profileScheduleOpen && (
-                <div style={{ borderTop: "1px solid #f4f4f6", padding: "20px", display: "flex", flexDirection: "column", alignItems: "center" }}>
-                  {schedule.map((s, i) => {
-                    const isCur = i === schedCurrentIdx;
-                    const nowMins = schedNow.getHours() * 60 + schedNow.getMinutes();
-                    const toMinsLocal = (t: string) => t.split(":").reduce((a: number, b: string, j: number) => a + (j === 0 ? Number(b) * 60 : Number(b)), 0);
-                    const isPast = !isCur && nowMins > toMinsLocal(s.time);
-                    const dotColor = isPast ? "#d1d5db" : s.color;
-                    return (
-                      <React.Fragment key={i}>
-                        {i > 0 && <div style={{ width: 2, height: 36, background: "#e5e7eb", flexShrink: 0 }} />}
-                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-                          <div style={{ width: isCur ? 32 : 16, height: isCur ? 32 : 16, borderRadius: "50%", background: dotColor, flexShrink: 0, boxShadow: isCur ? `0 0 0 8px ${s.color}28` : "none" }} />
-                          <div style={{ textAlign: "center" }}>
-                            <p style={{ margin: 0, fontSize: isCur ? 22 : 15, fontWeight: isCur ? 800 : 600, color: isPast ? "#9ca3af" : isCur ? "#1a1c1c" : "#6b7480", lineHeight: 1.2 }}>{s.title}</p>
-                            <span style={{ fontSize: isCur ? 15 : 13, fontWeight: 500, color: isPast ? "#c4c7c7" : isCur ? "#8a9096" : "#b0b5ba" }}>{s.time}</span>
-                          </div>
-                        </div>
-                      </React.Fragment>
-                    );
-                  })}
-                </div>
-              )}
-              <button
-                onClick={() => setProfileInsightsOpen(o => !o)}
-                style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", borderTop: "1px solid #f4f4f6", cursor: "pointer" }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                   <span style={{ color: "var(--c-text-dim)" }}>
@@ -1807,7 +1797,7 @@ export default function ProfilePage() {
                 </div>
               )}
               <button
-                onClick={() => setProfileMatchesOpen(o => !o)}
+                onClick={() => { setProfileMatchesOpen(o => !o); setProfileInsightsOpen(false); }}
                 style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", borderTop: "1px solid #f4f4f6", cursor: "pointer" }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
