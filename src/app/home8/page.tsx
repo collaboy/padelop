@@ -1588,7 +1588,6 @@ export default function Home8() {
 
                   {/* TODAY SECTION */}
                   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: dayColor, paddingLeft: 4 }}>{dayLabel}</span>
                     <Link href="/profile?tab=today" onClick={closeSheet} style={{ textDecoration: "none", display: "block" }}>
                       <div style={{ background: dayColor, borderRadius: 24, padding: "18px 20px", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
                         <span style={{ fontSize: 18, fontWeight: 700, color: "#fff" }}>{improveTips(pillarStates).length} Recommendations</span>
