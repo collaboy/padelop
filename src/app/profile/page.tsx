@@ -1047,17 +1047,58 @@ export default function ProfilePage() {
       {/* ── Tab: Profile ─────────────────────────────────────────────────── */}
       {activeTab === 'profile' && (
         <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
-          {/* Profile header — greeting card */}
-          <button onClick={() => setProfileTabEditOpen(o => !o)} style={{ background: "#fff", border: "none", cursor: "pointer", padding: "20px 24px", textAlign: "center", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", width: "100%" }}>
-            <p style={{ margin: 0, fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.15 }}>
-              {(() => {
-                const h = new Date().getHours();
-                const greeting = h < 12 ? "Good morning," : h < 18 ? "Good afternoon," : "Good evening,";
-                const firstName = profile.name ? profile.name.trim().split(" ")[0] : "";
-                return firstName ? <>{greeting}<br />{firstName}.</> : <>{greeting}</>;
-              })()}
-            </p>
-          </button>
+          {/* Profile header — greeting + Pala message card */}
+          {(() => {
+            const statusScore = (s: PillarStatus) => s === "good" ? 3 : s === "ok" ? 2 : s === "low" ? 1 : 0;
+            const pillarEntries = [
+              { key: "recovery",  status: pillarStates.recovery.status },
+              { key: "nutrition", status: pillarStates.nutrition.status },
+              { key: "training",  status: pillarStates.training.status },
+              { key: "wellbeing", status: pillarStates.wellbeing.status },
+            ];
+            const sc = (e: { status: PillarStatus }) => statusScore(e.status);
+            const best  = pillarEntries.reduce((a, b) => sc(b) > sc(a) ? b : a);
+            const worst = pillarEntries.reduce((a, b) => sc(b) < sc(a) ? b : a);
+            const avgScore = pillarEntries.reduce((sum, e) => sum + sc(e), 0) / pillarEntries.length;
+            const overallBand = avgScore >= 2.5 ? "strong" : avgScore >= 1.75 ? "good" : avgScore >= 1 ? "steady" : "low";
+            const topImprove = (() => {
+              const counts: Record<string, number> = {};
+              reviews.flatMap(r => r.improved ?? []).forEach(t => { counts[t] = (counts[t] ?? 0) + 1; });
+              return Object.entries(counts).sort((a, b) => b[1] - a[1])[0] ?? null;
+            })();
+            const opening = overallBand === "strong"
+              ? "You're in great shape right now — all your pillars are firing well."
+              : overallBand === "good"
+              ? "You're in good form overall — your daily habits are holding up."
+              : overallBand === "steady"
+              ? "Your form is steady — a few adjustments could push you into a stronger zone."
+              : "You're at a low point right now — the priority is recovery and consistency.";
+            const improveActions: Record<string, string> = {
+              recovery:  "Prioritise sleep quality and limit late nights.",
+              nutrition:  "Tighten up your hydration and post-session meals.",
+              training:  "Add a structured session this week, even a short one.",
+              wellbeing: "Take a moment to check in on your energy and stress levels.",
+            };
+            const workingClause = sc(best) >= 2 ? ` Your ${best.key} is your strongest area right now — keep protecting that.` : "";
+            const improveClause = sc(worst) < 2 ? ` Your ${worst.key} is the area to focus on — ${improveActions[worst.key]}` : "";
+            const matchClause = topImprove
+              ? ` On court, "${topImprove[0]}" is the skill you've flagged most for improvement — that's your clearest path to a stronger game.`
+              : reviews.length > 0 ? ` You've played ${reviews.length} match${reviews.length > 1 ? "es" : ""} — keep logging your results to unlock deeper insights.` : "";
+            const palaMessage = opening + workingClause + improveClause + matchClause;
+            const h = new Date().getHours();
+            const greetingWord = h < 12 ? "Good morning," : h < 18 ? "Good afternoon," : "Good evening,";
+            const firstName = profile.name ? profile.name.trim().split(" ")[0] : "";
+            return (
+              <div style={{ background: "#fff", borderRadius: 18, padding: "20px 24px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", textAlign: "center" }}>
+                <button onClick={() => setProfileTabEditOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "center", width: "100%" }}>
+                  <p style={{ margin: 0, fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.15 }}>
+                    {firstName ? <>{greetingWord}<br />{firstName}.</> : <>{greetingWord}</>}
+                  </p>
+                </button>
+                <p style={{ margin: "14px 0 0", fontSize: 14, fontWeight: 500, color: "#5a6270", lineHeight: 1.6 }}>{palaMessage}</p>
+              </div>
+            );
+          })()}
           {profileTabEditOpen && (<>
           <label htmlFor="avatar-upload2" className="cursor-pointer flex items-center gap-3 active:opacity-70 transition-opacity">
             <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#f0f4ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -1122,98 +1163,6 @@ export default function ProfilePage() {
           </button>
           </>)}
 
-          {/* Featured insight */}
-          {(() => {
-            const wins   = reviews.filter(r => r.result === "win").length;
-            const losses = reviews.filter(r => r.result === "loss").length;
-            const last5  = [...reviews].sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 5);
-            const last5Wins = last5.filter(r => r.result === "win").length;
-            const topWellDone = (() => {
-              const counts: Record<string, number> = {};
-              reviews.flatMap(r => r.wellDone ?? []).forEach(t => { counts[t] = (counts[t] ?? 0) + 1; });
-              return Object.entries(counts).sort((a, b) => b[1] - a[1])[0] ?? null;
-            })();
-            const topImprove = (() => {
-              const counts: Record<string, number> = {};
-              reviews.flatMap(r => r.improved ?? []).forEach(t => { counts[t] = (counts[t] ?? 0) + 1; });
-              return Object.entries(counts).sort((a, b) => b[1] - a[1])[0] ?? null;
-            })();
-            const pool: { label: string; body: string }[] = [
-              reviews.length >= 3 && wins + losses > 0
-                ? { label: "Win rate", body: `You've won ${wins} out of ${wins + losses} recorded matches — a ${Math.round((wins / (wins + losses)) * 100)}% win rate. ${wins > losses ? "Keep it going." : "Every loss is data. Use it."}` }
-                : null,
-              last5.length >= 3
-                ? { label: "Recent form", body: `In your last ${last5.length} matches you won ${last5Wins}. ${last5Wins >= 3 ? "Strong run — confidence should be high going into your next game." : last5Wins === 0 ? "Tough stretch. Look back at what you improved on and build from there." : "Mixed results — small consistency gains will tip the balance."}` }
-                : null,
-              topWellDone
-                ? { label: "Your strength", body: `"${topWellDone[0]}" is the thing you've done well in most often — flagged across ${topWellDone[1]} match${topWellDone[1] > 1 ? "es" : ""}. That's your weapon. Keep sharpening it.` }
-                : null,
-              topImprove
-                ? { label: "Your focus area", body: `"${topImprove[0]}" is the area you've logged as needing work most — ${topImprove[1]} time${topImprove[1] > 1 ? "s" : ""}. Targeted practice on this one will move your game the fastest.` }
-                : null,
-              streak > 0
-                ? { label: "Streak", body: streak >= 7 ? `${streak} days and counting. A week-plus streak means habits are forming — that's where real gains live.` : streak >= 3 ? `${streak}-day streak. You're building momentum. Don't break the chain.` : `${streak} day${streak > 1 ? "s" : ""} in a row. Small start, big potential — log tomorrow and keep it going.` }
-                : null,
-              partnerCount >= 2
-                ? { label: "Partners", body: `You've played with ${partnerCount} different partners. Variety in partners exposes you to different styles and speeds up your adaptability on court.` }
-                : null,
-              trainingSessions.length > 0
-                ? { label: "Training", body: `${trainingSessions.length} training session${trainingSessions.length > 1 ? "s" : ""} logged so far. Players who train consistently between matches typically improve 2–3× faster than those who only play.` }
-                : null,
-              thisWeekAvg !== null && lastWeekAvg !== null
-                ? (() => {
-                    const band = (n: number) => n >= 85 ? "Strong" : n >= 75 ? "Good" : n >= 65 ? "Steady" : "Low";
-                    const thisLabel = band(thisWeekAvg);
-                    const lastLabel = band(lastWeekAvg);
-                    const avgPillar = (snaps: ScoreSnapshot[], key: keyof ScoreSnapshot) => snaps.length ? snaps.reduce((a, s) => a + (s[key] as number), 0) / snaps.length : 0;
-                    const pillars = ["recovery", "nutrition", "training", "wellbeing"] as const;
-                    const pillarNames: Record<string, string> = { recovery: "Recovery", nutrition: "Nutrition", training: "Training", wellbeing: "Wellbeing" };
-                    const deltas = pillars.map(p => ({ p, delta: avgPillar(thisWeekSnaps, p) - avgPillar(lastWeekSnaps, p) }));
-                    const biggest = deltas.reduce((a, b) => Math.abs(b.delta) > Math.abs(a.delta) ? b : a);
-                    const bestGain = deltas.filter(d => d.delta > 2).reduce((a, b) => b.delta > a.delta ? b : a, { p: "", delta: -Infinity });
-                    const worstDrop = deltas.filter(d => d.delta < -2).reduce((a, b) => b.delta < a.delta ? b : a, { p: "", delta: Infinity });
-                    const body = thisLabel === lastLabel
-                      ? thisWeekAvg > lastWeekAvg
-                        ? `Still ${thisLabel} — you improved slightly this week${bestGain.p ? `, with ${pillarNames[bestGain.p].toLowerCase()} leading the way` : ""}. You're close to breaking into ${band(thisWeekAvg + 5)} territory.`
-                        : thisWeekAvg < lastWeekAvg
-                          ? `Still ${thisLabel}, but your scores dipped slightly this week${worstDrop.p ? ` — ${pillarNames[worstDrop.p].toLowerCase()} was the weakest area` : ""}. Nothing alarming, but worth keeping an eye on.`
-                          : `Exactly the same as last week — your routine is holding steady. ${thisLabel === "Strong" ? "That's a great place to be." : "Improving your sleep or hydration consistency is usually the quickest way to move forward."}`
-                      : thisWeekAvg > lastWeekAvg
-                        ? `You moved from ${lastLabel} to ${thisLabel} this week${bestGain.p ? ` — ${pillarNames[bestGain.p].toLowerCase()} improved the most` : ""}. That's real progress.`
-                        : `Your scores dropped from ${lastLabel} to ${thisLabel} this week${worstDrop.p ? ` — ${pillarNames[worstDrop.p].toLowerCase()} took the biggest hit` : ""}. A dip happens; focus on getting your sleep and recovery back on track.`;
-                    return { label: "Week on week", body };
-                  })()
-                : null,
-              tournamentCount > 0
-                ? { label: "Tournaments", body: `You've entered ${tournamentCount} tournament${tournamentCount > 1 ? "s" : ""}. Competitive pressure is one of the best accelerators — the nerves, the intensity, the opponents. Keep entering.` }
-                : null,
-            ].filter((x): x is { label: string; body: string } => x !== null);
-
-            if (pool.length === 0) return null;
-            const idx = featuredIdx % pool.length;
-            const insight = pool[idx];
-            return (
-              <div>
-                <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px", textAlign: "center" }}>Featured insights</p>
-                <button
-                  onClick={() => setFeaturedIdx(i => (i + 1) % pool.length)}
-                  style={{ width: "100%", background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)", border: "none", cursor: "pointer", textAlign: "left" }}
-                >
-                  <p style={{ margin: "0 0 8px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-blue)" }}>{insight.label}</p>
-                  <p style={{ margin: "0 0 14px", fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{insight.body}</p>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div style={{ display: "flex", gap: 5 }}>
-                      {pool.map((_, i) => (
-                        <div key={i} style={{ width: i === idx ? 16 : 6, height: 6, borderRadius: 3, background: i === idx ? "var(--c-blue)" : "#e2e5ea", transition: "width 0.2s" }} />
-                      ))}
-                    </div>
-                    <span style={{ fontSize: 12, color: "var(--c-hint)", fontWeight: 500 }}>Tap for next</span>
-                  </div>
-                </button>
-              </div>
-            );
-          })()}
-
 
           {/* Info section */}
           <div>
@@ -1233,6 +1182,97 @@ export default function ProfilePage() {
               </button>
               {profileInsightsOpen && (
                 <div style={{ borderTop: "1px solid #f4f4f6", padding: "16px", display: "flex", flexDirection: "column", gap: 16 }}>
+
+                  {/* Featured insights */}
+                  {(() => {
+                    const wins   = reviews.filter(r => r.result === "win").length;
+                    const losses = reviews.filter(r => r.result === "loss").length;
+                    const last5  = [...reviews].sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 5);
+                    const last5Wins = last5.filter(r => r.result === "win").length;
+                    const topWellDone = (() => {
+                      const counts: Record<string, number> = {};
+                      reviews.flatMap(r => r.wellDone ?? []).forEach(t => { counts[t] = (counts[t] ?? 0) + 1; });
+                      return Object.entries(counts).sort((a, b) => b[1] - a[1])[0] ?? null;
+                    })();
+                    const topImprove = (() => {
+                      const counts: Record<string, number> = {};
+                      reviews.flatMap(r => r.improved ?? []).forEach(t => { counts[t] = (counts[t] ?? 0) + 1; });
+                      return Object.entries(counts).sort((a, b) => b[1] - a[1])[0] ?? null;
+                    })();
+                    const pool: { label: string; body: string }[] = [
+                      reviews.length >= 3 && wins + losses > 0
+                        ? { label: "Win rate", body: `You've won ${wins} out of ${wins + losses} recorded matches — a ${Math.round((wins / (wins + losses)) * 100)}% win rate. ${wins > losses ? "Keep it going." : "Every loss is data. Use it."}` }
+                        : null,
+                      last5.length >= 3
+                        ? { label: "Recent form", body: `In your last ${last5.length} matches you won ${last5Wins}. ${last5Wins >= 3 ? "Strong run — confidence should be high going into your next game." : last5Wins === 0 ? "Tough stretch. Look back at what you improved on and build from there." : "Mixed results — small consistency gains will tip the balance."}` }
+                        : null,
+                      topWellDone
+                        ? { label: "Your strength", body: `"${topWellDone[0]}" is the thing you've done well in most often — flagged across ${topWellDone[1]} match${topWellDone[1] > 1 ? "es" : ""}. That's your weapon. Keep sharpening it.` }
+                        : null,
+                      topImprove
+                        ? { label: "Your focus area", body: `"${topImprove[0]}" is the area you've logged as needing work most — ${topImprove[1]} time${topImprove[1] > 1 ? "s" : ""}. Targeted practice on this one will move your game the fastest.` }
+                        : null,
+                      streak > 0
+                        ? { label: "Streak", body: streak >= 7 ? `${streak} days and counting. A week-plus streak means habits are forming — that's where real gains live.` : streak >= 3 ? `${streak}-day streak. You're building momentum. Don't break the chain.` : `${streak} day${streak > 1 ? "s" : ""} in a row. Small start, big potential — log tomorrow and keep it going.` }
+                        : null,
+                      partnerCount >= 2
+                        ? { label: "Partners", body: `You've played with ${partnerCount} different partners. Variety in partners exposes you to different styles and speeds up your adaptability on court.` }
+                        : null,
+                      trainingSessions.length > 0
+                        ? { label: "Training", body: `${trainingSessions.length} training session${trainingSessions.length > 1 ? "s" : ""} logged so far. Players who train consistently between matches typically improve 2–3× faster than those who only play.` }
+                        : null,
+                      thisWeekAvg !== null && lastWeekAvg !== null
+                        ? (() => {
+                            const band = (n: number) => n >= 85 ? "Strong" : n >= 75 ? "Good" : n >= 65 ? "Steady" : "Low";
+                            const thisLabel = band(thisWeekAvg);
+                            const lastLabel = band(lastWeekAvg);
+                            const avgPillar = (snaps: ScoreSnapshot[], key: keyof ScoreSnapshot) => snaps.length ? snaps.reduce((a, s) => a + (s[key] as number), 0) / snaps.length : 0;
+                            const pillars = ["recovery", "nutrition", "training", "wellbeing"] as const;
+                            const pillarNames: Record<string, string> = { recovery: "Recovery", nutrition: "Nutrition", training: "Training", wellbeing: "Wellbeing" };
+                            const deltas = pillars.map(p => ({ p, delta: avgPillar(thisWeekSnaps, p) - avgPillar(lastWeekSnaps, p) }));
+                            const bestGain = deltas.filter(d => d.delta > 2).reduce((a, b) => b.delta > a.delta ? b : a, { p: "", delta: -Infinity });
+                            const worstDrop = deltas.filter(d => d.delta < -2).reduce((a, b) => b.delta < a.delta ? b : a, { p: "", delta: Infinity });
+                            const body = thisLabel === lastLabel
+                              ? thisWeekAvg > lastWeekAvg
+                                ? `Still ${thisLabel} — you improved slightly this week${bestGain.p ? `, with ${pillarNames[bestGain.p].toLowerCase()} leading the way` : ""}. You're close to breaking into ${band(thisWeekAvg + 5)} territory.`
+                                : thisWeekAvg < lastWeekAvg
+                                  ? `Still ${thisLabel}, but your scores dipped slightly this week${worstDrop.p ? ` — ${pillarNames[worstDrop.p].toLowerCase()} was the weakest area` : ""}. Nothing alarming, but worth keeping an eye on.`
+                                  : `Exactly the same as last week — your routine is holding steady. ${thisLabel === "Strong" ? "That's a great place to be." : "Improving your sleep or hydration consistency is usually the quickest way to move forward."}`
+                              : thisWeekAvg > lastWeekAvg
+                                ? `You moved from ${lastLabel} to ${thisLabel} this week${bestGain.p ? ` — ${pillarNames[bestGain.p].toLowerCase()} improved the most` : ""}. That's real progress.`
+                                : `Your scores dropped from ${lastLabel} to ${thisLabel} this week${worstDrop.p ? ` — ${pillarNames[worstDrop.p].toLowerCase()} took the biggest hit` : ""}. A dip happens; focus on getting your sleep and recovery back on track.`;
+                            return { label: "Week on week", body };
+                          })()
+                        : null,
+                      tournamentCount > 0
+                        ? { label: "Tournaments", body: `You've entered ${tournamentCount} tournament${tournamentCount > 1 ? "s" : ""}. Competitive pressure is one of the best accelerators — the nerves, the intensity, the opponents. Keep entering.` }
+                        : null,
+                    ].filter((x): x is { label: string; body: string } => x !== null);
+
+                    if (pool.length === 0) return null;
+                    const idx = featuredIdx % pool.length;
+                    const insight = pool[idx];
+                    return (
+                      <div>
+                        <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px", textAlign: "center" }}>Featured insights</p>
+                        <button
+                          onClick={() => setFeaturedIdx(i => (i + 1) % pool.length)}
+                          style={{ width: "100%", background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)", border: "none", cursor: "pointer", textAlign: "left" }}
+                        >
+                          <p style={{ margin: "0 0 8px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-blue)" }}>{insight.label}</p>
+                          <p style={{ margin: "0 0 14px", fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{insight.body}</p>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            <div style={{ display: "flex", gap: 5 }}>
+                              {pool.map((_, i) => (
+                                <div key={i} style={{ width: i === idx ? 16 : 6, height: 6, borderRadius: 3, background: i === idx ? "var(--c-blue)" : "#e2e5ea", transition: "width 0.2s" }} />
+                              ))}
+                            </div>
+                            <span style={{ fontSize: 12, color: "var(--c-hint)", fontWeight: 500 }}>Tap for next</span>
+                          </div>
+                        </button>
+                      </div>
+                    );
+                  })()}
 
                   {/* Padel Journey */}
                   <div style={{ background: "#f8f9fa", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
