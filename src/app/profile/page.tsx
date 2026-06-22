@@ -729,6 +729,7 @@ export default function ProfilePage() {
   const [profileTipsOpen, setProfileTipsOpen] = useState(false);
   const [profileInsightsOpen, setProfileInsightsOpen] = useState(false);
   const [profileMatchesOpen, setProfileMatchesOpen] = useState(false);
+  const [trendOpen, setTrendOpen] = useState(false);
   const [gearEditOpen, setGearEditOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [racketName, setRacketName] = useState("Wilson Carbon Pro v2");
@@ -1145,30 +1146,37 @@ export default function ProfilePage() {
             const avg = (arr: number[]) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
             const recentHalf = sorted.slice(Math.floor(sorted.length / 2));
             const olderHalf  = sorted.slice(0, Math.floor(sorted.length / 2));
-            const trendDelta = avg(olderHalf.map(s => s.overall)) > 0 ? ((avg(recentHalf.map(s => s.overall)) - avg(olderHalf.map(s => s.overall))) / avg(olderHalf.map(s => s.overall))) * 100 : 0;
+            const recentAvg = avg(recentHalf.map(s => s.overall));
+            const olderAvg  = avg(olderHalf.map(s => s.overall));
+            const trendDelta = olderAvg > 0 ? ((recentAvg - olderAvg) / olderAvg) * 100 : 0;
             const trendLabel = trendDelta > 3 ? "Improving" : trendDelta < -3 ? "Declining" : "Stable";
             const trendColor = trendDelta > 3 ? "#16a34a" : trendDelta < -3 ? "#dc2626" : "#d97706";
             const trendArrow = trendDelta > 3 ? "↑" : trendDelta < -3 ? "↓" : "→";
+            const hasData = enrichedScores.length >= 4;
+            const explanation = !hasData
+              ? "This tracks your overall wellbeing score across the last 30 days. Log your check-ins daily and we'll show you whether you're on an upward or downward trajectory."
+              : trendDelta > 3
+                ? `Your scores over the last 15 days are averaging ${Math.round(trendDelta)}% higher than the 15 days before that. You're building positive momentum — keep logging and maintaining your habits.`
+                : trendDelta < -3
+                  ? `Your scores over the last 15 days are averaging ${Math.abs(Math.round(trendDelta))}% lower than the 15 days before. This could be fatigue, stress, or inconsistent logging — check your recovery and wellbeing entries.`
+                  : `Your scores have been consistent over the last 30 days — no significant rise or fall. Consistency is good; focus on nudging one pillar (sleep, nutrition, or recovery) to push the trend upward.`;
             return (
-              <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)" }}>
-                <p style={{ margin: "0 0 12px", fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>30-day trend</p>
-                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  <div style={{ width: 52, height: 52, borderRadius: "50%", background: `${trendColor}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <span style={{ fontSize: 26, lineHeight: 1, color: trendColor }}>{trendArrow}</span>
+              <div style={{ background: "#fff", borderRadius: "var(--r-lg)", overflow: "hidden", boxShadow: "var(--shadow-card)" }}>
+                <button onClick={() => setTrendOpen(o => !o)} style={{ width: "100%", padding: "18px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <div style={{ width: 44, height: 44, borderRadius: "50%", background: `${trendColor}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <span style={{ fontSize: 22, lineHeight: 1, color: trendColor }}>{trendArrow}</span>
+                    </div>
+                    <div>
+                      <p style={{ margin: 0, fontSize: 16, fontWeight: 800, color: trendColor }}>{trendLabel}</p>
+                      <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9aa0a6", fontWeight: 500 }}>30-day trend</p>
+                    </div>
                   </div>
-                  <div>
-                    <p style={{ margin: 0, fontSize: 20, fontWeight: 800, color: trendColor }}>{trendLabel}</p>
-                    <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9aa0a6", fontWeight: 500 }}>
-                      {enrichedScores.length < 4 ? "Log more days to see your trend" : `${Math.abs(Math.round(trendDelta))}% ${trendDelta >= 0 ? "above" : "below"} your earlier baseline`}
-                    </p>
-                  </div>
-                </div>
-                {enrichedScores.length >= 4 && (
-                  <div style={{ marginTop: 14, display: "flex", alignItems: "flex-end", gap: 3, height: 40 }}>
-                    {sorted.map((s, i) => {
-                      const h = Math.max(4, Math.round(((s.overall - 65) / 35) * 36));
-                      return <div key={i} style={{ flex: 1, height: h, borderRadius: 3, background: i >= Math.floor(sorted.length / 2) ? trendColor : `${trendColor}55` }} />;
-                    })}
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: trendOpen ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+                {trendOpen && (
+                  <div style={{ padding: "0 20px 20px", borderTop: "1px solid #f4f4f6" }}>
+                    <p style={{ margin: "16px 0 0", fontSize: 14, fontWeight: 500, color: "#4b5563", lineHeight: 1.65 }}>{explanation}</p>
                   </div>
                 )}
               </div>
