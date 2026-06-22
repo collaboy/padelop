@@ -499,22 +499,24 @@ export function computeMatchReadiness(
 
 export function improveTips(states: PillarStates): string[] {
   const tips: string[] = [];
-  if (states.recovery.status === "low") {
+  if (states.recovery.status === "not_logged") tips.push("Log your morning check-in to track sleep and soreness");
+  else if (states.recovery.status === "low") {
     const r = states.recovery.reason;
     tips.push(r.includes("sleep") ? "Poor sleep last night — try a short nap or wind down early tonight" : "High soreness — prioritise stretching and take it easy today");
   }
-  if (states.nutrition.status === "low") {
+  if (states.wellbeing.status === "not_logged") tips.push("Log how you're feeling today — energy and stress levels matter");
+  else if (states.wellbeing.status === "low") {
+    const r = states.wellbeing.reason;
+    tips.push(r.includes("stress") ? "Feeling stressed — try 5 minutes of box breathing or a short walk" : "Low motivation — keep it simple, even a short session counts");
+  }
+  if (states.nutrition.status === "not_logged") tips.push("Complete your night check-in to track nutrition");
+  else if (states.nutrition.status === "low") {
     const r = states.nutrition.reason;
     if (r.includes("dark") || r.includes("fluids")) tips.push("Hydration low — aim for 2+ litres before end of day");
     else if (r.includes("Protein")) tips.push("Protein low — add eggs, chicken, or a shake to your next meal");
     else tips.push("Nutrition off today — aim for a balanced meal with veg and protein");
   }
-  if (states.wellbeing.status === "low") {
-    const r = states.wellbeing.reason;
-    tips.push(r.includes("stress") ? "Feeling stressed — try 5 minutes of box breathing or a short walk" : "Low motivation — keep it simple, even a short session counts");
-  }
-  if (states.training.status === "not_logged")  tips.push("No session logged — even 30 min of drills counts");
-  if (states.nutrition.status === "not_logged") tips.push("Complete your night check-in to track nutrition");
+  if (states.training.status === "not_logged") tips.push("No session logged — even 30 min of drills counts");
   return tips.slice(0, 3);
 }
 
