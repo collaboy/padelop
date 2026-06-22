@@ -1168,7 +1168,25 @@ export default function ProfilePage() {
                 ? { label: "Training", body: `${trainingSessions.length} training session${trainingSessions.length > 1 ? "s" : ""} logged so far. Players who train consistently between matches typically improve 2–3× faster than those who only play.` }
                 : null,
               thisWeekAvg !== null && lastWeekAvg !== null
-                ? { label: "Week on week", body: thisWeekAvg >= lastWeekAvg ? `Your overall score this week (${thisWeekAvg}) is up ${thisWeekAvg - lastWeekAvg} points on last week. You're heading in the right direction.` : `This week's score (${thisWeekAvg}) is ${lastWeekAvg - thisWeekAvg} points below last week. Check your recovery and sleep entries — those tend to move the needle fastest.` }
+                ? (() => {
+                    const band = (n: number) => n >= 85 ? "Strong" : n >= 75 ? "Good" : n >= 65 ? "Steady" : "Low";
+                    const thisLabel = band(thisWeekAvg);
+                    const lastLabel = band(lastWeekAvg);
+                    const avgPillar = (snaps: ScoreSnapshot[], key: keyof ScoreSnapshot) => snaps.length ? snaps.reduce((a, s) => a + (s[key] as number), 0) / snaps.length : 0;
+                    const pillars = ["recovery", "nutrition", "training", "wellbeing"] as const;
+                    const pillarNames: Record<string, string> = { recovery: "Recovery", nutrition: "Nutrition", training: "Training", wellbeing: "Wellbeing" };
+                    const deltas = pillars.map(p => ({ p, delta: avgPillar(thisWeekSnaps, p) - avgPillar(lastWeekSnaps, p) }));
+                    const biggest = deltas.reduce((a, b) => Math.abs(b.delta) > Math.abs(a.delta) ? b : a);
+                    const driver = Math.abs(biggest.delta) > 2
+                      ? `, mainly driven by ${biggest.delta > 0 ? "stronger" : "weaker"} ${pillarNames[biggest.p].toLowerCase()}`
+                      : "";
+                    const body = thisLabel === lastLabel
+                      ? `You're ${thisLabel} again this week — consistent form${driver}. ${thisLabel === "Strong" ? "That's elite territory." : "Push one pillar to move up a band."}`
+                      : thisWeekAvg > lastWeekAvg
+                        ? `You moved from ${lastLabel} to ${thisLabel} this week${driver}. Keep doing what's working.`
+                        : `You slipped from ${lastLabel} to ${thisLabel} this week${driver}. A dip is normal — focus on sleep and hydration to recover quickly.`;
+                    return { label: "Week on week", body };
+                  })()
                 : null,
               tournamentCount > 0
                 ? { label: "Tournaments", body: `You've entered ${tournamentCount} tournament${tournamentCount > 1 ? "s" : ""}. Competitive pressure is one of the best accelerators — the nerves, the intensity, the opponents. Keep entering.` }
