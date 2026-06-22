@@ -1079,8 +1079,13 @@ export default function ProfilePage() {
           </div>
           <div>
             <p className="t-label text-c-hint mb-2">Playing since</p>
-            <input type="month" value={profile.playingSince} onChange={e => setField("playingSince", e.target.value)}
-              className="t-ui w-full px-4 py-3 rounded-2xl border-2 border-c-line text-c-text outline-none focus:border-c-blue transition-colors bg-c-bg-input focus:bg-white" />
+            <select value={profile.playingSince} onChange={e => setField("playingSince", e.target.value)}
+              className="t-ui w-full px-4 py-3 rounded-2xl border-2 border-c-line text-c-text outline-none focus:border-c-blue transition-colors bg-c-bg-input focus:bg-white">
+              <option value="">Select year</option>
+              {Array.from({ length: new Date().getFullYear() - 1989 }, (_, i) => new Date().getFullYear() - i).map(y => (
+                <option key={y} value={String(y)}>{y}</option>
+              ))}
+            </select>
           </div>
           <div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
@@ -1319,9 +1324,7 @@ export default function ProfilePage() {
                     <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Padel Journey</p>
                     {(profile.playingSince || journeyStart) && (
                       <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 16px", fontWeight: 500 }}>
-                        Started {profile.playingSince
-                          ? new Date(profile.playingSince + "-01").toLocaleDateString("en-US", { month: "long", year: "numeric" })
-                          : journeyStart}
+                        Started {profile.playingSince || journeyStart}
                       </p>
                     )}
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
