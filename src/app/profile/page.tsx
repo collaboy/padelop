@@ -1437,32 +1437,35 @@ export default function ProfilePage() {
                 <path d="M6 9l6 6 6-6"/>
               </svg>
             </button>
-            {schedOpen && <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {schedule.map((s, i) => {
-                const isCur = i === schedCurrentIdx;
-                const nowMins = schedNow.getHours() * 60 + schedNow.getMinutes();
-                const toMins = (t: string) => t.split(":").reduce((a: number, b: string, j: number) => a + (j === 0 ? Number(b) * 60 : Number(b)), 0);
-                const isPast = !isCur && nowMins > toMins(s.time);
-                const hasDetail = !!SCHEDULE_DETAILS[s.title] || s.isDrill;
-                const isDone = (schedDone[todayKey] ?? []).includes(s.title);
-                return (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, borderRadius: 14, padding: isCur ? "14px 14px 14px 16px" : "10px 10px 10px 14px", background: isDone ? "#f0fdf4" : isCur ? `${s.color}0e` : "transparent", boxShadow: isDone ? "0 0 0 1.5px #bbf7d0" : isCur ? `0 0 0 2px ${s.color}, 0 2px 12px ${s.color}22` : "none" }}>
-                    <button onClick={() => toggleSchedDone(todayKey, s.title)} style={{ width: isCur ? 40 : 28, height: isCur ? 40 : 28, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: isDone ? "#16a34a" : isCur ? `${s.color}22` : "transparent", border: isDone || isCur ? "none" : `1.5px solid ${isPast ? "#e0e0e0" : s.color}44`, cursor: "pointer", padding: 0 }}>
-                      {isDone
-                        ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-                        : <div style={{ width: isCur ? 13 : 8, height: isCur ? 13 : 8, borderRadius: "50%", background: isPast ? "#d0d3d6" : s.color, opacity: isCur ? 1 : 0.5 }} />
-                      }
-                    </button>
-                    <div onClick={() => hasDetail && setSchedModalIdx(i)} style={{ flex: 1, minWidth: 0, cursor: hasDetail ? "pointer" : "default" }}>
-                      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", margin: "0 0 2px", color: isDone ? "#16a34a" : isPast ? "#c4c7c7" : isCur ? s.color : "#b0b8c1" }}>{s.time}</p>
-                      <p style={{ fontSize: isCur ? "clamp(17px,4.4vw,20px)" : "clamp(14px,3.6vw,16px)", fontWeight: isCur ? 700 : 500, margin: 0, lineHeight: 1.25, color: isDone ? "#16a34a" : isPast ? "#c4c7c7" : isCur ? "#1a1c1c" : "#4b5563", textDecoration: isDone ? "line-through" : "none", opacity: isDone ? 0.6 : 1 }}>{s.title}</p>
-                      {s.subtitle && isCur && <p style={{ fontSize: "clamp(12px,3.1vw,14px)", margin: "2px 0 0", color: "#6b7480" }}>{s.subtitle}</p>}
-                    </div>
-                    {hasDetail && !isDone && isCur && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>}
-                  </div>
-                );
-              })}
-            </div>}
+            {schedOpen && (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 8 }}>
+                {schedule.map((s, i) => {
+                  const isCur = i === schedCurrentIdx;
+                  const nowMins = schedNow.getHours() * 60 + schedNow.getMinutes();
+                  const toMinsLocal = (t: string) => t.split(":").reduce((a: number, b: string, j: number) => a + (j === 0 ? Number(b) * 60 : Number(b)), 0);
+                  const isPast = !isCur && nowMins > toMinsLocal(s.time);
+                  const hasDetail = !!SCHEDULE_DETAILS[s.title] || s.isDrill;
+                  const ballColor = isPast ? "#c4c7c7" : s.color;
+                  return (
+                    <React.Fragment key={i}>
+                      {i > 0 && <div style={{ width: 2, height: 24, background: "#e0e0e0", flexShrink: 0 }} />}
+                      {isCur ? (
+                        <div onClick={() => hasDetail && setSchedModalIdx(i)} style={{ width: "100%", borderRadius: 24, background: s.color, padding: "22px 24px", cursor: hasDetail ? "pointer" : "default", display: "flex", flexDirection: "column", gap: 6, boxShadow: `0 4px 20px ${s.color}44` }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)" }}>{s.time}</span>
+                          <p style={{ margin: 0, fontSize: "clamp(22px,5.5vw,26px)", fontWeight: 800, color: "#fff", lineHeight: 1.1 }}>{s.title}</p>
+                          {s.subtitle && <p style={{ margin: 0, fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 1.4 }}>{s.subtitle}</p>}
+                        </div>
+                      ) : (
+                        <div onClick={() => hasDetail && setSchedModalIdx(i)} style={{ width: "calc(33.333% - 0px)", aspectRatio: "1 / 1", borderRadius: "50%", background: ballColor, opacity: isPast ? 0.45 : 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: hasDetail ? "pointer" : "default", padding: "8%", flexShrink: 0, boxShadow: isPast ? "none" : `0 2px 10px ${s.color}33` }}>
+                          <span style={{ fontSize: "clamp(10px,2.6vw,12px)", fontWeight: 700, color: "#fff", textAlign: "center", lineHeight: 1.2 }}>{s.title}</span>
+                          <span style={{ fontSize: "clamp(9px,2.2vw,11px)", color: "rgba(255,255,255,0.8)", marginTop: 4, textAlign: "center" }}>{s.time}</span>
+                        </div>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
 
