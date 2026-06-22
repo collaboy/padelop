@@ -1047,19 +1047,17 @@ export default function ProfilePage() {
       {/* ── Tab: Profile ─────────────────────────────────────────────────── */}
       {activeTab === 'profile' && (
         <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
-          {/* Profile header — greeting */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "center" }}>
-            <button onClick={() => setProfileTabEditOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "center" }}>
-              <p style={{ margin: 0, fontSize: "clamp(24px, 6vw, 30px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1 }}>
-                {(() => {
-                  const h = new Date().getHours();
-                  const greeting = h < 12 ? "Good morning," : h < 18 ? "Good afternoon," : "Good evening,";
-                  const firstName = profile.name ? profile.name.trim().split(" ")[0] : "";
-                  return firstName ? <>{greeting}<br />{firstName}.</> : <>{greeting}</>;
-                })()}
-              </p>
-            </button>
-          </div>
+          {/* Profile header — greeting card */}
+          <button onClick={() => setProfileTabEditOpen(o => !o)} style={{ background: "#fff", border: "none", cursor: "pointer", padding: "20px 24px", textAlign: "center", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", width: "100%" }}>
+            <p style={{ margin: 0, fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.15 }}>
+              {(() => {
+                const h = new Date().getHours();
+                const greeting = h < 12 ? "Good morning," : h < 18 ? "Good afternoon," : "Good evening,";
+                const firstName = profile.name ? profile.name.trim().split(" ")[0] : "";
+                return firstName ? <>{greeting}<br />{firstName}.</> : <>{greeting}</>;
+              })()}
+            </p>
+          </button>
           {profileTabEditOpen && (<>
           <label htmlFor="avatar-upload2" className="cursor-pointer flex items-center gap-3 active:opacity-70 transition-opacity">
             <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#f0f4ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
