@@ -901,7 +901,6 @@ export default function Home8() {
                               <text fill="rgba(255,255,255,0.7)" fontSize="9.5" fontWeight="700" letterSpacing="2.5" fontFamily="inherit">
                                 <textPath href="#matchArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
                               </text>
-                              <circle cx="50" cy="91" r="4" fill={dayColor} stroke="white" strokeWidth="1.5" />
                             </svg>
                           </div>
                         </div>
@@ -1041,7 +1040,7 @@ export default function Home8() {
                   }
                 };
                 return (
-                  <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => setDoModalOpen(true)}>
+                  <div key="active" className="animate-bounce-in" style={cardStyle}>
                     {textureOverlay}
                     {/* Visualizer — fills ball when playing */}
                     <canvas
@@ -1060,7 +1059,7 @@ export default function Home8() {
                             <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><polygon points="3,1 15,8 3,15" fill="#1a1c1c"/></svg>
                           </button>
                         ) : (
-                          <button onClick={e => { e.stopPropagation(); setDoModalOpen(true); }} className="mt-3 font-semibold px-3 py-1 rounded-full flex items-center gap-1" style={{ background: isSleepytime ? "transparent" : "#fff", color: "#1a1c1c", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me</button>
+                          <button onClick={() => setDoModalOpen(true)} className="mt-3 font-semibold px-3 py-1 rounded-full flex items-center gap-1" style={{ background: isSleepytime ? "transparent" : "#fff", color: "#1a1c1c", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me</button>
                         )
                       }
                     </div>
@@ -1128,7 +1127,7 @@ export default function Home8() {
                   "Keep going.";
                 const sub =
                   dayType === "match"
-                    ? `Trust your game and enjoy every point.${match?.time ? ` Match at ${match.time}${match.club ? ` · ${match.club}` : ""}.` : ""}`
+                    ? "Trust your game and enjoy every point."
                     : dayType === "recovery"
                     ? "Rest is part of training. Let your body recover and come back stronger."
                     : drillTag
@@ -1587,33 +1586,6 @@ export default function Home8() {
                     </div>{/* end gradient section */}
                   </div>
 
-                  {/* TODAY SECTION */}
-                  {(() => {
-                    const tips = improveTips(pillarStates);
-                    return (
-                      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                        <button onClick={() => setMatchInfoTipsOpen(o => !o)} style={{ background: dayColor, borderRadius: 24, padding: "18px 20px", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, border: "none", cursor: "pointer", width: "100%" }}>
-                          <span style={{ fontSize: 18, fontWeight: 700, color: "#fff" }}>{tips.length} Recommendation{tips.length !== 1 ? "s" : ""}</span>
-                          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: matchInfoTipsOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s" }}><path d="M9 18l6-6-6-6"/></svg>
-                        </button>
-                        {matchInfoTipsOpen && (
-                          <div style={{ background: "#fff", borderRadius: 20, padding: "16px 20px 10px", display: "flex", flexDirection: "column", gap: 12 }}>
-                            {tips.length === 0 ? (
-                              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e", flexShrink: 0 }} />
-                                <span style={{ fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.45 }}>All pillars on track today</span>
-                              </div>
-                            ) : tips.map(tip => (
-                              <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                                <div style={{ width: 8, height: 8, borderRadius: "50%", background: dayColor, flexShrink: 0, marginTop: 6 }} />
-                                <span style={{ fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.45 }}>{tip}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
 
                 </div>{/* end flex column */}
                 </div>{/* end scroll container */}
