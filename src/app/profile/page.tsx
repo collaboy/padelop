@@ -1196,7 +1196,7 @@ export default function ProfilePage() {
             const insight = pool[idx];
             return (
               <div>
-                <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px" }}>Featured insights</p>
+                <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px", textAlign: "center" }}>Featured insights</p>
                 <button
                   onClick={() => setFeaturedIdx(i => (i + 1) % pool.length)}
                   style={{ width: "100%", background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)", border: "none", cursor: "pointer", textAlign: "left" }}
@@ -1219,7 +1219,7 @@ export default function ProfilePage() {
 
           {/* Info section */}
           <div>
-            <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px" }}>Info</p>
+            <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px", textAlign: "center" }}>Info</p>
             <div style={{ background: "#fff", borderRadius: "var(--r-md)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
               <button
                 onClick={() => { setProfileInsightsOpen(o => !o); setProfileMatchesOpen(false); }}
