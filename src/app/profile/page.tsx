@@ -980,26 +980,11 @@ export default function ProfilePage() {
 
           {/* Day type card */}
           <div style={{ margin: "0 20px", borderRadius: 24, overflow: "hidden", boxShadow: "var(--shadow-card)" }}>
-            {(() => {
-              const title = dayType === "match" ? "Game on." : dayType === "recovery" ? "Well played." : "Keep going.";
-              const sub =
-                dayType === "match"
-                  ? "Trust your game and enjoy every point."
-                  : dayType === "recovery"
-                  ? "Rest is part of training. Let your body recover and come back stronger."
-                  : drillTag
-                  ? `Today focus on ${drillTag}. Small improvements compound into big gains.`
-                  : "Every session counts. Show up, put in the work, and trust the process.";
-              return (
-                <div style={{ background: "#fff", padding: "28px 20px 28px", textAlign: "center" }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: dayColor }}>Today</span>
-                  <p style={{ margin: "6px 0 8px", fontSize: "clamp(32px, 8vw, 42px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{dayLabel}</p>
-                  <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500, lineHeight: 1 }}>{now.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" })}</span>
-                  <p style={{ margin: "16px 0 4px", fontSize: "clamp(28px, 7vw, 36px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1 }}>{title}</p>
-                  <p style={{ margin: "0", fontSize: "clamp(15px, 3.8vw, 18px)", color: "#6b7480", lineHeight: 1.6 }}>{sub}</p>
-                </div>
-              );
-            })()}
+            <div style={{ background: "#fff", padding: "28px 20px", textAlign: "center" }}>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: dayColor }}>Today</span>
+              <p style={{ margin: "6px 0 8px", fontSize: "clamp(32px, 8vw, 42px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{dayLabel}</p>
+              <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500, lineHeight: 1 }}>{now.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" })}</span>
+            </div>
           </div>
 
           {/* Today's Schedule */}
