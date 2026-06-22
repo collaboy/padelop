@@ -1049,75 +1049,21 @@ export default function ProfilePage() {
         <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
           {/* Profile avatar card */}
           <div style={{ background: "#fff", borderRadius: 18, padding: "20px 24px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-            <label htmlFor="avatar-upload-top" style={{ cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+            <button onClick={() => setProfileTabEditOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
               <div style={{ width: 72, height: 72, borderRadius: "50%", background: "var(--c-blue)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                 {profile.avatar
                   ? <img src={profile.avatar} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   : <span style={{ fontSize: 24, fontWeight: 800, color: "#fff" }}>{initials(profile.name)}</span>
                 }
               </div>
-              <input id="avatar-upload-top" type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
               <span style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>{profile.name || "Set your name"}</span>
-            </label>
+            </button>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
               {profile.level && <span style={{ fontSize: 12, fontWeight: 700, color: "var(--c-blue)", background: "var(--c-blue-tint)", padding: "4px 10px", borderRadius: 20 }}>{profile.level}</span>}
               {profile.position && <span style={{ fontSize: 12, fontWeight: 700, color: "var(--c-teal)", background: "#f0fdfd", padding: "4px 10px", borderRadius: 20 }}>{profile.position}</span>}
               {profile.hand && <span style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text-sub)", background: "#f4f6f8", padding: "4px 10px", borderRadius: 20 }}>{profile.hand}-handed</span>}
             </div>
           </div>
-
-          {/* Profile header — greeting + Pala message card */}
-          {(() => {
-            const statusScore = (s: PillarStatus) => s === "good" ? 3 : s === "ok" ? 2 : s === "low" ? 1 : 0;
-            const pillarEntries = [
-              { key: "recovery",  status: pillarStates.recovery.status },
-              { key: "nutrition", status: pillarStates.nutrition.status },
-              { key: "training",  status: pillarStates.training.status },
-              { key: "wellbeing", status: pillarStates.wellbeing.status },
-            ];
-            const sc = (e: { status: PillarStatus }) => statusScore(e.status);
-            const best  = pillarEntries.reduce((a, b) => sc(b) > sc(a) ? b : a);
-            const worst = pillarEntries.reduce((a, b) => sc(b) < sc(a) ? b : a);
-            const avgScore = pillarEntries.reduce((sum, e) => sum + sc(e), 0) / pillarEntries.length;
-            const overallBand = avgScore >= 2.5 ? "strong" : avgScore >= 1.75 ? "good" : avgScore >= 1 ? "steady" : "low";
-            const topImprove = (() => {
-              const counts: Record<string, number> = {};
-              reviews.flatMap(r => r.improved ?? []).forEach(t => { counts[t] = (counts[t] ?? 0) + 1; });
-              return Object.entries(counts).sort((a, b) => b[1] - a[1])[0] ?? null;
-            })();
-            const opening = overallBand === "strong"
-              ? "You're in great shape right now — all your pillars are firing well."
-              : overallBand === "good"
-              ? "You're in good form overall — your daily habits are holding up."
-              : overallBand === "steady"
-              ? "Your form is steady — a few adjustments could push you into a stronger zone."
-              : "You're at a low point right now — the priority is recovery and consistency.";
-            const improveActions: Record<string, string> = {
-              recovery:  "Prioritise sleep quality and limit late nights.",
-              nutrition:  "Tighten up your hydration and post-session meals.",
-              training:  "Add a structured session this week, even a short one.",
-              wellbeing: "Take a moment to check in on your energy and stress levels.",
-            };
-            const workingClause = sc(best) >= 2 ? ` Your ${best.key} is your strongest area right now — keep protecting that.` : "";
-            const improveClause = sc(worst) < 2 ? ` Your ${worst.key} is the area to focus on — ${improveActions[worst.key]}` : "";
-            const matchClause = topImprove
-              ? ` On court, "${topImprove[0]}" is the skill you've flagged most for improvement — that's your clearest path to a stronger game.`
-              : reviews.length > 0 ? ` You've played ${reviews.length} match${reviews.length > 1 ? "es" : ""} — keep logging your results to unlock deeper insights.` : "";
-            const palaMessage = opening + workingClause + improveClause + matchClause;
-            const h = new Date().getHours();
-            const greetingWord = h < 12 ? "Good morning," : h < 18 ? "Good afternoon," : "Good evening,";
-            const firstName = profile.name ? profile.name.trim().split(" ")[0] : "";
-            return (
-              <div style={{ background: "#fff", borderRadius: 18, padding: "20px 24px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", textAlign: "left" }}>
-                <button onClick={() => setProfileTabEditOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left", width: "100%" }}>
-                  <p style={{ margin: 0, fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.15 }}>
-                    {firstName ? <>{greetingWord}<br />{firstName}.</> : <>{greetingWord}</>}
-                  </p>
-                </button>
-                <p style={{ margin: "14px 0 0", fontSize: 14, fontWeight: 500, color: "#5a6270", lineHeight: 1.6 }}>{palaMessage}</p>
-              </div>
-            );
-          })()}
           {profileTabEditOpen && (<>
           <label htmlFor="avatar-upload2" className="cursor-pointer flex items-center gap-3 active:opacity-70 transition-opacity">
             <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#f0f4ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -1182,6 +1128,76 @@ export default function ProfilePage() {
           </button>
           </>)}
 
+          {/* Profile header — greeting + Pala message card */}
+          {(() => {
+            const statusScore = (s: PillarStatus) => s === "good" ? 3 : s === "ok" ? 2 : s === "low" ? 1 : 0;
+            const pillarEntries = [
+              { key: "recovery",  status: pillarStates.recovery.status },
+              { key: "nutrition", status: pillarStates.nutrition.status },
+              { key: "training",  status: pillarStates.training.status },
+              { key: "wellbeing", status: pillarStates.wellbeing.status },
+            ];
+            const sc = (e: { status: PillarStatus }) => statusScore(e.status);
+            const best  = pillarEntries.reduce((a, b) => sc(b) > sc(a) ? b : a);
+            const worst = pillarEntries.reduce((a, b) => sc(b) < sc(a) ? b : a);
+            const avgScore = pillarEntries.reduce((sum, e) => sum + sc(e), 0) / pillarEntries.length;
+            const overallBand = avgScore >= 2.5 ? "strong" : avgScore >= 1.75 ? "good" : avgScore >= 1 ? "steady" : "low";
+            const topImprove = (() => {
+              const counts: Record<string, number> = {};
+              reviews.flatMap(r => r.improved ?? []).forEach(t => { counts[t] = (counts[t] ?? 0) + 1; });
+              return Object.entries(counts).sort((a, b) => b[1] - a[1])[0] ?? null;
+            })();
+            const opening = overallBand === "strong"
+              ? "You're in great shape right now — all your pillars are firing well."
+              : overallBand === "good"
+              ? "You're in good form overall — your daily habits are holding up."
+              : overallBand === "steady"
+              ? "Your form is steady — a few adjustments could push you into a stronger zone."
+              : "You're at a low point right now — the priority is recovery and consistency.";
+            const improveActions: Record<string, string> = {
+              recovery:  "Prioritise sleep quality and limit late nights.",
+              nutrition:  "Tighten up your hydration and post-session meals.",
+              training:  "Add a structured session this week, even a short one.",
+              wellbeing: "Take a moment to check in on your energy and stress levels.",
+            };
+            const workingClause = sc(best) >= 2 ? ` Your ${best.key} is your strongest area right now — keep protecting that.` : "";
+            const improveClause = sc(worst) < 2 ? ` Your ${worst.key} is the area to focus on — ${improveActions[worst.key]}` : "";
+            const matchClause = topImprove
+              ? ` On court, "${topImprove[0]}" is the skill you've flagged most for improvement — that's your clearest path to a stronger game.`
+              : reviews.length > 0 ? ` You've played ${reviews.length} match${reviews.length > 1 ? "es" : ""} — keep logging your results to unlock deeper insights.` : "";
+            const palaMessage = opening + workingClause + improveClause + matchClause;
+            const h = new Date().getHours();
+            const greetingWord = h < 12 ? "Good morning," : h < 18 ? "Good afternoon," : "Good evening,";
+            const firstName = profile.name ? profile.name.trim().split(" ")[0] : "";
+            return (
+              <div style={{ background: "#fff", borderRadius: 18, padding: "20px 24px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", textAlign: "left" }}>
+                <p style={{ margin: 0, fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.15 }}>
+                  {firstName ? <>{greetingWord}<br />{firstName}.</> : <>{greetingWord}</>}
+                </p>
+                <p style={{ margin: "14px 0 0", fontSize: 14, fontWeight: 500, color: "#5a6270", lineHeight: 1.6 }}>{palaMessage}</p>
+              </div>
+            );
+          })()}
+
+          {/* Daily tasks completion card */}
+          {(() => {
+            const doneTitles = schedDone[todayKey] ?? [];
+            const total = schedule.length;
+            const done = schedule.filter(s => doneTitles.includes(s.title)).length;
+            if (total === 0) return null;
+            const pct = Math.round((done / total) * 100);
+            const barColor = pct === 100 ? "var(--c-green)" : pct >= 50 ? "var(--c-blue)" : "var(--c-orange)";
+            return (
+              <div style={{ background: "#fff", borderRadius: 18, padding: "18px 20px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
+                <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>
+                  {pct === 100 ? "All tasks done today ✓" : `You've completed ${done} of ${total} scheduled tasks today`}
+                </p>
+                <div style={{ height: 6, borderRadius: 3, background: "#f0f2f5", overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${pct}%`, borderRadius: 3, background: barColor, transition: "width 0.4s" }} />
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Info section */}
           <div>
