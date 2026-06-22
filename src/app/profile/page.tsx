@@ -945,7 +945,7 @@ export default function ProfilePage() {
 
           {/* Avatar center */}
           <button onClick={() => setProfileOpen(o => !o)} className="active:opacity-70 transition-opacity" style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "inline-block" }}>
-            <div style={{ width: 80, height: 80, borderRadius: "50%", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "3px solid #fff", background: profile.avatar ? "transparent" : "var(--c-blue)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: 44, height: 44, borderRadius: "50%", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "3px solid #fff", background: profile.avatar ? "transparent" : "var(--c-blue)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               {profile.avatar ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={profile.avatar} alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
