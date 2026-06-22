@@ -10,7 +10,7 @@ import { hydrateFromSupabase } from "@/lib/sync";
 import { analyzeMeals, compareMealsToSchedule, foodGrade, loadFoodHistory, type MealEntry } from "@/lib/food-scoring";
 import {
   computeScores, loadScoringData, saveScoreSnapshot, loadScoreHistory,
-  computePillarStates, computeMatchReadiness, loadMorningLog, improveTips,
+  computePillarStates, computeMatchReadiness, loadMorningLog, improveTips, buildInsightParagraph,
   type MatchReadinessResult,
   type Scores, type ScoreSnapshot, type ReviewEntry, type PillarStates, type PillarStatus,
   type HydrationEntry, type NutritionEntry, type HabitsEntry,
@@ -1044,24 +1044,12 @@ export default function ProfilePage() {
 
           {/* Recommendations */}
           <div style={{ margin: "0 20px", borderRadius: "var(--r-lg)", background: "#fff", boxShadow: "var(--shadow-card)", padding: "20px" }}>
-            <p style={{ margin: "0 0 16px", fontSize: 17, fontWeight: 700, color: "#1a1c1c", textAlign: "center" }}>
-              {tips.length} Recommendation{tips.length !== 1 ? "s" : ""}
+            <p style={{ margin: "0 0 14px", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: dayColor }}>
+              {dayLabel}
             </p>
-            {tips.length === 0 ? (
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e", flexShrink: 0 }} />
-                <span style={{ fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.45 }}>All pillars on track today</span>
-              </div>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {tips.map(tip => (
-                  <div key={tip} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: dayColor, flexShrink: 0, marginTop: 5 }} />
-                    <span style={{ fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.45 }}>{tip}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+            <p style={{ margin: 0, fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>
+              {buildInsightParagraph(pillarStates)}
+            </p>
           </div>
 
         </div>

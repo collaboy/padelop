@@ -559,6 +559,83 @@ export function improveTips(states: PillarStates): string[] {
   return tips.slice(0, 3);
 }
 
+export function buildInsightParagraph(states: PillarStates): string {
+  const isMatchDay = states.training.reason?.includes("Match");
+  const isRecoveryDay = states.training.reason?.includes("recovery") || states.training.reason?.includes("Recovery");
+
+  // Gather what each pillar needs, as clause fragments
+  const clauses: string[] = [];
+
+  // Recovery
+  if (states.recovery.status === "low") {
+    const r = states.recovery.reason;
+    if (r.includes("sleep")) {
+      clauses.push(isMatchDay
+        ? "you're short on sleep so squeeze in a 20-min nap before your match and cut caffeine by 2pm"
+        : "last night's sleep was poor so a 20-min nap now will do more for you than another coffee");
+    } else {
+      clauses.push(isMatchDay
+        ? "your legs are carrying some soreness so make your warm-up thorough and stay loose between sets"
+        : "soreness is high so spend 10 minutes on foam rolling or finish with a cold shower");
+    }
+  } else if (states.recovery.status === "ok") {
+    clauses.push(isMatchDay
+      ? "you're not fully rested so keep your warm-up dynamic and sip water consistently throughout"
+      : "recovery is partial so keep today's intensity moderate and aim to be in bed 30 minutes earlier");
+  }
+
+  // Wellbeing
+  if (states.wellbeing.status === "low") {
+    const r = states.wellbeing.reason;
+    if (r.includes("stress")) {
+      clauses.push("stress is elevated so take 5 minutes of box breathing before you start");
+    } else {
+      clauses.push(isMatchDay
+        ? "motivation is low but lean on your routine and let the match energy do the rest"
+        : "motivation is low so commit to just 15 minutes — momentum usually follows");
+    }
+  } else if (states.wellbeing.status === "ok") {
+    clauses.push("energy isn't at its peak so open with a dynamic warm-up to get the body switched on");
+  }
+
+  // Nutrition
+  if (states.nutrition.status === "low") {
+    const r = states.nutrition.reason;
+    if (r.includes("dark") || r.includes("fluids")) {
+      clauses.push("hydration is behind so drink 500ml right now and keep a bottle close for the rest of the day");
+    } else if (r.includes("Protein")) {
+      clauses.push("protein is low so add eggs, chicken, or a shake to your next meal before you train");
+    } else {
+      clauses.push(isMatchDay
+        ? "fuelling is light so get a carb-rich snack in 60–90 minutes before your match"
+        : "nutrition is light so build your next meal around protein, veg, and slow carbs");
+    }
+  } else if (states.nutrition.status === "ok") {
+    clauses.push(isMatchDay
+      ? "top up with a banana or rice cakes about an hour before kick-off"
+      : "add one more glass of water and a protein source at your next meal to push nutrition higher");
+  }
+
+  // All clear
+  if (clauses.length === 0) {
+    if (isMatchDay) return "Everything is tracking well. Trust your preparation, stay sharp, and enjoy the game.";
+    if (isRecoveryDay) return "Your body is in good shape today. Keep the load light, stay hydrated, and let the recovery do its work.";
+    return "All pillars are on track. Show up, put in the work, and keep the streak going.";
+  }
+
+  // Build the paragraph
+  const dayOpener = isMatchDay ? "Ahead of your match" : isRecoveryDay ? "For your recovery today" : "Going into today's session";
+
+  if (clauses.length === 1) {
+    return `${dayOpener}, ${clauses[0]}.`;
+  }
+  if (clauses.length === 2) {
+    return `${dayOpener}, ${clauses[0]}. Also, ${clauses[1]}.`;
+  }
+  // 3 clauses
+  return `${dayOpener}, ${clauses[0]}. On top of that, ${clauses[1]}. Finally, ${clauses[2]}.`;
+}
+
 export function computeAllTimeScores(): Scores {
   try {
     const hydLogs = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]") as HydrationEntry[];
