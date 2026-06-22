@@ -1611,6 +1611,10 @@ export default function Home8() {
                             ))}
                           </div>
                         )}
+                        <Link href="/profile?tab=today" style={{ textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "4px 0" }}>
+                          <span style={{ fontSize: 14, fontWeight: 600, color: dayColor }}>See more</span>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={dayColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                        </Link>
                       </div>
                     );
                   })()}
