@@ -256,7 +256,7 @@ export default function Fab() {
                     <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Settings</span>
                   </button>
                   <button
-                    onClick={() => router.push("/profile")}
+                    onClick={() => { closeAll(); router.push("/profile?tab=profile"); }}
                     style={{ background: "#eef2ff", border: "none", borderRadius: 14, padding: "12px 8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, aspectRatio: "1" }}
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>

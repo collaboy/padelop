@@ -447,7 +447,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<'today' | 'archive' | 'profile'>('today');
   useEffect(() => {
     const t = new URLSearchParams(window.location.search).get('tab');
-    if (t === 'archive') goTab(t);
+    if (t === 'archive' || t === 'profile') goTab(t);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const [tabAnimKey, setTabAnimKey] = useState(0);
@@ -940,6 +940,10 @@ export default function ProfilePage() {
           <Link href="/home8" style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "12px 0", color: "#9aa0a6" }}>
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
           </Link>
+          <button onClick={() => goTab('profile')} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "12px 0", color: activeTab === 'profile' ? "#1a1c1c" : "#9aa0a6", background: "none", border: "none", cursor: "pointer", position: "relative" }}>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={activeTab === 'profile' ? 2.8 : 2.2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            {activeTab === 'profile' && <div style={{ position: "absolute", bottom: 0, left: "20%", right: "20%", height: 2, borderRadius: 2, background: "#1a1c1c" }} />}
+          </button>
           {TABS.map(tab => (
             <button
               key={tab.key}
@@ -952,10 +956,6 @@ export default function ProfilePage() {
               )}
             </button>
           ))}
-          <button onClick={() => goTab('profile')} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "12px 0", color: activeTab === 'profile' ? "#1a1c1c" : "#9aa0a6", background: "none", border: "none", cursor: "pointer", position: "relative" }}>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={activeTab === 'profile' ? 2.8 : 2.2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-            {activeTab === 'profile' && <div style={{ position: "absolute", bottom: 0, left: "20%", right: "20%", height: 2, borderRadius: 2, background: "#1a1c1c" }} />}
-          </button>
         </div>
       </div>
 
@@ -975,50 +975,6 @@ export default function ProfilePage() {
       {activeTab === 'archive' && (
         <div className="px-5 pt-5 flex flex-col gap-5">
 
-          {/* Streak */}
-          {(() => {
-            const TIERS = [
-              { min: 0,  label: "Beginner",    color: "#9aa0a6", grad: ["#f4f4f6", "#eaecee"] },
-              { min: 5,  label: "Starter",     color: "#2653d4", grad: ["#eef2ff", "#dbe4ff"] },
-              { min: 15, label: "Grinder",     color: "#059669", grad: ["#ecfdf5", "#d1fae5"] },
-              { min: 30, label: "Dedicated",   color: "#d97706", grad: ["#fffbeb", "#fde68a"] },
-              { min: 60, label: "Elite",       color: "#7c3aed", grad: ["#faf5ff", "#ede9fe"] },
-              { min: 100,label: "Legend",      color: "#0ea5e9", grad: ["#f0f9ff", "#bae6fd"] },
-            ];
-            const tier = [...TIERS].reverse().find(t => streak >= t.min) ?? TIERS[0];
-            const nextTier = TIERS[TIERS.indexOf(tier) + 1];
-            const message =
-              streak === 0   ? "Log your first check-in to start your streak." :
-              streak === 1   ? "Day one. Come back tomorrow to keep it going." :
-              !nextTier      ? "Legend status. You're in a league of your own." :
-              `${nextTier.min - streak} day${nextTier.min - streak === 1 ? "" : "s"} to ${nextTier.label}.`;
-            return (
-              <div style={{ borderRadius: "var(--r-lg)", overflow: "hidden", boxShadow: "var(--shadow-card)" }}>
-                {/* Hero */}
-                <div style={{ background: `linear-gradient(145deg, ${tier.grad[0]}, ${tier.grad[1]})`, padding: "32px 24px 24px", textAlign: "center" }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: tier.color }}>{tier.label}</span>
-                  <p style={{ margin: "8px 0 4px", fontSize: "clamp(56px, 14vw, 72px)", fontWeight: 800, color: tier.color, lineHeight: 1 }}>{streak}</p>
-                  <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: tier.color, opacity: 0.7 }}>day streak</p>
-                  <p style={{ margin: "14px 0 0", fontSize: 14, fontWeight: 500, color: "#4b5563", lineHeight: 1.5 }}>{message}</p>
-                </div>
-                {/* Tier ladder */}
-                <div style={{ background: "#fff", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 4 }}>
-                  {TIERS.map((t, i) => {
-                    const active = t.label === tier.label;
-                    const unlocked = streak >= t.min;
-                    return (
-                      <div key={t.label} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                        <div style={{ width: "100%", height: 3, borderRadius: 99, background: unlocked ? t.color : "#e5e7eb", opacity: unlocked ? 1 : 0.4 }} />
-                        <span style={{ fontSize: 9, fontWeight: active ? 800 : 600, color: active ? t.color : "#9aa0a6", textAlign: "center", lineHeight: 1.2, letterSpacing: "0.04em" }}>{t.label}</span>
-                        <span style={{ fontSize: 9, color: "#b0b8c1", fontWeight: 500 }}>{t.min === 0 ? "0" : `${t.min}d`}</span>
-                        {i < TIERS.length - 1 && <div style={{ position: "absolute" }} />}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })()}
 
           {/* Padel Journey */}
           <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
@@ -1153,18 +1109,18 @@ export default function ProfilePage() {
                     >
                       {/* Dot */}
                       <div style={{
-                        width: isCur ? 22 : 16,
-                        height: isCur ? 22 : 16,
+                        width: isCur ? 32 : 16,
+                        height: isCur ? 32 : 16,
                         borderRadius: "50%",
                         background: dotColor,
                         flexShrink: 0,
-                        boxShadow: isCur ? `0 0 0 6px ${s.color}28` : "none",
+                        boxShadow: isCur ? `0 0 0 8px ${s.color}28` : "none",
                       }} />
                       {/* Info below dot */}
                       <div style={{ textAlign: "center" }}>
-                        <p style={{ margin: 0, fontSize: isCur ? 17 : 15, fontWeight: isCur ? 800 : 600, color: isPast ? "#9ca3af" : "#1a1c1c", lineHeight: 1.2 }}>{s.title}</p>
-                        <span style={{ fontSize: 13, fontWeight: 500, color: isPast ? "#c4c7c7" : "#8a9096" }}>{s.time}</span>
-                        {s.subtitle && isCur && <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6b7480", lineHeight: 1.4 }}>{s.subtitle}</p>}
+                        <p style={{ margin: 0, fontSize: isCur ? 22 : 15, fontWeight: isCur ? 800 : 600, color: isPast ? "#9ca3af" : isCur ? "#1a1c1c" : "#6b7480", lineHeight: 1.2 }}>{s.title}</p>
+                        <span style={{ fontSize: isCur ? 15 : 13, fontWeight: 500, color: isPast ? "#c4c7c7" : isCur ? "#8a9096" : "#b0b5ba" }}>{s.time}</span>
+                        {s.subtitle && isCur && <p style={{ margin: "4px 0 0", fontSize: 14, color: "#6b7480", lineHeight: 1.4 }}>{s.subtitle}</p>}
                       </div>
                     </div>
                   </React.Fragment>
@@ -1283,6 +1239,49 @@ export default function ProfilePage() {
           </button>
           </>)}
 
+          {/* Streak */}
+          {(() => {
+            const TIERS = [
+              { min: 0,  label: "Beginner",  color: "#9aa0a6", grad: ["#f4f4f6", "#eaecee"] },
+              { min: 5,  label: "Starter",   color: "#2653d4", grad: ["#eef2ff", "#dbe4ff"] },
+              { min: 15, label: "Grinder",   color: "#059669", grad: ["#ecfdf5", "#d1fae5"] },
+              { min: 30, label: "Dedicated", color: "#d97706", grad: ["#fffbeb", "#fde68a"] },
+              { min: 60, label: "Elite",     color: "#7c3aed", grad: ["#faf5ff", "#ede9fe"] },
+              { min: 100,label: "Legend",    color: "#0ea5e9", grad: ["#f0f9ff", "#bae6fd"] },
+            ];
+            const tier = [...TIERS].reverse().find(t => streak >= t.min) ?? TIERS[0];
+            const nextTier = TIERS[TIERS.indexOf(tier) + 1];
+            const message =
+              streak === 0  ? "Log your first check-in to start your streak." :
+              streak === 1  ? "Day one. Come back tomorrow to keep it going." :
+              !nextTier     ? "Legend status. You're in a league of your own." :
+              `${nextTier.min - streak} day${nextTier.min - streak === 1 ? "" : "s"} to ${nextTier.label}.`;
+            return (
+              <div style={{ borderRadius: "var(--r-lg)", overflow: "hidden", boxShadow: "var(--shadow-card)" }}>
+                <div style={{ background: `linear-gradient(145deg, ${tier.grad[0]}, ${tier.grad[1]})`, padding: "32px 24px 24px", textAlign: "center" }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: tier.color }}>{tier.label}</span>
+                  <p style={{ margin: "8px 0 4px", fontSize: "clamp(56px, 14vw, 72px)", fontWeight: 800, color: tier.color, lineHeight: 1 }}>{streak}</p>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: tier.color, opacity: 0.7 }}>day streak</p>
+                  <p style={{ margin: "14px 0 0", fontSize: 14, fontWeight: 500, color: "#4b5563", lineHeight: 1.5 }}>{message}</p>
+                </div>
+                <div style={{ background: "#fff", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 4 }}>
+                  {TIERS.map((t, i) => {
+                    const active = t.label === tier.label;
+                    const unlocked = streak >= t.min;
+                    return (
+                      <div key={t.label} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                        <div style={{ width: "100%", height: 3, borderRadius: 99, background: unlocked ? t.color : "#e5e7eb", opacity: unlocked ? 1 : 0.4 }} />
+                        <span style={{ fontSize: 9, fontWeight: active ? 800 : 600, color: active ? t.color : "#9aa0a6", textAlign: "center", lineHeight: 1.2, letterSpacing: "0.04em" }}>{t.label}</span>
+                        <span style={{ fontSize: 9, color: "#b0b8c1", fontWeight: 500 }}>{t.min === 0 ? "0" : `${t.min}d`}</span>
+                        {i < TIERS.length - 1 && <div style={{ position: "absolute" }} />}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
           {/* ── Progress content ─────────────────────────────────────────── */}
           {(() => {
             const last30Dates = Array.from({ length: 30 }, (_, i) => {
@@ -1361,25 +1360,6 @@ export default function ProfilePage() {
 
             return (
               <>
-                <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)", display: "flex", flexDirection: "column", gap: 14 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 12, height: 12, borderRadius: "50%", background: rdotColor, flexShrink: 0 }} />
-                    <span style={{ fontSize: 16, fontWeight: 800, color: "#1a1c1c" }}>{r?.label ?? "Manage"}</span>
-                    {r?.limiter && <span style={{ fontSize: 13, color: "#6b7480", fontWeight: 500 }}>· {r.limiter} is your limiter</span>}
-                  </div>
-                  {r && r.actions.length > 0 && (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", margin: 0 }}>Today&apos;s adjustments</p>
-                      {r.actions.slice(0, 3).map((a, i) => (
-                        <div key={i} style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                          <div style={{ width: 4, height: 4, borderRadius: "50%", background: rdotColor, flexShrink: 0, marginTop: 7 }} />
-                          <span style={{ fontSize: 13, color: "#3a4040", lineHeight: 1.5 }}>{a}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
                 <div style={{ background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)" }}>
                   <p style={{ margin: "0 0 12px", fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>30-day trend</p>
                   <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
