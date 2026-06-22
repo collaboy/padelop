@@ -239,21 +239,28 @@ export default function Fab() {
                   </div>
                 </div>
 
-                {/* Home + My Profile */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, paddingTop: 0, marginTop: -4 }}>
+                {/* Home + My Profile + Settings */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, paddingTop: 0, marginTop: -4 }}>
                   <button
                     onClick={() => router.push("/home8")}
                     style={{ background: "#eef2ff", border: "none", borderRadius: 14, padding: "12px 8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, aspectRatio: "1" }}
                   >
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
+                  </button>
+                  <button
+                    onClick={() => { closeAll(); router.push("/settings"); }}
+                    style={{ background: "#eef2ff", border: "none", borderRadius: 14, padding: "12px 8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, aspectRatio: "1" }}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Settings</span>
                   </button>
                   <button
                     onClick={() => router.push("/profile")}
                     style={{ background: "#eef2ff", border: "none", borderRadius: 14, padding: "12px 8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, aspectRatio: "1" }}
                   >
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>My Profile</span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>My Profile</span>
                   </button>
                 </div>
 

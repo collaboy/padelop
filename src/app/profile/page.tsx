@@ -725,6 +725,7 @@ export default function ProfilePage() {
   }, [todayMeals, nextMatch]);
 
   const [profileOpen, setProfileOpen] = useState(false);
+  const [profileTabEditOpen, setProfileTabEditOpen] = useState(false);
   const [gearEditOpen, setGearEditOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [racketName, setRacketName] = useState("Wilson Carbon Pro v2");
@@ -932,132 +933,6 @@ export default function ProfilePage() {
 
   return (
     <div className="w-full pb-20" style={{ background: "#fff" }}>
-
-      {/* ── Profile Header (always visible) ─────────────────────────────── */}
-      <div className="flex flex-col items-center text-center gap-2">
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "16px 20px 0" }}>
-          <Link href="/home8" style={{ width: 44, height: 44, borderRadius: "50%", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--c-text-sub)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/>
-              <path d="M9 21V12h6v9"/>
-            </svg>
-          </Link>
-
-          {/* Avatar center */}
-          <button onClick={() => setProfileOpen(o => !o)} className="active:opacity-70 transition-opacity" style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "inline-block" }}>
-            <div style={{ width: 44, height: 44, borderRadius: "50%", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "3px solid #fff", background: profile.avatar ? "transparent" : "var(--c-blue)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {profile.avatar ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={profile.avatar} alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              ) : (
-                <span className="t-stat" style={{ color: "#fff" }}>
-                  {profile.name ? profile.name.trim().split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) : "?"}
-                </span>
-              )}
-            </div>
-          </button>
-
-          {/* Settings right */}
-          <Link href="/settings" style={{ width: 44, height: 44, borderRadius: "50%", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--c-text-dim)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-            </svg>
-          </Link>
-        </div>
-
-        {profileOpen && (
-          <div style={{ width: "100%", background: "#fff", borderRadius: "var(--r-lg)", padding: "20px", display: "flex", flexDirection: "column", gap: "20px", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-line)", textAlign: "left" }}>
-            <label htmlFor="avatar-upload" className="cursor-pointer flex items-center gap-3 active:opacity-70 transition-opacity">
-              <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#f0f4ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--c-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                </svg>
-              </div>
-              <span className="t-ui" style={{ color: "var(--c-blue)" }}>Change Photo</span>
-              <input id="avatar-upload" type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
-            </label>
-            <div>
-              <p className="t-label text-c-hint mb-2">Your name</p>
-              <input type="text" value={profile.name} onChange={e => setField("name", e.target.value)} placeholder="e.g. Eddie"
-                className="t-ui w-full px-4 py-3 rounded-2xl border-2 border-c-line text-c-text outline-none focus:border-c-blue transition-colors bg-c-bg-input focus:bg-white" />
-            </div>
-            <div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
-                <p className="t-label text-c-hint">Padel level</p>
-                <span className="t-heading" style={{ color: profile.level ? "var(--c-blue)" : "var(--c-disabled)", lineHeight: 1 }}>{profile.level || "—"}</span>
-              </div>
-              <input type="range" min={0} max={LEVELS.length - 1} step={1}
-                value={LEVELS.indexOf(profile.level) >= 0 ? LEVELS.indexOf(profile.level) : 0}
-                onChange={e => setField("level", LEVELS[parseInt(e.target.value)])}
-                className="w-full" style={{ accentColor: "var(--c-blue)", height: 4, cursor: "pointer" }} />
-              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-                <span className="t-tag font-medium" style={{ color: "#b0b8c1" }}>1.0</span>
-                <span className="t-tag font-medium" style={{ color: "#b0b8c1" }}>5.0</span>
-              </div>
-            </div>
-            <div>
-              <p className="t-label text-c-hint mb-2">Preferred position</p>
-              <div className="flex gap-2">
-                {POSITIONS.map(pos => {
-                  const sel = profile.position === pos;
-                  return (
-                    <button key={pos} onClick={() => setField("position", pos)}
-                      className="t-caption flex-1 py-2 rounded-xl border-2 font-bold transition-all active:scale-95"
-                      style={{ borderColor: sel ? "var(--c-blue)" : "var(--c-line)", background: sel ? "var(--c-blue-tint)" : "var(--c-bg-input)", color: sel ? "var(--c-blue)" : "var(--c-text-sub)" }}>
-                      {pos}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <div>
-              <p className="t-label text-c-hint mb-2">Dominant hand</p>
-              <div className="flex gap-2">
-                {HANDS.map(h => {
-                  const sel = profile.hand === h;
-                  return (
-                    <button key={h} onClick={() => setField("hand", h)}
-                      className="t-body-sm flex-1 py-2 rounded-xl border-2 font-bold transition-all active:scale-95"
-                      style={{ borderColor: sel ? "var(--c-blue)" : "var(--c-line)", background: sel ? "var(--c-blue-tint)" : "var(--c-bg-input)", color: sel ? "var(--c-blue)" : "var(--c-text-sub)" }}>
-                      {h}-handed
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <button disabled={!canSave} onClick={() => { save(); setProfileOpen(false); }}
-              className="t-ui w-full py-3.5 rounded-2xl font-bold transition-all active:scale-[0.98]"
-              style={{ background: saved ? "var(--c-green)" : canSave ? "var(--c-blue)" : "var(--c-line)", color: canSave ? "#fff" : "#b0b3b3" }}>
-              {saved ? "Saved ✓" : "Save profile"}
-            </button>
-          </div>
-        )}
-
-        <div>
-          <h1 style={{ fontSize: 17, fontWeight: 700, color: "var(--c-text)", margin: 0 }}>{profile.name || "Add your name"}</h1>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginTop: "4px" }}>
-            {profile.level && <span className="t-caption" style={{ background: "var(--c-blue-light)", color: "var(--c-blue)", padding: "2px 12px", borderRadius: "var(--r-pill)" }}>Level {profile.level}</span>}
-            {profile.position && <span className="t-caption" style={{ color: "#444748" }}>• {profile.position}</span>}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Daily Check-in + Focus Today (header area) ───────────────────── */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 12, padding: "8px 20px 0px" }}>
-        {checkinDone === false && (
-          <button onClick={() => { setLogTab("checkin"); setLogSheetOpen(true); }}
-            style={{ width: "100%", background: "#f5f0ff", border: "none", borderRadius: "var(--r-lg)", padding: "18px 20px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, textAlign: "left" }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-            <div style={{ flex: 1 }}>
-              <p className="t-body" style={{ fontWeight: 700, color: "#1a1c1c", margin: 0 }}>Daily Check-in</p>
-              <p className="t-body-sm" style={{ color: "#7c3aed", margin: "2px 0 0" }}>Log how you feel today</p>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0b8c1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-        )}
-
-      </div>
 
       {/* ── Tab bar ──────────────────────────────────────────────────────── */}
       <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#fff", borderBottom: "1px solid #f0f0f0", marginTop: 8 }}>
@@ -1483,19 +1358,25 @@ export default function ProfilePage() {
       {/* ── Tab: Profile ─────────────────────────────────────────────────── */}
       {activeTab === 'profile' && (
         <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
-          {/* Profile header row */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 44, height: 44, borderRadius: "50%", overflow: "hidden", flexShrink: 0, background: profile.avatar ? "transparent" : "var(--c-blue)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {profile.avatar
-                ? <img src={profile.avatar} alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                : <span style={{ fontSize: 16, fontWeight: 700, color: "#fff" }}>{profile.name ? profile.name.trim().split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2) : "?"}</span>
-              }
+          {/* Profile header centered — tap photo to toggle edit */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+            <button onClick={() => setProfileTabEditOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, borderRadius: "50%" }}>
+              <div style={{ width: 44, height: 44, borderRadius: "50%", overflow: "hidden", background: profile.avatar ? "transparent" : "var(--c-blue)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {profile.avatar
+                  ? <img src={profile.avatar} alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  : <span style={{ fontSize: 16, fontWeight: 700, color: "#fff" }}>{profile.name ? profile.name.trim().split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2) : "?"}</span>
+                }
+              </div>
+            </button>
+            <span style={{ fontSize: 15, fontWeight: 700, color: "var(--c-text)" }}>{profile.name || "Add your name"}</span>
+            {/* Player details always visible below name */}
+            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", justifyContent: "center" }}>
+              {profile.level && <span style={{ fontSize: 12, fontWeight: 700, background: "var(--c-blue-tint)", color: "var(--c-blue)", padding: "2px 10px", borderRadius: 999 }}>Level {profile.level}</span>}
+              {profile.position && <span style={{ fontSize: 12, fontWeight: 600, color: "var(--c-text-sub)" }}>{profile.position}</span>}
+              {profile.hand && <span style={{ fontSize: 12, fontWeight: 600, color: "var(--c-text-sub)" }}>{profile.hand}-handed</span>}
             </div>
-            <span style={{ fontSize: 17, fontWeight: 700, color: "var(--c-text)", flex: 1 }}>{profile.name || "Add your name"}</span>
-            <Link href="/settings" style={{ width: 44, height: 44, borderRadius: "50%", background: "var(--c-bg)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--c-text-sub)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            </Link>
           </div>
+          {profileTabEditOpen && (<>
           <label htmlFor="avatar-upload2" className="cursor-pointer flex items-center gap-3 active:opacity-70 transition-opacity">
             <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#f0f4ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--c-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -1552,11 +1433,12 @@ export default function ProfilePage() {
               })}
             </div>
           </div>
-          <button disabled={!canSave} onClick={() => { save(); }}
+          <button disabled={!canSave} onClick={() => { save(); setProfileTabEditOpen(false); }}
             className="t-ui w-full py-3.5 rounded-2xl font-bold transition-all active:scale-[0.98]"
             style={{ background: saved ? "var(--c-green)" : canSave ? "var(--c-blue)" : "var(--c-line)", color: canSave ? "#fff" : "#b0b3b3" }}>
             {saved ? "Saved ✓" : "Save profile"}
           </button>
+          </>)}
         </div>
       )}
 
