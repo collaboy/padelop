@@ -1475,12 +1475,12 @@ export default function Home8() {
             closeSheet();
           };
           return (
-            <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" onClick={closeSheet}>
+            <div className="fixed inset-0 z-[200] flex items-start justify-center px-5" style={{ paddingTop: "10dvh", paddingBottom: "10dvh" }} onClick={closeSheet}>
               <style>{`@keyframes miScaleIn{from{transform:scale(0.95);opacity:0}to{transform:scale(1);opacity:1}}`}</style>
               <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
               <div
                 className="relative w-full bg-white rounded-[28px] flex flex-col overflow-hidden"
-                style={{ animation: "miScaleIn 0.2s cubic-bezier(0.22,1,0.36,1)", height: "80dvh" }}
+                style={{ animation: "miScaleIn 0.2s cubic-bezier(0.22,1,0.36,1)", maxHeight: "80dvh" }}
                 onClick={e => e.stopPropagation()}
               >
                 {/* Shared hidden file input for both edit and add upload */}
