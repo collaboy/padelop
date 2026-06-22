@@ -1089,8 +1089,8 @@ export default function ProfilePage() {
             const greetingWord = h < 12 ? "Good morning," : h < 18 ? "Good afternoon," : "Good evening,";
             const firstName = profile.name ? profile.name.trim().split(" ")[0] : "";
             return (
-              <div style={{ background: "#fff", borderRadius: 18, padding: "20px 24px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", textAlign: "center" }}>
-                <button onClick={() => setProfileTabEditOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "center", width: "100%" }}>
+              <div style={{ background: "#fff", borderRadius: 18, padding: "20px 24px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", textAlign: "left" }}>
+                <button onClick={() => setProfileTabEditOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left", width: "100%" }}>
                   <p style={{ margin: 0, fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.15 }}>
                     {firstName ? <>{greetingWord}<br />{firstName}.</> : <>{greetingWord}</>}
                   </p>
@@ -1166,7 +1166,7 @@ export default function ProfilePage() {
 
           {/* Info section */}
           <div>
-            <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px", textAlign: "center" }}>Info</p>
+            <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px" }}>Info</p>
             <div style={{ background: "#fff", borderRadius: "var(--r-md)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
               <button
                 onClick={() => { setProfileInsightsOpen(o => !o); setProfileMatchesOpen(false); }}
