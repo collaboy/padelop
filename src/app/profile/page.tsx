@@ -21,8 +21,8 @@ import { getScheduleData, SCHEDULE_DETAILS, DRILL_LIBRARY, DEFAULT_DRILL, getTop
 
 const PROFILE_KEY = "padelop:profile";
 
-type Profile = { name: string; level: string; position: string; hand: string; avatar: string };
-const EMPTY: Profile = { name: "", level: "", position: "", hand: "", avatar: "" };
+type Profile = { name: string; level: string; position: string; hand: string; avatar: string; playingSince: string };
+const EMPTY: Profile = { name: "", level: "", position: "", hand: "", avatar: "", playingSince: "" };
 const LEVELS    = ["1.0","1.5","2.0","2.5","3.0","3.5","4.0","4.5","5.0"];
 const POSITIONS = ["Left wall","Right wall","Both"];
 const HANDS     = ["Right","Left"];
@@ -1078,6 +1078,11 @@ export default function ProfilePage() {
               className="t-ui w-full px-4 py-3 rounded-2xl border-2 border-c-line text-c-text outline-none focus:border-c-blue transition-colors bg-c-bg-input focus:bg-white" />
           </div>
           <div>
+            <p className="t-label text-c-hint mb-2">Playing since</p>
+            <input type="month" value={profile.playingSince} onChange={e => setField("playingSince", e.target.value)}
+              className="t-ui w-full px-4 py-3 rounded-2xl border-2 border-c-line text-c-text outline-none focus:border-c-blue transition-colors bg-c-bg-input focus:bg-white" />
+          </div>
+          <div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
               <p className="t-label text-c-hint">Padel level</p>
               <span className="t-heading" style={{ color: profile.level ? "var(--c-blue)" : "var(--c-disabled)", lineHeight: 1 }}>{profile.level || "—"}</span>
@@ -1312,8 +1317,12 @@ export default function ProfilePage() {
                   {/* Padel Journey */}
                   <div style={{ background: "#f8f9fa", borderRadius: "var(--r-lg)", padding: "20px", boxShadow: "var(--shadow-card)" }}>
                     <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 16px" }}>Padel Journey</p>
-                    {journeyStart && (
-                      <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 16px", fontWeight: 500 }}>Started {journeyStart}</p>
+                    {(profile.playingSince || journeyStart) && (
+                      <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 16px", fontWeight: 500 }}>
+                        Started {profile.playingSince
+                          ? new Date(profile.playingSince + "-01").toLocaleDateString("en-US", { month: "long", year: "numeric" })
+                          : journeyStart}
+                      </p>
                     )}
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                       {[
