@@ -1201,7 +1201,7 @@ export default function ProfilePage() {
             const insight = pool[idx];
             return (
               <div>
-                <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px" }}>Featured insight</p>
+                <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px" }}>Featured insights</p>
                 <button
                   onClick={() => setFeaturedIdx(i => (i + 1) % pool.length)}
                   style={{ width: "100%", background: "#fff", borderRadius: "var(--r-lg)", padding: "18px 20px", boxShadow: "var(--shadow-card)", border: "none", cursor: "pointer", textAlign: "left" }}
@@ -1221,60 +1221,6 @@ export default function ProfilePage() {
             );
           })()}
 
-          {/* 30-day trend */}
-          {(() => {
-            const last30Dates = Array.from({ length: 30 }, (_, i) => { const d = new Date(); d.setDate(d.getDate() - i); return d.toISOString().slice(0, 10); });
-            type CIHistoryEntry = { date: string; sleep: number; energy: number; hydration: number; stress: number };
-            const scoreHistory: ScoreSnapshot[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:score-history") || "[]"); } catch { return []; } })();
-            const ciHistory: CIHistoryEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:checkin-history") || "[]"); } catch { return []; } })();
-            const ciProxyScore = (c: CIHistoryEntry) => Math.max(65, Math.min(100, Math.round(65 + ((c.sleep + c.energy + c.stress + c.hydration - 12) / 8) * 35)));
-            const enrichedScores = last30Dates.map(date => {
-              const snap = scoreHistory.find(s => s.date === date);
-              if (snap) return { date, overall: snap.overall };
-              const ci = ciHistory.find(c => c.date === date);
-              if (ci) return { date, overall: ciProxyScore(ci) };
-              return null;
-            }).filter((x): x is { date: string; overall: number } => x !== null);
-            const sorted = [...enrichedScores].sort((a, b) => a.date.localeCompare(b.date));
-            const avg = (arr: number[]) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
-            const recentHalf = sorted.slice(Math.floor(sorted.length / 2));
-            const olderHalf  = sorted.slice(0, Math.floor(sorted.length / 2));
-            const recentAvg = avg(recentHalf.map(s => s.overall));
-            const olderAvg  = avg(olderHalf.map(s => s.overall));
-            const trendDelta = olderAvg > 0 ? ((recentAvg - olderAvg) / olderAvg) * 100 : 0;
-            const trendLabel = trendDelta > 3 ? "Improving" : trendDelta < -3 ? "Declining" : "Stable";
-            const trendColor = trendDelta > 3 ? "#16a34a" : trendDelta < -3 ? "#dc2626" : "#d97706";
-            const trendArrow = trendDelta > 3 ? "↑" : trendDelta < -3 ? "↓" : "→";
-            const hasData = enrichedScores.length >= 4;
-            const explanation = !hasData
-              ? "This tracks your overall wellbeing score across the last 30 days. Log your check-ins daily and we'll show you whether you're on an upward or downward trajectory."
-              : trendDelta > 3
-                ? `Your scores over the last 15 days are averaging ${Math.round(trendDelta)}% higher than the 15 days before that. You're building positive momentum — keep logging and maintaining your habits.`
-                : trendDelta < -3
-                  ? `Your scores over the last 15 days are averaging ${Math.abs(Math.round(trendDelta))}% lower than the 15 days before. This could be fatigue, stress, or inconsistent logging — check your recovery and wellbeing entries.`
-                  : `Your scores have been consistent over the last 30 days — no significant rise or fall. Consistency is good; focus on nudging one pillar (sleep, nutrition, or recovery) to push the trend upward.`;
-            return (
-              <div style={{ background: "#fff", borderRadius: "var(--r-lg)", overflow: "hidden", boxShadow: "var(--shadow-card)" }}>
-                <button onClick={() => setTrendOpen(o => !o)} style={{ width: "100%", padding: "18px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: "50%", background: `${trendColor}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <span style={{ fontSize: 22, lineHeight: 1, color: trendColor }}>{trendArrow}</span>
-                    </div>
-                    <div>
-                      <p style={{ margin: 0, fontSize: 16, fontWeight: 800, color: trendColor }}>{trendLabel}</p>
-                      <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9aa0a6", fontWeight: 500 }}>30-day trend</p>
-                    </div>
-                  </div>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: trendOpen ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
-                </button>
-                {trendOpen && (
-                  <div style={{ padding: "0 20px 20px", borderTop: "1px solid #f4f4f6" }}>
-                    <p style={{ margin: "16px 0 0", fontSize: 14, fontWeight: 500, color: "#4b5563", lineHeight: 1.65 }}>{explanation}</p>
-                  </div>
-                )}
-              </div>
-            );
-          })()}
 
           {/* Info section */}
           <div>
