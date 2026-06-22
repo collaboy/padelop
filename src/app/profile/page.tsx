@@ -1048,8 +1048,8 @@ export default function ProfilePage() {
       {activeTab === 'profile' && (
         <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
           {/* Profile header — greeting */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <button onClick={() => setProfileTabEditOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "center" }}>
+            <button onClick={() => setProfileTabEditOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "center" }}>
               <p style={{ margin: 0, fontSize: "clamp(24px, 6vw, 30px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1 }}>
                 {(() => {
                   const h = new Date().getHours();
