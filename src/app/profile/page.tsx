@@ -1047,23 +1047,18 @@ export default function ProfilePage() {
       {/* ── Tab: Profile ─────────────────────────────────────────────────── */}
       {activeTab === 'profile' && (
         <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
-          {/* Profile header centered — tap photo to toggle edit */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-            <button onClick={() => setProfileTabEditOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, borderRadius: "50%" }}>
-              <div style={{ width: 44, height: 44, borderRadius: "50%", overflow: "hidden", background: profile.avatar ? "transparent" : "var(--c-blue)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {profile.avatar
-                  ? <img src={profile.avatar} alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  : <span style={{ fontSize: 16, fontWeight: 700, color: "#fff" }}>{profile.name ? profile.name.trim().split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2) : "?"}</span>
-                }
-              </div>
+          {/* Profile header — greeting */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            <button onClick={() => setProfileTabEditOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, textAlign: "left" }}>
+              <p style={{ margin: 0, fontSize: "clamp(24px, 6vw, 30px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1 }}>
+                {(() => {
+                  const h = new Date().getHours();
+                  const greeting = h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+                  const firstName = profile.name ? profile.name.trim().split(" ")[0] : "";
+                  return firstName ? `${greeting}, ${firstName}.` : `${greeting}.`;
+                })()}
+              </p>
             </button>
-            <span style={{ fontSize: 15, fontWeight: 700, color: "var(--c-text)" }}>{profile.name || "Add your name"}</span>
-            {/* Player details always visible below name */}
-            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", justifyContent: "center" }}>
-              {profile.level && <span style={{ fontSize: 12, fontWeight: 700, background: "var(--c-blue-tint)", color: "var(--c-blue)", padding: "2px 10px", borderRadius: 999 }}>Level {profile.level}</span>}
-              {profile.position && <span style={{ fontSize: 12, fontWeight: 600, color: "var(--c-text-sub)" }}>{profile.position}</span>}
-              {profile.hand && <span style={{ fontSize: 12, fontWeight: 600, color: "var(--c-text-sub)" }}>{profile.hand}-handed</span>}
-            </div>
           </div>
           {profileTabEditOpen && (<>
           <label htmlFor="avatar-upload2" className="cursor-pointer flex items-center gap-3 active:opacity-70 transition-opacity">
