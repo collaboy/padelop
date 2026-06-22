@@ -1505,15 +1505,15 @@ export default function Home8() {
 
                   {/* MATCH INFO CARD */}
                   <div style={{ position: "relative", borderRadius: 24, overflow: "hidden" }}>
-                    {/* All content on solid blue */}
-                    <div style={{ background: "#2653d4", padding: "28px 20px 28px", position: "relative" }}>
+                    {/* All content on white */}
+                    <div style={{ background: "#fff", padding: "28px 20px 28px", position: "relative" }}>
                       {/* Edit icon */}
                       <button
                         onClick={() => {
                           if (matchInfoMode === 'edit') { setMatchInfoMode(null); }
                           else { const fresh = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); const src = fresh ?? match; setMatchForm({ date: src.date ?? '', time: src.time ?? '', club: src.club ?? src.location ?? '', court: src.court ?? '', p1: src.player_1 ?? src.players?.[0] ?? '', p2: src.player_2 ?? src.players?.[1] ?? '', p3: src.player_3 ?? src.players?.[2] ?? '', p4: src.player_4 ?? src.players?.[3] ?? '' }); setMatchInfoMode('edit'); setMatchInfoAddTab(null); }
                         }}
-                        style={{ position: "absolute", top: 14, right: 14, background: "rgba(255,255,255,0.15)", border: "none", cursor: "pointer", padding: 7, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.8)" }}
+                        style={{ position: "absolute", top: 14, right: 14, background: "#f4f4f6", border: "none", cursor: "pointer", padding: 7, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a5050" }}
                       >
                         {matchInfoMode === 'edit' ? (
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -1523,14 +1523,14 @@ export default function Home8() {
                       </button>
                       {/* Hero text */}
                       <div style={{ textAlign: "center", marginBottom: 6 }} onClick={closeSheet}>
-                        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)" }}>Next Match</span>
-                        <p style={{ margin: "6px 0 8px", fontSize: "clamp(32px, 8vw, 42px)", fontWeight: 800, color: "#fff", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{countdownLabel}</p>
-                        <span style={{ fontSize: 14, color: "rgba(255,255,255,0.65)", fontWeight: 500, lineHeight: 1 }}>{dateStr} · {match.time}</span>
+                        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4" }}>Next Match</span>
+                        <p style={{ margin: "6px 0 8px", fontSize: "clamp(32px, 8vw, 42px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{countdownLabel}</p>
+                        <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500, lineHeight: 1 }}>{dateStr} · {match.time}</span>
                       </div>
                       {/* Detail rows */}
                       <div style={{ display: "flex", flexDirection: "column", textAlign: "center", gap: 4 }}>
-                        {match.club && <span style={{ fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.55)", lineHeight: 1 }}>({match.club})</span>}
-                        {match.court && (() => { const n = match.court.match(/\d+/)?.[0]; return n ? <span style={{ fontSize: 17, fontWeight: 700, color: "rgba(255,255,255,0.9)", lineHeight: 1.4, marginTop: 2 }}>#{n}</span> : null; })()}
+                        {match.club && <span style={{ fontSize: 13, fontWeight: 500, color: "#8a9096", lineHeight: 1 }}>({match.club})</span>}
+                        {match.court && (() => { const n = match.court.match(/\d+/)?.[0]; return n ? <span style={{ fontSize: 17, fontWeight: 700, color: "#1a1c1c", lineHeight: 1.4, marginTop: 2 }}>#{n}</span> : null; })()}
                       </div>
 
                     {/* Inline edit form — expands below info rows */}
