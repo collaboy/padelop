@@ -1061,7 +1061,10 @@ export default function ProfilePage() {
 
       {/* ── Tab bar ──────────────────────────────────────────────────────── */}
       <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#fff", borderBottom: "1px solid #f0f0f0", marginTop: 8 }}>
-        <div style={{ display: "flex", padding: "0 20px" }}>
+        <div style={{ display: "flex", alignItems: "center", padding: "0 20px" }}>
+          <Link href="/home8" style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "12px 12px 12px 0", color: "#9aa0a6", flexShrink: 0 }}>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+          </Link>
           {TABS.map(tab => (
             <button
               key={tab.key}
@@ -1074,6 +1077,9 @@ export default function ProfilePage() {
               )}
             </button>
           ))}
+          <button onClick={() => setProfileOpen(o => !o)} style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "12px 0 12px 12px", color: "#9aa0a6", background: "none", border: "none", cursor: "pointer", flexShrink: 0 }}>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          </button>
         </div>
       </div>
 
