@@ -524,6 +524,33 @@ export default function ProfilePage() {
   }
 
   function loadAll() {
+    // Seal yesterday's schedule completion into padelop:schedule-history
+    try {
+      const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+      const history: { date: string; dayType: string; total: number; completed: number; pct: number; titles: string[] }[] =
+        JSON.parse(localStorage.getItem("padelop:schedule-history") || "[]");
+      if (!history.some(h => h.date === yesterday)) {
+        const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
+        const doneTitles = sd[yesterday] ?? [];
+        let yDayType: "match" | "recovery" | "training" = "training";
+        try {
+          const nm = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
+          if (nm?.date === yesterday) { yDayType = "match"; }
+          else {
+            const dayBefore = new Date(Date.now() - 2 * 864e5).toISOString().slice(0, 10);
+            const revs: { ts?: string }[] = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+            if (revs.some(r => r.ts?.slice(0, 10) === dayBefore)) yDayType = "recovery";
+          }
+        } catch {}
+        const ySched = getScheduleData(yDayType, null, getTopNeedsWorkTag()).schedule;
+        const total = ySched.length;
+        const completed = ySched.filter(s => doneTitles.includes(s.title)).length;
+        const pct = total ? Math.round((completed / total) * 100) : 0;
+        history.unshift({ date: yesterday, dayType: yDayType, total, completed, pct, titles: doneTitles });
+        localStorage.setItem("padelop:schedule-history", JSON.stringify(history.slice(0, 90)));
+      }
+    } catch {}
+
     // Profile
     try {
       const raw = localStorage.getItem(PROFILE_KEY);
