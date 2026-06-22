@@ -1396,11 +1396,16 @@ export default function ProfilePage() {
         <div className="pt-5 flex flex-col gap-5">
 
           {/* Day type card */}
-          <div style={{ margin: "0 20px", borderRadius: "var(--r-lg)", background: dayColor, padding: "32px 24px", textAlign: "center", boxShadow: "var(--shadow-card)" }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.7)" }}>Today</span>
-            <p style={{ margin: "8px 0 6px", fontSize: "clamp(32px, 8vw, 40px)", fontWeight: 800, color: "#fff", lineHeight: 1.1 }}>{dayLabel}</p>
-            <span style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", fontWeight: 500 }}>{now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</span>
-          </div>
+          {(() => {
+            const dayGrad = dayType === "match" ? ["#eef2ff", "#dbe4ff"] : dayType === "recovery" ? ["#faf5ff", "#ede9fe"] : ["#ecfdf5", "#d1fae5"];
+            return (
+              <div style={{ margin: "0 20px", borderRadius: "var(--r-lg)", background: `linear-gradient(145deg, ${dayGrad[0]}, ${dayGrad[1]})`, padding: "32px 24px", textAlign: "center", boxShadow: "var(--shadow-card)" }}>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: dayColor }}>Today</span>
+                <p style={{ margin: "8px 0 6px", fontSize: "clamp(32px, 8vw, 40px)", fontWeight: 800, color: dayColor, lineHeight: 1.1 }}>{dayLabel}</p>
+                <span style={{ fontSize: 13, color: "#8a9096", fontWeight: 500 }}>{now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}</span>
+              </div>
+            );
+          })()}
 
           {/* Recommendations card */}
           <div style={{ margin: "0 20px", borderRadius: "var(--r-lg)", background: "#fff", padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12, boxShadow: "var(--shadow-card)" }}>
