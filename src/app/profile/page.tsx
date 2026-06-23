@@ -1109,32 +1109,23 @@ export default function ProfilePage() {
             const sc = (e: { status: PillarStatus }) => statusScore(e.status);
             const best  = pillarEntries.reduce((a, b) => sc(b) > sc(a) ? b : a);
             const worst = pillarEntries.reduce((a, b) => sc(b) < sc(a) ? b : a);
-            const avgScore = pillarEntries.reduce((sum, e) => sum + sc(e), 0) / pillarEntries.length;
-            const overallBand = avgScore >= 2.5 ? "strong" : avgScore >= 1.75 ? "good" : avgScore >= 1 ? "steady" : "low";
-            const topImprove = (() => {
-              const counts: Record<string, number> = {};
-              reviews.flatMap(r => r.improved ?? []).forEach(t => { counts[t] = (counts[t] ?? 0) + 1; });
-              return Object.entries(counts).sort((a, b) => b[1] - a[1])[0] ?? null;
-            })();
-            const opening = overallBand === "strong"
-              ? "You're in great shape right now — all your pillars are firing well."
-              : overallBand === "good"
-              ? "You're in good form overall — your daily habits are holding up."
-              : overallBand === "steady"
-              ? "Your form is steady — a few adjustments could push you into a stronger zone."
-              : "You're at a low point right now — the priority is recovery and consistency.";
-            const improveActions: Record<string, string> = {
-              recovery:  "Prioritise sleep quality and limit late nights.",
-              nutrition:  "Tighten up your hydration and post-session meals.",
-              training:  "Add a structured session this week, even a short one.",
-              wellbeing: "Take a moment to check in on your energy and stress levels.",
+            const focusActions: Record<string, string> = {
+              recovery:  "Sleep is your lever — prioritise it tonight.",
+              nutrition: "Eat and hydrate well today; your body needs the fuel.",
+              training:  "Get a session in this week, even a short one.",
+              wellbeing: "Check your stress and energy before training today.",
             };
-            const workingClause = sc(best) >= 2 ? ` Your ${best.key} is your strongest area right now — keep protecting that.` : "";
-            const improveClause = sc(worst) < 2 ? ` Your ${worst.key} is the area to focus on — ${improveActions[worst.key]}` : "";
-            const matchClause = topImprove
-              ? ` On court, "${topImprove[0]}" is the skill you've flagged most for improvement — that's your clearest path to a stronger game.`
-              : reviews.length > 0 ? ` You've played ${reviews.length} match${reviews.length > 1 ? "es" : ""} — keep logging your results to unlock deeper insights.` : "";
-            const palaMessage = opening + workingClause + improveClause;
+            const worstReason = pillarStates[worst.key as keyof PillarStates].reason;
+            let palaMessage = "";
+            if (sc(worst) < 2) {
+              palaMessage = `${focusActions[worst.key]}`;
+              if (worstReason && sc(worst) === 0) palaMessage += ` (${worstReason.toLowerCase()})`;
+              if (sc(best) >= 3 && best.key !== worst.key) palaMessage += ` Your ${best.key} is solid — keep it up.`;
+            } else if (sc(best) >= 3) {
+              palaMessage = `Your ${best.key} is your strongest pillar right now — keep it up.`;
+            } else {
+              palaMessage = "Log your check-in to see today's readiness.";
+            }
             const h = new Date().getHours();
             const greetingWord = h < 12 ? "Good morning," : h < 18 ? "Good afternoon," : "Good evening,";
             const firstName = profile.name ? profile.name.trim().split(" ")[0] : "";
