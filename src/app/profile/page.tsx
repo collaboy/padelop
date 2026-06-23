@@ -1097,7 +1097,7 @@ export default function ProfilePage() {
       {activeTab === 'profile' && (
         <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
 
-          {/* Profile header — greeting + Pala message card */}
+          {/* Day header card */}
           {(() => {
             const statusScore = (s: PillarStatus) => s === "good" ? 3 : s === "ok" ? 2 : s === "low" ? 1 : 0;
             const pillarEntries = [
@@ -1110,36 +1110,26 @@ export default function ProfilePage() {
             const best  = pillarEntries.reduce((a, b) => sc(b) > sc(a) ? b : a);
             const worst = pillarEntries.reduce((a, b) => sc(b) < sc(a) ? b : a);
             const focusActions: Record<string, string> = {
-              recovery:  "Sleep is your lever — prioritise it tonight.",
-              nutrition: "Eat and hydrate well today; your body needs the fuel.",
-              training:  "Get a session in this week, even a short one.",
-              wellbeing: "Check your stress and energy before training today.",
+              recovery:  "Your recovery is the area to focus on right now — sleep is your biggest lever. Prioritise rest tonight and protect your sleep window.",
+              nutrition: "Your nutrition needs attention today. Make sure you're eating and hydrating well; your body performs how you fuel it.",
+              training:  "It's been a while since your last training session. Even a short drill block today keeps the momentum going.",
+              wellbeing: "Your energy or stress levels look off. Take stock of how you're feeling before your next session.",
             };
-            const worstReason = pillarStates[worst.key as keyof PillarStates].reason;
             let palaMessage = "";
             if (sc(worst) < 2) {
-              palaMessage = `${focusActions[worst.key]}`;
-              if (worstReason && sc(worst) === 0) palaMessage += ` (${worstReason.toLowerCase()})`;
-              if (sc(best) >= 3 && best.key !== worst.key) palaMessage += ` Your ${best.key} is solid — keep it up.`;
+              palaMessage = focusActions[worst.key];
+              if (sc(best) >= 3 && best.key !== worst.key) palaMessage += ` Your ${best.key} is solid — keep that going.`;
             } else if (sc(best) >= 3) {
-              palaMessage = `Your ${best.key} is your strongest pillar right now — keep it up.`;
+              palaMessage = `Your ${best.key} is your strongest pillar right now — that's a real asset. Keep the habits that are working and let them carry the rest.`;
             } else {
-              palaMessage = "Log your check-in to see today's readiness.";
+              palaMessage = "All your pillars are tracking around average. Consistency across recovery, nutrition, and training is what moves the needle.";
             }
-            const h = new Date().getHours();
-            const greetingWord = h < 12 ? "Good morning," : h < 18 ? "Good afternoon," : "Good evening,";
-            const firstName = profile.name ? profile.name.trim().split(" ")[0] : "";
             return (
               <div style={{ background: "#fff", borderRadius: 18, padding: "20px 24px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", textAlign: "left" }}>
-                <p style={{ margin: 0, fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.15 }}>
-                  {firstName ? <>{greetingWord}<br />{firstName}.</> : <>{greetingWord}</>}
-                </p>
-                <div style={{ margin: "18px 0 16px", paddingTop: 18, borderTop: "1px solid #f0f2f5" }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: dayColor }}>Today</span>
-                  <p style={{ margin: "4px 0 4px", fontSize: "clamp(28px, 7vw, 36px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{dayLabel}</p>
-                  <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500 }}>{new Date().toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" })}</span>
-                </div>
-                <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "#5a6270", lineHeight: 1.6 }}>{palaMessage}</p>
+                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: dayColor }}>Today</span>
+                <p style={{ margin: "4px 0 4px", fontSize: "clamp(28px, 7vw, 36px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{dayLabel}</p>
+                <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500 }}>{new Date().toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" })}</span>
+                <p style={{ margin: "14px 0 0", fontSize: 14, fontWeight: 500, color: "#5a6270", lineHeight: 1.6 }}>{palaMessage}</p>
               </div>
             );
           })()}
@@ -1153,34 +1143,46 @@ export default function ProfilePage() {
             const pct = Math.round((done / total) * 100);
             const barColor = pct === 100 ? "var(--c-green)" : pct >= 50 ? "var(--c-blue)" : "var(--c-orange)";
             return (
-              <div style={{ background: "#fff", borderRadius: 18, padding: "18px 20px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
-                <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 700, color: "#1a1c1c" }}>
-                  {pct === 100 ? "Today's Scheduled Tasks ✓" : `Today's Scheduled Tasks — ${done} of ${total} done`}
-                </p>
-                <div style={{ height: 5, borderRadius: 3, background: "#f0f2f5", overflow: "hidden", marginBottom: 16 }}>
-                  <div style={{ height: "100%", width: `${pct}%`, borderRadius: 3, background: barColor, transition: "width 0.4s" }} />
+              <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                <button
+                  onClick={() => setSchedOpen(o => !o)}
+                  style={{ width: "100%", padding: "18px 20px", display: "flex", alignItems: "center", gap: 10, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round" style={{ transform: schedOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c", flex: 1 }}>
+                    {pct === 100 ? "Today's Scheduled Tasks ✓" : `Today's Scheduled Tasks — ${done} of ${total} done`}
+                  </span>
+                </button>
+                <div style={{ padding: "0 20px", marginBottom: schedOpen ? 16 : 18 }}>
+                  <div style={{ height: 5, borderRadius: 3, background: "#f0f2f5", overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${pct}%`, borderRadius: 3, background: barColor, transition: "width 0.4s" }} />
+                  </div>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                  {schedule.map(item => {
-                    const isDone = doneTitles.includes(item.title);
-                    return (
-                      <button
-                        key={item.title}
-                        onClick={() => toggleSchedDone(todayKey, item.title)}
-                        style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", background: "none", border: "none", cursor: "pointer", textAlign: "left", borderBottom: "1px solid #f4f4f6" }}
-                      >
-                        <div style={{ width: 22, height: 22, borderRadius: 6, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s" }}>
-                          {isDone && <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none" }}>{item.title}</p>
-                          {item.subtitle && <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9aa0a6", fontWeight: 500 }}>{item.subtitle}</p>}
-                        </div>
-                        <span style={{ fontSize: 12, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
-                      </button>
-                    );
-                  })}
-                </div>
+                {schedOpen && (
+                  <div style={{ padding: "0 20px 18px" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                      {schedule.map(item => {
+                        const isDone = doneTitles.includes(item.title);
+                        return (
+                          <button
+                            key={item.title}
+                            onClick={() => toggleSchedDone(todayKey, item.title)}
+                            style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", background: "none", border: "none", cursor: "pointer", textAlign: "left", borderBottom: "1px solid #f4f4f6" }}
+                          >
+                            <div style={{ width: 22, height: 22, borderRadius: 6, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s" }}>
+                              {isDone && <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none" }}>{item.title}</p>
+                              {item.subtitle && <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9aa0a6", fontWeight: 500 }}>{item.subtitle}</p>}
+                            </div>
+                            <span style={{ fontSize: 12, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })()}
