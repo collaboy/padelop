@@ -212,13 +212,18 @@ export async function hydrateFromSupabase() {
     // ── Gear ─────────────────────────────────────────────────────────────
     const gear = gearRes.data ?? [];
     const racket = gear.find(g => g.type === "racket");
-    if (racket) {
+    const shoe   = gear.find(g => g.type === "shoe");
+    const kit    = gear.find(g => g.type === "kit");
+    if (racket || shoe || kit) {
       const existing = JSON.parse(localStorage.getItem("padelop:gear") || "{}");
       localStorage.setItem("padelop:gear", JSON.stringify({
         ...existing,
-        ...(racket.name        ? { racketName:  racket.name }        : {}),
-        ...(racket.racket_type ? { racketType:  racket.racket_type } : {}),
-        ...(racket.racket_since? { racketSince: racket.racket_since }: {}),
+        ...(racket?.name         ? { racketName:  racket.name }         : {}),
+        ...(racket?.racket_type  ? { racketType:  racket.racket_type }  : {}),
+        ...(racket?.racket_since ? { racketSince: racket.racket_since } : {}),
+        ...(racket?.photo_url    ? { racketImage: racket.photo_url }    : {}),
+        ...(shoe?.photo_url      ? { shoeImage:   shoe.photo_url }      : {}),
+        ...(kit?.photo_url       ? { kitImage:    kit.photo_url }       : {}),
       }));
     }
 

@@ -241,6 +241,27 @@ export async function saveNoteToDb(entry: { date: string; body: string }) {
   } catch {}
 }
 
+export async function uploadGearImageToStorage(gearType: string, dataUrl: string): Promise<string | null> {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    const ext = blob.type.includes("png") ? "png" : blob.type.includes("webp") ? "webp" : "jpg";
+    const path = `${user.id}/${gearType}.${ext}`;
+    const { error } = await supabase.storage.from("gear-images").upload(path, blob, {
+      upsert: true,
+      contentType: blob.type,
+    });
+    if (error) return null;
+    const { data } = supabase.storage.from("gear-images").getPublicUrl(path);
+    return data.publicUrl;
+  } catch {
+    return null;
+  }
+}
+
 export async function saveHydrationToDb(date: string, ml: number) {
   try {
     const supabase = createClient();

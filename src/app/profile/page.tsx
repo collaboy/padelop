@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { saveGearToDb, saveProfileToDb, saveNutritionInsightToDb, saveUpcomingMatch, saveScheduleDoneToDb, saveScoreSnapshotToDb } from "@/lib/db";
+import { saveGearToDb, uploadGearImageToStorage, saveProfileToDb, saveNutritionInsightToDb, saveUpcomingMatch, saveScheduleDoneToDb, saveScoreSnapshotToDb } from "@/lib/db";
 import LogSheet from "@/components/log-sheet";
 import AvatarCropModal from "@/components/avatar-crop-modal";
 import { hydrateFromSupabase } from "@/lib/sync";
@@ -796,10 +796,15 @@ export default function ProfilePage() {
     reader.onload = () => {
       const img = reader.result as string;
       setKitImage(img);
-      try {
-        const existing = JSON.parse(localStorage.getItem("padelop:gear") || "{}");
-        localStorage.setItem("padelop:gear", JSON.stringify({ ...existing, kitImage: img }));
-      } catch {}
+      uploadGearImageToStorage("kit", img).then(url => {
+        const src = url ?? img;
+        setKitImage(src);
+        try {
+          const existing = JSON.parse(localStorage.getItem("padelop:gear") || "{}");
+          localStorage.setItem("padelop:gear", JSON.stringify({ ...existing, kitImage: src }));
+        } catch {}
+        if (url) saveGearToDb({ type: "kit", photo_url: url });
+      });
     };
     reader.readAsDataURL(file);
     e.target.value = "";
@@ -812,10 +817,15 @@ export default function ProfilePage() {
     reader.onload = () => {
       const img = reader.result as string;
       setShoeImage(img);
-      try {
-        const existing = JSON.parse(localStorage.getItem("padelop:gear") || "{}");
-        localStorage.setItem("padelop:gear", JSON.stringify({ ...existing, shoeImage: img }));
-      } catch {}
+      uploadGearImageToStorage("shoe", img).then(url => {
+        const src = url ?? img;
+        setShoeImage(src);
+        try {
+          const existing = JSON.parse(localStorage.getItem("padelop:gear") || "{}");
+          localStorage.setItem("padelop:gear", JSON.stringify({ ...existing, shoeImage: src }));
+        } catch {}
+        if (url) saveGearToDb({ type: "shoe", photo_url: url });
+      });
     };
     reader.readAsDataURL(file);
     e.target.value = "";
@@ -828,10 +838,14 @@ export default function ProfilePage() {
     reader.onload = () => {
       const img = reader.result as string;
       setRacketImage(img);
-      try {
-        const existing = JSON.parse(localStorage.getItem("padelop:gear") || "{}");
-        localStorage.setItem("padelop:gear", JSON.stringify({ ...existing, racketImage: img }));
-      } catch {}
+      uploadGearImageToStorage("racket", img).then(url => {
+        const src = url ?? img;
+        setRacketImage(src);
+        try {
+          const existing = JSON.parse(localStorage.getItem("padelop:gear") || "{}");
+          localStorage.setItem("padelop:gear", JSON.stringify({ ...existing, racketImage: src }));
+        } catch {}
+      });
     };
     reader.readAsDataURL(file);
     e.target.value = "";
@@ -1436,7 +1450,7 @@ export default function ProfilePage() {
                             <input type="month" value={racketSince} onChange={e => setRacketSince(e.target.value)} className="t-body"
                               style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--r-sm)", border: "2px solid #e2e2e2", fontWeight: 500, color: "var(--c-text)", outline: "none", background: "var(--c-bg-input)" }} />
                           </div>
-                          <button onClick={() => { localStorage.setItem("padelop:gear", JSON.stringify({ racketName, racketType, racketImage, racketSince })); saveGearToDb({ type: "racket", name: racketName ?? undefined, racket_type: racketType ?? undefined, racket_since: racketSince ?? undefined }); setGearEditOpen(false); }}
+                          <button onClick={() => { localStorage.setItem("padelop:gear", JSON.stringify({ racketName, racketType, racketImage, racketSince })); saveGearToDb({ type: "racket", name: racketName ?? undefined, racket_type: racketType ?? undefined, racket_since: racketSince ?? undefined, photo_url: racketImage?.startsWith("http") ? racketImage : undefined }); setGearEditOpen(false); }}
                             className="t-ui" style={{ padding: "12px", borderRadius: "var(--r-sm)", background: "var(--c-blue)", border: "none", cursor: "pointer", color: "#fff" }}>
                             Save
                           </button>
