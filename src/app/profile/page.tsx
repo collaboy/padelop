@@ -667,7 +667,7 @@ export default function ProfilePage() {
     window.addEventListener("padelop:sync-done", loadAll);
     let lastSync = Date.now();
     const onVisible = () => {
-      if (document.visibilityState === "visible" && Date.now() - lastSync > 30_000) {
+      if (document.visibilityState === "visible" && Date.now() - lastSync > 5_000) {
         lastSync = Date.now();
         hydrateFromSupabase();
       }
