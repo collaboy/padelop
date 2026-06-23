@@ -663,7 +663,18 @@ export default function ProfilePage() {
     loadAll();
     hydrateFromSupabase();
     window.addEventListener("storage", loadAll);
-    return () => window.removeEventListener("storage", loadAll);
+    let lastSync = Date.now();
+    const onVisible = () => {
+      if (document.visibilityState === "visible" && Date.now() - lastSync > 30_000) {
+        lastSync = Date.now();
+        hydrateFromSupabase();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.removeEventListener("storage", loadAll);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, []);
 
   // Schedule clock tick
@@ -849,9 +860,10 @@ export default function ProfilePage() {
     window.dispatchEvent(new Event("storage"));
     saveProfileToDb({
       display_name:  profile.name,
-      dominant_hand: profile.hand   || undefined,
-      play_level:    profile.level  || undefined,
-      position:      profile.position || undefined,
+      dominant_hand: profile.hand         || undefined,
+      play_level:    profile.level        || undefined,
+      position:      profile.position     || undefined,
+      playing_since: profile.playingSince || undefined,
     });
     setSaved(true);
   };

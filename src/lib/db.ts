@@ -33,6 +33,7 @@ export async function saveProfileToDb(profile: {
   overall_goal?: string;
   club?: string;
   tournament_count?: number;
+  playing_since?: string;
 }) {
   try {
     const supabase = createClient();
@@ -48,6 +49,7 @@ export async function saveProfileToDb(profile: {
     if (profile.overall_goal     !== undefined) fields.overall_goal     = profile.overall_goal;
     if (profile.club             !== undefined) fields.club             = profile.club;
     if (profile.tournament_count !== undefined) fields.tournament_count = profile.tournament_count;
+    if (profile.playing_since    !== undefined) fields.playing_since    = profile.playing_since;
     await supabase.from("profiles").upsert(fields);
   } catch {}
 }

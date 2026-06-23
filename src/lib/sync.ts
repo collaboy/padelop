@@ -18,7 +18,7 @@ export async function hydrateFromSupabase() {
       supabase.from("nutrition_logs").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(50),
       supabase.from("sessions").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(50),
       supabase.from("gear").select("*").eq("user_id", user.id),
-      supabase.from("profiles").select("display_name, avatar_url, dominant_hand, play_level, position, tournament_count").eq("id", user.id).single(),
+      supabase.from("profiles").select("display_name, avatar_url, dominant_hand, play_level, position, tournament_count, playing_since").eq("id", user.id).single(),
       supabase.from("notes").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(200),
       supabase.from("schedule_done").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(30),
       supabase.from("score_snapshots").select("*").eq("user_id", user.id).order("date", { ascending: false }).limit(90),
@@ -31,10 +31,11 @@ export async function hydrateFromSupabase() {
       localStorage.setItem("padelop:profile", JSON.stringify({
         ...existing,
         ...(dbProfile.display_name ? { name: dbProfile.display_name } : {}),
-        hand:     dbProfile.dominant_hand  ?? existing.hand     ?? "",
-        level:    dbProfile.play_level     ?? existing.level    ?? "",
-        position: dbProfile.position       ?? existing.position ?? "",
-        avatar:   dbProfile.avatar_url     ?? existing.avatar   ?? "",
+        hand:         dbProfile.dominant_hand  ?? existing.hand         ?? "",
+        level:        dbProfile.play_level     ?? existing.level        ?? "",
+        position:     dbProfile.position       ?? existing.position     ?? "",
+        avatar:       dbProfile.avatar_url     ?? existing.avatar       ?? "",
+        playingSince: dbProfile.playing_since  ?? existing.playingSince ?? "",
       }));
       if (dbProfile.tournament_count != null) {
         localStorage.setItem("padelop:tournaments", JSON.stringify({ count: dbProfile.tournament_count }));
