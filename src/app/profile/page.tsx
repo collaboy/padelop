@@ -1134,7 +1134,7 @@ export default function ProfilePage() {
             const matchClause = topImprove
               ? ` On court, "${topImprove[0]}" is the skill you've flagged most for improvement — that's your clearest path to a stronger game.`
               : reviews.length > 0 ? ` You've played ${reviews.length} match${reviews.length > 1 ? "es" : ""} — keep logging your results to unlock deeper insights.` : "";
-            const palaMessage = opening + workingClause + improveClause + matchClause;
+            const palaMessage = opening + workingClause + improveClause;
             const h = new Date().getHours();
             const greetingWord = h < 12 ? "Good morning," : h < 18 ? "Good afternoon," : "Good evening,";
             const firstName = profile.name ? profile.name.trim().split(" ")[0] : "";
