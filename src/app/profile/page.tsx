@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { saveGearToDb, uploadGearImageToStorage, saveProfileToDb, saveNutritionInsightToDb, saveUpcomingMatch, saveScheduleDoneToDb, saveScoreSnapshotToDb } from "@/lib/db";
+import { resizeImage } from "@/lib/image";
 import LogSheet from "@/components/log-sheet";
 import AvatarCropModal from "@/components/avatar-crop-modal";
 import { hydrateFromSupabase } from "@/lib/sync";
@@ -862,12 +863,21 @@ export default function ProfilePage() {
   };
   const saveAvatar = (croppedDataUrl: string) => {
     setCropSrc(null);
-    setField("avatar", croppedDataUrl);
-    const updated = { ...profile, avatar: croppedDataUrl };
-    localStorage.setItem(PROFILE_KEY, JSON.stringify(updated));
-    window.dispatchEvent(new Event("storage"));
-    saveProfileToDb({ display_name: updated.name, avatar_url: croppedDataUrl });
-    setSaved(true);
+    resizeImage(croppedDataUrl, 320, 0.80).then(resized => {
+      setField("avatar", resized);
+      const updated = { ...profile, avatar: resized };
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(updated));
+      window.dispatchEvent(new Event("storage"));
+      saveProfileToDb({ display_name: updated.name, avatar_url: resized });
+      setSaved(true);
+    }).catch(() => {
+      setField("avatar", croppedDataUrl);
+      const updated = { ...profile, avatar: croppedDataUrl };
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(updated));
+      window.dispatchEvent(new Event("storage"));
+      saveProfileToDb({ display_name: updated.name, avatar_url: croppedDataUrl });
+      setSaved(true);
+    });
   };
   const save = () => {
     localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));

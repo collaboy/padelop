@@ -2,6 +2,7 @@
 // These never throw; failures are silent so the app stays responsive offline.
 
 import { createClient } from "@/lib/supabase/client";
+import { resizeImageToBlob } from "@/lib/image";
 
 export async function saveTrainingToDb(entry: {
   date: string;
@@ -246,13 +247,11 @@ export async function uploadGearImageToStorage(gearType: string, dataUrl: string
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
-    const res = await fetch(dataUrl);
-    const blob = await res.blob();
-    const ext = blob.type.includes("png") ? "png" : blob.type.includes("webp") ? "webp" : "jpg";
-    const path = `${user.id}/${gearType}.${ext}`;
+    const blob = await resizeImageToBlob(dataUrl, 800, 0.82);
+    const path = `${user.id}/${gearType}.jpg`;
     const { error } = await supabase.storage.from("gear-images").upload(path, blob, {
       upsert: true,
-      contentType: blob.type,
+      contentType: "image/jpeg",
     });
     if (error) return null;
     const { data } = supabase.storage.from("gear-images").getPublicUrl(path);
