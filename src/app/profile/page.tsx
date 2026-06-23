@@ -558,13 +558,13 @@ export default function ProfilePage() {
       if (raw) setProfile(JSON.parse(raw));
     } catch {}
     try {
-      const g = JSON.parse(localStorage.getItem("padelop:gear") || "null");
-      if (g?.racketName)  setRacketName(g.racketName);
-      if (g?.racketType)  setRacketType(g.racketType);
-      if (g?.racketImage) setRacketImage(g.racketImage);
-      if (g?.racketSince) setRacketSince(g.racketSince);
-      if (g?.shoeImage)   setShoeImage(g.shoeImage);
-      if (g?.kitImage)    setKitImage(g.kitImage);
+      const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}");
+      setRacketName(g.racketName  ?? null);
+      setRacketType(g.racketType  ?? null);
+      setRacketImage(g.racketImage ?? null);
+      setRacketSince(g.racketSince ?? null);
+      setShoeImage(g.shoeImage   ?? null);
+      setKitImage(g.kitImage    ?? null);
     } catch {}
 
     // Matches
@@ -664,6 +664,7 @@ export default function ProfilePage() {
     loadAll();
     hydrateFromSupabase();
     window.addEventListener("storage", loadAll);
+    window.addEventListener("padelop:sync-done", loadAll);
     let lastSync = Date.now();
     const onVisible = () => {
       if (document.visibilityState === "visible" && Date.now() - lastSync > 30_000) {
@@ -674,6 +675,7 @@ export default function ProfilePage() {
     document.addEventListener("visibilitychange", onVisible);
     return () => {
       window.removeEventListener("storage", loadAll);
+      window.removeEventListener("padelop:sync-done", loadAll);
       document.removeEventListener("visibilitychange", onVisible);
     };
   }, []);
@@ -846,6 +848,7 @@ export default function ProfilePage() {
           const existing = JSON.parse(localStorage.getItem("padelop:gear") || "{}");
           localStorage.setItem("padelop:gear", JSON.stringify({ ...existing, racketImage: src }));
         } catch {}
+        if (url) saveGearToDb({ type: "racket", photo_url: url });
       });
     };
     reader.readAsDataURL(file);

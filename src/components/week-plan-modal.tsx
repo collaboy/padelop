@@ -1,6 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { saveUpcomingMatch } from "@/lib/db";
+
+const TIME_TO_HM: Record<string, string> = {
+  morning:   "09:00",
+  afternoon: "14:00",
+  evening:   "18:00",
+  night:     "20:00",
+};
 
 const STORAGE_KEY = "padelop:game-days";
 const GAME_TIMES_KEY = "padelop:game-times";
@@ -362,6 +370,12 @@ export default function WeekPlanModal() {
               if (Object.keys(matchData).length > 0) {
                 localStorage.setItem(MATCH_DATA_KEY, JSON.stringify(matchData));
               }
+              weekPlanDays.forEach(date => {
+                const slot = weekPlanTimes[date];
+                const time = TIME_TO_HM[slot] ?? "09:00";
+                const md = matchData[date] ?? {};
+                saveUpcomingMatch({ date, time, player_1: md.p1, player_2: md.p2, player_3: md.p3, player_4: md.p4 });
+              });
               window.dispatchEvent(new CustomEvent("week-plan-saved"));
               setOpen(false);
             }}

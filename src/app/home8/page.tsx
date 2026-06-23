@@ -8,7 +8,7 @@ import ReadinessSheet from "@/components/readiness-sheet";
 import PushPrompt from "@/components/push-prompt";
 import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, computeMatchReadiness, loadMorningLog, improveTips, type MatchReadinessResult, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
 import { pad, addMins, toMins, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag, ITEM_COLORS, type ScheduleItem, getScheduleData, SCHEDULE_DETAILS } from "@/lib/schedule-data";
-import { saveUpcomingMatch, saveNutritionToDb, saveHydrationToDb, saveNoteToDb, saveMatchReview, saveGearToDb } from "@/lib/db";
+import { saveUpcomingMatch, saveNutritionToDb, saveHydrationToDb, saveNoteToDb, saveMatchReview, saveGearToDb, saveScheduleDoneToDb } from "@/lib/db";
 import { hydrateFromSupabase } from "@/lib/sync";
 import { downloadSnapshot } from "@/lib/storage";
 
@@ -584,6 +584,8 @@ export default function Home8() {
     window.addEventListener("padelop:toggle-log-sheet", handleToggleLogSheet);
     // Only show the morning nudge AFTER sync finishes — avoids false positives when sync hasn't loaded yet
     function handleSyncDone() {
+      loadReadiness();
+      loadMatch();
       const todayStr = new Date().toISOString().slice(0, 10);
       const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null");
       const done = ml?.date === todayStr;
@@ -1396,6 +1398,7 @@ export default function Home8() {
                               localStorage.setItem("padelop:training-logs", JSON.stringify([entry, ...prev2].slice(0, 50)));
                               window.dispatchEvent(new Event("storage"));
                             } catch {}
+                            saveTrainingToDb({ date: new Date().toISOString().slice(0, 10), drill_focus: drillTag ?? undefined, duration_mins: 30 });
                           }
                         } else {
                           n.delete(modalIdx);
@@ -1410,6 +1413,7 @@ export default function Home8() {
                           ? titles.filter(t => t !== modalItem.title)
                           : [...titles.filter(t => t !== modalItem.title), modalItem.title];
                         localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
+                        saveScheduleDoneToDb(todayKey, sd[todayKey]);
                         window.dispatchEvent(new Event("storage"));
                       } catch {}
                     }}

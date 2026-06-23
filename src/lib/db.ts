@@ -202,14 +202,12 @@ export async function saveGearToDb(item: {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    await supabase.from("gear").upsert({
-      user_id:      user.id,
-      type:         item.type,
-      name:         item.name ?? null,
-      photo_url:    item.photo_url ?? null,
-      racket_type:  item.racket_type ?? null,
-      racket_since: item.racket_since ?? null,
-    }, { onConflict: "user_id,type" });
+    const fields: Record<string, unknown> = { user_id: user.id, type: item.type };
+    if (item.name        !== undefined) fields.name         = item.name        ?? null;
+    if (item.photo_url   !== undefined) fields.photo_url    = item.photo_url;
+    if (item.racket_type !== undefined) fields.racket_type  = item.racket_type ?? null;
+    if (item.racket_since !== undefined) fields.racket_since = item.racket_since ?? null;
+    await supabase.from("gear").upsert(fields, { onConflict: "user_id,type" });
   } catch {}
 }
 

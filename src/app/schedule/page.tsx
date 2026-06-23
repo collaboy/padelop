@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { getScheduleData, SCHEDULE_DETAILS, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag } from "@/lib/schedule-data";
+import { hydrateFromSupabase } from "@/lib/sync";
 
 export default function SchedulePage() {
   const [now, setNow] = useState(new Date());
@@ -14,34 +15,57 @@ export default function SchedulePage() {
   const [modalIdx, setModalIdx] = useState<number | null>(null);
 
   useEffect(() => {
+    hydrateFromSupabase();
+    let lastSync = Date.now();
+    const onVisible = () => {
+      if (document.visibilityState === "visible" && Date.now() - lastSync > 30_000) {
+        lastSync = Date.now();
+        hydrateFromSupabase();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, []);
+
+  useEffect(() => {
     const tick = setInterval(() => setNow(new Date()), 30_000);
     return () => clearInterval(tick);
   }, []);
 
   useEffect(() => {
-    const todayStr = new Date().toISOString().slice(0, 10);
-    const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
-    let type: "match" | "recovery" | "training" = "training";
-    let mTime: string | null = null;
+    function load() {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+      let type: "match" | "recovery" | "training" = "training";
+      let mTime: string | null = null;
 
-    try {
-      const m = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
-      if (m?.date === todayStr && m?.time) { type = "match"; mTime = m.time; }
-    } catch {}
-    if (type === "training") {
       try {
-        const reviews: { ts: string }[] = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
-        if (reviews.some(r => r.ts.slice(0, 10) === yesterday)) type = "recovery";
+        const m = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
+        if (m?.date === todayStr && m?.time) { type = "match"; mTime = m.time; }
       } catch {}
+      if (type === "training") {
+        try {
+          const reviews: { ts: string }[] = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+          if (reviews.some(r => r.ts.slice(0, 10) === yesterday)) type = "recovery";
+        } catch {}
+      }
+
+      const tag = getTopNeedsWorkTag();
+      setDrillTag(tag);
+      setDayType(type);
+      setMatchTime(mTime);
+      const { schedule: s, currentIdx: ci } = getScheduleData(type, mTime, tag);
+      setSchedule(s);
+      setCurrentIdx(ci);
     }
 
-    const tag = getTopNeedsWorkTag();
-    setDrillTag(tag);
-    setDayType(type);
-    setMatchTime(mTime);
-    const { schedule: s, currentIdx: ci } = getScheduleData(type, mTime, tag);
-    setSchedule(s);
-    setCurrentIdx(ci);
+    load();
+    window.addEventListener("storage", load);
+    window.addEventListener("padelop:sync-done", load);
+    return () => {
+      window.removeEventListener("storage", load);
+      window.removeEventListener("padelop:sync-done", load);
+    };
   }, []);
 
   useEffect(() => {

@@ -124,8 +124,19 @@ export default function MatchesPage() {
   useEffect(() => {
     load();
     hydrateFromSupabase();
+    let lastSync = Date.now();
+    const onVisible = () => {
+      if (document.visibilityState === "visible" && Date.now() - lastSync > 30_000) {
+        lastSync = Date.now();
+        hydrateFromSupabase();
+      }
+    };
     window.addEventListener("storage", load);
-    return () => window.removeEventListener("storage", load);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.removeEventListener("storage", load);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, []);
 
   // Seed edit forms when matches load
