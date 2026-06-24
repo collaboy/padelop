@@ -1298,6 +1298,7 @@ export default function Home8() {
           const detail = SCHEDULE_DETAILS[modalItem.title];
           const isMeal = detail?.type === 'meal';
           const isExercise = detail?.type === 'exercise';
+          const isInfo = detail?.type === 'info';
           const isDrill = modalItem.isDrill && !!drillSteps;
 
           const handleDone = () => {
@@ -1360,44 +1361,31 @@ export default function Home8() {
               >
                 {/* Header */}
                 <div className="px-6 pt-7 pb-3 flex-shrink-0">
-                  {isMeal ? (
-                    <>
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: modalItem.color }} />
-                          <p className="text-[11px] tracking-[0.1em] uppercase" style={{ color: modalItem.color, fontWeight: 700 }}>{modalItem.time}</p>
-                        </div>
-                        <p className="text-[13px] font-semibold text-[#9aa5b0]">{modalItem.title}</p>
-                      </div>
-                      <h3 className="text-[24px] font-bold text-[#1a1c1c]" style={{ lineHeight: 1.15 }}>{modalItem.subtitle}</h3>
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: modalItem.color }} />
-                        <p className="text-[11px] tracking-[0.1em] uppercase" style={{ color: modalItem.color, fontWeight: 700 }}>{modalItem.time}</p>
-                      </div>
-                      <h3 className="text-[28px] font-bold text-[#1a1c1c] leading-tight">{modalItem.title}</h3>
-                      {modalItem.subtitle && <p className="text-[14px] text-[#9aa5b0] mt-1 font-medium">{modalItem.subtitle}</p>}
-                      {(isExercise && detail) && <p className="text-[12px] font-semibold mt-2" style={{ color: modalItem.color }}>{detail.focus}</p>}
-                      {isDrill && <p className="text-[12px] font-semibold mt-2" style={{ color: modalItem.color }}>No gear needed · do it anywhere</p>}
-                    </>
-                  )}
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: modalItem.color }} />
+                    <p className="text-[11px] tracking-[0.1em] uppercase" style={{ color: modalItem.color, fontWeight: 700 }}>{modalItem.time}</p>
+                  </div>
+                  <h3 className="text-[22px] font-bold text-[#1a1c1c]" style={{ lineHeight: 1.15 }}>{modalItem.subtitle}</h3>
                 </div>
 
-                {/* Mark as complete — sits directly below header */}
-                <div className="px-4 pt-3 pb-6 flex-shrink-0">
+                {/* Tap to complete */}
+                <div className="px-4 py-4 flex-shrink-0">
                   <button
                     onClick={handleDone}
-                    className="w-full py-3 rounded-2xl text-[15px] font-bold active:scale-[0.98] transition-transform"
+                    className="w-full py-3 rounded-2xl text-[15px] font-bold active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
                     style={isComplete ? { background: `${modalItem.color}15`, color: modalItem.color } : { background: modalItem.color, color: "#fff" }}
                   >
-                    {isComplete ? "Mark as incomplete" : "Mark as complete"}
+                    {isComplete ? (
+                      <>
+                        Completed
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                      </>
+                    ) : "Tap to complete"}
                   </button>
                 </div>
 
-                {/* Scrollable detail — accordion for meals, always open for exercise/drill */}
-                {(isMeal || isExercise || isDrill) && (
+                {/* Scrollable detail — accordion for meals, text for info, steps for exercise/drill */}
+                {(isMeal || isExercise || isDrill || isInfo) && (
                   <div className="overflow-y-auto flex-1 px-6 pb-4" style={{ minHeight: 0, borderTop: "1px solid #f0f0f0" }}>
                     {isMeal && detail?.type === 'meal' && (
                       <>
@@ -1411,6 +1399,7 @@ export default function Home8() {
                         </button>
                         {modalDetailOpen && (
                           <div className="flex flex-col gap-2 pb-2">
+                            {modalItem.subtitle && <p className="text-[15px] font-bold text-[#1a1c1c] pb-1" style={{ lineHeight: 1.2 }}>{modalItem.subtitle}</p>}
                             <p className="text-[11px] font-bold uppercase tracking-widest pb-1" style={{ color: modalItem.color }}>{detail.focus}</p>
                             {detail.options.map((meal, i) => (
                               <div key={i} className="flex items-start gap-3 p-3 rounded-2xl" style={{ background: "#f8f9fa" }}>
@@ -1422,8 +1411,27 @@ export default function Home8() {
                         )}
                       </>
                     )}
-                    {isExercise && detail?.type === 'exercise' && renderSteps(detail.steps)}
-                    {isDrill && drillSteps && renderSteps(drillSteps)}
+                    {(isInfo || isExercise || isDrill) && (
+                      <>
+                        <button
+                          onClick={() => setModalDetailOpen(o => !o)}
+                          style={{ background: "none", border: "none", cursor: "pointer", padding: "12px 0", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}
+                        >
+                          <span className="text-[13px] font-semibold text-[#4a5050]">Details</span>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" style={{ transform: modalDetailOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s", flexShrink: 0 }}><path d="M6 9l6 6 6-6"/></svg>
+                        </button>
+                        {modalDetailOpen && (
+                          <div className="pb-2">
+                            {modalItem.subtitle && <p className="text-[15px] font-bold text-[#1a1c1c] pb-3" style={{ lineHeight: 1.2 }}>{modalItem.subtitle}</p>}
+                            {isInfo && detail?.type === 'info' && (
+                              <p className="text-[14px] text-[#4a5050] leading-relaxed">{detail.text}</p>
+                            )}
+                            {isExercise && detail?.type === 'exercise' && renderSteps(detail.steps)}
+                            {isDrill && drillSteps && renderSteps(drillSteps)}
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 )}
               </div>
