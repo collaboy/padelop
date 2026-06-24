@@ -984,6 +984,7 @@ export default function ProfilePage() {
 
   const TABS = [
     { key: 'today' as const, label: 'Today' },
+    { key: 'profile' as const, label: 'Profile' },
   ];
 
   const swipeStartX = useRef(0);
