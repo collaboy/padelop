@@ -2,7 +2,8 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { saveUpcomingMatch, saveNutritionToDb, saveNoteToDb, saveMatchReview, saveGearToDb } from "@/lib/db";
+import { saveUpcomingMatch, saveNutritionToDb, saveNoteToDb, saveMatchReview, saveGearToDb, saveScheduleDoneToDb } from "@/lib/db";
+import { getScheduleData, SCHEDULE_DETAILS, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag } from "@/lib/schedule-data";
 
 type StoredMatch = { date: string; time: string; club: string; court: string; player_1: string; player_2: string; player_3: string; player_4: string };
 
@@ -50,6 +51,15 @@ export default function Fab() {
   const [mealsToday, setMealsToday] = useState<{ id: string; time: string; description: string }[]>([]);
   const [noteText, setNoteText] = useState("");
 
+  // Schedule state (for Today section in the sheet)
+  const [fabDayType, setFabDayType] = useState<"match" | "recovery" | "training">("training");
+  const [fabDrillTag, setFabDrillTag] = useState<string | null>(null);
+  const [fabSchedule, setFabSchedule] = useState<ReturnType<typeof getScheduleData>["schedule"]>([]);
+  const [fabCurrentIdx, setFabCurrentIdx] = useState(0);
+  const [fabSchedDone, setFabSchedDone] = useState<Set<string>>(new Set());
+  const [fabSchedModalIdx, setFabSchedModalIdx] = useState<number | null>(null);
+  const [fabSchedModalClosing, setFabSchedModalClosing] = useState(false);
+
   const insertUploadRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -58,6 +68,39 @@ export default function Fab() {
       closeAll();
     }
   }, [pathname]);
+
+  useEffect(() => {
+    function load() {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+      let type: "match" | "recovery" | "training" = "training";
+      let mTime: string | null = null;
+      try {
+        const m = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
+        if (m?.date === todayStr && m?.time) { type = "match"; mTime = m.time; }
+      } catch {}
+      if (type === "training") {
+        try {
+          const reviews: { ts: string }[] = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+          if (reviews.some(r => r.ts.slice(0, 10) === yesterday)) type = "recovery";
+        } catch {}
+      }
+      const tag = getTopNeedsWorkTag();
+      setFabDrillTag(tag);
+      setFabDayType(type);
+      const { schedule: s, currentIdx: ci } = getScheduleData(type, mTime, tag);
+      setFabSchedule(s);
+      setFabCurrentIdx(ci);
+      try {
+        const sd = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
+        setFabSchedDone(new Set(sd[todayStr] ?? []));
+      } catch {}
+    }
+    load();
+    window.addEventListener("storage", load);
+    window.addEventListener("padelop:sync-done", load);
+    return () => { window.removeEventListener("storage", load); window.removeEventListener("padelop:sync-done", load); };
+  }, []);
 
   useEffect(() => {
     function handleOpen() { setSmartUploadError(null); setFabExpanded(false); setLogPickerOpen(true); }
@@ -102,7 +145,40 @@ export default function Fab() {
     setLogPickerSub(null);
     setFabExpanded(false);
     setSmartUploadError(null);
+    setFabSchedModalIdx(null);
+    setFabSchedModalClosing(false);
   }
+
+  const fabDayLabel = fabDayType === "match" ? "Match Day" : fabDayType === "recovery" ? "Recovery Day" : "Training Day";
+  const fabDayColor = fabDayType === "match" ? "#2653d4" : fabDayType === "recovery" ? "#7c3aed" : "#16a34a";
+  const fabDayMessage = fabDayType === "match"
+    ? "Match day — focus, communicate, compete."
+    : fabDayType === "recovery"
+    ? "Recovery day — rest is training too. Go easy."
+    : "Training day — small habits compound into big results.";
+
+  const closeFabSchedModal = () => {
+    setFabSchedModalClosing(true);
+    setTimeout(() => { setFabSchedModalIdx(null); setFabSchedModalClosing(false); }, 320);
+  };
+
+  const handleFabSchedDone = () => {
+    if (fabSchedModalIdx === null) return;
+    const item = fabSchedule[fabSchedModalIdx];
+    const isComplete = fabSchedDone.has(item.title);
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const newDone = new Set(fabSchedDone);
+    if (isComplete) { newDone.delete(item.title); } else { newDone.add(item.title); }
+    setFabSchedDone(newDone);
+    try {
+      const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
+      sd[todayKey] = [...newDone];
+      localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
+      saveScheduleDoneToDb(todayKey, sd[todayKey]);
+      window.dispatchEvent(new Event("storage"));
+    } catch {}
+    if (!isComplete) { setTimeout(closeFabSchedModal, 350); } else { closeFabSchedModal(); }
+  };
 
   const inputSt: React.CSSProperties = { width: "100%", padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", outline: "none", fontFamily: "inherit", background: "#f8f9fa", boxSizing: "border-box" };
   const labelSt: React.CSSProperties = { fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#8a9096", marginBottom: 4, display: "block" };
@@ -271,8 +347,162 @@ export default function Fab() {
                   </div>
                 </div>
 
+                {/* Today separator */}
+                <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "4px 4px" }}>
+                  <div style={{ flex: 1, height: 1, background: "#f0f0f0" }} />
+                  <span style={{ fontSize: 11, fontWeight: 700, color: "#b0b5ba", textTransform: "uppercase", letterSpacing: "0.08em", whiteSpace: "nowrap" }}>Today</span>
+                  <div style={{ flex: 1, height: 1, background: "#f0f0f0" }} />
+                </div>
+
+                {/* Day card */}
+                <div style={{ background: "#fff", borderRadius: 16, padding: "14px 16px", boxShadow: "0 0 0 1px #f0f0f0" }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: fabDayColor }}>{fabDayLabel}</span>
+                  <p style={{ margin: "6px 0 0", fontSize: 14, fontWeight: 500, color: "#5a6270", lineHeight: 1.6 }}>{fabDayMessage}</p>
+                </div>
+
+                {/* Today's schedule */}
+                {fabSchedule.length > 0 && (
+                  <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 0 0 1px #f0f0f0" }}>
+                    <p style={{ margin: 0, padding: "12px 16px 8px", fontSize: 12, fontWeight: 700, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.06em" }}>Schedule</p>
+                    <div style={{ display: "flex", flexDirection: "column", padding: "0 12px 10px" }}>
+                      {fabSchedule.map((s, i) => {
+                        const isDone = fabSchedDone.has(s.title);
+                        const isCur = i === fabCurrentIdx;
+                        const hasDetail = !!SCHEDULE_DETAILS[s.title] || s.isDrill;
+                        return (
+                          <div
+                            key={i}
+                            onClick={() => hasDetail && setFabSchedModalIdx(i)}
+                            style={{
+                              display: "flex", alignItems: "center", gap: 10, padding: "8px 4px",
+                              cursor: hasDetail ? "pointer" : "default",
+                              borderBottom: i < fabSchedule.length - 1 ? "1px solid #f4f4f6" : "none",
+                            }}
+                          >
+                            <div style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0, background: isDone ? "#d1d5db" : isCur ? s.color : "#e0e3e8" }} />
+                            <span style={{ flex: 1, fontSize: 14, fontWeight: isCur ? 700 : 500, color: isDone ? "#9ca3af" : isCur ? "#1a1c1c" : "#6b7480", textDecoration: isDone ? "line-through" : "none" }}>{s.title}</span>
+                            {isDone
+                              ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00D455" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                              : <span style={{ fontSize: 11, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{s.time}</span>
+                            }
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Info nav rows */}
+                <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 0 0 1px #f0f0f0", marginBottom: 4 }}>
+                  {([
+                    { label: "Profile", href: "/profile?tab=profile", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
+                    { label: "Insights", href: "/profile?tab=profile", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> },
+                    { label: "Matches", href: "/profile?tab=profile", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
+                  ] as const).map(({ label, href, icon }, i, arr) => (
+                    <button
+                      key={label}
+                      onClick={() => { closeAll(); router.push(href); }}
+                      className="active:scale-[0.98] transition-transform"
+                      style={{ width: "100%", padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, background: "none", border: "none", cursor: "pointer", borderBottom: i < arr.length - 1 ? "1px solid #f4f4f6" : "none", textAlign: "left" }}
+                    >
+                      {icon}
+                      <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>{label}</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                  ))}
+                </div>
+
               </div>
             </div>
+
+            {/* Schedule detail modal */}
+            {fabSchedModalIdx !== null && (() => {
+              const item = fabSchedule[fabSchedModalIdx];
+              const isComplete = fabSchedDone.has(item.title);
+              const detail = SCHEDULE_DETAILS[item.title];
+              const isMeal = detail?.type === 'meal';
+              const isExercise = detail?.type === 'exercise';
+              const isInfo = detail?.type === 'info';
+              const drillDef = DRILL_LIBRARY[fabDrillTag ?? ""] ?? DEFAULT_DRILL;
+              const isDrill = !!item.isDrill;
+
+              const renderSteps = (stepList: { step: string; cue: string; reps: string }[]) => (
+                <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 12 }}>
+                  {stepList.map((s, i) => (
+                    <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "8px 4px", textAlign: "center" }}>
+                      <span style={{ width: 38, height: 38, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: "#2653d420", color: "#2653d4", fontSize: 18, fontWeight: 800, marginBottom: 4 }}>{i + 1}</span>
+                      <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#1a1c1c", lineHeight: 1.3 }}>{s.step}</p>
+                      <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6b7480", lineHeight: 1.5 }}>{s.cue}</p>
+                      <span style={{ marginTop: 6, padding: "2px 8px", borderRadius: 99, background: "#2653d420", color: "#2653d4", fontSize: 11, fontWeight: 700 }}>{s.reps}</span>
+                    </div>
+                  ))}
+                </div>
+              );
+
+              return (
+                <div className="fixed inset-0 z-[300] flex items-center justify-center px-6" style={{ paddingTop: 24, paddingBottom: 24 }} onClick={closeFabSchedModal}>
+                  <style>{`@keyframes guideIn{from{transform:scale(0.94);opacity:0}to{transform:scale(1);opacity:1}}@keyframes guideOut{from{transform:scale(1);opacity:1}to{transform:scale(0.94);opacity:0}}`}</style>
+                  <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: fabSchedModalClosing ? "guideOut 0.2s cubic-bezier(0.4,0,1,1) both" : undefined }} />
+                  <div
+                    className="relative w-full bg-white flex flex-col"
+                    style={{ borderRadius: 28, maxHeight: "85dvh", animation: fabSchedModalClosing ? "guideOut 0.2s cubic-bezier(0.4,0,1,1) both" : "guideIn 0.22s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 8px 40px rgba(0,0,0,0.22)", overflow: "hidden" }}
+                    onClick={e => e.stopPropagation()}
+                  >
+                    {/* Green title strip */}
+                    <div style={{ background: "#00D455", padding: "24px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <p style={{ background: "#fff", padding: 4, borderRadius: 4, color: "#000", fontSize: "clamp(24px, 7.5vw, 34px)", fontWeight: 800, lineHeight: 1, margin: 0 }}>{item.title}</p>
+                    </div>
+                    {/* Content */}
+                    <div className="overflow-y-auto flex-1 px-6 pb-6" style={{ minHeight: 0, borderTop: "1px solid #f0f0f0" }}>
+                      {isMeal && detail?.type === 'meal' && (
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 16, textAlign: "center" }}>
+                          <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{detail.focus}</p>
+                          {detail.options.map((meal, i) => (
+                            <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "8px 0", width: "100%" }}>
+                              <span style={{ width: 38, height: 38, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: "#2653d420", color: "#2653d4", fontSize: 18, fontWeight: 800, marginBottom: 4 }}>{i + 1}</span>
+                              <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#1a1c1c" }}>{meal.title}</p>
+                              <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6b7480" }}>{meal.detail}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {isInfo && detail?.type === 'info' && (
+                        <div style={{ paddingTop: 16, textAlign: "center" }}>
+                          <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{detail.focus}</p>
+                          <p style={{ margin: 0, fontSize: 15, color: "#4a5050", lineHeight: 1.7 }}>{detail.text}</p>
+                        </div>
+                      )}
+                      {isExercise && detail?.type === 'exercise' && (
+                        <div style={{ paddingTop: 16, textAlign: "center" }}>
+                          <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{detail.focus}</p>
+                          {renderSteps(detail.steps)}
+                        </div>
+                      )}
+                      {isDrill && (
+                        <div style={{ paddingTop: 16, textAlign: "center" }}>
+                          <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{drillDef.focus}</p>
+                          {renderSteps(drillDef.steps)}
+                        </div>
+                      )}
+                      {/* Mark as complete */}
+                      <div style={{ paddingTop: 24, display: "flex", justifyContent: "center" }}>
+                        <button
+                          onClick={handleFabSchedDone}
+                          className="flex items-center gap-3 active:scale-[0.96] transition-transform"
+                        >
+                          <span style={{ fontSize: 15, fontWeight: 600, color: isComplete ? "#00D455" : "#6b7480" }}>
+                            {isComplete ? "Completed" : "Mark as complete"}
+                          </span>
+                          <div style={{ width: 48, height: 48, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, ...(isComplete ? { background: "#00D455" } : { background: "transparent", border: "2.5px solid #d0d5dd" }) }}>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isComplete ? "#fff" : "#c8cdd3"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Food sub-modal */}
             {logPickerSub === "nutrition" && (
