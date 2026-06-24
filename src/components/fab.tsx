@@ -59,6 +59,7 @@ export default function Fab() {
   const [fabSchedDone, setFabSchedDone] = useState<Set<string>>(new Set());
   const [fabSchedModalIdx, setFabSchedModalIdx] = useState<number | null>(null);
   const [fabSchedModalClosing, setFabSchedModalClosing] = useState(false);
+  const [fabSchedOpen, setFabSchedOpen] = useState(false);
 
   const insertUploadRef = useRef<HTMLInputElement>(null);
 
@@ -166,9 +167,14 @@ export default function Fab() {
     if (fabSchedModalIdx === null) return;
     const item = fabSchedule[fabSchedModalIdx];
     const isComplete = fabSchedDone.has(item.title);
+    fabToggleDone(item.title);
+    if (!isComplete) { setTimeout(closeFabSchedModal, 350); } else { closeFabSchedModal(); }
+  };
+
+  const fabToggleDone = (title: string) => {
     const todayKey = new Date().toISOString().slice(0, 10);
     const newDone = new Set(fabSchedDone);
-    if (isComplete) { newDone.delete(item.title); } else { newDone.add(item.title); }
+    if (newDone.has(title)) { newDone.delete(title); } else { newDone.add(title); }
     setFabSchedDone(newDone);
     try {
       const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
@@ -177,7 +183,6 @@ export default function Fab() {
       saveScheduleDoneToDb(todayKey, sd[todayKey]);
       window.dispatchEvent(new Event("storage"));
     } catch {}
-    if (!isComplete) { setTimeout(closeFabSchedModal, 350); } else { closeFabSchedModal(); }
   };
 
   const inputSt: React.CSSProperties = { width: "100%", padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", outline: "none", fontFamily: "inherit", background: "#f8f9fa", boxSizing: "border-box" };
@@ -355,42 +360,66 @@ export default function Fab() {
                 </div>
 
                 {/* Day card */}
-                <div style={{ background: "#fff", borderRadius: 16, padding: "14px 16px", boxShadow: "0 0 0 1px #f0f0f0" }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: fabDayColor }}>{fabDayLabel}</span>
-                  <p style={{ margin: "6px 0 0", fontSize: 14, fontWeight: 500, color: "#5a6270", lineHeight: 1.6 }}>{fabDayMessage}</p>
+                <div style={{ background: "#fff", borderRadius: 18, padding: "18px 20px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: fabDayColor }}>Today</span>
+                  <p style={{ margin: "4px 0 4px", fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{fabDayLabel}</p>
+                  <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500 }}>{new Date().toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" })}</span>
+                  <p style={{ margin: "12px 0 0", fontSize: 14, fontWeight: 500, color: "#5a6270", lineHeight: 1.6 }}>{fabDayMessage}</p>
                 </div>
 
-                {/* Today's schedule */}
-                {fabSchedule.length > 0 && (
-                  <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 0 0 1px #f0f0f0" }}>
-                    <p style={{ margin: 0, padding: "12px 16px 8px", fontSize: 12, fontWeight: 700, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.06em" }}>Schedule</p>
-                    <div style={{ display: "flex", flexDirection: "column", padding: "0 12px 10px" }}>
-                      {fabSchedule.map((s, i) => {
-                        const isDone = fabSchedDone.has(s.title);
-                        const isCur = i === fabCurrentIdx;
-                        const hasDetail = !!SCHEDULE_DETAILS[s.title] || s.isDrill;
-                        return (
-                          <div
-                            key={i}
-                            onClick={() => hasDetail && setFabSchedModalIdx(i)}
-                            style={{
-                              display: "flex", alignItems: "center", gap: 10, padding: "8px 4px",
-                              cursor: hasDetail ? "pointer" : "default",
-                              borderBottom: i < fabSchedule.length - 1 ? "1px solid #f4f4f6" : "none",
-                            }}
-                          >
-                            <div style={{ width: 7, height: 7, borderRadius: "50%", flexShrink: 0, background: isDone ? "#d1d5db" : isCur ? s.color : "#e0e3e8" }} />
-                            <span style={{ flex: 1, fontSize: 14, fontWeight: isCur ? 700 : 500, color: isDone ? "#9ca3af" : isCur ? "#1a1c1c" : "#6b7480", textDecoration: isDone ? "line-through" : "none" }}>{s.title}</span>
-                            {isDone
-                              ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00D455" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
-                              : <span style={{ fontSize: 11, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{s.time}</span>
-                            }
+                {/* Today's schedule — collapsible checklist */}
+                {fabSchedule.length > 0 && (() => {
+                  const total = fabSchedule.length;
+                  const done = fabSchedule.filter(s => fabSchedDone.has(s.title)).length;
+                  const pct = Math.round((done / total) * 100);
+                  const barColor = pct === 100 ? "#00D455" : pct >= 50 ? "#2653d4" : "#f59e0b";
+                  return (
+                    <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                      <button
+                        onClick={() => setFabSchedOpen(o => !o)}
+                        style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", gap: 10, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round" style={{ transform: fabSchedOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c", flex: 1 }}>
+                          {pct === 100 ? "Today's Scheduled Tasks ✓" : `Today's Scheduled Tasks — ${done} of ${total} done`}
+                        </span>
+                      </button>
+                      <div style={{ padding: "0 20px", marginBottom: fabSchedOpen ? 14 : 16 }}>
+                        <div style={{ height: 5, borderRadius: 3, background: "#f0f2f5", overflow: "hidden" }}>
+                          <div style={{ height: "100%", width: `${pct}%`, borderRadius: 3, background: barColor, transition: "width 0.4s" }} />
+                        </div>
+                      </div>
+                      {fabSchedOpen && (
+                        <div style={{ padding: "0 20px 16px" }}>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                            {fabSchedule.map((item, i) => {
+                              const isDone = fabSchedDone.has(item.title);
+                              return (
+                                <div
+                                  key={item.title}
+                                  onClick={() => { if (SCHEDULE_DETAILS[item.title] || item.isDrill) setFabSchedModalIdx(i); }}
+                                  style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", cursor: SCHEDULE_DETAILS[item.title] || item.isDrill ? "pointer" : "default", borderBottom: i < fabSchedule.length - 1 ? "1px solid #f4f4f6" : "none" }}
+                                >
+                                  <button
+                                    onClick={e => { e.stopPropagation(); fabToggleDone(item.title); }}
+                                    style={{ width: 22, height: 22, borderRadius: 6, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s", cursor: "pointer" }}
+                                  >
+                                    {isDone && <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                                  </button>
+                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                    <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none" }}>{item.title}</p>
+                                    {item.subtitle && <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9aa0a6", fontWeight: 500 }}>{item.subtitle}</p>}
+                                  </div>
+                                  <span style={{ fontSize: 12, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
+                                </div>
+                              );
+                            })}
                           </div>
-                        );
-                      })}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
 
                 {/* Info nav rows */}
                 <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 0 0 1px #f0f0f0", marginBottom: 4 }}>
