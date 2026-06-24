@@ -370,7 +370,7 @@ export default function Fab() {
                         <button
                           onClick={() => setFabSchedOpen(o => !o)}
                           className="active:scale-95 transition-transform"
-                          style={{ width: "100%", background: fabSchedOpen ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 10, textAlign: "left" }}
+                          style={{ width: "100%", background: fabSchedOpen ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 10, textAlign: "left", marginTop: -4 }}
                         >
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                             <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c" }}>Daily Tasks</span>
