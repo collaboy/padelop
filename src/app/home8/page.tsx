@@ -1007,18 +1007,15 @@ export default function Home8() {
                 if (isDone) return (
                   <>
                     <style>{`
-                      @keyframes checkRiseIn{from{transform:translateY(28px);opacity:0}to{transform:translateY(0);opacity:1}}
+                      @keyframes checkRiseIn{from{transform:translate(-50%,-20%);opacity:0}to{transform:translate(-50%,-50%);opacity:1}}
                       @keyframes fadeUpIn{from{transform:translateY(18px);opacity:0}to{transform:translateY(0);opacity:1}}
                     `}</style>
                     <div key="done" className="animate-bounce-in" style={cardStyle} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
                       {textureOverlay}
                       {sleepOverlay}
-                      {/* Centering wrapper stays fixed; inner div carries the rise animation */}
-                      <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", opacity: isSleepytime ? 0.2 : contentOpacity }}>
-                        <div style={{ animation: "checkRiseIn 0.5s cubic-bezier(0.22,1,0.36,1) both" }}>
-                          <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: "#fff" }}>
-                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
-                          </div>
+                      <div style={{ position: "absolute", top: "50%", left: "50%", opacity: isSleepytime ? 0.2 : contentOpacity, animation: "checkRiseIn 0.5s cubic-bezier(0.22,1,0.36,1) both" }}>
+                        <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: "#fff" }}>
+                          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
                         </div>
                       </div>
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: isSleepytime ? 0.2 : contentOpacity, animation: "fadeUpIn 0.45s 0.18s cubic-bezier(0.22,1,0.36,1) both" }}>
