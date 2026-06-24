@@ -1008,13 +1008,16 @@ export default function Home8() {
                   <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
                     {textureOverlay}
                     {sleepOverlay}
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.25s" }}>
-                      <p className="font-bold leading-none text-center" style={{ color: "#fff", fontSize: "clamp(26px, 8vw, 36px)" }}>Good Job!</p>
-                      <p className="font-semibold mt-1 leading-none text-center" style={{ color: "#fff", fontSize: "clamp(15px, 4.8vw, 22px)" }}>{s.title} complete</p>
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center mt-3" style={{ background: "rgba(255,255,255,0.25)" }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", opacity: isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.25s" }}>
+                      <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: "#fff" }}>
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
                       </div>
-                      {nextSlide && <div className="mt-4 text-center">
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.25s" }}>
+                      <p className="font-bold leading-none text-center" style={{ color: "#fff", fontSize: "clamp(18px, 5.5vw, 24px)" }}>Good Job!</p>
+                      <p className="font-semibold leading-none text-center mt-1" style={{ color: "rgba(255,255,255,0.85)", fontSize: "clamp(13px, 4vw, 18px)" }}>{s.title} complete</p>
+                      <div style={{ height: "clamp(56px, 17vw, 80px)" }} />
+                      {nextSlide && <div className="mt-9 text-center">
                         <p className="leading-none" style={{ color: "rgba(255,255,255,0.75)", fontSize: "clamp(12px, 3.7vw, 16px)" }}>see you in</p>
                         <p className="font-bold leading-none mt-1" style={{ color: "#fff", fontSize: "clamp(22px, 7vw, 32px)" }}>{fmtTime(secsUntilNext)}</p>
                         <p className="leading-none mt-1" style={{ color: "rgba(255,255,255,0.75)", fontSize: "clamp(12px, 3.7vw, 16px)" }}>for: <span className="font-semibold" style={{ color: "#fff" }}>{nextSlide.title}</span></p>
@@ -1102,15 +1105,18 @@ export default function Home8() {
 
                     {/* INFO STATE: fades out when playing */}
                     <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: warmupPlaying ? 0 : isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.35s", pointerEvents: warmupPlaying ? "none" : "auto" }}>
-                      {!isSleepytime && <p className="text-[14px] tracking-wide leading-none" style={{ color: "#000", fontWeight: 600 }}>Do this now</p>}
-                      <p className="font-bold text-center" style={{ color: "#000", fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1 }}>{s.title}</p>
+                      {!isSleepytime && <p className="text-[14px] tracking-wide leading-none" style={{ color: "#000", fontWeight: 600, background: "#fff", padding: 4, borderRadius: 4 }}>Do this now</p>}
+                      <p className="font-bold text-center" style={{ color: "#000", fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1, background: "#fff", padding: 4, borderRadius: 4 }}>{s.title}</p>
                       {isAudioAvailable
                         ? (
                           <button onClick={handleWarmupToggle} style={{ marginTop: 10, background: "#fff", border: "none", borderRadius: "50%", cursor: "pointer", width: 52, height: 52, display: "flex", alignItems: "center", justifyContent: "center" }}>
                             <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><polygon points="3,1 15,8 3,15" fill="#1a1c1c"/></svg>
                           </button>
                         ) : (
-                          <button onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }} className="mt-3 font-semibold px-3 py-1 rounded-full flex items-center gap-1" style={{ background: isSleepytime ? "transparent" : "#fff", color: "#1a1c1c", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me</button>
+                          <button onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }} className="mt-2 font-semibold px-4 py-1.5 rounded-full flex items-center gap-1.5" style={{ background: `${s.color}40`, color: "#fff", fontSize: "clamp(13px, 4vw, 18px)", border: "none", cursor: "pointer" }}>
+                            Show me
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><path d="M15 6l6 6-6 6"/></svg>
+                          </button>
                         )
                       }
                     </div>
@@ -1338,12 +1344,12 @@ export default function Home8() {
           const renderSteps = (stepList: { step: string; cue: string; reps: string }[]) => (
             <div className="flex flex-col gap-3 mt-3">
               {stepList.map((s, i) => (
-                <div key={i} className="flex gap-3 p-3 rounded-2xl" style={{ background: "#f8f9fa" }}>
+                <div key={i} className="flex gap-3 p-3 rounded-2xl" style={{ background: "#fff" }}>
                   <span className="text-[12px] font-bold flex-shrink-0 mt-0.5" style={{ color: modalItem.color, minWidth: 14 }}>{i + 1}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-[14px] font-semibold text-[#1a1c1c] leading-snug">{s.step}</p>
                     <p className="text-[12px] text-[#6b7480] mt-1 leading-relaxed">{s.cue}</p>
-                    <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold" style={{ background: `${modalItem.color}15`, color: modalItem.color }}>{s.reps}</span>
+                    <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold" style={{ background: `${modalItem.color}20`, color: modalItem.color }}>{s.reps}</span>
                   </div>
                 </div>
               ))}
@@ -1361,8 +1367,8 @@ export default function Home8() {
               >
                 {/* Header */}
                 <div className="px-6 pt-7 pb-3 flex-shrink-0">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: modalItem.color }} />
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: `${modalItem.color}18`, padding: "3px 8px", borderRadius: 4, marginBottom: 12 }}>
+                    <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: modalItem.color }} />
                     <p className="text-[11px] tracking-[0.1em] uppercase" style={{ color: modalItem.color, fontWeight: 700 }}>{modalItem.time}</p>
                   </div>
                   <h3 className="text-[22px] font-bold text-[#1a1c1c]" style={{ lineHeight: 1.15 }}>{modalItem.subtitle}</h3>
@@ -1391,7 +1397,6 @@ export default function Home8() {
                       <>
                         <button
                           onClick={() => setModalDetailOpen(o => !o)}
-                          className="w-full flex items-center justify-between active:opacity-70"
                           style={{ background: "none", border: "none", cursor: "pointer", padding: "12px 0", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}
                         >
                           <span className="text-[13px] font-semibold text-[#4a5050]">See options</span>
