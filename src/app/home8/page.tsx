@@ -1373,7 +1373,7 @@ export default function Home8() {
                   <div className="overflow-y-auto flex-1 px-6 pb-4" style={{ minHeight: 0, borderTop: "1px solid #f0f0f0" }}>
                     {isMeal && detail?.type === 'meal' && (
                       <div className="flex flex-col gap-3 pt-4 text-center">
-                        <p className="text-[11px] font-bold uppercase tracking-widest pb-1" style={{ color: "#2653d4" }}>{detail.focus}</p>
+                        <p className="text-[11px] font-bold uppercase tracking-widest pb-1" style={{ color: "#1a1c1c" }}>{detail.focus}</p>
                         {detail.options.map((meal, i) => (
                           <div key={i} className="flex flex-col items-center p-3 text-center">
                             <span className="w-10 h-10 rounded-full flex items-center justify-center text-[22px] font-bold mb-1" style={{ background: "#2653d420", color: "#2653d4" }}>{i + 1}</span>
@@ -1387,14 +1387,14 @@ export default function Home8() {
                       <div className="pt-4 text-center">
                         {isInfo && detail?.type === 'info' && (
                           <>
-                            <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#2653d4" }}>{detail.focus}</p>
+                            <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#1a1c1c" }}>{detail.focus}</p>
                             <p className="text-[17px] text-[#4a5050] leading-relaxed text-center">{detail.text}</p>
                           </>
                         )}
                         {isExercise && detail?.type === 'exercise' && renderSteps(detail.steps)}
                         {isDrill && drillSteps && (
                           <>
-                            <p className="text-[11px] font-bold uppercase tracking-widest pb-1" style={{ color: "#2653d4" }}>{(DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).focus}</p>
+                            <p className="text-[11px] font-bold uppercase tracking-widest pb-1" style={{ color: "#1a1c1c" }}>{(DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).focus}</p>
                             {renderSteps(drillSteps)}
                           </>
                         )}
@@ -1403,19 +1403,19 @@ export default function Home8() {
                   </div>
                 )}
 
-                {/* Mark as complete — pinned to bottom */}
-                <div className="px-4 py-4 flex-shrink-0">
+                {/* Complete circle — pinned to bottom */}
+                <div className="py-5 flex-shrink-0 flex justify-center">
                   <button
                     onClick={handleDone}
-                    className="w-full py-3 rounded-2xl text-[15px] font-bold active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
-                    style={isComplete ? { background: "#2653d415", color: "#2653d4" } : { background: "#2653d4", color: "#fff" }}
+                    className="w-16 h-16 rounded-full flex items-center justify-center active:scale-[0.92] transition-transform"
+                    style={isComplete
+                      ? { background: "#00D455", border: "none" }
+                      : { background: "transparent", border: "2.5px solid #d0d5dd" }
+                    }
                   >
-                    {isComplete ? (
-                      <>
-                        Completed
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
-                      </>
-                    ) : "Mark as complete"}
+                    {isComplete && (
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                    )}
                   </button>
                 </div>
               </div>
