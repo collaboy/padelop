@@ -1005,31 +1005,25 @@ export default function Home8() {
                   </div>
                 ) : null;
                 if (isDone) return (
-                  <>
-                    <style>{`
-                      @keyframes checkRiseIn{from{transform:translate(-50%,-20%);opacity:0}to{transform:translate(-50%,-50%);opacity:1}}
-                      @keyframes fadeUpIn{from{transform:translateY(18px);opacity:0}to{transform:translateY(0);opacity:1}}
-                    `}</style>
-                    <div key="done" className="animate-bounce-in" style={cardStyle} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
-                      {textureOverlay}
-                      {sleepOverlay}
-                      <div style={{ position: "absolute", top: "50%", left: "50%", opacity: isSleepytime ? 0.2 : contentOpacity, animation: "checkRiseIn 0.5s cubic-bezier(0.22,1,0.36,1) both" }}>
-                        <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: "#fff" }}>
-                          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
-                        </div>
-                      </div>
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: isSleepytime ? 0.2 : contentOpacity, animation: "fadeUpIn 0.45s 0.18s cubic-bezier(0.22,1,0.36,1) both" }}>
-                        <p className="font-bold leading-none text-center" style={{ color: "#fff", fontSize: "clamp(18px, 5.5vw, 24px)" }}>Good Job!</p>
-                        <p className="font-semibold leading-none text-center mt-1" style={{ color: "rgba(255,255,255,0.85)", fontSize: "clamp(13px, 4vw, 18px)" }}>{s.title} complete</p>
-                        <div style={{ height: "clamp(56px, 17vw, 80px)" }} />
-                        {nextSlide && <div className="mt-9 text-center">
-                          <p className="leading-none" style={{ color: "rgba(255,255,255,0.75)", fontSize: "clamp(12px, 3.7vw, 16px)" }}>see you in</p>
-                          <p className="font-bold leading-none mt-1" style={{ color: "#fff", fontSize: "clamp(22px, 7vw, 32px)" }}>{fmtTime(secsUntilNext)}</p>
-                          <p className="leading-none mt-1" style={{ color: "rgba(255,255,255,0.75)", fontSize: "clamp(12px, 3.7vw, 16px)" }}>for: <span className="font-semibold" style={{ color: "#fff" }}>{nextSlide.title}</span></p>
-                        </div>}
+                  <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
+                    {textureOverlay}
+                    {sleepOverlay}
+                    <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", opacity: isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.25s" }}>
+                      <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: "#fff" }}>
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
                       </div>
                     </div>
-                  </>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.25s" }}>
+                      <p className="font-bold leading-none text-center" style={{ color: "#fff", fontSize: "clamp(18px, 5.5vw, 24px)" }}>Good Job!</p>
+                      <p className="font-semibold leading-none text-center mt-1" style={{ color: "rgba(255,255,255,0.85)", fontSize: "clamp(13px, 4vw, 18px)" }}>{s.title} complete</p>
+                      <div style={{ height: "clamp(56px, 17vw, 80px)" }} />
+                      {nextSlide && <div className="mt-9 text-center">
+                        <p className="leading-none" style={{ color: "rgba(255,255,255,0.75)", fontSize: "clamp(12px, 3.7vw, 16px)" }}>see you in</p>
+                        <p className="font-bold leading-none mt-1" style={{ color: "#fff", fontSize: "clamp(22px, 7vw, 32px)" }}>{fmtTime(secsUntilNext)}</p>
+                        <p className="leading-none mt-1" style={{ color: "rgba(255,255,255,0.75)", fontSize: "clamp(12px, 3.7vw, 16px)" }}>for: <span className="font-semibold" style={{ color: "#fff" }}>{nextSlide.title}</span></p>
+                      </div>}
+                    </div>
+                  </div>
                 );
                 const isAudioAvailable = dayType === "match" && match && (() => { const [mH, mM] = match.time.split(":").map(Number); return now.getHours() * 60 + now.getMinutes() >= mH * 60 + mM - 60; })();
                 const handleWarmupToggle = (e: React.MouseEvent) => {
