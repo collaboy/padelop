@@ -445,7 +445,7 @@ export default function ProfilePage() {
   const router = useRouter();
 
   // Tab
-  const [activeTab, setActiveTab] = useState<'today' | 'profile'>('today');
+  const [activeTab, setActiveTab] = useState<'today' | 'profile'>('profile');
   useEffect(() => {
     const t = new URLSearchParams(window.location.search).get('tab');
     if (t === 'profile') goTab(t);
@@ -984,7 +984,6 @@ export default function ProfilePage() {
   const dayColor = dayType === "match" ? "#2653d4" : dayType === "recovery" ? "#7c3aed" : "#16a34a";
 
   const TABS = [
-    { key: 'today' as const, label: 'Today' },
     { key: 'profile' as const, label: 'Profile' },
   ];
 
@@ -1000,6 +999,7 @@ export default function ProfilePage() {
     const dx = e.changedTouches[0].clientX - swipeStartX.current;
     const dy = e.changedTouches[0].clientY - swipeStartY.current;
     if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.8) return;
+    if (dx < -80) { router.push("/home8"); return; }
     const idx = TABS.findIndex(t => t.key === activeTab);
     if (dx < 0 && idx < TABS.length - 1) goTab(TABS[idx + 1].key);
     if (dx > 0 && idx > 0) goTab(TABS[idx - 1].key);
@@ -1008,12 +1008,6 @@ export default function ProfilePage() {
   return (
     <div className="w-full pb-20" style={{ background: "#fff" }}>
 
-      {/* ── Top bar ──────────────────────────────────────────────────────── */}
-      <div style={{ position: "sticky", top: 0, zIndex: 10, background: "#fff", borderBottom: "1px solid #f0f0f0", display: "flex", justifyContent: "center", marginTop: 8 }}>
-        <Link href="/home8" style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "12px 20px", color: "#9aa0a6" }}>
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
-        </Link>
-      </div>
 
       <style>{`
         @keyframes tabSlideInRight { from { transform: translateX(48px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
