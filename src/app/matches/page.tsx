@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Nav4 from "@/components/nav4";
 import { saveUpcomingMatch } from "@/lib/db";
 import { hydrateFromSupabase } from "@/lib/sync";
 
@@ -13,7 +12,7 @@ type StoredMatch = {
 
 type ReviewEntry = {
   ts: string; result: string; feeling: string; energy: string;
-  wellDone: string[]; improved: string[];
+  wellDone: string[]; improved: string[]; opponent?: string; opponentNames?: string;
 };
 
 type Form = { date: string; time: string; club: string; court: string; p1: string; p2: string; p3: string; p4: string };
@@ -191,12 +190,14 @@ export default function MatchesPage() {
   return (
     <div style={{ minHeight: "100dvh", background: "#f0f2f5", fontFamily: "Inter, sans-serif" }}>
       {/* Header */}
-      <div style={{ position: "sticky", top: 0, zIndex: 50, background: "#f0f2f5", paddingTop: "env(safe-area-inset-top)" }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 50, background: "var(--c-bg, #f0f2f5)", paddingTop: "env(safe-area-inset-top)" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px 12px" }}>
-          <button onClick={() => router.back()} style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex", alignItems: "center" }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-          </button>
-          <p style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#1a1c1c" }}>Matches</p>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button onClick={() => router.back()} style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--c-bg, #f0f2f5)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--c-text, #1a1c1c)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <h1 className="t-heading" style={{ color: "var(--c-text, #1a1c1c)", margin: 0 }}>Matches</h1>
+          </div>
           <button
             onClick={() => { setAddOpen(o => !o); setExpandedIdx(null); if (!addOpen) setAddForm(EMPTY_FORM); }}
             style={{ background: addOpen ? "#e8edf8" : "#2653d4", border: "none", borderRadius: 20, padding: "7px 16px", fontSize: 14, fontWeight: 700, color: addOpen ? "#2653d4" : "#fff", cursor: "pointer" }}
@@ -319,6 +320,7 @@ export default function MatchesPage() {
                     <p style={{ margin: "1px 0 0", fontSize: 20, fontWeight: 900, color: "#1a1c1c", lineHeight: 1 }}>{new Date(r.ts.slice(0, 10) + "T12:00").getDate()}</p>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
+                    {(r.opponentNames || r.opponent) && <p style={{ margin: "0 0 2px", fontSize: 13, fontWeight: 600, color: "#1a1c1c" }}>vs {r.opponentNames || r.opponent}</p>}
                     {r.feeling && <p style={{ margin: "0 0 2px", fontSize: 13, color: "#8a9096" }}>{r.feeling}</p>}
                     {(r.wellDone?.length > 0 || r.improved?.length > 0) && (
                       <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
@@ -338,8 +340,6 @@ export default function MatchesPage() {
           </div>
         )}
       </div>
-
-      <Nav4 />
     </div>
   );
 }
