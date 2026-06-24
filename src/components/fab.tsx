@@ -422,115 +422,25 @@ export default function Fab() {
                   );
                 })()}
 
-                {/* Info nav rows — expandable */}
-                <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 0 0 1px #f0f0f0", marginBottom: 4 }}>
+                {/* Insights + Matches tiles */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  <button onClick={() => { closeAll(); router.push("/insights"); }} className="active:scale-95 transition-transform" style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1" }}>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>Insights</span>
+                  </button>
+                  <button onClick={() => { closeAll(); router.push("/matches"); }} className="active:scale-95 transition-transform" style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1" }}>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>Matches</span>
+                  </button>
+                </div>
 
-                  {/* Profile */}
-                  <div style={{ borderBottom: "1px solid #f4f4f6" }}>
-                    <button onClick={() => setFabExpandedRow(fabExpandedRow === "profile" ? null : "profile")} style={{ width: "100%", padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Profile</span>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" style={{ transition: "transform 0.2s", transform: fabExpandedRow === "profile" ? "rotate(90deg)" : "rotate(0deg)" }}><path d="M9 18l6-6-6-6"/></svg>
-                    </button>
-                    {fabExpandedRow === "profile" && (
-                      <div style={{ padding: "0 16px 14px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                          <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#2653d420", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                            <span style={{ fontSize: 17, fontWeight: 800, color: "#2653d4" }}>{fabProfile?.name?.[0]?.toUpperCase() || "?"}</span>
-                          </div>
-                          <div>
-                            <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>{fabProfile?.name || "My Profile"}</p>
-                            {fabStreak > 0 && <p style={{ margin: 0, fontSize: 12, color: "#8a9096" }}>{fabStreak} day streak · {fabStreak >= 100 ? "Legend" : fabStreak >= 60 ? "Elite" : fabStreak >= 30 ? "Dedicated" : fabStreak >= 15 ? "Grinder" : fabStreak >= 5 ? "Starter" : "Beginner"}</p>}
-                          </div>
-                        </div>
-                        <button onClick={() => { closeAll(); router.push("/profile"); }} style={{ fontSize: 13, fontWeight: 600, color: "#2653d4", background: "none", border: "none", cursor: "pointer", padding: 0 }}>See all →</button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Insights */}
-                  <div style={{ borderBottom: "1px solid #f4f4f6" }}>
-                    <button onClick={() => setFabExpandedRow(fabExpandedRow === "insights" ? null : "insights")} style={{ width: "100%", padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Insights</span>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" style={{ transition: "transform 0.2s", transform: fabExpandedRow === "insights" ? "rotate(90deg)" : "rotate(0deg)" }}><path d="M9 18l6-6-6-6"/></svg>
-                    </button>
-                    {fabExpandedRow === "insights" && (
-                      <div style={{ padding: "0 16px 14px" }}>
-                        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
-                          {fabStreak > 0 && (
-                            <div style={{ padding: "8px 12px", borderRadius: 10, background: "#f0fdf4", textAlign: "center" }}>
-                              <p style={{ margin: 0, fontSize: 18, fontWeight: 800, color: "#16a34a", lineHeight: 1 }}>{fabStreak}</p>
-                              <p style={{ margin: "2px 0 0", fontSize: 10, fontWeight: 600, color: "#16a34a" }}>day streak</p>
-                            </div>
-                          )}
-                          {fabDrillTag && (
-                            <div style={{ padding: "8px 12px", borderRadius: 10, background: "#eef2ff", textAlign: "center" }}>
-                              <p style={{ margin: 0, fontSize: 13, fontWeight: 800, color: "#2653d4", lineHeight: 1 }}>{fabDrillTag}</p>
-                              <p style={{ margin: "2px 0 0", fontSize: 10, fontWeight: 600, color: "#2653d4" }}>focus</p>
-                            </div>
-                          )}
-                          <div style={{ padding: "8px 12px", borderRadius: 10, background: fabDayType === "match" ? "#eef2ff" : fabDayType === "recovery" ? "#f5f0ff" : "#f0fdf4", textAlign: "center" }}>
-                            <p style={{ margin: 0, fontSize: 13, fontWeight: 800, color: fabDayColor, lineHeight: 1 }}>{fabDayLabel.replace(" Day", "")}</p>
-                            <p style={{ margin: "2px 0 0", fontSize: 10, fontWeight: 600, color: fabDayColor }}>today</p>
-                          </div>
-                        </div>
-                        <button onClick={() => { closeAll(); router.push("/insights"); }} style={{ fontSize: 13, fontWeight: 600, color: "#2653d4", background: "none", border: "none", cursor: "pointer", padding: 0 }}>See all →</button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Matches */}
-                  <div>
-                    <button onClick={() => setFabExpandedRow(fabExpandedRow === "matches" ? null : "matches")} style={{ width: "100%", padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Matches</span>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" style={{ transition: "transform 0.2s", transform: fabExpandedRow === "matches" ? "rotate(90deg)" : "rotate(0deg)" }}><path d="M9 18l6-6-6-6"/></svg>
-                    </button>
-                    {fabExpandedRow === "matches" && (
-                      <div style={{ padding: "0 16px 14px" }}>
-                        <div style={{ marginBottom: 10 }}>
-                          <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em" }}>NEXT</p>
-                          {fabNextMatch ? (
-                            <>
-                              <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>
-                                {new Date(fabNextMatch.date + "T12:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })} · {fabNextMatch.time}
-                              </p>
-                              {fabNextMatch.club && <p style={{ margin: "2px 0 0", fontSize: 12, color: "#8a9096" }}>{fabNextMatch.club}{fabNextMatch.court ? ` #${fabNextMatch.court}` : ""}</p>}
-                            </>
-                          ) : (
-                            <p style={{ margin: 0, fontSize: 13, color: "#b0b8c1" }}>No upcoming matches</p>
-                          )}
-                        </div>
-                        {fabLastReview && (
-                          <div style={{ marginBottom: 10 }}>
-                            <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em" }}>LAST</p>
-                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                              {fabLastReview.result && (
-                                <span style={{ fontSize: 12, fontWeight: 700, padding: "3px 9px", borderRadius: 999, background: fabLastReview.result === "win" ? "#f0fdf4" : fabLastReview.result === "loss" ? "#fff5f5" : "#f4f6f8", color: fabLastReview.result === "win" ? "#16a34a" : fabLastReview.result === "loss" ? "#ef4444" : "#8a9096" }}>
-                                  {fabLastReview.result.charAt(0).toUpperCase() + fabLastReview.result.slice(1)}
-                                </span>
-                              )}
-                              {(fabLastReview.opponentNames || fabLastReview.opponent) && (
-                                <span style={{ fontSize: 12, color: "#6b7480", fontWeight: 500 }}>vs {fabLastReview.opponentNames || fabLastReview.opponent}</span>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                        <button onClick={() => { closeAll(); router.push("/matches"); }} style={{ fontSize: 13, fontWeight: 600, color: "#2653d4", background: "none", border: "none", cursor: "pointer", padding: 0 }}>See all →</button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Settings */}
-                  <div style={{ borderTop: "1px solid #f4f4f6" }}>
-                    <button onClick={() => { closeAll(); router.push("/settings"); }} style={{ width: "100%", padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Settings</span>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                    </button>
-                  </div>
-
+                {/* Settings link */}
+                <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 0 0 1px #f0f0f0" }}>
+                  <button onClick={() => { closeAll(); router.push("/settings"); }} style={{ width: "100%", padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Settings</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                  </button>
                 </div>
 
               </div>
