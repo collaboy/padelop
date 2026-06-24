@@ -7,10 +7,11 @@ export const addMins = (h: number, m: number, delta: number) => {
 };
 export const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
 
-export type DrillDef = { subtitle: string; steps: { step: string; cue: string; reps: string }[] };
+export type DrillDef = { subtitle: string; focus: string; steps: { step: string; cue: string; reps: string }[] };
 export const DRILL_LIBRARY: Record<string, DrillDef> = {
   "Serve": {
     subtitle: "Toss rhythm & arm swing — no racket needed",
+    focus: "Toss rhythm · arm swing",
     steps: [
       { step: "Toss arm drill", cue: "Raise your toss arm slowly, release an imaginary ball at eye level, watch it rise. Consistency here eliminates most serve errors.", reps: "20 reps" },
       { step: "Shadow swing", cue: "Full serve motion in slow motion — trophy position, shoulder turn, pronation at contact. No racket needed.", reps: "15 each side" },
@@ -19,6 +20,7 @@ export const DRILL_LIBRARY: Record<string, DrillDef> = {
   },
   "Bandeja": {
     subtitle: "Shoulder prep & overhead shadow — anywhere",
+    focus: "Shoulder prep · overhead control",
     steps: [
       { step: "Shoulder circles", cue: "Slow full arm circles forward and back. Activates the rotator cuff — the key joint in every overhead.", reps: "10 each direction" },
       { step: "Closed-face shadow", cue: "Elbow up, wrist firm, simulate the controlled downward snap of a bandeja. No backswing.", reps: "15 each side" },
@@ -27,6 +29,7 @@ export const DRILL_LIBRARY: Record<string, DrillDef> = {
   },
   "Smash": {
     subtitle: "Jump timing & contact point — no gear",
+    focus: "Jump timing · contact point",
     steps: [
       { step: "Jump reach", cue: "Jump straight up reaching as high as possible. Land softly. Contact point precision starts here.", reps: "3 × 8 reps" },
       { step: "Trophy position hold", cue: "Shoulder back, elbow up, weight loaded. Hold 3 seconds, release. Builds the muscle memory for timing.", reps: "10 reps" },
@@ -35,6 +38,7 @@ export const DRILL_LIBRARY: Record<string, DrillDef> = {
   },
   "Volleys": {
     subtitle: "Compact hand speed — desk or wall",
+    focus: "Hand speed · compact technique",
     steps: [
       { step: "Wrist lock tap", cue: "Arm extended, wrist firm, punch your palm against a wall or desk. No swing — just the contact impulse.", reps: "3 × 20 reps" },
       { step: "Shadow punch volley", cue: "Forehand then backhand, elbow up, contact in front of your body. Slow and deliberate.", reps: "20 each hand" },
@@ -43,6 +47,7 @@ export const DRILL_LIBRARY: Record<string, DrillDef> = {
   },
   "Defense": {
     subtitle: "Defensive footwork — any corridor or room",
+    focus: "Defensive footwork · reading the lob",
     steps: [
       { step: "Lateral shuffle", cue: "3 steps left, 3 right, low centre of gravity. Quick light feet — avoid crossing your legs.", reps: "5 × 20 seconds" },
       { step: "Split step", cue: "Small soft jump, land feet shoulder-width apart, weight forward. This is your reset between every point.", reps: "20 reps" },
@@ -51,6 +56,7 @@ export const DRILL_LIBRARY: Record<string, DrillDef> = {
   },
   "Attack": {
     subtitle: "Quick hands & pattern recall — no gear",
+    focus: "Pattern recall · net finishing",
     steps: [
       { step: "Pen drop", cue: "Hold a pen at shoulder height, drop it, catch before it reaches waist. Trains the hand speed you need for net exchanges.", reps: "15 reps" },
       { step: "Shadow volley finish", cue: "Simulate approach + compact volley finish — step forward, punch to the angle. Weight transfers forward.", reps: "15 reps" },
@@ -59,6 +65,7 @@ export const DRILL_LIBRARY: Record<string, DrillDef> = {
   },
   "Positioning": {
     subtitle: "Court awareness — mental mapping",
+    focus: "Court awareness · recovery lines",
     steps: [
       { step: "T-recovery shadow", cue: "Split step, move to the imaginary T, recover back. Automatic positioning starts with repetition.", reps: "20 reps" },
       { step: "Scenario mapping", cue: "Picture 5 common in-game situations and identify your optimal position for each — net, mid, back corner.", reps: "5 scenarios" },
@@ -67,6 +74,7 @@ export const DRILL_LIBRARY: Record<string, DrillDef> = {
   },
   "Communication": {
     subtitle: "Call habits — build automaticity anywhere",
+    focus: "Call habits · partner sync",
     steps: [
       { step: "Call out loud", cue: "Say 'mine', 'yours', 'leave' out loud 30 times. Building the habit under low pressure makes it instinctive under high pressure.", reps: "30 calls" },
       { step: "Pre-point routine", cue: "Practice your between-point reset — breathe, walk to position, make your call intention. Repeat until automatic.", reps: "10 reps" },
@@ -75,6 +83,7 @@ export const DRILL_LIBRARY: Record<string, DrillDef> = {
   },
   "Movement": {
     subtitle: "Padel footwork — any hallway works",
+    focus: "Padel footwork · quick feet",
     steps: [
       { step: "Lateral shuffle + split", cue: "Side-to-side shuffle, 3 steps each way, ending with a soft split step. Core padel movement loop.", reps: "5 × 20 seconds" },
       { step: "Forward lunge", cue: "Step into a deep lunge, back knee near the floor, recover. Works the hip flexors critical for fast first steps.", reps: "3 × 10 each leg" },
@@ -83,6 +92,7 @@ export const DRILL_LIBRARY: Record<string, DrillDef> = {
   },
   "Mental strength": {
     subtitle: "Box breathing & pressure visualisation",
+    focus: "Focus · pressure management",
     steps: [
       { step: "Box breathing", cue: "4 in, 4 hold, 4 out, 4 hold. Activates your parasympathetic system — the same technique used before high-pressure points.", reps: "5 rounds" },
       { step: "Pressure point visualisation", cue: "Picture yourself at 6-6 tiebreak. Breathe, pick your target, execute. Feel calm, not anxious.", reps: "5 mental reps" },
@@ -93,6 +103,7 @@ export const DRILL_LIBRARY: Record<string, DrillDef> = {
 
 export const DEFAULT_DRILL: DrillDef = {
   subtitle: "Movement & mental prep — no gear needed",
+  focus: "Movement · mental focus",
   steps: [
     { step: "Lateral shuffle", cue: "Side-to-side with a split step. Core padel footwork.", reps: "5 × 20 seconds" },
     { step: "Box breathing", cue: "4 in, 4 hold, 4 out, 4 hold. Sharpen focus before your next session.", reps: "5 rounds" },
@@ -182,11 +193,11 @@ export function getScheduleData(dayType: "match" | "recovery" | "training", matc
 
 export type DetailMeal     = { type: 'meal';     focus: string; options: [string, string, string] };
 export type DetailExercise = { type: 'exercise'; focus: string; steps: { step: string; cue: string; reps: string }[] };
-export type DetailInfo     = { type: 'info';     text: string };
+export type DetailInfo     = { type: 'info';     focus: string; text: string };
 export type ScheduleDetail = DetailMeal | DetailExercise | DetailInfo;
 
 export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
-  "Wake up": { type: 'info', text: "Starting your day with 500 ml of water re-hydrates you after 7–8 hours without fluids. Do this before coffee — caffeine is a mild diuretic and amplifies morning dehydration." },
+  "Wake up": { type: 'info', focus: "Hydration · morning routine", text: "Starting your day with 500 ml of water re-hydrates you after 7–8 hours without fluids. Do this before coffee — caffeine is a mild diuretic and amplifies morning dehydration." },
   "Breakfast": { type: 'meal', focus: "High protein · slow-release carbs", options: [
     "Scrambled eggs + oats with banana and almond butter",
     "Greek yogurt bowl with granola, mixed berries and honey",
@@ -207,7 +218,7 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
     { step: "Lateral shuffle", cue: "Stay low, weight on balls of feet. Shuffle 5 metres left and right. Explode off each plant.", reps: "3 sets of 10 metres" },
     { step: "Shadow swings", cue: "20 forehand + 20 backhand shadow swings, building from 60% to 80% intensity. Focus on footwork and contact point.", reps: "20 each side" },
   ]},
-  "Match": { type: 'info', text: "Match time. Focus on early rhythm — the first two games set the tone. Communicate constantly with your partner. Stay hydrated between sets." },
+  "Match": { type: 'info', focus: "Early rhythm · partner communication", text: "Match time. Focus on early rhythm — the first two games set the tone. Communicate constantly with your partner. Stay hydrated between sets." },
   "Cool down": { type: 'exercise', focus: "Heart rate reduction · static stretching", steps: [
     { step: "Standing quad stretch", cue: "Hold your ankle behind you against your glute. Keep the knee pointing straight down.", reps: "45 sec each leg" },
     { step: "Seated hamstring stretch", cue: "Legs straight out in front, hinge from the hips and reach towards your feet.", reps: "45 sec" },
@@ -218,7 +229,7 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
     "Chicken stir-fry with rice noodles and broccoli",
     "Protein shake + banana + peanut butter on whole grain toast",
   ]},
-  "Short walk": { type: 'info', text: "Walk at a pace where you can hold a full conversation. Low-intensity movement flushes metabolic waste from fatigued muscles without adding stress. 20 minutes is enough." },
+  "Short walk": { type: 'info', focus: "Active recovery · circulation", text: "Walk at a pace where you can hold a full conversation. Low-intensity movement flushes metabolic waste from fatigued muscles without adding stress. 20 minutes is enough." },
   "Stretch": { type: 'exercise', focus: "Quads · IT band · hip flexors · calves", steps: [
     { step: "IT band roll", cue: "Side-lying, roll slowly from hip to knee on the outer thigh. Pause and breathe on tight spots.", reps: "60–90 sec each leg" },
     { step: "Quad roll", cue: "Face down, forearms supporting you. Roll from hip to knee on the front of the thigh.", reps: "60 sec each leg" },
@@ -229,17 +240,17 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
     "Tuna nicoise salad with boiled eggs, green beans and olives",
     "Salmon fillet + brown rice + steamed broccoli with olive oil",
   ]},
-  "Cold shower": { type: 'info', text: "Two minutes of cold water constricts blood vessels, reduces inflammation, and blunts delayed onset muscle soreness. Start warm, finish cold for the last 90–120 seconds." },
+  "Cold shower": { type: 'info', focus: "Inflammation reduction · DOMS relief", text: "Two minutes of cold water constricts blood vessels, reduces inflammation, and blunts delayed onset muscle soreness. Start warm, finish cold for the last 90–120 seconds." },
   "Dinner": { type: 'meal', focus: "Anti-inflammatory · high micronutrient", options: [
     "Baked salmon + roasted sweet potato + wilted spinach with garlic",
     "Grilled sea bass + brown rice + stir-fried kale and broccoli",
     "Chicken thighs + roasted Mediterranean veg + a small portion of couscous",
   ]},
-  "Active recovery": { type: 'info', text: "Walk, swim, or cycle at a pace where you can hold a full conversation. Keep heart rate below 130 bpm. Light aerobic activity maintains cardiovascular fitness without accumulating fatigue." },
+  "Active recovery": { type: 'info', focus: "Aerobic flush · below 130 bpm", text: "Walk, swim, or cycle at a pace where you can hold a full conversation. Keep heart rate below 130 bpm. Light aerobic activity maintains cardiovascular fitness without accumulating fatigue." },
   "Visualisation": { type: 'exercise', focus: "Mental rehearsal · pattern reinforcement", steps: [
     { step: "Replay a key moment", cue: "Pick one point from your last match that you lost. Replay it slowly in your mind — what would you change?", reps: "2 min" },
     { step: "Strongest pattern", cue: "Visualise your best attacking sequence in full detail: footwork → position → shot → result. Make it vivid.", reps: "2 min" },
     { step: "Next session intent", cue: "Walk through your next session mentally and set one specific technical focus before you begin.", reps: "1 min" },
   ]},
-  "Wind down": { type: 'info', text: "Blue light from screens suppresses melatonin by up to 50%. In the 60 minutes before bed: dim lights, avoid screens, and keep the room cool for deeper sleep." },
+  "Wind down": { type: 'info', focus: "Sleep quality · screen-free wind-down", text: "Blue light from screens suppresses melatonin by up to 50%. In the 60 minutes before bed: dim lights, avoid screens, and keep the room cool for deeper sleep." },
 };
