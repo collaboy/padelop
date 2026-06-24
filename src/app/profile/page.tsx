@@ -2267,13 +2267,13 @@ export default function ProfilePage() {
               <div className="py-5 flex-shrink-0 flex justify-center">
                 <button
                   onClick={() => { toggleSchedDone(todayKey, schedModalItem.title); setSchedModalIdx(null); }}
-                  className="w-16 h-16 rounded-full flex items-center justify-center active:scale-[0.92] transition-transform"
+                  className="w-12 h-12 rounded-full flex items-center justify-center active:scale-[0.92] transition-transform"
                   style={isSchedItemDone
                     ? { background: "#00D455", border: "none" }
                     : { background: "transparent", border: "2.5px solid #d0d5dd" }
                   }
                 >
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={isSchedItemDone ? "#fff" : "#c8cdd3"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isSchedItemDone ? "#fff" : "#c8cdd3"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
                 </button>
               </div>
             </div>
