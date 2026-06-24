@@ -1195,8 +1195,8 @@ export default function ProfilePage() {
             )}
           </div>
 
-          {/* Day header card */}
-          {(() => {
+          {/* Day header card — removed */}
+          {false && (() => {
             const statusScore = (s: PillarStatus) => s === "good" ? 3 : s === "ok" ? 2 : s === "low" ? 1 : 0;
             const pillarEntries = [
               { key: "recovery",  status: pillarStates.recovery.status },
@@ -1232,8 +1232,8 @@ export default function ProfilePage() {
             );
           })()}
 
-          {/* Daily tasks completion card */}
-          {(() => {
+          {/* Daily tasks completion card — removed */}
+          {false && (() => {
             const doneTitles = schedDone[todayKey] ?? [];
             const total = schedule.length;
             const done = schedule.filter(s => doneTitles.includes(s.title)).length;
