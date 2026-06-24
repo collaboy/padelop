@@ -361,14 +361,6 @@ export default function Fab() {
                   <div style={{ flex: 1, height: 1, background: "#f0f0f0" }} />
                 </div>
 
-                {/* Day card */}
-                <div style={{ background: "#fff", borderRadius: 18, padding: "18px 20px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: fabDayColor }}>Today</span>
-                  <p style={{ margin: "4px 0 4px", fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{fabDayLabel}</p>
-                  <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500 }}>{new Date().toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" })}</span>
-                  <p style={{ margin: "12px 0 0", fontSize: 14, fontWeight: 500, color: "#5a6270", lineHeight: 1.6 }}>{fabDayMessage}</p>
-                </div>
-
                 {/* Today's schedule — collapsible checklist */}
                 {fabSchedule.length > 0 && (() => {
                   const total = fabSchedule.length;
@@ -383,7 +375,7 @@ export default function Fab() {
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round" style={{ transform: fabSchedOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
                         <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c", flex: 1 }}>
-                          {pct === 100 ? "Today's Scheduled Tasks ✓" : `Today's Scheduled Tasks — ${done} of ${total} done`}
+                          {pct === 100 ? "Today's Tasks ✓" : `Today's Tasks — ${done} of ${total} done`}
                         </span>
                       </button>
                       <div style={{ padding: "0 20px", marginBottom: fabSchedOpen ? 14 : 16 }}>
@@ -393,6 +385,13 @@ export default function Fab() {
                       </div>
                       {fabSchedOpen && (
                         <div style={{ padding: "0 20px 16px" }}>
+                          {/* Day card inside dropdown */}
+                          <div style={{ paddingBottom: 16, marginBottom: 14, borderBottom: "1px solid #f0f2f5" }}>
+                            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: fabDayColor }}>Today</span>
+                            <p style={{ margin: "4px 0 4px", fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{fabDayLabel}</p>
+                            <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500 }}>{new Date().toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" })}</span>
+                            <p style={{ margin: "12px 0 0", fontSize: 14, fontWeight: 500, color: "#5a6270", lineHeight: 1.6 }}>{fabDayMessage}</p>
+                          </div>
                           <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                             {fabSchedule.map((item, i) => {
                               const isDone = fabSchedDone.has(item.title);
