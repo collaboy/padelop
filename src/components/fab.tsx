@@ -387,7 +387,7 @@ export default function Fab() {
                       <div style={{ overflow: "hidden", maxHeight: fabSchedOpen ? 800 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
                         <div style={{ paddingTop: 10 }}>
                           <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden", padding: "20px" }}>
-                            <div style={{ paddingBottom: 16, marginBottom: 14, borderBottom: "1px solid #f0f2f5" }}>
+                            <div style={{ paddingBottom: 16, marginBottom: 14, borderBottom: "1px solid #f0f2f5", textAlign: "center" }}>
                               <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: fabDayColor }}>Today</span>
                               <p style={{ margin: "4px 0 4px", fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{fabDayLabel}</p>
                               <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500 }}>{new Date().toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" })}</span>
