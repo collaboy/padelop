@@ -354,13 +354,6 @@ export default function Fab() {
                   </div>
                 </div>
 
-                {/* Today separator */}
-                <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "4px 4px" }}>
-                  <div style={{ flex: 1, height: 1, background: "#f0f0f0" }} />
-                  <span style={{ fontSize: 11, fontWeight: 700, color: "#b0b5ba", textTransform: "uppercase", letterSpacing: "0.08em", whiteSpace: "nowrap" }}>Today</span>
-                  <div style={{ flex: 1, height: 1, background: "#f0f0f0" }} />
-                </div>
-
                 {/* Today's schedule — collapsible checklist */}
                 {fabSchedule.length > 0 && (() => {
                   const total = fabSchedule.length;
@@ -371,7 +364,7 @@ export default function Fab() {
                     <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
                       <button
                         onClick={() => setFabSchedOpen(o => !o)}
-                        style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", gap: 10, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
+                        style={{ width: "100%", padding: "22px 20px", display: "flex", alignItems: "center", gap: 10, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round" style={{ transform: fabSchedOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
                         <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c", flex: 1 }}>
@@ -422,16 +415,17 @@ export default function Fab() {
                   );
                 })()}
 
-                {/* Insights + Matches tiles */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                  <button onClick={() => setFabExpandedRow(fabExpandedRow === "insights" ? null : "insights")} className="active:scale-95 transition-transform" style={{ background: fabExpandedRow === "insights" ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1" }}>
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>Insights</span>
+                {/* Insights + Matches + phantom tiles */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+                  <button onClick={() => setFabExpandedRow(fabExpandedRow === "insights" ? null : "insights")} className="active:scale-95 transition-transform" style={{ background: fabExpandedRow === "insights" ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Insights</span>
                   </button>
-                  <button onClick={() => setFabExpandedRow(fabExpandedRow === "matches" ? null : "matches")} className="active:scale-95 transition-transform" style={{ background: fabExpandedRow === "matches" ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1" }}>
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>Matches</span>
+                  <button onClick={() => setFabExpandedRow(fabExpandedRow === "matches" ? null : "matches")} className="active:scale-95 transition-transform" style={{ background: fabExpandedRow === "matches" ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Matches</span>
                   </button>
+                  <div style={{ background: "#f5f6f7", borderRadius: 18, aspectRatio: "1" }} />
                 </div>
 
                 {/* Insights expanded */}
