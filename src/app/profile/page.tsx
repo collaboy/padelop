@@ -2273,9 +2273,7 @@ export default function ProfilePage() {
                     : { background: "transparent", border: "2.5px solid #d0d5dd" }
                   }
                 >
-                  {isSchedItemDone && (
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
-                  )}
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={isSchedItemDone ? "#fff" : "#c8cdd3"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
                 </button>
               </div>
             </div>
