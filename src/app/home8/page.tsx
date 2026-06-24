@@ -248,6 +248,7 @@ export default function Home8() {
   const router = useRouter();
   const [doModalOpen, setDoModalOpen] = useState(false);
   const [schedModalIdx, setSchedModalIdx] = useState<number | null>(null);
+  const [modalDetailOpen, setModalDetailOpen] = useState(false);
   const [logSheetOpen, setLogSheetOpen] = useState(false);
   const [readinessSheetOpen, setReadinessSheetOpen] = useState(false);
   const [logTab, setLogTab] = useState<"checkin" | "wellbeing" | "matchreview" | "hydration" | "nutrition" | "training" | null>(null);
@@ -1004,7 +1005,7 @@ export default function Home8() {
                   </div>
                 ) : null;
                 if (isDone) return (
-                  <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => setDoModalOpen(true)}>
+                  <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
                     {textureOverlay}
                     {sleepOverlay}
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.25s" }}>
@@ -1109,7 +1110,7 @@ export default function Home8() {
                             <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><polygon points="3,1 15,8 3,15" fill="#1a1c1c"/></svg>
                           </button>
                         ) : (
-                          <button onClick={() => setDoModalOpen(true)} className="mt-3 font-semibold px-3 py-1 rounded-full flex items-center gap-1" style={{ background: isSleepytime ? "transparent" : "#fff", color: "#1a1c1c", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me</button>
+                          <button onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }} className="mt-3 font-semibold px-3 py-1 rounded-full flex items-center gap-1" style={{ background: isSleepytime ? "transparent" : "#fff", color: "#1a1c1c", fontSize: "clamp(13px, 4vw, 18px)" }}>Guide me</button>
                         )
                       }
                     </div>
@@ -1294,133 +1295,137 @@ export default function Home8() {
         {/* Complete modal */}
         {doModalOpen && modalItem && (() => {
           const isComplete = completed.has(modalIdx);
-          const steps = modalItem.isDrill
-            ? (drillSteps ?? [])
-            : (() => { const d = SCHEDULE_DETAILS[modalItem.title]; return d?.type === 'exercise' || d?.type === 'meal' ? d : null; })();
+          const detail = SCHEDULE_DETAILS[modalItem.title];
+          const isMeal = detail?.type === 'meal';
+          const isExercise = detail?.type === 'exercise';
+          const isDrill = modalItem.isDrill && !!drillSteps;
+
+          const handleDone = () => {
+            setDoModalOpen(false);
+            setSchedModalIdx(null);
+            setCompleted(prev => {
+              const n = new Set(prev);
+              if (!isComplete) {
+                n.add(modalIdx);
+                if (modalItem.isDrill) {
+                  try {
+                    const entry = { ts: new Date().toISOString(), sessionType: ["Drills"], drillFocus: drillTag ? [drillTag] : [], duration: "30", intensity: "moderate" };
+                    const prev2 = JSON.parse(localStorage.getItem("padelop:training-logs") || "[]");
+                    localStorage.setItem("padelop:training-logs", JSON.stringify([entry, ...prev2].slice(0, 50)));
+                    window.dispatchEvent(new Event("storage"));
+                  } catch {}
+                  saveTrainingToDb({ date: new Date().toISOString().slice(0, 10), drill_focus: drillTag ?? undefined, duration_mins: 30 });
+                }
+              } else {
+                n.delete(modalIdx);
+              }
+              return n;
+            });
+            try {
+              const todayKey = new Date().toISOString().slice(0, 10);
+              const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
+              const titles = sd[todayKey] ?? [];
+              sd[todayKey] = isComplete
+                ? titles.filter(t => t !== modalItem.title)
+                : [...titles.filter(t => t !== modalItem.title), modalItem.title];
+              localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
+              saveScheduleDoneToDb(todayKey, sd[todayKey]);
+              window.dispatchEvent(new Event("storage"));
+            } catch {}
+          };
+
+          const renderSteps = (stepList: { step: string; cue: string; reps: string }[]) => (
+            <div className="flex flex-col gap-3 mt-3">
+              {stepList.map((s, i) => (
+                <div key={i} className="flex gap-3 p-3 rounded-2xl" style={{ background: "#f8f9fa" }}>
+                  <span className="text-[12px] font-bold flex-shrink-0 mt-0.5" style={{ color: modalItem.color, minWidth: 14 }}>{i + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[14px] font-semibold text-[#1a1c1c] leading-snug">{s.step}</p>
+                    <p className="text-[12px] text-[#6b7480] mt-1 leading-relaxed">{s.cue}</p>
+                    <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold" style={{ background: `${modalItem.color}15`, color: modalItem.color }}>{s.reps}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+
           return (
-            <div className="fixed inset-0 z-[200] flex items-end" onClick={() => { setDoModalOpen(false); setSchedModalIdx(null); }} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
-              <style>{`@keyframes guideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
+            <div className="fixed inset-0 z-[200] flex items-start justify-center px-6" style={{ paddingTop: "calc(50dvh - 160px)", paddingBottom: "24px", boxSizing: "border-box" }} onClick={() => { setDoModalOpen(false); setSchedModalIdx(null); }} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
+              <style>{`@keyframes guideIn{from{transform:scale(0.94);opacity:0}to{transform:scale(1);opacity:1}}`}</style>
               <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
               <div
                 className="relative w-full bg-white flex flex-col"
-                style={{ borderRadius: "28px 28px 0 0", maxHeight: "88dvh", animation: "guideUp 0.32s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -4px 40px rgba(0,0,0,0.18)" }}
+                style={{ borderRadius: 28, maxHeight: "100%", animation: "guideIn 0.22s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 8px 40px rgba(0,0,0,0.22)", overflow: "hidden" }}
                 onClick={e => e.stopPropagation()}
               >
-                {/* Drag handle */}
-                <div className="flex justify-center pt-3 pb-1 flex-shrink-0">
-                  <div className="w-10 h-1 rounded-full bg-[#e2e2e2]" />
-                </div>
-
                 {/* Header */}
-                <div className="px-6 pt-3 pb-5 flex-shrink-0">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: modalItem.color }} />
-                    <p className="text-[12px] font-700 tracking-[0.1em] uppercase" style={{ color: modalItem.color, fontWeight: 700 }}>{modalItem.time}</p>
-                  </div>
-                  <h3 className="text-[26px] font-bold text-[#1a1c1c] leading-tight">{modalItem.title}</h3>
-                  {modalItem.subtitle && <p className="text-[15px] text-[#9aa5b0] mt-1 font-medium">{modalItem.subtitle}</p>}
-                </div>
-
-                {/* Scrollable content */}
-                <div className="overflow-y-auto flex-1 px-6 pb-4" style={{ minHeight: 0 }}>
-                  {(() => {
-                    const detail = SCHEDULE_DETAILS[modalItem.title];
-
-                    const renderSteps = (stepList: { step: string; cue: string; reps: string }[]) => (
-                      <div className="flex flex-col gap-3">
-                        {stepList.map((s, i) => (
-                          <div key={i} className="flex gap-4 p-4 rounded-2xl" style={{ background: "#fff" }}>
-                            <span className="text-[13px] font-bold flex-shrink-0 mt-0.5" style={{ color: modalItem.color, minWidth: 16 }}>{i + 1}</span>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[15px] font-semibold text-[#1a1c1c] leading-snug">{s.step}</p>
-                              <p className="text-[13px] text-[#6b7480] mt-1 leading-relaxed">{s.cue}</p>
-                              <span className="inline-block mt-2 px-2.5 py-0.5 rounded-full text-[12px] font-bold" style={{ background: `${modalItem.color}15`, color: modalItem.color }}>{s.reps}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    );
-
-                    if (modalItem.isDrill && drillSteps) {
-                      return (
-                        <div className="flex flex-col gap-4">
-                          <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0]">No gear needed · do it anywhere</p>
-                          {renderSteps(drillSteps)}
+                <div className="px-6 pt-7 pb-3 flex-shrink-0">
+                  {isMeal ? (
+                    <>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: modalItem.color }} />
+                          <p className="text-[11px] tracking-[0.1em] uppercase" style={{ color: modalItem.color, fontWeight: 700 }}>{modalItem.time}</p>
                         </div>
-                      );
-                    }
-
-                    if (!detail) return null;
-
-                    if (detail.type === 'meal') return (
-                      <div className="flex flex-col gap-3">
-                        <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-1">{detail.focus}</p>
-                        {detail.options.map((meal, i) => (
-                          <div key={i} className="flex items-start gap-3 p-4 rounded-2xl" style={{ background: "#fff" }}>
-                            <div className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0" style={{ background: modalItem.color }} />
-                            <p className="text-[14px] text-[#2c3235] leading-snug">{meal}</p>
-                          </div>
-                        ))}
+                        <p className="text-[13px] font-semibold text-[#9aa5b0]">{modalItem.title}</p>
                       </div>
-                    );
-
-                    if (detail.type === 'exercise') return (
-                      <div className="flex flex-col gap-4">
-                        <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0]">{detail.focus}</p>
-                        {renderSteps(detail.steps)}
+                      <h3 className="text-[24px] font-bold text-[#1a1c1c]" style={{ lineHeight: 1.15 }}>{modalItem.subtitle}</h3>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: modalItem.color }} />
+                        <p className="text-[11px] tracking-[0.1em] uppercase" style={{ color: modalItem.color, fontWeight: 700 }}>{modalItem.time}</p>
                       </div>
-                    );
-
-                    return (
-                      <div className="p-4 rounded-2xl" style={{ background: "#fff" }}>
-                        <p className="text-[15px] text-[#2c3235] leading-relaxed">{detail.text}</p>
-                      </div>
-                    );
-                  })()}
+                      <h3 className="text-[28px] font-bold text-[#1a1c1c] leading-tight">{modalItem.title}</h3>
+                      {modalItem.subtitle && <p className="text-[14px] text-[#9aa5b0] mt-1 font-medium">{modalItem.subtitle}</p>}
+                      {(isExercise && detail) && <p className="text-[12px] font-semibold mt-2" style={{ color: modalItem.color }}>{detail.focus}</p>}
+                      {isDrill && <p className="text-[12px] font-semibold mt-2" style={{ color: modalItem.color }}>No gear needed · do it anywhere</p>}
+                    </>
+                  )}
                 </div>
 
-                {/* Sticky footer */}
-                <div className="px-6 pt-4 pb-8 flex-shrink-0" style={{ borderTop: "1px solid #f0f0f0" }}>
+                {/* Mark as complete — sits directly below header */}
+                <div className="px-4 pt-3 pb-6 flex-shrink-0">
                   <button
-                    onClick={() => {
-                      setDoModalOpen(false);
-                      setSchedModalIdx(null);
-                      setCompleted(prev => {
-                        const n = new Set(prev);
-                        if (!isComplete) {
-                          n.add(modalIdx);
-                          if (modalItem.isDrill) {
-                            try {
-                              const entry = { ts: new Date().toISOString(), sessionType: ["Drills"], drillFocus: drillTag ? [drillTag] : [], duration: "30", intensity: "moderate" };
-                              const prev2 = JSON.parse(localStorage.getItem("padelop:training-logs") || "[]");
-                              localStorage.setItem("padelop:training-logs", JSON.stringify([entry, ...prev2].slice(0, 50)));
-                              window.dispatchEvent(new Event("storage"));
-                            } catch {}
-                            saveTrainingToDb({ date: new Date().toISOString().slice(0, 10), drill_focus: drillTag ?? undefined, duration_mins: 30 });
-                          }
-                        } else {
-                          n.delete(modalIdx);
-                        }
-                        return n;
-                      });
-                      try {
-                        const todayKey = new Date().toISOString().slice(0, 10);
-                        const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
-                        const titles = sd[todayKey] ?? [];
-                        sd[todayKey] = isComplete
-                          ? titles.filter(t => t !== modalItem.title)
-                          : [...titles.filter(t => t !== modalItem.title), modalItem.title];
-                        localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
-                        saveScheduleDoneToDb(todayKey, sd[todayKey]);
-                        window.dispatchEvent(new Event("storage"));
-                      } catch {}
-                    }}
-                    className="w-full py-4 rounded-2xl text-[16px] font-bold active:scale-[0.98] transition-transform"
+                    onClick={handleDone}
+                    className="w-full py-3 rounded-2xl text-[15px] font-bold active:scale-[0.98] transition-transform"
                     style={isComplete ? { background: `${modalItem.color}15`, color: modalItem.color } : { background: modalItem.color, color: "#fff" }}
                   >
-                    {isComplete ? "Mark as incomplete" : "Done"}
+                    {isComplete ? "Mark as incomplete" : "Mark as complete"}
                   </button>
                 </div>
+
+                {/* Scrollable detail — accordion for meals, always open for exercise/drill */}
+                {(isMeal || isExercise || isDrill) && (
+                  <div className="overflow-y-auto flex-1 px-6 pb-4" style={{ minHeight: 0, borderTop: "1px solid #f0f0f0" }}>
+                    {isMeal && detail?.type === 'meal' && (
+                      <>
+                        <button
+                          onClick={() => setModalDetailOpen(o => !o)}
+                          className="w-full flex items-center justify-between active:opacity-70"
+                          style={{ background: "none", border: "none", cursor: "pointer", padding: "12px 0", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}
+                        >
+                          <span className="text-[13px] font-semibold text-[#4a5050]">See options</span>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" style={{ transform: modalDetailOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s", flexShrink: 0 }}><path d="M6 9l6 6 6-6"/></svg>
+                        </button>
+                        {modalDetailOpen && (
+                          <div className="flex flex-col gap-2 pb-2">
+                            <p className="text-[11px] font-bold uppercase tracking-widest pb-1" style={{ color: modalItem.color }}>{detail.focus}</p>
+                            {detail.options.map((meal, i) => (
+                              <div key={i} className="flex items-start gap-3 p-3 rounded-2xl" style={{ background: "#f8f9fa" }}>
+                                <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: modalItem.color }} />
+                                <p className="text-[13px] text-[#2c3235] leading-snug">{meal}</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
+                    )}
+                    {isExercise && detail?.type === 'exercise' && renderSteps(detail.steps)}
+                    {isDrill && drillSteps && renderSteps(drillSteps)}
+                  </div>
+                )}
               </div>
             </div>
           );
