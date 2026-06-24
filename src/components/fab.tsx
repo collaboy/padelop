@@ -375,7 +375,7 @@ export default function Fab() {
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round" style={{ transform: fabSchedOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
                         <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c", flex: 1 }}>
-                          {pct === 100 ? "Today's Tasks ✓" : `Today's Tasks — ${done} of ${total} done`}
+                          {pct === 100 ? "Daily Tasks ✓" : `Daily Tasks — ${done} of ${total} done`}
                         </span>
                       </button>
                       <div style={{ padding: "0 20px", marginBottom: fabSchedOpen ? 14 : 16 }}>
