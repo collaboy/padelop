@@ -248,7 +248,6 @@ export default function Home8() {
   const router = useRouter();
   const [doModalOpen, setDoModalOpen] = useState(false);
   const [modalClosing, setModalClosing] = useState(false);
-  const [ballPop, setBallPop] = useState(false);
   const [schedModalIdx, setSchedModalIdx] = useState<number | null>(null);
   const [modalDetailOpen, setModalDetailOpen] = useState(false);
   const [logSheetOpen, setLogSheetOpen] = useState(false);
@@ -1007,7 +1006,7 @@ export default function Home8() {
                   </div>
                 ) : null;
                 if (isDone) return (
-                  <div key="active" className="animate-bounce-in" style={{ ...cardStyle, animation: ballPop ? "ballPopIn 0.35s cubic-bezier(0.22,1,0.36,1)" : undefined }} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
+                  <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
                     {textureOverlay}
                     {sleepOverlay}
                     <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", opacity: isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.25s" }}>
@@ -1309,14 +1308,12 @@ export default function Home8() {
           const isInfo = detail?.type === 'info';
           const isDrill = modalItem.isDrill && !!drillSteps;
 
-          const closeModal = (afterComplete = false) => {
+          const closeModal = () => {
             setModalClosing(true);
-            if (afterComplete) setBallPop(true);
             setTimeout(() => {
               setDoModalOpen(false);
               setSchedModalIdx(null);
               setModalClosing(false);
-              if (afterComplete) setTimeout(() => setBallPop(false), 400);
             }, 240);
           };
 
@@ -1353,7 +1350,7 @@ export default function Home8() {
             } catch {}
             // A: if marking complete, pause so circle shows green, then B: fade modal out
             if (!isComplete) {
-              setTimeout(() => closeModal(true), 250);
+              setTimeout(closeModal, 350);
             } else {
               closeModal();
             }
@@ -1373,9 +1370,9 @@ export default function Home8() {
           );
 
           return (
-            <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "24px", paddingBottom: "24px" }} onClick={() => closeModal()} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
-              <style>{`@keyframes guideIn{from{transform:scale(0.94);opacity:0}to{transform:scale(1);opacity:1}}@keyframes guideOut{from{transform:scale(1);opacity:1}to{transform:scale(0.94);opacity:0}}@keyframes ballPopIn{0%{transform:scale(0.97)}60%{transform:scale(1.02)}100%{transform:scale(1)}}`}</style>
-              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: modalClosing ? "guideOut 0.24s cubic-bezier(0.4,0,1,1) both" : undefined }} />
+            <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "24px", paddingBottom: "24px" }} onClick={closeModal} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
+              <style>{`@keyframes guideIn{from{transform:scale(0.94);opacity:0}to{transform:scale(1);opacity:1}}@keyframes guideOut{from{transform:scale(1);opacity:1}to{transform:scale(0.94);opacity:0}}`}</style>
+              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
               <div
                 className="relative w-full bg-white flex flex-col"
                 style={{ borderRadius: 28, maxHeight: "85dvh", animation: modalClosing ? "guideOut 0.24s cubic-bezier(0.4,0,1,1) both" : "guideIn 0.22s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 8px 40px rgba(0,0,0,0.22)", overflow: "hidden" }}
