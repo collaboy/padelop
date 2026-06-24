@@ -310,15 +310,15 @@ export default function Fab() {
                   </button>
                 </div>
 
-                {/* Log manually — separator row */}
+                {/* Log manually — line separator */}
                 <button
                   onClick={() => setFabExpanded(v => !v)}
-                  className="active:scale-95 transition-transform"
-                  style={{ width: "100%", background: fabExpanded ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, textAlign: "left" }}
+                  style={{ width: "100%", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, padding: "4px 0" }}
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Log manually</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: fabExpanded ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
+                  <div style={{ flex: 1, height: 1, background: "#e0e2e5" }} />
+                  <span style={{ fontSize: 12, fontWeight: 600, color: "#8a9096", whiteSpace: "nowrap" }}>Log manually</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#b0b5ba" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: fabExpanded ? "rotate(180deg)" : "rotate(0deg)", flexShrink: 0 }}><polyline points="6 9 12 15 18 9"/></svg>
+                  <div style={{ flex: 1, height: 1, background: "#e0e2e5" }} />
                 </button>
 
                 {/* Log manually expanded */}
@@ -365,28 +365,22 @@ export default function Fab() {
                   const barColor = pct === 100 ? "#00D455" : pct >= 50 ? "#2653d4" : "#f59e0b";
                   return (
                     <>
-                      {/* Daily Tasks tile row */}
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
-                        {total > 0 ? (
-                          <button
-                            onClick={() => setFabSchedOpen(o => !o)}
-                            className="active:scale-95 transition-transform"
-                            style={{ background: fabSchedOpen ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 18, padding: "14px 12px", cursor: "pointer", display: "flex", flexDirection: "column", justifyContent: "space-between", alignItems: "flex-start", aspectRatio: "1", width: "100%" }}
-                          >
-                            <div>
-                              <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#1a1c1c", lineHeight: 1.3 }}>Daily Tasks</p>
-                              <p style={{ margin: "3px 0 0", fontSize: 11, color: "#8a9096" }}>{pct === 100 ? "All done ✓" : `${done} of ${total}`}</p>
-                            </div>
-                            <div style={{ width: "100%", height: 4, borderRadius: 2, background: "#e0e2e5", overflow: "hidden" }}>
-                              <div style={{ height: "100%", width: `${pct}%`, background: barColor, borderRadius: 2, transition: "width 0.4s" }} />
-                            </div>
-                          </button>
-                        ) : (
-                          <div style={{ background: "#f5f6f7", borderRadius: 18, aspectRatio: "1" }} />
-                        )}
-                        <div style={{ background: "#f5f6f7", borderRadius: 18, aspectRatio: "1" }} />
-                        <div style={{ background: "#f5f6f7", borderRadius: 18, aspectRatio: "1" }} />
-                      </div>
+                      {/* Daily Tasks — full-width button */}
+                      {total > 0 && (
+                        <button
+                          onClick={() => setFabSchedOpen(o => !o)}
+                          className="active:scale-95 transition-transform"
+                          style={{ width: "100%", background: fabSchedOpen ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 10, textAlign: "left" }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c" }}>Daily Tasks</span>
+                            <span style={{ fontSize: 12, color: "#8a9096" }}>{pct === 100 ? "All done ✓" : `${done} of ${total}`}</span>
+                          </div>
+                          <div style={{ width: "100%", height: 4, borderRadius: 2, background: "#e0e2e5", overflow: "hidden" }}>
+                            <div style={{ height: "100%", width: `${pct}%`, background: barColor, borderRadius: 2, transition: "width 0.4s" }} />
+                          </div>
+                        </button>
+                      )}
 
                       {/* Daily Tasks expanded */}
                       <div style={{ overflow: "hidden", maxHeight: fabSchedOpen ? 800 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
