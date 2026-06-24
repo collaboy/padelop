@@ -165,7 +165,10 @@ export default function SchedulePage() {
                           <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-1" style={{ background: `${modalItem.color}18` }}>
                             <span className="text-[13px] font-bold" style={{ color: modalItem.color }}>{i + 1}</span>
                           </div>
-                          <p className="text-[23px] text-[#2c3235] leading-snug">{meal}</p>
+                          <div>
+                            <p className="text-[23px] text-[#2c3235] leading-snug">{meal.title}</p>
+                            <p className="text-[14px] text-[#6b7480] mt-0.5">{meal.detail}</p>
+                          </div>
                         </div>
                       ))}
                     </div>

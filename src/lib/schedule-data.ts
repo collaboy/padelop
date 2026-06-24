@@ -191,7 +191,8 @@ export function getScheduleData(dayType: "match" | "recovery" | "training", matc
   return { schedule, currentIdx: idx };
 }
 
-export type DetailMeal     = { type: 'meal';     focus: string; options: [string, string, string] };
+export type MealOption     = { title: string; detail: string };
+export type DetailMeal     = { type: 'meal';     focus: string; options: [MealOption, MealOption, MealOption] };
 export type DetailExercise = { type: 'exercise'; focus: string; steps: { step: string; cue: string; reps: string }[] };
 export type DetailInfo     = { type: 'info';     focus: string; text: string };
 export type ScheduleDetail = DetailMeal | DetailExercise | DetailInfo;
@@ -199,9 +200,9 @@ export type ScheduleDetail = DetailMeal | DetailExercise | DetailInfo;
 export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
   "Wake up": { type: 'info', focus: "Hydration · morning routine", text: "Starting your day with 500 ml of water re-hydrates you after 7–8 hours without fluids. Do this before coffee — caffeine is a mild diuretic and amplifies morning dehydration." },
   "Breakfast": { type: 'meal', focus: "High protein · slow-release carbs", options: [
-    "Scrambled eggs + oats with banana and almond butter",
-    "Greek yogurt bowl with granola, mixed berries and honey",
-    "Whole grain toast + 3-egg omelette with spinach and feta",
+    { title: "Scrambled eggs + oats", detail: "banana and almond butter" },
+    { title: "Greek yogurt bowl", detail: "granola, mixed berries and honey" },
+    { title: "Omelette + whole grain toast", detail: "spinach and feta" },
   ]},
   "Mobility Exercise": { type: 'exercise', focus: "Hip flexors · thoracic spine · ankles", steps: [
     { step: "Hip flexor lunge hold", cue: "Step into a deep lunge, front knee at 90°. Push hips gently forward and hold.", reps: "60 sec each side" },
@@ -209,9 +210,9 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
     { step: "Ankle circles", cue: "Stand on one foot and draw slow controlled circles with your raised ankle.", reps: "10 each direction, each ankle" },
   ]},
   "Pre-match meal": { type: 'meal', focus: "Easily digestible · energy without heaviness", options: [
-    "Grilled chicken breast + white rice + cucumber salad",
-    "Pasta with light tomato sauce and lean mince",
-    "Jacket potato + tuna + a small mixed salad",
+    { title: "Chicken + white rice", detail: "cucumber salad" },
+    { title: "Pasta + lean mince", detail: "light tomato sauce" },
+    { title: "Jacket potato + tuna", detail: "mixed salad" },
   ]},
   "Warm up": { type: 'exercise', focus: "Neuromuscular activation · movement prep", steps: [
     { step: "Leg swings", cue: "Hold a wall for balance. Swing each leg forward and back, then laterally. Stay controlled.", reps: "15 reps each direction, each leg" },
@@ -225,9 +226,9 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
     { step: "Shoulder cross-body stretch", cue: "Pull one arm across your chest. Keep your shoulder pressed down away from your ear.", reps: "30 sec each side" },
   ]},
   "Recovery meal": { type: 'meal', focus: "Protein + carbs · 30-min window", options: [
-    "Grilled salmon + sweet potato mash + wilted spinach",
-    "Chicken stir-fry with rice noodles and broccoli",
-    "Protein shake + banana + peanut butter on whole grain toast",
+    { title: "Salmon + sweet potato", detail: "wilted spinach" },
+    { title: "Chicken stir-fry", detail: "rice noodles and broccoli" },
+    { title: "Protein shake + toast", detail: "banana and peanut butter" },
   ]},
   "Short walk": { type: 'info', focus: "Active recovery · circulation", text: "Walk at a pace where you can hold a full conversation. Low-intensity movement flushes metabolic waste from fatigued muscles without adding stress. 20 minutes is enough." },
   "Stretch": { type: 'exercise', focus: "Quads · IT band · hip flexors · calves", steps: [
@@ -236,15 +237,15 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
     { step: "Hip flexor lunge stretch", cue: "Low lunge, back knee down, slight backward lean. Feel the stretch in the front of the back hip.", reps: "60 sec each side" },
   ]},
   "Lunch": { type: 'meal', focus: "Protein · carbs · greens", options: [
-    "Grilled chicken breast + quinoa + roasted courgette and peppers",
-    "Tuna nicoise salad with boiled eggs, green beans and olives",
-    "Salmon fillet + brown rice + steamed broccoli with olive oil",
+    { title: "Chicken + quinoa", detail: "roasted courgette and peppers" },
+    { title: "Tuna niçoise", detail: "boiled eggs, green beans and olives" },
+    { title: "Salmon + brown rice", detail: "steamed broccoli with olive oil" },
   ]},
   "Cold shower": { type: 'info', focus: "Inflammation reduction · DOMS relief", text: "Two minutes of cold water constricts blood vessels, reduces inflammation, and blunts delayed onset muscle soreness. Start warm, finish cold for the last 90–120 seconds." },
   "Dinner": { type: 'meal', focus: "Anti-inflammatory · high micronutrient", options: [
-    "Baked salmon + roasted sweet potato + wilted spinach with garlic",
-    "Grilled sea bass + brown rice + stir-fried kale and broccoli",
-    "Chicken thighs + roasted Mediterranean veg + a small portion of couscous",
+    { title: "Baked salmon + sweet potato", detail: "wilted spinach with garlic" },
+    { title: "Sea bass + brown rice", detail: "stir-fried kale and broccoli" },
+    { title: "Chicken thighs + couscous", detail: "roasted Mediterranean veg" },
   ]},
   "Active recovery": { type: 'info', focus: "Aerobic flush · below 130 bpm", text: "Walk, swim, or cycle at a pace where you can hold a full conversation. Keep heart rate below 130 bpm. Light aerobic activity maintains cardiovascular fitness without accumulating fatigue." },
   "Visualisation": { type: 'exercise', focus: "Mental rehearsal · pattern reinforcement", steps: [

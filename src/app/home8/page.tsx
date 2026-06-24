@@ -1377,7 +1377,8 @@ export default function Home8() {
                         {detail.options.map((meal, i) => (
                           <div key={i} className="flex flex-col items-center p-3 text-center">
                             <span className="w-10 h-10 rounded-full flex items-center justify-center text-[22px] font-bold mb-1" style={{ background: "#2653d420", color: "#2653d4" }}>{i + 1}</span>
-                            <p className="text-[17px] font-semibold text-[#1a1c1c] leading-snug">{meal}</p>
+                            <p className="text-[17px] font-semibold text-[#1a1c1c] leading-snug">{meal.title}</p>
+                            <p className="text-[13px] text-[#6b7480] mt-0.5">{meal.detail}</p>
                           </div>
                         ))}
                       </div>
