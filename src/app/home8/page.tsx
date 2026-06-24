@@ -1372,7 +1372,7 @@ export default function Home8() {
           return (
             <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "24px", paddingBottom: "24px" }} onClick={closeModal} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
               <style>{`@keyframes guideIn{from{transform:scale(0.94);opacity:0}to{transform:scale(1);opacity:1}}@keyframes guideOut{from{transform:scale(1);opacity:1}to{transform:scale(0.94);opacity:0}}`}</style>
-              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: modalClosing ? "guideOut 0.2s cubic-bezier(0.4,0,1,1) both" : undefined }} />
               <div
                 className="relative w-full bg-white flex flex-col"
                 style={{ borderRadius: 28, maxHeight: "85dvh", animation: modalClosing ? "guideOut 0.2s cubic-bezier(0.4,0,1,1) both" : "guideIn 0.22s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 8px 40px rgba(0,0,0,0.22)", overflow: "hidden" }}
