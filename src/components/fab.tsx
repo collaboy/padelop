@@ -280,7 +280,7 @@ export default function Fab() {
                 {/* Top row — Home, My Profile, Upload a photo */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
                   <button
-                    onClick={() => { closeAll(); router.push("/home8"); }}
+                    onClick={() => { router.push("/home8"); }}
                     className="active:scale-95 transition-transform"
                     style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
                   >
@@ -288,7 +288,7 @@ export default function Fab() {
                     <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
                   </button>
                   <button
-                    onClick={() => { closeAll(); router.push("/profile?tab=profile"); }}
+                    onClick={() => { router.push("/profile?tab=profile"); }}
                     className="active:scale-95 transition-transform"
                     style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
                   >
@@ -426,7 +426,7 @@ export default function Fab() {
 
                 {/* Settings link */}
                 <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 0 0 1px #f0f0f0" }}>
-                  <button onClick={() => { closeAll(); router.push("/settings"); }} style={{ width: "100%", padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
+                  <button onClick={() => { router.push("/settings"); }} style={{ width: "100%", padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                     <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Settings</span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
