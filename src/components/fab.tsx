@@ -391,7 +391,6 @@ export default function Fab() {
                               <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: fabDayColor }}>Today</span>
                               <p style={{ margin: "4px 0 4px", fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{fabDayLabel}</p>
                               <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500 }}>{new Date().toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" })}</span>
-                              <p style={{ margin: "12px 0 0", fontSize: 14, fontWeight: 500, color: "#5a6270", lineHeight: 1.6 }}>{fabDayMessage}</p>
                             </div>
                             <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                               {fabSchedule.map((item, i) => {
