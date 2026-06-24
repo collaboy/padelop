@@ -277,45 +277,51 @@ export default function Fab() {
                   </div>
                 )}
 
-                {/* 2×2 nav grid */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                {/* Top row — Home, My Profile, Upload a photo */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
                   <button
                     onClick={() => { closeAll(); router.push("/home8"); }}
                     className="active:scale-95 transition-transform"
-                    style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1" }}
+                    style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
                   >
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
                   </button>
                   <button
                     onClick={() => { closeAll(); router.push("/profile"); }}
                     className="active:scale-95 transition-transform"
-                    style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1" }}
+                    style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
                   >
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>My Profile</span>
-                  </button>
-                  <button
-                    onClick={() => setFabExpanded(v => !v)}
-                    className="active:scale-95 transition-transform"
-                    style={{ background: fabExpanded ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1" }}
-                  >
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>Log manually</span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>My Profile</span>
                   </button>
                   <button
                     onClick={() => insertUploadRef.current?.click()}
                     disabled={insertUploadLoading}
                     className="active:scale-95 transition-transform"
-                    style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1", opacity: insertUploadLoading ? 0.7 : 1 }}
+                    style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1", opacity: insertUploadLoading ? 0.7 : 1 }}
                   >
                     {insertUploadLoading ? (
-                      <svg className="animate-spin" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.2" strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                      <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.2" strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
                     ) : (
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
                     )}
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>{insertUploadLoading ? "Analysing…" : "Upload a photo"}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>{insertUploadLoading ? "Analysing…" : "Upload"}</span>
                   </button>
+                </div>
+
+                {/* Bottom row — Log manually + 2 phantoms */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+                  <button
+                    onClick={() => setFabExpanded(v => !v)}
+                    className="active:scale-95 transition-transform"
+                    style={{ background: fabExpanded ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Log manually</span>
+                  </button>
+                  <div style={{ background: "#f5f6f7", borderRadius: 18, aspectRatio: "1" }} />
+                  <div style={{ background: "#f5f6f7", borderRadius: 18, aspectRatio: "1" }} />
                 </div>
 
                 {/* Log tile grid */}
