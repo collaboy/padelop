@@ -1384,7 +1384,7 @@ export default function Home8() {
                       </div>
                     )}
                     {(isInfo || isExercise || isDrill) && (
-                      <div className={`${isInfo ? "pt-2" : "pt-4"} text-center`}>
+                      <div className="pt-4 text-center">
                         {isInfo && detail?.type === 'info' && (
                           <>
                             <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#2653d4" }}>{detail.focus}</p>
