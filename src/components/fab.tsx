@@ -429,47 +429,51 @@ export default function Fab() {
                 </div>
 
                 {/* Insights expanded */}
-                {fabExpandedRow === "insights" && (
-                  <div style={{ background: "#fff", borderRadius: 16, padding: "16px 18px", boxShadow: "0 0 0 1px #f0f0f0" }}>
-                    <p style={{ margin: "0 0 14px", fontSize: 13, color: "#8a9096", lineHeight: 1.5 }}>Your insights snapshot will appear here.</p>
-                    <button onClick={() => { closeAll(); router.push("/insights"); }} style={{ fontSize: 13, fontWeight: 600, color: "#2653d4", background: "none", border: "none", cursor: "pointer", padding: 0 }}>See all →</button>
+                <div style={{ overflow: "hidden", maxHeight: fabExpandedRow === "insights" ? 300 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
+                  <div style={{ paddingTop: 10 }}>
+                    <div style={{ background: "#fff", borderRadius: 16, padding: "16px 18px", boxShadow: "0 0 0 1px #f0f0f0" }}>
+                      <p style={{ margin: "0 0 14px", fontSize: 13, color: "#8a9096", lineHeight: 1.5 }}>Your insights snapshot will appear here.</p>
+                      <button onClick={() => { closeAll(); router.push("/insights"); }} style={{ fontSize: 13, fontWeight: 600, color: "#2653d4", background: "none", border: "none", cursor: "pointer", padding: 0 }}>See all →</button>
+                    </div>
                   </div>
-                )}
+                </div>
 
                 {/* Matches expanded */}
-                {fabExpandedRow === "matches" && (
-                  <div style={{ background: "#fff", borderRadius: 16, padding: "16px 18px", boxShadow: "0 0 0 1px #f0f0f0" }}>
-                    <div style={{ marginBottom: 12 }}>
-                      <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em" }}>NEXT</p>
-                      {fabNextMatch ? (
-                        <>
-                          <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>
-                            {new Date(fabNextMatch.date + "T12:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })} · {fabNextMatch.time}
-                          </p>
-                          {fabNextMatch.club && <p style={{ margin: "2px 0 0", fontSize: 12, color: "#8a9096" }}>{fabNextMatch.club}{fabNextMatch.court ? ` #${fabNextMatch.court}` : ""}</p>}
-                        </>
-                      ) : (
-                        <p style={{ margin: 0, fontSize: 13, color: "#b0b8c1" }}>No upcoming matches</p>
-                      )}
-                    </div>
-                    {fabLastReview && (
+                <div style={{ overflow: "hidden", maxHeight: fabExpandedRow === "matches" ? 300 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
+                  <div style={{ paddingTop: 10 }}>
+                    <div style={{ background: "#fff", borderRadius: 16, padding: "16px 18px", boxShadow: "0 0 0 1px #f0f0f0" }}>
                       <div style={{ marginBottom: 12 }}>
-                        <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em" }}>LAST</p>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          {fabLastReview.result && (
-                            <span style={{ fontSize: 12, fontWeight: 700, padding: "3px 9px", borderRadius: 999, background: fabLastReview.result === "win" ? "#f0fdf4" : fabLastReview.result === "loss" ? "#fff5f5" : "#f4f6f8", color: fabLastReview.result === "win" ? "#16a34a" : fabLastReview.result === "loss" ? "#ef4444" : "#8a9096" }}>
-                              {fabLastReview.result.charAt(0).toUpperCase() + fabLastReview.result.slice(1)}
-                            </span>
-                          )}
-                          {(fabLastReview.opponentNames || fabLastReview.opponent) && (
-                            <span style={{ fontSize: 12, color: "#6b7480", fontWeight: 500 }}>vs {fabLastReview.opponentNames || fabLastReview.opponent}</span>
-                          )}
-                        </div>
+                        <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em" }}>NEXT</p>
+                        {fabNextMatch ? (
+                          <>
+                            <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>
+                              {new Date(fabNextMatch.date + "T12:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })} · {fabNextMatch.time}
+                            </p>
+                            {fabNextMatch.club && <p style={{ margin: "2px 0 0", fontSize: 12, color: "#8a9096" }}>{fabNextMatch.club}{fabNextMatch.court ? ` #${fabNextMatch.court}` : ""}</p>}
+                          </>
+                        ) : (
+                          <p style={{ margin: 0, fontSize: 13, color: "#b0b8c1" }}>No upcoming matches</p>
+                        )}
                       </div>
-                    )}
-                    <button onClick={() => { closeAll(); router.push("/matches"); }} style={{ fontSize: 13, fontWeight: 600, color: "#2653d4", background: "none", border: "none", cursor: "pointer", padding: 0 }}>See all →</button>
+                      {fabLastReview && (
+                        <div style={{ marginBottom: 12 }}>
+                          <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em" }}>LAST</p>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            {fabLastReview.result && (
+                              <span style={{ fontSize: 12, fontWeight: 700, padding: "3px 9px", borderRadius: 999, background: fabLastReview.result === "win" ? "#f0fdf4" : fabLastReview.result === "loss" ? "#fff5f5" : "#f4f6f8", color: fabLastReview.result === "win" ? "#16a34a" : fabLastReview.result === "loss" ? "#ef4444" : "#8a9096" }}>
+                                {fabLastReview.result.charAt(0).toUpperCase() + fabLastReview.result.slice(1)}
+                              </span>
+                            )}
+                            {(fabLastReview.opponentNames || fabLastReview.opponent) && (
+                              <span style={{ fontSize: 12, color: "#6b7480", fontWeight: 500 }}>vs {fabLastReview.opponentNames || fabLastReview.opponent}</span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      <button onClick={() => { closeAll(); router.push("/matches"); }} style={{ fontSize: 13, fontWeight: 600, color: "#2653d4", background: "none", border: "none", cursor: "pointer", padding: 0 }}>See all →</button>
+                    </div>
                   </div>
-                )}
+                </div>
 
                 {/* Settings link */}
                 <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 0 0 1px #f0f0f0" }}>
