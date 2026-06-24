@@ -1314,7 +1314,7 @@ export default function Home8() {
               setDoModalOpen(false);
               setSchedModalIdx(null);
               setModalClosing(false);
-            }, 240);
+            }, 320);
           };
 
           const handleDone = () => {
@@ -1375,7 +1375,7 @@ export default function Home8() {
               <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
               <div
                 className="relative w-full bg-white flex flex-col"
-                style={{ borderRadius: 28, maxHeight: "85dvh", animation: modalClosing ? "guideOut 0.24s cubic-bezier(0.4,0,1,1) both" : "guideIn 0.22s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 8px 40px rgba(0,0,0,0.22)", overflow: "hidden" }}
+                style={{ borderRadius: 28, maxHeight: "85dvh", animation: modalClosing ? "guideOut 0.2s cubic-bezier(0.4,0,1,1) both" : "guideIn 0.22s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 8px 40px rgba(0,0,0,0.22)", overflow: "hidden" }}
                 onClick={e => e.stopPropagation()}
               >
                 {/* Green title strip */}
