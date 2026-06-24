@@ -372,9 +372,10 @@ export default function Fab() {
                           className="active:scale-95 transition-transform"
                           style={{ width: "100%", background: fabSchedOpen ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 10, textAlign: "left", marginTop: -8 }}
                         >
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                            <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c" }}>Daily Tasks</span>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Daily Tasks</span>
                             <span style={{ fontSize: 12, color: "#8a9096" }}>{pct === 100 ? "All done ✓" : `${done} of ${total}`}</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: fabSchedOpen ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
                           </div>
                           <div style={{ width: "100%", height: 4, borderRadius: 2, background: "#e0e2e5", overflow: "hidden" }}>
                             <div style={{ height: "100%", width: `${pct}%`, background: barColor, borderRadius: 2, transition: "width 0.4s" }} />
