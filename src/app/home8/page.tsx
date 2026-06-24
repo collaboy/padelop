@@ -1407,13 +1407,19 @@ export default function Home8() {
                 <div className="py-5 flex-shrink-0 flex justify-center">
                   <button
                     onClick={handleDone}
-                    className="w-12 h-12 rounded-full flex items-center justify-center active:scale-[0.92] transition-transform"
-                    style={isComplete
-                      ? { background: "#00D455", border: "none" }
-                      : { background: "transparent", border: "2.5px solid #d0d5dd" }
-                    }
+                    className="flex items-center gap-3 active:scale-[0.96] transition-transform"
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isComplete ? "#fff" : "#c8cdd3"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                    <span className="text-[15px] font-semibold" style={{ color: isComplete ? "#00D455" : "#6b7480" }}>
+                      {isComplete ? "Completed" : "Mark as complete"}
+                    </span>
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={isComplete
+                        ? { background: "#00D455", border: "none" }
+                        : { background: "transparent", border: "2.5px solid #d0d5dd" }
+                      }
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isComplete ? "#fff" : "#c8cdd3"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                    </div>
                   </button>
                 </div>
               </div>
