@@ -2248,7 +2248,7 @@ export default function ProfilePage() {
                       {isInfo && schedDetail?.type === 'info' && (
                         <>
                           <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#2653d4" }}>{schedDetail.focus}</p>
-                          <p className="text-[14px] text-[#4a5050] leading-relaxed text-center">{schedDetail.text}</p>
+                          <p className="text-[17px] text-[#4a5050] leading-relaxed text-center">{schedDetail.text}</p>
                         </>
                       )}
                       {isExercise && renderSteps(steps)}

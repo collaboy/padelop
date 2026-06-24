@@ -1388,7 +1388,7 @@ export default function Home8() {
                         {isInfo && detail?.type === 'info' && (
                           <>
                             <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#2653d4" }}>{detail.focus}</p>
-                            <p className="text-[14px] text-[#4a5050] leading-relaxed text-center">{detail.text}</p>
+                            <p className="text-[17px] text-[#4a5050] leading-relaxed text-center">{detail.text}</p>
                           </>
                         )}
                         {isExercise && detail?.type === 'exercise' && renderSteps(detail.steps)}
