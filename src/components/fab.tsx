@@ -296,6 +296,14 @@ export default function Fab() {
                     <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>My Profile</span>
                   </button>
                   <button
+                    onClick={() => setFabExpanded(v => !v)}
+                    className="active:scale-95 transition-transform"
+                    style={{ background: fabExpanded ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1" }}
+                  >
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>Log manually</span>
+                  </button>
+                  <button
                     onClick={() => insertUploadRef.current?.click()}
                     disabled={insertUploadLoading}
                     className="active:scale-95 transition-transform"
@@ -307,14 +315,6 @@ export default function Fab() {
                       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
                     )}
                     <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>{insertUploadLoading ? "Analysing…" : "Upload a photo"}</span>
-                  </button>
-                  <button
-                    onClick={() => setFabExpanded(v => !v)}
-                    className="active:scale-95 transition-transform"
-                    style={{ background: fabExpanded ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1" }}
-                  >
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>Log manually</span>
                   </button>
                 </div>
 
