@@ -1344,13 +1344,11 @@ export default function Home8() {
           const renderSteps = (stepList: { step: string; cue: string; reps: string }[]) => (
             <div className="flex flex-col gap-3 mt-3">
               {stepList.map((s, i) => (
-                <div key={i} className="flex gap-3 p-3 rounded-2xl" style={{ background: "#fff" }}>
-                  <span className="text-[12px] font-bold flex-shrink-0 mt-0.5" style={{ color: modalItem.color, minWidth: 14 }}>{i + 1}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[14px] font-semibold text-[#1a1c1c] leading-snug">{s.step}</p>
-                    <p className="text-[12px] text-[#6b7480] mt-1 leading-relaxed">{s.cue}</p>
-                    <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold" style={{ background: `${modalItem.color}20`, color: modalItem.color }}>{s.reps}</span>
-                  </div>
+                <div key={i} className="flex flex-col items-center p-3 text-center">
+                  <span className="w-10 h-10 rounded-full flex items-center justify-center text-[22px] font-bold mb-1" style={{ background: `${modalItem.color}20`, color: modalItem.color }}>{i + 1}</span>
+                  <p className="text-[17px] font-semibold text-[#1a1c1c] leading-snug">{s.step}</p>
+                  <p className="text-[14px] text-[#6b7480] mt-1 leading-relaxed">{s.cue}</p>
+                  <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold" style={{ background: `${modalItem.color}20`, color: modalItem.color }}>{s.reps}</span>
                 </div>
               ))}
             </div>
@@ -1366,12 +1364,12 @@ export default function Home8() {
                 onClick={e => e.stopPropagation()}
               >
                 {/* Header */}
-                <div className="px-6 pt-7 pb-3 flex-shrink-0">
+                <div className="px-6 pt-7 pb-3 flex-shrink-0 flex flex-col items-center text-center">
                   <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: `${modalItem.color}18`, padding: "3px 8px", borderRadius: 4, marginBottom: 12 }}>
                     <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: modalItem.color }} />
                     <p className="text-[11px] tracking-[0.1em] uppercase" style={{ color: modalItem.color, fontWeight: 700 }}>{modalItem.time}</p>
                   </div>
-                  <h3 className="text-[22px] font-bold text-[#1a1c1c]" style={{ lineHeight: 1.15 }}>{modalItem.subtitle}</h3>
+                  <h3 className="text-[22px] font-bold text-[#1a1c1c] text-center" style={{ lineHeight: 1.15 }}>{modalItem.subtitle}</h3>
                 </div>
 
                 {/* Tap to complete */}
@@ -1403,13 +1401,12 @@ export default function Home8() {
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" style={{ transform: modalDetailOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s", flexShrink: 0 }}><path d="M6 9l6 6 6-6"/></svg>
                         </button>
                         {modalDetailOpen && (
-                          <div className="flex flex-col gap-2 pb-2">
+                          <div className="flex flex-col gap-2 pb-2 text-center">
                             {modalItem.subtitle && <p className="text-[15px] font-bold text-[#1a1c1c] pb-1" style={{ lineHeight: 1.2 }}>{modalItem.subtitle}</p>}
                             <p className="text-[11px] font-bold uppercase tracking-widest pb-1" style={{ color: modalItem.color }}>{detail.focus}</p>
                             {detail.options.map((meal, i) => (
-                              <div key={i} className="flex items-start gap-3 p-3 rounded-2xl" style={{ background: "#f8f9fa" }}>
-                                <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style={{ background: modalItem.color }} />
-                                <p className="text-[13px] text-[#2c3235] leading-snug">{meal}</p>
+                              <div key={i} className="p-3 rounded-2xl" style={{ background: "#f8f9fa" }}>
+                                <p className="text-[13px] text-[#2c3235] leading-snug text-center">{meal}</p>
                               </div>
                             ))}
                           </div>
@@ -1420,16 +1417,15 @@ export default function Home8() {
                       <>
                         <button
                           onClick={() => setModalDetailOpen(o => !o)}
-                          style={{ background: "none", border: "none", cursor: "pointer", padding: "12px 0", width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}
+                          style={{ background: "none", border: "none", cursor: "pointer", padding: "12px 0", width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
                         >
                           <span className="text-[13px] font-semibold text-[#4a5050]">Details</span>
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9aa5b0" strokeWidth="2.5" strokeLinecap="round" style={{ transform: modalDetailOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s", flexShrink: 0 }}><path d="M6 9l6 6 6-6"/></svg>
                         </button>
                         {modalDetailOpen && (
-                          <div className="pb-2">
-                            {modalItem.subtitle && <p className="text-[15px] font-bold text-[#1a1c1c] pb-3" style={{ lineHeight: 1.2 }}>{modalItem.subtitle}</p>}
+                          <div className="pb-2 text-center">
                             {isInfo && detail?.type === 'info' && (
-                              <p className="text-[14px] text-[#4a5050] leading-relaxed">{detail.text}</p>
+                              <p className="text-[14px] text-[#4a5050] leading-relaxed text-center">{detail.text}</p>
                             )}
                             {isExercise && detail?.type === 'exercise' && renderSteps(detail.steps)}
                             {isDrill && drillSteps && renderSteps(drillSteps)}
