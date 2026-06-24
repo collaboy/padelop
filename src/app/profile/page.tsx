@@ -510,6 +510,7 @@ export default function ProfilePage() {
   const [drillTag, setDrillTag] = useState<string | null>(null);
   const [schedMatchTime, setSchedMatchTime] = useState<string | null>(null);
   const [schedModalIdx, setSchedModalIdx] = useState<number | null>(null);
+  const [schedModalClosing, setSchedModalClosing] = useState(false);
   const [profileDetailOpen, setProfileDetailOpen] = useState(false);
   const [prevDaysOpen, setPrevDaysOpen] = useState(false);
   const todayKey = new Date().toISOString().slice(0, 10);
@@ -2201,6 +2202,19 @@ export default function ProfilePage() {
         const isDrill = schedModalItem.isDrill;
         const steps = isDrill ? (schedDrillSteps ?? []) : (schedDetail?.type === 'exercise' ? schedDetail.steps : []);
 
+        const closeSchedModal = () => {
+          setSchedModalClosing(true);
+          setTimeout(() => { setSchedModalIdx(null); setSchedModalClosing(false); }, 240);
+        };
+        const handleSchedDone = () => {
+          toggleSchedDone(todayKey, schedModalItem.title);
+          if (!isSchedItemDone) {
+            setTimeout(closeSchedModal, 350);
+          } else {
+            closeSchedModal();
+          }
+        };
+
         const renderSteps = (stepList: { step: string; cue: string; reps: string }[]) => (
           <div className="flex flex-col gap-3 mt-3">
             {stepList.map((s, i) => (
@@ -2215,12 +2229,12 @@ export default function ProfilePage() {
         );
 
         return (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "24px", paddingBottom: "24px" }} onClick={() => setSchedModalIdx(null)}>
-            <style>{`@keyframes profileGuideIn{from{transform:scale(0.94);opacity:0}to{transform:scale(1);opacity:1}}`}</style>
+          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "24px", paddingBottom: "24px" }} onClick={closeSchedModal}>
+            <style>{`@keyframes profileGuideIn{from{transform:scale(0.94);opacity:0}to{transform:scale(1);opacity:1}}@keyframes profileGuideOut{from{transform:scale(1);opacity:1}to{transform:scale(0.94);opacity:0}}`}</style>
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
             <div
               className="relative w-full bg-white flex flex-col"
-              style={{ borderRadius: 28, maxHeight: "85dvh", animation: "profileGuideIn 0.22s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 8px 40px rgba(0,0,0,0.22)", overflow: "hidden" }}
+              style={{ borderRadius: 28, maxHeight: "85dvh", animation: schedModalClosing ? "profileGuideOut 0.24s cubic-bezier(0.4,0,1,1) both" : "profileGuideIn 0.22s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 8px 40px rgba(0,0,0,0.22)", overflow: "hidden" }}
               onClick={e => e.stopPropagation()}
             >
               {/* Green title strip */}
@@ -2262,7 +2276,7 @@ export default function ProfilePage() {
                   )}
                   <div className="pt-6 flex justify-center">
                     <button
-                      onClick={() => { toggleSchedDone(todayKey, schedModalItem.title); setSchedModalIdx(null); }}
+                      onClick={handleSchedDone}
                       className="flex items-center gap-3 active:scale-[0.96] transition-transform"
                     >
                       <span className="text-[15px] font-semibold" style={{ color: isSchedItemDone ? "#00D455" : "#6b7480" }}>
