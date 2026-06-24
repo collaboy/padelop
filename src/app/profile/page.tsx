@@ -2230,7 +2230,7 @@ export default function ProfilePage() {
 
               {/* Detail content — always visible */}
               {(isMeal || isExercise || isDrill || isInfo) && (
-                <div className="overflow-y-auto flex-1 px-6 pb-4" style={{ minHeight: 0, borderTop: "1px solid #f0f0f0" }}>
+                <div className="overflow-y-auto flex-1 px-6 pb-6" style={{ minHeight: 0, borderTop: "1px solid #f0f0f0" }}>
                   {isMeal && schedDetail?.type === 'meal' && (
                     <div className="flex flex-col gap-3 pt-4 text-center">
                       <p className="text-[11px] font-bold uppercase tracking-widest pb-1" style={{ color: "#1a1c1c" }}>{schedDetail.focus}</p>
@@ -2260,28 +2260,26 @@ export default function ProfilePage() {
                       )}
                     </div>
                   )}
+                  <div className="pt-6 flex justify-center">
+                    <button
+                      onClick={() => { toggleSchedDone(todayKey, schedModalItem.title); setSchedModalIdx(null); }}
+                      className="flex items-center gap-3 active:scale-[0.96] transition-transform"
+                    >
+                      <span className="text-[15px] font-semibold" style={{ color: isSchedItemDone ? "#00D455" : "#6b7480" }}>
+                        {isSchedItemDone ? "Completed" : "Mark as complete"}
+                      </span>
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+                        style={isSchedItemDone
+                          ? { background: "#00D455", border: "none" }
+                          : { background: "transparent", border: "2.5px solid #d0d5dd" }
+                        }
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isSchedItemDone ? "#fff" : "#c8cdd3"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                      </div>
+                    </button>
+                  </div>
                 </div>
               )}
-
-              {/* Complete circle — pinned to bottom */}
-              <div className="py-5 flex-shrink-0 flex justify-center">
-                <button
-                  onClick={() => { toggleSchedDone(todayKey, schedModalItem.title); setSchedModalIdx(null); }}
-                  className="flex items-center gap-3 active:scale-[0.96] transition-transform"
-                >
-                  <span className="text-[15px] font-semibold" style={{ color: isSchedItemDone ? "#00D455" : "#6b7480" }}>
-                    {isSchedItemDone ? "Completed" : "Mark as complete"}
-                  </span>
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={isSchedItemDone
-                      ? { background: "#00D455", border: "none" }
-                      : { background: "transparent", border: "2.5px solid #d0d5dd" }
-                    }
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isSchedItemDone ? "#fff" : "#c8cdd3"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
-                  </div>
-                </button>
-              </div>
             </div>
           </div>
         );
