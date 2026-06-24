@@ -2244,7 +2244,7 @@ export default function ProfilePage() {
                     </div>
                   )}
                   {(isInfo || isExercise || isDrill) && (
-                    <div className="pt-4 text-center">
+                    <div className={`${isInfo ? "pt-2" : "pt-4"} text-center`}>
                       {isInfo && schedDetail?.type === 'info' && (
                         <>
                           <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#2653d4" }}>{schedDetail.focus}</p>
