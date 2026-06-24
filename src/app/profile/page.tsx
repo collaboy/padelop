@@ -2232,11 +2232,11 @@ export default function ProfilePage() {
               {(isMeal || isExercise || isDrill || isInfo) && (
                 <div className="overflow-y-auto flex-1 px-6 pb-4" style={{ minHeight: 0, borderTop: "1px solid #f0f0f0" }}>
                   {isMeal && schedDetail?.type === 'meal' && (
-                    <div className="flex flex-col pt-4 text-center">
-                      <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#2653d4" }}>{schedDetail.focus}</p>
+                    <div className="flex flex-col gap-3 pt-4 text-center">
+                      <p className="text-[11px] font-bold uppercase tracking-widest pb-1" style={{ color: "#2653d4" }}>{schedDetail.focus}</p>
                       {schedDetail.options.map((meal, i) => (
-                        <div key={i} className="flex flex-col items-center px-3 pb-3 text-center">
-                          {i > 0 && <p className="text-[11px] font-bold uppercase tracking-widest py-2" style={{ color: "#b0b8c1" }}>or</p>}
+                        <div key={i} className="flex flex-col items-center p-3 text-center">
+                          <span className="w-10 h-10 rounded-full flex items-center justify-center text-[22px] font-bold mb-1" style={{ background: "#2653d420", color: "#2653d4" }}>{i + 1}</span>
                           <p className="text-[17px] font-semibold text-[#1a1c1c] leading-snug">{meal}</p>
                         </div>
                       ))}
