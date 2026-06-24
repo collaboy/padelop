@@ -1010,7 +1010,7 @@ export default function Home8() {
                       @keyframes checkRiseIn{from{transform:translateY(28px);opacity:0}to{transform:translateY(0);opacity:1}}
                       @keyframes fadeUpIn{from{transform:translateY(18px);opacity:0}to{transform:translateY(0);opacity:1}}
                     `}</style>
-                    <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
+                    <div key="done" className="animate-bounce-in" style={cardStyle} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
                       {textureOverlay}
                       {sleepOverlay}
                       {/* Centering wrapper stays fixed; inner div carries the rise animation */}
