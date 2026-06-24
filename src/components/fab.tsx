@@ -163,8 +163,16 @@ export default function Fab() {
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" />
           <div className="relative w-full bg-white rounded-t-[28px] shadow-2xl" style={{ animation: "sheetUp 0.3s cubic-bezier(0.22,1,0.36,1)", overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "85dvh", paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
 
+            {/* Green header strip */}
+            <div style={{ background: "#00D455", padding: "20px 20px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+              <span style={{ background: "#fff", padding: "3px 8px", borderRadius: 4, fontSize: "clamp(20px, 6vw, 26px)", fontWeight: 800, color: "#000", lineHeight: 1 }}>padelop</span>
+              <button onClick={closeAll} style={{ background: "rgba(0,0,0,0.15)", border: "none", borderRadius: "50%", width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+
             <div style={{ overflowY: "auto", minHeight: 0 }}>
-              <div style={{ padding: "16px 16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ padding: "16px 16px 24px", display: "flex", flexDirection: "column", gap: 10 }}>
 
                 {smartUploadError && (
                   <div style={{ background: "#fff5f5", border: "1.5px solid #fecaca", borderRadius: 12, padding: "10px 14px" }}>
@@ -175,37 +183,41 @@ export default function Fab() {
                 {/* 2×2 nav grid */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                   <button
-                    onClick={() => router.push("/home8")}
-                    style={{ background: "#eef2ff", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1" }}
+                    onClick={() => { closeAll(); router.push("/home8"); }}
+                    className="active:scale-95 transition-transform"
+                    style={{ background: "#00D455", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1" }}
                   >
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>Home</span>
                   </button>
                   <button
                     onClick={() => insertUploadRef.current?.click()}
                     disabled={insertUploadLoading}
-                    style={{ background: "#eef2ff", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1", opacity: insertUploadLoading ? 0.6 : 1, position: "relative" }}
+                    className="active:scale-95 transition-transform"
+                    style={{ background: "#2653d4", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1", opacity: insertUploadLoading ? 0.7 : 1, position: "relative" }}
                   >
                     {insertUploadLoading ? (
-                      <svg className="animate-spin" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="2.2" strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                      <svg className="animate-spin" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
                     ) : (
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
                     )}
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>{insertUploadLoading ? "Analysing…" : "Upload a photo"}</span>
-                    {!insertUploadLoading && <p style={{ position: "absolute", bottom: 12, left: 0, right: 0, textAlign: "center", fontSize: 10, fontWeight: 500, color: "#6b7480", margin: 0, lineHeight: 1.4 }}>Match · Food · Results · Gear</p>}
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{insertUploadLoading ? "Analysing…" : "Upload a photo"}</span>
+                    {!insertUploadLoading && <p style={{ position: "absolute", bottom: 12, left: 0, right: 0, textAlign: "center", fontSize: 10, fontWeight: 500, color: "rgba(255,255,255,0.7)", margin: 0, lineHeight: 1.4 }}>Match · Food · Results · Gear</p>}
                   </button>
                   <button
                     onClick={() => { closeAll(); router.push("/settings"); }}
-                    style={{ background: "#eef2ff", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1" }}
+                    className="active:scale-95 transition-transform"
+                    style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1" }}
                   >
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                     <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>Settings</span>
                   </button>
                   <button
                     onClick={() => { closeAll(); router.push("/profile?tab=profile"); }}
-                    style={{ background: "#eef2ff", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1" }}
+                    className="active:scale-95 transition-transform"
+                    style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "20px 16px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, aspectRatio: "1" }}
                   >
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1e3fa8" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>
                     <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>My Profile</span>
                   </button>
                 </div>
@@ -213,45 +225,46 @@ export default function Fab() {
                 {/* Add manually toggle */}
                 <button
                   onClick={() => setFabExpanded(v => !v)}
-                  style={{ width: "100%", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, padding: "6px 4px" }}
+                  style={{ width: "100%", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, padding: "4px 4px" }}
                 >
                   <div style={{ flex: 1, height: 1, background: "#f0f0f0" }} />
-                  <span style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 600, color: "#b0b5ba", textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>Add manually</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: fabExpanded ? "rotate(180deg)" : "rotate(0deg)", flexShrink: 0 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: "#b0b5ba", textTransform: "uppercase", letterSpacing: "0.08em", whiteSpace: "nowrap" }}>Log manually</span>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: fabExpanded ? "rotate(180deg)" : "rotate(0deg)", flexShrink: 0 }}>
                     <polyline points="6 9 12 15 18 9"/>
                   </svg>
                   <div style={{ flex: 1, height: 1, background: "#f0f0f0" }} />
                 </button>
 
-                {/* Tile grid */}
+                {/* Log tile grid */}
                 <div style={{ overflow: "hidden", maxHeight: fabExpanded ? 600 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingTop: 2 }}>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                       {([
-                        { label: "Match", sub: "Schedule", bg: "#eef2ff", color: "#2653d4", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>, action: () => { setSmartUploadResult({ category: "match_schedule", label: "Schedule a match", confidence: "high", data: { date: "", time: "", club: "", court: "", player_1: "", player_2: "", player_3: "", player_4: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
-                        { label: "Food", sub: "Meal or snack", bg: "#f0fdf4", color: "#16a34a", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>, action: () => { setSmartUploadResult({ category: "meal", label: "Add a meal", confidence: "high", data: { description: "", meal_type: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
-                        { label: "Gear", sub: "Racket, shoes…", bg: "#f5f0ff", color: "#7c3aed", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, action: () => { setSmartUploadResult({ category: "gear", label: "Add gear", confidence: "high", data: { type: "", brand: "", name: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
-                        { label: "Results", sub: "Match result", bg: "#fff7ed", color: "#ea580c", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, action: () => { setSmartUploadResult({ category: "match_result", label: "Add match result", confidence: "high", data: { result: "", score: "", opponent_names: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
+                        { label: "Match", sub: "Schedule", bg: "#eef2ff", color: "#2653d4", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>, action: () => { setSmartUploadResult({ category: "match_schedule", label: "Schedule a match", confidence: "high", data: { date: "", time: "", club: "", court: "", player_1: "", player_2: "", player_3: "", player_4: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
+                        { label: "Food", sub: "Meal or snack", bg: "#f0fdf4", color: "#16a34a", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>, action: () => { setSmartUploadResult({ category: "meal", label: "Add a meal", confidence: "high", data: { description: "", meal_type: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
+                        { label: "Gear", sub: "Racket, shoes…", bg: "#f5f0ff", color: "#7c3aed", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, action: () => { setSmartUploadResult({ category: "gear", label: "Add gear", confidence: "high", data: { type: "", brand: "", name: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
+                        { label: "Results", sub: "Match result", bg: "#fff7ed", color: "#ea580c", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, action: () => { setSmartUploadResult({ category: "match_result", label: "Add match result", confidence: "high", data: { result: "", score: "", opponent_names: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
                       ]).map(({ label, sub, bg, color, icon, action }) => (
-                        <button key={label} onClick={action} style={{ background: bg, border: "none", borderRadius: 14, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 16, textAlign: "left" }}>
+                        <button key={label} onClick={action} className="active:scale-95 transition-transform" style={{ background: bg, border: "none", borderRadius: 16, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14, textAlign: "left" }}>
                           {icon}
                           <div>
-                            <p style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{label}</p>
-                            <p style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 600, color, margin: "2px 0 0" }}>{sub}</p>
+                            <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{label}</p>
+                            <p style={{ fontSize: 12, fontWeight: 600, color, margin: "2px 0 0" }}>{sub}</p>
                           </div>
                         </button>
                       ))}
                     </div>
                     <button
                       onClick={() => setLogPickerSub("matchreview")}
-                      style={{ width: "100%", background: "#f8f9fa", border: "none", borderRadius: 14, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, textAlign: "left" }}
+                      className="active:scale-95 transition-transform"
+                      style={{ width: "100%", background: "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, textAlign: "left" }}
                     >
-                      <div style={{ width: 36, height: 36, borderRadius: 10, background: "#f0f0f2", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <div style={{ width: 38, height: 38, borderRadius: 10, background: "#eaebec", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                       </div>
                       <div>
-                        <p style={{ fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Note</p>
-                        <p style={{ fontSize: "clamp(11px, 2.8vw, 13px)", fontWeight: 500, color: "#8a9096", margin: "2px 0 0" }}>Thoughts, feelings, ideas</p>
+                        <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Note</p>
+                        <p style={{ fontSize: 12, fontWeight: 500, color: "#8a9096", margin: "2px 0 0" }}>Thoughts, feelings, ideas</p>
                       </div>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: "auto" }}><polyline points="9 18 15 12 9 6"/></svg>
                     </button>
