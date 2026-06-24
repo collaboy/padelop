@@ -371,7 +371,7 @@ export default function Fab() {
                           {pct === 100 ? "Daily Tasks ✓" : `Daily Tasks — ${done} of ${total} done`}
                         </span>
                       </button>
-                      <div style={{ padding: "0 20px", marginBottom: fabSchedOpen ? 14 : 16 }}>
+                      <div style={{ padding: "0 20px", marginBottom: fabSchedOpen ? 14 : 0 }}>
                         <div style={{ height: 5, borderRadius: 3, background: "#f0f2f5", overflow: "hidden" }}>
                           <div style={{ height: "100%", width: `${pct}%`, borderRadius: 3, background: barColor, transition: "width 0.4s" }} />
                         </div>
