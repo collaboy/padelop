@@ -590,6 +590,17 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
           saveHydrationToDb(yesterdayYMD, rangeToMl(hydrationLitres));
         }
       } catch {}
+
+      // Mark "Wake up" done in schedule so Daily Tasks bar reflects check-in completion
+      try {
+        const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
+        const titles = sd[todayYMD] ?? [];
+        if (!titles.includes("Wake up")) {
+          sd[todayYMD] = [...titles, "Wake up"];
+          localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
+        }
+      } catch {}
+
       afterSave();
     }
 
