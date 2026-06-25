@@ -1203,6 +1203,10 @@ export default function Home8() {
                     </p>
                     <p style={{ margin: 0, fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>{title}</p>
                     <p style={{ margin: 0, fontSize: "clamp(15px, 3.8vw, 18px)", color: "#6b7480", lineHeight: 1.6, textAlign: "center" }}>{sub}</p>
+                    <Link href="/profile?tab=profile" style={{ marginTop: 10, display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 999, background: "#f4f4f6", textDecoration: "none" }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: "#8a9096" }}>Profile</span>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#b0b5ba" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </Link>
                   </div>
                 );
               })()}
