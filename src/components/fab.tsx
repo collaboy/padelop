@@ -295,17 +295,12 @@ export default function Fab() {
                     <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>My Profile</span>
                   </button>
                   <button
-                    onClick={() => insertUploadRef.current?.click()}
-                    disabled={insertUploadLoading}
+                    onClick={() => setFabExpanded(v => !v)}
                     className="active:scale-95 transition-transform"
-                    style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1", opacity: insertUploadLoading ? 0.7 : 1 }}
+                    style={{ background: fabExpanded ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
                   >
-                    {insertUploadLoading ? (
-                      <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.2" strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                    ) : (
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
-                    )}
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>{insertUploadLoading ? "Analysing…" : "Upload"}</span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>+</span>
                   </button>
                 </div>
 
@@ -333,7 +328,7 @@ export default function Fab() {
                         <button key={label} onClick={action} className="active:scale-95 transition-transform" style={{ background: bg, border: "none", borderRadius: 16, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14, textAlign: "left" }}>
                           {icon}
                           <div>
-                            <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{label}</p>
+                            <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>+ {label}</p>
                             <p style={{ fontSize: 12, fontWeight: 600, color, margin: "2px 0 0" }}>{sub}</p>
                           </div>
                         </button>
@@ -348,7 +343,7 @@ export default function Fab() {
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                       </div>
                       <div>
-                        <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Note</p>
+                        <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>+ Note</p>
                         <p style={{ fontSize: 12, fontWeight: 500, color: "#8a9096", margin: "2px 0 0" }}>Thoughts, feelings, ideas</p>
                       </div>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: "auto" }}><polyline points="9 18 15 12 9 6"/></svg>
