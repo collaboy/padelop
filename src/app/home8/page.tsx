@@ -7,7 +7,7 @@ import LogSheet from "@/components/log-sheet";
 import ReadinessSheet from "@/components/readiness-sheet";
 import PushPrompt from "@/components/push-prompt";
 import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, computeMatchReadiness, loadMorningLog, improveTips, type MatchReadinessResult, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
-import { pad, addMins, toMins, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag, ITEM_COLORS, type ScheduleItem, type DayType, getScheduleData, SCHEDULE_DETAILS } from "@/lib/schedule-data";
+import { pad, addMins, toMins, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag, getDayType, ITEM_COLORS, type ScheduleItem, type DayType, getScheduleData, SCHEDULE_DETAILS } from "@/lib/schedule-data";
 import { saveUpcomingMatch, saveNutritionToDb, saveHydrationToDb, saveNoteToDb, saveMatchReview, saveGearToDb, saveScheduleDoneToDb, saveTrainingToDb } from "@/lib/db";
 import { hydrateFromSupabase } from "@/lib/sync";
 import { downloadSnapshot } from "@/lib/storage";
@@ -306,6 +306,7 @@ export default function Home8() {
   const [postMatchDate, setPostMatchDate] = useState<string | null>(null);
   const [checkinNudgeOpen, setCheckinNudgeOpen] = useState(false);
   const [yesterdayWasMatch, setYesterdayWasMatch] = useState(false);
+  const [dayType, setDayType] = useState<DayType>("baseline");
   const [drillTag, setDrillTag] = useState<string | null>(null);
   const [drillSteps, setDrillSteps] = useState<{ step: string; cue: string; reps: string }[] | null>(null);
 
@@ -580,6 +581,7 @@ export default function Home8() {
         }
       } catch {}
       setYesterdayWasMatch(wasYesterday);
+      setDayType(getDayType());
     }
     loadReadiness();
     loadMatch();
@@ -817,18 +819,6 @@ export default function Home8() {
   }, [cardSnap]);
 
   const today = new Date().toISOString().slice(0, 10);
-  const tomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
-  const lastMatchDate = [...reviews].sort((a, b) => b.ts.localeCompare(a.ts))[0]?.ts.slice(0, 10) ?? null;
-  const dayType: DayType = (() => {
-    if (match?.date === today) return "match";
-    if (match?.date === tomorrow) return "pre-match";
-    if (yesterdayWasMatch) return "recovery";
-    if (!lastMatchDate) return "baseline";
-    const daysSince = Math.round((new Date(today + "T12:00").getTime() - new Date(lastMatchDate + "T12:00").getTime()) / 86400000);
-    if (daysSince <= 0) return "match";
-    if (daysSince === 1) return "recovery";
-    return (daysSince - 2) % 2 === 0 ? "rest" : "training";
-  })();
   const dayColor = dayType === "match" ? "#2653d4" : dayType === "pre-match" ? "#d97706" : dayType === "recovery" ? "#7c3aed" : dayType === "rest" ? "#0e7490" : "#16a34a";
   const dayLabel = dayType === "match" ? "Match Day" : dayType === "pre-match" ? "Pre-Match Day" : dayType === "recovery" ? "Recovery Day" : dayType === "rest" ? "Rest Day" : dayType === "training" ? "Training Day" : "Today";
   const { schedule, currentIdx } = getScheduleData(dayType, match?.time ?? null, drillTag);
