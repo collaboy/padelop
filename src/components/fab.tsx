@@ -299,8 +299,7 @@ export default function Fab() {
                     className="active:scale-95 transition-transform"
                     style={{ background: fabExpanded ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
                   >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>+</span>
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                   </button>
                 </div>
 
