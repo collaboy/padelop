@@ -1123,7 +1123,11 @@ export default function Home8() {
                     {/* INFO STATE: fades out when playing */}
                     <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: warmupPlaying ? 0 : isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.35s", pointerEvents: warmupPlaying ? "none" : "auto" }}>
                       {!isSleepytime && <p className="text-[14px] tracking-wide leading-none" style={{ color: "#000", fontWeight: 600, background: "#fff", padding: 4, borderRadius: 4 }}>Do this now</p>}
-                      <p className="font-bold text-center" style={{ color: "#000", fontSize: s.title.length > 14 ? "clamp(19px, 5.8vw, 26px)" : "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, background: "#fff", padding: "4px 10px", borderRadius: 6, width: "fit-content", maxWidth: "84%", margin: 0 }}>{s.title}</p>
+                      <p className="font-bold text-center" style={{ color: "#000", fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, background: "#fff", padding: "3px 5px", borderRadius: 4, width: "fit-content", maxWidth: "84%", margin: 0 }}>
+                        {s.title.includes(" & ")
+                          ? <>{s.title.split(" & ")[0]} &<br />{s.title.split(" & ").slice(1).join(" & ")}</>
+                          : s.title}
+                      </p>
                       {isAudioAvailable
                         ? (
                           <button onClick={handleWarmupToggle} style={{ marginTop: 10, background: "#fff", border: "none", borderRadius: "50%", cursor: "pointer", width: 52, height: 52, display: "flex", alignItems: "center", justifyContent: "center" }}>
