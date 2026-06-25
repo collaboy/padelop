@@ -16,7 +16,7 @@ import {
   type Scores, type ScoreSnapshot, type ReviewEntry, type PillarStates, type PillarStatus,
   type HydrationEntry, type NutritionEntry, type HabitsEntry,
 } from "@/lib/scoring";
-import { getScheduleData, SCHEDULE_DETAILS, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag } from "@/lib/schedule-data";
+import { getScheduleData, getDayType, SCHEDULE_DETAILS, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag, type DayType } from "@/lib/schedule-data";
 
 // ── Profile ───────────────────────────────────────────────────────────────
 
@@ -530,7 +530,7 @@ export default function ProfilePage() {
 
   // Schedule state
   const [schedNow, setSchedNow] = useState(new Date());
-  const [dayType, setDayType] = useState<"match" | "recovery" | "training">("training");
+  const [dayType, setDayType] = useState<DayType>("baseline");
   const [schedule, setSchedule] = useState<ReturnType<typeof getScheduleData>["schedule"]>([]);
   const [schedCurrentIdx, setSchedCurrentIdx] = useState(0);
   const [drillTag, setDrillTag] = useState<string | null>(null);
@@ -613,8 +613,17 @@ export default function ProfilePage() {
     setPanelNoteText("");
   }
 
-  const panelDayLabel = dayType === "match" ? "Match Day" : dayType === "recovery" ? "Recovery Day" : "Training Day";
-  const panelDayColor = dayType === "match" ? "#2653d4" : dayType === "recovery" ? "#7c3aed" : "#16a34a";
+  const panelDayLabel =
+    dayType === "match"     ? "Match Day" :
+    dayType === "pre-match" ? "Pre-Match Day" :
+    dayType === "recovery"  ? "Recovery Day" :
+    dayType === "rest"      ? "Rest Day" :
+    dayType === "training"  ? "Training Day" : "Today";
+  const panelDayColor =
+    dayType === "match"     ? "#2653d4" :
+    dayType === "pre-match" ? "#d97706" :
+    dayType === "recovery"  ? "#7c3aed" :
+    dayType === "rest"      ? "#0e7490" : "#16a34a";
   const panelInputSt: React.CSSProperties = { width: "100%", padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", outline: "none", fontFamily: "inherit", background: "#f8f9fa", boxSizing: "border-box" };
   const panelLabelSt: React.CSSProperties = { fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#8a9096", marginBottom: 4, display: "block" };
 
@@ -627,14 +636,26 @@ export default function ProfilePage() {
       if (!history.some(h => h.date === yesterday)) {
         const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
         const doneTitles = sd[yesterday] ?? [];
-        let yDayType: "match" | "recovery" | "training" = "training";
+        let yDayType: DayType = "baseline";
         try {
           const nm = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
-          if (nm?.date === yesterday) { yDayType = "match"; }
-          else {
-            const dayBefore = new Date(Date.now() - 2 * 864e5).toISOString().slice(0, 10);
-            const revs: { ts?: string }[] = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
-            if (revs.some(r => r.ts?.slice(0, 10) === dayBefore)) yDayType = "recovery";
+          const todayForSeal = new Date().toISOString().slice(0, 10);
+          const revs: { ts?: string }[] = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+          if (nm?.date === yesterday) {
+            yDayType = "match";
+          } else if (nm?.date === todayForSeal) {
+            yDayType = "pre-match";
+          } else {
+            const matchDates = revs
+              .map(r => r.ts?.slice(0, 10))
+              .filter((d): d is string => !!d && d <= yesterday)
+              .sort().reverse();
+            if (matchDates.length > 0) {
+              const daysSince = Math.round((new Date(yesterday + "T12:00").getTime() - new Date(matchDates[0] + "T12:00").getTime()) / 86400000);
+              if (daysSince === 0) yDayType = "match";
+              else if (daysSince === 1) yDayType = "recovery";
+              else yDayType = (daysSince - 2) % 2 === 0 ? "rest" : "training";
+            }
           }
         } catch {}
         const ySched = getScheduleData(yDayType, null, getTopNeedsWorkTag()).schedule;
@@ -784,18 +805,12 @@ export default function ProfilePage() {
   useEffect(() => {
     const todayStr = new Date().toISOString().slice(0, 10);
     const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
-    let type: "match" | "recovery" | "training" = "training";
     let mTime: string | null = null;
     try {
       const m = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
-      if (m?.date === todayStr && m?.time) { type = "match"; mTime = m.time; }
+      if (m?.date === todayStr && m?.time) mTime = m.time;
     } catch {}
-    if (type === "training") {
-      try {
-        const revs: { ts: string }[] = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
-        if (revs.some(r => r.ts.slice(0, 10) === yesterday)) type = "recovery";
-      } catch {}
-    }
+    const type = getDayType();
     const tag = getTopNeedsWorkTag();
     setDrillTag(tag);
     setDayType(type);
@@ -1072,8 +1087,17 @@ export default function ProfilePage() {
   const schedModalItem = schedModalIdx !== null ? schedule[schedModalIdx] : null;
   const schedDetail = schedModalItem ? SCHEDULE_DETAILS[schedModalItem.title] : null;
   const schedDrillSteps = schedModalItem?.isDrill ? (DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).steps : null;
-  const dayLabel = dayType === "match" ? "Match Day" : dayType === "recovery" ? "Recovery Day" : "Training Day";
-  const dayColor = dayType === "match" ? "#2653d4" : dayType === "recovery" ? "#7c3aed" : "#16a34a";
+  const dayLabel =
+    dayType === "match"     ? "Match Day" :
+    dayType === "pre-match" ? "Pre-Match Day" :
+    dayType === "recovery"  ? "Recovery Day" :
+    dayType === "rest"      ? "Rest Day" :
+    dayType === "training"  ? "Training Day" : "Today";
+  const dayColor =
+    dayType === "match"     ? "#2653d4" :
+    dayType === "pre-match" ? "#d97706" :
+    dayType === "recovery"  ? "#7c3aed" :
+    dayType === "rest"      ? "#0e7490" : "#16a34a";
 
   const TABS = [
     { key: 'profile' as const, label: 'Profile' },

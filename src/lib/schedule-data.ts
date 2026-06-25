@@ -7,6 +7,8 @@ export const addMins = (h: number, m: number, delta: number) => {
 };
 export const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
 
+export type DayType = "match" | "pre-match" | "recovery" | "rest" | "training" | "baseline";
+
 export type DrillDef = { subtitle: string; focus: string; steps: { step: string; cue: string; reps: string }[] };
 export const DRILL_LIBRARY: Record<string, DrillDef> = {
   "Serve": {
@@ -121,37 +123,156 @@ export function getTopNeedsWorkTag(): string | null {
   } catch { return null; }
 }
 
+export function getDayType(): DayType {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const tomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
+
+    const nextMatch = JSON.parse(localStorage.getItem("padelop:next-match") || "null") as { date?: string } | null;
+    if (nextMatch?.date === today) return "match";
+    if (nextMatch?.date === tomorrow) return "pre-match";
+
+    const upcoming = JSON.parse(localStorage.getItem("padelop:upcoming-matches") || "[]") as { date?: string }[];
+    if (upcoming.some(m => m.date === today)) return "match";
+    if (upcoming.some(m => m.date === tomorrow)) return "pre-match";
+
+    const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]") as { ts?: string }[];
+    const matchDates = reviews
+      .map(r => r.ts?.slice(0, 10))
+      .filter((d): d is string => !!d && d <= today)
+      .sort()
+      .reverse();
+
+    if (matchDates.length === 0) return "baseline";
+
+    const lastMatchDate = matchDates[0];
+    const daysSince = Math.round(
+      (new Date(today + "T12:00").getTime() - new Date(lastMatchDate + "T12:00").getTime()) / 86400000
+    );
+
+    if (daysSince <= 0) return "match";
+    if (daysSince === 1) return "recovery";
+    // day 2 → rest, day 3 → training, day 4 → rest, day 5 → training…
+    return (daysSince - 2) % 2 === 0 ? "rest" : "training";
+  } catch {
+    return "baseline";
+  }
+}
+
 export const ITEM_COLORS: Record<string, string> = {
-  "Wake up": "#0e7490", "Breakfast": "#16a34a",
+  "Wake up": "#0e7490",
+  "Breakfast": "#16a34a",
   "Mobility Exercise": "#64748b",
-  "Pre-match meal": "#16a34a", "Warm up": "#d97706",
-  "Match": "#2653d4", "Cool down": "#64748b",
-  "Recovery meal": "#16a34a", "Short walk": "#0e7490",
-  "Stretch": "#64748b", "Lunch": "#16a34a",
-  "Cold shower": "#0e7490", "Dinner": "#16a34a",
-  "Active recovery": "#0e7490", "Visualisation": "#64748b",
+  "Light mobility": "#64748b",
+  "Morning snack": "#16a34a",
+  "Pre-match meal": "#16a34a",
+  "Warm up": "#d97706",
+  "Match": "#2653d4",
+  "Cool down": "#64748b",
+  "Recovery meal": "#16a34a",
+  "Post-match lunch": "#16a34a",
+  "Rest": "#0e7490",
+  "Short walk": "#0e7490",
+  "Stretch": "#64748b",
+  "Lunch": "#16a34a",
+  "Cold shower": "#0e7490",
+  "Dinner": "#16a34a",
+  "Early dinner": "#16a34a",
+  "Active recovery": "#0e7490",
+  "Visualisation": "#64748b",
+  "Regroup & mental prep": "#7c3aed",
   "Wind down": "#64748b",
 };
 
 export type ScheduleItem = { time: string; title: string; subtitle?: string; color: string; isDrill?: boolean };
 
-export function getScheduleData(dayType: "match" | "recovery" | "training", matchTime: string | null, drillTag: string | null): { schedule: ScheduleItem[]; currentIdx: number } {
-  const mH = matchTime ? parseInt(matchTime.split(":")[0]) : 18;
+function buildMatchSchedule(mH: number, mM: number, mt: string): Array<{ time: string; title: string; subtitle?: string }> {
+  const matchMins = mH * 60 + mM;
+
+  // Cap post-midnight times to 23:45 to avoid currentIdx wrap-around issues
+  const safeAdd = (delta: number) => {
+    const total = mH * 60 + mM + delta;
+    if (total >= 24 * 60) return `${pad(23)}:${pad(Math.min(59, total - 24 * 60))}`;
+    return addMins(mH, mM, delta);
+  };
+
+  // Morning match (before 13:00)
+  if (matchMins < 13 * 60) {
+    const hasMobility = matchMins - 90 >= 8 * 60 + 30;
+    const items: Array<{ time: string; title: string; subtitle?: string }> = [
+      { time: "07:00", title: "Wake up", subtitle: "500ml water before anything else" },
+      { time: "07:30", title: "Breakfast", subtitle: "Light and easy to digest" },
+    ];
+    if (hasMobility) {
+      items.push({ time: addMins(mH, mM, -90), title: "Light mobility", subtitle: "Brief activation — 15 min" });
+    }
+    items.push(
+      { time: addMins(mH, mM, -60), title: "Warm up", subtitle: "Get loose — dynamic movement" },
+      { time: mt, title: "Match", subtitle: "Game time" },
+      { time: safeAdd(90), title: "Post-match lunch", subtitle: "Protein + carbs — recovery window" },
+      { time: safeAdd(180), title: "Rest", subtitle: "Let your body recover" },
+      { time: "19:00", title: "Dinner", subtitle: "Anti-inflammatory focus — fish, greens" },
+      { time: "22:00", title: "Wind down", subtitle: "No screens, consistent bedtime" },
+    );
+    return items;
+  }
+
+  // Evening match (18:00 and later)
+  if (matchMins >= 18 * 60) {
+    return [
+      { time: "07:00", title: "Wake up", subtitle: "500ml water before anything else" },
+      { time: "07:30", title: "Breakfast", subtitle: "Oats, eggs, fruit" },
+      { time: "09:00", title: "Mobility Exercise", subtitle: "Foam roll & light stretching" },
+      { time: "12:30", title: "Lunch", subtitle: "Chicken, rice, veg" },
+      { time: addMins(mH, mM, -270), title: "Regroup & mental prep", subtitle: "Rest, visualise, stay off your feet" },
+      { time: addMins(mH, mM, -150), title: "Pre-match meal", subtitle: "Chicken, rice, light salad" },
+      { time: addMins(mH, mM, -60), title: "Warm up", subtitle: "Get loose — dynamic movement" },
+      { time: mt, title: "Match", subtitle: "Game time" },
+      { time: safeAdd(90), title: "Cool down", subtitle: "Stretch & mobility, 15 min" },
+      { time: safeAdd(120), title: "Recovery meal", subtitle: "Protein + carbs within 30 min" },
+      { time: safeAdd(150), title: "Wind down", subtitle: "No screens, light reading" },
+    ];
+  }
+
+  // Afternoon match (13:00–17:59)
+  const showMorningSnack = matchMins >= 16 * 60 + 30;
+  const items: Array<{ time: string; title: string; subtitle?: string }> = [
+    { time: "07:00", title: "Wake up", subtitle: "500ml water before anything else" },
+    { time: "07:30", title: "Breakfast", subtitle: "Oats, eggs, fruit" },
+    { time: "09:00", title: "Mobility Exercise", subtitle: "Foam roll & light stretching" },
+  ];
+  if (showMorningSnack) {
+    items.push({ time: "11:30", title: "Morning snack", subtitle: "Banana, oat bar or yogurt" });
+  }
+  items.push(
+    { time: addMins(mH, mM, -150), title: "Pre-match meal", subtitle: "Chicken, rice, light salad" },
+    { time: addMins(mH, mM, -60), title: "Warm up", subtitle: "Get loose — dynamic movement" },
+    { time: mt, title: "Match", subtitle: "Game time" },
+    { time: safeAdd(90), title: "Cool down", subtitle: "Stretch & mobility, 15 min" },
+    { time: safeAdd(120), title: "Recovery meal", subtitle: "Protein + carbs — serves as dinner" },
+    { time: "22:00", title: "Wind down", subtitle: "No screens, consistent bedtime" },
+  );
+  return items;
+}
+
+export function getScheduleData(dayType: DayType, matchTime: string | null, drillTag: string | null): { schedule: ScheduleItem[]; currentIdx: number } {
+  const mH = matchTime ? parseInt(matchTime.split(":")[0]) : 20;
   const mM = matchTime ? parseInt(matchTime.split(":")[1]) : 30;
-  const mt = matchTime ?? "18:30";
+  const mt = matchTime ?? "20:30";
   const drill = DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL;
   const drillTitle = drillTag ? `${drillTag} Focus` : "Skill Prep";
-  const rawSchedules: Record<string, Array<{ time: string; title: string; subtitle?: string; isDrill?: boolean }>> = {
-    match: [
-      { time: "07:00", title: "Wake up",        subtitle: "500ml water before anything else" },
-      { time: "07:30", title: "Breakfast",       subtitle: "Oats, eggs, fruit" },
-      { time: "09:00", title: "Mobility Exercise",        subtitle: "Foam roll & light stretching" },
-      { time: addMins(mH, mM, -360), title: "Pre-match meal", subtitle: "Chicken, rice, light salad" },
-      { time: addMins(mH, mM, -60),  title: "Warm up",        subtitle: "Get loose — dynamic movement" },
-      { time: mt,                    title: "Match",           subtitle: "Game time" },
-      { time: addMins(mH, mM, 90),   title: "Cool down",      subtitle: "Stretch & mobility, 15 min" },
-      { time: addMins(mH, mM, 120),  title: "Recovery meal",  subtitle: "Protein + carbs within 30 min" },
-      { time: "22:30", title: "Wind down",       subtitle: "No screens, light reading" },
+
+  type RawItem = { time: string; title: string; subtitle?: string; isDrill?: boolean };
+
+  const staticSchedules: Record<Exclude<DayType, "match">, RawItem[]> = {
+    "pre-match": [
+      { time: "07:00", title: "Wake up",            subtitle: "500ml water to start the day" },
+      { time: "07:30", title: "Breakfast",           subtitle: "Oats, eggs — carb focus today" },
+      { time: "09:30", title: "Light mobility",      subtitle: "Gentle — no hard session the day before" },
+      { time: "12:30", title: "Lunch",               subtitle: "Pasta, rice or potatoes — carb-rich" },
+      { time: "15:00", title: "Regroup & mental prep", subtitle: "Visualise tomorrow — review your patterns" },
+      { time: "18:30", title: "Early dinner",        subtitle: "Finish eating by 7pm — sleep quality matters" },
+      { time: "21:30", title: "Wind down",           subtitle: "Prioritise sleep — it's your biggest lever tonight" },
     ],
     recovery: [
       { time: "07:30", title: "Wake up",     subtitle: "500ml water — rehydrate after yesterday" },
@@ -163,10 +284,18 @@ export function getScheduleData(dayType: "match" | "recovery" | "training", matc
       { time: "19:00", title: "Dinner",      subtitle: "Anti-inflammatory focus — fish, greens" },
       { time: "21:30", title: "Wind down",   subtitle: "Sleep is your best recovery tool tonight" },
     ],
+    rest: [
+      { time: "07:00", title: "Wake up",        subtitle: "500ml water — rest day hydration still matters" },
+      { time: "07:30", title: "Breakfast",       subtitle: "Eggs, fruit, Greek yogurt" },
+      { time: "10:00", title: "Short walk",      subtitle: "20 min — light movement keeps you loose" },
+      { time: "12:30", title: "Lunch",           subtitle: "Chicken, salmon or legumes + veg" },
+      { time: "19:00", title: "Dinner",          subtitle: "Anti-inflammatory focus — fish, greens" },
+      { time: "22:00", title: "Wind down",       subtitle: "Consistent sleep schedule is performance" },
+    ],
     training: [
       { time: "07:00", title: "Wake up",          subtitle: "500ml water before coffee" },
       { time: "07:30", title: "Breakfast",         subtitle: "High protein — eggs, yogurt, fruit" },
-      { time: "09:30", title: "Mobility Exercise",          subtitle: "Hip flexors, thoracic spine, ankles" },
+      { time: "09:30", title: "Mobility Exercise", subtitle: "Hip flexors, thoracic spine, ankles" },
       { time: "11:00", title: drillTitle,          subtitle: drill.subtitle, isDrill: true },
       { time: "12:30", title: "Lunch",             subtitle: "Carbs + protein + greens" },
       { time: "15:00", title: "Active recovery",   subtitle: "Light walk or gentle movement" },
@@ -174,11 +303,26 @@ export function getScheduleData(dayType: "match" | "recovery" | "training", matc
       { time: "21:00", title: "Visualisation",     subtitle: "5 min mental rehearsal of key patterns" },
       { time: "22:30", title: "Wind down",         subtitle: "No screens, consistent bedtime" },
     ],
+    baseline: [
+      { time: "07:00", title: "Wake up",          subtitle: "500ml water before anything else" },
+      { time: "07:30", title: "Breakfast",         subtitle: "High protein — eggs, yogurt, fruit" },
+      { time: "09:30", title: "Mobility Exercise", subtitle: "Hip flexors, thoracic spine, ankles" },
+      { time: "12:30", title: "Lunch",             subtitle: "Carbs + protein + greens" },
+      { time: "15:00", title: "Active recovery",   subtitle: "Light walk or gentle movement" },
+      { time: "19:00", title: "Dinner",            subtitle: "Focus on variety and micronutrients" },
+      { time: "22:00", title: "Wind down",         subtitle: "No screens, consistent bedtime" },
+    ],
   };
-  const schedule: ScheduleItem[] = rawSchedules[dayType].map(item => ({
+
+  const rawItems: RawItem[] = dayType === "match"
+    ? buildMatchSchedule(mH, mM, mt)
+    : staticSchedules[dayType];
+
+  const schedule: ScheduleItem[] = rawItems.map(item => ({
     ...item,
     color: item.isDrill ? "#2653d4" : (ITEM_COLORS[item.title] ?? "#8a9096"),
   }));
+
   const curMins = new Date().getHours() * 60 + new Date().getMinutes();
   let idx = 0;
   if (curMins >= toMins(schedule[schedule.length - 1].time)) {
@@ -209,6 +353,16 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
     { step: "Thoracic rotation", cue: "Sit back on heels, hands behind head. Rotate your upper back slowly left and right.", reps: "10 reps each direction" },
     { step: "Ankle circles", cue: "Stand on one foot and draw slow controlled circles with your raised ankle.", reps: "10 each direction, each ankle" },
   ]},
+  "Light mobility": { type: 'exercise', focus: "Activation · gentle prep", steps: [
+    { step: "Leg swings", cue: "Hold a wall, swing each leg forward and back. Easy and controlled.", reps: "10 each leg" },
+    { step: "Shoulder rolls", cue: "Slow full circles forward and back. Wake up the rotator cuff without loading it.", reps: "10 each direction" },
+    { step: "Hip circles", cue: "Hands on hips, slow big circles. Loosen the hip capsule before tomorrow.", reps: "10 each direction" },
+  ]},
+  "Morning snack": { type: 'meal', focus: "Light energy · easy digestion", options: [
+    { title: "Banana + nut butter", detail: "quick carbs, a little fat" },
+    { title: "Oat bar", detail: "slow release, portable" },
+    { title: "Greek yogurt", detail: "protein hit, light on the stomach" },
+  ]},
   "Pre-match meal": { type: 'meal', focus: "Easily digestible · energy without heaviness", options: [
     { title: "Chicken + white rice", detail: "cucumber salad" },
     { title: "Pasta + lean mince", detail: "light tomato sauce" },
@@ -230,6 +384,12 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
     { title: "Chicken stir-fry", detail: "rice noodles and broccoli" },
     { title: "Protein shake + toast", detail: "banana and peanut butter" },
   ]},
+  "Post-match lunch": { type: 'meal', focus: "Recovery · protein + carbs", options: [
+    { title: "Salmon + sweet potato", detail: "wilted spinach" },
+    { title: "Chicken + rice", detail: "roasted veg" },
+    { title: "Protein shake + toast", detail: "banana and peanut butter" },
+  ]},
+  "Rest": { type: 'info', focus: "Active recovery · circulation", text: "Rest is part of training. Keep movement minimal — a short walk is fine, nothing more. Your nervous system needs this window to consolidate adaptation from the sessions around it." },
   "Short walk": { type: 'info', focus: "Active recovery · circulation", text: "Walk at a pace where you can hold a full conversation. Low-intensity movement flushes metabolic waste from fatigued muscles without adding stress. 20 minutes is enough." },
   "Stretch": { type: 'exercise', focus: "Quads · IT band · hip flexors · calves", steps: [
     { step: "IT band roll", cue: "Side-lying, roll slowly from hip to knee on the outer thigh. Pause and breathe on tight spots.", reps: "60–90 sec each leg" },
@@ -247,7 +407,17 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
     { title: "Sea bass + brown rice", detail: "stir-fried kale and broccoli" },
     { title: "Chicken thighs + couscous", detail: "roasted Mediterranean veg" },
   ]},
+  "Early dinner": { type: 'meal', focus: "Carb focus · pre-match prep", options: [
+    { title: "Pasta + chicken", detail: "light tomato sauce" },
+    { title: "Rice + salmon", detail: "steamed veg" },
+    { title: "Jacket potato + eggs", detail: "side salad" },
+  ]},
   "Active recovery": { type: 'info', focus: "Aerobic flush · below 130 bpm", text: "Walk, swim, or cycle at a pace where you can hold a full conversation. Keep heart rate below 130 bpm. Light aerobic activity maintains cardiovascular fitness without accumulating fatigue." },
+  "Regroup & mental prep": { type: 'exercise', focus: "Mental rehearsal · focus", steps: [
+    { step: "Box breathing", cue: "4 in, 4 hold, 4 out, 4 hold. Settle the nervous system before the match window.", reps: "5 rounds" },
+    { step: "Pattern review", cue: "Recall 2–3 patterns that work for you. Not everything — just what you'll lean on today.", reps: "3 minutes" },
+    { step: "Visualise the first game", cue: "Picture your first serve, first volley, first exchange. Arrive mentally before you arrive physically.", reps: "2 minutes" },
+  ]},
   "Visualisation": { type: 'exercise', focus: "Mental rehearsal · pattern reinforcement", steps: [
     { step: "Replay a key moment", cue: "Pick one point from your last match that you lost. Replay it slowly in your mind — what would you change?", reps: "2 min" },
     { step: "Strongest pattern", cue: "Visualise your best attacking sequence in full detail: footwork → position → shot → result. Make it vivid.", reps: "2 min" },

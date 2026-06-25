@@ -7,7 +7,7 @@ import LogSheet from "@/components/log-sheet";
 import ReadinessSheet from "@/components/readiness-sheet";
 import PushPrompt from "@/components/push-prompt";
 import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, computeMatchReadiness, loadMorningLog, improveTips, type MatchReadinessResult, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
-import { pad, addMins, toMins, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag, ITEM_COLORS, type ScheduleItem, getScheduleData, SCHEDULE_DETAILS } from "@/lib/schedule-data";
+import { pad, addMins, toMins, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag, ITEM_COLORS, type ScheduleItem, type DayType, getScheduleData, SCHEDULE_DETAILS } from "@/lib/schedule-data";
 import { saveUpcomingMatch, saveNutritionToDb, saveHydrationToDb, saveNoteToDb, saveMatchReview, saveGearToDb, saveScheduleDoneToDb, saveTrainingToDb } from "@/lib/db";
 import { hydrateFromSupabase } from "@/lib/sync";
 import { downloadSnapshot } from "@/lib/storage";
@@ -160,19 +160,20 @@ function greeting() {
   return "Good Evening";
 }
 
-function getDayMsg(match: { date: string; time: string } | null, now: Date): string {
-  const today = now.toISOString().slice(0, 10);
-  const yesterday = new Date(now.getTime() - 864e5).toISOString().slice(0, 10);
-  if (match?.date === today) {
+function getDayMsg(dayType: DayType, match: { date: string; time: string } | null, now: Date): string {
+  if (dayType === "match" && match) {
     const [mH, mM] = match.time.split(":").map(Number);
     const diffMins = mH * 60 + mM - now.getHours() * 60 - now.getMinutes();
-    if (diffMins > 180) { const hrs = Math.floor(diffMins / 60); return `Match in ${hrs}h — hydrate and eat your pre-game meal ${hrs > 4 ? "a few hours before" : "soon"}.`; }
+    if (diffMins > 180) { const hrs = Math.floor(diffMins / 60); return `Match in ${hrs}h — hydrate and eat your pre-match meal ${hrs > 4 ? "a few hours before" : "soon"}.`; }
     if (diffMins > 60) return "Time to warm up. Sip water and focus.";
     if (diffMins > 0) return "Almost game time. Breathe and trust your prep.";
     return "Great match today. Stretch, eat protein, and rest up.";
   }
-  if (match?.date === yesterday) return "Recovery day. Drink plenty of water and get your protein in.";
-  return "Rest day. Hydrate, eat well, and take it easy.";
+  if (dayType === "pre-match") return "Match tomorrow — carb up tonight, get to bed early.";
+  if (dayType === "recovery") return "Recovery day. Drink plenty of water and get your protein in.";
+  if (dayType === "rest") return "Rest day. Hydrate, eat well, and let the body absorb the work.";
+  if (dayType === "training") return "Training day — small habits compound into big results.";
+  return "Hydrate, eat well, and stay consistent.";
 }
 
 function getMatchTips(
@@ -371,15 +372,29 @@ export default function Home8() {
       if (!alreadySealed) {
         const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
         const doneTitles = sd[yesterday] ?? [];
-        let yDayType: "match" | "recovery" | "training" = "training";
+        let yDayType: DayType = "baseline";
         try {
           const nm = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
-          if (nm?.date === yesterday) { yDayType = "match"; }
-          else {
-            const dayBefore = new Date(Date.now() - 2 * 864e5).toISOString().slice(0, 10);
-            const revs: { ts?: string }[] = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
-            if (revs.some(r => r.ts?.slice(0, 10) === dayBefore)) yDayType = "recovery";
+          const twoDaysAgo = new Date(Date.now() - 2 * 864e5).toISOString().slice(0, 10);
+          const revs: { ts?: string }[] = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+          if (nm?.date === yesterday) {
+            yDayType = "match";
+          } else if (nm?.date === today) {
+            yDayType = "pre-match";
+          } else {
+            const matchDates = revs
+              .map(r => r.ts?.slice(0, 10))
+              .filter((d): d is string => !!d && d <= yesterday)
+              .sort().reverse();
+            if (matchDates.length === 0) { yDayType = "baseline"; }
+            else {
+              const daysSince = Math.round((new Date(yesterday + "T12:00").getTime() - new Date(matchDates[0] + "T12:00").getTime()) / 86400000);
+              if (daysSince === 0) yDayType = "match";
+              else if (daysSince === 1) yDayType = "recovery";
+              else yDayType = (daysSince - 2) % 2 === 0 ? "rest" : "training";
+            }
           }
+          void twoDaysAgo;
         } catch {}
         const ySched = getScheduleData(yDayType, null, getTopNeedsWorkTag()).schedule;
         const total = ySched.length;
@@ -802,9 +817,20 @@ export default function Home8() {
   }, [cardSnap]);
 
   const today = new Date().toISOString().slice(0, 10);
-  const dayType: "match" | "recovery" | "training" = match?.date === today ? "match" : yesterdayWasMatch ? "recovery" : "training";
-  const dayColor = dayType === "match" ? "#2653d4" : dayType === "recovery" ? "#7c3aed" : "#16a34a";
-  const dayLabel = dayType === "match" ? "Match Day" : dayType === "recovery" ? "Recovery Day" : "Training Day";
+  const tomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
+  const lastMatchDate = [...reviews].sort((a, b) => b.ts.localeCompare(a.ts))[0]?.ts.slice(0, 10) ?? null;
+  const dayType: DayType = (() => {
+    if (match?.date === today) return "match";
+    if (match?.date === tomorrow) return "pre-match";
+    if (yesterdayWasMatch) return "recovery";
+    if (!lastMatchDate) return "baseline";
+    const daysSince = Math.round((new Date(today + "T12:00").getTime() - new Date(lastMatchDate + "T12:00").getTime()) / 86400000);
+    if (daysSince <= 0) return "match";
+    if (daysSince === 1) return "recovery";
+    return (daysSince - 2) % 2 === 0 ? "rest" : "training";
+  })();
+  const dayColor = dayType === "match" ? "#2653d4" : dayType === "pre-match" ? "#d97706" : dayType === "recovery" ? "#7c3aed" : dayType === "rest" ? "#0e7490" : "#16a34a";
+  const dayLabel = dayType === "match" ? "Match Day" : dayType === "pre-match" ? "Pre-Match Day" : dayType === "recovery" ? "Recovery Day" : dayType === "rest" ? "Rest Day" : dayType === "training" ? "Training Day" : "Today";
   const { schedule, currentIdx } = getScheduleData(dayType, match?.time ?? null, drillTag);
   const doItem = schedule[currentIdx];
   const modalIdx = schedModalIdx ?? currentIdx;
@@ -1180,12 +1206,15 @@ export default function Home8() {
               {/* Card 2: encouragement */}
               {(() => {
                 const title =
-                  dayType === "match"    ? "Game on." :
-                  dayType === "recovery" ? "Well played." :
+                  dayType === "match"     ? "Game on." :
+                  dayType === "pre-match" ? "Tomorrow is match day." :
+                  dayType === "recovery"  ? "Well played." :
                   "Keep going.";
                 const sub =
                   dayType === "match"
                     ? "Trust your game and enjoy every point."
+                    : dayType === "pre-match"
+                    ? "Rest up, carb load, and get to bed early. The prep is done."
                     : dayType === "recovery"
                     ? "Rest is part of training. Let your body recover and come back stronger."
                     : drillTag
@@ -1199,7 +1228,7 @@ export default function Home8() {
                     onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
                   >
                     <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4", textAlign: "center" }}>
-                      {dayType === "match" ? "Match Day" : dayType === "recovery" ? "Recovery Day" : "Training Day"}
+                      {dayLabel}
                     </p>
                     <p style={{ margin: 0, fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>{title}</p>
                     <p style={{ margin: 0, fontSize: "clamp(15px, 3.8vw, 18px)", color: "#6b7480", lineHeight: 1.6, textAlign: "center" }}>{sub}</p>

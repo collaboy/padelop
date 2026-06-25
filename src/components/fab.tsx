@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { saveUpcomingMatch, saveNutritionToDb, saveNoteToDb, saveMatchReview, saveGearToDb, saveScheduleDoneToDb } from "@/lib/db";
-import { getScheduleData, SCHEDULE_DETAILS, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag } from "@/lib/schedule-data";
+import { getScheduleData, getDayType, SCHEDULE_DETAILS, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag, type DayType } from "@/lib/schedule-data";
 
 type StoredMatch = { date: string; time: string; club: string; court: string; player_1: string; player_2: string; player_3: string; player_4: string };
 
@@ -52,7 +52,7 @@ export default function Fab() {
   const [noteText, setNoteText] = useState("");
 
   // Schedule state (for Today section in the sheet)
-  const [fabDayType, setFabDayType] = useState<"match" | "recovery" | "training">("training");
+  const [fabDayType, setFabDayType] = useState<DayType>("baseline");
   const [fabDrillTag, setFabDrillTag] = useState<string | null>(null);
   const [fabSchedule, setFabSchedule] = useState<ReturnType<typeof getScheduleData>["schedule"]>([]);
   const [fabCurrentIdx, setFabCurrentIdx] = useState(0);
@@ -79,21 +79,20 @@ export default function Fab() {
     function load() {
       const todayStr = new Date().toISOString().slice(0, 10);
       const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
-      let type: "match" | "recovery" | "training" = "training";
       let mTime: string | null = null;
       try {
         const m = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
-        if (m?.date === todayStr && m?.time) { type = "match"; mTime = m.time; }
+        if (m?.date === todayStr && m?.time) mTime = m.time;
         setFabNextMatch(m?.date ? m : null);
       } catch { setFabNextMatch(null); }
       try {
         const reviews: { ts: string; result?: string; opponentNames?: string; opponent?: string }[] = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
-        if (type === "training" && reviews.some(r => r.ts.slice(0, 10) === yesterday)) type = "recovery";
         const sorted = [...reviews].sort((a, b) => b.ts.localeCompare(a.ts));
         setFabLastReview(sorted[0] ? { ts: sorted[0].ts, result: sorted[0].result || "", opponentNames: sorted[0].opponentNames, opponent: sorted[0].opponent } : null);
       } catch { setFabLastReview(null); }
       const tag = getTopNeedsWorkTag();
       setFabDrillTag(tag);
+      const type = getDayType();
       setFabDayType(type);
       const { schedule: s, currentIdx: ci } = getScheduleData(type, mTime, tag);
       setFabSchedule(s);
@@ -166,13 +165,23 @@ export default function Fab() {
     setFabExpandedRow(null);
   }
 
-  const fabDayLabel = fabDayType === "match" ? "Match Day" : fabDayType === "recovery" ? "Recovery Day" : "Training Day";
-  const fabDayColor = fabDayType === "match" ? "#2653d4" : fabDayType === "recovery" ? "#7c3aed" : "#16a34a";
-  const fabDayMessage = fabDayType === "match"
-    ? "Match day — focus, communicate, compete."
-    : fabDayType === "recovery"
-    ? "Recovery day — rest is training too. Go easy."
-    : "Training day — small habits compound into big results.";
+  const fabDayLabel =
+    fabDayType === "match"     ? "Match Day" :
+    fabDayType === "pre-match" ? "Pre-Match Day" :
+    fabDayType === "recovery"  ? "Recovery Day" :
+    fabDayType === "rest"      ? "Rest Day" :
+    fabDayType === "training"  ? "Training Day" : "Today";
+  const fabDayColor =
+    fabDayType === "match"     ? "#2653d4" :
+    fabDayType === "pre-match" ? "#d97706" :
+    fabDayType === "recovery"  ? "#7c3aed" :
+    fabDayType === "rest"      ? "#0e7490" : "#16a34a";
+  const fabDayMessage =
+    fabDayType === "match"     ? "Match day — focus, communicate, compete." :
+    fabDayType === "pre-match" ? "Match tomorrow — rest up, carb load, get to bed early." :
+    fabDayType === "recovery"  ? "Recovery day — rest is training too. Go easy." :
+    fabDayType === "rest"      ? "Rest day — let the body absorb the work." :
+    "Training day — small habits compound into big results.";
 
   const closeFabSchedModal = () => {
     setFabSchedModalClosing(true);
