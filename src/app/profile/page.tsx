@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { saveGearToDb, uploadGearImageToStorage, saveProfileToDb, saveNutritionInsightToDb, saveUpcomingMatch, saveScheduleDoneToDb, saveScoreSnapshotToDb } from "@/lib/db";
+import { saveGearToDb, uploadGearImageToStorage, saveProfileToDb, saveNutritionInsightToDb, saveUpcomingMatch, saveScheduleDoneToDb, saveScoreSnapshotToDb, saveNutritionToDb, saveNoteToDb, saveMatchReview } from "@/lib/db";
 import { resizeImage } from "@/lib/image";
 import LogSheet from "@/components/log-sheet";
 import AvatarCropModal from "@/components/avatar-crop-modal";
@@ -439,6 +439,32 @@ function PrevDaysList({ days, schedDone, deduped, getScheduleData, loadScoringDa
   return <div>{rows}</div>;
 }
 
+function panelGetMatchList(): StoredMatch[] {
+  try {
+    const raw = localStorage.getItem("padelop:upcoming-matches");
+    if (raw) return JSON.parse(raw);
+    const single = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
+    if (single?.date) return [single];
+  } catch {}
+  return [];
+}
+
+function panelSaveMatchListLocal(list: StoredMatch[]) {
+  const today = new Date().toISOString().slice(0, 10);
+  const future = list.filter(m => m.date >= today).sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+  try {
+    localStorage.setItem("padelop:upcoming-matches", JSON.stringify(future));
+    if (future.length > 0) localStorage.setItem("padelop:next-match", JSON.stringify(future[0]));
+    else localStorage.removeItem("padelop:next-match");
+    window.dispatchEvent(new Event("storage"));
+  } catch {}
+}
+
+function nowTimeStr() {
+  const n = new Date();
+  return `${String(n.getHours()).padStart(2, "0")}:${String(n.getMinutes()).padStart(2, "0")}`;
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
@@ -512,6 +538,23 @@ export default function ProfilePage() {
   const [schedModalIdx, setSchedModalIdx] = useState<number | null>(null);
   const [schedModalClosing, setSchedModalClosing] = useState(false);
   const [profileDetailOpen, setProfileDetailOpen] = useState(false);
+
+  // Panel state (inline action panel below profile card)
+  const [panelExpanded, setPanelExpanded] = useState(false);
+  const [panelSchedOpen, setPanelSchedOpen] = useState(false);
+  const [panelUploadLoading, setPanelUploadLoading] = useState(false);
+  const [panelUploadCategory, setPanelUploadCategory] = useState<string | null>(null);
+  const [panelSmartResult, setPanelSmartResult] = useState<{ category: string; label: string; confidence: string; data: Record<string, string> } | null>(null);
+  const [panelSmartError, setPanelSmartError] = useState<string | null>(null);
+  const [panelUploadCatPickerOpen, setPanelUploadCatPickerOpen] = useState(false);
+  const [panelMealTime, setPanelMealTime] = useState("");
+  const [panelMealText, setPanelMealText] = useState("");
+  const [panelMealsToday, setPanelMealsToday] = useState<{ id: string; time: string; description: string }[]>([]);
+  const [panelNoteText, setPanelNoteText] = useState("");
+  const [panelLogSub, setPanelLogSub] = useState<"nutrition" | "matchreview" | "upload-confirm" | null>(null);
+  const [panelSchedModalIdx, setPanelSchedModalIdx] = useState<number | null>(null);
+  const [panelSchedModalClosing, setPanelSchedModalClosing] = useState(false);
+  const panelUploadRef = useRef<HTMLInputElement>(null);
   const [prevDaysOpen, setPrevDaysOpen] = useState(false);
   const todayKey = new Date().toISOString().slice(0, 10);
   const [schedDone, setSchedDone] = useState<Record<string, string[]>>({});
@@ -525,6 +568,55 @@ export default function ProfilePage() {
       return updated;
     });
   }
+
+  function panelToggleDone(title: string) {
+    toggleSchedDone(todayKey, title);
+  }
+
+  function panelCloseSchedModal() {
+    setPanelSchedModalClosing(true);
+    setTimeout(() => { setPanelSchedModalIdx(null); setPanelSchedModalClosing(false); }, 320);
+  }
+
+  function panelHandleSchedDone() {
+    if (panelSchedModalIdx === null) return;
+    const item = schedule[panelSchedModalIdx];
+    const isComplete = (schedDone[todayKey] ?? []).includes(item.title);
+    panelToggleDone(item.title);
+    if (!isComplete) { setTimeout(panelCloseSchedModal, 350); } else { panelCloseSchedModal(); }
+  }
+
+  function panelSaveMealEntry(time: string, description: string) {
+    if (!description.trim()) return;
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const entry = { id: Date.now().toString(), date: dateStr, time, description: description.trim() };
+    try {
+      const existing = JSON.parse(localStorage.getItem("padelop:meal-log") || "[]");
+      localStorage.setItem("padelop:meal-log", JSON.stringify([...existing, entry]));
+      window.dispatchEvent(new Event("storage"));
+    } catch {}
+    saveNutritionToDb({ date: dateStr, meal_type: time, description: description.trim() });
+    setPanelMealsToday(prev => [...prev, entry]);
+    setPanelMealText("");
+  }
+
+  function panelSaveNote(text: string) {
+    if (!text.trim()) return;
+    const date = new Date().toISOString().slice(0, 10);
+    const entry = { id: Date.now().toString(), date, ts: new Date().toISOString(), text: text.trim() };
+    try {
+      const existing = JSON.parse(localStorage.getItem("padelop:notes") || "[]");
+      localStorage.setItem("padelop:notes", JSON.stringify([entry, ...existing].slice(0, 200)));
+      window.dispatchEvent(new Event("storage"));
+    } catch {}
+    saveNoteToDb({ date, body: text.trim() });
+    setPanelNoteText("");
+  }
+
+  const panelDayLabel = dayType === "match" ? "Match Day" : dayType === "recovery" ? "Recovery Day" : "Training Day";
+  const panelDayColor = dayType === "match" ? "#2653d4" : dayType === "recovery" ? "#7c3aed" : "#16a34a";
+  const panelInputSt: React.CSSProperties = { width: "100%", padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", outline: "none", fontFamily: "inherit", background: "#f8f9fa", boxSizing: "border-box" };
+  const panelLabelSt: React.CSSProperties = { fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#8a9096", marginBottom: 4, display: "block" };
 
   function loadAll() {
     // Seal yesterday's schedule completion into padelop:schedule-history
@@ -1188,6 +1280,162 @@ export default function ProfilePage() {
                 </button>
               </div>
             )}
+          </div>
+
+          {/* ── Inline Action Panel ─────────────────────────────────────── */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+
+            {panelSmartError && (
+              <div style={{ background: "#fff5f5", border: "1.5px solid #fecaca", borderRadius: 12, padding: "10px 14px" }}>
+                <p style={{ fontSize: 14, color: "#dc2626", margin: 0 }}>{panelSmartError}</p>
+              </div>
+            )}
+
+            {/* Top row — Home, My Profile, Upload */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+              <button
+                onClick={() => { router.push("/home8"); }}
+                className="active:scale-95 transition-transform"
+                style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
+              </button>
+              <button
+                onClick={() => { router.push("/profile?tab=profile"); }}
+                className="active:scale-95 transition-transform"
+                style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>My Profile</span>
+              </button>
+              <button
+                onClick={() => panelUploadRef.current?.click()}
+                disabled={panelUploadLoading}
+                className="active:scale-95 transition-transform"
+                style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1", opacity: panelUploadLoading ? 0.7 : 1 }}
+              >
+                {panelUploadLoading ? (
+                  <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.2" strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                ) : (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                )}
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>{panelUploadLoading ? "Analysing…" : "Upload"}</span>
+              </button>
+            </div>
+
+            {/* Log manually — line separator */}
+            <button
+              onClick={() => setPanelExpanded(v => !v)}
+              style={{ width: "100%", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, padding: "4px 0" }}
+            >
+              <div style={{ flex: 1, height: 1, background: "#e0e2e5" }} />
+              <span style={{ fontSize: 12, fontWeight: 600, color: "#8a9096", whiteSpace: "nowrap" }}>Log manually</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#b0b5ba" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: panelExpanded ? "rotate(180deg)" : "rotate(0deg)", flexShrink: 0 }}><polyline points="6 9 12 15 18 9"/></svg>
+              <div style={{ flex: 1, height: 1, background: "#e0e2e5" }} />
+            </button>
+
+            {/* Log manually expanded */}
+            <div style={{ overflow: "hidden", maxHeight: panelExpanded ? 600 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingTop: 10 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                  {([
+                    { label: "Match", sub: "Schedule", bg: "#eef2ff", color: "#2653d4", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>, action: () => { setPanelSmartResult({ category: "match_schedule", label: "Schedule a match", confidence: "high", data: { date: "", time: "", club: "", court: "", player_1: "", player_2: "", player_3: "", player_4: "" } }); setPanelLogSub("upload-confirm"); } },
+                    { label: "Food", sub: "Meal or snack", bg: "#f0fdf4", color: "#16a34a", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>, action: () => { setPanelSmartResult({ category: "meal", label: "Add a meal", confidence: "high", data: { description: "", meal_type: "" } }); setPanelLogSub("upload-confirm"); } },
+                    { label: "Gear", sub: "Racket, shoes…", bg: "#f5f0ff", color: "#7c3aed", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, action: () => { setPanelSmartResult({ category: "gear", label: "Add gear", confidence: "high", data: { type: "", brand: "", name: "" } }); setPanelLogSub("upload-confirm"); } },
+                    { label: "Results", sub: "Match result", bg: "#fff7ed", color: "#ea580c", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, action: () => { setPanelSmartResult({ category: "match_result", label: "Add match result", confidence: "high", data: { result: "", score: "", opponent_names: "" } }); setPanelLogSub("upload-confirm"); } },
+                  ] as { label: string; sub: string; bg: string; color: string; icon: React.ReactNode; action: () => void }[]).map(({ label, sub, bg, color, icon, action }) => (
+                    <button key={label} onClick={action} className="active:scale-95 transition-transform" style={{ background: bg, border: "none", borderRadius: 16, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14, textAlign: "left" }}>
+                      {icon}
+                      <div>
+                        <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{label}</p>
+                        <p style={{ fontSize: 12, fontWeight: 600, color, margin: "2px 0 0" }}>{sub}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setPanelLogSub("matchreview")}
+                  className="active:scale-95 transition-transform"
+                  style={{ width: "100%", background: "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, textAlign: "left" }}
+                >
+                  <div style={{ width: 38, height: 38, borderRadius: 10, background: "#eaebec", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Note</p>
+                    <p style={{ fontSize: 12, fontWeight: 500, color: "#8a9096", margin: "2px 0 0" }}>Thoughts, feelings, ideas</p>
+                  </div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: "auto" }}><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Daily Tasks row + expanded */}
+            {(() => {
+              const todayDoneSet = new Set(schedDone[todayKey] ?? []);
+              const total = schedule.length;
+              const done = schedule.filter(s => todayDoneSet.has(s.title)).length;
+              const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+              const barColor = pct === 100 ? "#00D455" : pct >= 50 ? "#2653d4" : "#f59e0b";
+              return (
+                <>
+                  {total > 0 && (
+                    <button
+                      onClick={() => setPanelSchedOpen(o => !o)}
+                      className="active:scale-95 transition-transform"
+                      style={{ width: "100%", background: panelSchedOpen ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 10, textAlign: "left", marginTop: -8 }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Daily Tasks</span>
+                        <span style={{ fontSize: 12, color: "#8a9096" }}>{pct === 100 ? "All done ✓" : `${done} of ${total}`}</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: panelSchedOpen ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
+                      </div>
+                      <div style={{ width: "100%", height: 4, borderRadius: 2, background: "#e0e2e5", overflow: "hidden" }}>
+                        <div style={{ height: "100%", width: `${pct}%`, background: barColor, borderRadius: 2, transition: "width 0.4s" }} />
+                      </div>
+                    </button>
+                  )}
+
+                  <div style={{ overflow: "hidden", maxHeight: panelSchedOpen ? 800 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
+                    <div style={{ paddingTop: 10 }}>
+                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden", padding: "20px" }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                          {schedule.map((item, i) => {
+                            const isDone = (schedDone[todayKey] ?? []).includes(item.title);
+                            return (
+                              <div
+                                key={item.title}
+                                onClick={() => { if (SCHEDULE_DETAILS[item.title] || item.isDrill) setPanelSchedModalIdx(i); }}
+                                style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", cursor: SCHEDULE_DETAILS[item.title] || item.isDrill ? "pointer" : "default", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f6" : "none" }}
+                              >
+                                <button
+                                  onClick={e => { e.stopPropagation(); panelToggleDone(item.title); }}
+                                  style={{ width: 22, height: 22, borderRadius: 6, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s", cursor: "pointer" }}
+                                >
+                                  {isDone && <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                                </button>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none" }}>{item.title}</p>
+                                  {item.subtitle && <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9aa0a6", fontWeight: 500 }}>{item.subtitle}</p>}
+                                </div>
+                                <span style={{ fontSize: 12, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div style={{ paddingTop: 16, marginTop: 14, borderTop: "1px solid #f0f2f5", textAlign: "center" }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: panelDayColor }}>Today</span>
+                          <p style={{ margin: "4px 0 4px", fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{panelDayLabel}</p>
+                          <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500 }}>{new Date().toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" })}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
+
           </div>
 
           {/* Day header card — removed */}
@@ -2291,6 +2539,373 @@ export default function ProfilePage() {
       })()}
 
       </div>{/* end swipe wrapper */}
+
+      {/* Panel file input */}
+      <input
+        ref={panelUploadRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={async e => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          setPanelUploadLoading(true);
+          setPanelSmartError(null);
+          try {
+            const reader = new FileReader();
+            const base64 = await new Promise<string>((resolve, reject) => {
+              reader.onload = () => resolve((reader.result as string).split(",")[1]);
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
+            });
+            const body: Record<string, string> = { image: base64, mediaType: file.type };
+            if (panelUploadCategory) body.forceCategory = panelUploadCategory;
+            const res = await fetch("/api/classify-upload", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+            const result = await res.json();
+            if (!res.ok || result.error) {
+              setPanelSmartError(result.message || "Could not read the image.");
+            } else {
+              setPanelSmartResult(result);
+              setPanelLogSub("upload-confirm");
+            }
+          } catch {
+            setPanelSmartError("Upload failed. Please try again.");
+          }
+          setPanelUploadLoading(false);
+          setPanelUploadCategory(null);
+          if (panelUploadRef.current) panelUploadRef.current.value = "";
+        }}
+      />
+
+      {/* Panel schedule detail modal */}
+      {panelSchedModalIdx !== null && (() => {
+        const item = schedule[panelSchedModalIdx];
+        const isComplete = (schedDone[todayKey] ?? []).includes(item.title);
+        const detail = SCHEDULE_DETAILS[item.title];
+        const isMeal = detail?.type === 'meal';
+        const isExercise = detail?.type === 'exercise';
+        const isInfo = detail?.type === 'info';
+        const drillDef = DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL;
+        const isDrill = !!item.isDrill;
+
+        const renderSteps = (stepList: { step: string; cue: string; reps: string }[]) => (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 12 }}>
+            {stepList.map((s, i) => (
+              <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "8px 4px", textAlign: "center" }}>
+                <span style={{ width: 38, height: 38, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: "#2653d420", color: "#2653d4", fontSize: 18, fontWeight: 800, marginBottom: 4 }}>{i + 1}</span>
+                <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#1a1c1c", lineHeight: 1.3 }}>{s.step}</p>
+                <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6b7480", lineHeight: 1.5 }}>{s.cue}</p>
+                <span style={{ marginTop: 6, padding: "2px 8px", borderRadius: 99, background: "#2653d420", color: "#2653d4", fontSize: 11, fontWeight: 700 }}>{s.reps}</span>
+              </div>
+            ))}
+          </div>
+        );
+
+        return (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center px-6" style={{ paddingTop: 24, paddingBottom: 24 }} onClick={panelCloseSchedModal}>
+            <style>{`@keyframes guideIn{from{transform:scale(0.94);opacity:0}to{transform:scale(1);opacity:1}}@keyframes guideOut{from{transform:scale(1);opacity:1}to{transform:scale(0.94);opacity:0}}`}</style>
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: panelSchedModalClosing ? "guideOut 0.2s cubic-bezier(0.4,0,1,1) both" : undefined }} />
+            <div
+              className="relative w-full bg-white flex flex-col"
+              style={{ borderRadius: 28, maxHeight: "85dvh", animation: panelSchedModalClosing ? "guideOut 0.2s cubic-bezier(0.4,0,1,1) both" : "guideIn 0.22s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 8px 40px rgba(0,0,0,0.22)", overflow: "hidden" }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div style={{ background: "#00D455", padding: "24px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <p style={{ background: "#fff", padding: 4, borderRadius: 4, color: "#000", fontSize: "clamp(24px, 7.5vw, 34px)", fontWeight: 800, lineHeight: 1, margin: 0 }}>{item.title}</p>
+              </div>
+              <div className="overflow-y-auto flex-1 px-6 pb-6" style={{ minHeight: 0, borderTop: "1px solid #f0f0f0" }}>
+                {isMeal && detail?.type === 'meal' && (
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 16, textAlign: "center" }}>
+                    <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{detail.focus}</p>
+                    {detail.options.map((meal, i) => (
+                      <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "8px 0", width: "100%" }}>
+                        <span style={{ width: 38, height: 38, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: "#2653d420", color: "#2653d4", fontSize: 18, fontWeight: 800, marginBottom: 4 }}>{i + 1}</span>
+                        <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#1a1c1c" }}>{meal.title}</p>
+                        <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6b7480" }}>{meal.detail}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {isInfo && detail?.type === 'info' && (
+                  <div style={{ paddingTop: 16, textAlign: "center" }}>
+                    <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{detail.focus}</p>
+                    <p style={{ margin: 0, fontSize: 15, color: "#4a5050", lineHeight: 1.7 }}>{detail.text}</p>
+                  </div>
+                )}
+                {isExercise && detail?.type === 'exercise' && (
+                  <div style={{ paddingTop: 16, textAlign: "center" }}>
+                    <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{detail.focus}</p>
+                    {renderSteps(detail.steps)}
+                  </div>
+                )}
+                {isDrill && (
+                  <div style={{ paddingTop: 16, textAlign: "center" }}>
+                    <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{drillDef.focus}</p>
+                    {renderSteps(drillDef.steps)}
+                  </div>
+                )}
+                <div style={{ paddingTop: 24, display: "flex", justifyContent: "center" }}>
+                  <button onClick={panelHandleSchedDone} className="flex items-center gap-3 active:scale-[0.96] transition-transform">
+                    <span style={{ fontSize: 15, fontWeight: 600, color: isComplete ? "#00D455" : "#6b7480" }}>
+                      {isComplete ? "Completed" : "Mark as complete"}
+                    </span>
+                    <div style={{ width: 48, height: 48, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, ...(isComplete ? { background: "#00D455" } : { background: "transparent", border: "2.5px solid #d0d5dd" }) }}>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isComplete ? "#fff" : "#c8cdd3"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Panel nutrition sub-modal */}
+      {panelLogSub === "nutrition" && (
+        <div className="fixed inset-0 z-[300] flex items-end" onClick={() => setPanelLogSub(null)}>
+          <div className="fixed inset-0 bg-black/20" />
+          <div className="relative w-full bg-white rounded-t-[24px] shadow-2xl" style={{ paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
+            <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-[#e0e0e0]" /></div>
+            <div style={{ padding: "12px 20px 4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <p style={{ fontSize: "clamp(18px, 4.6vw, 22px)", fontWeight: 800, color: "#1a1c1c", margin: 0 }}>Food &amp; Snacks</p>
+                <input type="time" value={panelMealTime || nowTimeStr()} onChange={e => setPanelMealTime(e.target.value)} onClick={() => { if (!panelMealTime) setPanelMealTime(nowTimeStr()); }} style={{ padding: "4px 8px", borderRadius: 8, border: "1.5px solid #e8eaed", fontSize: "clamp(13px, 3.4vw, 15px)", color: "#6b7480", outline: "none", background: "#f8f9fa" }} />
+              </div>
+              <button onClick={() => setPanelLogSub(null)} style={{ background: "rgba(0,0,0,0.06)", border: "none", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div style={{ padding: "12px 20px 20px" }}>
+              <textarea value={panelMealText} onChange={e => setPanelMealText(e.target.value)} placeholder="What are you actually eating?" rows={4} autoFocus style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: "clamp(16px, 4.1vw, 19px)", color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box" }} />
+              <button onClick={() => panelSaveMealEntry(panelMealTime || nowTimeStr(), panelMealText)} style={{ marginTop: 8, padding: "10px 22px", borderRadius: 999, background: panelMealText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: panelMealText.trim() ? "pointer" : "default", fontSize: "clamp(14px, 3.6vw, 17px)", fontWeight: 700, color: panelMealText.trim() ? "#fff" : "#b0b8c1" }}>Save</button>
+              {panelMealsToday.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 5, marginTop: 16 }}>
+                  {panelMealsToday.map(m => (
+                    <div key={m.id} style={{ display: "flex", gap: 10, alignItems: "baseline" }}>
+                      <span style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 600, color: "#b0b8c1", flexShrink: 0 }}>{m.time}</span>
+                      <span style={{ fontSize: "clamp(13px, 3.4vw, 16px)", color: "#6b7480", lineHeight: 1.4 }}>{m.description}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Panel note sub-modal */}
+      {panelLogSub === "matchreview" && (
+        <div className="fixed inset-0 z-[300] flex items-end" onClick={() => setPanelLogSub(null)}>
+          <div className="fixed inset-0 bg-black/20" />
+          <div className="relative w-full bg-white rounded-t-[24px] shadow-2xl" style={{ paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
+            <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-[#e0e0e0]" /></div>
+            <div style={{ padding: "12px 20px 4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <p style={{ fontSize: "clamp(18px, 4.6vw, 22px)", fontWeight: 800, color: "#1a1c1c", margin: 0 }}>Add a note</p>
+              <button onClick={() => setPanelLogSub(null)} style={{ background: "rgba(0,0,0,0.06)", border: "none", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div style={{ padding: "12px 20px 20px" }}>
+              <textarea value={panelNoteText} onChange={e => setPanelNoteText(e.target.value)} placeholder="What&apos;s on your mind?" rows={4} style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: "clamp(16px, 4.1vw, 19px)", color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box" }} />
+              <button onClick={() => { panelSaveNote(panelNoteText); setPanelLogSub(null); }} style={{ marginTop: 8, padding: "10px 22px", borderRadius: 999, background: panelNoteText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: panelNoteText.trim() ? "pointer" : "default", fontSize: "clamp(14px, 3.6vw, 17px)", fontWeight: 700, color: panelNoteText.trim() ? "#fff" : "#b0b8c1" }}>Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Panel upload-confirm modal */}
+      {panelLogSub === "upload-confirm" && panelSmartResult && (() => {
+        const { category, label, data } = panelSmartResult;
+        const categoryMeta: Record<string, { title: string; color: string }> = {
+          match_schedule: { title: "Match schedule", color: "#2653d4" },
+          meal:           { title: "Meal detected",  color: "#16a34a" },
+          gear:           { title: "Gear identified", color: "#7c3aed" },
+          match_result:   { title: "Match result",   color: "#ea580c" },
+          unknown:        { title: "Couldn't identify", color: "#8a9096" },
+        };
+        const meta = categoryMeta[category] ?? categoryMeta.unknown;
+        const updateData = (key: string, val: string) =>
+          setPanelSmartResult(r => r ? { ...r, data: { ...r.data, [key]: val } } : r);
+        const canConfirm = category !== "match_schedule" || (!!data.date && !!data.time);
+
+        const handleConfirm = () => {
+          if (category === "match_schedule") {
+            const matchData: StoredMatch = { date: data.date ?? "", time: data.time ?? "", club: data.club ?? "", court: data.court ?? "", player_1: data.player_1 ?? "", player_2: data.player_2 ?? "", player_3: data.player_3 ?? "", player_4: data.player_4 ?? "" };
+            panelSaveMatchListLocal([...panelGetMatchList(), matchData]);
+            saveUpcomingMatch(matchData);
+            window.dispatchEvent(new CustomEvent("padelop:match-added", { detail: matchData }));
+          } else if (category === "meal") {
+            panelSaveMealEntry(nowTimeStr(), data.description ?? label);
+          } else if (category === "match_result") {
+            const entry = { ts: new Date().toISOString(), feeling: "", result: data.result ?? "", opponent: data.opponent_names ?? "", energy: "", wellDone: [] as string[], improved: [] as string[] };
+            const prev = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+            localStorage.setItem("padelop:match-reviews", JSON.stringify([entry, ...prev].slice(0, 50)));
+            window.dispatchEvent(new Event("storage"));
+            saveMatchReview({ ts: entry.ts, result: entry.result, opponentNames: entry.opponent });
+          } else if (category === "gear") {
+            saveGearToDb({ type: data.type || "other", name: data.name || data.brand || "" });
+          }
+          setPanelLogSub(null); setPanelSmartResult(null);
+        };
+
+        const handleEditManually = () => {
+          if (category === "meal") {
+            setPanelMealText(data.description ?? label); setPanelLogSub("nutrition"); setPanelSmartResult(null);
+          } else {
+            setPanelLogSub(null); setPanelSmartResult(null);
+          }
+        };
+
+        return (
+          <div className="fixed inset-0 z-[300] flex items-end" onClick={() => { setPanelLogSub(null); setPanelSmartResult(null); }}>
+            <div className="fixed inset-0 bg-black/20" />
+            <div className="relative w-full bg-white rounded-t-[24px] shadow-2xl" style={{ paddingBottom: "env(safe-area-inset-bottom)", maxHeight: "82vh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+              <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-[#e0e0e0]" /></div>
+              <div style={{ padding: "12px 20px 4px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <button
+                    onClick={() => setPanelUploadCatPickerOpen(o => !o)}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 8px", borderRadius: 6, background: meta.color + "18", border: "none", cursor: "pointer", marginBottom: 6 }}
+                  >
+                    <span style={{ fontSize: 11, fontWeight: 700, color: meta.color, letterSpacing: "0.06em", textTransform: "uppercase" }}>{meta.title}</span>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={meta.color} strokeWidth="2.5" strokeLinecap="round" style={{ transition: "transform 0.15s", transform: panelUploadCatPickerOpen ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+                  {panelUploadCatPickerOpen && (() => {
+                    const emptyData: Record<string, Record<string, string>> = {
+                      match_schedule: { date: "", time: "", club: "", court: "", player_1: "", player_2: "", player_3: "", player_4: "" },
+                      meal:           { description: "", meal_type: "" },
+                      gear:           { type: "", brand: "", name: "" },
+                      match_result:   { result: "", score: "", opponent_names: "" },
+                    };
+                    const options = [
+                      { key: "match_schedule", title: "Match schedule", color: "#2653d4" },
+                      { key: "meal",           title: "Meal",           color: "#16a34a" },
+                      { key: "gear",           title: "Gear",           color: "#7c3aed" },
+                      { key: "match_result",   title: "Match result",   color: "#ea580c" },
+                    ];
+                    return (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
+                        {options.map(opt => (
+                          <button key={opt.key} onClick={() => { setPanelSmartResult(r => r ? { ...r, category: opt.key, data: emptyData[opt.key] ?? {} } : r); setPanelUploadCatPickerOpen(false); }} style={{ padding: "4px 10px", borderRadius: 6, border: `1.5px solid ${opt.key === category ? opt.color : "#e8eaed"}`, background: opt.key === category ? opt.color + "18" : "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700, color: opt.key === category ? opt.color : "#6b7480" }}>
+                            {opt.title}
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                  <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.3 }}>{label}</p>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0, marginTop: 2 }}>
+                  <button onClick={() => { setPanelUploadCategory(category); panelUploadRef.current?.click(); }} disabled={panelUploadLoading} style={{ background: "rgba(0,0,0,0.06)", border: "none", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: panelUploadLoading ? 0.5 : 1 }}>
+                    {panelUploadLoading ? (
+                      <svg className="animate-spin" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                    ) : (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    )}
+                  </button>
+                  <button onClick={() => { setPanelLogSub(null); setPanelSmartResult(null); }} style={{ background: "rgba(0,0,0,0.06)", border: "none", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div style={{ padding: "12px 20px 4px" }}>
+                {category === "match_schedule" && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                      <div>
+                        <label style={panelLabelSt}>Date</label>
+                        <div style={{ position: "relative" }}>
+                          <div style={{ ...panelInputSt, color: data.date ? "#1a1c1c" : "#b0b5ba", minHeight: 38, display: "flex", alignItems: "center" }}>{data.date ? new Date(data.date + "T12:00").toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "Pick date"}</div>
+                          <input type="date" value={data.date ?? ""} onChange={e => updateData("date", e.target.value)} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
+                        </div>
+                      </div>
+                      <div>
+                        <label style={panelLabelSt}>Time</label>
+                        <div style={{ position: "relative" }}>
+                          <div style={{ ...panelInputSt, color: data.time ? "#1a1c1c" : "#b0b5ba", minHeight: 38, display: "flex", alignItems: "center" }}>{data.time || "Pick time"}</div>
+                          <input type="time" value={data.time ?? ""} onChange={e => updateData("time", e.target.value)} style={{ position: "absolute", inset: 0, opacity: 0, width: "100%", height: "100%" }} />
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                      <div><label style={panelLabelSt}>Club</label><input type="text" value={data.club ?? ""} onChange={e => updateData("club", e.target.value)} style={panelInputSt} placeholder="Club name" /></div>
+                      <div><label style={panelLabelSt}>Court</label><input type="text" value={data.court ?? ""} onChange={e => updateData("court", e.target.value)} style={panelInputSt} placeholder="Court #" /></div>
+                    </div>
+                    <div>
+                      <label style={panelLabelSt}>Players</label>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        {(["player_1","player_2","player_3","player_4"] as const).map((k, i) => (
+                          <input key={k} type="text" value={data[k] ?? ""} onChange={e => updateData(k, e.target.value)} style={panelInputSt} placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {category === "meal" && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    <div>
+                      <label style={panelLabelSt}>What you ate</label>
+                      <textarea value={data.description ?? ""} onChange={e => updateData("description", e.target.value)} rows={3} style={{ ...panelInputSt, resize: "none", lineHeight: 1.5 }} />
+                    </div>
+                    <div>
+                      <label style={panelLabelSt}>Meal type</label>
+                      <select value={data.meal_type ?? ""} onChange={e => updateData("meal_type", e.target.value)} style={panelInputSt}>
+                        <option value="">Select…</option>
+                        {["breakfast","lunch","dinner","snack","pre-match","post-match"].map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                )}
+                {category === "gear" && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    <div>
+                      <label style={panelLabelSt}>Type</label>
+                      <select value={data.type ?? ""} onChange={e => updateData("type", e.target.value)} style={panelInputSt}>
+                        <option value="">Select…</option>
+                        {["racket","shoes","bag","other"].map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
+                      </select>
+                    </div>
+                    <div><label style={panelLabelSt}>Brand</label><input type="text" value={data.brand ?? ""} onChange={e => updateData("brand", e.target.value)} style={panelInputSt} placeholder="Brand name" /></div>
+                    <div><label style={panelLabelSt}>Name / Model</label><input type="text" value={data.name ?? ""} onChange={e => updateData("name", e.target.value)} style={panelInputSt} placeholder="Model or description" /></div>
+                  </div>
+                )}
+                {category === "match_result" && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    <div>
+                      <label style={panelLabelSt}>Result</label>
+                      <select value={data.result ?? ""} onChange={e => updateData("result", e.target.value)} style={panelInputSt}>
+                        <option value="">Select…</option>
+                        <option value="win">Win</option>
+                        <option value="loss">Loss</option>
+                        <option value="draw">Draw</option>
+                      </select>
+                    </div>
+                    <div><label style={panelLabelSt}>Score</label><input type="text" value={data.score ?? ""} onChange={e => updateData("score", e.target.value)} style={panelInputSt} placeholder="e.g. 6-3, 7-5" /></div>
+                    <div><label style={panelLabelSt}>Opponents</label><input type="text" value={data.opponent_names ?? ""} onChange={e => updateData("opponent_names", e.target.value)} style={panelInputSt} placeholder="Opponent names" /></div>
+                  </div>
+                )}
+                {category === "unknown" && (
+                  <p style={{ fontSize: "clamp(14px, 3.6vw, 16px)", color: "#6b7480", lineHeight: 1.5, margin: 0 }}>
+                    We couldn&apos;t identify a category for this image. Try uploading a match schedule screenshot, a meal photo, gear, or a match result scoreboard.
+                  </p>
+                )}
+              </div>
+              <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
+                {category !== "unknown" && (
+                  <button onClick={handleConfirm} disabled={!canConfirm} style={{ padding: "13px 20px", borderRadius: 999, background: canConfirm ? meta.color : "#e8eaed", border: "none", cursor: canConfirm ? "pointer" : "default", fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 700, color: canConfirm ? "#fff" : "#b0b8c1", width: "100%" }}>
+                    {category === "match_schedule" ? "Save match" : category === "meal" ? "Log meal" : category === "match_result" ? "Save result" : "Save"}
+                  </button>
+                )}
+                {category !== "gear" && (
+                  <button onClick={handleEditManually} style={{ padding: "10px 20px", borderRadius: 999, background: "none", border: "1.5px solid #e8eaed", cursor: "pointer", fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 600, color: "#6b7480", width: "100%" }}>
+                    {category === "unknown" ? "Enter manually" : "Edit manually"}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       <LogSheet open={logSheetOpen} onClose={() => {
         setLogSheetOpen(false);
