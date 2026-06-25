@@ -260,13 +260,6 @@ export default function Fab() {
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" />
           <div className="relative w-full bg-white rounded-t-[28px] shadow-2xl" style={{ animation: "sheetUp 0.3s cubic-bezier(0.22,1,0.36,1)", overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "85dvh", paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
 
-            {/* Green header strip */}
-            <div style={{ background: "#00D455", padding: "20px 20px 20px", display: "flex", alignItems: "center", justifyContent: "flex-end", flexShrink: 0 }}>
-              <button onClick={closeAll} style={{ background: "rgba(0,0,0,0.15)", border: "none", borderRadius: "50%", width: 32, height: 32, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
-            </div>
-
             <div style={{ overflowY: "auto", minHeight: 0 }}>
               <div style={{ padding: "16px 16px 24px", display: "flex", flexDirection: "column", gap: 10 }}>
 
