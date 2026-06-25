@@ -303,6 +303,17 @@ export default function Fab() {
                   </button>
                 </div>
 
+                {/* Log manually — line separator */}
+                <button
+                  onClick={() => setFabExpanded(v => !v)}
+                  style={{ width: "100%", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, padding: "4px 0" }}
+                >
+                  <div style={{ flex: 1, height: 1, background: "#e0e2e5" }} />
+                  <span style={{ fontSize: 12, fontWeight: 600, color: "#8a9096", whiteSpace: "nowrap" }}>Log manually</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#b0b5ba" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: fabExpanded ? "rotate(180deg)" : "rotate(0deg)", flexShrink: 0 }}><polyline points="6 9 12 15 18 9"/></svg>
+                  <div style={{ flex: 1, height: 1, background: "#e0e2e5" }} />
+                </button>
+
                 {/* Log manually expanded */}
                 <div style={{ overflow: "hidden", maxHeight: fabExpanded ? 600 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingTop: 10 }}>
@@ -352,7 +363,7 @@ export default function Fab() {
                         <button
                           onClick={() => setFabSchedOpen(o => !o)}
                           className="active:scale-95 transition-transform"
-                          style={{ width: "100%", background: fabSchedOpen ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 16, padding: "18px 16px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 10, textAlign: "left", marginTop: fabExpanded ? 8 : 0 }}
+                          style={{ width: "100%", background: fabSchedOpen ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 10, textAlign: "left", marginTop: -8 }}
                         >
                           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                             <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Daily Tasks</span>
