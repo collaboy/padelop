@@ -495,21 +495,7 @@ export default function Home8() {
           setCheckinNudgeOpen(false);
         }
       } catch { setMorningDone(false); }
-      // Retroactively mark "Wake up" done if morning log shows waterOnWaking
-      try {
-        const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null");
-        if (ml?.date === todayStr && ml?.waterOnWaking === true) {
-          const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
-          const titles = sd[todayStr] ?? [];
-          if (!titles.includes("Wake up")) {
-            const updated = [...titles, "Wake up"];
-            sd[todayStr] = updated;
-            localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
-            saveScheduleDoneToDb(todayStr, updated);
-          }
-        }
-      } catch {}
-      // Seed completed Set from padelop:schedule-done
+      // Seed completed Set from padelop:schedule-done + waterOnWaking
       try {
         const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
         const doneTitles = sd[todayStr] ?? [];
@@ -526,6 +512,23 @@ export default function Home8() {
         const sched = getScheduleData(dt, null, getTopNeedsWorkTag()).schedule;
         const indices = new Set<number>();
         sched.forEach((item, i) => { if (doneTitles.includes(item.title)) indices.add(i); });
+        // Directly merge waterOnWaking into indices without going through schedule-done
+        try {
+          const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null");
+          if (ml?.date === todayStr && ml?.waterOnWaking === true) {
+            const wakeIdx = sched.findIndex(item => item.title === "Wake up");
+            if (wakeIdx >= 0) {
+              indices.add(wakeIdx);
+              // Persist to schedule-done + DB if not already there
+              if (!doneTitles.includes("Wake up")) {
+                const updated = [...doneTitles, "Wake up"];
+                sd[todayStr] = updated;
+                localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
+                saveScheduleDoneToDb(todayStr, updated);
+              }
+            }
+          }
+        } catch {}
         setCompleted(indices);
       } catch {}
     }
