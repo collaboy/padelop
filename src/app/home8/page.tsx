@@ -1042,20 +1042,12 @@ export default function Home8() {
                   </div>
                 ) : null;
                 if (isDone) return (
-                  <div key="active" className="animate-bounce-in animate-circle-breathe" style={{ ...cardStyle, background: "#fff", border: "2.5px solid #d0d0d0", boxShadow: "none" }} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", opacity: contentOpacity, transition: "opacity 0.25s", padding: "0 clamp(22px, 6vw, 32px)", gap: 0 }}>
-                      <div style={{ width: "clamp(28px, 8vw, 38px)", height: "clamp(28px, 8vw, 38px)", borderRadius: "50%", background: "#f0f0f0", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "clamp(4px, 1.2vw, 7px)" }}>
-                        <svg width="clamp(13px, 4vw, 18px)" height="clamp(13px, 4vw, 18px)" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
-                      </div>
-                      <p style={{ fontSize: "clamp(11px, 3.2vw, 14px)", fontWeight: 600, color: "#bbb", lineHeight: 1, margin: 0, marginBottom: "clamp(6px, 1.8vw, 10px)" }}>{(["you're all set.", "done.", "nice."])[currentIdx % 3]}</p>
-                      {nextSlide ? (
-                        <>
-                          <p style={{ fontSize: "clamp(9px, 2.6vw, 12px)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#c0c0c0", margin: 0, marginBottom: "clamp(2px, 0.6vw, 4px)" }}>all set until:</p>
-                          <p style={{ fontSize: "clamp(14px, 4vw, 18px)", fontWeight: 700, color: "#1a1c1c", lineHeight: 1.1, margin: 0, marginBottom: "clamp(6px, 1.8vw, 10px)" }}>{nextSlide.title}</p>
-                        </>
-                      ) : null}
-                      <p style={{ fontSize: "clamp(30px, 9vw, 42px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1, margin: 0, marginBottom: "clamp(6px, 2vw, 10px)" }}>{nextSlide ? fmtTime(secsUntilNext) : "—"}</p>
-                      <p style={{ fontSize: "clamp(12px, 3.4vw, 15px)", fontWeight: 600, color: "#bbb", margin: 0 }}>enjoy your day.</p>
+                  <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
+                    {textureOverlay}
+                    <div style={{ position: "absolute", inset: 0, background: "rgba(10,12,30,0.82)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0, zIndex: 2 }}>
+                      {nextSlide && <p style={{ fontSize: "clamp(18px, 5.5vw, 26px)", fontWeight: 700, color: "#fff", margin: 0, marginBottom: "clamp(6px, 2vw, 10px)", textAlign: "center", padding: "0 clamp(16px, 5vw, 24px)", lineHeight: 1.2 }}>{nextSlide.title}</p>}
+                      <p style={{ fontSize: "clamp(30px, 9vw, 42px)", fontWeight: 800, color: "#fff", margin: 0, marginBottom: "clamp(8px, 2.5vw, 14px)", letterSpacing: "-0.02em" }}>{nextSlide ? fmtTime(secsUntilNext) : "—"}</p>
+                      <p style={{ fontSize: "clamp(13px, 4vw, 17px)", fontWeight: 500, color: "rgba(200,210,255,0.75)", margin: 0 }}>enjoy your day until then.</p>
                     </div>
                   </div>
                 );
