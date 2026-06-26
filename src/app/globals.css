@@ -228,6 +228,8 @@ body {
 @keyframes nav-slide-in-left   { from { transform: translateX(-100%); opacity: 0; } }
 @keyframes water-wave { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 .animate-water-wave { animation: water-wave 2.4s linear infinite; }
+@keyframes circle-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.022); } }
+.animate-circle-breathe { animation: circle-breathe 4s ease-in-out infinite; }
 
 /* Root: no animation (background stays put) */
 ::view-transition-old(root),
