@@ -1044,9 +1044,9 @@ export default function Home8() {
                 if (isDone) return (
                   <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
                     {textureOverlay}
-                    {/* Next task content bleeds through overlay for depth */}
+                    {/* Next task content faded so pure green bleeds through overlay */}
                     {nextSlide && (
-                      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: 0.2 }}>
                         <p className="text-[14px] tracking-wide leading-none" style={{ color: "#000", fontWeight: 600, background: "#fff", padding: 4, borderRadius: 4 }}>Do this now</p>
                         <p style={{ color: "#000", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, background: "#fff", padding: "3px 6px", borderRadius: 4, display: "inline-block", textAlign: "center", margin: 0 }}>
                           {nextSlide.title.includes(" & ")
