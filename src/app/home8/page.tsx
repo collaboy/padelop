@@ -1047,7 +1047,7 @@ export default function Home8() {
                       <div style={{ width: "clamp(32px, 9.5vw, 44px)", height: "clamp(32px, 9.5vw, 44px)", borderRadius: "50%", background: "#f0f0f0", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "clamp(6px, 1.8vw, 10px)" }}>
                         <svg width="clamp(15px, 4.5vw, 20px)" height="clamp(15px, 4.5vw, 20px)" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
                       </div>
-                      <p style={{ fontSize: "clamp(20px, 6vw, 27px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1, margin: 0, marginBottom: "clamp(10px, 3vw, 16px)" }}>you're done.</p>
+                      <p style={{ fontSize: "clamp(20px, 6vw, 27px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1, margin: 0, marginBottom: "clamp(10px, 3vw, 16px)" }}>{(["you're all set.", "done.", "nice."])[currentIdx % 3]}</p>
                       {nextSlide ? (
                         <>
                           <p style={{ fontSize: "clamp(9px, 2.6vw, 12px)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#c0c0c0", margin: 0, marginBottom: "clamp(2px, 0.6vw, 4px)" }}>Next up</p>
