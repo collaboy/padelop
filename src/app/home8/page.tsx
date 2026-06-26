@@ -1405,14 +1405,10 @@ export default function Home8() {
                 style={{ borderRadius: 28, maxHeight: "85dvh", animation: modalClosing ? "guideOut 0.2s cubic-bezier(0.4,0,1,1) both" : "guideIn 0.22s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 8px 40px rgba(0,0,0,0.22)", overflow: "hidden" }}
                 onClick={e => e.stopPropagation()}
               >
-                {/* Green title strip */}
-                <div className="px-6 pt-6 pb-6 flex-shrink-0 flex items-center justify-center" style={{ background: "#00D455" }}>
-                  <p className="font-bold text-center" style={{ background: "#fff", padding: 4, borderRadius: 4, color: "#000", fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1 }}>{modalItem.title}</p>
-                </div>
-
                 {/* Detail content + inline complete button */}
                 {(isMeal || isExercise || isDrill || isInfo) && (
-                  <div className="overflow-y-auto flex-1 px-6 pb-6" style={{ minHeight: 0, borderTop: "1px solid #f0f0f0" }}>
+                  <div className="overflow-y-auto flex-1 px-6 pb-6" style={{ minHeight: 0 }}>
+                    <p className="font-bold text-center" style={{ color: "#1a1c1c", fontSize: "clamp(22px, 6.5vw, 30px)", lineHeight: 1.15, margin: "20px 0 4px" }}>{modalItem.title}</p>
                     {isMeal && detail?.type === 'meal' && (
                       <div className="flex flex-col gap-3 pt-4 text-center">
                         <p className="text-[11px] font-bold uppercase tracking-widest pb-1" style={{ color: "#1a1c1c" }}>{detail.focus}</p>
