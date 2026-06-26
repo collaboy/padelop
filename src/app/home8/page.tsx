@@ -1042,22 +1042,20 @@ export default function Home8() {
                   </div>
                 ) : null;
                 if (isDone) return (
-                  <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
-                    {textureOverlay}
-                    {sleepOverlay}
-                    <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", opacity: isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.25s" }}>
-                      <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: "#fff" }}>
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={s.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                  <div key="active" className="animate-bounce-in" style={{ ...cardStyle, background: "#fff", border: "2.5px solid #111", boxShadow: "none" }} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
+                    <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", opacity: contentOpacity, transition: "opacity 0.25s" }}>
+                      <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: "#111" }}>
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
                       </div>
                     </div>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.25s" }}>
-                      <p className="font-bold leading-none text-center" style={{ color: "#fff", fontSize: "clamp(18px, 5.5vw, 24px)" }}>Good Job!</p>
-                      <p className="font-semibold leading-none text-center mt-1" style={{ color: "rgba(255,255,255,0.85)", fontSize: "clamp(13px, 4vw, 18px)" }}>{s.title} complete</p>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
+                      <p className="font-bold leading-none text-center" style={{ color: "#111", fontSize: "clamp(18px, 5.5vw, 24px)" }}>Good Job!</p>
+                      <p className="font-semibold leading-none text-center mt-1" style={{ color: "#555", fontSize: "clamp(13px, 4vw, 18px)" }}>{s.title} complete</p>
                       <div style={{ height: "clamp(56px, 17vw, 80px)" }} />
                       {nextSlide && <div className="mt-9 text-center">
-                        <p className="leading-none" style={{ color: "rgba(255,255,255,0.75)", fontSize: "clamp(12px, 3.7vw, 16px)" }}>see you in</p>
-                        <p className="font-bold leading-none mt-1" style={{ color: "#fff", fontSize: "clamp(22px, 7vw, 32px)" }}>{fmtTime(secsUntilNext)}</p>
-                        <p className="leading-none mt-1" style={{ color: "rgba(255,255,255,0.75)", fontSize: "clamp(12px, 3.7vw, 16px)" }}>for: <span className="font-semibold" style={{ color: "#fff" }}>{nextSlide.title}</span></p>
+                        <p className="leading-none" style={{ color: "#888", fontSize: "clamp(12px, 3.7vw, 16px)" }}>see you in</p>
+                        <p className="font-bold leading-none mt-1" style={{ color: "#111", fontSize: "clamp(22px, 7vw, 32px)" }}>{fmtTime(secsUntilNext)}</p>
+                        <p className="leading-none mt-1" style={{ color: "#888", fontSize: "clamp(12px, 3.7vw, 16px)" }}>for: <span className="font-semibold" style={{ color: "#111" }}>{nextSlide.title}</span></p>
                       </div>}
                     </div>
                   </div>
@@ -1269,7 +1267,7 @@ export default function Home8() {
                 const innerH = 118;
                 const fillH  = pct * innerH;
                 const waterY = 130 - fillH;
-                const waveAmp = logHydrationMl > 0 ? 3 : 0;
+                const waveAmp = logHydrationMl > 0 ? 8 : 0;
                 const labelMl = logHydrationMl === 0
                   ? "Drink!"
                   : logHydrationMl >= 1000
@@ -1292,15 +1290,25 @@ export default function Home8() {
                       {/* Water fill clipped to teardrop */}
                       <g clipPath="url(#drop-clip-r)">
                         {/* Solid fill below wave */}
-                        <rect x="-10" y={waterY + waveAmp} width="120" height={fillH + 10} fill="#3b9eff" opacity="0.85"/>
+                        <rect x="-10" y={waterY + waveAmp} width="120" height={fillH + 10} fill="#3b9eff" opacity="0.9"/>
                         {/* Animated wave at water surface */}
                         {logHydrationMl > 0 && (
-                          <g style={{ animation: "water-wave 5s linear infinite", willChange: "transform", transformBox: "fill-box" }}>
-                            <path
-                              d={`M0 ${waterY} Q25 ${waterY - waveAmp} 50 ${waterY} Q75 ${waterY + waveAmp} 100 ${waterY} Q125 ${waterY - waveAmp} 150 ${waterY} Q175 ${waterY + waveAmp} 200 ${waterY} L200 130 L0 130 Z`}
-                              fill="#3b9eff" opacity="0.85"
-                            />
-                          </g>
+                          <>
+                            {/* Back wave — slower, lighter */}
+                            <g style={{ animation: "water-wave 3.5s linear infinite", willChange: "transform", transformBox: "fill-box" }}>
+                              <path
+                                d={`M0 ${waterY + 3} Q25 ${waterY + 3 + waveAmp} 50 ${waterY + 3} Q75 ${waterY + 3 - waveAmp} 100 ${waterY + 3} Q125 ${waterY + 3 + waveAmp} 150 ${waterY + 3} Q175 ${waterY + 3 - waveAmp} 200 ${waterY + 3} L200 130 L0 130 Z`}
+                                fill="#5aaeff" opacity="0.6"
+                              />
+                            </g>
+                            {/* Front wave — faster, solid */}
+                            <g style={{ animation: "water-wave 2.2s linear infinite", willChange: "transform", transformBox: "fill-box" }}>
+                              <path
+                                d={`M0 ${waterY} Q25 ${waterY - waveAmp} 50 ${waterY} Q75 ${waterY + waveAmp} 100 ${waterY} Q125 ${waterY - waveAmp} 150 ${waterY} Q175 ${waterY + waveAmp} 200 ${waterY} L200 130 L0 130 Z`}
+                                fill="#3b9eff" opacity="0.9"
+                              />
+                            </g>
+                          </>
                         )}
                       </g>
 
@@ -1410,7 +1418,7 @@ export default function Home8() {
               {stepList.map((s, i) => (
                 <div key={i} className="flex flex-col items-start p-3">
                   <p className="text-[17px] font-semibold text-[#1a1c1c] leading-snug">{s.step}</p>
-                  <p className="text-[14px] text-[#6b7480] mt-1 leading-relaxed">{s.cue}</p>
+                  <p className="text-[14px] text-[#6b7480] mt-1 leading-snug">{s.cue}</p>
                   <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold" style={{ background: "#2653d420", color: "#2653d4" }}>{s.reps}</span>
                 </div>
               ))}
@@ -1445,7 +1453,7 @@ export default function Home8() {
                         {isInfo && detail?.type === 'info' && (
                           <>
                             <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#1a1c1c" }}>{detail.focus}</p>
-                            <p className="text-[17px] text-[#4a5050] leading-relaxed">{detail.text}</p>
+                            <p className="text-[17px] text-[#4a5050] leading-snug">{detail.text}</p>
                           </>
                         )}
                         {isExercise && detail?.type === 'exercise' && renderSteps(detail.steps)}

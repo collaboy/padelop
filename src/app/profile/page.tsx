@@ -1105,6 +1105,8 @@ export default function ProfilePage() {
 
   const swipeStartX = useRef(0);
   const swipeStartY = useRef(0);
+  const [schedSwipeX, setSchedSwipeX] = useState(0);
+  const schedSwipeTrackRef = useRef<HTMLDivElement>(null);
 
   function onSwipeStart(e: React.TouchEvent) {
     swipeStartX.current = e.touches[0].clientX;
@@ -1544,9 +1546,94 @@ export default function ProfilePage() {
             <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px" }}>Info</p>
             <div style={{ background: "#fff", borderRadius: "var(--r-md)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
 
+              {/* Gear row */}
+              <button
+                onClick={() => { setProfileGearOpen(o => !o); setProfileInsightsOpen(false); setProfileMatchesOpen(false); setProfileCardOpen(false); }}
+                style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", cursor: "pointer" }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <span style={{ color: "var(--c-text-dim)" }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                  </span>
+                  <span className="t-ui" style={{ color: "var(--c-text)" }}>Gear</span>
+                </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: profileGearOpen ? "rotate(90deg)" : "rotate(0deg)" }}><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+              {profileGearOpen && (
+                <div style={{ borderTop: "1px solid #f4f4f6" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px 0" }}>
+                    <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>My Gear</p>
+                    <button onClick={() => setGearEditOpen(o => !o)} className="t-caption" style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 500, color: "var(--c-forest)" }}>{gearEditOpen ? "Done" : "Edit"}</button>
+                  </div>
+                  <div ref={racketRowRef} style={{ display: "flex", alignItems: "stretch", padding: 12, gap: 14 }}>
+                    <label htmlFor="racket-img-upload" style={{ cursor: "pointer", flexShrink: 0, width: racketSlotSize, height: racketSlotSize, display: "block" }}>
+                      <div style={{ width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        {racketImage ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={racketImage} alt="Racket" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        ) : (
+                          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c4c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                        )}
+                      </div>
+                    </label>
+                    <input id="racket-img-upload" type="file" accept="image/*" className="hidden" onChange={handleRacketImage} />
+                    <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "8px 0" }}>
+                      <span className="t-label" style={{ color: "var(--c-label)", display: "block", marginBottom: "8px" }}>Current Racket</span>
+                      <p className="t-title" style={{ color: "var(--c-text)", margin: 0, lineHeight: 1.2 }}>{racketName || "—"}</p>
+                      <p className="t-body" style={{ color: "var(--c-text-dim)", margin: "4px 0 0" }}>{racketType || "Add a description"}</p>
+                      <p className="t-caption" style={{ color: racketSince ? "var(--c-hint)" : "var(--c-disabled)", margin: "6px 0 0" }}>
+                        {racketSince ? `Using since ${new Date(racketSince + "-01").toLocaleDateString("en-GB", { month: "short", year: "numeric" })}` : "Using since —"}
+                      </p>
+                    </div>
+                  </div>
+                  {gearEditOpen && (
+                    <div style={{ borderTop: "1px solid #f0f0f0", padding: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                      <div>
+                        <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 0 6px" }}>Racket name</p>
+                        <input type="text" value={racketName} onChange={e => setRacketName(e.target.value)} placeholder="e.g. Bullpadel Vertex" className="t-body"
+                          style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--r-sm)", border: "2px solid #e2e2e2", fontWeight: 500, color: "var(--c-text)", outline: "none", background: "var(--c-bg-input)" }} />
+                      </div>
+                      <div>
+                        <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 0 6px" }}>Type / description</p>
+                        <input type="text" value={racketType} onChange={e => setRacketType(e.target.value)} placeholder="e.g. Control, Power, Hybrid" className="t-body"
+                          style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--r-sm)", border: "2px solid #e2e2e2", fontWeight: 500, color: "var(--c-text)", outline: "none", background: "var(--c-bg-input)" }} />
+                      </div>
+                      <div>
+                        <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 0 6px" }}>Using since</p>
+                        <input type="month" value={racketSince} onChange={e => setRacketSince(e.target.value)} className="t-body"
+                          style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--r-sm)", border: "2px solid #e2e2e2", fontWeight: 500, color: "var(--c-text)", outline: "none", background: "var(--c-bg-input)" }} />
+                      </div>
+                      <button onClick={() => { localStorage.setItem("padelop:gear", JSON.stringify({ racketName, racketType, racketImage, racketSince })); saveGearToDb({ type: "racket", name: racketName ?? undefined, racket_type: racketType ?? undefined, racket_since: racketSince ?? undefined, photo_url: racketImage?.startsWith("http") ? racketImage : undefined }); setGearEditOpen(false); }}
+                        className="t-ui" style={{ padding: "12px", borderRadius: "var(--r-sm)", background: "var(--c-blue)", border: "none", cursor: "pointer", color: "#fff" }}>
+                        Save
+                      </button>
+                    </div>
+                  )}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "var(--c-line)", borderTop: "1px solid var(--c-line)" }}>
+                    <div style={{ background: "#fff", padding: "16px", display: "flex", flexDirection: "column" }}>
+                      <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 12px" }}>My Shoes</p>
+                      <label htmlFor="shoe-img-upload" style={{ cursor: "pointer", display: "block", flex: 1 }}>
+                        <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: shoeImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          {shoeImage ? <img src={shoeImage} alt="Shoes" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 17h20v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-1z"/><path d="M2 17c0-3.5 2.5-6 6-6h2l3-2h3c2.2 0 4 1.5 4.5 3.5L21 17"/></svg>}
+                        </div>
+                      </label>
+                      <input id="shoe-img-upload" type="file" accept="image/*" className="hidden" onChange={handleShoeImage} />
+                    </div>
+                    <div style={{ background: "#fff", padding: "16px", display: "flex", flexDirection: "column" }}>
+                      <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 12px" }}>My Kit</p>
+                      <label htmlFor="kit-img-upload" style={{ cursor: "pointer", display: "block", flex: 1 }}>
+                        <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: kitImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          {kitImage ? <img src={kitImage} alt="Kit" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg>}
+                        </div>
+                      </label>
+                      <input id="kit-img-upload" type="file" accept="image/*" className="hidden" onChange={handleKitImage} />
+                    </div>
+                  </div>
+                </div>
+              )}
               <button
                 onClick={() => { setProfileInsightsOpen(o => !o); setProfileMatchesOpen(false); setProfileCardOpen(false); setProfileGearOpen(false); }}
-                style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", cursor: "pointer" }}
+                style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", borderTop: "1px solid #f4f4f6", cursor: "pointer" }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                   <span style={{ color: "var(--c-text-dim)" }}>
@@ -2246,91 +2333,6 @@ export default function ProfilePage() {
                 </div>
               )}
 
-              {/* Gear row */}
-              <button
-                onClick={() => { setProfileGearOpen(o => !o); setProfileInsightsOpen(false); setProfileMatchesOpen(false); setProfileCardOpen(false); }}
-                style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", borderTop: "1px solid #f4f4f6", cursor: "pointer" }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  <span style={{ color: "var(--c-text-dim)" }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                  </span>
-                  <span className="t-ui" style={{ color: "var(--c-text)" }}>Gear</span>
-                </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: profileGearOpen ? "rotate(90deg)" : "rotate(0deg)" }}><polyline points="9 18 15 12 9 6"/></svg>
-              </button>
-              {profileGearOpen && (
-                <div style={{ borderTop: "1px solid #f4f4f6" }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px 0" }}>
-                    <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>My Gear</p>
-                    <button onClick={() => setGearEditOpen(o => !o)} className="t-caption" style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 500, color: "var(--c-forest)" }}>{gearEditOpen ? "Done" : "Edit"}</button>
-                  </div>
-                  <div ref={racketRowRef} style={{ display: "flex", alignItems: "stretch", padding: 12, gap: 14 }}>
-                    <label htmlFor="racket-img-upload" style={{ cursor: "pointer", flexShrink: 0, width: racketSlotSize, height: racketSlotSize, display: "block" }}>
-                      <div style={{ width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        {racketImage ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={racketImage} alt="Racket" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        ) : (
-                          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c4c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                        )}
-                      </div>
-                    </label>
-                    <input id="racket-img-upload" type="file" accept="image/*" className="hidden" onChange={handleRacketImage} />
-                    <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "8px 0" }}>
-                      <span className="t-label" style={{ color: "var(--c-label)", display: "block", marginBottom: "8px" }}>Current Racket</span>
-                      <p className="t-title" style={{ color: "var(--c-text)", margin: 0, lineHeight: 1.2 }}>{racketName || "—"}</p>
-                      <p className="t-body" style={{ color: "var(--c-text-dim)", margin: "4px 0 0" }}>{racketType || "Add a description"}</p>
-                      <p className="t-caption" style={{ color: racketSince ? "var(--c-hint)" : "var(--c-disabled)", margin: "6px 0 0" }}>
-                        {racketSince ? `Using since ${new Date(racketSince + "-01").toLocaleDateString("en-GB", { month: "short", year: "numeric" })}` : "Using since —"}
-                      </p>
-                    </div>
-                  </div>
-                  {gearEditOpen && (
-                    <div style={{ borderTop: "1px solid #f0f0f0", padding: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
-                      <div>
-                        <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 0 6px" }}>Racket name</p>
-                        <input type="text" value={racketName} onChange={e => setRacketName(e.target.value)} placeholder="e.g. Bullpadel Vertex" className="t-body"
-                          style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--r-sm)", border: "2px solid #e2e2e2", fontWeight: 500, color: "var(--c-text)", outline: "none", background: "var(--c-bg-input)" }} />
-                      </div>
-                      <div>
-                        <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 0 6px" }}>Type / description</p>
-                        <input type="text" value={racketType} onChange={e => setRacketType(e.target.value)} placeholder="e.g. Control, Power, Hybrid" className="t-body"
-                          style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--r-sm)", border: "2px solid #e2e2e2", fontWeight: 500, color: "var(--c-text)", outline: "none", background: "var(--c-bg-input)" }} />
-                      </div>
-                      <div>
-                        <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 0 6px" }}>Using since</p>
-                        <input type="month" value={racketSince} onChange={e => setRacketSince(e.target.value)} className="t-body"
-                          style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--r-sm)", border: "2px solid #e2e2e2", fontWeight: 500, color: "var(--c-text)", outline: "none", background: "var(--c-bg-input)" }} />
-                      </div>
-                      <button onClick={() => { localStorage.setItem("padelop:gear", JSON.stringify({ racketName, racketType, racketImage, racketSince })); saveGearToDb({ type: "racket", name: racketName ?? undefined, racket_type: racketType ?? undefined, racket_since: racketSince ?? undefined, photo_url: racketImage?.startsWith("http") ? racketImage : undefined }); setGearEditOpen(false); }}
-                        className="t-ui" style={{ padding: "12px", borderRadius: "var(--r-sm)", background: "var(--c-blue)", border: "none", cursor: "pointer", color: "#fff" }}>
-                        Save
-                      </button>
-                    </div>
-                  )}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "var(--c-line)", borderTop: "1px solid var(--c-line)" }}>
-                    <div style={{ background: "#fff", padding: "16px", display: "flex", flexDirection: "column" }}>
-                      <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 12px" }}>My Shoes</p>
-                      <label htmlFor="shoe-img-upload" style={{ cursor: "pointer", display: "block", flex: 1 }}>
-                        <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: shoeImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          {shoeImage ? <img src={shoeImage} alt="Shoes" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 17h20v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-1z"/><path d="M2 17c0-3.5 2.5-6 6-6h2l3-2h3c2.2 0 4 1.5 4.5 3.5L21 17"/></svg>}
-                        </div>
-                      </label>
-                      <input id="shoe-img-upload" type="file" accept="image/*" className="hidden" onChange={handleShoeImage} />
-                    </div>
-                    <div style={{ background: "#fff", padding: "16px", display: "flex", flexDirection: "column" }}>
-                      <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 12px" }}>My Kit</p>
-                      <label htmlFor="kit-img-upload" style={{ cursor: "pointer", display: "block", flex: 1 }}>
-                        <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: kitImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          {kitImage ? <img src={kitImage} alt="Kit" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg>}
-                        </div>
-                      </label>
-                      <input id="kit-img-upload" type="file" accept="image/*" className="hidden" onChange={handleKitImage} />
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
@@ -2467,7 +2469,7 @@ export default function ProfilePage() {
             {stepList.map((s, i) => (
               <div key={i} className="flex flex-col items-center p-3 text-center">
                 <p className="text-[17px] font-semibold text-[#1a1c1c] leading-snug">{s.step}</p>
-                <p className="text-[14px] text-[#6b7480] mt-1 leading-relaxed">{s.cue}</p>
+                <p className="text-[14px] text-[#6b7480] mt-1 leading-snug">{s.cue}</p>
                 <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold" style={{ background: "#2653d420", color: "#2653d4" }}>{s.reps}</span>
               </div>
             ))}
@@ -2501,7 +2503,7 @@ export default function ProfilePage() {
                       {isInfo && schedDetail?.type === 'info' && (
                         <>
                           <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#1a1c1c" }}>{schedDetail.focus}</p>
-                          <p className="text-[17px] text-[#4a5050] leading-relaxed">{schedDetail.text}</p>
+                          <p className="text-[17px] text-[#4a5050] leading-snug">{schedDetail.text}</p>
                         </>
                       )}
                       {isExercise && renderSteps(steps)}
@@ -2513,23 +2515,46 @@ export default function ProfilePage() {
                       )}
                     </div>
                   )}
-                  <div className="pt-6 flex justify-center">
-                    <button
-                      onClick={handleSchedDone}
-                      className="flex items-center gap-3 active:scale-[0.96] transition-transform"
-                    >
-                      <span className="text-[15px] font-semibold" style={{ color: isSchedItemDone ? "#00D455" : "#6b7480" }}>
-                        {isSchedItemDone ? "Completed" : "Mark as complete"}
-                      </span>
-                      <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-                        style={isSchedItemDone
-                          ? { background: "#00D455", border: "none" }
-                          : { background: "transparent", border: "2.5px solid #d0d5dd" }
-                        }
+                  <div className="pt-6">
+                    {isSchedItemDone ? (
+                      <button
+                        onClick={handleSchedDone}
+                        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", height: 56, borderRadius: 28, border: "2px solid #00D455", background: "transparent", cursor: "pointer" }}
                       >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isSchedItemDone ? "#fff" : "#c8cdd3"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                        <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#00D455", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <span style={{ fontSize: 15, fontWeight: 600, color: "#00D455" }}>Done</span>
+                      </button>
+                    ) : (
+                      <div
+                        ref={schedSwipeTrackRef}
+                        style={{ position: "relative", height: 56, borderRadius: 28, background: "#f0f1f3", overflow: "hidden", touchAction: "none" }}
+                        onTouchStart={e => { setSchedSwipeX(0); const track = schedSwipeTrackRef.current as (HTMLDivElement & { _startX?: number }) | null; if (track) track._startX = e.touches[0].clientX; }}
+                        onTouchMove={e => {
+                          const track = schedSwipeTrackRef.current as (HTMLDivElement & { _startX?: number }) | null;
+                          if (!track) return;
+                          const maxX = track.offsetWidth - 56;
+                          const startX = track._startX ?? e.touches[0].clientX;
+                          setSchedSwipeX(Math.max(0, Math.min(maxX, e.touches[0].clientX - startX)));
+                        }}
+                        onTouchEnd={() => {
+                          const track = schedSwipeTrackRef.current;
+                          if (!track) return;
+                          const maxX = track.offsetWidth - 56;
+                          if (schedSwipeX >= maxX * 0.82) { handleSchedDone(); }
+                          setSchedSwipeX(0);
+                        }}
+                      >
+                        <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: schedSwipeX, background: "#00D455", transition: schedSwipeX === 0 ? "width 0.3s" : "none" }} />
+                        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+                          <span style={{ fontSize: 14, fontWeight: 600, color: "#8a9096", opacity: Math.max(0, 1 - schedSwipeX / 80), transition: "opacity 0.1s" }}>Swipe to complete</span>
+                        </div>
+                        <div style={{ position: "absolute", top: 4, left: 4 + schedSwipeX, width: 48, height: 48, borderRadius: "50%", background: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", justifyContent: "center", transition: schedSwipeX === 0 ? "left 0.3s" : "none", pointerEvents: "none" }}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/><path d="M13 6l6 6-6 6"/></svg>
+                        </div>
                       </div>
-                    </button>
+                    )}
                   </div>
                 </div>
               )}
@@ -2593,7 +2618,7 @@ export default function ProfilePage() {
             {stepList.map((s, i) => (
               <div key={i} className="flex flex-col items-start p-3">
                 <p className="text-[17px] font-semibold text-[#1a1c1c] leading-snug" style={{ margin: 0 }}>{s.step}</p>
-                <p className="text-[14px] text-[#6b7480] mt-1 leading-relaxed" style={{ margin: 0 }}>{s.cue}</p>
+                <p className="text-[14px] text-[#6b7480] mt-1 leading-snug" style={{ margin: 0 }}>{s.cue}</p>
                 <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold" style={{ background: "#2653d420", color: "#2653d4" }}>{s.reps}</span>
               </div>
             ))}
@@ -2639,15 +2664,46 @@ export default function ProfilePage() {
                     {renderSteps(drillDef.steps)}
                   </div>
                 )}
-                <div style={{ paddingTop: 24, display: "flex", justifyContent: "center" }}>
-                  <button onClick={panelHandleSchedDone} className="flex items-center gap-3 active:scale-[0.96] transition-transform">
-                    <span style={{ fontSize: 15, fontWeight: 600, color: isComplete ? "#00D455" : "#6b7480" }}>
-                      {isComplete ? "Completed" : "Mark as complete"}
-                    </span>
-                    <div style={{ width: 48, height: 48, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, ...(isComplete ? { background: "#00D455" } : { background: "transparent", border: "2.5px solid #d0d5dd" }) }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isComplete ? "#fff" : "#c8cdd3"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                <div style={{ paddingTop: 24 }}>
+                  {isComplete ? (
+                    <button
+                      onClick={panelHandleSchedDone}
+                      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", height: 56, borderRadius: 28, border: "2px solid #00D455", background: "transparent", cursor: "pointer" }}
+                    >
+                      <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#00D455", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M5 13l4 4L19 7"/></svg>
+                      </div>
+                      <span style={{ fontSize: 15, fontWeight: 600, color: "#00D455" }}>Done</span>
+                    </button>
+                  ) : (
+                    <div
+                      ref={schedSwipeTrackRef}
+                      style={{ position: "relative", height: 56, borderRadius: 28, background: "#f0f1f3", overflow: "hidden", touchAction: "none" }}
+                      onTouchStart={e => { setSchedSwipeX(0); const track = schedSwipeTrackRef.current as (HTMLDivElement & { _startX?: number }) | null; if (track) track._startX = e.touches[0].clientX; }}
+                      onTouchMove={e => {
+                        const track = schedSwipeTrackRef.current as (HTMLDivElement & { _startX?: number }) | null;
+                        if (!track) return;
+                        const maxX = track.offsetWidth - 56;
+                        const startX = track._startX ?? e.touches[0].clientX;
+                        setSchedSwipeX(Math.max(0, Math.min(maxX, e.touches[0].clientX - startX)));
+                      }}
+                      onTouchEnd={() => {
+                        const track = schedSwipeTrackRef.current;
+                        if (!track) return;
+                        const maxX = track.offsetWidth - 56;
+                        if (schedSwipeX >= maxX * 0.82) { panelHandleSchedDone(); }
+                        setSchedSwipeX(0);
+                      }}
+                    >
+                      <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: schedSwipeX, background: "#00D455", transition: schedSwipeX === 0 ? "width 0.3s" : "none" }} />
+                      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: "#8a9096", opacity: Math.max(0, 1 - schedSwipeX / 80), transition: "opacity 0.1s" }}>Swipe to complete</span>
+                      </div>
+                      <div style={{ position: "absolute", top: 4, left: 4 + schedSwipeX, width: 48, height: 48, borderRadius: "50%", background: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", justifyContent: "center", transition: schedSwipeX === 0 ? "left 0.3s" : "none", pointerEvents: "none" }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/><path d="M13 6l6 6-6 6"/></svg>
+                      </div>
                     </div>
-                  </button>
+                  )}
                 </div>
               </div>
             </div>
