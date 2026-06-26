@@ -1044,7 +1044,7 @@ export default function Home8() {
                 if (isDone) return (
                   <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
                     {textureOverlay}
-                    <div style={{ position: "absolute", inset: 0, background: "rgba(10,12,30,0.82)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0, zIndex: 2 }}>
+                    <div style={{ position: "absolute", inset: 0, background: "rgba(10,12,30,0.6)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0, zIndex: 2 }}>
                       {nextSlide && <p style={{ fontSize: "clamp(10px, 2.8vw, 13px)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(200,210,255,0.6)", margin: 0, marginBottom: "clamp(2px, 0.8vw, 4px)" }}>next up</p>}
                       {nextSlide && <p style={{ fontSize: "clamp(18px, 5.5vw, 26px)", fontWeight: 700, color: "#fff", margin: 0, marginBottom: 0, textAlign: "center", padding: "0 clamp(16px, 5vw, 24px)", lineHeight: 1.1 }}>{nextSlide.title}</p>}
                       <p style={{ fontSize: "clamp(30px, 9vw, 42px)", fontWeight: 800, color: "#fff", margin: 0, marginBottom: 0, letterSpacing: "-0.02em", lineHeight: 1 }}>{nextSlide ? fmtTime(secsUntilNext) : "—"}</p>
