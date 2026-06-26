@@ -150,7 +150,7 @@ export function getDayType(): DayType {
       (new Date(today + "T12:00").getTime() - new Date(lastMatchDate + "T12:00").getTime()) / 86400000
     );
 
-    if (daysSince <= 0) return "match";
+    if (daysSince <= 0) return "recovery";
     if (daysSince === 1) return "recovery";
     // day 2 → rest, day 3 → training, day 4 → rest, day 5 → training…
     return (daysSince - 2) % 2 === 0 ? "rest" : "training";
