@@ -1047,14 +1047,14 @@ export default function Home8() {
                       <div style={{ width: "clamp(28px, 8vw, 38px)", height: "clamp(28px, 8vw, 38px)", borderRadius: "50%", background: "#f0f0f0", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "clamp(4px, 1.2vw, 7px)" }}>
                         <svg width="clamp(13px, 4vw, 18px)" height="clamp(13px, 4vw, 18px)" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
                       </div>
-                      <p style={{ fontSize: "clamp(11px, 3.2vw, 14px)", fontWeight: 600, color: "#bbb", lineHeight: 1, margin: 0, marginBottom: "clamp(4px, 1.2vw, 8px)" }}>{(["you're all set.", "done.", "nice."])[currentIdx % 3]}</p>
-                      <p style={{ fontSize: "clamp(30px, 9vw, 42px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1, margin: 0, marginBottom: nextSlide ? "clamp(8px, 2.4vw, 14px)" : "clamp(6px, 2vw, 10px)" }}>{nextSlide ? fmtTime(secsUntilNext) : "—"}</p>
+                      <p style={{ fontSize: "clamp(11px, 3.2vw, 14px)", fontWeight: 600, color: "#bbb", lineHeight: 1, margin: 0, marginBottom: "clamp(6px, 1.8vw, 10px)" }}>{(["you're all set.", "done.", "nice."])[currentIdx % 3]}</p>
                       {nextSlide ? (
                         <>
                           <p style={{ fontSize: "clamp(9px, 2.6vw, 12px)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#c0c0c0", margin: 0, marginBottom: "clamp(2px, 0.6vw, 4px)" }}>all set until:</p>
-                          <p style={{ fontSize: "clamp(14px, 4vw, 18px)", fontWeight: 700, color: "#1a1c1c", lineHeight: 1.1, margin: 0, marginBottom: "clamp(6px, 2vw, 10px)" }}>{nextSlide.title}</p>
+                          <p style={{ fontSize: "clamp(14px, 4vw, 18px)", fontWeight: 700, color: "#1a1c1c", lineHeight: 1.1, margin: 0, marginBottom: "clamp(6px, 1.8vw, 10px)" }}>{nextSlide.title}</p>
                         </>
                       ) : null}
+                      <p style={{ fontSize: "clamp(30px, 9vw, 42px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1, margin: 0, marginBottom: "clamp(6px, 2vw, 10px)" }}>{nextSlide ? fmtTime(secsUntilNext) : "—"}</p>
                       <p style={{ fontSize: "clamp(12px, 3.4vw, 15px)", fontWeight: 600, color: "#bbb", margin: 0 }}>enjoy your day.</p>
                     </div>
                   </div>
