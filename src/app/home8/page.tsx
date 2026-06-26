@@ -349,6 +349,9 @@ export default function Home8() {
   const checkinNudgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [cardSnap, setCardSnap] = useState<'none' | 'left' | 'right'>('none');
   const [liveX, setLiveX] = useState(0);
+  const [swipeX, setSwipeX] = useState(0);
+  const swipeTrackRef = useRef<HTMLDivElement>(null);
+  const swipeStartX = useRef(0);
   const [liveY, setLiveY] = useState(0);
   const [breathPhase, setBreathPhase] = useState(0);
   const [breathDashOffset, setBreathDashOffset] = useState(560);
@@ -1342,6 +1345,7 @@ export default function Home8() {
 
           const closeModal = () => {
             setModalClosing(true);
+            setSwipeX(0);
             setTimeout(() => {
               setDoModalOpen(false);
               setSchedModalIdx(null);
@@ -1442,23 +1446,48 @@ export default function Home8() {
                         )}
                       </div>
                     )}
-                    <div className="pt-6 flex justify-center">
-                      <button
-                        onClick={handleDone}
-                        className="flex items-center gap-3 active:scale-[0.96] transition-transform"
-                      >
-                        <span className="text-[15px] font-semibold" style={{ color: isComplete ? "#00D455" : "#6b7480" }}>
-                          {isComplete ? "Completed" : "Mark as complete"}
-                        </span>
-                        <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-                          style={isComplete
-                            ? { background: "#00D455", border: "none" }
-                            : { background: "transparent", border: "2.5px solid #d0d5dd" }
-                          }
+                    <div style={{ padding: "24px 0 4px" }}>
+                      {isComplete ? (
+                        <button
+                          onClick={handleDone}
+                          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", height: 56, borderRadius: 28, border: "2px solid #00D455", background: "transparent", cursor: "pointer" }}
                         >
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isComplete ? "#fff" : "#c8cdd3"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                          <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#00D455", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M5 13l4 4L19 7"/></svg>
+                          </div>
+                          <span style={{ fontSize: 15, fontWeight: 600, color: "#00D455" }}>Done</span>
+                        </button>
+                      ) : (
+                        <div
+                          ref={swipeTrackRef}
+                          style={{ position: "relative", height: 56, borderRadius: 28, background: "#f0f1f3", overflow: "hidden", touchAction: "none" }}
+                          onTouchStart={e => { swipeStartX.current = e.touches[0].clientX - swipeX; }}
+                          onTouchMove={e => {
+                            const track = swipeTrackRef.current;
+                            if (!track) return;
+                            const maxX = track.offsetWidth - 56;
+                            setSwipeX(Math.max(0, Math.min(maxX, e.touches[0].clientX - swipeStartX.current)));
+                          }}
+                          onTouchEnd={() => {
+                            const track = swipeTrackRef.current;
+                            if (!track) return;
+                            const maxX = track.offsetWidth - 56;
+                            if (swipeX >= maxX * 0.82) { handleDone(); }
+                            setSwipeX(0);
+                          }}
+                        >
+                          {/* Green fill */}
+                          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: swipeX, background: "#00D455", transition: swipeX === 0 ? "width 0.3s" : "none" }} />
+                          {/* Label */}
+                          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+                            <span style={{ fontSize: 14, fontWeight: 600, color: "#8a9096", opacity: Math.max(0, 1 - swipeX / 80), transition: "opacity 0.1s" }}>Swipe to complete</span>
+                          </div>
+                          {/* Thumb */}
+                          <div style={{ position: "absolute", top: 4, left: 4 + swipeX, width: 48, height: 48, borderRadius: "50%", background: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", justifyContent: "center", transition: swipeX === 0 ? "left 0.3s" : "none", pointerEvents: "none" }}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/><path d="M13 6l6 6-6 6"/></svg>
+                          </div>
                         </div>
-                      </button>
+                      )}
                     </div>
                   </div>
                 )}
