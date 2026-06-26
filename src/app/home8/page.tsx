@@ -1053,7 +1053,6 @@ export default function Home8() {
                           <p style={{ fontSize: "clamp(9px, 2.6vw, 12px)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#c0c0c0", margin: 0, marginBottom: "clamp(2px, 0.6vw, 4px)" }}>Next up</p>
                           <p style={{ fontSize: "clamp(14px, 4vw, 18px)", fontWeight: 700, color: "#1a1c1c", lineHeight: 1.1, margin: 0, marginBottom: "clamp(2px, 0.6vw, 4px)" }}>{nextSlide.title}</p>
                           <p style={{ fontSize: "clamp(20px, 5.8vw, 26px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1, margin: 0, marginBottom: "clamp(8px, 2.4vw, 14px)" }}>{fmtTime(secsUntilNext)}</p>
-                          <p style={{ fontSize: "clamp(10px, 2.8vw, 13px)", color: "#c0c0c0", fontWeight: 500, margin: 0, marginBottom: "clamp(3px, 1vw, 6px)" }}>until then...</p>
                           <p style={{ fontSize: "clamp(13px, 3.6vw, 16px)", fontWeight: 600, color: "#999", margin: 0 }}>enjoy your day.</p>
                         </>
                       ) : (
