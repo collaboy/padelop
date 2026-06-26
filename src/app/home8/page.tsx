@@ -502,8 +502,10 @@ export default function Home8() {
           const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
           const titles = sd[todayStr] ?? [];
           if (!titles.includes("Wake up")) {
-            sd[todayStr] = [...titles, "Wake up"];
+            const updated = [...titles, "Wake up"];
+            sd[todayStr] = updated;
             localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
+            saveScheduleDoneToDb(todayStr, updated);
           }
         }
       } catch {}

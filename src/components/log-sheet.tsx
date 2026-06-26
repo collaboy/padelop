@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { saveCheckIn, computeScores, loadScoringData } from "@/lib/scoring";
 import { downloadSnapshot, importData } from "@/lib/storage";
-import { saveMatchReview, saveCheckInToDb, saveHydrationToDb, saveNutritionToDb, saveTrainingToDb } from "@/lib/db";
+import { saveMatchReview, saveCheckInToDb, saveHydrationToDb, saveNutritionToDb, saveTrainingToDb, saveScheduleDoneToDb } from "@/lib/db";
 
 function rangeToMl(range: string): number {
   if (range === "<1L")    return 750;
@@ -557,11 +557,11 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
           try {
             const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
             const titles = sd[todayYMD] ?? [];
-            if (!titles.includes("Wake up")) {
-              sd[todayYMD] = [...titles, "Wake up"];
-              localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
-              window.dispatchEvent(new Event("storage"));
-            }
+            const updated = titles.includes("Wake up") ? titles : [...titles, "Wake up"];
+            sd[todayYMD] = updated;
+            localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
+            saveScheduleDoneToDb(todayYMD, updated);
+            window.dispatchEvent(new Event("storage"));
           } catch {}
         }
 
