@@ -446,7 +446,6 @@ export default function Fab() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 12 }}>
                   {stepList.map((s, i) => (
                     <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "8px 4px", textAlign: "center" }}>
-                      <span style={{ width: 38, height: 38, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: "#2653d420", color: "#2653d4", fontSize: 18, fontWeight: 800, marginBottom: 4 }}>{i + 1}</span>
                       <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#1a1c1c", lineHeight: 1.3 }}>{s.step}</p>
                       <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6b7480", lineHeight: 1.5 }}>{s.cue}</p>
                       <span style={{ marginTop: 6, padding: "2px 8px", borderRadius: 99, background: "#2653d420", color: "#2653d4", fontSize: 11, fontWeight: 700 }}>{s.reps}</span>
@@ -475,7 +474,6 @@ export default function Fab() {
                           <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{detail.focus}</p>
                           {detail.options.map((meal, i) => (
                             <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "8px 0", width: "100%" }}>
-                              <span style={{ width: 38, height: 38, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: "#2653d420", color: "#2653d4", fontSize: 18, fontWeight: 800, marginBottom: 4 }}>{i + 1}</span>
                               <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#1a1c1c" }}>{meal.title}</p>
                               <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6b7480" }}>{meal.detail}</p>
                             </div>

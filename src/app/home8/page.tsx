@@ -1413,7 +1413,6 @@ export default function Home8() {
             <div className="flex flex-col gap-3 mt-3">
               {stepList.map((s, i) => (
                 <div key={i} className="flex flex-col items-start p-3">
-                  <span className="w-10 h-10 rounded-full flex items-center justify-center text-[22px] font-bold mb-1" style={{ background: "#2653d420", color: "#2653d4" }}>{i + 1}</span>
                   <p className="text-[17px] font-semibold text-[#1a1c1c] leading-snug">{s.step}</p>
                   <p className="text-[14px] text-[#6b7480] mt-1 leading-relaxed">{s.cue}</p>
                   <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold" style={{ background: "#2653d420", color: "#2653d4" }}>{s.reps}</span>
@@ -1440,7 +1439,6 @@ export default function Home8() {
                         <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#8a9096" }}>{detail.focus}</p>
                         {detail.options.map((meal, i) => (
                           <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "6px 0" }}>
-                            <span style={{ fontSize: 11, fontWeight: 800, color: "#2653d4", minWidth: 14, paddingTop: 3 }}>{i + 1}</span>
                             <p style={{ margin: 0, fontSize: 16, fontWeight: 500, color: "#1a1c1c", lineHeight: 1.4 }}>{meal.title}</p>
                           </div>
                         ))}
