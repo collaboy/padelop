@@ -10,12 +10,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: true, message: "API key not configured." }, { status: 503 });
   }
 
-  let body: { image: string; mediaType: string; forceCategory?: string };
+  let body: { image: string; mediaType: string; forceCategory?: string; hint?: string };
   try { body = await req.json(); } catch {
     return NextResponse.json({ error: true, message: "Invalid request." }, { status: 400 });
   }
 
-  const { image, mediaType, forceCategory } = body;
+  const { image, mediaType, forceCategory, hint } = body;
   if (!image || !mediaType) return NextResponse.json({ error: true }, { status: 400 });
   if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(mediaType))
     return NextResponse.json({ error: true, message: "Please upload a JPEG, PNG, or WebP image." }, { status: 415 });
@@ -56,10 +56,10 @@ Return ONLY valid JSON:
     ? `{ "result": "win|loss|draw", "score": "", "opponent_names": "" }`
     : `{}`}
 }`
-              : `Analyse this image for a padel fitness app. Today is ${new Date().toISOString().slice(0, 10)}.
+              : `Analyse this image for a padel fitness app. Today is ${new Date().toISOString().slice(0, 10)}.${hint === "post-match" ? "\n\nContext: the user played a match today or yesterday. If this image could be a score, result, or post-game screenshot, prefer classifying it as match_result." : ""}
 
 Classify it as one of:
-- "match_schedule" — a booking, calendar invite, or WhatsApp message about an upcoming match
+- "match_schedule" — a booking, calendar invite, or WhatsApp message about an UPCOMING match
 - "meal" — food, a plate, restaurant dish, or nutrition label
 - "gear" — a padel racket, shoes, bag, or sports equipment
 - "match_result" — a scoreboard, match result screenshot, or post-game summary

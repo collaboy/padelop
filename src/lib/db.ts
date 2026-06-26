@@ -86,6 +86,8 @@ export async function saveUpcomingMatch(match: {
 
 export async function saveMatchReview(entry: {
   ts: string;
+  matchDate?: string;
+  matchTime?: string;
   result?: string;
   feeling?: string;
   opponentNames?: string;
@@ -104,9 +106,7 @@ export async function saveMatchReview(entry: {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    await supabase.from("matches").insert({
-      user_id:       user.id,
-      date:          entry.ts.slice(0, 10),
+    const resultFields = {
       result:        entry.result ?? null,
       feeling:       entry.feeling ?? null,
       energy:        entry.energy ?? null,
@@ -118,7 +118,22 @@ export async function saveMatchReview(entry: {
       well_done:     entry.wellDone ?? [],
       improved:      entry.improved ?? [],
       notes:         entry.notes ?? null,
-    });
+    };
+
+    if (entry.matchDate && entry.matchTime) {
+      // Link to existing scheduled match — update it with result data
+      await supabase.from("matches")
+        .update(resultFields)
+        .eq("user_id", user.id)
+        .eq("date", entry.matchDate)
+        .eq("time", entry.matchTime);
+    } else {
+      await supabase.from("matches").insert({
+        user_id: user.id,
+        date:    entry.matchDate ?? entry.ts.slice(0, 10),
+        ...resultFields,
+      });
+    }
   } catch {}
 }
 

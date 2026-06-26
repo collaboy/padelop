@@ -244,6 +244,16 @@ export default function Fab() {
             });
             const body: Record<string, string> = { image: base64, mediaType: file.type };
             if (insertUploadCategory) body.forceCategory = insertUploadCategory;
+            // Hint the classifier if the user has a recent match (today or yesterday)
+            try {
+              const todayStr = new Date().toISOString().slice(0, 10);
+              const yStr = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+              const stored: StoredMatch[] = JSON.parse(localStorage.getItem("padelop:upcoming-matches") || "[]");
+              const nextRaw: StoredMatch | null = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
+              const hasRecent = stored.some(m => m.date === todayStr || m.date === yStr)
+                || (nextRaw?.date === todayStr || nextRaw?.date === yStr);
+              if (hasRecent) body.hint = "post-match";
+            } catch {}
             const res = await fetch("/api/classify-upload", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
             const result = await res.json();
             if (!res.ok || result.error) {
@@ -591,11 +601,23 @@ export default function Fab() {
           } else if (category === "meal") {
             saveMealEntry(nowTimeStr(), data.description ?? label);
           } else if (category === "match_result") {
+            // Find a recent match to link the result to (today or yesterday)
+            let linkedMatch: StoredMatch | null = null;
+            try {
+              const todayStr = new Date().toISOString().slice(0, 10);
+              const yStr = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+              const stored: StoredMatch[] = JSON.parse(localStorage.getItem("padelop:upcoming-matches") || "[]");
+              linkedMatch = stored.find(m => m.date === todayStr || m.date === yStr) ?? null;
+              if (!linkedMatch) {
+                const nextRaw: StoredMatch | null = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
+                if (nextRaw?.date === todayStr || nextRaw?.date === yStr) linkedMatch = nextRaw;
+              }
+            } catch {}
             const entry = { ts: new Date().toISOString(), feeling: "", result: data.result ?? "", opponent: data.opponent_names ?? "", energy: "", wellDone: [] as string[], improved: [] as string[] };
             const prev = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
             localStorage.setItem("padelop:match-reviews", JSON.stringify([entry, ...prev].slice(0, 50)));
             window.dispatchEvent(new Event("storage"));
-            saveMatchReview({ ts: entry.ts, result: entry.result, opponentNames: entry.opponent });
+            saveMatchReview({ ts: entry.ts, result: entry.result, opponentNames: entry.opponent, matchDate: linkedMatch?.date, matchTime: linkedMatch?.time });
           } else if (category === "gear") {
             saveGearToDb({ type: data.type || "other", name: data.name || data.brand || "" });
           }
