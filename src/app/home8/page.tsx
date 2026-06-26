@@ -1415,12 +1415,12 @@ export default function Home8() {
                   <div className="overflow-y-auto flex-1 px-6 pb-6" style={{ minHeight: 0 }}>
                     <p className="font-bold text-center" style={{ color: "#1a1c1c", fontSize: "clamp(22px, 6.5vw, 30px)", lineHeight: 1.15, margin: "20px 0 4px" }}>{modalItem.title}</p>
                     {isMeal && detail?.type === 'meal' && (
-                      <div className="flex flex-col gap-3 pt-4 text-center">
-                        <p className="text-[11px] font-bold uppercase tracking-widest pb-1" style={{ color: "#1a1c1c" }}>{detail.focus}</p>
+                      <div className="flex flex-col pt-4">
+                        <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#8a9096" }}>{detail.focus}</p>
                         {detail.options.map((meal, i) => (
-                          <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: i < 2 ? "1px solid #f0f0f2" : "none" }}>
-                            <span style={{ fontSize: 11, fontWeight: 800, color: "#2653d4", minWidth: 14 }}>{i + 1}</span>
-                            <p style={{ margin: 0, fontSize: 16, fontWeight: 500, color: "#1a1c1c", lineHeight: 1.35 }}>{meal.title}</p>
+                          <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "6px 0" }}>
+                            <span style={{ fontSize: 11, fontWeight: 800, color: "#2653d4", minWidth: 14, paddingTop: 3 }}>{i + 1}</span>
+                            <p style={{ margin: 0, fontSize: 16, fontWeight: 500, color: "#1a1c1c", lineHeight: 1.4 }}>{meal.title}</p>
                           </div>
                         ))}
                       </div>
