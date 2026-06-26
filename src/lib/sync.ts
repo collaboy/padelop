@@ -243,10 +243,22 @@ export async function hydrateFromSupabase() {
 
     // ── Schedule done ────────────────────────────────────────────────────
     const schedDoneData = schedDoneRes.data ?? [];
-    if (schedDoneData.length) {
-      const schedDone: Record<string, string[]> = {};
-      schedDoneData.forEach(row => { schedDone[row.date as string] = row.tasks ?? []; });
-      localStorage.setItem("padelop:schedule-done", JSON.stringify(schedDone));
+    const localSchedDone: Record<string, string[]> = (() => {
+      try { return JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}"); } catch { return {}; }
+    })();
+    // Merge: DB wins per date it knows about; local keeps dates DB doesn't have
+    const dbDates = new Set(schedDoneData.map(r => r.date as string));
+    const mergedSchedDone: Record<string, string[]> = { ...localSchedDone };
+    schedDoneData.forEach(r => { mergedSchedDone[r.date as string] = r.tasks ?? []; });
+    localStorage.setItem("padelop:schedule-done", JSON.stringify(mergedSchedDone));
+    // Push any local-only dates to DB so other devices can see them
+    for (const date of Object.keys(localSchedDone)) {
+      if (!dbDates.has(date) && localSchedDone[date]?.length > 0) {
+        supabase.from("schedule_done").upsert(
+          { user_id: user.id, date, tasks: localSchedDone[date] },
+          { onConflict: "user_id,date" }
+        ).then();
+      }
     }
 
     // ── Score snapshots ──────────────────────────────────────────────────
