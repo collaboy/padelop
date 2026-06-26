@@ -1044,6 +1044,18 @@ export default function Home8() {
                 if (isDone) return (
                   <div key="active" className="animate-bounce-in" style={cardStyle} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
                     {textureOverlay}
+                    {/* Next task content bleeds through overlay for depth */}
+                    {nextSlide && (
+                      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                        <p className="text-[14px] tracking-wide leading-none" style={{ color: "#000", fontWeight: 600, background: "#fff", padding: 4, borderRadius: 4 }}>Do this now</p>
+                        <p style={{ color: "#000", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, background: "#fff", padding: "3px 6px", borderRadius: 4, display: "inline-block", textAlign: "center", margin: 0 }}>
+                          {nextSlide.title.includes(" & ")
+                            ? <>{nextSlide.title.split(" & ")[0]}<br />{"& " + nextSlide.title.split(" & ").slice(1).join(" & ")}</>
+                            : nextSlide.title}
+                        </p>
+                      </div>
+                    )}
+                    {/* Dark overlay with countdown info */}
                     <div style={{ position: "absolute", inset: 0, background: "rgba(10,12,30,0.6)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0, zIndex: 2 }}>
                       {nextSlide && <p style={{ fontSize: "clamp(10px, 2.8vw, 13px)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(200,210,255,0.6)", margin: 0, marginBottom: "clamp(2px, 0.8vw, 4px)" }}>next up</p>}
                       {nextSlide && <p style={{ fontSize: "clamp(18px, 5.5vw, 26px)", fontWeight: 700, color: "#fff", margin: 0, marginBottom: 0, textAlign: "center", padding: "0 clamp(16px, 5vw, 24px)", lineHeight: 1.1 }}>{nextSlide.title}</p>}
