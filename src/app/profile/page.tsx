@@ -2466,7 +2466,6 @@ export default function ProfilePage() {
           <div className="flex flex-col gap-3 mt-3">
             {stepList.map((s, i) => (
               <div key={i} className="flex flex-col items-center p-3 text-center">
-                <span className="w-10 h-10 rounded-full flex items-center justify-center text-[22px] font-bold mb-1" style={{ background: "#2653d420", color: "#2653d4" }}>{i + 1}</span>
                 <p className="text-[17px] font-semibold text-[#1a1c1c] leading-snug">{s.step}</p>
                 <p className="text-[14px] text-[#6b7480] mt-1 leading-relaxed">{s.cue}</p>
                 <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold" style={{ background: "#2653d420", color: "#2653d4" }}>{s.reps}</span>
@@ -2497,7 +2496,6 @@ export default function ProfilePage() {
                       <p className="text-[11px] font-bold uppercase tracking-widest pb-1" style={{ color: "#1a1c1c" }}>{schedDetail.focus}</p>
                       {schedDetail.options.map((meal, i) => (
                         <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "6px 0", width: "100%" }}>
-                          <span style={{ fontSize: 11, fontWeight: 800, color: "#2653d4", minWidth: 14, paddingTop: 3 }}>{i + 1}</span>
                           <p style={{ margin: 0, fontSize: 16, fontWeight: 500, color: "#1a1c1c", lineHeight: 1.4 }}>{meal.title}</p>
                         </div>
                       ))}
@@ -2599,7 +2597,6 @@ export default function ProfilePage() {
           <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 12 }}>
             {stepList.map((s, i) => (
               <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "8px 4px", textAlign: "center" }}>
-                <span style={{ width: 38, height: 38, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: "#2653d420", color: "#2653d4", fontSize: 18, fontWeight: 800, marginBottom: 4 }}>{i + 1}</span>
                 <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#1a1c1c", lineHeight: 1.3 }}>{s.step}</p>
                 <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6b7480", lineHeight: 1.5 }}>{s.cue}</p>
                 <span style={{ marginTop: 6, padding: "2px 8px", borderRadius: 99, background: "#2653d420", color: "#2653d4", fontSize: 11, fontWeight: 700 }}>{s.reps}</span>
@@ -2626,7 +2623,6 @@ export default function ProfilePage() {
                     <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{detail.focus}</p>
                     {detail.options.map((meal, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "6px 0", width: "100%" }}>
-                        <span style={{ fontSize: 11, fontWeight: 800, color: "#2653d4", minWidth: 14, paddingTop: 3 }}>{i + 1}</span>
                         <p style={{ margin: 0, fontSize: 16, fontWeight: 500, color: "#1a1c1c", lineHeight: 1.4 }}>{meal.title}</p>
                       </div>
                     ))}
