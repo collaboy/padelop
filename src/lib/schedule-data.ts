@@ -128,13 +128,13 @@ export function getDayType(): DayType {
     const today = new Date().toISOString().slice(0, 10);
     const tomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
 
-    const nextMatch = JSON.parse(localStorage.getItem("padelop:next-match") || "null") as { date?: string } | null;
-    if (nextMatch?.date === today) return "match";
-    if (nextMatch?.date === tomorrow) return "pre-match";
+    const nextMatch = JSON.parse(localStorage.getItem("padelop:next-match") || "null") as { date?: string; time?: string } | null;
+    if (nextMatch?.date === today && nextMatch?.time) return "match";
+    if (nextMatch?.date === tomorrow && nextMatch?.time) return "pre-match";
 
-    const upcoming = JSON.parse(localStorage.getItem("padelop:upcoming-matches") || "[]") as { date?: string }[];
-    if (upcoming.some(m => m.date === today)) return "match";
-    if (upcoming.some(m => m.date === tomorrow)) return "pre-match";
+    const upcoming = JSON.parse(localStorage.getItem("padelop:upcoming-matches") || "[]") as { date?: string; time?: string }[];
+    if (upcoming.some(m => m.date === today && m.time)) return "match";
+    if (upcoming.some(m => m.date === tomorrow && m.time)) return "pre-match";
 
     const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]") as { ts?: string }[];
     const matchDates = reviews

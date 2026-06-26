@@ -19,7 +19,7 @@ function getMatchList(): StoredMatch[] {
 
 function saveMatchListLocal(list: StoredMatch[]) {
   const today = new Date().toISOString().slice(0, 10);
-  const future = list.filter(m => m.date >= today).sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+  const future = list.filter(m => m.date >= today && m.time).sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
   try {
     localStorage.setItem("padelop:upcoming-matches", JSON.stringify(future));
     if (future.length > 0) localStorage.setItem("padelop:next-match", JSON.stringify(future[0]));
