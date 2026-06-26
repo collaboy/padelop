@@ -363,10 +363,10 @@ export default function Fab() {
                         <button
                           onClick={() => setFabSchedOpen(o => !o)}
                           className="active:scale-95 transition-transform"
-                          style={{ width: "100%", background: fabSchedOpen ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 10, textAlign: "left", marginTop: -8 }}
+                          style={{ width: "100%", background: fabSchedOpen ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", flexDirection: "column", justifyContent: "space-between", textAlign: "left", marginTop: -8, minHeight: "calc((100vw - 52px) / 3)" }}
                         >
                           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Daily Tasks</span>
+                            <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Today's Goals</span>
                             <span style={{ fontSize: 12, color: "#8a9096" }}>{pct === 100 ? "All done ✓" : `${done} of ${total}`}</span>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: fabSchedOpen ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
                           </div>
@@ -377,7 +377,7 @@ export default function Fab() {
                       )}
 
                       {/* Daily Tasks expanded */}
-                      <div style={{ overflow: "hidden", maxHeight: fabSchedOpen ? 800 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
+                      <div style={{ overflow: "hidden", maxHeight: fabSchedOpen ? 2000 : 0, transition: "max-height 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
                         <div style={{ paddingTop: 10 }}>
                           <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden", padding: "20px" }}>
                             <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -387,7 +387,7 @@ export default function Fab() {
                                   <div
                                     key={item.title}
                                     onClick={() => { if (SCHEDULE_DETAILS[item.title] || item.isDrill) setFabSchedModalIdx(i); }}
-                                    style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", cursor: SCHEDULE_DETAILS[item.title] || item.isDrill ? "pointer" : "default", borderBottom: i < fabSchedule.length - 1 ? "1px solid #f4f4f6" : "none" }}
+                                    style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 0", cursor: SCHEDULE_DETAILS[item.title] || item.isDrill ? "pointer" : "default", borderBottom: i < fabSchedule.length - 1 ? "1px solid #f4f4f6" : "none" }}
                                   >
                                     <button
                                       onClick={e => { e.stopPropagation(); fabToggleDone(item.title); }}
@@ -417,14 +417,6 @@ export default function Fab() {
                   );
                 })()}
 
-                {/* Settings link */}
-                <div style={{ background: "#fff", borderRadius: 16, overflow: "hidden", boxShadow: "0 0 0 1px #f0f0f0" }}>
-                  <button onClick={() => { router.push("/settings"); }} style={{ width: "100%", padding: "14px 16px", display: "flex", alignItems: "center", gap: 14, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Settings</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                  </button>
-                </div>
 
               </div>
             </div>

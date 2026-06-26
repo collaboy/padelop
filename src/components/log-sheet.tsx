@@ -507,7 +507,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
       { key: "pain",             section: "morning", type: "opts3", question: "Any pain or injury today?",           opts: [["none","None"],["minor","Minor"],["yes","Yes"]] },
       { key: "energy",           section: "morning", type: "scale", question: "Energy level?",                      lo: "Exhausted",     hi: "Energised"   },
       { key: "motivation",       section: "morning", type: "scale", question: "Motivated today?",                   lo: "None",          hi: "Fired up"    },
-      { key: "water",            section: "morning", type: "yesno", question: "Did you drink water on waking?" },
+      { key: "water",            section: "morning", type: "yesno", question: "Did you drink 500ml of water on waking?" },
     ];
 
     const totalSteps = COMBINED_STEPS.length;
@@ -552,6 +552,19 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
           waterOnWaking: next.water === "yes",
         }));
 
+        // Auto-mark "Wake up" as done only if they drank water on waking
+        if (next.water === "yes") {
+          try {
+            const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
+            const titles = sd[todayYMD] ?? [];
+            if (!titles.includes("Wake up")) {
+              sd[todayYMD] = [...titles, "Wake up"];
+              localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
+              window.dispatchEvent(new Event("storage"));
+            }
+          } catch {}
+        }
+
         const bedtime = String(next.bedtime ?? "");
         const earlyBed = ["9pm","10pm","10:30pm"].includes(bedtime);
         const habitsEntry = {
@@ -588,16 +601,6 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
           localStorage.setItem("padelop:hydration-logs", JSON.stringify([hydrationEntry, ...prevHydration].slice(0, 50)));
           const yesterdayYMD = yesterday.toISOString().slice(0, 10);
           saveHydrationToDb(yesterdayYMD, rangeToMl(hydrationLitres));
-        }
-      } catch {}
-
-      // Mark "Wake up" done in schedule so Daily Tasks bar reflects check-in completion
-      try {
-        const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
-        const titles = sd[todayYMD] ?? [];
-        if (!titles.includes("Wake up")) {
-          sd[todayYMD] = [...titles, "Wake up"];
-          localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
         }
       } catch {}
 

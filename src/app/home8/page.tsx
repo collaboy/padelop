@@ -495,6 +495,18 @@ export default function Home8() {
           setCheckinNudgeOpen(false);
         }
       } catch { setMorningDone(false); }
+      // Retroactively mark "Wake up" done if morning log shows waterOnWaking
+      try {
+        const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null");
+        if (ml?.date === todayStr && ml?.waterOnWaking === true) {
+          const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
+          const titles = sd[todayStr] ?? [];
+          if (!titles.includes("Wake up")) {
+            sd[todayStr] = [...titles, "Wake up"];
+            localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
+          }
+        }
+      } catch {}
       // Seed completed Set from padelop:schedule-done
       try {
         const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
@@ -1395,7 +1407,7 @@ export default function Home8() {
           const renderSteps = (stepList: { step: string; cue: string; reps: string }[]) => (
             <div className="flex flex-col gap-3 mt-3">
               {stepList.map((s, i) => (
-                <div key={i} className="flex flex-col items-center p-3 text-center">
+                <div key={i} className="flex flex-col items-start p-3">
                   <span className="w-10 h-10 rounded-full flex items-center justify-center text-[22px] font-bold mb-1" style={{ background: "#2653d420", color: "#2653d4" }}>{i + 1}</span>
                   <p className="text-[17px] font-semibold text-[#1a1c1c] leading-snug">{s.step}</p>
                   <p className="text-[14px] text-[#6b7480] mt-1 leading-relaxed">{s.cue}</p>
@@ -1417,7 +1429,7 @@ export default function Home8() {
                 {/* Detail content + inline complete button */}
                 {(isMeal || isExercise || isDrill || isInfo) && (
                   <div className="overflow-y-auto flex-1 px-6 pb-6" style={{ minHeight: 0 }}>
-                    <p className="font-bold text-center" style={{ color: "#1a1c1c", fontSize: "clamp(22px, 6.5vw, 30px)", lineHeight: 1.15, margin: "20px 0 4px" }}>{modalItem.title}</p>
+                    <p className="font-bold" style={{ color: "#1a1c1c", fontSize: "clamp(22px, 6.5vw, 30px)", lineHeight: 1.15, margin: "20px 0 4px" }}>{modalItem.title}</p>
                     {isMeal && detail?.type === 'meal' && (
                       <div className="flex flex-col pt-4">
                         <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#8a9096" }}>{detail.focus}</p>
@@ -1430,17 +1442,17 @@ export default function Home8() {
                       </div>
                     )}
                     {(isInfo || isExercise || isDrill) && (
-                      <div className="pt-4 text-center">
+                      <div className="pt-4">
                         {isInfo && detail?.type === 'info' && (
                           <>
                             <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#1a1c1c" }}>{detail.focus}</p>
-                            <p className="text-[17px] text-[#4a5050] leading-relaxed text-center">{detail.text}</p>
+                            <p className="text-[17px] text-[#4a5050] leading-relaxed">{detail.text}</p>
                           </>
                         )}
                         {isExercise && detail?.type === 'exercise' && renderSteps(detail.steps)}
                         {isDrill && drillSteps && (
                           <>
-                            <p className="text-[11px] font-bold uppercase tracking-widest pb-1" style={{ color: "#1a1c1c" }}>{(DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).focus}</p>
+                            <p className="text-[11px] font-bold uppercase tracking-widest pb-1 text-left" style={{ color: "#1a1c1c" }}>{(DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).focus}</p>
                             {renderSteps(drillSteps)}
                           </>
                         )}

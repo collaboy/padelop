@@ -1211,6 +1211,23 @@ export default function ProfilePage() {
       {activeTab === 'profile' && (
         <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
 
+          {/* Header */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button
+              onClick={() => router.push("/home8")}
+              style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--c-bg)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--c-text)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <h1 className="t-heading" style={{ color: "var(--c-text)", margin: 0, flex: 1 }}>Profile</h1>
+            <button
+              onClick={() => router.push("/settings")}
+              style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--c-bg)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--c-text)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </button>
+          </div>
+
           {/* Profile card */}
           <div style={{ background: "#fff", borderRadius: 18, padding: "20px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
@@ -1306,109 +1323,26 @@ export default function ProfilePage() {
             )}
           </div>
 
-          {/* ── Inline Action Panel ─────────────────────────────────────── */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-
-            {panelSmartError && (
-              <div style={{ background: "#fff5f5", border: "1.5px solid #fecaca", borderRadius: 12, padding: "10px 14px" }}>
-                <p style={{ fontSize: 14, color: "#dc2626", margin: 0 }}>{panelSmartError}</p>
-              </div>
-            )}
-
-            {/* Top row — Home, My Profile, Upload */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
-              <button
-                onClick={() => { router.push("/home8"); }}
-                className="active:scale-95 transition-transform"
-                style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
-              </button>
-              <button
-                onClick={() => { router.push("/profile?tab=profile"); }}
-                className="active:scale-95 transition-transform"
-                style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>
-                <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>My Profile</span>
-              </button>
-              <button
-                onClick={() => panelUploadRef.current?.click()}
-                disabled={panelUploadLoading}
-                className="active:scale-95 transition-transform"
-                style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1", opacity: panelUploadLoading ? 0.7 : 1 }}
-              >
-                {panelUploadLoading ? (
-                  <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.2" strokeLinecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-                ) : (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
-                )}
-                <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>{panelUploadLoading ? "Analysing…" : "Upload"}</span>
-              </button>
+          {panelSmartError && (
+            <div style={{ background: "#fff5f5", border: "1.5px solid #fecaca", borderRadius: 12, padding: "10px 14px" }}>
+              <p style={{ fontSize: 14, color: "#dc2626", margin: 0 }}>{panelSmartError}</p>
             </div>
+          )}
 
-            {/* Log manually — line separator */}
-            <button
-              onClick={() => setPanelExpanded(v => !v)}
-              style={{ width: "100%", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, padding: "4px 0" }}
-            >
-              <div style={{ flex: 1, height: 1, background: "#e0e2e5" }} />
-              <span style={{ fontSize: 12, fontWeight: 600, color: "#8a9096", whiteSpace: "nowrap" }}>Log manually</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#b0b5ba" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: panelExpanded ? "rotate(180deg)" : "rotate(0deg)", flexShrink: 0 }}><polyline points="6 9 12 15 18 9"/></svg>
-              <div style={{ flex: 1, height: 1, background: "#e0e2e5" }} />
-            </button>
-
-            {/* Log manually expanded */}
-            <div style={{ overflow: "hidden", maxHeight: panelExpanded ? 600 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingTop: 10 }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                  {([
-                    { label: "Match", sub: "Schedule", bg: "#eef2ff", color: "#2653d4", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>, action: () => { setPanelSmartResult({ category: "match_schedule", label: "Schedule a match", confidence: "high", data: { date: "", time: "", club: "", court: "", player_1: "", player_2: "", player_3: "", player_4: "" } }); setPanelLogSub("upload-confirm"); } },
-                    { label: "Food", sub: "Meal or snack", bg: "#f0fdf4", color: "#16a34a", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>, action: () => { setPanelSmartResult({ category: "meal", label: "Add a meal", confidence: "high", data: { description: "", meal_type: "" } }); setPanelLogSub("upload-confirm"); } },
-                    { label: "Gear", sub: "Racket, shoes…", bg: "#f5f0ff", color: "#7c3aed", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, action: () => { setPanelSmartResult({ category: "gear", label: "Add gear", confidence: "high", data: { type: "", brand: "", name: "" } }); setPanelLogSub("upload-confirm"); } },
-                    { label: "Results", sub: "Match result", bg: "#fff7ed", color: "#ea580c", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, action: () => { setPanelSmartResult({ category: "match_result", label: "Add match result", confidence: "high", data: { result: "", score: "", opponent_names: "" } }); setPanelLogSub("upload-confirm"); } },
-                  ] as { label: string; sub: string; bg: string; color: string; icon: React.ReactNode; action: () => void }[]).map(({ label, sub, bg, color, icon, action }) => (
-                    <button key={label} onClick={action} className="active:scale-95 transition-transform" style={{ background: bg, border: "none", borderRadius: 16, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14, textAlign: "left" }}>
-                      {icon}
-                      <div>
-                        <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{label}</p>
-                        <p style={{ fontSize: 12, fontWeight: 600, color, margin: "2px 0 0" }}>{sub}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={() => setPanelLogSub("matchreview")}
-                  className="active:scale-95 transition-transform"
-                  style={{ width: "100%", background: "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, textAlign: "left" }}
-                >
-                  <div style={{ width: 38, height: 38, borderRadius: 10, background: "#eaebec", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                  </div>
-                  <div>
-                    <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Note</p>
-                    <p style={{ fontSize: 12, fontWeight: 500, color: "#8a9096", margin: "2px 0 0" }}>Thoughts, feelings, ideas</p>
-                  </div>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: "auto" }}><polyline points="9 18 15 12 9 6"/></svg>
-                </button>
-              </div>
-            </div>
-
-            {/* Daily Tasks row + expanded */}
-            {(() => {
+          {/* Daily Tasks row + expanded */}
+          {(() => {
               const todayDoneSet = new Set(schedDone[todayKey] ?? []);
               const total = schedule.length;
               const done = schedule.filter(s => todayDoneSet.has(s.title)).length;
               const pct = total > 0 ? Math.round((done / total) * 100) : 0;
               const barColor = pct === 100 ? "#00D455" : pct >= 50 ? "#2653d4" : "#f59e0b";
               return (
-                <>
+                <div style={{ display: "flex", flexDirection: "column" }}>
                   {total > 0 && (
                     <button
                       onClick={() => setPanelSchedOpen(o => !o)}
                       className="active:scale-95 transition-transform"
-                      style={{ width: "100%", background: panelSchedOpen ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 10, textAlign: "left", marginTop: -8 }}
+                      style={{ width: "100%", background: panelSchedOpen ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 10, textAlign: "left" }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Daily Tasks</span>
@@ -1456,11 +1390,61 @@ export default function ProfilePage() {
                       </div>
                     </div>
                   </div>
-                </>
+                </div>
               );
             })()}
 
-          </div>
+          {/* Current Insights */}
+          {(() => {
+            // Best streak ever from score history
+            const sortedDates = [...history].map(h => h.date).sort();
+            let bestStreak = streak;
+            let cur = 1;
+            for (let i = 1; i < sortedDates.length; i++) {
+              const diff = Math.round((new Date(sortedDates[i]).getTime() - new Date(sortedDates[i - 1]).getTime()) / 86400000);
+              if (diff === 1) { cur++; if (cur > bestStreak) bestStreak = cur; } else { cur = 1; }
+            }
+
+            // Top wellDone / improved tags across all reviews
+            const wellDoneCounts: Record<string, number> = {};
+            const improvedCounts: Record<string, number> = {};
+            reviews.forEach(r => {
+              (r.wellDone ?? []).forEach(t => { wellDoneCounts[t] = (wellDoneCounts[t] ?? 0) + 1; });
+              (r.improved ?? []).forEach(t => { improvedCounts[t] = (improvedCounts[t] ?? 0) + 1; });
+            });
+            const topGood = Object.entries(wellDoneCounts).sort((a, b) => b[1] - a[1]).slice(0, 2).map(e => e[0]);
+            const topWork = Object.entries(improvedCounts).sort((a, b) => b[1] - a[1]).slice(0, 1).map(e => e[0]);
+
+            // Streak sentence
+            const streakSentence = streak === 0
+              ? "No active streak yet — start logging daily to build one."
+              : streak >= 7
+                ? `You're on a ${streak}-day streak, which is excellent consistency.`
+                : bestStreak > streak
+                  ? `You're on a ${streak}-day streak — your personal best is ${bestStreak} days, so there's a record to chase.`
+                  : `You're on a ${streak}-day streak — keep it going.`;
+
+            // Strengths / work-on sentence
+            const strengthSentence = topGood.length > 0
+              ? `Self-reported, ${topGood.length > 1 ? `${topGood[0]} and ${topGood[1]} have been` : `${topGood[0]} has been`} your strongest area${topGood.length > 1 ? "s" : ""}${topWork.length > 0 ? `, while ${topWork[0]} is where you most want to improve` : ""}.`
+              : reviews.length === 0 ? "Log some match reviews to see your strengths and areas to work on." : "";
+
+            // Nutrition & hydration sentence
+            const nutScore = scores.nutrition;
+            const recScore = scores.recovery;
+            const nutWord = nutScore >= 75 ? "strong" : nutScore >= 50 ? "reasonable" : "something to focus on";
+            const hydWord = recScore >= 75 ? "solid" : recScore >= 50 ? "ok" : "below where you want it";
+            const statusSentence = `Nutrition is looking ${nutWord} and hydration is ${hydWord} right now.`;
+
+            const paragraph = [streakSentence, strengthSentence, statusSentence].filter(Boolean).join(" ");
+
+            return (
+              <div style={{ background: "#fff", borderRadius: 18, padding: "20px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
+                <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096" }}>Current Insights</p>
+                <p style={{ margin: 0, fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{paragraph}</p>
+              </div>
+            );
+          })()}
 
           {/* Day header card — removed */}
           {false && (() => {
