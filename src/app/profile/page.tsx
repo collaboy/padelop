@@ -1345,7 +1345,7 @@ export default function ProfilePage() {
                       style={{ width: "100%", background: panelSchedOpen ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 10, textAlign: "left" }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Daily Tasks</span>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Today's Goals</span>
                         <span style={{ fontSize: 12, color: "#8a9096" }}>{pct === 100 ? "All done ✓" : `${done} of ${total}`}</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: panelSchedOpen ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
                       </div>
@@ -1374,10 +1374,10 @@ export default function ProfilePage() {
                                   {isDone && <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                                 </button>
                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                  <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none" }}>{item.title}</p>
+                                  <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none" }}>{item.title}</p>
                                   {item.subtitle && <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9aa0a6", fontWeight: 500 }}>{item.subtitle}</p>}
                                 </div>
-                                <span style={{ fontSize: 12, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
+                                <span style={{ fontSize: 14, color: "#b0b8c1", fontWeight: 600, flexShrink: 0 }}>{item.time}</span>
                               </div>
                             );
                           })}

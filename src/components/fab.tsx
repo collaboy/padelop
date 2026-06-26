@@ -2,8 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { saveUpcomingMatch, saveNutritionToDb, saveNoteToDb, saveMatchReview, saveGearToDb, saveScheduleDoneToDb } from "@/lib/db";
-import { getScheduleData, getDayType, SCHEDULE_DETAILS, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag, type DayType } from "@/lib/schedule-data";
+import { saveUpcomingMatch, saveNutritionToDb, saveNoteToDb, saveMatchReview, saveGearToDb } from "@/lib/db";
 
 type StoredMatch = { date: string; time: string; club: string; court: string; player_1: string; player_2: string; player_3: string; player_4: string };
 
@@ -51,21 +50,6 @@ export default function Fab() {
   const [mealsToday, setMealsToday] = useState<{ id: string; time: string; description: string }[]>([]);
   const [noteText, setNoteText] = useState("");
 
-  // Schedule state (for Today section in the sheet)
-  const [fabDayType, setFabDayType] = useState<DayType>("baseline");
-  const [fabDrillTag, setFabDrillTag] = useState<string | null>(null);
-  const [fabSchedule, setFabSchedule] = useState<ReturnType<typeof getScheduleData>["schedule"]>([]);
-  const [fabCurrentIdx, setFabCurrentIdx] = useState(0);
-  const [fabSchedDone, setFabSchedDone] = useState<Set<string>>(new Set());
-  const [fabSchedModalIdx, setFabSchedModalIdx] = useState<number | null>(null);
-  const [fabSchedModalClosing, setFabSchedModalClosing] = useState(false);
-  const [fabSchedOpen, setFabSchedOpen] = useState(false);
-  const [fabProfile, setFabProfile] = useState<{ name: string } | null>(null);
-  const [fabStreak, setFabStreak] = useState(0);
-  const [fabLastReview, setFabLastReview] = useState<{ ts: string; result: string; opponentNames?: string; opponent?: string } | null>(null);
-  const [fabNextMatch, setFabNextMatch] = useState<StoredMatch | null>(null);
-  const [fabExpandedRow, setFabExpandedRow] = useState<string | null>(null);
-
   const insertUploadRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -74,48 +58,6 @@ export default function Fab() {
       closeAll();
     }
   }, [pathname]);
-
-  useEffect(() => {
-    function load() {
-      const todayStr = new Date().toISOString().slice(0, 10);
-      const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
-      let mTime: string | null = null;
-      try {
-        const m = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
-        if (m?.date === todayStr && m?.time) mTime = m.time;
-        setFabNextMatch(m?.date ? m : null);
-      } catch { setFabNextMatch(null); }
-      try {
-        const reviews: { ts: string; result?: string; opponentNames?: string; opponent?: string }[] = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
-        const sorted = [...reviews].sort((a, b) => b.ts.localeCompare(a.ts));
-        setFabLastReview(sorted[0] ? { ts: sorted[0].ts, result: sorted[0].result || "", opponentNames: sorted[0].opponentNames, opponent: sorted[0].opponent } : null);
-      } catch { setFabLastReview(null); }
-      const tag = getTopNeedsWorkTag();
-      setFabDrillTag(tag);
-      const type = getDayType();
-      setFabDayType(type);
-      const { schedule: s, currentIdx: ci } = getScheduleData(type, mTime, tag);
-      setFabSchedule(s);
-      setFabCurrentIdx(ci);
-      try {
-        const sd = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
-        setFabSchedDone(new Set(sd[todayStr] ?? []));
-      } catch {}
-      try {
-        const p = JSON.parse(localStorage.getItem("padelop:profile") || "null");
-        const name = p?.name || (p?.firstName ? `${p.firstName}${p.lastName ? ` ${p.lastName}` : ""}` : "");
-        setFabProfile(name ? { name } : null);
-      } catch {}
-      try {
-        const sk = JSON.parse(localStorage.getItem("padelop:streak") || "0");
-        setFabStreak(typeof sk === "number" ? sk : 0);
-      } catch {}
-    }
-    load();
-    window.addEventListener("storage", load);
-    window.addEventListener("padelop:sync-done", load);
-    return () => { window.removeEventListener("storage", load); window.removeEventListener("padelop:sync-done", load); };
-  }, []);
 
   useEffect(() => {
     function handleOpen() { setSmartUploadError(null); setFabExpanded(false); setLogPickerOpen(true); }
@@ -160,55 +102,7 @@ export default function Fab() {
     setLogPickerSub(null);
     setFabExpanded(false);
     setSmartUploadError(null);
-    setFabSchedModalIdx(null);
-    setFabSchedModalClosing(false);
-    setFabExpandedRow(null);
   }
-
-  const fabDayLabel =
-    fabDayType === "match"     ? "Match Day" :
-    fabDayType === "pre-match" ? "Pre-Match Day" :
-    fabDayType === "recovery"  ? "Recovery Day" :
-    fabDayType === "rest"      ? "Rest Day" :
-    fabDayType === "training"  ? "Training Day" : "Today";
-  const fabDayColor =
-    fabDayType === "match"     ? "#2653d4" :
-    fabDayType === "pre-match" ? "#d97706" :
-    fabDayType === "recovery"  ? "#7c3aed" :
-    fabDayType === "rest"      ? "#0e7490" : "#16a34a";
-  const fabDayMessage =
-    fabDayType === "match"     ? "Match day — focus, communicate, compete." :
-    fabDayType === "pre-match" ? "Match tomorrow — rest up, carb load, get to bed early." :
-    fabDayType === "recovery"  ? "Recovery day — rest is training too. Go easy." :
-    fabDayType === "rest"      ? "Rest day — let the body absorb the work." :
-    "Training day — small habits compound into big results.";
-
-  const closeFabSchedModal = () => {
-    setFabSchedModalClosing(true);
-    setTimeout(() => { setFabSchedModalIdx(null); setFabSchedModalClosing(false); }, 320);
-  };
-
-  const handleFabSchedDone = () => {
-    if (fabSchedModalIdx === null) return;
-    const item = fabSchedule[fabSchedModalIdx];
-    const isComplete = fabSchedDone.has(item.title);
-    fabToggleDone(item.title);
-    if (!isComplete) { setTimeout(closeFabSchedModal, 350); } else { closeFabSchedModal(); }
-  };
-
-  const fabToggleDone = (title: string) => {
-    const todayKey = new Date().toISOString().slice(0, 10);
-    const newDone = new Set(fabSchedDone);
-    if (newDone.has(title)) { newDone.delete(title); } else { newDone.add(title); }
-    setFabSchedDone(newDone);
-    try {
-      const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
-      sd[todayKey] = [...newDone];
-      localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
-      saveScheduleDoneToDb(todayKey, sd[todayKey]);
-      window.dispatchEvent(new Event("storage"));
-    } catch {}
-  };
 
   const inputSt: React.CSSProperties = { width: "100%", padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", outline: "none", fontFamily: "inherit", background: "#f8f9fa", boxSizing: "border-box" };
   const labelSt: React.CSSProperties = { fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#8a9096", marginBottom: 4, display: "block" };
@@ -351,167 +245,8 @@ export default function Fab() {
                   </div>
                 </div>
 
-                {/* Separator between log content and Daily Tasks */}
-                {fabExpanded && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "2px 0" }}>
-                    <div style={{ flex: 1, height: 1, background: "#e0e2e5" }} />
-                    <span style={{ fontSize: 11, fontWeight: 600, color: "#b0b5ba", whiteSpace: "nowrap", letterSpacing: "0.05em" }}>Today</span>
-                    <div style={{ flex: 1, height: 1, background: "#e0e2e5" }} />
-                  </div>
-                )}
-
-                {/* Daily Tasks row + expanded */}
-                {(() => {
-                  const total = fabSchedule.length;
-                  const done = fabSchedule.filter(s => fabSchedDone.has(s.title)).length;
-                  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-                  const barColor = pct === 100 ? "#00D455" : pct >= 50 ? "#2653d4" : "#f59e0b";
-                  return (
-                    <>
-                      {/* Daily Tasks — full-width button */}
-                      {total > 0 && (
-                        <button
-                          onClick={() => setFabSchedOpen(o => !o)}
-                          className="active:scale-95 transition-transform"
-                          style={{ width: "100%", background: fabSchedOpen ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", flexDirection: "column", justifyContent: "space-between", textAlign: "left", marginTop: -8, minHeight: "calc((100vw - 52px) / 3)" }}
-                        >
-                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Today's Goals</span>
-                            <span style={{ fontSize: 12, color: "#8a9096" }}>{pct === 100 ? "All done ✓" : `${done} of ${total}`}</span>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: fabSchedOpen ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
-                          </div>
-                          <div style={{ width: "100%", height: 4, borderRadius: 2, background: "#e0e2e5", overflow: "hidden" }}>
-                            <div style={{ height: "100%", width: `${pct}%`, background: barColor, borderRadius: 2, transition: "width 0.4s" }} />
-                          </div>
-                        </button>
-                      )}
-
-                      {/* Daily Tasks expanded */}
-                      <div style={{ overflow: "hidden", maxHeight: fabSchedOpen ? 2000 : 0, transition: "max-height 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-                        <div style={{ paddingTop: 10 }}>
-                          <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden", padding: "20px" }}>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                              {fabSchedule.map((item, i) => {
-                                const isDone = fabSchedDone.has(item.title);
-                                return (
-                                  <div
-                                    key={item.title}
-                                    onClick={() => { if (SCHEDULE_DETAILS[item.title] || item.isDrill) setFabSchedModalIdx(i); }}
-                                    style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 0", cursor: SCHEDULE_DETAILS[item.title] || item.isDrill ? "pointer" : "default", borderBottom: i < fabSchedule.length - 1 ? "1px solid #f4f4f6" : "none" }}
-                                  >
-                                    <button
-                                      onClick={e => { e.stopPropagation(); fabToggleDone(item.title); }}
-                                      style={{ width: 22, height: 22, borderRadius: 6, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s", cursor: "pointer" }}
-                                    >
-                                      {isDone && <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                                    </button>
-                                    <div style={{ flex: 1, minWidth: 0 }}>
-                                      <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none" }}>{item.title}</p>
-                                      {item.subtitle && <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9aa0a6", fontWeight: 500 }}>{item.subtitle}</p>}
-                                    </div>
-                                    <span style={{ fontSize: 12, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                            <div style={{ paddingTop: 16, marginTop: 14, borderTop: "1px solid #f0f2f5", textAlign: "center" }}>
-                              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: fabDayColor }}>Today</span>
-                              <p style={{ margin: "4px 0 4px", fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{fabDayLabel}</p>
-                              <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500 }}>{new Date().toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" })}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                    </>
-                  );
-                })()}
-
-
               </div>
             </div>
-
-            {/* Schedule detail modal */}
-            {fabSchedModalIdx !== null && (() => {
-              const item = fabSchedule[fabSchedModalIdx];
-              const isComplete = fabSchedDone.has(item.title);
-              const detail = SCHEDULE_DETAILS[item.title];
-              const isMeal = detail?.type === 'meal';
-              const isExercise = detail?.type === 'exercise';
-              const isInfo = detail?.type === 'info';
-              const drillDef = DRILL_LIBRARY[fabDrillTag ?? ""] ?? DEFAULT_DRILL;
-              const isDrill = !!item.isDrill;
-
-              const renderSteps = (stepList: { step: string; cue: string; reps: string }[]) => (
-                <div className="flex flex-col gap-3 mt-3">
-                  {stepList.map((s, i) => (
-                    <div key={i} className="flex flex-col items-start p-3">
-                      <p className="text-[17px] font-semibold text-[#1a1c1c] leading-snug" style={{ margin: 0 }}>{s.step}</p>
-                      <p className="text-[14px] text-[#6b7480] mt-1 leading-relaxed" style={{ margin: 0 }}>{s.cue}</p>
-                      <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold" style={{ background: "#2653d420", color: "#2653d4" }}>{s.reps}</span>
-                    </div>
-                  ))}
-                </div>
-              );
-
-              return (
-                <div className="fixed inset-0 z-[300] flex items-center justify-center px-6" style={{ paddingTop: 24, paddingBottom: 24 }} onClick={closeFabSchedModal}>
-                  <style>{`@keyframes guideIn{from{transform:scale(0.94);opacity:0}to{transform:scale(1);opacity:1}}@keyframes guideOut{from{transform:scale(1);opacity:1}to{transform:scale(0.94);opacity:0}}`}</style>
-                  <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: fabSchedModalClosing ? "guideOut 0.2s cubic-bezier(0.4,0,1,1) both" : undefined }} />
-                  <div
-                    className="relative w-full bg-white flex flex-col"
-                    style={{ borderRadius: 28, maxHeight: "85dvh", animation: fabSchedModalClosing ? "guideOut 0.2s cubic-bezier(0.4,0,1,1) both" : "guideIn 0.22s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 8px 40px rgba(0,0,0,0.22)", overflow: "hidden" }}
-                    onClick={e => e.stopPropagation()}
-                  >
-                    <div className="overflow-y-auto flex-1 px-6 pb-6" style={{ minHeight: 0 }}>
-                      <p style={{ margin: "20px 0 4px", fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.15 }}>{item.title}</p>
-                      {isMeal && detail?.type === 'meal' && (
-                        <div className="flex flex-col pt-4">
-                          <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#8a9096" }}>{detail.focus}</p>
-                          {detail.options.map((meal, i) => (
-                            <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "6px 0" }}>
-                              <p style={{ margin: 0, fontSize: 16, fontWeight: 500, color: "#1a1c1c", lineHeight: 1.4 }}>{meal.title}</p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      {isInfo && detail?.type === 'info' && (
-                        <div className="pt-4">
-                          <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{detail.focus}</p>
-                          <p style={{ margin: 0, fontSize: 15, color: "#4a5050", lineHeight: 1.7 }}>{detail.text}</p>
-                        </div>
-                      )}
-                      {isExercise && detail?.type === 'exercise' && (
-                        <div className="pt-4">
-                          <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{detail.focus}</p>
-                          {renderSteps(detail.steps)}
-                        </div>
-                      )}
-                      {isDrill && (
-                        <div className="pt-4">
-                          <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{drillDef.focus}</p>
-                          {renderSteps(drillDef.steps)}
-                        </div>
-                      )}
-                      {/* Mark as complete */}
-                      <div style={{ paddingTop: 24, display: "flex", justifyContent: "center" }}>
-                        <button
-                          onClick={handleFabSchedDone}
-                          className="flex items-center gap-3 active:scale-[0.96] transition-transform"
-                        >
-                          <span style={{ fontSize: 15, fontWeight: 600, color: isComplete ? "#00D455" : "#6b7480" }}>
-                            {isComplete ? "Completed" : "Mark as complete"}
-                          </span>
-                          <div style={{ width: 48, height: 48, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, ...(isComplete ? { background: "#00D455" } : { background: "transparent", border: "2.5px solid #d0d5dd" }) }}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={isComplete ? "#fff" : "#c8cdd3"} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
-                          </div>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
 
             {/* Food sub-modal */}
             {logPickerSub === "nutrition" && (
