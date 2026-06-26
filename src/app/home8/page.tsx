@@ -1042,21 +1042,23 @@ export default function Home8() {
                   </div>
                 ) : null;
                 if (isDone) return (
-                  <div key="active" className="animate-bounce-in" style={{ ...cardStyle, background: "#fff", border: "2.5px solid #111", boxShadow: "none" }} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
-                    <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", opacity: contentOpacity, transition: "opacity 0.25s" }}>
-                      <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: "#111" }}>
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                  <div key="active" className="animate-bounce-in" style={{ ...cardStyle, background: "#fff", border: "2.5px solid #d0d0d0", boxShadow: "none" }} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", opacity: contentOpacity, transition: "opacity 0.25s", padding: "0 clamp(22px, 6vw, 32px)", gap: 0 }}>
+                      <div style={{ width: "clamp(32px, 9.5vw, 44px)", height: "clamp(32px, 9.5vw, 44px)", borderRadius: "50%", background: "#f0f0f0", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "clamp(6px, 1.8vw, 10px)" }}>
+                        <svg width="clamp(15px, 4.5vw, 20px)" height="clamp(15px, 4.5vw, 20px)" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
                       </div>
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: contentOpacity, transition: "opacity 0.25s" }}>
-                      <p className="font-bold leading-none text-center" style={{ color: "#111", fontSize: "clamp(18px, 5.5vw, 24px)" }}>Good Job!</p>
-                      <p className="font-semibold leading-none text-center mt-1" style={{ color: "#555", fontSize: "clamp(13px, 4vw, 18px)" }}>{s.title} complete</p>
-                      <div style={{ height: "clamp(56px, 17vw, 80px)" }} />
-                      {nextSlide && <div className="mt-9 text-center">
-                        <p className="leading-none" style={{ color: "#888", fontSize: "clamp(12px, 3.7vw, 16px)" }}>see you in</p>
-                        <p className="font-bold leading-none mt-1" style={{ color: "#111", fontSize: "clamp(22px, 7vw, 32px)" }}>{fmtTime(secsUntilNext)}</p>
-                        <p className="leading-none mt-1" style={{ color: "#888", fontSize: "clamp(12px, 3.7vw, 16px)" }}>for: <span className="font-semibold" style={{ color: "#111" }}>{nextSlide.title}</span></p>
-                      </div>}
+                      <p style={{ fontSize: "clamp(20px, 6vw, 27px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1, margin: 0, marginBottom: "clamp(10px, 3vw, 16px)" }}>you're done.</p>
+                      {nextSlide ? (
+                        <>
+                          <p style={{ fontSize: "clamp(9px, 2.6vw, 12px)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#c0c0c0", margin: 0, marginBottom: "clamp(2px, 0.6vw, 4px)" }}>Next up</p>
+                          <p style={{ fontSize: "clamp(14px, 4vw, 18px)", fontWeight: 700, color: "#1a1c1c", lineHeight: 1.1, margin: 0, marginBottom: "clamp(2px, 0.6vw, 4px)" }}>{nextSlide.title}</p>
+                          <p style={{ fontSize: "clamp(20px, 5.8vw, 26px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1, margin: 0, marginBottom: "clamp(8px, 2.4vw, 14px)" }}>{fmtTime(secsUntilNext)}</p>
+                          <p style={{ fontSize: "clamp(10px, 2.8vw, 13px)", color: "#c0c0c0", fontWeight: 500, margin: 0, marginBottom: "clamp(3px, 1vw, 6px)" }}>until then...</p>
+                          <p style={{ fontSize: "clamp(13px, 3.6vw, 16px)", fontWeight: 600, color: "#999", margin: 0 }}>enjoy your day.</p>
+                        </>
+                      ) : (
+                        <p style={{ fontSize: "clamp(13px, 3.6vw, 16px)", fontWeight: 600, color: "#999", margin: 0 }}>enjoy your day.</p>
+                      )}
                     </div>
                   </div>
                 );
