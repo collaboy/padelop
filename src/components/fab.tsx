@@ -219,7 +219,7 @@ export default function Fab() {
       <button
         onClick={() => { setSmartUploadError(null); setFabExpanded(false); setLogPickerOpen(true); }}
         className="fixed z-40 flex items-center justify-center active:scale-90 transition-transform"
-        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.5rem", width: 54, height: 54, borderRadius: 27, background: "linear-gradient(145deg, #2c5be0 0%, #1e3faf 100%)", boxShadow: "0 6px 28px rgba(38,83,212,0.55), 0 2px 8px rgba(0,0,0,0.18)" }}
+        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.5rem", width: 54, height: 54, borderRadius: 27, background: "linear-gradient(145deg, #2c5be0 0%, #1e3faf 100%)" }}
         aria-label="Add"
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
