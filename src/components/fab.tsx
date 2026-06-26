@@ -443,12 +443,12 @@ export default function Fab() {
               const isDrill = !!item.isDrill;
 
               const renderSteps = (stepList: { step: string; cue: string; reps: string }[]) => (
-                <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 12 }}>
+                <div className="flex flex-col gap-3 mt-3">
                   {stepList.map((s, i) => (
-                    <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "8px 4px", textAlign: "center" }}>
-                      <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#1a1c1c", lineHeight: 1.3 }}>{s.step}</p>
-                      <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6b7480", lineHeight: 1.5 }}>{s.cue}</p>
-                      <span style={{ marginTop: 6, padding: "2px 8px", borderRadius: 99, background: "#2653d420", color: "#2653d4", fontSize: 11, fontWeight: 700 }}>{s.reps}</span>
+                    <div key={i} className="flex flex-col items-start p-3">
+                      <p className="text-[17px] font-semibold text-[#1a1c1c] leading-snug" style={{ margin: 0 }}>{s.step}</p>
+                      <p className="text-[14px] text-[#6b7480] mt-1 leading-relaxed" style={{ margin: 0 }}>{s.cue}</p>
+                      <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold" style={{ background: "#2653d420", color: "#2653d4" }}>{s.reps}</span>
                     </div>
                   ))}
                 </div>
@@ -463,37 +463,32 @@ export default function Fab() {
                     style={{ borderRadius: 28, maxHeight: "85dvh", animation: fabSchedModalClosing ? "guideOut 0.2s cubic-bezier(0.4,0,1,1) both" : "guideIn 0.22s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 8px 40px rgba(0,0,0,0.22)", overflow: "hidden" }}
                     onClick={e => e.stopPropagation()}
                   >
-                    {/* Green title strip */}
-                    <div style={{ background: "#00D455", padding: "24px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <p style={{ background: "#fff", padding: 4, borderRadius: 4, color: "#000", fontSize: "clamp(24px, 7.5vw, 34px)", fontWeight: 800, lineHeight: 1, margin: 0 }}>{item.title}</p>
-                    </div>
-                    {/* Content */}
-                    <div className="overflow-y-auto flex-1 px-6 pb-6" style={{ minHeight: 0, borderTop: "1px solid #f0f0f0" }}>
+                    <div className="overflow-y-auto flex-1 px-6 pb-6" style={{ minHeight: 0 }}>
+                      <p style={{ margin: "20px 0 4px", fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.15 }}>{item.title}</p>
                       {isMeal && detail?.type === 'meal' && (
-                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 16, textAlign: "center" }}>
-                          <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{detail.focus}</p>
+                        <div className="flex flex-col pt-4">
+                          <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#8a9096" }}>{detail.focus}</p>
                           {detail.options.map((meal, i) => (
-                            <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "8px 0", width: "100%" }}>
-                              <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#1a1c1c" }}>{meal.title}</p>
-                              <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6b7480" }}>{meal.detail}</p>
+                            <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "6px 0" }}>
+                              <p style={{ margin: 0, fontSize: 16, fontWeight: 500, color: "#1a1c1c", lineHeight: 1.4 }}>{meal.title}</p>
                             </div>
                           ))}
                         </div>
                       )}
                       {isInfo && detail?.type === 'info' && (
-                        <div style={{ paddingTop: 16, textAlign: "center" }}>
+                        <div className="pt-4">
                           <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{detail.focus}</p>
                           <p style={{ margin: 0, fontSize: 15, color: "#4a5050", lineHeight: 1.7 }}>{detail.text}</p>
                         </div>
                       )}
                       {isExercise && detail?.type === 'exercise' && (
-                        <div style={{ paddingTop: 16, textAlign: "center" }}>
+                        <div className="pt-4">
                           <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{detail.focus}</p>
                           {renderSteps(detail.steps)}
                         </div>
                       )}
                       {isDrill && (
-                        <div style={{ paddingTop: 16, textAlign: "center" }}>
+                        <div className="pt-4">
                           <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{drillDef.focus}</p>
                           {renderSteps(drillDef.steps)}
                         </div>
