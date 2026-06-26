@@ -343,10 +343,10 @@ export type ScheduleDetail = DetailMeal | DetailExercise | DetailInfo;
 
 export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
   "Wake up": { type: 'info', focus: "Hydration · morning routine", text: "Starting your day with 500 ml of water re-hydrates you after 7–8 hours without fluids. Do this before coffee — caffeine is a mild diuretic and amplifies morning dehydration." },
-  "Breakfast": { type: 'meal', focus: "High protein · slow-release carbs", options: [
-    { title: "Scrambled eggs + oats", detail: "banana and almond butter" },
-    { title: "Greek yogurt bowl", detail: "granola, mixed berries and honey" },
-    { title: "Omelette + whole grain toast", detail: "spinach and feta" },
+  "Breakfast": { type: 'meal', focus: "Protein · slow carbs · fruit", options: [
+    { title: "Scrambled eggs, oats & banana", detail: "" },
+    { title: "Greek yogurt with granola & berries", detail: "" },
+    { title: "Spinach omelette & wholegrain toast", detail: "" },
   ]},
   "Mobility Exercise": { type: 'exercise', focus: "Hip flexors · thoracic spine · ankles", steps: [
     { step: "Hip flexor lunge hold", cue: "Step into a deep lunge, front knee at 90°. Push hips gently forward and hold.", reps: "60 sec each side" },
@@ -359,14 +359,14 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
     { step: "Hip circles", cue: "Hands on hips, slow big circles. Loosen the hip capsule before tomorrow.", reps: "10 each direction" },
   ]},
   "Morning snack": { type: 'meal', focus: "Light energy · easy digestion", options: [
-    { title: "Banana + nut butter", detail: "quick carbs, a little fat" },
-    { title: "Oat bar", detail: "slow release, portable" },
-    { title: "Greek yogurt", detail: "protein hit, light on the stomach" },
+    { title: "Banana & nut butter", detail: "" },
+    { title: "Oat bar", detail: "" },
+    { title: "Greek yogurt", detail: "" },
   ]},
-  "Pre-match meal": { type: 'meal', focus: "Easily digestible · energy without heaviness", options: [
-    { title: "Chicken + white rice", detail: "cucumber salad" },
-    { title: "Pasta + lean mince", detail: "light tomato sauce" },
-    { title: "Jacket potato + tuna", detail: "mixed salad" },
+  "Pre-match meal": { type: 'meal', focus: "Easy to digest · sustained energy", options: [
+    { title: "Chicken, white rice & cucumber", detail: "" },
+    { title: "Pasta, lean mince & tomato sauce", detail: "" },
+    { title: "Jacket potato, tuna & salad", detail: "" },
   ]},
   "Warm up": { type: 'exercise', focus: "Neuromuscular activation · movement prep", steps: [
     { step: "Leg swings", cue: "Hold a wall for balance. Swing each leg forward and back, then laterally. Stay controlled.", reps: "15 reps each direction, each leg" },
@@ -379,15 +379,15 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
     { step: "Seated hamstring stretch", cue: "Legs straight out in front, hinge from the hips and reach towards your feet.", reps: "45 sec" },
     { step: "Shoulder cross-body stretch", cue: "Pull one arm across your chest. Keep your shoulder pressed down away from your ear.", reps: "30 sec each side" },
   ]},
-  "Recovery meal": { type: 'meal', focus: "Protein + carbs · 30-min window", options: [
-    { title: "Salmon + sweet potato", detail: "wilted spinach" },
-    { title: "Chicken stir-fry", detail: "rice noodles and broccoli" },
-    { title: "Protein shake + toast", detail: "banana and peanut butter" },
+  "Recovery meal": { type: 'meal', focus: "Protein + carbs · within 30 min", options: [
+    { title: "Salmon, sweet potato & spinach", detail: "" },
+    { title: "Chicken stir-fry, noodles & broccoli", detail: "" },
+    { title: "Protein shake, toast & banana", detail: "" },
   ]},
   "Post-match lunch": { type: 'meal', focus: "Recovery · protein + carbs", options: [
-    { title: "Salmon + sweet potato", detail: "wilted spinach" },
-    { title: "Chicken + rice", detail: "roasted veg" },
-    { title: "Protein shake + toast", detail: "banana and peanut butter" },
+    { title: "Salmon, sweet potato & spinach", detail: "" },
+    { title: "Chicken, rice & roasted veg", detail: "" },
+    { title: "Protein shake, toast & banana", detail: "" },
   ]},
   "Rest": { type: 'info', focus: "Active recovery · circulation", text: "Rest is part of training. Keep movement minimal — a short walk is fine, nothing more. Your nervous system needs this window to consolidate adaptation from the sessions around it." },
   "Short walk": { type: 'info', focus: "Active recovery · circulation", text: "Walk at a pace where you can hold a full conversation. Low-intensity movement flushes metabolic waste from fatigued muscles without adding stress. 20 minutes is enough." },
@@ -397,20 +397,20 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
     { step: "Hip flexor lunge stretch", cue: "Low lunge, back knee down, slight backward lean. Feel the stretch in the front of the back hip.", reps: "60 sec each side" },
   ]},
   "Lunch": { type: 'meal', focus: "Protein · carbs · greens", options: [
-    { title: "Chicken + quinoa", detail: "roasted courgette and peppers" },
-    { title: "Tuna niçoise", detail: "boiled eggs, green beans and olives" },
-    { title: "Salmon + brown rice", detail: "steamed broccoli with olive oil" },
+    { title: "Chicken, quinoa & roasted veg", detail: "" },
+    { title: "Tuna niçoise — eggs & green beans", detail: "" },
+    { title: "Salmon, brown rice & broccoli", detail: "" },
   ]},
   "Cold shower": { type: 'info', focus: "Inflammation reduction · DOMS relief", text: "Two minutes of cold water constricts blood vessels, reduces inflammation, and blunts delayed onset muscle soreness. Start warm, finish cold for the last 90–120 seconds." },
-  "Dinner": { type: 'meal', focus: "Anti-inflammatory · high micronutrient", options: [
-    { title: "Baked salmon + sweet potato", detail: "wilted spinach with garlic" },
-    { title: "Sea bass + brown rice", detail: "stir-fried kale and broccoli" },
-    { title: "Chicken thighs + couscous", detail: "roasted Mediterranean veg" },
+  "Dinner": { type: 'meal', focus: "Anti-inflammatory · micronutrient-rich", options: [
+    { title: "Salmon, sweet potato & spinach", detail: "" },
+    { title: "Sea bass, brown rice & kale", detail: "" },
+    { title: "Chicken thighs, couscous & roasted veg", detail: "" },
   ]},
-  "Early dinner": { type: 'meal', focus: "Carb focus · pre-match prep", options: [
-    { title: "Pasta + chicken", detail: "light tomato sauce" },
-    { title: "Rice + salmon", detail: "steamed veg" },
-    { title: "Jacket potato + eggs", detail: "side salad" },
+  "Early dinner": { type: 'meal', focus: "Carb focus · finish by 7pm", options: [
+    { title: "Pasta & chicken in tomato sauce", detail: "" },
+    { title: "Salmon, rice & steamed veg", detail: "" },
+    { title: "Jacket potato, eggs & salad", detail: "" },
   ]},
   "Active recovery": { type: 'info', focus: "Aerobic flush · below 130 bpm", text: "Walk, swim, or cycle at a pace where you can hold a full conversation. Keep heart rate below 130 bpm. Light aerobic activity maintains cardiovascular fitness without accumulating fatigue." },
   "Regroup & mental prep": { type: 'exercise', focus: "Mental rehearsal · focus", steps: [

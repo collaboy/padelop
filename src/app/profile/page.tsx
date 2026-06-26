@@ -2512,10 +2512,9 @@ export default function ProfilePage() {
                     <div className="flex flex-col gap-3 pt-4 text-center">
                       <p className="text-[11px] font-bold uppercase tracking-widest pb-1" style={{ color: "#1a1c1c" }}>{schedDetail.focus}</p>
                       {schedDetail.options.map((meal, i) => (
-                        <div key={i} className="flex flex-col items-center p-3 text-center">
-                          <span className="w-10 h-10 rounded-full flex items-center justify-center text-[22px] font-bold mb-1" style={{ background: "#2653d420", color: "#2653d4" }}>{i + 1}</span>
-                          <p className="text-[17px] font-semibold text-[#1a1c1c] leading-snug">{meal.title}</p>
-                          <p className="text-[13px] text-[#6b7480] mt-0.5">{meal.detail}</p>
+                        <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: i < 2 ? "1px solid #f0f0f2" : "none", width: "100%", textAlign: "left" }}>
+                          <span style={{ fontSize: 11, fontWeight: 800, color: "#2653d4", minWidth: 14 }}>{i + 1}</span>
+                          <p style={{ margin: 0, fontSize: 16, fontWeight: 500, color: "#1a1c1c", lineHeight: 1.35 }}>{meal.title}</p>
                         </div>
                       ))}
                     </div>
@@ -2642,10 +2641,9 @@ export default function ProfilePage() {
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 16, textAlign: "center" }}>
                     <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{detail.focus}</p>
                     {detail.options.map((meal, i) => (
-                      <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "8px 0", width: "100%" }}>
-                        <span style={{ width: 38, height: 38, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", background: "#2653d420", color: "#2653d4", fontSize: 18, fontWeight: 800, marginBottom: 4 }}>{i + 1}</span>
-                        <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: "#1a1c1c" }}>{meal.title}</p>
-                        <p style={{ margin: "2px 0 0", fontSize: 12, color: "#6b7480" }}>{meal.detail}</p>
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: i < 2 ? "1px solid #f0f0f2" : "none", width: "100%" }}>
+                        <span style={{ fontSize: 11, fontWeight: 800, color: "#2653d4", minWidth: 14 }}>{i + 1}</span>
+                        <p style={{ margin: 0, fontSize: 16, fontWeight: 500, color: "#1a1c1c", lineHeight: 1.35 }}>{meal.title}</p>
                       </div>
                     ))}
                   </div>

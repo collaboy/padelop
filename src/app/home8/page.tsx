@@ -1123,11 +1123,16 @@ export default function Home8() {
                     {/* INFO STATE: fades out when playing */}
                     <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: warmupPlaying ? 0 : isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.35s", pointerEvents: warmupPlaying ? "none" : "auto" }}>
                       {!isSleepytime && <p className="text-[14px] tracking-wide leading-none" style={{ color: "#000", fontWeight: 600, background: "#fff", padding: 4, borderRadius: 4 }}>Do this now</p>}
-                      <p style={{ color: "#000", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, background: "#fff", padding: "3px 6px", borderRadius: 4, display: "inline-block", textAlign: "center", margin: 0 }}>
-                        {s.title.includes(" & ")
-                          ? <>{s.title.split(" & ")[0]}<br />{"& " + s.title.split(" & ").slice(1).join(" & ")}</>
-                          : s.title}
-                      </p>
+                      {(() => {
+                        const circleTitle = s.title === "Lunch" ? "Lunchtime" : s.title === "Dinner" ? "Dinnertime" : s.title;
+                        return (
+                          <p style={{ color: "#000", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, background: "#fff", padding: "3px 6px", borderRadius: 4, display: "inline-block", textAlign: "center", margin: 0 }}>
+                            {circleTitle.includes(" & ")
+                              ? <>{circleTitle.split(" & ")[0]}<br />{"& " + circleTitle.split(" & ").slice(1).join(" & ")}</>
+                              : circleTitle}
+                          </p>
+                        );
+                      })()}
                       {isAudioAvailable
                         ? (
                           <button onClick={handleWarmupToggle} style={{ marginTop: 10, background: "#fff", border: "none", borderRadius: "50%", cursor: "pointer", width: 52, height: 52, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -1413,10 +1418,9 @@ export default function Home8() {
                       <div className="flex flex-col gap-3 pt-4 text-center">
                         <p className="text-[11px] font-bold uppercase tracking-widest pb-1" style={{ color: "#1a1c1c" }}>{detail.focus}</p>
                         {detail.options.map((meal, i) => (
-                          <div key={i} className="flex flex-col items-center p-3 text-center">
-                            <span className="w-10 h-10 rounded-full flex items-center justify-center text-[22px] font-bold mb-1" style={{ background: "#2653d420", color: "#2653d4" }}>{i + 1}</span>
-                            <p className="text-[17px] font-semibold text-[#1a1c1c] leading-snug">{meal.title}</p>
-                            <p className="text-[13px] text-[#6b7480] mt-0.5">{meal.detail}</p>
+                          <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: i < 2 ? "1px solid #f0f0f2" : "none" }}>
+                            <span style={{ fontSize: 11, fontWeight: 800, color: "#2653d4", minWidth: 14 }}>{i + 1}</span>
+                            <p style={{ margin: 0, fontSize: 16, fontWeight: 500, color: "#1a1c1c", lineHeight: 1.35 }}>{meal.title}</p>
                           </div>
                         ))}
                       </div>
