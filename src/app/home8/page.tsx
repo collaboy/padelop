@@ -1306,7 +1306,7 @@ export default function Home8() {
 
                       {/* Amount label inside drop */}
                       <text x="50" y="88" textAnchor="middle" fontSize="19" fontWeight="800"
-                        fill="#1a1c1c" fontFamily="inherit">
+                        fill="#2653d4" fontFamily="inherit">
                         {labelMl}
                       </text>
                     </svg>
