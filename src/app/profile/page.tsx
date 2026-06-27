@@ -1392,7 +1392,7 @@ export default function ProfilePage() {
                         <div style={{ display: "flex", flexDirection: "column", gap: 7, padding: "8px 0 12px" }}>
                           {DAY_TYPE_INFO.map(dt => (
                             <div key={dt.label} style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                              <span style={{ fontSize: 10, fontWeight: 700, color: dt.color, background: `${dt.color}18`, borderRadius: 5, padding: "1px 6px", flexShrink: 0, whiteSpace: "nowrap" }}>{dt.label}</span>
+                              <span style={{ fontSize: 10, fontWeight: 700, color: dt.color, background: `${dt.color}18`, borderRadius: 5, padding: "1px 6px", flexShrink: 0, whiteSpace: "nowrap", minWidth: 108, textAlign: "center", display: "inline-block" }}>{dt.label}</span>
                               <span style={{ fontSize: 12, color: "#5a6270", lineHeight: 1.4 }}>{dt.desc}</span>
                             </div>
                           ))}
