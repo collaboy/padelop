@@ -272,6 +272,7 @@ export default function Home8() {
   const [upcomingCount, setUpcomingCount] = useState(0);
   const [now, setNow] = useState(new Date());
   const lastDateRef = useRef(new Date().toISOString().slice(0, 10));
+  const doneAtRef = useRef<Map<number, number>>(new Map());
   const [doIdx, setDoIdx] = useState(0); // -1 = top holder, 0 = do-this-now, 1 = see schedule
   const [completed, setCompleted] = useState<Set<number>>(new Set());
   const [readiness, setReadiness] = useState(65);
@@ -1093,28 +1094,25 @@ export default function Home8() {
                 ) : null;
                 if (isDone) {
                   const gapSecs = nextSlide ? (toMins(nextSlide.time) - toMins(s.time)) * 60 : 0;
-                  const elapsed = gapSecs - secsUntilNext;
+                  const doneAt = doneAtRef.current.get(currentIdx);
+                  const elapsed = doneAt ? (Date.now() - doneAt) / 1000 : gapSecs;
                   const p = nextSlide ? Math.min(1, Math.max(0, (elapsed - 5) / Math.max(1, gapSecs - 5))) : 0;
-                  const r = Math.round(255 * (1 - p));
-                  const g = Math.round(255 - 43 * p);
-                  const b = Math.round(255 - 170 * p);
-                  const ballBg = `rgb(${r}, ${g}, ${b})`;
-                  const borderCol = `rgba(0,${Math.round(212 * (0.3 + 0.7 * p))},${Math.round(85 * (0.3 + 0.7 * p))},${0.35 + 0.65 * p})`;
-                  const mutedCol = p > 0.2 ? `rgba(255,255,255,${0.6 + 0.4 * p})` : `rgb(${Math.round(154 + (255 - 154) * p)}, ${Math.round(165 + (255 - 165) * p)}, ${Math.round(176 + (255 - 176) * p)})`;
-                  const mainCol = p > 0.2 ? "#fff" : "#1a1c1c";
-                  const mainShadow = p > 0.2 && p < 0.5 ? "0 1px 4px rgba(0,0,0,0.35)" : "none";
+                  const ri = Math.round(255 * (1 - p));
+                  const gi = Math.round(255 - 43 * p);
+                  const bi = Math.round(255 - 170 * p);
+                  const ballBg = `rgb(${ri}, ${gi}, ${bi})`;
                   return (
                     <div key="active" className="animate-bounce-in animate-done-breathe" style={{ ...cardStyle, background: ballBg, borderWidth: "2px", borderStyle: "solid", boxShadow: "none" }} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
                       {p > 0.05 && <div style={{ position: "absolute", inset: 0, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E")`, backgroundSize: "200px 200px", pointerEvents: "none", mixBlendMode: "overlay" as React.CSSProperties["mixBlendMode"], opacity: p }} />}
                       <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={mutedCol} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: -4 }}><path d="M5 13l4 4L19 7"/></svg>
-                        <p style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 600, color: mutedCol, margin: 0, letterSpacing: "0.04em" }}>see you in</p>
-                        <p style={{ fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: mainCol, lineHeight: 1.05, letterSpacing: "-0.02em", margin: 0, fontVariantNumeric: "tabular-nums", minWidth: "7ch", textAlign: "center", textShadow: mainShadow }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: -4 }}><path d="M5 13l4 4L19 7"/></svg>
+                        <p style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 600, color: "#1a1c1c", margin: 0, letterSpacing: "0.04em" }}>see you in</p>
+                        <p style={{ fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.02em", margin: 0, fontVariantNumeric: "tabular-nums", minWidth: "7ch", textAlign: "center" }}>
                           {nextSlide ? fmtTime(secsUntilNext) : "—"}
                         </p>
                         {nextSlide && (
-                          <p style={{ color: mainCol, fontWeight: 700, fontSize: "clamp(11px, 3vw, 13px)", lineHeight: 1.2, textAlign: "center", margin: 0, padding: "0 clamp(16px, 5vw, 24px)", textShadow: mainShadow }}>
-                            <span style={{ color: mutedCol, fontWeight: 500 }}>for </span>
+                          <p style={{ color: "#1a1c1c", fontWeight: 700, fontSize: "clamp(11px, 3vw, 13px)", lineHeight: 1.2, textAlign: "center", margin: 0, padding: "0 clamp(16px, 5vw, 24px)" }}>
+                            <span style={{ color: "#1a1c1c", fontWeight: 500 }}>for </span>
                             {nextSlide.title.includes(" & ")
                               ? <>{nextSlide.title.split(" & ")[0]}<br />{"& " + nextSlide.title.split(" & ").slice(1).join(" & ")}</>
                               : nextSlide.title}
@@ -1444,6 +1442,7 @@ export default function Home8() {
               const n = new Set(prev);
               if (!isComplete) {
                 n.add(modalIdx);
+                doneAtRef.current.set(modalIdx, Date.now());
                 if (modalItem.isDrill) {
                   try {
                     const entry = { ts: new Date().toISOString(), sessionType: ["Drills"], drillFocus: drillTag ? [drillTag] : [], duration: "6", intensity: "moderate" };
