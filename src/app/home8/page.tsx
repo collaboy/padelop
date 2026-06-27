@@ -539,6 +539,15 @@ export default function Home8() {
       try {
         const listRaw = localStorage.getItem("padelop:upcoming-matches");
         const list: StoredMatch[] = listRaw ? JSON.parse(listRaw) : [];
+        // Persist past match dates before filtering them out
+        const past = list.filter(m => m.date && m.date < todayD);
+        if (past.length > 0) {
+          try {
+            const existing: string[] = JSON.parse(localStorage.getItem("padelop:past-match-dates") || "[]");
+            const merged = [...new Set([...existing, ...past.map(m => m.date!)])].sort();
+            localStorage.setItem("padelop:past-match-dates", JSON.stringify(merged));
+          } catch {}
+        }
         const future = list.filter(m => m.date >= todayD).sort((a, b) => a.date.localeCompare(b.date));
         setUpcomingCount(future.length);
         // Sync next-match from list, merging to preserve any fields not in the list entry
