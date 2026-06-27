@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import LogSheet from "@/components/log-sheet";
@@ -306,11 +306,17 @@ export default function Home8() {
   const [postMatchDate, setPostMatchDate] = useState<string | null>(null);
   const [checkinNudgeOpen, setCheckinNudgeOpen] = useState(false);
   const [yesterdayWasMatch, setYesterdayWasMatch] = useState(false);
-  const [gameDays, setGameDays] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem("padelop:game-days") || "[]"); } catch { return []; } });
+  const [gameDays, setGameDays] = useState<string[]>([]);
   const [upcomingMatches, setUpcomingMatches] = useState<{ date: string; time: string }[]>([]);
   const dayType = useMemo(() => getDayType(gameDays, match, upcomingMatches), [gameDays, match, upcomingMatches]);
-  const [drillTag, setDrillTag] = useState<string | null>(() => { try { return getTopNeedsWorkTag(); } catch { return null; } });
+  const [drillTag, setDrillTag] = useState<string | null>(null);
   const [drillSteps, setDrillSteps] = useState<{ step: string; cue: string; reps: string }[] | null>(null);
+
+  // Seed cache-backed state synchronously on client before first paint (avoids SSR mismatch + flash)
+  useLayoutEffect(() => {
+    try { setGameDays(JSON.parse(localStorage.getItem("padelop:game-days") || "[]")); } catch {}
+    try { const t = getTopNeedsWorkTag(); if (t) setDrillTag(t); } catch {}
+  }, []);
 
   const [logHydrationMl, setLogHydrationMl] = useState(0);
   const logGaugeRef    = useRef<HTMLDivElement>(null);
