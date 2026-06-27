@@ -1045,7 +1045,10 @@ export default function Home8() {
                 if (isDone) return (
                   <div key="active" className="animate-bounce-in" style={{ ...cardStyle, background: "#fff", border: "2px solid #e4e4e4", boxShadow: "none" }} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-                      <p style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", margin: 0 }}>Up next</p>
+                      <p style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 600, color: "#9aa5b0", margin: 0, letterSpacing: "0.04em" }}>see you in</p>
+                      <p style={{ fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.02em", margin: 0, fontVariantNumeric: "tabular-nums", minWidth: "7ch", textAlign: "center" }}>
+                        {nextSlide ? fmtTime(secsUntilNext) : "—"}
+                      </p>
                       {nextSlide && (
                         <p style={{ color: "#1a1c1c", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1.15, textAlign: "center", margin: 0, padding: "0 clamp(16px, 5vw, 24px)" }}>
                           {nextSlide.title.includes(" & ")
@@ -1053,10 +1056,6 @@ export default function Home8() {
                             : nextSlide.title}
                         </p>
                       )}
-                      <p style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 600, color: "#9aa5b0", margin: "2px 0 0", letterSpacing: "0.04em" }}>in</p>
-                      <p style={{ fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.02em", margin: 0, fontVariantNumeric: "tabular-nums", minWidth: "7ch", textAlign: "center" }}>
-                        {nextSlide ? fmtTime(secsUntilNext) : "—"}
-                      </p>
                     </div>
                   </div>
                 );
