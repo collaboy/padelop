@@ -1240,22 +1240,29 @@ export default function ProfilePage() {
 
           {/* Profile card */}
           <div style={{ background: "#fff", borderRadius: 18, padding: "20px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", gap: 16 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <button onClick={() => setProfileTabEditOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, flex: "0 0 50%" }}>
-                <div style={{ width: "100%", aspectRatio: "1/1", borderRadius: "50%", background: "var(--c-blue)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-                  {profile.avatar
-                    ? <img src={profile.avatar} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    : <span style={{ fontSize: "clamp(28px, 10vw, 48px)", fontWeight: 800, color: "#fff" }}>{initials(profile.name)}</span>
-                  }
-                </div>
-                <span style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>{profile.name || "Set your name"}</span>
-              </button>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-start" }}>
-                {profile.level && <span style={{ fontSize: 12, fontWeight: 700, color: "var(--c-blue)", background: "var(--c-blue-tint)", padding: "4px 10px", borderRadius: 20 }}>{profile.level}</span>}
-                {profile.position && <span style={{ fontSize: 12, fontWeight: 700, color: "var(--c-teal)", background: "#f0fdfd", padding: "4px 10px", borderRadius: 20 }}>{profile.position}</span>}
-                {profile.hand && <span style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text-sub)", background: "#f4f6f8", padding: "4px 10px", borderRadius: 20 }}>{profile.hand}-handed</span>}
+            <button
+              onClick={() => setProfileTabEditOpen(o => !o)}
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 16, width: "100%", textAlign: "left" }}
+            >
+              {/* Photo */}
+              <div style={{ flex: "0 0 44%", aspectRatio: "1/1", borderRadius: "50%", background: "var(--c-blue)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                {profile.avatar
+                  ? <img src={profile.avatar} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  : <span style={{ fontSize: "clamp(28px, 10vw, 44px)", fontWeight: 800, color: "#fff" }}>{initials(profile.name)}</span>
+                }
               </div>
-            </div>
+              {/* Identity */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1, minWidth: 0 }}>
+                <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, letterSpacing: "-0.02em" }}>{profile.name || "Your name"}</p>
+                {profile.position && <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "var(--c-teal)" }}>{profile.position}</p>}
+                {profile.level && <span style={{ alignSelf: "flex-start", fontSize: 11, fontWeight: 700, color: "var(--c-blue)", background: "var(--c-blue-tint)", padding: "3px 9px", borderRadius: 20 }}>{profile.level}</span>}
+                {(profile.playingSince || profile.hand) && (
+                  <p style={{ margin: "4px 0 0", fontSize: 11, color: "#9aa0a6", fontWeight: 500 }}>
+                    {[profile.playingSince ? `Since ${profile.playingSince}` : null, profile.hand ? `${profile.hand}-handed` : null].filter(Boolean).join(" · ")}
+                  </p>
+                )}
+              </div>
+            </button>
             {profileTabEditOpen && (
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 <label htmlFor="avatar-upload2" className="cursor-pointer flex items-center gap-3 active:opacity-70 transition-opacity">
