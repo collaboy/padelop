@@ -1241,6 +1241,11 @@ export default function ProfilePage() {
           {/* Profile card */}
           <div style={{ background: "#fff", borderRadius: 18, padding: "20px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
+                {profile.level && <span style={{ fontSize: 12, fontWeight: 700, color: "var(--c-blue)", background: "var(--c-blue-tint)", padding: "4px 10px", borderRadius: 20 }}>{profile.level}</span>}
+                {profile.position && <span style={{ fontSize: 12, fontWeight: 700, color: "var(--c-teal)", background: "#f0fdfd", padding: "4px 10px", borderRadius: 20 }}>{profile.position}</span>}
+                {profile.hand && <span style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text-sub)", background: "#f4f6f8", padding: "4px 10px", borderRadius: 20 }}>{profile.hand}-handed</span>}
+              </div>
               <button onClick={() => setProfileTabEditOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
                 <div style={{ width: 72, height: 72, borderRadius: "50%", background: "var(--c-blue)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                   {profile.avatar
@@ -1250,11 +1255,6 @@ export default function ProfilePage() {
                 </div>
                 <span style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>{profile.name || "Set your name"}</span>
               </button>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
-                {profile.level && <span style={{ fontSize: 12, fontWeight: 700, color: "var(--c-blue)", background: "var(--c-blue-tint)", padding: "4px 10px", borderRadius: 20 }}>{profile.level}</span>}
-                {profile.position && <span style={{ fontSize: 12, fontWeight: 700, color: "var(--c-teal)", background: "#f0fdfd", padding: "4px 10px", borderRadius: 20 }}>{profile.position}</span>}
-                {profile.hand && <span style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text-sub)", background: "#f4f6f8", padding: "4px 10px", borderRadius: 20 }}>{profile.hand}-handed</span>}
-              </div>
             </div>
             {profileTabEditOpen && (
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
