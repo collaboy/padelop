@@ -1054,8 +1054,8 @@ export default function Home8() {
                             : nextSlide.title}
                         </p>
                       )}
-                      <p style={{ marginTop: 6, fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#fff", background: "rgba(0,0,0,0.18)", borderRadius: 12, padding: "4px 14px", lineHeight: 1.2, letterSpacing: "-0.02em" }}>
-                        {nextSlide ? fmtTime(secsUntilNext) : "—"}
+                      <p style={{ marginTop: 6, fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#fff", lineHeight: 1.2, letterSpacing: "-0.02em" }}>
+                        <span style={{ fontWeight: 500, fontSize: "clamp(14px, 4vw, 18px)", opacity: 0.8, marginRight: 4 }}>in</span>{nextSlide ? fmtTime(secsUntilNext) : "—"}
                       </p>
                     </div>
                   </div>
