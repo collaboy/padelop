@@ -1353,6 +1353,7 @@ export default function ProfilePage() {
                 { label: "Training Day",    color: "#16a34a", desc: "Build the habit. Small consistent actions compound." },
                 { label: "Maintenance Day", color: "#0e7490", desc: "Between cycles. Stay loose and let the body absorb the work." },
               ];
+              const nextItem = pct < 100 ? schedule.find(s => !todayDoneSet.has(s.title)) ?? null : null;
               return (
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {total > 0 && (
@@ -1366,6 +1367,11 @@ export default function ProfilePage() {
                         <span style={{ fontSize: 12, color: "#8a9096" }}>{pct === 100 ? "All done ✓" : `${done} of ${total}`}</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: panelSchedOpen ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
                       </div>
+                      {nextItem && !panelSchedOpen && (
+                        <p style={{ margin: 0, fontSize: 12, color: "#8a9096", fontWeight: 500 }}>
+                          Next: <span style={{ color: "#1a1c1c", fontWeight: 600 }}>{nextItem.title}</span> at {nextItem.time}
+                        </p>
+                      )}
                       <div style={{ width: "100%", height: 3, borderRadius: 2, background: "#e0e2e5", overflow: "hidden" }}>
                         <div style={{ height: "100%", width: `${pct}%`, background: barColor, borderRadius: 2, transition: "width 0.4s" }} />
                       </div>
