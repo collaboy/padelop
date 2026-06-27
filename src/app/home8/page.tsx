@@ -353,6 +353,11 @@ export default function Home8() {
   const hitTopYRef = useRef<number | null>(null); // Y when scroll first reached 0
   const handleDragStartY = useRef(0);
   const swipeDirRef = useRef<'h' | 'v' | null>(null);
+  const dayTypeRef = useRef<DayType>("baseline");
+  const drillTagRef = useRef<string | null>(null);
+  // Keep refs current so stale-closure callbacks (loadReadiness) always use latest values
+  dayTypeRef.current = dayType;
+  drillTagRef.current = drillTag;
   const settlingRef = useRef(false);
   const checkinNudgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [cardSnap, setCardSnap] = useState<'none' | 'left' | 'right'>('none');
@@ -515,17 +520,7 @@ export default function Home8() {
       try {
         const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
         const doneTitles = sd[todayStr] ?? [];
-        let dt: "match" | "recovery" | "training" = "training";
-        try {
-          const nm = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
-          if (nm?.date === todayStr) { dt = "match"; }
-          else {
-            const yest = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
-            const revs: { ts?: string }[] = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
-            if (revs.some(r => r.ts?.slice(0, 10) === yest)) dt = "recovery";
-          }
-        } catch {}
-        const sched = getScheduleData(dt, null, getTopNeedsWorkTag()).schedule;
+        const sched = getScheduleData(dayTypeRef.current, match?.time ?? null, drillTagRef.current).schedule;
         const indices = new Set<number>();
         sched.forEach((item, i) => { if (doneTitles.includes(item.title)) indices.add(i); });
         // Directly merge waterOnWaking into indices without going through schedule-done
