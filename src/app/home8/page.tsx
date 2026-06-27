@@ -1446,12 +1446,12 @@ export default function Home8() {
                 n.add(modalIdx);
                 if (modalItem.isDrill) {
                   try {
-                    const entry = { ts: new Date().toISOString(), sessionType: ["Drills"], drillFocus: drillTag ? [drillTag] : [], duration: "30", intensity: "moderate" };
+                    const entry = { ts: new Date().toISOString(), sessionType: ["Drills"], drillFocus: drillTag ? [drillTag] : [], duration: "6", intensity: "moderate" };
                     const prev2 = JSON.parse(localStorage.getItem("padelop:training-logs") || "[]");
                     localStorage.setItem("padelop:training-logs", JSON.stringify([entry, ...prev2].slice(0, 50)));
                     window.dispatchEvent(new Event("storage"));
                   } catch {}
-                  saveTrainingToDb({ date: new Date().toISOString().slice(0, 10), drill_focus: drillTag ?? undefined, duration_mins: 30 });
+                  saveTrainingToDb({ date: new Date().toISOString().slice(0, 10), drill_focus: drillTag ?? undefined, duration_mins: 6 });
                 }
               } else {
                 n.delete(modalIdx);
