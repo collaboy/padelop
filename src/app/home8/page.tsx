@@ -306,10 +306,10 @@ export default function Home8() {
   const [postMatchDate, setPostMatchDate] = useState<string | null>(null);
   const [checkinNudgeOpen, setCheckinNudgeOpen] = useState(false);
   const [yesterdayWasMatch, setYesterdayWasMatch] = useState(false);
-  const [gameDays, setGameDays] = useState<string[]>([]);
+  const [gameDays, setGameDays] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem("padelop:game-days") || "[]"); } catch { return []; } });
   const [upcomingMatches, setUpcomingMatches] = useState<{ date: string; time: string }[]>([]);
   const dayType = useMemo(() => getDayType(gameDays, match, upcomingMatches), [gameDays, match, upcomingMatches]);
-  const [drillTag, setDrillTag] = useState<string | null>(null);
+  const [drillTag, setDrillTag] = useState<string | null>(() => { try { return getTopNeedsWorkTag(); } catch { return null; } });
   const [drillSteps, setDrillSteps] = useState<{ step: string; cue: string; reps: string }[] | null>(null);
 
   const [logHydrationMl, setLogHydrationMl] = useState(0);
