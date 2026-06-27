@@ -1053,8 +1053,9 @@ export default function Home8() {
                             : nextSlide.title}
                         </p>
                       )}
-                      <p style={{ marginTop: 4, fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.2, letterSpacing: "-0.02em", margin: 0 }}>
-                        <span style={{ fontWeight: 500, fontSize: "clamp(13px, 3.6vw, 16px)", color: "#9aa5b0", marginRight: 5 }}>in</span>{nextSlide ? fmtTime(secsUntilNext) : "—"}
+                      <p style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 600, color: "#9aa5b0", margin: "4px 0 0", letterSpacing: "0.04em" }}>in</p>
+                      <p style={{ fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, letterSpacing: "-0.02em", margin: 0, fontVariantNumeric: "tabular-nums", minWidth: "7ch", textAlign: "center" }}>
+                        {nextSlide ? fmtTime(secsUntilNext) : "—"}
                       </p>
                     </div>
                   </div>
