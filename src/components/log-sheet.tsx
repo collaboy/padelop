@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { saveCheckIn, computeScores, loadScoringData } from "@/lib/scoring";
 import { downloadSnapshot, importData } from "@/lib/storage";
-import { saveMatchReview, saveCheckInToDb, saveHydrationToDb, saveNutritionToDb, saveTrainingToDb, saveScheduleDoneToDb } from "@/lib/db";
+import { saveMatchReview, saveCheckInToDb, saveHydrationToDb, seedHydrationToDb, saveNutritionToDb, saveTrainingToDb, saveScheduleDoneToDb } from "@/lib/db";
 
 function rangeToMl(range: string): number {
   if (range === "<1L")    return 750;
@@ -586,6 +586,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
             const existing = hq?.date === todayYMD ? (hq.ml ?? 0) : 0;
             if (existing < 500) {
               localStorage.setItem("padelop:hydration-quick", JSON.stringify({ date: todayYMD, ml: 500 }));
+              seedHydrationToDb(todayYMD, 500); // ON CONFLICT DO NOTHING — never overwrites a real value
             }
           } catch {}
           window.dispatchEvent(new Event("storage"));

@@ -299,3 +299,18 @@ export async function saveHydrationToDb(date: string, ml: number) {
     }, { onConflict: "user_id,date" });
   } catch {}
 }
+
+// Inserts a baseline ml value only if no row exists for that date — never overwrites a real measurement
+export async function seedHydrationToDb(date: string, ml: number) {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase.from("hydration_logs").upsert({
+      user_id: user.id,
+      date,
+      ml,
+    }, { onConflict: "user_id,date", ignoreDuplicates: true });
+  } catch {}
+}
