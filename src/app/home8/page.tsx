@@ -171,7 +171,7 @@ function getDayMsg(dayType: DayType, match: { date: string; time: string } | nul
   }
   if (dayType === "pre-match") return "Match tomorrow — carb up tonight, get to bed early.";
   if (dayType === "recovery") return "Recovery day. Drink plenty of water and get your protein in.";
-  if (dayType === "rest") return "Rest day. Hydrate, eat well, and let the body absorb the work.";
+  if (dayType === "maintenance") return "Maintenance day. Hydrate, eat well, and let the body absorb the work.";
   if (dayType === "training") return "Training day — small habits compound into big results.";
   return "Hydrate, eat well, and stay consistent.";
 }
@@ -395,7 +395,7 @@ export default function Home8() {
               const daysSince = Math.round((new Date(yesterday + "T12:00").getTime() - new Date(matchDates[0] + "T12:00").getTime()) / 86400000);
               if (daysSince === 0) yDayType = "match";
               else if (daysSince === 1) yDayType = "recovery";
-              else yDayType = (daysSince - 2) % 2 === 0 ? "rest" : "training";
+              else yDayType = (daysSince - 2) % 2 === 0 ? "maintenance" : "training";
             }
           }
           void twoDaysAgo;
@@ -849,8 +849,8 @@ export default function Home8() {
   }, [cardSnap]);
 
   const today = new Date().toISOString().slice(0, 10);
-  const dayColor = dayType === "match" ? "#2653d4" : dayType === "pre-match" ? "#d97706" : dayType === "recovery" ? "#7c3aed" : dayType === "rest" ? "#0e7490" : "#16a34a";
-  const dayLabel = dayType === "match" ? "Match Day" : dayType === "pre-match" ? "Pre-Match Day" : dayType === "recovery" ? "Recovery Day" : dayType === "rest" ? "Rest Day" : dayType === "training" ? "Training Day" : "Today";
+  const dayColor = dayType === "match" ? "#2653d4" : dayType === "pre-match" ? "#d97706" : dayType === "recovery" ? "#7c3aed" : dayType === "maintenance" ? "#0e7490" : "#16a34a";
+  const dayLabel = dayType === "match" ? "Match Day" : dayType === "pre-match" ? "Pre-Match Day" : dayType === "recovery" ? "Recovery Day" : dayType === "maintenance" ? "Maintenance Day" : dayType === "training" ? "Training Day" : "Today";
   const { schedule, currentIdx } = getScheduleData(dayType, match?.time ?? null, drillTag);
   const doItem = schedule[currentIdx];
   const modalIdx = schedModalIdx ?? currentIdx;

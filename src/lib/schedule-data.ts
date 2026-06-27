@@ -7,7 +7,7 @@ export const addMins = (h: number, m: number, delta: number) => {
 };
 export const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
 
-export type DayType = "match" | "pre-match" | "recovery" | "rest" | "training" | "baseline";
+export type DayType = "match" | "pre-match" | "recovery" | "maintenance" | "training" | "baseline";
 
 export type DrillDef = { subtitle: string; focus: string; steps: { step: string; cue: string; reps: string }[] };
 export const DRILL_LIBRARY: Record<string, DrillDef> = {
@@ -156,7 +156,7 @@ export function getDayType(): DayType {
     if (daysSince <= 0) return "recovery";
     if (daysSince === 1) return "recovery";
     // day 2 → rest, day 3 → training, day 4 → rest, day 5 → training…
-    return (daysSince - 2) % 2 === 0 ? "rest" : "training";
+    return (daysSince - 2) % 2 === 0 ? "maintenance" : "training";
   } catch {
     return "baseline";
   }
@@ -287,8 +287,8 @@ export function getScheduleData(dayType: DayType, matchTime: string | null, dril
       { time: "19:00", title: "Dinner",      subtitle: "Anti-inflammatory focus — fish, greens" },
       { time: "21:30", title: "Wind down",   subtitle: "Sleep is your best recovery tool tonight" },
     ],
-    rest: [
-      { time: "07:00", title: "Wake up",        subtitle: "500ml water — rest day hydration still matters" },
+    maintenance: [
+      { time: "07:00", title: "Wake up",        subtitle: "500ml water — maintenance day hydration still matters" },
       { time: "07:30", title: "Breakfast",       subtitle: "Eggs, fruit, Greek yogurt" },
       { time: "10:00", title: "Short walk",      subtitle: "20 min — light movement keeps you loose" },
       { time: "12:30", title: "Lunch",           subtitle: "Chicken, salmon or legumes + veg" },

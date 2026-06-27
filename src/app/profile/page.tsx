@@ -617,13 +617,13 @@ export default function ProfilePage() {
     dayType === "match"     ? "Match Day" :
     dayType === "pre-match" ? "Pre-Match Day" :
     dayType === "recovery"  ? "Recovery Day" :
-    dayType === "rest"      ? "Rest Day" :
+    dayType === "maintenance" ? "Maintenance Day" :
     dayType === "training"  ? "Training Day" : "Today";
   const panelDayColor =
     dayType === "match"     ? "#2653d4" :
     dayType === "pre-match" ? "#d97706" :
     dayType === "recovery"  ? "#7c3aed" :
-    dayType === "rest"      ? "#0e7490" : "#16a34a";
+    dayType === "maintenance" ? "#0e7490" : "#16a34a";
   const panelInputSt: React.CSSProperties = { width: "100%", padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", outline: "none", fontFamily: "inherit", background: "#f8f9fa", boxSizing: "border-box" };
   const panelLabelSt: React.CSSProperties = { fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#8a9096", marginBottom: 4, display: "block" };
 
@@ -654,7 +654,7 @@ export default function ProfilePage() {
               const daysSince = Math.round((new Date(yesterday + "T12:00").getTime() - new Date(matchDates[0] + "T12:00").getTime()) / 86400000);
               if (daysSince === 0) yDayType = "match";
               else if (daysSince === 1) yDayType = "recovery";
-              else yDayType = (daysSince - 2) % 2 === 0 ? "rest" : "training";
+              else yDayType = (daysSince - 2) % 2 === 0 ? "maintenance" : "training";
             }
           }
         } catch {}
@@ -1091,13 +1091,13 @@ export default function ProfilePage() {
     dayType === "match"     ? "Match Day" :
     dayType === "pre-match" ? "Pre-Match Day" :
     dayType === "recovery"  ? "Recovery Day" :
-    dayType === "rest"      ? "Rest Day" :
+    dayType === "maintenance" ? "Maintenance Day" :
     dayType === "training"  ? "Training Day" : "Today";
   const dayColor =
     dayType === "match"     ? "#2653d4" :
     dayType === "pre-match" ? "#d97706" :
     dayType === "recovery"  ? "#7c3aed" :
-    dayType === "rest"      ? "#0e7490" : "#16a34a";
+    dayType === "maintenance" ? "#0e7490" : "#16a34a";
 
   const TABS = [
     { key: 'profile' as const, label: 'Profile' },
