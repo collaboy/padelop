@@ -1183,7 +1183,8 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
             </div>
             <button onClick={() => {
                 try {
-                  const entry = { ...matchReview, resultImage: matchResultImage ?? undefined, ts: new Date().toISOString() };
+                  const matchDateSaved = (() => { try { const m = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); return m?.date ?? null; } catch { return null; } })();
+                  const entry = { ...matchReview, resultImage: matchResultImage ?? undefined, ts: new Date().toISOString(), matchDate: matchDateSaved };
                   const prev = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
                   localStorage.setItem("padelop:match-reviews", JSON.stringify([entry, ...prev].slice(0, 50)));
                   saveMatchReview(entry);

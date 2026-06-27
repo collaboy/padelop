@@ -136,12 +136,18 @@ export function getDayType(): DayType {
     if (upcoming.some(m => m.date === today && m.time)) return "match";
     if (upcoming.some(m => m.date === tomorrow && m.time)) return "pre-match";
 
-    const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]") as { ts?: string }[];
-    const matchDates = reviews
-      .map(r => r.ts?.slice(0, 10))
-      .filter((d): d is string => !!d && d <= today)
-      .sort()
-      .reverse();
+    // Collect past match dates from all sources
+    const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]") as { ts?: string; matchDate?: string }[];
+    const reviewDates = reviews
+      .map(r => r.matchDate ?? r.ts?.slice(0, 10))
+      .filter((d): d is string => !!d && d <= today);
+
+    // Also pull past dates from next-match and upcoming-matches (more reliable than review ts)
+    const pastMatchDates: string[] = [...reviewDates];
+    if (nextMatch?.date && nextMatch.date < today) pastMatchDates.push(nextMatch.date);
+    upcoming.forEach(m => { if (m.date && m.date < today) pastMatchDates.push(m.date); });
+
+    const matchDates = [...new Set(pastMatchDates)].sort().reverse();
 
     if (matchDates.length === 0) return "baseline";
 
