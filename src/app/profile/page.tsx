@@ -1360,15 +1360,13 @@ export default function ProfilePage() {
                 { label: "Training Day",    color: "#16a34a", desc: "Build the habit. Small consistent actions compound." },
                 { label: "Maintenance Day", color: "#0e7490", desc: "Between cycles. Stay loose and let the body absorb the work." },
               ];
+              const currentDayDesc = DAY_TYPE_INFO.find(d => d.label === panelDayLabel)?.desc ?? null;
               return (
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  <button
-                    onClick={() => setDayTypeInfoOpen(o => !o)}
-                    style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4, width: "100%" }}
-                  >
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
                     <span style={{ fontSize: 11, fontWeight: 700, color: panelDayColor, letterSpacing: "0.04em", textTransform: "uppercase" }}>{panelDayLabel}</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={panelDayColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: dayTypeInfoOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}><polyline points="6 9 12 15 18 9"/></svg>
-                  </button>
+                    {currentDayDesc && <p style={{ margin: 0, fontSize: 12, color: "#8a9096", textAlign: "center", lineHeight: 1.4 }}>{currentDayDesc}</p>}
+                  </div>
                   {total > 0 && (
                     <button
                       onClick={() => setPanelSchedOpen(o => !o)}
@@ -1397,19 +1395,6 @@ export default function ProfilePage() {
                   {/* Schedule list */}
                   <div style={{ overflow: "hidden", maxHeight: panelSchedOpen ? 900 : 0, transition: "max-height 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
                     <div style={{ background: "#fff", borderRadius: 14, overflow: "hidden", padding: "10px 14px 8px" }}>
-
-                      {/* Day type explainer */}
-                      <div style={{ overflow: "hidden", maxHeight: dayTypeInfoOpen ? 300 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
-                        <div style={{ display: "flex", flexDirection: "column", gap: 7, padding: "8px 0 12px" }}>
-                          {DAY_TYPE_INFO.map(dt => (
-                            <div key={dt.label} style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                              <span style={{ fontSize: 10, fontWeight: 700, color: dt.color, background: `${dt.color}18`, borderRadius: 5, padding: "1px 6px", flexShrink: 0, whiteSpace: "nowrap", minWidth: 108, textAlign: "center", display: "inline-block" }}>{dt.label}</span>
-                              <span style={{ fontSize: 12, color: "#5a6270", lineHeight: 1.4 }}>{dt.desc}</span>
-                            </div>
-                          ))}
-                        </div>
-                        <div style={{ height: 1, background: "#f0f2f5", marginBottom: 4 }} />
-                      </div>
 
                       {schedule.map((item, i) => {
                         const isDone = (schedDone[todayKey] ?? []).includes(item.title);
