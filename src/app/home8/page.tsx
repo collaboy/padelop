@@ -1029,7 +1029,7 @@ export default function Home8() {
                 const isReady = curMins >= toMins(s.time);
                 const nextSlide = schedule[currentIdx + 1];
                 const secsUntilNext = nextSlide ? toMins(nextSlide.time) * 60 - (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) : 0;
-                const fmtTime = (s: number) => { if (s <= 0) return "a moment"; const h = Math.floor(s / 3600), rem = s % 3600, m = Math.floor(rem / 60), sec = rem % 60; if (h > 0) return `${h}h ${m}m ${sec}s`; return m > 0 ? `${m}m ${sec}s` : `${sec}s`; };
+                const fmtTime = (s: number) => { if (s <= 0) return "a moment"; const h = Math.floor(s / 3600), rem = s % 3600, m = Math.floor(rem / 60), sec = rem % 60; const ss = String(sec).padStart(2, "0"); if (h > 0) return `${h}h ${String(m).padStart(2,"0")}m ${ss}s`; return m > 0 ? `${m}m ${ss}s` : `${sec}s`; };
                 const cardStyle: React.CSSProperties = { position: "relative", width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", zIndex: 3, boxShadow: "none" };
                 const textureOverlay = <div style={{ position: "absolute", inset: 0, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E")`, backgroundSize: "200px 200px", pointerEvents: "none", mixBlendMode: "overlay" as React.CSSProperties["mixBlendMode"] }} />;
                 const isSleepytime = now.getHours() < 7;
@@ -1044,17 +1044,17 @@ export default function Home8() {
                 ) : null;
                 if (isDone) return (
                   <div key="active" className="animate-bounce-in" style={{ ...cardStyle, background: "#fff", border: "2px solid #e4e4e4", boxShadow: "none" }} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
                       <p style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#b0b8c1", margin: 0 }}>Up next</p>
                       {nextSlide && (
-                        <p style={{ color: "#1a1c1c", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, textAlign: "center", margin: 0, padding: "0 clamp(16px, 5vw, 24px)" }}>
+                        <p style={{ color: "#1a1c1c", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1.15, textAlign: "center", margin: 0, padding: "0 clamp(16px, 5vw, 24px)" }}>
                           {nextSlide.title.includes(" & ")
                             ? <>{nextSlide.title.split(" & ")[0]}<br />{"& " + nextSlide.title.split(" & ").slice(1).join(" & ")}</>
                             : nextSlide.title}
                         </p>
                       )}
-                      <p style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 600, color: "#9aa5b0", margin: "4px 0 0", letterSpacing: "0.04em" }}>in</p>
-                      <p style={{ fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, letterSpacing: "-0.02em", margin: 0, fontVariantNumeric: "tabular-nums", minWidth: "7ch", textAlign: "center" }}>
+                      <p style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 600, color: "#9aa5b0", margin: "2px 0 0", letterSpacing: "0.04em" }}>in</p>
+                      <p style={{ fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.02em", margin: 0, fontVariantNumeric: "tabular-nums", minWidth: "7ch", textAlign: "center" }}>
                         {nextSlide ? fmtTime(secsUntilNext) : "—"}
                       </p>
                     </div>
