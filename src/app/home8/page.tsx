@@ -432,9 +432,10 @@ export default function Home8() {
       try {
         const todayKey = new Date().toISOString().slice(0, 10);
         const hq = JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null");
-        let hml = hq?.date === todayKey ? (hq.ml ?? 0) : 0;
-        // If the quick key has no today value, fall back to hydration-logs entry
-        if (!hml) {
+        const hasQuickToday = hq?.date === todayKey;
+        let hml = hasQuickToday ? (hq.ml ?? 0) : 0;
+        // Only fall back to hydration-logs if there's no hydration-quick entry for today at all
+        if (!hasQuickToday) {
           const logEntry = (JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]") as Array<{ ts: string; litres: string }>)[0];
           if (logEntry?.ts?.slice(0, 10) === todayKey) {
             const litreMap: Record<string, number> = { "<1L": 750, "1–1.5L": 1250, "1.5–2L": 1750, "2–2.5L": 2250, "2.5–3L": 2750, "3L+": 3000 };
