@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { saveGearToDb, uploadGearImageToStorage, saveProfileToDb, saveNutritionInsightToDb, saveUpcomingMatch, saveScheduleDoneToDb, saveScoreSnapshotToDb, saveNutritionToDb, saveNoteToDb, saveMatchReview } from "@/lib/db";
@@ -530,7 +530,8 @@ export default function ProfilePage() {
 
   // Schedule state
   const [schedNow, setSchedNow] = useState(new Date());
-  const [dayType, setDayType] = useState<DayType>("baseline");
+  const [gameDays, setGameDays] = useState<string[]>([]);
+  const dayType = useMemo(() => getDayType(gameDays, nextMatch, upcomingMatches), [gameDays, nextMatch, upcomingMatches]);
   const [schedule, setSchedule] = useState<ReturnType<typeof getScheduleData>["schedule"]>([]);
   const [schedCurrentIdx, setSchedCurrentIdx] = useState(0);
   const [drillTag, setDrillTag] = useState<string | null>(null);
@@ -777,14 +778,18 @@ export default function ProfilePage() {
 
   useEffect(() => {
     loadAll();
-    hydrateFromSupabase();
+    hydrateFromSupabase().then(result => {
+      if (result) { setGameDays(result.gameDays); setUpcomingMatches(result.upcoming as StoredMatch[]); setNextMatch(result.nextMatch as StoredMatch | null); }
+    });
     window.addEventListener("storage", loadAll);
     window.addEventListener("padelop:sync-done", loadAll);
     let lastSync = Date.now();
     const onVisible = () => {
       if (document.visibilityState === "visible" && Date.now() - lastSync > 5_000) {
         lastSync = Date.now();
-        hydrateFromSupabase();
+        hydrateFromSupabase().then(result => {
+          if (result) { setGameDays(result.gameDays); setUpcomingMatches(result.upcoming as StoredMatch[]); setNextMatch(result.nextMatch as StoredMatch | null); }
+        });
       }
     };
     document.addEventListener("visibilitychange", onVisible);
@@ -810,15 +815,17 @@ export default function ProfilePage() {
       const m = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
       if (m?.date === todayStr && m?.time) mTime = m.time;
     } catch {}
-    const type = getDayType();
     const tag = getTopNeedsWorkTag();
     setDrillTag(tag);
-    setDayType(type);
     setSchedMatchTime(mTime);
-    const { schedule: s, currentIdx: ci } = getScheduleData(type, mTime, tag);
+  }, []);
+
+  // Recompute schedule when dayType or drill changes
+  useEffect(() => {
+    const { schedule: s, currentIdx: ci } = getScheduleData(dayType, schedMatchTime, drillTag);
     setSchedule(s);
     setSchedCurrentIdx(ci);
-  }, []);
+  }, [dayType, schedMatchTime, drillTag]);
 
   // Update current schedule item as time passes
   useEffect(() => {

@@ -1,13 +1,16 @@
-// Hydrate localStorage from Supabase on login/app load.
-// All existing UI reads localStorage as normal — this just populates it.
-
 import { createClient } from "@/lib/supabase/client";
 
-export async function hydrateFromSupabase() {
+export type SyncResult = {
+  gameDays: string[];
+  upcoming: { date: string; time: string; club?: string; court?: string; player_1?: string; player_2?: string; player_3?: string; player_4?: string }[];
+  nextMatch: { date: string; time: string; club?: string; court?: string; player_1?: string; player_2?: string; player_3?: string; player_4?: string } | null;
+};
+
+export async function hydrateFromSupabase(): Promise<SyncResult | null> {
   try {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { window.dispatchEvent(new Event("padelop:sync-done")); return; }
+    if (!user) { window.dispatchEvent(new Event("padelop:sync-done")); return null; }
 
     const today = new Date().toISOString().slice(0, 10);
 
@@ -283,7 +286,9 @@ export async function hydrateFromSupabase() {
 
     window.dispatchEvent(new Event("storage"));
     window.dispatchEvent(new Event("padelop:sync-done"));
+    return { gameDays: matchDates, upcoming, nextMatch: upcoming[0] ?? null };
   } catch {
     window.dispatchEvent(new Event("padelop:sync-done"));
+    return null;
   }
 }

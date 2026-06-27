@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import LogSheet from "@/components/log-sheet";
@@ -306,7 +306,9 @@ export default function Home8() {
   const [postMatchDate, setPostMatchDate] = useState<string | null>(null);
   const [checkinNudgeOpen, setCheckinNudgeOpen] = useState(false);
   const [yesterdayWasMatch, setYesterdayWasMatch] = useState(false);
-  const [dayType, setDayType] = useState<DayType>("baseline");
+  const [gameDays, setGameDays] = useState<string[]>([]);
+  const [upcomingMatches, setUpcomingMatches] = useState<{ date: string; time: string }[]>([]);
+  const dayType = useMemo(() => getDayType(gameDays, match, upcomingMatches), [gameDays, match, upcomingMatches]);
   const [drillTag, setDrillTag] = useState<string | null>(null);
   const [drillSteps, setDrillSteps] = useState<{ step: string; cue: string; reps: string }[] | null>(null);
 
@@ -365,7 +367,12 @@ export default function Home8() {
         if (data && !data.display_name) router.push("/onboarding");
       });
     });
-    hydrateFromSupabase();
+    hydrateFromSupabase().then(result => {
+      if (result) {
+        setGameDays(result.gameDays);
+        setUpcomingMatches(result.upcoming);
+      }
+    });
     // Seal yesterday's schedule completion into padelop:schedule-history
     try {
       const todayStr = new Date().toISOString().slice(0, 10);
@@ -414,7 +421,9 @@ export default function Home8() {
     const onVisible = () => {
       if (document.visibilityState === "visible" && Date.now() - lastSync > 5_000) {
         lastSync = Date.now();
-        hydrateFromSupabase();
+        hydrateFromSupabase().then(result => {
+          if (result) { setGameDays(result.gameDays); setUpcomingMatches(result.upcoming); }
+        });
       }
     };
     document.addEventListener("visibilitychange", onVisible);
@@ -611,7 +620,6 @@ export default function Home8() {
         }
       } catch {}
       setYesterdayWasMatch(wasYesterday);
-      setDayType(getDayType());
     }
     loadReadiness();
     loadMatch();

@@ -123,29 +123,22 @@ export function getTopNeedsWorkTag(): string | null {
   } catch { return null; }
 }
 
-export function getDayType(): DayType {
+export function getDayType(
+  gameDays: string[],
+  nextMatch: { date?: string; time?: string } | null,
+  upcoming: { date?: string; time?: string }[],
+): DayType {
   try {
-    const today = new Date().toISOString().slice(0, 10);
-    const tomorrow = new Date(Date.now() + 864e5).toISOString().slice(0, 10);
+    const now = new Date();
+    const today    = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    const tomorrow = (() => { const d = new Date(now); d.setDate(d.getDate()+1); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
 
-    const nextMatch = JSON.parse(localStorage.getItem("padelop:next-match") || "null") as { date?: string; time?: string } | null;
-    if (nextMatch?.date === today && nextMatch?.time) return "match";
+    if (nextMatch?.date === today    && nextMatch?.time) return "match";
     if (nextMatch?.date === tomorrow && nextMatch?.time) return "pre-match";
-
-    const upcoming = JSON.parse(localStorage.getItem("padelop:upcoming-matches") || "[]") as { date?: string; time?: string }[];
-    if (upcoming.some(m => m.date === today && m.time)) return "match";
+    if (upcoming.some(m => m.date === today    && m.time)) return "match";
     if (upcoming.some(m => m.date === tomorrow && m.time)) return "pre-match";
 
-    // Collect past match dates from all sources, most reliable first
-    const gameDays: string[] = JSON.parse(localStorage.getItem("padelop:game-days") || "[]");
-    const savedDates: string[] = JSON.parse(localStorage.getItem("padelop:past-match-dates") || "[]");
-    const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]") as { ts?: string; matchDate?: string }[];
-    const reviewDates = reviews
-      .map(r => r.matchDate ?? r.ts?.slice(0, 10))
-      .filter((d): d is string => !!d);
-
-    const matchDates = [...new Set([...gameDays, ...savedDates, ...reviewDates])].filter(d => d <= today).sort().reverse();
-
+    const matchDates = [...new Set(gameDays)].filter(d => d <= today).sort().reverse();
     if (matchDates.length === 0) return "baseline";
 
     const lastMatchDate = matchDates[0];
@@ -155,7 +148,6 @@ export function getDayType(): DayType {
 
     if (daysSince <= 0) return "recovery";
     if (daysSince === 1) return "recovery";
-    // day 2 → rest, day 3 → training, day 4 → rest, day 5 → training…
     return (daysSince - 2) % 2 === 0 ? "maintenance" : "training";
   } catch {
     return "baseline";
