@@ -230,6 +230,8 @@ body {
 .animate-water-wave { animation: water-wave 2.4s linear infinite; }
 @keyframes circle-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.022); } }
 .animate-circle-breathe { animation: circle-breathe 4s ease-in-out infinite; }
+@keyframes done-breathe { 0%, 100% { transform: scale(1); border-color: #e4e4e4; } 50% { transform: scale(1.012); border-color: #bebebe; } }
+.animate-done-breathe { animation: done-breathe 4s ease-in-out infinite; }
 
 /* Root: no animation (background stays put) */
 ::view-transition-old(root),
