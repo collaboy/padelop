@@ -1259,14 +1259,14 @@ export default function ProfilePage() {
                         onClick={() => setDayTypeInfoOpen(o => !o)}
                         style={{ background: "none", border: "none", padding: "12px 16px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", width: "100%" }}
                       >
-                        <span style={{ fontSize: 11, fontWeight: 700, color: panelDayColor, letterSpacing: "0.08em", textTransform: "uppercase" }}>{panelDayLabel}</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: panelDayColor, letterSpacing: "0.08em", textTransform: "uppercase" }}>{panelDayLabel}</span>
                       </button>
                       <div style={{ overflow: "hidden", maxHeight: dayTypeInfoOpen ? 300 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
                         <div style={{ padding: "0 14px 12px", display: "flex", flexDirection: "column", gap: 7 }}>
                           {DAY_TYPE_INFO.map(dt => (
                             <div key={dt.label} style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                              <span style={{ fontSize: 10, fontWeight: 700, color: dt.color, background: `${dt.color}18`, borderRadius: 5, padding: "1px 6px", flexShrink: 0, whiteSpace: "nowrap", minWidth: 108, textAlign: "center", display: "inline-block" }}>{dt.label}</span>
-                              <span style={{ fontSize: 12, color: "#5a6270", lineHeight: 1.4 }}>{dt.desc}</span>
+                              <span style={{ fontSize: 12, fontWeight: 700, color: dt.color, background: `${dt.color}18`, borderRadius: 5, padding: "1px 6px", flexShrink: 0, whiteSpace: "nowrap", minWidth: 108, textAlign: "center", display: "inline-block" }}>{dt.label}</span>
+                              <span style={{ fontSize: 14, color: "#5a6270", lineHeight: 1.4 }}>{dt.desc}</span>
                             </div>
                           ))}
                         </div>
@@ -1282,8 +1282,8 @@ export default function ProfilePage() {
                         style={{ width: "100%", background: "none", border: "none", padding: "12px 16px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 8, textAlign: "left" }}
                       >
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <span style={{ fontSize: 13, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Today&apos;s Goals</span>
-                          <span style={{ fontSize: 12, color: "#8a9096" }}>{pct === 100 ? "All done ✓" : `${done} of ${total}`}</span>
+                          <span style={{ fontSize: 15, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Today&apos;s Goals</span>
+                          <span style={{ fontSize: 13, color: "#8a9096" }}>{pct === 100 ? "All done ✓" : `${done} of ${total}`}</span>
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: panelSchedOpen ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
                         </div>
                         <div style={{ display: "flex", gap: 3 }}>
@@ -1318,9 +1318,9 @@ export default function ProfilePage() {
                               {isDone && <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                             </button>
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none" }}>{item.title}</p>
+                              <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none" }}>{item.title}</p>
                             </div>
-                            <span style={{ fontSize: 12, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
+                            <span style={{ fontSize: 13, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
                           </div>
                         );
                       })}
@@ -1404,20 +1404,20 @@ export default function ProfilePage() {
             const insight = pool[idx];
             return (
               <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-                <p style={{ margin: 0, padding: "14px 16px 0", fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--c-label)" }}>Featured Insights</p>
+                <p style={{ margin: 0, padding: "14px 16px 0", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--c-label)" }}>Featured Insights</p>
                 <button
                   onClick={() => setFeaturedIdx(i => (i + 1) % pool.length)}
                   style={{ width: "100%", background: "none", border: "none", padding: "12px 16px 16px", cursor: "pointer", textAlign: "left" }}
                 >
-                  <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-blue)" }}>{insight.label}</p>
-                  <p style={{ margin: "0 0 12px", fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{insight.body}</p>
+                  <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-blue)" }}>{insight.label}</p>
+                  <p style={{ margin: "0 0 12px", fontSize: 16, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{insight.body}</p>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <div style={{ display: "flex", gap: 4 }}>
                       {pool.map((_, i) => (
                         <div key={i} style={{ width: i === idx ? 14 : 5, height: 5, borderRadius: 3, background: i === idx ? "var(--c-blue)" : "#e2e5ea", transition: "width 0.2s" }} />
                       ))}
                     </div>
-                    <span style={{ fontSize: 11, color: "var(--c-hint)", fontWeight: 500 }}>Tap for next</span>
+                    <span style={{ fontSize: 12, color: "var(--c-hint)", fontWeight: 500 }}>Tap for next</span>
                   </div>
                 </button>
               </div>
@@ -1431,7 +1431,7 @@ export default function ProfilePage() {
               onClick={() => setProfileOpen(o => !o)}
               style={{ width: "100%", padding: "14px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", cursor: "pointer" }}
             >
-              <span style={{ fontSize: 13, fontWeight: 600, color: "var(--c-text)" }}>My Stats & Gear</span>
+              <span style={{ fontSize: 16, fontWeight: 600, color: "var(--c-text)" }}>My Stats & Gear</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: profileOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s", flexShrink: 0 }}><polyline points="6 9 12 15 18 9"/></svg>
             </button>
             <div style={{ overflow: "hidden", maxHeight: profileOpen ? 9999 : 0, transition: "max-height 0.4s cubic-bezier(0.4,0,0.2,1)" }}>
