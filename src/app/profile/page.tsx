@@ -1355,6 +1355,15 @@ export default function ProfilePage() {
               ];
               return (
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, paddingLeft: 2 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: panelDayColor, letterSpacing: "0.04em", textTransform: "uppercase" }}>{panelDayLabel}</span>
+                    <button
+                      onClick={() => setDayTypeInfoOpen(o => !o)}
+                      style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center", color: dayTypeInfoOpen ? panelDayColor : "#c4c7c7" }}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    </button>
+                  </div>
                   {total > 0 && (
                     <button
                       onClick={() => setPanelSchedOpen(o => !o)}
@@ -1383,17 +1392,6 @@ export default function ProfilePage() {
                   {/* Schedule list */}
                   <div style={{ overflow: "hidden", maxHeight: panelSchedOpen ? 900 : 0, transition: "max-height 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
                     <div style={{ background: "#fff", borderRadius: 14, overflow: "hidden", padding: "10px 14px 8px" }}>
-
-                      {/* Day type header row */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, paddingBottom: 10, marginBottom: 2, borderBottom: "1px solid #f0f2f5" }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: panelDayColor, background: `${panelDayColor}18`, borderRadius: 6, padding: "2px 8px", letterSpacing: "0.03em" }}>{panelDayLabel}</span>
-                        <button
-                          onClick={e => { e.stopPropagation(); setDayTypeInfoOpen(o => !o); }}
-                          style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center", color: dayTypeInfoOpen ? panelDayColor : "#c4c7c7" }}
-                        >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        </button>
-                      </div>
 
                       {/* Day type explainer */}
                       <div style={{ overflow: "hidden", maxHeight: dayTypeInfoOpen ? 300 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
