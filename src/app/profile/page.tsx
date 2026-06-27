@@ -1241,11 +1241,11 @@ export default function ProfilePage() {
           {/* Profile card */}
           <div style={{ background: "#fff", borderRadius: 18, padding: "20px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <button onClick={() => setProfileTabEditOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, flexShrink: 0 }}>
-                <div style={{ width: 72, height: 72, borderRadius: "50%", background: "var(--c-blue)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+              <button onClick={() => setProfileTabEditOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, flex: "0 0 50%" }}>
+                <div style={{ width: "100%", aspectRatio: "1/1", borderRadius: "50%", background: "var(--c-blue)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                   {profile.avatar
                     ? <img src={profile.avatar} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    : <span style={{ fontSize: 24, fontWeight: 800, color: "#fff" }}>{initials(profile.name)}</span>
+                    : <span style={{ fontSize: "clamp(28px, 10vw, 48px)", fontWeight: 800, color: "#fff" }}>{initials(profile.name)}</span>
                   }
                 </div>
                 <span style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>{profile.name || "Set your name"}</span>
