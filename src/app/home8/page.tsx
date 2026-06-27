@@ -308,15 +308,41 @@ export default function Home8() {
   const [yesterdayWasMatch, setYesterdayWasMatch] = useState(false);
   const [gameDays, setGameDays] = useState<string[]>([]);
   const [upcomingMatches, setUpcomingMatches] = useState<{ date: string; time: string }[]>([]);
-  const dayType = useMemo(() => getDayType(gameDays, match, upcomingMatches), [gameDays, match, upcomingMatches]);
+  const [dayType, setDayType] = useState<DayType>("baseline");
   const [drillTag, setDrillTag] = useState<string | null>(null);
   const [drillSteps, setDrillSteps] = useState<{ step: string; cue: string; reps: string }[] | null>(null);
+  const [clientReady, setClientReady] = useState(false);
 
   // Seed cache-backed state synchronously on client before first paint (avoids SSR mismatch + flash)
   useLayoutEffect(() => {
-    try { setGameDays(JSON.parse(localStorage.getItem("padelop:game-days") || "[]")); } catch {}
+    const today = new Date().toISOString().slice(0, 10);
+    let dt: DayType = "baseline";
+    // Try day-type cache first (fastest — no derivation needed)
+    try {
+      const cached = JSON.parse(localStorage.getItem("padelop:day-type-cache") || "null");
+      if (cached?.date === today && cached?.type) dt = cached.type as DayType;
+    } catch {}
+    // Seed gameDays; if no cache, derive dayType from them right here
+    let gd: string[] = [];
+    try { gd = JSON.parse(localStorage.getItem("padelop:game-days") || "[]"); setGameDays(gd); } catch {}
+    if (dt === "baseline" && gd.length > 0) {
+      dt = getDayType(gd, null, []);
+      try { localStorage.setItem("padelop:day-type-cache", JSON.stringify({ date: today, type: dt })); } catch {}
+    }
+    setDayType(dt);
     try { const t = getTopNeedsWorkTag(); if (t) setDrillTag(t); } catch {}
+    setClientReady(true);
   }, []);
+
+  // Recompute + re-cache when Supabase data arrives (match schedule may have changed)
+  useEffect(() => {
+    const computed = getDayType(gameDays, match, upcomingMatches);
+    setDayType(computed);
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      localStorage.setItem("padelop:day-type-cache", JSON.stringify({ date: today, type: computed }));
+    } catch {}
+  }, [gameDays, match, upcomingMatches]);
 
   const [logHydrationMl, setLogHydrationMl] = useState(0);
   const logGaugeRef    = useRef<HTMLDivElement>(null);
@@ -1049,6 +1075,11 @@ export default function Home8() {
                 const secsUntilNext = nextSlide ? toMins(nextSlide.time) * 60 - (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) : 0;
                 const fmtTime = (s: number) => { if (s <= 0) return "a moment"; const h = Math.floor(s / 3600), rem = s % 3600, m = Math.floor(rem / 60), sec = rem % 60; const ss = String(sec).padStart(2, "0"); if (h > 0) return `${h}h ${String(m).padStart(2,"0")}m ${ss}s`; return m > 0 ? `${m}m ${ss}s` : `${sec}s`; };
                 const cardStyle: React.CSSProperties = { position: "relative", width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", zIndex: 3, boxShadow: "none" };
+                if (!clientReady) return (
+                  <div key="active" style={{ ...cardStyle, background: "#fff" }}>
+                    <div style={{ width: 36, height: 36, borderRadius: "50%", border: "3px solid rgba(0,160,60,0.2)", borderTopColor: "#00A83C", animation: "spin 0.8s linear infinite" }} />
+                  </div>
+                );
                 const textureOverlay = <div style={{ position: "absolute", inset: 0, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E")`, backgroundSize: "200px 200px", pointerEvents: "none", mixBlendMode: "overlay" as React.CSSProperties["mixBlendMode"] }} />;
                 const isSleepytime = now.getHours() < 7;
                 const contentOpacity = doIdx === 0 ? 1 : 0.2;

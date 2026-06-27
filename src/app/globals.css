@@ -232,6 +232,7 @@ body {
 .animate-circle-breathe { animation: circle-breathe 4s ease-in-out infinite; }
 @keyframes done-breathe { 0%, 100% { border-color: rgba(0,212,85,0.3); } 50% { border-color: rgba(0,212,85,0.9); } }
 .animate-done-breathe { animation: done-breathe 3s ease-in-out infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 /* Root: no animation (background stays put) */
 ::view-transition-old(root),

@@ -170,7 +170,11 @@ export async function hydrateFromSupabase(): Promise<SyncResult | null> {
     }
     const todayHydration = hydrationData.find(h => h.date === today);
     if (todayHydration) {
-      localStorage.setItem("padelop:hydration-quick", JSON.stringify({ date: today, ml: todayHydration.ml }));
+      const existingQuick = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null"); } catch { return null; } })();
+      const localMl = existingQuick?.date === today ? (existingQuick.ml ?? 0) : 0;
+      if (todayHydration.ml > localMl) {
+        localStorage.setItem("padelop:hydration-quick", JSON.stringify({ date: today, ml: todayHydration.ml }));
+      }
     }
 
     // ── Nutrition ────────────────────────────────────────────────────────
