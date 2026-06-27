@@ -1050,7 +1050,7 @@ export default function Home8() {
                   const g = Math.round(255 - 43 * p);
                   const b = Math.round(255 - 170 * p);
                   const ballBg = `rgb(${r}, ${g}, ${b})`;
-                  const borderCol = `rgba(0,0,0,${0.08 * (1 - p) + 0 * p})`;
+                  const borderCol = `rgba(0,${Math.round(212 * (0.3 + 0.7 * p))},${Math.round(85 * (0.3 + 0.7 * p))},${0.35 + 0.65 * p})`;
                   const mutedCol = `rgb(${Math.round(154 + (255 - 154) * p)}, ${Math.round(165 + (255 - 165) * p)}, ${Math.round(176 + (255 - 176) * p)})`;
                   const mainCol = p > 0.5 ? "#fff" : "#1a1c1c";
                   return (
