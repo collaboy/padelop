@@ -523,6 +523,17 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
     function pick(key: string, val: string | number) {
       const next = { ...morningData, [key]: val };
       setMorningData(next);
+      if (key === "water" && val === "yes") {
+        try {
+          const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
+          const titles = sd[todayYMD] ?? [];
+          if (!titles.includes("Wake up")) {
+            sd[todayYMD] = [...titles, "Wake up"];
+            localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
+            window.dispatchEvent(new Event("storage"));
+          }
+        } catch {}
+      }
       if (!isLastStep) {
         setTimeout(() => setMorningStep(s => s + 1), 180);
       }
