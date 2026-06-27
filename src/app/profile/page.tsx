@@ -543,6 +543,7 @@ export default function ProfilePage() {
   // Panel state (inline action panel below profile card)
   const [panelExpanded, setPanelExpanded] = useState(false);
   const [panelSchedOpen, setPanelSchedOpen] = useState(false);
+  const [dayTypeInfoOpen, setDayTypeInfoOpen] = useState(false);
   const [panelUploadLoading, setPanelUploadLoading] = useState(false);
   const [panelUploadCategory, setPanelUploadCategory] = useState<string | null>(null);
   const [panelSmartResult, setPanelSmartResult] = useState<{ category: string; label: string; confidence: string; data: Record<string, string> } | null>(null);
@@ -1345,58 +1346,79 @@ export default function ProfilePage() {
               const done = schedule.filter(s => todayDoneSet.has(s.title)).length;
               const pct = total > 0 ? Math.round((done / total) * 100) : 0;
               const barColor = pct === 100 ? "#00D455" : pct >= 50 ? "#2653d4" : "#f59e0b";
+              const DAY_TYPE_INFO: { label: string; color: string; desc: string }[] = [
+                { label: "Match Day",       color: "#2653d4", desc: "Game day. Trust your prep and enjoy every point." },
+                { label: "Pre-Match Day",   color: "#d97706", desc: "Match tomorrow. Carb up, rest, and sleep early." },
+                { label: "Recovery Day",    color: "#7c3aed", desc: "Day after a match. Light movement, protein, hydration." },
+                { label: "Training Day",    color: "#16a34a", desc: "Build the habit. Small consistent actions compound." },
+                { label: "Maintenance Day", color: "#0e7490", desc: "Between cycles. Stay loose and let the body absorb the work." },
+              ];
               return (
-                <div style={{ display: "flex", flexDirection: "column" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {total > 0 && (
                     <button
                       onClick={() => setPanelSchedOpen(o => !o)}
                       className="active:scale-95 transition-transform"
-                      style={{ width: "100%", background: panelSchedOpen ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 10, textAlign: "left" }}
+                      style={{ width: "100%", background: panelSchedOpen ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 16, padding: "12px 14px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 8, textAlign: "left" }}
                     >
+                      {/* Header row */}
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <span style={{ fontSize: 14, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Today's Goals</span>
+                        {/* Day type pill */}
+                        <span style={{ fontSize: 11, fontWeight: 700, color: panelDayColor, background: `${panelDayColor}18`, borderRadius: 6, padding: "2px 7px", letterSpacing: "0.03em", flexShrink: 0 }}>{panelDayLabel}</span>
+                        {/* Info icon */}
+                        <button
+                          onClick={e => { e.stopPropagation(); setDayTypeInfoOpen(o => !o); }}
+                          style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center", color: dayTypeInfoOpen ? panelDayColor : "#b0b5ba", flexShrink: 0 }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        </button>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Today&apos;s Goals</span>
                         <span style={{ fontSize: 12, color: "#8a9096" }}>{pct === 100 ? "All done ✓" : `${done} of ${total}`}</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: panelSchedOpen ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
                       </div>
-                      <div style={{ width: "100%", height: 4, borderRadius: 2, background: "#e0e2e5", overflow: "hidden" }}>
+                      {/* Progress bar */}
+                      <div style={{ width: "100%", height: 3, borderRadius: 2, background: "#e0e2e5", overflow: "hidden" }}>
                         <div style={{ height: "100%", width: `${pct}%`, background: barColor, borderRadius: 2, transition: "width 0.4s" }} />
                       </div>
                     </button>
                   )}
 
-                  <div style={{ overflow: "hidden", maxHeight: panelSchedOpen ? 800 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
-                    <div style={{ paddingTop: 10 }}>
-                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden", padding: "20px" }}>
-                        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                          {schedule.map((item, i) => {
-                            const isDone = (schedDone[todayKey] ?? []).includes(item.title);
-                            return (
-                              <div
-                                key={item.title}
-                                onClick={() => { if (SCHEDULE_DETAILS[item.title] || item.isDrill) setPanelSchedModalIdx(i); }}
-                                style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", cursor: SCHEDULE_DETAILS[item.title] || item.isDrill ? "pointer" : "default", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f6" : "none" }}
-                              >
-                                <button
-                                  onClick={e => { e.stopPropagation(); panelToggleDone(item.title); }}
-                                  style={{ width: 22, height: 22, borderRadius: 6, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s", cursor: "pointer" }}
-                                >
-                                  {isDone && <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                                </button>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                  <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none" }}>{item.title}</p>
-                                  {item.subtitle && <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9aa0a6", fontWeight: 500 }}>{item.subtitle}</p>}
-                                </div>
-                                <span style={{ fontSize: 14, color: "#b0b8c1", fontWeight: 600, flexShrink: 0 }}>{item.time}</span>
-                              </div>
-                            );
-                          })}
+                  {/* Day type explainer */}
+                  <div style={{ overflow: "hidden", maxHeight: dayTypeInfoOpen ? 400 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
+                    <div style={{ background: "#f5f6f7", borderRadius: 14, padding: "12px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
+                      {DAY_TYPE_INFO.map(dt => (
+                        <div key={dt.label} style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: dt.color, background: `${dt.color}18`, borderRadius: 5, padding: "1px 6px", flexShrink: 0, whiteSpace: "nowrap" }}>{dt.label}</span>
+                          <span style={{ fontSize: 12, color: "#5a6270", lineHeight: 1.4 }}>{dt.desc}</span>
                         </div>
-                        <div style={{ paddingTop: 16, marginTop: 14, borderTop: "1px solid #f0f2f5", textAlign: "center" }}>
-                          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: panelDayColor }}>Today</span>
-                          <p style={{ margin: "4px 0 4px", fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{panelDayLabel}</p>
-                          <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500 }}>{new Date().toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" })}</span>
-                        </div>
-                      </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Schedule list */}
+                  <div style={{ overflow: "hidden", maxHeight: panelSchedOpen ? 900 : 0, transition: "max-height 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+                    <div style={{ background: "#fff", borderRadius: 14, overflow: "hidden", padding: "4px 14px 8px" }}>
+                      {schedule.map((item, i) => {
+                        const isDone = (schedDone[todayKey] ?? []).includes(item.title);
+                        return (
+                          <div
+                            key={item.title}
+                            onClick={() => { if (SCHEDULE_DETAILS[item.title] || item.isDrill) setPanelSchedModalIdx(i); }}
+                            style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0", cursor: SCHEDULE_DETAILS[item.title] || item.isDrill ? "pointer" : "default", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f6" : "none" }}
+                          >
+                            <button
+                              onClick={e => { e.stopPropagation(); panelToggleDone(item.title); }}
+                              style={{ width: 20, height: 20, borderRadius: 5, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s", cursor: "pointer" }}
+                            >
+                              {isDone && <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                            </button>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none" }}>{item.title}</p>
+                            </div>
+                            <span style={{ fontSize: 12, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
