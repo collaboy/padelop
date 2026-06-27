@@ -550,6 +550,12 @@ export default function Home8() {
         const sched = getScheduleData(dayTypeRef.current, match?.time ?? null, drillTagRef.current).schedule;
         const indices = new Set<number>();
         sched.forEach((item, i) => { if (doneTitles.includes(item.title)) indices.add(i); });
+        // Restore done-at timestamps so the white→green fade works after page reloads
+        try {
+          const dat: Record<string, Record<string, number>> = JSON.parse(localStorage.getItem("padelop:done-at") || "{}");
+          const todayDat = dat[todayStr] ?? {};
+          sched.forEach((item, i) => { if (todayDat[item.title]) doneAtRef.current.set(i, todayDat[item.title]); });
+        } catch {}
         // Directly merge waterOnWaking into indices without going through schedule-done
         try {
           const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null");
@@ -1466,6 +1472,11 @@ export default function Home8() {
                 : [...titles.filter(t => t !== modalItem.title), modalItem.title];
               localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
               saveScheduleDoneToDb(todayKey, sd[todayKey]);
+              // Persist done-at timestamp so the white→green fade survives page reloads
+              const dat: Record<string, Record<string, number>> = JSON.parse(localStorage.getItem("padelop:done-at") || "{}");
+              if (!dat[todayKey]) dat[todayKey] = {};
+              if (isComplete) { delete dat[todayKey][modalItem.title]; } else { dat[todayKey][modalItem.title] = Date.now(); }
+              localStorage.setItem("padelop:done-at", JSON.stringify(dat));
               window.dispatchEvent(new Event("storage"));
             } catch {}
             // A: if marking complete, pause so circle shows green, then B: fade modal out
