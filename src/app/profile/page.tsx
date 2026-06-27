@@ -1366,8 +1366,16 @@ export default function ProfilePage() {
                         <span style={{ fontSize: 12, color: "#8a9096" }}>{pct === 100 ? "All done ✓" : `${done} of ${total}`}</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: panelSchedOpen ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
                       </div>
-                      <div style={{ width: "100%", height: 3, borderRadius: 2, background: "#e0e2e5", overflow: "hidden" }}>
-                        <div style={{ height: "100%", width: `${pct}%`, background: barColor, borderRadius: 2, transition: "width 0.4s" }} />
+                      <div style={{ display: "flex", gap: 3 }}>
+                        {schedule.map(item => {
+                          const isDone = todayDoneSet.has(item.title);
+                          return (
+                            <div
+                              key={item.title}
+                              style={{ flex: 1, height: 6, borderRadius: 3, background: isDone ? item.color : "#e0e2e5", transition: "background 0.3s" }}
+                            />
+                          );
+                        })}
                       </div>
                     </button>
                   )}
