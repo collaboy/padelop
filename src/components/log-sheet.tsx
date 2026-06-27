@@ -579,8 +579,16 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
             sd[todayYMD] = updated;
             localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
             saveScheduleDoneToDb(todayYMD, updated);
-            window.dispatchEvent(new Event("storage"));
           } catch {}
+          // Seed hydration meter with 500ml so it isn't empty after check-in
+          try {
+            const hq = JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null");
+            const existing = hq?.date === todayYMD ? (hq.ml ?? 0) : 0;
+            if (existing < 500) {
+              localStorage.setItem("padelop:hydration-quick", JSON.stringify({ date: todayYMD, ml: 500 }));
+            }
+          } catch {}
+          window.dispatchEvent(new Event("storage"));
         }
 
         const bedtime = String(next.bedtime ?? "");

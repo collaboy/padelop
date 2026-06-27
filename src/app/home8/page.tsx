@@ -481,13 +481,18 @@ export default function Home8() {
         const hq = JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null");
         const hasQuickToday = hq?.date === todayKey;
         let hml = hasQuickToday ? (hq.ml ?? 0) : 0;
-        // Only fall back to hydration-logs if there's no hydration-quick entry for today at all
+        // Fall back to hydration-logs if no quick entry today
         if (!hasQuickToday) {
           const logEntry = (JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]") as Array<{ ts: string; litres: string }>)[0];
           if (logEntry?.ts?.slice(0, 10) === todayKey) {
             const litreMap: Record<string, number> = { "<1L": 750, "1–1.5L": 1250, "1.5–2L": 1750, "2–2.5L": 2250, "2.5–3L": 2750, "3L+": 3000 };
             hml = litreMap[logEntry.litres] ?? 0;
           }
+        }
+        // Final fallback: morning check-in water on waking = at least 500ml
+        if (hml === 0) {
+          const morningLog = JSON.parse(localStorage.getItem("padelop:morning-log") || "null");
+          if (morningLog?.date === todayKey && morningLog?.waterOnWaking === true) hml = 500;
         }
         setLogHydrationMl(hml);
         const ri = [!!d.checkIn, hml >= 2500, !!d.nutrition, !!d.training];
