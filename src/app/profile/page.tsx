@@ -1361,43 +1361,45 @@ export default function ProfilePage() {
                       className="active:scale-95 transition-transform"
                       style={{ width: "100%", background: panelSchedOpen ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 16, padding: "12px 14px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 8, textAlign: "left" }}
                     >
-                      {/* Header row */}
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        {/* Day type pill */}
-                        <span style={{ fontSize: 11, fontWeight: 700, color: panelDayColor, background: `${panelDayColor}18`, borderRadius: 6, padding: "2px 7px", letterSpacing: "0.03em", flexShrink: 0 }}>{panelDayLabel}</span>
-                        {/* Info icon */}
-                        <button
-                          onClick={e => { e.stopPropagation(); setDayTypeInfoOpen(o => !o); }}
-                          style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center", color: dayTypeInfoOpen ? panelDayColor : "#b0b5ba", flexShrink: 0 }}
-                        >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        </button>
                         <span style={{ fontSize: 13, fontWeight: 600, color: "#1a1c1c", flex: 1 }}>Today&apos;s Goals</span>
                         <span style={{ fontSize: 12, color: "#8a9096" }}>{pct === 100 ? "All done ✓" : `${done} of ${total}`}</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: panelSchedOpen ? "rotate(90deg)" : "rotate(0deg)", flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
                       </div>
-                      {/* Progress bar */}
                       <div style={{ width: "100%", height: 3, borderRadius: 2, background: "#e0e2e5", overflow: "hidden" }}>
                         <div style={{ height: "100%", width: `${pct}%`, background: barColor, borderRadius: 2, transition: "width 0.4s" }} />
                       </div>
                     </button>
                   )}
 
-                  {/* Day type explainer */}
-                  <div style={{ overflow: "hidden", maxHeight: dayTypeInfoOpen ? 400 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
-                    <div style={{ background: "#f5f6f7", borderRadius: 14, padding: "12px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
-                      {DAY_TYPE_INFO.map(dt => (
-                        <div key={dt.label} style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                          <span style={{ fontSize: 11, fontWeight: 700, color: dt.color, background: `${dt.color}18`, borderRadius: 5, padding: "1px 6px", flexShrink: 0, whiteSpace: "nowrap" }}>{dt.label}</span>
-                          <span style={{ fontSize: 12, color: "#5a6270", lineHeight: 1.4 }}>{dt.desc}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
                   {/* Schedule list */}
                   <div style={{ overflow: "hidden", maxHeight: panelSchedOpen ? 900 : 0, transition: "max-height 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-                    <div style={{ background: "#fff", borderRadius: 14, overflow: "hidden", padding: "4px 14px 8px" }}>
+                    <div style={{ background: "#fff", borderRadius: 14, overflow: "hidden", padding: "10px 14px 8px" }}>
+
+                      {/* Day type header row */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, paddingBottom: 10, marginBottom: 2, borderBottom: "1px solid #f0f2f5" }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: panelDayColor, background: `${panelDayColor}18`, borderRadius: 6, padding: "2px 8px", letterSpacing: "0.03em" }}>{panelDayLabel}</span>
+                        <button
+                          onClick={e => { e.stopPropagation(); setDayTypeInfoOpen(o => !o); }}
+                          style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center", color: dayTypeInfoOpen ? panelDayColor : "#c4c7c7" }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        </button>
+                      </div>
+
+                      {/* Day type explainer */}
+                      <div style={{ overflow: "hidden", maxHeight: dayTypeInfoOpen ? 300 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 7, padding: "8px 0 12px" }}>
+                          {DAY_TYPE_INFO.map(dt => (
+                            <div key={dt.label} style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                              <span style={{ fontSize: 10, fontWeight: 700, color: dt.color, background: `${dt.color}18`, borderRadius: 5, padding: "1px 6px", flexShrink: 0, whiteSpace: "nowrap" }}>{dt.label}</span>
+                              <span style={{ fontSize: 12, color: "#5a6270", lineHeight: 1.4 }}>{dt.desc}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <div style={{ height: 1, background: "#f0f2f5", marginBottom: 4 }} />
+                      </div>
+
                       {schedule.map((item, i) => {
                         const isDone = (schedDone[todayKey] ?? []).includes(item.title);
                         return (
