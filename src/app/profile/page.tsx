@@ -1355,15 +1355,13 @@ export default function ProfilePage() {
               ];
               return (
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, paddingLeft: 2 }}>
+                  <button
+                    onClick={() => setDayTypeInfoOpen(o => !o)}
+                    style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4, width: "100%" }}
+                  >
                     <span style={{ fontSize: 11, fontWeight: 700, color: panelDayColor, letterSpacing: "0.04em", textTransform: "uppercase" }}>{panelDayLabel}</span>
-                    <button
-                      onClick={() => setDayTypeInfoOpen(o => !o)}
-                      style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center", color: dayTypeInfoOpen ? panelDayColor : "#c4c7c7" }}
-                    >
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    </button>
-                  </div>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={panelDayColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transform: dayTypeInfoOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
                   {total > 0 && (
                     <button
                       onClick={() => setPanelSchedOpen(o => !o)}
