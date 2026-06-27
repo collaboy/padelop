@@ -272,7 +272,6 @@ export default function Home8() {
   const [upcomingCount, setUpcomingCount] = useState(0);
   const [now, setNow] = useState(new Date());
   const lastDateRef = useRef(new Date().toISOString().slice(0, 10));
-  const doneAtRef = useRef<Map<number, number>>(new Map());
   const [doIdx, setDoIdx] = useState(0); // -1 = top holder, 0 = do-this-now, 1 = see schedule
   const [completed, setCompleted] = useState<Set<number>>(new Set());
   const [readiness, setReadiness] = useState(65);
@@ -550,12 +549,6 @@ export default function Home8() {
         const sched = getScheduleData(dayTypeRef.current, match?.time ?? null, drillTagRef.current).schedule;
         const indices = new Set<number>();
         sched.forEach((item, i) => { if (doneTitles.includes(item.title)) indices.add(i); });
-        // Restore done-at timestamps so the white→green fade works after page reloads
-        try {
-          const dat: Record<string, Record<string, number>> = JSON.parse(localStorage.getItem("padelop:done-at") || "{}");
-          const todayDat = dat[todayStr] ?? {};
-          sched.forEach((item, i) => { if (todayDat[item.title]) doneAtRef.current.set(i, todayDat[item.title]); });
-        } catch {}
         // Directly merge waterOnWaking into indices without going through schedule-done
         try {
           const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null");
@@ -1100,9 +1093,8 @@ export default function Home8() {
                 ) : null;
                 if (isDone) {
                   const gapSecs = nextSlide ? (toMins(nextSlide.time) - toMins(s.time)) * 60 : 0;
-                  const doneAt = doneAtRef.current.get(currentIdx);
-                  const elapsed = doneAt ? (Date.now() - doneAt) / 1000 : gapSecs;
-                  const p = nextSlide ? Math.min(1, Math.max(0, (elapsed - 5) / Math.max(1, gapSecs - 5))) : 0;
+                  const elapsed = gapSecs - secsUntilNext;
+                  const p = nextSlide ? Math.min(1, Math.max(0, elapsed / Math.max(1, gapSecs))) : 0;
                   const ri = Math.round(255 * (1 - p));
                   const gi = Math.round(255 - 43 * p);
                   const bi = Math.round(255 - 170 * p);
@@ -1448,7 +1440,6 @@ export default function Home8() {
               const n = new Set(prev);
               if (!isComplete) {
                 n.add(modalIdx);
-                doneAtRef.current.set(modalIdx, Date.now());
                 if (modalItem.isDrill) {
                   try {
                     const entry = { ts: new Date().toISOString(), sessionType: ["Drills"], drillFocus: drillTag ? [drillTag] : [], duration: "6", intensity: "moderate" };
@@ -1472,11 +1463,6 @@ export default function Home8() {
                 : [...titles.filter(t => t !== modalItem.title), modalItem.title];
               localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
               saveScheduleDoneToDb(todayKey, sd[todayKey]);
-              // Persist done-at timestamp so the white→green fade survives page reloads
-              const dat: Record<string, Record<string, number>> = JSON.parse(localStorage.getItem("padelop:done-at") || "{}");
-              if (!dat[todayKey]) dat[todayKey] = {};
-              if (isComplete) { delete dat[todayKey][modalItem.title]; } else { dat[todayKey][modalItem.title] = Date.now(); }
-              localStorage.setItem("padelop:done-at", JSON.stringify(dat));
               window.dispatchEvent(new Event("storage"));
             } catch {}
             // A: if marking complete, pause so circle shows green, then B: fade modal out
