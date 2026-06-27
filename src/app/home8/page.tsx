@@ -1054,7 +1054,7 @@ export default function Home8() {
                   const mutedCol = `rgb(${Math.round(154 + (255 - 154) * p)}, ${Math.round(165 + (255 - 165) * p)}, ${Math.round(176 + (255 - 176) * p)})`;
                   const mainCol = p > 0.5 ? "#fff" : "#1a1c1c";
                   return (
-                    <div key="active" className="animate-bounce-in" style={{ ...cardStyle, background: ballBg, border: `2px solid ${borderCol}`, boxShadow: "none" }} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
+                    <div key="active" className="animate-bounce-in animate-done-breathe" style={{ ...cardStyle, background: ballBg, border: `2px solid`, boxShadow: "none" }} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
                       {p > 0.05 && <div style={{ position: "absolute", inset: 0, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E")`, backgroundSize: "200px 200px", pointerEvents: "none", mixBlendMode: "overlay" as React.CSSProperties["mixBlendMode"], opacity: p }} />}
                       <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={mutedCol} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: -4 }}><path d="M5 13l4 4L19 7"/></svg>
