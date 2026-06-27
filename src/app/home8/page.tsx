@@ -1050,7 +1050,8 @@ export default function Home8() {
                         {nextSlide ? fmtTime(secsUntilNext) : "—"}
                       </p>
                       {nextSlide && (
-                        <p style={{ color: "#1a1c1c", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1.15, textAlign: "center", margin: 0, padding: "0 clamp(16px, 5vw, 24px)" }}>
+                        <p style={{ color: "#1a1c1c", fontWeight: 700, fontSize: "clamp(16px, 4.5vw, 22px)", lineHeight: 1.2, textAlign: "center", margin: 0, padding: "0 clamp(16px, 5vw, 24px)" }}>
+                          <span style={{ color: "#9aa5b0", fontWeight: 500 }}>for </span>
                           {nextSlide.title.includes(" & ")
                             ? <>{nextSlide.title.split(" & ")[0]}<br />{"& " + nextSlide.title.split(" & ").slice(1).join(" & ")}</>
                             : nextSlide.title}
