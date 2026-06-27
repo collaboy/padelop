@@ -470,25 +470,6 @@ function nowTimeStr() {
 export default function ProfilePage() {
   const router = useRouter();
 
-  // Tab
-  const [activeTab, setActiveTab] = useState<'today' | 'profile'>('profile');
-  useEffect(() => {
-    const t = new URLSearchParams(window.location.search).get('tab');
-    if (t === 'profile') goTab(t);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  const [tabAnimKey, setTabAnimKey] = useState(0);
-  const tabDir = useRef<1 | -1>(1);
-  const [schedOpen, setSchedOpen] = useState(false);
-
-  const TAB_ORDER = ['today', 'profile'] as const;
-  function goTab(key: typeof activeTab) {
-    if (key === activeTab) return;
-    tabDir.current = TAB_ORDER.indexOf(key) > TAB_ORDER.indexOf(activeTab) ? 1 : -1;
-    setActiveTab(key);
-    setTabAnimKey(k => k + 1);
-  }
-
   // Profile
   const [profile, setProfile] = useState<Profile>(EMPTY);
   const [saved, setSaved]     = useState(false);
@@ -1107,10 +1088,6 @@ export default function ProfilePage() {
     dayType === "recovery"  ? "#7c3aed" :
     dayType === "maintenance" ? "#0e7490" : "#16a34a";
 
-  const TABS = [
-    { key: 'profile' as const, label: 'Profile' },
-  ];
-
   const swipeStartX = useRef(0);
   const swipeStartY = useRef(0);
   const [schedSwipeX, setSchedSwipeX] = useState(0);
@@ -1126,99 +1103,12 @@ export default function ProfilePage() {
     const dy = e.changedTouches[0].clientY - swipeStartY.current;
     if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.8) return;
     if (dx < -80) { router.push("/home8"); return; }
-    const idx = TABS.findIndex(t => t.key === activeTab);
-    if (dx < 0 && idx < TABS.length - 1) goTab(TABS[idx + 1].key);
-    if (dx > 0 && idx > 0) goTab(TABS[idx - 1].key);
   }
 
   return (
-    <div className="w-full pb-20" style={{ background: "#fff" }}>
+    <div className="w-full pb-20" style={{ background: "#fff" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
 
-
-      <style>{`
-        @keyframes tabSlideInRight { from { transform: translateX(48px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes tabSlideInLeft  { from { transform: translateX(-48px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-      `}</style>
-      <div
-        key={tabAnimKey}
-        onTouchStart={onSwipeStart}
-        onTouchEnd={onSwipeEnd}
-        style={{ animation: `${tabDir.current === 1 ? 'tabSlideInRight' : 'tabSlideInLeft'} 0.26s cubic-bezier(0.4,0,0.2,1)` }}
-      >
-
-      {/* ── Tab: Me ──────────────────────────────────────────────────────── */}
-
-
-      {/* ── Tab: Today ───────────────────────────────────────────────────── */}
-      {activeTab === 'today' && (
-        <div className="pt-5 flex flex-col gap-5">
-
-          {/* Day type card */}
-          <div style={{ margin: "0 20px", borderRadius: 24, overflow: "hidden", boxShadow: "var(--shadow-card)" }}>
-            <div style={{ background: "#fff", padding: "28px 20px", textAlign: "center" }}>
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: dayColor }}>Today</span>
-              <p style={{ margin: "6px 0 8px", fontSize: "clamp(32px, 8vw, 42px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{dayLabel}</p>
-              <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500, lineHeight: 1 }}>{now.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" })}</span>
-            </div>
-          </div>
-
-          {/* Insight paragraph */}
-          {(() => {
-            const accentColor = dayType === "match" ? "#2653d4" : dayType === "recovery" ? "#7c3aed" : "#16a34a";
-            const bgColor = dayType === "match" ? "#f0f4ff" : dayType === "recovery" ? "#faf5ff" : "#f0fdf4";
-            return (
-              <div style={{ margin: "0 20px", background: bgColor, borderRadius: "var(--r-md)", padding: "18px 20px" }}>
-                <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: accentColor }}>{dayLabel}</p>
-                <p style={{ margin: 0, fontSize: "clamp(14px, 3.8vw, 16px)", fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{buildInsightParagraph(pillarStates)}</p>
-              </div>
-            );
-          })()}
-
-          {/* Today's Schedule */}
-          <div style={{ margin: "0 20px", borderRadius: "var(--r-lg)", background: "#fff", padding: "20px", boxShadow: "var(--shadow-card)" }}>
-            <p style={{ margin: "0 0 16px", fontSize: 17, fontWeight: 700, color: "#1a1c1c", textAlign: "center" }}>Today&apos;s schedule</p>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-              {schedule.map((s, i) => {
-                const isCur = i === schedCurrentIdx;
-                const nowMins = schedNow.getHours() * 60 + schedNow.getMinutes();
-                const toMinsLocal = (t: string) => t.split(":").reduce((a: number, b: string, j: number) => a + (j === 0 ? Number(b) * 60 : Number(b)), 0);
-                const isPast = !isCur && nowMins > toMinsLocal(s.time);
-                const hasDetail = !!SCHEDULE_DETAILS[s.title] || s.isDrill;
-                const dotColor = isPast ? "#d1d5db" : s.color;
-                return (
-                  <React.Fragment key={i}>
-                    {i > 0 && <div style={{ width: 2, height: 36, background: "#e5e7eb", flexShrink: 0 }} />}
-                    <div
-                      onClick={() => hasDetail && setSchedModalIdx(i)}
-                      style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, cursor: hasDetail ? "pointer" : "default" }}
-                    >
-                      {/* Dot */}
-                      <div style={{
-                        width: isCur ? 32 : 16,
-                        height: isCur ? 32 : 16,
-                        borderRadius: "50%",
-                        background: dotColor,
-                        flexShrink: 0,
-                        boxShadow: isCur ? `0 0 0 8px ${s.color}28` : "none",
-                      }} />
-                      {/* Info below dot */}
-                      <div style={{ textAlign: "center" }}>
-                        <p style={{ margin: 0, fontSize: isCur ? 22 : 15, fontWeight: isCur ? 800 : 600, color: isPast ? "#9ca3af" : isCur ? "#1a1c1c" : "#6b7480", lineHeight: 1.2 }}>{s.title}</p>
-                        <span style={{ fontSize: isCur ? 15 : 13, fontWeight: 500, color: isPast ? "#c4c7c7" : isCur ? "#8a9096" : "#b0b5ba" }}>{s.time}</span>
-                        {s.subtitle && isCur && <p style={{ margin: "4px 0 0", fontSize: 14, color: "#6b7480", lineHeight: 1.4 }}>{s.subtitle}</p>}
-                      </div>
-                    </div>
-                  </React.Fragment>
-                );
-              })}
-            </div>
-          </div>
-
-        </div>
-      )}
-
-      {/* ── Tab: Profile ─────────────────────────────────────────────────── */}
-      {activeTab === 'profile' && (
+      {/* ── Profile ──────────────────────────────────────────────────────── */}
         <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
 
           {/* Header */}
@@ -1483,99 +1373,6 @@ export default function ProfilePage() {
               <div style={{ background: "#fff", borderRadius: 18, padding: "20px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
                 <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a9096" }}>Current Insights</p>
                 <p style={{ margin: 0, fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{paragraph}</p>
-              </div>
-            );
-          })()}
-
-          {/* Day header card — removed */}
-          {false && (() => {
-            const statusScore = (s: PillarStatus) => s === "good" ? 3 : s === "ok" ? 2 : s === "low" ? 1 : 0;
-            const pillarEntries = [
-              { key: "recovery",  status: pillarStates.recovery.status },
-              { key: "nutrition", status: pillarStates.nutrition.status },
-              { key: "training",  status: pillarStates.training.status },
-              { key: "wellbeing", status: pillarStates.wellbeing.status },
-            ];
-            const sc = (e: { status: PillarStatus }) => statusScore(e.status);
-            const best  = pillarEntries.reduce((a, b) => sc(b) > sc(a) ? b : a);
-            const worst = pillarEntries.reduce((a, b) => sc(b) < sc(a) ? b : a);
-            const focusActions: Record<string, string> = {
-              recovery:  "Your recovery is the area to focus on right now — sleep is your biggest lever. Prioritise rest tonight and protect your sleep window.",
-              nutrition: "Your nutrition needs attention today. Make sure you're eating and hydrating well; your body performs how you fuel it.",
-              training:  "It's been a while since your last training session. Even a short drill block today keeps the momentum going.",
-              wellbeing: "Your energy or stress levels look off. Take stock of how you're feeling before your next session.",
-            };
-            let palaMessage = "";
-            if (sc(worst) < 2) {
-              palaMessage = focusActions[worst.key];
-              if (sc(best) >= 3 && best.key !== worst.key) palaMessage += ` Your ${best.key} is solid — keep that going.`;
-            } else if (sc(best) >= 3) {
-              palaMessage = `Your ${best.key} is your strongest pillar right now — that's a real asset. Keep the habits that are working and let them carry the rest.`;
-            } else {
-              palaMessage = "All your pillars are tracking around average. Consistency across recovery, nutrition, and training is what moves the needle.";
-            }
-            return (
-              <div style={{ background: "#fff", borderRadius: 18, padding: "20px 24px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", textAlign: "left" }}>
-                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: dayColor }}>Today</span>
-                <p style={{ margin: "4px 0 4px", fontSize: "clamp(28px, 7vw, 36px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{dayLabel}</p>
-                <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500 }}>{new Date().toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" })}</span>
-                <p style={{ margin: "14px 0 0", fontSize: 14, fontWeight: 500, color: "#5a6270", lineHeight: 1.6 }}>{palaMessage}</p>
-              </div>
-            );
-          })()}
-
-          {/* Daily tasks completion card — removed */}
-          {false && (() => {
-            const doneTitles = schedDone[todayKey] ?? [];
-            const total = schedule.length;
-            const done = schedule.filter(s => doneTitles.includes(s.title)).length;
-            if (total === 0) return null;
-            const pct = Math.round((done / total) * 100);
-            const barColor = pct === 100 ? "var(--c-green)" : pct >= 50 ? "var(--c-blue)" : "var(--c-orange)";
-            return (
-              <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-                <button
-                  onClick={() => setSchedOpen(o => !o)}
-                  style={{ width: "100%", padding: "18px 20px", display: "flex", alignItems: "center", gap: 10, background: "none", border: "none", cursor: "pointer", textAlign: "left" }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round" style={{ transform: schedOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c", flex: 1 }}>
-                    {pct === 100 ? "Today's Scheduled Tasks ✓" : `Today's Scheduled Tasks — ${done} of ${total} done`}
-                  </span>
-                </button>
-                <div style={{ padding: "0 20px", marginBottom: schedOpen ? 16 : 18 }}>
-                  <div style={{ height: 5, borderRadius: 3, background: "#f0f2f5", overflow: "hidden" }}>
-                    <div style={{ height: "100%", width: `${pct}%`, borderRadius: 3, background: barColor, transition: "width 0.4s" }} />
-                  </div>
-                </div>
-                {schedOpen && (
-                  <div style={{ padding: "0 20px 18px" }}>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                      {schedule.map((item, i) => {
-                        const isDone = doneTitles.includes(item.title);
-                        return (
-                          <div
-                            key={item.title}
-                            onClick={() => { setSchedModalIdx(i); setProfileDetailOpen(false); }}
-                            style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", cursor: "pointer", borderBottom: "1px solid #f4f4f6" }}
-                          >
-                            <button
-                              onClick={e => { e.stopPropagation(); toggleSchedDone(todayKey, item.title); }}
-                              style={{ width: 22, height: 22, borderRadius: 6, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s", cursor: "pointer" }}
-                            >
-                              {isDone && <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                            </button>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none" }}>{item.title}</p>
-                              {item.subtitle && <p style={{ margin: "2px 0 0", fontSize: 12, color: "#9aa0a6", fontWeight: 500 }}>{item.subtitle}</p>}
-                            </div>
-                            <span style={{ fontSize: 12, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
               </div>
             );
           })()}
@@ -2376,7 +2173,6 @@ export default function ProfilePage() {
           </div>
 
         </div>
-      )}
 
 
       {/* ── Match detail bottom sheet ─────────────────────────────────────── */}
@@ -2602,7 +2398,6 @@ export default function ProfilePage() {
         );
       })()}
 
-      </div>{/* end swipe wrapper */}
 
       {/* Panel file input */}
       <input
