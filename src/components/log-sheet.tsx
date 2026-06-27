@@ -530,9 +530,16 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
           if (!titles.includes("Wake up")) {
             sd[todayYMD] = [...titles, "Wake up"];
             localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
-            window.dispatchEvent(new Event("storage"));
           }
         } catch {}
+        try {
+          const hq = JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null");
+          const currentMl = hq?.date === todayYMD ? (hq.ml ?? 0) : 0;
+          if (currentMl < 500) {
+            localStorage.setItem("padelop:hydration-quick", JSON.stringify({ date: todayYMD, ml: 500 }));
+          }
+        } catch {}
+        window.dispatchEvent(new Event("storage"));
       }
       if (!isLastStep) {
         setTimeout(() => setMorningStep(s => s + 1), 180);
