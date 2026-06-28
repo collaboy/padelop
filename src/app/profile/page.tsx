@@ -1294,13 +1294,13 @@ export default function ProfilePage() {
                               <text fontSize="19" fontWeight="700" letterSpacing="2.5" style={{ fill: "rgba(255,255,255,0.7)", fontFamily: ff }}>
                                 <textPath href="#nextMatchTopArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
                               </text>
-                              <text x="100" y={timeLabel ? "97" : "108"} textAnchor="middle" dominantBaseline="middle"
+                              <text x="100" y={timeLabel ? "93" : "108"} textAnchor="middle" dominantBaseline="middle"
                                 fontSize={countdownLabel.length > 7 ? "18" : "22"} fontWeight="800" letterSpacing="0.06em"
                                 style={{ fill: "rgba(255,255,255,0.9)", fontFamily: ff }}>
                                 {countdownLabel}
                               </text>
                               {timeLabel && (
-                                <text x="100" y="128" textAnchor="middle" dominantBaseline="middle"
+                                <text x="100" y="123" textAnchor="middle" dominantBaseline="middle"
                                   fontSize="32" fontWeight="800" letterSpacing="-0.02em" style={{ fill: "#fff", fontFamily: ff }}>
                                   {timeLabel}
                                 </text>
