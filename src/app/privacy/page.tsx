@@ -55,7 +55,7 @@ export default function PrivacyPage() {
         </Section>
 
         <Section title="Your rights (GDPR)">
-          You have the right to access, correct, or delete your personal data at any time. You can delete your account and all data from Settings → Danger Zone. For any other requests, contact us at <a href="mailto:eddievd@outlook.com" style={link}>eddievd@outlook.com</a>. We will respond within 30 days.
+          You have the right to access, correct, or delete your personal data at any time. You can delete your account and all data from Settings → Danger Zone. For any other requests, contact us at <a href="mailto:tiborboris@proton.me" style={link}>tiborboris@proton.me</a>. We will respond within 30 days.
         </Section>
 
         <Section title="Children">
@@ -71,7 +71,7 @@ export default function PrivacyPage() {
         </Section>
 
         <Section title="Contact">
-          Questions? Email <a href="mailto:eddievd@outlook.com" style={link}>eddievd@outlook.com</a>.
+          Questions? Email <a href="mailto:tiborboris@proton.me" style={link}>tiborboris@proton.me</a>.
         </Section>
       </div>
     </div>

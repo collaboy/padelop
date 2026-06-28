@@ -56,7 +56,7 @@ export default function CookiesPage() {
         </Section>
 
         <Section title="Contact">
-          Questions? Email <a href="mailto:eddievd@outlook.com" style={link}>eddievd@outlook.com</a>.
+          Questions? Email <a href="mailto:tiborboris@proton.me" style={link}>tiborboris@proton.me</a>.
         </Section>
       </div>
     </div>
