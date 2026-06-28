@@ -1176,7 +1176,7 @@ export default function ProfilePage() {
           {/* Profile card v2 — ring style (comparison) */}
           {(() => {
             const ff2 = "-apple-system, BlinkMacSystemFont, sans-serif";
-            // Ring geometry: r=112, strokeWidth=36 → outer=130, inner=94
+            // Ring geometry: r=112, strokeWidth=42 → outer=133, inner=91
             // Bottom arc: full 180° half-circle (9→3 o'clock, 352px) to fit all 4 items
             const bottomItems = [
               profile.level    ? `LVL ${profile.level}` : null,
@@ -1186,10 +1186,10 @@ export default function ProfilePage() {
             ].filter(Boolean).join(" · ");
             return (
               <div style={{ display: "flex", justifyContent: "center", padding: "8px 0 4px" }}>
-                <svg viewBox="0 0 300 300" width="88%" style={{ maxWidth: 340, display: "block", overflow: "visible" }}>
+                <svg viewBox="0 0 300 300" width="96%" style={{ maxWidth: 400, display: "block", overflow: "visible" }}>
                   <defs>
                     <clipPath id="pc2_imgClip">
-                      <circle cx="150" cy="150" r="94" />
+                      <circle cx="150" cy="150" r="91" />
                     </clipPath>
                     {/* NAME: 10 o'clock → 2 o'clock, CW through 12 */}
                     <path id="pc2_nameArc" d="M 53,94 A 112,112 0 0,1 247,94" />
@@ -1198,15 +1198,15 @@ export default function ProfilePage() {
                   </defs>
 
                   {/* Black ring */}
-                  <circle cx="150" cy="150" r="112" fill="none" stroke="#111" strokeWidth="36" />
+                  <circle cx="150" cy="150" r="112" fill="none" stroke="#111" strokeWidth="42" />
 
                   {/* Inner fill + image */}
                   {profile.avatar ? (
-                    <image href={profile.avatar} x="56" y="56" width="188" height="188"
+                    <image href={profile.avatar} x="59" y="59" width="182" height="182"
                       clipPath="url(#pc2_imgClip)" preserveAspectRatio="xMidYMid slice" />
                   ) : (
                     <>
-                      <circle cx="150" cy="150" r="94" fill="#2653d4" />
+                      <circle cx="150" cy="150" r="91" fill="#2653d4" />
                       <text x="150" y="164" textAnchor="middle" fontSize="46" fontWeight="800"
                         fill="white" fontFamily={ff2}>{initials(profile.name)}</text>
                     </>
