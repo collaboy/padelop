@@ -1259,14 +1259,10 @@ export default function ProfilePage() {
                       {/* Left tile — Day type */}
                       <button
                         onClick={() => setDayTypeInfoOpen(o => !o)}
-                        style={{ flex: 1, aspectRatio: "1/1", background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: "16px 12px" }}
+                        style={{ flex: 1, aspectRatio: "1/1", background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between", padding: "16px 12px 20px" }}
                       >
-                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                          <span style={{ fontSize: "clamp(15px, 4.5vw, 19px)", fontWeight: 800, color: panelDayColor, lineHeight: 1.2, textAlign: "center" }}>{panelDayLabel}</span>
-                          <span style={{ fontSize: 11, fontWeight: 500, color: "var(--c-hint)" }}>
-                            {new Date().toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}
-                          </span>
-                        </div>
+                        <div />
+                        <span style={{ fontSize: "clamp(15px, 4.5vw, 19px)", fontWeight: 800, color: panelDayColor, lineHeight: 1.2, textAlign: "center" }}>{panelDayLabel}</span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={panelDayColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, transition: "transform 0.2s", transform: dayTypeInfoOpen ? "rotate(180deg)" : "none" }}><polyline points="6 9 12 15 18 9"/></svg>
                       </button>
 
