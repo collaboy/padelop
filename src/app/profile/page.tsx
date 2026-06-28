@@ -1268,9 +1268,47 @@ export default function ProfilePage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                   {total > 0 && (
                     <>
-                    {/* Three tiles */}
-                    <div style={{ display: "flex", gap: 10 }}>
-                      {/* Left tile — Day type (circle, SVG) */}
+                    {/* Circle scoreboard */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+
+                      {/* Next Match */}
+                      {(() => {
+                        const today = new Date().toISOString().slice(0, 10);
+                        const diffDays = nextMatch
+                          ? Math.round((new Date(nextMatch.date + "T12:00").getTime() - new Date(today + "T12:00").getTime()) / 86400000)
+                          : null;
+                        const mainNum = diffDays === null ? "—" : diffDays === 0 ? "NOW" : diffDays === 1 ? "1" : String(diffDays);
+                        const subLabel = diffDays === null ? "no match set" : diffDays === 0 ? "match day" : diffDays === 1 ? "day away" : "days away";
+                        const color = diffDays === null ? "#9aa0a6" : diffDays === 0 ? "#2653d4" : diffDays <= 3 ? "#d97706" : "#16a34a";
+                        const showSub = diffDays !== 0;
+                        return (
+                          <div style={{ aspectRatio: "1/1" }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs>
+                                <path id="nextMatchTopArc" d="M 30,76 A 76,76 0 0,1 170,76" />
+                              </defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                                <textPath href="#nextMatchTopArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
+                              </text>
+                              <text x="100" y={showSub ? "100" : "108"} textAnchor="middle" dominantBaseline="middle"
+                                fontSize={mainNum.length > 2 ? "28" : "46"} fontWeight="800"
+                                style={{ fill: color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                                {mainNum}
+                              </text>
+                              {showSub && (
+                                <text x="100" y="128" textAnchor="middle" dominantBaseline="middle"
+                                  fontSize="17" fontWeight="600"
+                                  style={{ fill: color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", opacity: 0.65 }}>
+                                  {subLabel}
+                                </text>
+                              )}
+                            </svg>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Day type (circle, SVG) */}
                       <button
                         onClick={() => { setDayTypeInfoOpen(o => !o); setPanelSchedOpen(false); setStreakPanelOpen(false); }}
                         style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}
