@@ -662,3 +662,124 @@ export function computeAllTimeScores(): Scores {
     return { overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65 };
   }
 }
+
+// ── Form Score ────────────────────────────────────────────────────────────────
+// 5-component rolling score (0–100, no artificial baseline).
+// Components that have no data return null and their weight is redistributed.
+
+export type FormScore = {
+  score: number;
+  components: {
+    body: number | null;        // 30% — 7-day recovery+wellbeing average
+    matchForm: number | null;   // 25% — last 5 match reviews (result + feeling + energy)
+    consistency: number | null; // 20% — check-in days + schedule completion last 7 days
+    activity: number | null;    // 15% — matches + training sessions last 14 days
+    hydration: number | null;   // 10% — today's ml vs 2L target (or recent litres logs)
+  };
+};
+
+export function computeFormScore(): FormScore {
+  const todayYMD = new Date().toISOString().slice(0, 10);
+  const c01 = (n: number) => Math.max(0, Math.min(1, n));
+
+  // Component 1: Body (30%)
+  // 7-day average of recovery + wellbeing pillars from score-history.
+  // These capture sleep, soreness, energy, stress, motivation.
+  // Scores are in [65,100], remapped to [0,100].
+  let body: number | null = null;
+  try {
+    const history = JSON.parse(localStorage.getItem("padelop:score-history") || "[]") as ScoreSnapshot[];
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 7);
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+    const recent = history.filter(s => s.date >= cutoffStr && s.date <= todayYMD);
+    if (recent.length >= 1) {
+      const avg = recent.reduce((sum, s) => sum + (s.recovery + s.wellbeing) / 2, 0) / recent.length;
+      body = Math.round(c01((avg - 65) / 35) * 100);
+    }
+  } catch {}
+
+  // Component 2: Match Form (25%)
+  // Last 5 match reviews. Result weighted 60%, feeling 20%, energy 20%.
+  let matchForm: number | null = null;
+  try {
+    const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]") as ReviewEntry[];
+    const last5 = reviews.slice(0, 5);
+    if (last5.length >= 1) {
+      const perReview = last5.map(r => {
+        const result  = r.result === "win" ? 1 : r.result === "draw" ? 0.5 : 0;
+        const feeling = r.feeling === "great" ? 1 : r.feeling === "ok" ? 0.5 : 0;
+        const energy  = r.energy === "high" ? 1 : r.energy === "mid" ? 0.5 : 0;
+        return (result * 0.6 + feeling * 0.2 + energy * 0.2) * 100;
+      });
+      matchForm = Math.round(perReview.reduce((a, b) => a + b, 0) / perReview.length);
+    }
+  } catch {}
+
+  // Component 3: Consistency (20%)
+  // Days with a score snapshot (logged check-in) + days with schedule tasks done, last 7 days.
+  let consistency: number | null = null;
+  try {
+    const history = JSON.parse(localStorage.getItem("padelop:score-history") || "[]") as ScoreSnapshot[];
+    const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
+    let loggedDays = 0, schedDays = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const ds = d.toISOString().slice(0, 10);
+      if (history.some(s => s.date === ds)) loggedDays++;
+      if (sd[ds]?.length > 0) schedDays++;
+    }
+    if (loggedDays > 0 || schedDays > 0) {
+      consistency = Math.round((loggedDays / 7 * 0.6 + schedDays / 7 * 0.4) * 100);
+    }
+  } catch {}
+
+  // Component 4: Activity (15%)
+  // Matches played (game-days) + training sessions logged, last 14 days.
+  // 4 activities in 14 days = 100%.
+  let activity: number | null = null;
+  try {
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 14);
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+    const gameDays = JSON.parse(localStorage.getItem("padelop:game-days") || "[]") as string[];
+    const matches = gameDays.filter(d => d >= cutoffStr && d <= todayYMD).length;
+    const tLogs = JSON.parse(localStorage.getItem("padelop:training-logs") || "[]") as { ts: string }[];
+    const sessions = tLogs.filter(t => {
+      const d = new Date(t.ts).toISOString().slice(0, 10);
+      return d >= cutoffStr && d <= todayYMD;
+    }).length;
+    const total = matches + sessions;
+    if (total > 0) activity = Math.round(c01(total / 4) * 100);
+  } catch {}
+
+  // Component 5: Hydration (10%)
+  // Prefer hydration-quick today (ml vs 2000ml target).
+  // Fall back to hydration-logs litres string (3-day average).
+  let hydration: number | null = null;
+  try {
+    const hq = JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null");
+    if (hq?.date === todayYMD && typeof hq.ml === "number" && hq.ml > 0) {
+      hydration = Math.round(c01(hq.ml / 2000) * 100);
+    } else {
+      const LITRE_SCORE: Record<string, number> = {
+        "<1L": 20, "1–1.5L": 40, "1.5–2L": 60, "2–2.5L": 80, "2.5–3L": 90, "3L+": 100,
+      };
+      const logs = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]") as HydrationEntry[];
+      const recent = logs.slice(0, 3);
+      if (recent.length > 0) {
+        hydration = Math.round(recent.reduce((sum, e) => sum + (LITRE_SCORE[e.litres] ?? 50), 0) / recent.length);
+      }
+    }
+  } catch {}
+
+  // Weighted average — null components redistribute their weight to present ones
+  const WEIGHTS: Record<string, number> = {
+    body: 0.30, matchForm: 0.25, consistency: 0.20, activity: 0.15, hydration: 0.10,
+  };
+  const components = { body, matchForm, consistency, activity, hydration };
+  let totalWeight = 0, weightedSum = 0;
+  for (const [k, v] of Object.entries(components)) {
+    if (v !== null) { const w = WEIGHTS[k]; weightedSum += v * w; totalWeight += w; }
+  }
+  const score = totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 0;
+  return { score, components };
+}

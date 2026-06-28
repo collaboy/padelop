@@ -12,9 +12,10 @@ import { analyzeMeals, compareMealsToSchedule, foodGrade, loadFoodHistory, type 
 import {
   computeScores, loadScoringData, saveScoreSnapshot, loadScoreHistory,
   computePillarStates, computeMatchReadiness, loadMorningLog, improveTips, buildInsightParagraph,
+  computeFormScore,
   type MatchReadinessResult,
   type Scores, type ScoreSnapshot, type ReviewEntry, type PillarStates, type PillarStatus,
-  type HydrationEntry, type NutritionEntry, type HabitsEntry,
+  type HydrationEntry, type NutritionEntry, type HabitsEntry, type FormScore,
 } from "@/lib/scoring";
 import { getScheduleData, getDayType, SCHEDULE_DETAILS, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag, type DayType } from "@/lib/schedule-data";
 
@@ -528,6 +529,9 @@ export default function ProfilePage() {
   const [panelSchedOpen, setPanelSchedOpen] = useState(false);
   const [dayTypeInfoOpen, setDayTypeInfoOpen] = useState(false);
   const [streakPanelOpen, setStreakPanelOpen] = useState(false);
+  const [formScore, setFormScore] = useState<FormScore | null>(null);
+  const [formScorePanelOpen, setFormScorePanelOpen] = useState(false);
+  const [hydrationPanelOpen, setHydrationPanelOpen] = useState(false);
   const [nextMatchPanelOpen, setNextMatchPanelOpen] = useState(false);
   const [nextMatchInfoMode, setNextMatchInfoMode] = useState<'edit'|'add'|null>(null);
   const [nmMatchForm, setNmMatchForm] = useState<MatchForm>(EMPTY_FORM);
@@ -745,6 +749,7 @@ export default function ProfilePage() {
     });
     saveScoreSnapshot(s);
     saveScoreSnapshotToDb(new Date().toISOString().slice(0, 10), s);
+    setFormScore(computeFormScore());
     const hist = loadScoreHistory();
     setHistory(hist);
     const habits: { date: string }[] = JSON.parse(localStorage.getItem("padelop:habits") || "[]");
@@ -1596,8 +1601,8 @@ export default function ProfilePage() {
                         ];
                         const stier = [...STIERS].reverse().find(t => streak >= t.min) ?? STIERS[0];
                         return (
-                          <button onClick={() => { setStreakPanelOpen(o => !o); setDayTypeInfoOpen(false); setPanelSchedOpen(false); setNextMatchPanelOpen(false); }}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", maxWidth: "calc((100% - 20px) / 3)" }}>
+                          <button onClick={() => { setStreakPanelOpen(o => !o); setDayTypeInfoOpen(false); setPanelSchedOpen(false); setNextMatchPanelOpen(false); setFormScorePanelOpen(false); setHydrationPanelOpen(false); }}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1613,6 +1618,76 @@ export default function ProfilePage() {
                                 style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", opacity: 0.65 } as React.CSSProperties}>
                                 day streak
                               </text>
+                            </svg>
+                          </button>
+                        );
+                      })()}
+
+                      {/* Form Score */}
+                      {(() => {
+                        const fs = formScore;
+                        const score = fs?.score ?? null;
+                        const color = score === null ? "#9aa0a6" : score >= 70 ? "#16a34a" : score >= 50 ? "#d97706" : "#ef4444";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        return (
+                          <button onClick={() => { setFormScorePanelOpen(o => !o); setStreakPanelOpen(false); setDayTypeInfoOpen(false); setPanelSchedOpen(false); setNextMatchPanelOpen(false); setHydrationPanelOpen(false); }}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="formScoreArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#formScoreArc" startOffset="50%" textAnchor="middle">MY FORM</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
+                                fontSize={score !== null ? "46" : "36"} fontWeight="800"
+                                style={{ fill: color, fontFamily: ff }}>
+                                {score !== null ? score : "—"}
+                              </text>
+                              <text x="100" y="152" textAnchor="middle" fontSize="17" fontWeight="600"
+                                style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
+                                {score === null ? "no data" : score >= 70 ? "on track" : score >= 50 ? "building" : "needs work"}
+                              </text>
+                              <circle cx="100" cy="188" r="4" fill={color} opacity={formScorePanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                            </svg>
+                          </button>
+                        );
+                      })()}
+
+                      {/* Hydration */}
+                      {(() => {
+                        const todayYMD2 = new Date().toISOString().slice(0, 10);
+                        const hq = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null"); } catch { return null; } })();
+                        const hLogs: HydrationEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch { return []; } })();
+                        const hasQuick = hq?.date === todayYMD2 && typeof hq.ml === "number" && hq.ml > 0;
+                        const displayMl = hasQuick ? hq.ml : null;
+                        const displayLitres = !hasQuick && hLogs.length > 0 && new Date(hLogs[0].ts).toISOString().slice(0, 10) === todayYMD2 ? hLogs[0].litres : null;
+                        const hasData = displayMl !== null || displayLitres !== null;
+                        const color = "#0ea5e9";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        const pct = displayMl !== null ? Math.min(displayMl / 2000, 1) : null;
+                        const centerText = displayMl !== null
+                          ? (displayMl >= 1000 ? `${(displayMl / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${displayMl}ml`)
+                          : displayLitres ?? "—";
+                        const subText = pct !== null ? `${Math.round(pct * 100)}% of 2L` : hasData ? "today" : "not logged";
+                        return (
+                          <button onClick={() => { setHydrationPanelOpen(o => !o); setStreakPanelOpen(false); setFormScorePanelOpen(false); setDayTypeInfoOpen(false); setPanelSchedOpen(false); setNextMatchPanelOpen(false); }}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="hydrationArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#hydrationArc" startOffset="50%" textAnchor="middle">HYDRATION</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
+                                fontSize={centerText.length > 4 ? "28" : "38"} fontWeight="800"
+                                style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff }}>
+                                {centerText}
+                              </text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600"
+                                style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
+                                {subText}
+                              </text>
+                              <circle cx="100" cy="188" r="4" fill={color} opacity={hydrationPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
                             </svg>
                           </button>
                         );
@@ -1651,6 +1726,89 @@ export default function ProfilePage() {
                                 </div>
                               );
                             })}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Form Score panel */}
+                    {formScorePanelOpen && formScore && (() => {
+                      const { score, components } = formScore;
+                      const color = score >= 70 ? "#16a34a" : score >= 50 ? "#d97706" : "#ef4444";
+                      const rows: { label: string; value: number | null; weight: string }[] = [
+                        { label: "Body",        value: components.body,        weight: "30%" },
+                        { label: "Match form",  value: components.matchForm,   weight: "25%" },
+                        { label: "Consistency", value: components.consistency, weight: "20%" },
+                        { label: "Activity",    value: components.activity,    weight: "15%" },
+                        { label: "Hydration",   value: components.hydration,   weight: "10%" },
+                      ];
+                      const bar = (v: number | null) => {
+                        if (v === null) return <span style={{ fontSize: 12, color: "#b0b8c1" }}>no data</span>;
+                        const c = v >= 70 ? "#16a34a" : v >= 50 ? "#d97706" : "#ef4444";
+                        return (
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, flex: 1 }}>
+                            <div style={{ flex: 1, height: 5, borderRadius: 99, background: "#f0f0f0" }}>
+                              <div style={{ width: `${v}%`, height: "100%", borderRadius: 99, background: c, transition: "width 0.4s" }} />
+                            </div>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: c, minWidth: 26, textAlign: "right" }}>{v}</span>
+                          </div>
+                        );
+                      };
+                      return (
+                        <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                          <div style={{ padding: "18px 18px 16px" }}>
+                            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14 }}>
+                              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>My Form</span>
+                              <span style={{ fontSize: 32, fontWeight: 800, color, lineHeight: 1 }}>{score}</span>
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                              {rows.map(r => (
+                                <div key={r.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                  <span style={{ fontSize: 13, color: "#6b7480", fontWeight: 500, minWidth: 80 }}>{r.label}</span>
+                                  {bar(r.value)}
+                                  <span style={{ fontSize: 10, color: "#c0c7d0", fontWeight: 500, minWidth: 28, textAlign: "right" }}>{r.weight}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Hydration panel */}
+                    {hydrationPanelOpen && (() => {
+                      const todayYMD3 = new Date().toISOString().slice(0, 10);
+                      const hq = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null"); } catch { return null; } })();
+                      const hLogs: HydrationEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch { return []; } })();
+                      const hasQuick = hq?.date === todayYMD3 && typeof hq.ml === "number" && hq.ml > 0;
+                      const ml: number | null = hasQuick ? hq.ml : null;
+                      const todayLog = hLogs.find(e => new Date(e.ts).toISOString().slice(0, 10) === todayYMD3) ?? null;
+                      const target = 2000;
+                      const pct = ml !== null ? Math.min(ml / target, 1) : null;
+                      const displayMl = ml !== null ? (ml >= 1000 ? `${(ml / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${ml}ml`) : todayLog?.litres ?? null;
+                      return (
+                        <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                          <div style={{ padding: "18px 18px 16px" }}>
+                            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
+                              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Hydration today</span>
+                              <span style={{ fontSize: 28, fontWeight: 800, color: "#0ea5e9", lineHeight: 1 }}>{displayMl ?? "—"}</span>
+                            </div>
+                            {pct !== null && (
+                              <>
+                                <div style={{ height: 7, borderRadius: 99, background: "#f0f0f0", marginBottom: 6 }}>
+                                  <div style={{ width: `${Math.round(pct * 100)}%`, height: "100%", borderRadius: 99, background: pct >= 1 ? "#16a34a" : "#0ea5e9", transition: "width 0.4s" }} />
+                                </div>
+                                <span style={{ fontSize: 12, color: "#9aa0a6", fontWeight: 500 }}>{Math.round(pct * 100)}% of {target / 1000}L daily target</span>
+                              </>
+                            )}
+                            {todayLog?.quality && (
+                              <div style={{ marginTop: 10 }}>
+                                <span style={{ fontSize: 12, color: "#6b7480" }}>Feeling: <strong style={{ color: todayLog.quality === "great" ? "#16a34a" : todayLog.quality === "bad" ? "#ef4444" : "#d97706" }}>{todayLog.quality}</strong></span>
+                              </div>
+                            )}
+                            {!displayMl && !todayLog && (
+                              <p style={{ margin: 0, fontSize: 13, color: "#9aa0a6" }}>No hydration logged today. Log from the home screen or check-in.</p>
+                            )}
                           </div>
                         </div>
                       );
