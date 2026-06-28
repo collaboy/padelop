@@ -1259,7 +1259,7 @@ export default function ProfilePage() {
                       {/* Left tile — Day type */}
                       <button
                         onClick={() => setDayTypeInfoOpen(o => !o)}
-                        style={{ flex: 1, aspectRatio: "1/1", background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between", padding: "16px 12px 20px" }}
+                        style={{ flex: 1, aspectRatio: "1/1", background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, padding: "16px 12px" }}
                       >
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
                           <span style={{ fontSize: "clamp(15px, 4.5vw, 19px)", fontWeight: 800, color: panelDayColor, lineHeight: 1.2, textAlign: "center" }}>{panelDayLabel}</span>
