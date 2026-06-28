@@ -2,7 +2,6 @@
 
 import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { downloadSnapshot, importData } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/client";
 
 async function subscribeAndSave() {
@@ -42,9 +41,7 @@ type NotifStatus = "unsupported" | "denied" | "enabled" | "off";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const importRef = useRef<HTMLInputElement>(null);
-  const [importDone, setImportDone] = useState(false);
-  const [notifStatus, setNotifStatus] = useState<NotifStatus>("off");
+  const[notifStatus, setNotifStatus] = useState<NotifStatus>("off");
   const [notifLoading, setNotifLoading] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [userEmail, setUserEmail] = useState("");
@@ -148,21 +145,6 @@ export default function SettingsPage() {
     denied:      "Blocked in system settings",
     unsupported: "Open from home screen (iOS) to enable",
   };
-
-  const dataItems = [
-    {
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
-      label: "Export my data",
-      sub: "Download a backup of all your data",
-      action: () => downloadSnapshot(),
-    },
-    {
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
-      label: importDone ? "Data restored ✓" : "Import backup",
-      sub: "Restore from a previous export",
-      action: () => importRef.current?.click(),
-    },
-  ];
 
   return (
     <div className="px-5 pt-6 pb-24 max-w-lg mx-auto flex flex-col gap-6">
@@ -305,51 +287,6 @@ export default function SettingsPage() {
             </button>
           ))}
         </div>
-      </section>
-
-      {/* Data */}
-      <section>
-        <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px" }}>Your Data</p>
-        <div style={{ background: "#fff", borderRadius: "var(--r-md)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
-          {dataItems.map(({ icon, label, sub, action }, i) => (
-            <button
-              key={label}
-              onClick={action}
-              style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", borderTop: i > 0 ? "1px solid #f4f4f6" : "none", cursor: "pointer" }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <span style={{ color: importDone && label.includes("Import") ? "var(--c-green)" : "var(--c-text-dim)" }}>{icon}</span>
-                <div style={{ textAlign: "left" }}>
-                  <span className="t-ui" style={{ color: importDone && label.includes("Import") ? "var(--c-green)" : "var(--c-text)", display: "block" }}>{label}</span>
-                  {sub && <span className="t-caption" style={{ color: "var(--c-hint)" }}>{sub}</span>}
-                </div>
-              </div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-          ))}
-        </div>
-        <input
-          ref={importRef}
-          type="file"
-          accept="application/json,.json"
-          className="hidden"
-          onChange={e => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = () => {
-              try {
-                importData(JSON.parse(reader.result as string));
-                setImportDone(true);
-                window.location.reload();
-              } catch {
-                alert("Couldn't read that file. Make sure it's a padla backup.");
-              }
-            };
-            reader.readAsText(file);
-            e.target.value = "";
-          }}
-        />
       </section>
 
       {/* Danger zone */}
