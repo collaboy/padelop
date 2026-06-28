@@ -533,6 +533,9 @@ export default function ProfilePage() {
   const streakPanelOpen     = openPanel === 'streak';
   const formScorePanelOpen  = openPanel === 'formScore';
   const hydrationPanelOpen  = openPanel === 'hydration';
+  const insightsPanelOpen   = openPanel === 'insights';
+  const gearPanelOpen       = openPanel === 'gear';
+  const matchesPanelOpen    = openPanel === 'matches';
   const togglePanel = (name: string) => setOpenPanel(p => p === name ? null : name);
   const [formScore, setFormScore] = useState<FormScore | null>(null);
   const [hydrationMl, setHydrationMl] = useState(0);
@@ -1866,6 +1869,311 @@ export default function ProfilePage() {
                         </div>
                       );
                     })()}
+
+                    {/* Row 3: Insights · Gear · Matches */}
+                    <div style={{ display: "flex", gap: 10 }}>
+                      {/* Insights circle */}
+                      {(() => {
+                        const color = "#f59e0b";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        const wins   = reviews.filter(r => r.result === "win").length;
+                        const losses = reviews.filter(r => r.result === "loss").length;
+                        const count  = [wins + losses > 0, reviews.length >= 3, streak > 0, partnerCount >= 2, trainingSessions.length > 0].filter(Boolean).length;
+                        return (
+                          <button onClick={() => togglePanel('insights')}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(insightsPanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="insightsArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#insightsArc" startOffset="50%" textAnchor="middle">INSIGHTS</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{count > 0 ? count : "—"}</text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>featured</text>
+                              <circle cx="100" cy="188" r="4" fill={color} opacity={insightsPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                            </svg>
+                          </button>
+                        );
+                      })()}
+
+                      {/* Gear circle */}
+                      {(() => {
+                        const color = "#7c3aed";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        const label = racketName ? racketName.split(" ").slice(0, 1).join("") : "—";
+                        const sub   = racketName ? "my racket" : "no gear";
+                        return (
+                          <button onClick={() => togglePanel('gear')}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(gearPanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="gearArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#gearArc" startOffset="50%" textAnchor="middle">GEAR</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize={label.length > 5 ? "22" : "36"} fontWeight="800" style={{ fill: color, fontFamily: ff }}>{label}</text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
+                              <circle cx="100" cy="188" r="4" fill={color} opacity={gearPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                            </svg>
+                          </button>
+                        );
+                      })()}
+
+                      {/* Matches circle */}
+                      {(() => {
+                        const color = "#2653d4";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        const wins   = reviews.filter(r => r.result === "win").length;
+                        const losses = reviews.filter(r => r.result === "loss").length;
+                        const total  = wins + losses;
+                        const centerText = reviews.length > 0 ? String(reviews.length) : "—";
+                        const sub = total > 0 ? `${Math.round((wins / total) * 100)}% wins` : "no matches";
+                        return (
+                          <button onClick={() => togglePanel('matches')}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(matchesPanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="matchesArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#matchesArc" startOffset="50%" textAnchor="middle">MATCHES</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{centerText}</text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
+                              <circle cx="100" cy="188" r="4" fill={color} opacity={matchesPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                            </svg>
+                          </button>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Insights panel */}
+                    {insightsPanelOpen && (() => {
+                      const wins   = reviews.filter(r => r.result === "win").length;
+                      const losses = reviews.filter(r => r.result === "loss").length;
+                      const last5  = [...reviews].sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 5);
+                      const last5Wins = last5.filter(r => r.result === "win").length;
+                      const topWellDone = (() => {
+                        const counts: Record<string, number> = {};
+                        reviews.flatMap(r => r.wellDone ?? []).forEach(t => { counts[t] = (counts[t] ?? 0) + 1; });
+                        return Object.entries(counts).sort((a, b) => b[1] - a[1])[0] ?? null;
+                      })();
+                      const topImprove = (() => {
+                        const counts: Record<string, number> = {};
+                        reviews.flatMap(r => r.improved ?? []).forEach(t => { counts[t] = (counts[t] ?? 0) + 1; });
+                        return Object.entries(counts).sort((a, b) => b[1] - a[1])[0] ?? null;
+                      })();
+                      const pool: { label: string; body: string }[] = [
+                        reviews.length >= 3 && wins + losses > 0
+                          ? { label: "Win rate", body: `You've won ${wins} out of ${wins + losses} recorded matches — a ${Math.round((wins / (wins + losses)) * 100)}% win rate. ${wins > losses ? "Keep it going." : "Every loss is data. Use it."}` }
+                          : null,
+                        last5.length >= 3
+                          ? { label: "Recent form", body: `In your last ${last5.length} matches you won ${last5Wins}. ${last5Wins >= 3 ? "Strong run — confidence should be high going into your next game." : last5Wins === 0 ? "Tough stretch. Look back at what you improved on and build from there." : "Mixed results — small consistency gains will tip the balance."}` }
+                          : null,
+                        topWellDone
+                          ? { label: "Your strength", body: `"${topWellDone[0]}" is the thing you've done well in most often — flagged across ${topWellDone[1]} match${topWellDone[1] > 1 ? "es" : ""}. That's your weapon. Keep sharpening it.` }
+                          : null,
+                        topImprove
+                          ? { label: "Your focus area", body: `"${topImprove[0]}" is the area you've logged as needing work most — ${topImprove[1]} time${topImprove[1] > 1 ? "s" : ""}. Targeted practice on this one will move your game the fastest.` }
+                          : null,
+                        streak > 0
+                          ? { label: "Streak", body: streak >= 7 ? `${streak} days and counting. A week-plus streak means habits are forming — that's where real gains live.` : streak >= 3 ? `${streak}-day streak. You're building momentum. Don't break the chain.` : `${streak} day${streak > 1 ? "s" : ""} in a row. Small start, big potential — log tomorrow and keep it going.` }
+                          : null,
+                        partnerCount >= 2
+                          ? { label: "Partners", body: `You've played with ${partnerCount} different partners. Variety in partners exposes you to different styles and speeds up your adaptability on court.` }
+                          : null,
+                        trainingSessions.length > 0
+                          ? { label: "Training", body: `${trainingSessions.length} training session${trainingSessions.length > 1 ? "s" : ""} logged so far. Players who train consistently between matches typically improve 2–3× faster than those who only play.` }
+                          : null,
+                        thisWeekAvg !== null && lastWeekAvg !== null
+                          ? (() => {
+                              const band = (n: number) => n >= 85 ? "Strong" : n >= 75 ? "Good" : n >= 65 ? "Steady" : "Low";
+                              const thisLabel = band(thisWeekAvg);
+                              const lastLabel = band(lastWeekAvg);
+                              const avgPillar = (snaps: ScoreSnapshot[], key: keyof ScoreSnapshot) => snaps.length ? snaps.reduce((a, s) => a + (s[key] as number), 0) / snaps.length : 0;
+                              const pillars = ["recovery", "nutrition", "training", "wellbeing"] as const;
+                              const pillarNames: Record<string, string> = { recovery: "Recovery", nutrition: "Nutrition", training: "Training", wellbeing: "Wellbeing" };
+                              const deltas = pillars.map(p => ({ p, delta: avgPillar(thisWeekSnaps, p) - avgPillar(lastWeekSnaps, p) }));
+                              const bestGain = deltas.filter(d => d.delta > 2).reduce((a, b) => b.delta > a.delta ? b : a, { p: "", delta: -Infinity });
+                              const worstDrop = deltas.filter(d => d.delta < -2).reduce((a, b) => b.delta < a.delta ? b : a, { p: "", delta: Infinity });
+                              const body = thisLabel === lastLabel
+                                ? thisWeekAvg > lastWeekAvg
+                                  ? `Still ${thisLabel} — you improved slightly this week${bestGain.p ? `, with ${pillarNames[bestGain.p].toLowerCase()} leading the way` : ""}. You're close to breaking into ${band(thisWeekAvg + 5)} territory.`
+                                  : thisWeekAvg < lastWeekAvg
+                                    ? `Still ${thisLabel}, but your scores dipped slightly this week${worstDrop.p ? ` — ${pillarNames[worstDrop.p].toLowerCase()} was the weakest area` : ""}. Nothing alarming, but worth keeping an eye on.`
+                                    : `Exactly the same as last week — your routine is holding steady. ${thisLabel === "Strong" ? "That's a great place to be." : "Improving your sleep or hydration consistency is usually the quickest way to move forward."}`
+                                : thisWeekAvg > lastWeekAvg
+                                  ? `You moved from ${lastLabel} to ${thisLabel} this week${bestGain.p ? ` — ${pillarNames[bestGain.p].toLowerCase()} improved the most` : ""}. That's real progress.`
+                                  : `Your scores dropped from ${lastLabel} to ${thisLabel} this week${worstDrop.p ? ` — ${pillarNames[worstDrop.p].toLowerCase()} took the biggest hit` : ""}. A dip happens; focus on getting your sleep and recovery back on track.`;
+                              return { label: "Week on week", body };
+                            })()
+                          : null,
+                        tournamentCount > 0
+                          ? { label: "Tournaments", body: `You've entered ${tournamentCount} tournament${tournamentCount > 1 ? "s" : ""}. Competitive pressure is one of the best accelerators — the nerves, the intensity, the opponents. Keep entering.` }
+                          : null,
+                      ].filter((x): x is { label: string; body: string } => x !== null);
+                      if (pool.length === 0) return <div style={{ borderRadius: 18, background: "#fff", padding: "20px 16px", textAlign: "center", color: "#9aa0a6", fontSize: 14 }}>No insights yet — log some matches and check-ins to unlock.</div>;
+                      const idx = featuredIdx % pool.length;
+                      const insight = pool[idx];
+                      return (
+                        <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                          <p style={{ margin: 0, padding: "14px 16px 0", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--c-label)" }}>Featured Insights</p>
+                          <button
+                            onClick={() => setFeaturedIdx(i => (i + 1) % pool.length)}
+                            style={{ width: "100%", background: "none", border: "none", padding: "12px 16px 16px", cursor: "pointer", textAlign: "left" }}
+                          >
+                            <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-blue)" }}>{insight.label}</p>
+                            <p style={{ margin: "0 0 12px", fontSize: 16, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{insight.body}</p>
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                              <div style={{ display: "flex", gap: 4 }}>
+                                {pool.map((_, i) => (
+                                  <div key={i} style={{ width: i === idx ? 14 : 5, height: 5, borderRadius: 3, background: i === idx ? "var(--c-blue)" : "#e2e5ea", transition: "width 0.2s" }} />
+                                ))}
+                              </div>
+                              <span style={{ fontSize: 12, color: "var(--c-hint)", fontWeight: 500 }}>Tap for next</span>
+                            </div>
+                          </button>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Gear panel */}
+                    {gearPanelOpen && (
+                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px 0" }}>
+                          <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>My Gear</p>
+                          <button onClick={() => setGearEditOpen(o => !o)} className="t-caption" style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 500, color: "var(--c-forest)" }}>{gearEditOpen ? "Done" : "Edit"}</button>
+                        </div>
+                        <div ref={racketRowRef} style={{ display: "flex", alignItems: "stretch", padding: 12, gap: 14 }}>
+                          <div style={{ position: "relative", flexShrink: 0, width: racketSlotSize, height: racketSlotSize }}>
+                            <label htmlFor="racket-img-upload-panel" style={{ cursor: "pointer", display: "block", width: "100%", height: "100%" }}>
+                              <div style={{ width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                {racketImage ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img src={racketImage} alt="Racket" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                ) : (
+                                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c4c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                )}
+                              </div>
+                            </label>
+                            <input id="racket-img-upload-panel" type="file" accept="image/*" style={{ display: "none" }} onChange={handleRacketImage} />
+                          </div>
+                          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 6 }}>
+                            {gearEditOpen ? (
+                              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                <input placeholder="Racket name" value={racketName} onChange={e => { setRacketName(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketName = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
+                                <input placeholder="Racket type (e.g. Control)" value={racketType} onChange={e => { setRacketType(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketType = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
+                                <input placeholder="Using since (e.g. Jan 2024)" value={racketSince} onChange={e => { setRacketSince(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketSince = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
+                              </div>
+                            ) : (
+                              <>
+                                <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1a1c1c" }}>{racketName || <span style={{ color: "#b0b5ba" }}>No racket added</span>}</p>
+                                {racketType && <p style={{ margin: 0, fontSize: 13, color: "#6b7480" }}>{racketType}</p>}
+                                {racketSince && <p style={{ margin: 0, fontSize: 12, color: "#9aa0a6" }}>Since {racketSince}</p>}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Matches panel */}
+                    {matchesPanelOpen && (
+                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
+                        <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>Matches</p>
+                        <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                          <button
+                            onClick={() => { setMatchAddOpen(o => !o); setMatchExpandedIdx(null); if (!matchAddOpen) setMatchAddForm(EMPTY_FORM); }}
+                            style={{ background: matchAddOpen ? "#e8edf8" : "#2653d4", border: "none", borderRadius: 20, padding: "7px 16px", fontSize: 14, fontWeight: 700, color: matchAddOpen ? "#2653d4" : "#fff", cursor: "pointer" }}
+                          >
+                            {matchAddOpen ? "Cancel" : "+ Add"}
+                          </button>
+                        </div>
+                        {matchAddOpen && (
+                          <div style={{ background: "#f8f9fa", borderRadius: 20, padding: "18px 16px" }}>
+                            <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "#1a1c1c" }}>New match</p>
+                            <MatchFormWidget form={matchAddForm} onChange={setMatchAddForm} onSave={matchSaveAdd} saveLabel="Save match" saveColor="#16a34a" />
+                          </div>
+                        )}
+                        {upcomingMatches.length > 0 ? (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                            <p style={{ margin: "4px 4px 0", fontSize: 12, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em" }}>UPCOMING</p>
+                            {upcomingMatches.map((m, idx) => {
+                              const expanded = matchExpandedIdx === idx;
+                              const form = matchEditForms[idx] ?? EMPTY_FORM;
+                              const players = [m.player_1, m.player_2, m.player_3, m.player_4].filter(Boolean);
+                              const countdown = fmtCountdown(m.date, m.time);
+                              const isToday2 = countdown === "Today";
+                              return (
+                                <div key={idx} style={{ background: "#f8f9fa", borderRadius: 18, overflow: "hidden" }}>
+                                  <button onClick={() => { setMatchExpandedIdx(expanded ? null : idx); setMatchAddOpen(false); }} style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "16px", display: "flex", alignItems: "center", gap: 12, textAlign: "left" }}>
+                                    <div style={{ flexShrink: 0, width: 48, textAlign: "center", background: isToday2 ? "#eef2ff" : "#fff", borderRadius: 12, padding: "8px 4px" }}>
+                                      <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: isToday2 ? "#2653d4" : "#8a9096", lineHeight: 1 }}>{new Date(m.date + "T12:00").toLocaleDateString("en-GB", { month: "short" }).toUpperCase()}</p>
+                                      <p style={{ margin: "2px 0 0", fontSize: 22, fontWeight: 900, color: isToday2 ? "#2653d4" : "#1a1c1c", lineHeight: 1 }}>{new Date(m.date + "T12:00").getDate()}</p>
+                                      <p style={{ margin: "2px 0 0", fontSize: 10, fontWeight: 600, color: isToday2 ? "#2653d4" : "#8a9096", lineHeight: 1 }}>{new Date(m.date + "T12:00").toLocaleDateString("en-GB", { weekday: "short" }).toUpperCase()}</p>
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                                        <span style={{ fontSize: 15, fontWeight: 800, color: "#1a1c1c" }}>{m.time || "—"}</span>
+                                        {m.club && <span style={{ fontSize: 13, color: "#8a9096", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>· {m.club}{m.court ? ` #${m.court}` : ""}</span>}
+                                      </div>
+                                      {players.length > 0 && <p style={{ margin: 0, fontSize: 12, color: "#8a9096", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{players.join(", ")}</p>}
+                                      <span style={{ display: "inline-block", marginTop: 5, fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: isToday2 ? "#eef2ff" : "#f4f6f8", color: isToday2 ? "#2653d4" : "#8a9096" }}>{countdown}</span>
+                                    </div>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: expanded ? "rotate(180deg)" : "rotate(0deg)" }}><path d="M6 9l6 6 6-6"/></svg>
+                                  </button>
+                                  {expanded && (
+                                    <div style={{ padding: "0 16px 16px", borderTop: "1px solid #f0f2f5" }}>
+                                      <MatchFormWidget form={form} onChange={f => setMatchEditForms(prev => ({ ...prev, [idx]: f }))} onSave={() => matchSaveEdit(idx)} onDelete={() => matchDelete(idx)} saveLabel="Save changes" saveColor="#2653d4" />
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : !matchAddOpen && (
+                          <div style={{ background: "#f8f9fa", borderRadius: 20, padding: "24px 20px", textAlign: "center" }}>
+                            <p style={{ margin: "0 0 6px", fontSize: 15, fontWeight: 800, color: "#1a1c1c" }}>No upcoming matches</p>
+                            <p style={{ margin: "0 0 14px", fontSize: 13, color: "#8a9096" }}>Schedule your next game</p>
+                            <button onClick={() => setMatchAddOpen(true)} style={{ padding: "10px 24px", borderRadius: 999, background: "#2653d4", border: "none", fontSize: 14, fontWeight: 700, color: "#fff", cursor: "pointer" }}>+ Add a match</button>
+                          </div>
+                        )}
+                        {reviews.length > 0 && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>
+                            <p style={{ margin: "4px 4px 0", fontSize: 12, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em" }}>HISTORY</p>
+                            {[...reviews].sort((a, b) => b.ts.localeCompare(a.ts)).map((r, i) => {
+                              const resultColor = r.result === "win" ? "#16a34a" : r.result === "loss" ? "#ef4444" : "#8a9096";
+                              const resultBg   = r.result === "win" ? "#f0fdf4" : r.result === "loss" ? "#fff5f5" : "#f4f6f8";
+                              const opponentNames = typeof (r as ReviewEntry & { opponentNames?: string }).opponentNames === "string" && (r as ReviewEntry & { opponentNames?: string }).opponentNames ? (r as ReviewEntry & { opponentNames?: string }).opponentNames : null;
+                              return (
+                                <button key={i} onClick={() => setSelectedReview(r)} style={{ width: "100%", background: "#f8f9fa", borderRadius: 16, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12, border: "none", cursor: "pointer", textAlign: "left" }}>
+                                  <div style={{ flexShrink: 0, width: 44, textAlign: "center", background: "#fff", borderRadius: 11, padding: "7px 4px" }}>
+                                    <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: "#8a9096" }}>{new Date(r.ts.slice(0, 10) + "T12:00").toLocaleDateString("en-GB", { month: "short" }).toUpperCase()}</p>
+                                    <p style={{ margin: "1px 0 0", fontSize: 20, fontWeight: 900, color: "#1a1c1c", lineHeight: 1 }}>{new Date(r.ts.slice(0, 10) + "T12:00").getDate()}</p>
+                                  </div>
+                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                    {opponentNames ? (
+                                      <p style={{ margin: "0 0 2px", fontSize: 14, fontWeight: 700, color: "#1a1c1c", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>vs {opponentNames}</p>
+                                    ) : (
+                                      r.feeling && <p style={{ margin: "0 0 2px", fontSize: 13, color: "#8a9096" }}>{r.feeling}</p>
+                                    )}
+                                    {(r.wellDone?.length > 0 || r.improved?.length > 0) && (
+                                      <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
+                                        {r.wellDone?.slice(0, 2).map(t => <span key={t} style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 999, background: "#f0fdf4", color: "#16a34a" }}>{t}</span>)}
+                                        {r.improved?.slice(0, 2).map(t => <span key={t} style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 999, background: "#fff5f5", color: "#ef4444" }}>{t}</span>)}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 6 }}>
+                                    {r.result && <span style={{ fontSize: 12, fontWeight: 800, padding: "4px 10px", borderRadius: 999, background: resultBg, color: resultColor }}>{r.result.charAt(0).toUpperCase() + r.result.slice(1)}</span>}
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
 </>
                     );
                   })()}
@@ -1873,96 +2181,6 @@ export default function ProfilePage() {
                 );
               })()}
 
-          {/* Featured Insights */}
-          {(() => {
-            const wins   = reviews.filter(r => r.result === "win").length;
-            const losses = reviews.filter(r => r.result === "loss").length;
-            const last5  = [...reviews].sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 5);
-            const last5Wins = last5.filter(r => r.result === "win").length;
-            const topWellDone = (() => {
-              const counts: Record<string, number> = {};
-              reviews.flatMap(r => r.wellDone ?? []).forEach(t => { counts[t] = (counts[t] ?? 0) + 1; });
-              return Object.entries(counts).sort((a, b) => b[1] - a[1])[0] ?? null;
-            })();
-            const topImprove = (() => {
-              const counts: Record<string, number> = {};
-              reviews.flatMap(r => r.improved ?? []).forEach(t => { counts[t] = (counts[t] ?? 0) + 1; });
-              return Object.entries(counts).sort((a, b) => b[1] - a[1])[0] ?? null;
-            })();
-            const pool: { label: string; body: string }[] = [
-              reviews.length >= 3 && wins + losses > 0
-                ? { label: "Win rate", body: `You've won ${wins} out of ${wins + losses} recorded matches — a ${Math.round((wins / (wins + losses)) * 100)}% win rate. ${wins > losses ? "Keep it going." : "Every loss is data. Use it."}` }
-                : null,
-              last5.length >= 3
-                ? { label: "Recent form", body: `In your last ${last5.length} matches you won ${last5Wins}. ${last5Wins >= 3 ? "Strong run — confidence should be high going into your next game." : last5Wins === 0 ? "Tough stretch. Look back at what you improved on and build from there." : "Mixed results — small consistency gains will tip the balance."}` }
-                : null,
-              topWellDone
-                ? { label: "Your strength", body: `"${topWellDone[0]}" is the thing you've done well in most often — flagged across ${topWellDone[1]} match${topWellDone[1] > 1 ? "es" : ""}. That's your weapon. Keep sharpening it.` }
-                : null,
-              topImprove
-                ? { label: "Your focus area", body: `"${topImprove[0]}" is the area you've logged as needing work most — ${topImprove[1]} time${topImprove[1] > 1 ? "s" : ""}. Targeted practice on this one will move your game the fastest.` }
-                : null,
-              streak > 0
-                ? { label: "Streak", body: streak >= 7 ? `${streak} days and counting. A week-plus streak means habits are forming — that's where real gains live.` : streak >= 3 ? `${streak}-day streak. You're building momentum. Don't break the chain.` : `${streak} day${streak > 1 ? "s" : ""} in a row. Small start, big potential — log tomorrow and keep it going.` }
-                : null,
-              partnerCount >= 2
-                ? { label: "Partners", body: `You've played with ${partnerCount} different partners. Variety in partners exposes you to different styles and speeds up your adaptability on court.` }
-                : null,
-              trainingSessions.length > 0
-                ? { label: "Training", body: `${trainingSessions.length} training session${trainingSessions.length > 1 ? "s" : ""} logged so far. Players who train consistently between matches typically improve 2–3× faster than those who only play.` }
-                : null,
-              thisWeekAvg !== null && lastWeekAvg !== null
-                ? (() => {
-                    const band = (n: number) => n >= 85 ? "Strong" : n >= 75 ? "Good" : n >= 65 ? "Steady" : "Low";
-                    const thisLabel = band(thisWeekAvg);
-                    const lastLabel = band(lastWeekAvg);
-                    const avgPillar = (snaps: ScoreSnapshot[], key: keyof ScoreSnapshot) => snaps.length ? snaps.reduce((a, s) => a + (s[key] as number), 0) / snaps.length : 0;
-                    const pillars = ["recovery", "nutrition", "training", "wellbeing"] as const;
-                    const pillarNames: Record<string, string> = { recovery: "Recovery", nutrition: "Nutrition", training: "Training", wellbeing: "Wellbeing" };
-                    const deltas = pillars.map(p => ({ p, delta: avgPillar(thisWeekSnaps, p) - avgPillar(lastWeekSnaps, p) }));
-                    const bestGain = deltas.filter(d => d.delta > 2).reduce((a, b) => b.delta > a.delta ? b : a, { p: "", delta: -Infinity });
-                    const worstDrop = deltas.filter(d => d.delta < -2).reduce((a, b) => b.delta < a.delta ? b : a, { p: "", delta: Infinity });
-                    const body = thisLabel === lastLabel
-                      ? thisWeekAvg > lastWeekAvg
-                        ? `Still ${thisLabel} — you improved slightly this week${bestGain.p ? `, with ${pillarNames[bestGain.p].toLowerCase()} leading the way` : ""}. You're close to breaking into ${band(thisWeekAvg + 5)} territory.`
-                        : thisWeekAvg < lastWeekAvg
-                          ? `Still ${thisLabel}, but your scores dipped slightly this week${worstDrop.p ? ` — ${pillarNames[worstDrop.p].toLowerCase()} was the weakest area` : ""}. Nothing alarming, but worth keeping an eye on.`
-                          : `Exactly the same as last week — your routine is holding steady. ${thisLabel === "Strong" ? "That's a great place to be." : "Improving your sleep or hydration consistency is usually the quickest way to move forward."}`
-                      : thisWeekAvg > lastWeekAvg
-                        ? `You moved from ${lastLabel} to ${thisLabel} this week${bestGain.p ? ` — ${pillarNames[bestGain.p].toLowerCase()} improved the most` : ""}. That's real progress.`
-                        : `Your scores dropped from ${lastLabel} to ${thisLabel} this week${worstDrop.p ? ` — ${pillarNames[worstDrop.p].toLowerCase()} took the biggest hit` : ""}. A dip happens; focus on getting your sleep and recovery back on track.`;
-                    return { label: "Week on week", body };
-                  })()
-                : null,
-              tournamentCount > 0
-                ? { label: "Tournaments", body: `You've entered ${tournamentCount} tournament${tournamentCount > 1 ? "s" : ""}. Competitive pressure is one of the best accelerators — the nerves, the intensity, the opponents. Keep entering.` }
-                : null,
-            ].filter((x): x is { label: string; body: string } => x !== null);
-
-            if (pool.length === 0) return null;
-            const idx = featuredIdx % pool.length;
-            const insight = pool[idx];
-            return (
-              <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-                <p style={{ margin: 0, padding: "14px 16px 0", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--c-label)" }}>Featured Insights</p>
-                <button
-                  onClick={() => setFeaturedIdx(i => (i + 1) % pool.length)}
-                  style={{ width: "100%", background: "none", border: "none", padding: "12px 16px 16px", cursor: "pointer", textAlign: "left" }}
-                >
-                  <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-blue)" }}>{insight.label}</p>
-                  <p style={{ margin: "0 0 12px", fontSize: 16, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{insight.body}</p>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div style={{ display: "flex", gap: 4 }}>
-                      {pool.map((_, i) => (
-                        <div key={i} style={{ width: i === idx ? 14 : 5, height: 5, borderRadius: 3, background: i === idx ? "var(--c-blue)" : "#e2e5ea", transition: "width 0.2s" }} />
-                      ))}
-                    </div>
-                    <span style={{ fontSize: 12, color: "var(--c-hint)", fontWeight: 500 }}>Tap for next</span>
-                  </div>
-                </button>
-              </div>
-            );
-          })()}
 
 
           {/* Info section */}
