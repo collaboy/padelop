@@ -301,6 +301,16 @@ export async function saveHydrationToDb(date: string, ml: number) {
 }
 
 // Inserts a baseline ml value only if no row exists for that date — never overwrites a real measurement
+export async function deleteGearImageFromStorage(gearType: string): Promise<void> {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.storage.from("gear-images").remove([`${user.id}/${gearType}.jpg`]);
+    await supabase.from("gear").update({ photo_url: null }).eq("user_id", user.id).eq("type", gearType);
+  } catch {}
+}
+
 export async function seedHydrationToDb(date: string, ml: number) {
   try {
     const supabase = createClient();
