@@ -1136,7 +1136,7 @@ export default function ProfilePage() {
               style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 14, width: "100%", textAlign: "left" }}
             >
               {/* Photo */}
-              <div style={{ flexShrink: 0, width: 62, height: 62, borderRadius: "50%", background: "var(--c-blue)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", border: "3px solid #00D455" }}>
+              <div style={{ flexShrink: 0, width: 62, height: 62, borderRadius: "50%", background: "var(--c-blue)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", }}>
                 {profile.avatar
                   ? <img src={profile.avatar} alt="avatar" style={{ width: 62, height: 62, objectFit: "cover", objectPosition: "center", display: "block", flexShrink: 0 }} />
                   : <span style={{ fontSize: 22, fontWeight: 800, color: "#fff" }}>{initials(profile.name)}</span>
