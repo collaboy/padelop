@@ -102,6 +102,15 @@ export default function AuthPage() {
             {mode === "signin" ? "Sign up" : "Sign in"}
           </button>
         </p>
+
+        {mode === "signup" && (
+          <p style={{ textAlign: "center", margin: "16px 0 0", fontSize: 12, color: "var(--c-hint)", lineHeight: 1.6 }}>
+            By creating an account you agree to our{" "}
+            <a href="/terms" style={{ color: "var(--c-blue)", textDecoration: "none" }}>Terms of Service</a>
+            {" "}and{" "}
+            <a href="/privacy" style={{ color: "var(--c-blue)", textDecoration: "none" }}>Privacy Policy</a>.
+          </p>
+        )}
       </div>
     </div>
   );
