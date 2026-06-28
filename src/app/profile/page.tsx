@@ -2120,14 +2120,6 @@ export default function ProfilePage() {
                     {matchesPanelOpen && (
                       <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
                         <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>Matches</p>
-                        <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                          <button
-                            onClick={() => { setMatchAddOpen(o => !o); setMatchExpandedIdx(null); if (!matchAddOpen) setMatchAddForm(EMPTY_FORM); }}
-                            style={{ background: matchAddOpen ? "#e8edf8" : "#2653d4", border: "none", borderRadius: 20, padding: "7px 16px", fontSize: 14, fontWeight: 700, color: matchAddOpen ? "#2653d4" : "#fff", cursor: "pointer" }}
-                          >
-                            {matchAddOpen ? "Cancel" : "+ Add"}
-                          </button>
-                        </div>
                         {matchAddOpen && (
                           <div style={{ background: "#f8f9fa", borderRadius: 20, padding: "18px 16px" }}>
                             <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "#1a1c1c" }}>New match</p>
@@ -2174,9 +2166,14 @@ export default function ProfilePage() {
                           <div style={{ background: "#f8f9fa", borderRadius: 20, padding: "24px 20px", textAlign: "center" }}>
                             <p style={{ margin: "0 0 6px", fontSize: 15, fontWeight: 800, color: "#1a1c1c" }}>No upcoming matches</p>
                             <p style={{ margin: "0 0 14px", fontSize: 13, color: "#8a9096" }}>Schedule your next game</p>
-                            <button onClick={() => setMatchAddOpen(true)} style={{ padding: "10px 24px", borderRadius: 999, background: "#2653d4", border: "none", fontSize: 14, fontWeight: 700, color: "#fff", cursor: "pointer" }}>+ Add a match</button>
                           </div>
                         )}
+                        <button
+                          onClick={() => { setMatchAddOpen(o => !o); setMatchExpandedIdx(null); if (!matchAddOpen) setMatchAddForm(EMPTY_FORM); }}
+                          style={{ alignSelf: "flex-start", background: matchAddOpen ? "#e8edf8" : "#2653d4", border: "none", borderRadius: 20, padding: "7px 16px", fontSize: 14, fontWeight: 700, color: matchAddOpen ? "#2653d4" : "#fff", cursor: "pointer" }}
+                        >
+                          {matchAddOpen ? "Cancel" : "+ Add"}
+                        </button>
                         {reviews.length > 0 && (
                           <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>
                             <p style={{ margin: "4px 4px 0", fontSize: 12, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em" }}>HISTORY</p>
