@@ -1268,148 +1268,162 @@ export default function ProfilePage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                   {total > 0 && (
                     <>
-                    {/* Circle scoreboard */}
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    {/* Circle scoreboard — 3 per row, each column owns its panel */}
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
 
                       {/* Next Match */}
-                      {(() => {
-                        const today = new Date().toISOString().slice(0, 10);
-                        const diffDays = nextMatch
-                          ? Math.round((new Date(nextMatch.date + "T12:00").getTime() - new Date(today + "T12:00").getTime()) / 86400000)
-                          : null;
-                        const mainNum = diffDays === null ? "—" : diffDays === 0 ? "NOW" : diffDays === 1 ? "1" : String(diffDays);
-                        const subLabel = diffDays === null ? "no match set" : diffDays === 0 ? "match day" : diffDays === 1 ? "day away" : "days away";
-                        const color = diffDays === null ? "#9aa0a6" : diffDays === 0 ? "#2653d4" : diffDays <= 3 ? "#d97706" : "#16a34a";
-                        const showSub = diffDays !== 0;
-                        return (
-                          <div style={{ aspectRatio: "1/1" }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                      <div style={{ width: "calc((100% - 20px) / 3)" }}>
+                        {(() => {
+                          const today = new Date().toISOString().slice(0, 10);
+                          const diffDays = nextMatch
+                            ? Math.round((new Date(nextMatch.date + "T12:00").getTime() - new Date(today + "T12:00").getTime()) / 86400000)
+                            : null;
+                          const countdownLabel = diffDays === null ? "NO MATCH" : diffDays === 0 ? "TODAY" : diffDays === 1 ? "TOMORROW" : `IN ${diffDays} DAYS`;
+                          const timeLabel = nextMatch?.time ?? "";
+                          const font = { fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" };
+                          return (
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 4px 20px rgba(38,83,212,0.35))", display: "block" }}>
                               <defs>
                                 <path id="nextMatchTopArc" d="M 30,76 A 76,76 0 0,1 170,76" />
                               </defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                              <circle cx="100" cy="100" r="99" fill="#2653d4" />
+                              <text fontSize="19" fontWeight="700" letterSpacing="2.5" style={{ fill: "rgba(255,255,255,0.7)", ...font }}>
                                 <textPath href="#nextMatchTopArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
                               </text>
-                              <text x="100" y={showSub ? "100" : "108"} textAnchor="middle" dominantBaseline="middle"
-                                fontSize={mainNum.length > 2 ? "28" : "46"} fontWeight="800"
-                                style={{ fill: color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                                {mainNum}
+                              <text x="100" y={timeLabel ? "97" : "108"} textAnchor="middle" dominantBaseline="middle"
+                                fontSize={countdownLabel.length > 7 ? "18" : "22"} fontWeight="800" letterSpacing="0.06em"
+                                style={{ fill: "rgba(255,255,255,0.9)", textTransform: "uppercase", ...font }}>
+                                {countdownLabel}
                               </text>
-                              {showSub && (
+                              {timeLabel && (
                                 <text x="100" y="128" textAnchor="middle" dominantBaseline="middle"
-                                  fontSize="17" fontWeight="600"
-                                  style={{ fill: color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", opacity: 0.65 }}>
-                                  {subLabel}
+                                  fontSize="32" fontWeight="800" letterSpacing="-0.02em"
+                                  style={{ fill: "#fff", ...font }}>
+                                  {timeLabel}
                                 </text>
                               )}
-                            </svg>
-                          </div>
-                        );
-                      })()}
-
-                      {/* Day type (circle, SVG) */}
-                      <button
-                        onClick={() => { setDayTypeInfoOpen(o => !o); setPanelSchedOpen(false); setStreakPanelOpen(false); }}
-                        style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}
-                      >
-                        {(() => {
-                          const parts = panelDayLabel.split(" ");
-                          const mainLabel = parts.length > 1 ? parts.slice(0, -1).join(" ") : panelDayLabel;
-                          const dayWord = parts.length > 1 ? parts[parts.length - 1] : "";
-                          return (
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                              <defs>
-                                <path id="dayTypeTopArc" d="M 30,76 A 76,76 0 0,1 170,76" />
-                              </defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: panelDayColor, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                                <textPath href="#dayTypeTopArc" startOffset="50%" textAnchor="middle">DAY TYPE</textPath>
-                              </text>
-                              <text
-                                x="100" y={dayWord ? "93" : "108"}
-                                textAnchor="middle"
-                                dominantBaseline="middle"
-                                fontSize="24"
-                                fontWeight="800"
-                                style={{ fill: panelDayColor, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}
-                              >
-                                {mainLabel}
-                              </text>
-                              {dayWord && (
-                                <text
-                                  x="100" y="123"
-                                  textAnchor="middle"
-                                  dominantBaseline="middle"
-                                  fontSize="20"
-                                  fontWeight="800"
-                                  style={{ fill: panelDayColor, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}
-                                >
-                                  {dayWord}
-                                </text>
-                              )}
-                              <circle cx="100" cy="188" r="4" fill={panelDayColor} opacity={dayTypeInfoOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
                             </svg>
                           );
                         })()}
-                      </button>
+                      </div>
 
-                      {/* Right tile — Today's Goals (circle, SVG) */}
-                      <button
-                        onClick={() => { setPanelSchedOpen(o => !o); setDayTypeInfoOpen(false); setStreakPanelOpen(false); }}
-                        style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}
-                      >
-                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                          <defs>
-                            <path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" />
-                          </defs>
-                          <circle cx="100" cy="100" r="99" fill="white" />
-                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "var(--c-label)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                            <textPath href="#goalsTextArc" startOffset="50%" textAnchor="middle">TODAY&apos;S GOALS</textPath>
-                          </text>
-                          <text
-                            x="100" y="108"
-                            textAnchor="middle"
-                            dominantBaseline="middle"
-                            fontSize={pct === 100 ? "44" : "36"}
-                            fontWeight="800"
-                            style={{ fill: pct === 100 ? "#00D455" : "var(--c-text)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}
-                          >
-                            {pct === 100 ? "✓" : `${done}/${total}`}
-                          </text>
+                      {/* Day Type */}
+                      <div style={{ width: "calc((100% - 20px) / 3)", display: "flex", flexDirection: "column", gap: 10 }}>
+                        <button
+                          onClick={() => { setDayTypeInfoOpen(o => !o); setPanelSchedOpen(false); setStreakPanelOpen(false); }}
+                          style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", width: "100%" }}
+                        >
                           {(() => {
-                            const r = 88, cX = 100, cY = 100, totalDeg = 110;
-                            const startDeg = 90 + totalDeg / 2;
-                            const N = schedule.length;
-                            if (!N) return null;
-                            const gapDeg = 7;
-                            const segDeg = (totalDeg - Math.max(0, N - 1) * gapDeg) / N;
-                            const toRad = (d: number) => d * Math.PI / 180;
-                            return schedule.map((item, i) => {
-                              const a1 = startDeg - i * (segDeg + gapDeg);
-                              const a2 = a1 - segDeg;
-                              const x1 = (cX + r * Math.cos(toRad(a1))).toFixed(2);
-                              const y1 = (cY + r * Math.sin(toRad(a1))).toFixed(2);
-                              const x2 = (cX + r * Math.cos(toRad(a2))).toFixed(2);
-                              const y2 = (cY + r * Math.sin(toRad(a2))).toFixed(2);
-                              const segDone = todayDoneSet.has(item.title);
-                              return (
-                                <path
-                                  key={item.title}
-                                  d={`M ${x1},${y1} A ${r},${r} 0 0,0 ${x2},${y2}`}
-                                  stroke={segDone ? item.color : "#e0e2e5"}
-                                  strokeWidth="9"
-                                  fill="none"
-                                  strokeLinecap="round"
-                                  style={{ transition: "stroke 0.3s" }}
-                                />
-                              );
-                            });
+                            const parts = panelDayLabel.split(" ");
+                            const mainLabel = parts.length > 1 ? parts.slice(0, -1).join(" ") : panelDayLabel;
+                            const dayWord = parts.length > 1 ? parts[parts.length - 1] : "";
+                            return (
+                              <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                                <defs>
+                                  <path id="dayTypeTopArc" d="M 30,76 A 76,76 0 0,1 170,76" />
+                                </defs>
+                                <circle cx="100" cy="100" r="99" fill="white" />
+                                <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: panelDayColor, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                                  <textPath href="#dayTypeTopArc" startOffset="50%" textAnchor="middle">DAY TYPE</textPath>
+                                </text>
+                                <text x="100" y={dayWord ? "93" : "108"} textAnchor="middle" dominantBaseline="middle"
+                                  fontSize="24" fontWeight="800" style={{ fill: panelDayColor, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                                  {mainLabel}
+                                </text>
+                                {dayWord && (
+                                  <text x="100" y="123" textAnchor="middle" dominantBaseline="middle"
+                                    fontSize="20" fontWeight="800" style={{ fill: panelDayColor, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                                    {dayWord}
+                                  </text>
+                                )}
+                                <circle cx="100" cy="188" r="4" fill={panelDayColor} opacity={dayTypeInfoOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                              </svg>
+                            );
                           })()}
-                        </svg>
-                      </button>
+                        </button>
+                        {dayTypeInfoOpen && (
+                          <div style={{ background: "#fff", borderRadius: 14, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                            <div style={{ padding: "12px", display: "flex", flexDirection: "column", gap: 7 }}>
+                              {DAY_TYPE_INFO.map(dt => (
+                                <div key={dt.label} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                                  <span style={{ fontSize: 11, fontWeight: 700, color: dt.color }}>{dt.label}</span>
+                                  <span style={{ fontSize: 12, color: "#5a6270", lineHeight: 1.4 }}>{dt.desc}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
 
-                      {/* Third tile — Streak (circle, SVG) */}
+                      {/* Today's Goals */}
+                      <div style={{ width: "calc((100% - 20px) / 3)", display: "flex", flexDirection: "column", gap: 10 }}>
+                        <button
+                          onClick={() => { setPanelSchedOpen(o => !o); setDayTypeInfoOpen(false); setStreakPanelOpen(false); }}
+                          style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", width: "100%" }}
+                        >
+                          <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                            <defs>
+                              <path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" />
+                            </defs>
+                            <circle cx="100" cy="100" r="99" fill="white" />
+                            <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "var(--c-label)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                              <textPath href="#goalsTextArc" startOffset="50%" textAnchor="middle">TODAY&apos;S GOALS</textPath>
+                            </text>
+                            <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
+                              fontSize={pct === 100 ? "44" : "36"} fontWeight="800"
+                              style={{ fill: pct === 100 ? "#00D455" : "var(--c-text)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                              {pct === 100 ? "✓" : `${done}/${total}`}
+                            </text>
+                            {(() => {
+                              const r = 88, cX = 100, cY = 100, totalDeg = 110;
+                              const startDeg = 90 + totalDeg / 2;
+                              const N = schedule.length;
+                              if (!N) return null;
+                              const gapDeg = 7;
+                              const segDeg = (totalDeg - Math.max(0, N - 1) * gapDeg) / N;
+                              const toRad = (d: number) => d * Math.PI / 180;
+                              return schedule.map((item, i) => {
+                                const a1 = startDeg - i * (segDeg + gapDeg);
+                                const a2 = a1 - segDeg;
+                                const x1 = (cX + r * Math.cos(toRad(a1))).toFixed(2);
+                                const y1 = (cY + r * Math.sin(toRad(a1))).toFixed(2);
+                                const x2 = (cX + r * Math.cos(toRad(a2))).toFixed(2);
+                                const y2 = (cY + r * Math.sin(toRad(a2))).toFixed(2);
+                                const segDone = todayDoneSet.has(item.title);
+                                return (
+                                  <path key={item.title}
+                                    d={`M ${x1},${y1} A ${r},${r} 0 0,0 ${x2},${y2}`}
+                                    stroke={segDone ? item.color : "#e0e2e5"} strokeWidth="9" fill="none" strokeLinecap="round"
+                                    style={{ transition: "stroke 0.3s" }} />
+                                );
+                              });
+                            })()}
+                          </svg>
+                        </button>
+                        {panelSchedOpen && (
+                          <div style={{ background: "#fff", borderRadius: 14, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                            <div style={{ padding: "10px 12px 8px" }}>
+                              {schedule.map((item, i) => {
+                                const isDone = (schedDone[todayKey] ?? []).includes(item.title);
+                                return (
+                                  <div key={item.title}
+                                    onClick={() => { if (SCHEDULE_DETAILS[item.title] || item.isDrill) setPanelSchedModalIdx(i); }}
+                                    style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 0", cursor: SCHEDULE_DETAILS[item.title] || item.isDrill ? "pointer" : "default", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f6" : "none" }}>
+                                    <button onClick={e => { e.stopPropagation(); panelToggleDone(item.title); }}
+                                      style={{ width: 18, height: 18, borderRadius: 4, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s", cursor: "pointer" }}>
+                                      {isDone && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                                    </button>
+                                    <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none", flex: 1, minWidth: 0 }}>{item.title}</p>
+                                    <span style={{ fontSize: 11, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Streak */}
                       {(() => {
                         const STIERS = [
                           { min: 0,   label: "Beginner",  color: "#9aa0a6", grad: ["#f4f4f6","#eaecee"] },
@@ -1421,124 +1435,61 @@ export default function ProfilePage() {
                         ];
                         const stier = [...STIERS].reverse().find(t => streak >= t.min) ?? STIERS[0];
                         const snext = STIERS[STIERS.indexOf(stier) + 1];
-                        const botText = streak === 0 ? "Start logging" : !snext ? "Legend" : `${snext.min - streak}d to ${snext.label}`;
+                        const msg = streak === 0 ? "Log your first check-in to start your streak." : streak === 1 ? "Day one. Come back tomorrow." : !snext ? "Legend status." : `${snext.min - streak} day${snext.min - streak === 1 ? "" : "s"} to ${snext.label}.`;
                         return (
-                          <button
-                            onClick={() => { setStreakPanelOpen(o => !o); setDayTypeInfoOpen(false); setPanelSchedOpen(false); }}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}
-                          >
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                              <defs>
-                                <path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" />
-                              </defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                                <textPath href="#streakTopArc" startOffset="50%" textAnchor="middle">{stier.label.toUpperCase()}</textPath>
-                              </text>
-                              <text
-                                x="100" y="108"
-                                textAnchor="middle"
-                                dominantBaseline="middle"
-                                fontSize={streak >= 100 ? "34" : streak >= 10 ? "40" : "46"}
-                                fontWeight="800"
-                                style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}
-                              >
-                                {streak > 0 ? streak : "—"}
-                              </text>
-                              <text
-                                x="100" y="152"
-                                textAnchor="middle"
-                                fontSize="20"
-                                fontWeight="600"
-                                style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", opacity: 0.65 } as React.CSSProperties}
-                              >
-                                day streak
-                              </text>
-                            </svg>
-                          </button>
+                          <div style={{ width: "calc((100% - 20px) / 3)", display: "flex", flexDirection: "column", gap: 10 }}>
+                            <button
+                              onClick={() => { setStreakPanelOpen(o => !o); setDayTypeInfoOpen(false); setPanelSchedOpen(false); }}
+                              style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", width: "100%" }}
+                            >
+                              <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                                <defs>
+                                  <path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" />
+                                </defs>
+                                <circle cx="100" cy="100" r="99" fill="white" />
+                                <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                                  <textPath href="#streakTopArc" startOffset="50%" textAnchor="middle">{stier.label.toUpperCase()}</textPath>
+                                </text>
+                                <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
+                                  fontSize={streak >= 100 ? "34" : streak >= 10 ? "40" : "46"} fontWeight="800"
+                                  style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                                  {streak > 0 ? streak : "—"}
+                                </text>
+                                <text x="100" y="152" textAnchor="middle" fontSize="20" fontWeight="600"
+                                  style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", opacity: 0.65 } as React.CSSProperties}>
+                                  day streak
+                                </text>
+                              </svg>
+                            </button>
+                            {streakPanelOpen && (
+                              <div style={{ borderRadius: 14, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
+                                <div style={{ background: `linear-gradient(145deg, ${stier.grad[0]}, ${stier.grad[1]})`, padding: "16px 16px 12px", textAlign: "center" }}>
+                                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: stier.color }}>{stier.label}</span>
+                                  <p style={{ margin: "4px 0 2px", fontSize: 36, fontWeight: 800, color: stier.color, lineHeight: 1 }}>{streak}</p>
+                                  <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: stier.color, opacity: 0.7 }}>day streak</p>
+                                  <p style={{ margin: "8px 0 0", fontSize: 12, fontWeight: 500, color: "#4b5563" }}>{msg}</p>
+                                </div>
+                                <div style={{ background: "#fff", padding: "10px 12px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2 }}>
+                                  {STIERS.map(t => {
+                                    const active = t.label === stier.label;
+                                    const unlocked = streak >= t.min;
+                                    return (
+                                      <div key={t.label} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+                                        <div style={{ width: "100%", height: 3, borderRadius: 99, background: unlocked ? t.color : "#e5e7eb", opacity: unlocked ? 1 : 0.4 }} />
+                                        <span style={{ fontSize: 8, fontWeight: active ? 800 : 600, color: active ? t.color : "#9aa0a6", textAlign: "center", lineHeight: 1.2 }}>{t.label}</span>
+                                        <span style={{ fontSize: 8, color: "#b0b8c1", fontWeight: 500 }}>{t.min === 0 ? "0" : `${t.min}d`}</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         );
                       })()}
+
                     </div>
-
-                    {/* Expandable: day type info */}
-                    <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden", display: dayTypeInfoOpen ? "block" : "none" }}>
-                      <div style={{ padding: "14px", display: "flex", flexDirection: "column", gap: 7 }}>
-                        {DAY_TYPE_INFO.map(dt => (
-                          <div key={dt.label} style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                            <span style={{ fontSize: 12, fontWeight: 700, color: dt.color, background: `${dt.color}18`, borderRadius: 5, padding: "1px 6px", flexShrink: 0, whiteSpace: "nowrap", minWidth: 108, textAlign: "center", display: "inline-block" }}>{dt.label}</span>
-                            <span style={{ fontSize: 14, color: "#5a6270", lineHeight: 1.4 }}>{dt.desc}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Expandable: schedule list */}
-                    {/* Expandable: streak tiers */}
-                    {streakPanelOpen && (() => {
-                      const STIERS = [
-                        { min: 0,   label: "Beginner",  color: "#9aa0a6", grad: ["#f4f4f6","#eaecee"] },
-                        { min: 5,   label: "Starter",   color: "#2653d4", grad: ["#eef2ff","#dbe4ff"] },
-                        { min: 15,  label: "Grinder",   color: "#059669", grad: ["#ecfdf5","#d1fae5"] },
-                        { min: 30,  label: "Dedicated", color: "#d97706", grad: ["#fffbeb","#fde68a"] },
-                        { min: 60,  label: "Elite",     color: "#7c3aed", grad: ["#faf5ff","#ede9fe"] },
-                        { min: 100, label: "Legend",    color: "#0ea5e9", grad: ["#f0f9ff","#bae6fd"] },
-                      ];
-                      const stier = [...STIERS].reverse().find(t => streak >= t.min) ?? STIERS[0];
-                      const snext = STIERS[STIERS.indexOf(stier) + 1];
-                      const msg = streak === 0 ? "Log your first check-in to start your streak." : streak === 1 ? "Day one. Come back tomorrow to keep it going." : !snext ? "Legend status. You're in a league of your own." : `${snext.min - streak} day${snext.min - streak === 1 ? "" : "s"} to ${snext.label}.`;
-                      return (
-                        <div style={{ borderRadius: 18, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
-                          <div style={{ background: `linear-gradient(145deg, ${stier.grad[0]}, ${stier.grad[1]})`, padding: "20px 20px 16px", textAlign: "center" }}>
-                            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: stier.color }}>{stier.label}</span>
-                            <p style={{ margin: "6px 0 3px", fontSize: 44, fontWeight: 800, color: stier.color, lineHeight: 1 }}>{streak}</p>
-                            <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: stier.color, opacity: 0.7 }}>day streak</p>
-                            <p style={{ margin: "10px 0 0", fontSize: 13, fontWeight: 500, color: "#4b5563" }}>{msg}</p>
-                          </div>
-                          <div style={{ background: "#fff", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 4 }}>
-                            {STIERS.map(t => {
-                              const active = t.label === stier.label;
-                              const unlocked = streak >= t.min;
-                              return (
-                                <div key={t.label} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                                  <div style={{ width: "100%", height: 3, borderRadius: 99, background: unlocked ? t.color : "#e5e7eb", opacity: unlocked ? 1 : 0.4 }} />
-                                  <span style={{ fontSize: 9, fontWeight: active ? 800 : 600, color: active ? t.color : "#9aa0a6", textAlign: "center", lineHeight: 1.2, letterSpacing: "0.04em" }}>{t.label}</span>
-                                  <span style={{ fontSize: 9, color: "#b0b8c1", fontWeight: 500 }}>{t.min === 0 ? "0" : `${t.min}d`}</span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      );
-                    })()}
-
-                    {panelSchedOpen && (
-                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-                        <div style={{ padding: "10px 14px 8px" }}>
-                          {schedule.map((item, i) => {
-                            const isDone = (schedDone[todayKey] ?? []).includes(item.title);
-                            return (
-                              <div
-                                key={item.title}
-                                onClick={() => { if (SCHEDULE_DETAILS[item.title] || item.isDrill) setPanelSchedModalIdx(i); }}
-                                style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0", cursor: SCHEDULE_DETAILS[item.title] || item.isDrill ? "pointer" : "default", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f6" : "none" }}
-                              >
-                                <button
-                                  onClick={e => { e.stopPropagation(); panelToggleDone(item.title); }}
-                                  style={{ width: 20, height: 20, borderRadius: 5, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s", cursor: "pointer" }}
-                                >
-                                  {isDone && <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                                </button>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                  <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none" }}>{item.title}</p>
-                                </div>
-                                <span style={{ fontSize: 13, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                    </>
+</>
                   )}
                 </div>
                 );
