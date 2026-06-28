@@ -528,6 +528,12 @@ export default function ProfilePage() {
   const [panelSchedOpen, setPanelSchedOpen] = useState(false);
   const [dayTypeInfoOpen, setDayTypeInfoOpen] = useState(false);
   const [streakPanelOpen, setStreakPanelOpen] = useState(false);
+  const [nextMatchPanelOpen, setNextMatchPanelOpen] = useState(false);
+  const [nextMatchInfoMode, setNextMatchInfoMode] = useState<'edit'|'add'|null>(null);
+  const [nmMatchForm, setNmMatchForm] = useState<MatchForm>(EMPTY_FORM);
+  const nmUploadRef = useRef<HTMLInputElement>(null);
+  const [nmUploadError, setNmUploadError] = useState<string|null>(null);
+  const [nmUploadExtracting, setNmUploadExtracting] = useState(false);
   const [panelUploadLoading, setPanelUploadLoading] = useState(false);
   const [panelUploadCategory, setPanelUploadCategory] = useState<string | null>(null);
   const [panelSmartResult, setPanelSmartResult] = useState<{ category: string; label: string; confidence: string; data: Record<string, string> } | null>(null);
@@ -1280,7 +1286,8 @@ export default function ProfilePage() {
                         const timeLabel = nextMatch?.time ?? "";
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                         return (
-                          <div style={{ flex: 1, aspectRatio: "1/1" }}>
+                          <button onClick={() => { setNextMatchPanelOpen(o => !o); setDayTypeInfoOpen(false); setPanelSchedOpen(false); setStreakPanelOpen(false); }}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 4px 20px rgba(38,83,212,0.35))", display: "block" }}>
                               <defs><path id="nextMatchTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#2653d4" />
@@ -1298,13 +1305,14 @@ export default function ProfilePage() {
                                   {timeLabel}
                                 </text>
                               )}
+                              <circle cx="100" cy="188" r="4" fill="rgba(255,255,255,0.7)" opacity={nextMatchPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
                             </svg>
-                          </div>
+                          </button>
                         );
                       })()}
 
                       {/* Day Type */}
-                      <button onClick={() => { setDayTypeInfoOpen(o => !o); setPanelSchedOpen(false); setStreakPanelOpen(false); }}
+                      <button onClick={() => { setDayTypeInfoOpen(o => !o); setPanelSchedOpen(false); setStreakPanelOpen(false); setNextMatchPanelOpen(false); }}
                         style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}>
                         {(() => {
                           const parts = panelDayLabel.split(" ");
@@ -1334,7 +1342,7 @@ export default function ProfilePage() {
                       </button>
 
                       {/* Today's Goals */}
-                      <button onClick={() => { setPanelSchedOpen(o => !o); setDayTypeInfoOpen(false); setStreakPanelOpen(false); }}
+                      <button onClick={() => { setPanelSchedOpen(o => !o); setDayTypeInfoOpen(false); setStreakPanelOpen(false); setNextMatchPanelOpen(false); }}
                         style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}>
                         <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                           <defs><path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
@@ -1399,6 +1407,182 @@ export default function ProfilePage() {
                       </div>
                     )}
 
+                    {/* Next Match panel — full width below row 1 */}
+                    {nextMatchPanelOpen && (() => {
+                      const today2 = new Date().toISOString().slice(0, 10);
+                      const matchDate = nextMatch ? new Date(nextMatch.date + "T12:00") : null;
+                      const todayDate = new Date(today2 + "T12:00");
+                      const diffDays = matchDate ? Math.round((matchDate.getTime() - todayDate.getTime()) / 86400000) : null;
+                      const cdLabel = diffDays === null ? "NO MATCH" : diffDays === 0 ? "TODAY" : diffDays === 1 ? "TOMORROW" : `IN ${diffDays} DAYS`;
+                      const dateStr = matchDate ? matchDate.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" }) : "";
+                      const saveEdit = () => {
+                        if (!nmMatchForm.date || !nmMatchForm.time) return;
+                        const data = matchFormToStored(nmMatchForm);
+                        const updated = upcomingMatches.map(m => m.date === nextMatch?.date && m.time === nextMatch?.time ? data : m);
+                        const merged = upcomingMatches.some(m => m.date === nextMatch?.date && m.time === nextMatch?.time) ? updated : [data, ...upcomingMatches];
+                        matchSaveList(merged);
+                        saveUpcomingMatch(data);
+                        setNextMatchInfoMode(null);
+                      };
+                      const saveAdd = () => {
+                        if (!nmMatchForm.date || !nmMatchForm.time) return;
+                        const data = matchFormToStored(nmMatchForm);
+                        matchSaveList([...upcomingMatches, data]);
+                        saveUpcomingMatch(data);
+                        setNmMatchForm(EMPTY_FORM);
+                        setNextMatchInfoMode(null);
+                      };
+                      return (
+                        <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                          {/* hidden file input for screenshot upload */}
+                          <input ref={nmUploadRef} type="file" accept="image/*" style={{ display: "none" }} onChange={async e => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            setNmUploadError(null); setNmUploadExtracting(true);
+                            try {
+                              const reader = new FileReader();
+                              const base64 = await new Promise<string>((resolve, reject) => { reader.onload = () => resolve((reader.result as string).split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); });
+                              const res = await fetch('/api/extract-match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: base64, mediaType: file.type }) });
+                              const data = await res.json();
+                              if (!res.ok || data.error) { setNmUploadError(data.message || 'Could not read the screenshot.'); }
+                              else { setNmMatchForm({ date: data.date ?? '', time: data.time ?? '', club: data.club ?? '', court: data.court ?? '', p1: data.player_1 ?? '', p2: data.player_2 ?? '', p3: data.player_3 ?? '', p4: data.player_4 ?? '' }); setNextMatchInfoMode('edit'); }
+                            } catch { setNmUploadError('Upload failed. Please try again.'); }
+                            setNmUploadExtracting(false);
+                            if (nmUploadRef.current) nmUploadRef.current.value = '';
+                          }} />
+
+                          <div style={{ padding: "20px", position: "relative" }}>
+                            {/* Edit icon */}
+                            <button onClick={() => {
+                              if (nextMatchInfoMode === 'edit') { setNextMatchInfoMode(null); }
+                              else if (nextMatch) { setNmMatchForm({ date: nextMatch.date, time: nextMatch.time, club: nextMatch.club ?? '', court: nextMatch.court ?? '', p1: nextMatch.player_1, p2: nextMatch.player_2, p3: nextMatch.player_3, p4: nextMatch.player_4 }); setNextMatchInfoMode('edit'); }
+                            }} style={{ position: "absolute", top: 14, left: 14, background: "#f4f4f6", border: "none", cursor: "pointer", padding: 7, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a5050" }}>
+                              {nextMatchInfoMode === 'edit' ? (
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                              ) : (
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                              )}
+                            </button>
+                            {/* Add icon */}
+                            <button onClick={() => {
+                              if (nextMatchInfoMode === 'add') { setNextMatchInfoMode(null); setNmMatchForm(EMPTY_FORM); }
+                              else { setNmMatchForm(EMPTY_FORM); setNmUploadError(null); setNextMatchInfoMode('add'); nmUploadRef.current?.click(); }
+                            }} style={{ position: "absolute", top: 14, right: 14, background: "#f4f4f6", border: "none", cursor: "pointer", padding: 7, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a5050" }}>
+                              {nextMatchInfoMode === 'add' ? (
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                              ) : (
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                              )}
+                            </button>
+
+                            {/* Hero */}
+                            <div style={{ textAlign: "center", marginBottom: 6, paddingTop: 4 }}>
+                              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4" }}>Next Match</span>
+                              <p style={{ margin: "6px 0 8px", fontSize: "clamp(28px, 7vw, 38px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{cdLabel}</p>
+                              {nextMatch && <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500 }}>{dateStr} · {nextMatch.time}</span>}
+                            </div>
+
+                            {/* Detail rows */}
+                            {nextMatch && (
+                              <div style={{ display: "flex", flexDirection: "column", textAlign: "center", gap: 4, marginBottom: 4 }}>
+                                {nextMatch.club && <span style={{ fontSize: 13, fontWeight: 500, color: "#8a9096" }}>({nextMatch.club})</span>}
+                                {nextMatch.court && (() => { const n = nextMatch.court.match(/\d+/)?.[0]; return n ? <span style={{ fontSize: 17, fontWeight: 700, color: "#1a1c1c", lineHeight: 1.4, marginTop: 2 }}>#{n}</span> : null; })()}
+                                {[nextMatch.player_1, nextMatch.player_2, nextMatch.player_3, nextMatch.player_4].filter(Boolean).length > 0 && (
+                                  <span style={{ fontSize: 13, color: "#6b7480", marginTop: 4 }}>
+                                    {[nextMatch.player_1, nextMatch.player_2, nextMatch.player_3, nextMatch.player_4].filter(Boolean).map(p => p.slice(0, 2)).join(' · ')}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Edit form */}
+                            {nextMatchInfoMode === 'edit' && (
+                              <div style={{ marginTop: 20 }}>
+                                <div style={{ height: 1, background: "#f0f0f0", marginBottom: 16 }} />
+                                <div className="flex flex-col gap-3">
+                                  <button onClick={() => { setNmUploadError(null); nmUploadRef.current?.click(); }} disabled={nmUploadExtracting} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl active:opacity-70" style={{ background: "#f4f6ff", border: "1.5px solid #2653d418", opacity: nmUploadExtracting ? 0.5 : 1 }}>
+                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#2653d4" }}>
+                                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                    </div>
+                                    <span className="text-[14px] font-semibold text-[#1a1c1c] flex-1 text-left">{nmUploadExtracting ? "Reading screenshot…" : "Upload screenshot"}</span>
+                                  </button>
+                                  {nmUploadError && <div className="px-3 py-2.5 rounded-xl text-[13px] text-[#c0392b]" style={{ background: "#fff0f0", border: "1.5px solid #ffd0d0" }}>{nmUploadError}</div>}
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
+                                    <input type="date" value={nmMatchForm.date} onChange={e => setNmMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: nmMatchForm.date ? "#2653d4" : "#e2e2e2", background: nmMatchForm.date ? "#f4f6ff" : "#fff", minHeight: 44, cursor: "pointer" }} />
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
+                                    <input type="time" value={nmMatchForm.time} onChange={e => setNmMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: nmMatchForm.time ? "#2653d4" : "#e2e2e2", background: nmMatchForm.time ? "#f4f6ff" : "#fff", minHeight: 44, cursor: "pointer" }} />
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Club</label>
+                                    <input type="text" placeholder="e.g. Club Padel BCN" value={nmMatchForm.club} onChange={e => setNmMatchForm(f => ({ ...f, club: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: nmMatchForm.club ? "#2653d4" : "#e2e2e2", background: nmMatchForm.club ? "#f4f6ff" : "#fff" }} />
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Court #</label>
+                                    <input type="text" placeholder="e.g. 3" value={nmMatchForm.court} onChange={e => setNmMatchForm(f => ({ ...f, court: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: nmMatchForm.court ? "#2653d4" : "#e2e2e2", background: nmMatchForm.court ? "#f4f6ff" : "#fff" }} />
+                                  </div>
+                                  <div className="flex flex-col gap-2">
+                                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Players</label>
+                                    {(['p1','p2','p3','p4'] as const).map((key, i) => (
+                                      <input key={key} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={nmMatchForm[key]} onChange={e => setNmMatchForm(f => ({ ...f, [key]: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: nmMatchForm[key] ? "#2653d4" : "#e2e2e2", background: nmMatchForm[key] ? "#f4f6ff" : "#fff" }} />
+                                    ))}
+                                  </div>
+                                  <button onClick={saveEdit} className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white" style={{ background: (!nmMatchForm.date || !nmMatchForm.time) ? "#c4c7c7" : "#2653d4" }}>Save changes</button>
+                                  <button onClick={() => {
+                                    if (!nextMatch) return;
+                                    matchSaveList(upcomingMatches.filter(m => !(m.date === nextMatch.date && m.time === nextMatch.time)));
+                                    setNextMatchPanelOpen(false);
+                                    setNextMatchInfoMode(null);
+                                  }} className="w-full py-3 rounded-2xl text-[14px] font-semibold" style={{ background: "#fef2f2", color: "#dc2626", border: "none", cursor: "pointer" }}>Delete match</button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Add form */}
+                            {nextMatchInfoMode === 'add' && (
+                              <div style={{ marginTop: 20 }}>
+                                <div style={{ height: 1, background: "#f0f0f0", marginBottom: 16 }} />
+                                <div className="flex flex-col gap-3">
+                                  <button onClick={() => { setNmUploadError(null); nmUploadRef.current?.click(); }} disabled={nmUploadExtracting} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl active:opacity-70" style={{ background: "#f4f6ff", border: "1.5px solid #2653d418", opacity: nmUploadExtracting ? 0.5 : 1 }}>
+                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#2653d4" }}>
+                                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                    </div>
+                                    <span className="text-[14px] font-semibold text-[#1a1c1c] flex-1 text-left">{nmUploadExtracting ? "Reading screenshot…" : "Upload screenshot"}</span>
+                                  </button>
+                                  {nmUploadError && <div className="px-3 py-2.5 rounded-xl text-[13px] text-[#c0392b]" style={{ background: "#fff0f0", border: "1.5px solid #ffd0d0" }}>{nmUploadError}</div>}
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
+                                    <input type="date" value={nmMatchForm.date} onChange={e => setNmMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: nmMatchForm.date ? "#2653d4" : "#e2e2e2", background: nmMatchForm.date ? "#f4f6ff" : "#fff", minHeight: 44, cursor: "pointer" }} />
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
+                                    <input type="time" value={nmMatchForm.time} onChange={e => setNmMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: nmMatchForm.time ? "#2653d4" : "#e2e2e2", background: nmMatchForm.time ? "#f4f6ff" : "#fff", minHeight: 44, cursor: "pointer" }} />
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Club</label>
+                                    <input type="text" placeholder="e.g. Club Padel BCN" value={nmMatchForm.club} onChange={e => setNmMatchForm(f => ({ ...f, club: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: nmMatchForm.club ? "#2653d4" : "#e2e2e2", background: nmMatchForm.club ? "#f4f6ff" : "#fff" }} />
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Court #</label>
+                                    <input type="text" placeholder="e.g. 3" value={nmMatchForm.court} onChange={e => setNmMatchForm(f => ({ ...f, court: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: nmMatchForm.court ? "#2653d4" : "#e2e2e2", background: nmMatchForm.court ? "#f4f6ff" : "#fff" }} />
+                                  </div>
+                                  <div className="flex flex-col gap-2">
+                                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Players</label>
+                                    {(['p1','p2','p3','p4'] as const).map((key, i) => (
+                                      <input key={key} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={nmMatchForm[key]} onChange={e => setNmMatchForm(f => ({ ...f, [key]: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: nmMatchForm[key] ? "#2653d4" : "#e2e2e2", background: nmMatchForm[key] ? "#f4f6ff" : "#fff" }} />
+                                    ))}
+                                  </div>
+                                  <button onClick={saveAdd} className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white" style={{ background: (!nmMatchForm.date || !nmMatchForm.time) ? "#c4c7c7" : "#2653d4" }}>Save match</button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
                     {/* Row 2: Streak (+ future cards) */}
                     <div style={{ display: "flex", gap: 10 }}>
                       {(() => {
@@ -1412,7 +1596,7 @@ export default function ProfilePage() {
                         ];
                         const stier = [...STIERS].reverse().find(t => streak >= t.min) ?? STIERS[0];
                         return (
-                          <button onClick={() => { setStreakPanelOpen(o => !o); setDayTypeInfoOpen(false); setPanelSchedOpen(false); }}
+                          <button onClick={() => { setStreakPanelOpen(o => !o); setDayTypeInfoOpen(false); setPanelSchedOpen(false); setNextMatchPanelOpen(false); }}
                             style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", maxWidth: "calc((100% - 20px) / 3)" }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
