@@ -1656,19 +1656,27 @@ export default function ProfilePage() {
                       {/* Hydration */}
                       {(() => {
                         const todayYMD2 = new Date().toISOString().slice(0, 10);
+                        const LITRE_ML: Record<string, number> = { "<1L": 750, "1–1.5L": 1250, "1.5–2L": 1750, "2–2.5L": 2250, "2.5–3L": 2750, "3L+": 3000 };
                         const hq = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null"); } catch { return null; } })();
                         const hLogs: HydrationEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch { return []; } })();
                         const hasQuick = hq?.date === todayYMD2 && typeof hq.ml === "number" && hq.ml > 0;
-                        const displayMl = hasQuick ? hq.ml : null;
-                        const displayLitres = !hasQuick && hLogs.length > 0 && new Date(hLogs[0].ts).toISOString().slice(0, 10) === todayYMD2 ? hLogs[0].litres : null;
-                        const hasData = displayMl !== null || displayLitres !== null;
+                        let ml: number = hasQuick ? hq.ml : 0;
+                        if (!hasQuick) {
+                          const todayLog = hLogs.find(e => new Date(e.ts).toISOString().slice(0, 10) === todayYMD2);
+                          if (todayLog) ml = LITRE_ML[todayLog.litres] ?? 0;
+                        }
+                        if (ml === 0) {
+                          const morningLog = (() => { try { return JSON.parse(localStorage.getItem("padelop:morning-log") || "null"); } catch { return null; } })();
+                          if (morningLog?.date === todayYMD2 && morningLog?.waterOnWaking === true) ml = 500;
+                        }
+                        const hasData = ml > 0;
                         const color = "#0ea5e9";
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        const pct = displayMl !== null ? Math.min(displayMl / 2000, 1) : null;
-                        const centerText = displayMl !== null
-                          ? (displayMl >= 1000 ? `${(displayMl / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${displayMl}ml`)
-                          : displayLitres ?? "—";
-                        const subText = pct !== null ? `${Math.round(pct * 100)}% of 2L` : hasData ? "today" : "not logged";
+                        const pct = hasData ? Math.min(ml / 2000, 1) : null;
+                        const centerText = hasData
+                          ? (ml >= 1000 ? `${(ml / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${ml}ml`)
+                          : "—";
+                        const subText = pct !== null ? `${Math.round(pct * 100)}% of 2L` : "not logged";
                         return (
                           <button onClick={() => { setHydrationPanelOpen(o => !o); setStreakPanelOpen(false); setFormScorePanelOpen(false); setDayTypeInfoOpen(false); setPanelSchedOpen(false); setNextMatchPanelOpen(false); }}
                             style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}>
@@ -1778,14 +1786,22 @@ export default function ProfilePage() {
                     {/* Hydration panel */}
                     {hydrationPanelOpen && (() => {
                       const todayYMD3 = new Date().toISOString().slice(0, 10);
+                      const LITRE_ML2: Record<string, number> = { "<1L": 750, "1–1.5L": 1250, "1.5–2L": 1750, "2–2.5L": 2250, "2.5–3L": 2750, "3L+": 3000 };
                       const hq = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null"); } catch { return null; } })();
                       const hLogs: HydrationEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch { return []; } })();
                       const hasQuick = hq?.date === todayYMD3 && typeof hq.ml === "number" && hq.ml > 0;
-                      const ml: number | null = hasQuick ? hq.ml : null;
+                      let ml: number = hasQuick ? hq.ml : 0;
                       const todayLog = hLogs.find(e => new Date(e.ts).toISOString().slice(0, 10) === todayYMD3) ?? null;
+                      if (!hasQuick) {
+                        if (todayLog) ml = LITRE_ML2[todayLog.litres] ?? 0;
+                      }
+                      if (ml === 0) {
+                        const morningLog = (() => { try { return JSON.parse(localStorage.getItem("padelop:morning-log") || "null"); } catch { return null; } })();
+                        if (morningLog?.date === todayYMD3 && morningLog?.waterOnWaking === true) ml = 500;
+                      }
                       const target = 2000;
-                      const pct = ml !== null ? Math.min(ml / target, 1) : null;
-                      const displayMl = ml !== null ? (ml >= 1000 ? `${(ml / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${ml}ml`) : todayLog?.litres ?? null;
+                      const pct = ml > 0 ? Math.min(ml / target, 1) : null;
+                      const displayMl = ml > 0 ? (ml >= 1000 ? `${(ml / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${ml}ml`) : null;
                       return (
                         <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
                           <div style={{ padding: "18px 18px 16px" }}>

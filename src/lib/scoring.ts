@@ -752,23 +752,23 @@ export function computeFormScore(): FormScore {
   } catch {}
 
   // Component 5: Hydration (10%)
-  // Prefer hydration-quick today (ml vs 2000ml target).
-  // Fall back to hydration-logs litres string (3-day average).
+  // Same three-step fallback as home8: quick tracker → litres log → waterOnWaking seed.
   let hydration: number | null = null;
   try {
+    const LITRE_ML: Record<string, number> = { "<1L": 750, "1–1.5L": 1250, "1.5–2L": 1750, "2–2.5L": 2250, "2.5–3L": 2750, "3L+": 3000 };
     const hq = JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null");
-    if (hq?.date === todayYMD && typeof hq.ml === "number" && hq.ml > 0) {
-      hydration = Math.round(c01(hq.ml / 2000) * 100);
-    } else {
-      const LITRE_SCORE: Record<string, number> = {
-        "<1L": 20, "1–1.5L": 40, "1.5–2L": 60, "2–2.5L": 80, "2.5–3L": 90, "3L+": 100,
-      };
+    const hasQuick = hq?.date === todayYMD && typeof hq.ml === "number" && hq.ml > 0;
+    let ml = hasQuick ? (hq.ml as number) : 0;
+    if (!hasQuick) {
       const logs = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]") as HydrationEntry[];
-      const recent = logs.slice(0, 3);
-      if (recent.length > 0) {
-        hydration = Math.round(recent.reduce((sum, e) => sum + (LITRE_SCORE[e.litres] ?? 50), 0) / recent.length);
-      }
+      const todayLog = logs.find(e => new Date(e.ts).toISOString().slice(0, 10) === todayYMD);
+      if (todayLog) ml = LITRE_ML[todayLog.litres] ?? 0;
     }
+    if (ml === 0) {
+      const mLog = JSON.parse(localStorage.getItem("padelop:morning-log") || "null");
+      if (mLog?.date === todayYMD && mLog?.waterOnWaking === true) ml = 500;
+    }
+    if (ml > 0) hydration = Math.round(c01(ml / 2000) * 100);
   } catch {}
 
   // Weighted average — null components redistribute their weight to present ones
