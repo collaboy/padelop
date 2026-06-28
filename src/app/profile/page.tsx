@@ -473,6 +473,8 @@ export default function ProfilePage() {
   // Profile
   const [profile, setProfile] = useState<Profile>(EMPTY);
   const [saved, setSaved]     = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const isAdmin = userEmail === "eddievd@outlook.com";
 
   // Matches
   const [logSheetOpen, setLogSheetOpen]       = useState(false);
@@ -781,6 +783,14 @@ export default function ProfilePage() {
       window.removeEventListener("padelop:sync-done", loadAll);
       document.removeEventListener("visibilitychange", onVisible);
     };
+  }, []);
+
+  useEffect(() => {
+    import("@/lib/supabase/client").then(({ createClient }) => {
+      createClient().auth.getUser().then(({ data: { user } }) => {
+        if (user?.email) setUserEmail(user.email);
+      });
+    });
   }, []);
 
   // Schedule clock tick
@@ -1707,7 +1717,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
               )}
-              <button
+              {isAdmin && <><button
                 onClick={() => { setProfileInsightsOpen(o => !o); setProfileMatchesOpen(false); setProfileCardOpen(false); setProfileGearOpen(false); }}
                 style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", borderTop: "1px solid #f4f4f6", cursor: "pointer" }}
               >
@@ -2206,6 +2216,7 @@ export default function ProfilePage() {
 
                 </div>
               )}
+              </>}
               <button
                 onClick={() => { setProfileMatchesOpen(o => !o); setProfileInsightsOpen(false); setProfileCardOpen(false); setProfileGearOpen(false); }}
                 style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", borderTop: "1px solid #f4f4f6", cursor: "pointer" }}
