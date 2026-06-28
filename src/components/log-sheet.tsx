@@ -586,8 +586,10 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
             const existing = hq?.date === todayYMD ? (hq.ml ?? 0) : 0;
             if (existing < 500) {
               localStorage.setItem("padelop:hydration-quick", JSON.stringify({ date: todayYMD, ml: 500 }));
-              seedHydrationToDb(todayYMD, 500); // ON CONFLICT DO NOTHING — never overwrites a real value
             }
+            // Always attempt DB seed — ignoreDuplicates=true won't overwrite a real value,
+            // but without this, a phone-side localStorage >= 500 would skip the DB write entirely
+            seedHydrationToDb(todayYMD, 500);
           } catch {}
           window.dispatchEvent(new Event("storage"));
         }
