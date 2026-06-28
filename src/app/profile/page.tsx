@@ -1176,52 +1176,52 @@ export default function ProfilePage() {
           {/* Profile card v2 — ring style (comparison) */}
           {(() => {
             const ff2 = "-apple-system, BlinkMacSystemFont, sans-serif";
-            // Ring geometry: circle at r=112, stroke-width=50 → outer edge=137, inner edge=87
-            // Ring geometry: r=112, stroke-width=46 → outer edge=135, inner edge=89
+            // Ring geometry: r=112, strokeWidth=42 → outer=133, inner=91
+            // Bottom arc: full 180° half-circle (9→3 o'clock, 352px) to fit all 4 items
             const bottomItems = [
               profile.level    ? `LVL ${profile.level}` : null,
               profile.position ? profile.position.toUpperCase() : null,
               profile.hand     ? `${profile.hand.toUpperCase()}-HANDED` : null,
               profile.playingSince ? `SINCE ${profile.playingSince}` : null,
-            ].filter(Boolean).join("  ·  ");
+            ].filter(Boolean).join(" · ");
             return (
               <div style={{ display: "flex", justifyContent: "center", padding: "8px 0 4px" }}>
                 <svg viewBox="0 0 300 300" width="75%" style={{ maxWidth: 280, display: "block", overflow: "visible" }}>
                   <defs>
                     <clipPath id="pc2_imgClip">
-                      <circle cx="150" cy="150" r="89" />
+                      <circle cx="150" cy="150" r="91" />
                     </clipPath>
-                    {/* NAME: 10 o'clock → 2 o'clock, clockwise through 12 */}
+                    {/* NAME: 10 o'clock → 2 o'clock, CW through 12 */}
                     <path id="pc2_nameArc" d="M 53,94 A 112,112 0 0,1 247,94" />
-                    {/* BOTTOM: 8 o'clock → 4 o'clock, counter-clockwise through 6 (reads L→R) */}
-                    <path id="pc2_bottomArc" d="M 53,206 A 112,112 0 0,0 247,206" />
+                    {/* BOTTOM: 9 o'clock → 3 o'clock, CCW through 6 (full 180°, 352px, reads L→R) */}
+                    <path id="pc2_bottomArc" d="M 38,150 A 112,112 0 0,0 262,150" />
                   </defs>
 
                   {/* Black ring */}
-                  <circle cx="150" cy="150" r="112" fill="none" stroke="#111" strokeWidth="46" />
+                  <circle cx="150" cy="150" r="112" fill="none" stroke="#111" strokeWidth="42" />
 
                   {/* Inner fill + image */}
                   {profile.avatar ? (
-                    <image href={profile.avatar} x="61" y="61" width="178" height="178"
+                    <image href={profile.avatar} x="59" y="59" width="182" height="182"
                       clipPath="url(#pc2_imgClip)" preserveAspectRatio="xMidYMid slice" />
                   ) : (
                     <>
-                      <circle cx="150" cy="150" r="89" fill="#2653d4" />
+                      <circle cx="150" cy="150" r="91" fill="#2653d4" />
                       <text x="150" y="164" textAnchor="middle" fontSize="46" fontWeight="800"
                         fill="white" fontFamily={ff2}>{initials(profile.name)}</text>
                     </>
                   )}
 
-                  {/* NAME — top arc */}
-                  <text fontSize="17" fontWeight="700" letterSpacing="2.5" fill="white" fontFamily={ff2}>
+                  {/* NAME — top arc, dy centers text vertically in the ring */}
+                  <text fontSize="18" fontWeight="700" letterSpacing="2.5" fill="white" fontFamily={ff2} dy="6">
                     <textPath href="#pc2_nameArc" startOffset="50%" textAnchor="middle">
                       {(profile.name || "YOUR NAME").toUpperCase()}
                     </textPath>
                   </text>
 
-                  {/* LEVEL · WALL · HAND · SINCE — bottom arc */}
+                  {/* LEVEL · WALL · HAND · SINCE — full bottom half-circle arc */}
                   {bottomItems && (
-                    <text fontSize="11.5" fontWeight="600" letterSpacing="1.2" fill="white" fontFamily={ff2}>
+                    <text fontSize="10" fontWeight="600" letterSpacing="0.8" fill="white" fontFamily={ff2} dy="4">
                       <textPath href="#pc2_bottomArc" startOffset="50%" textAnchor="middle">
                         {bottomItems}
                       </textPath>
