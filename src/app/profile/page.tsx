@@ -1173,6 +1173,84 @@ export default function ProfilePage() {
             </button>
           </div>
 
+          {/* Profile card v2 — ring style (comparison) */}
+          {(() => {
+            const ff2 = "-apple-system, BlinkMacSystemFont, sans-serif";
+            // Ring geometry: circle at r=112, stroke-width=50 → outer edge=137, inner edge=87
+            const bottomItems = [
+              profile.level   ? `LVL ${profile.level}` : null,
+              profile.position ? profile.position.toUpperCase() : null,
+            ].filter(Boolean).join("  ·  ");
+            return (
+              <div style={{ display: "flex", justifyContent: "center", padding: "8px 0 4px" }}>
+                <svg viewBox="0 0 300 300" width="75%" style={{ maxWidth: 280, display: "block", overflow: "visible" }}>
+                  <defs>
+                    <clipPath id="pc2_imgClip">
+                      <circle cx="150" cy="150" r="86" />
+                    </clipPath>
+                    {/* NAME: 10 o'clock → 2 o'clock, clockwise through 12 */}
+                    <path id="pc2_nameArc" d="M 53,94 A 112,112 0 0,1 247,94" />
+                    {/* BOTTOM: 8 o'clock → 4 o'clock, counter-clockwise through 6 (reads L→R) */}
+                    <path id="pc2_bottomArc" d="M 53,206 A 112,112 0 0,0 247,206" />
+                    {/* LEFT: 8 o'clock → 10 o'clock, clockwise through 9 (reads upward) */}
+                    <path id="pc2_leftArc" d="M 53,206 A 112,112 0 0,1 53,94" />
+                    {/* RIGHT: 2 o'clock → 4 o'clock, clockwise through 3 (reads downward) */}
+                    <path id="pc2_rightArc" d="M 247,94 A 112,112 0 0,1 247,206" />
+                  </defs>
+
+                  {/* Black ring */}
+                  <circle cx="150" cy="150" r="112" fill="none" stroke="#111" strokeWidth="50" />
+
+                  {/* Inner fill + image */}
+                  {profile.avatar ? (
+                    <image href={profile.avatar} x="64" y="64" width="172" height="172"
+                      clipPath="url(#pc2_imgClip)" preserveAspectRatio="xMidYMid slice" />
+                  ) : (
+                    <>
+                      <circle cx="150" cy="150" r="86" fill="#2653d4" />
+                      <text x="150" y="164" textAnchor="middle" fontSize="46" fontWeight="800"
+                        fill="white" fontFamily={ff2}>{initials(profile.name)}</text>
+                    </>
+                  )}
+
+                  {/* NAME — top arc */}
+                  <text fontSize="13.5" fontWeight="700" letterSpacing="2" fill="white" fontFamily={ff2}>
+                    <textPath href="#pc2_nameArc" startOffset="50%" textAnchor="middle">
+                      {(profile.name || "YOUR NAME").toUpperCase()}
+                    </textPath>
+                  </text>
+
+                  {/* LEVEL + WALL — bottom arc (reads naturally L→R) */}
+                  {bottomItems && (
+                    <text fontSize="9.5" fontWeight="600" letterSpacing="1.2" fill="white" fontFamily={ff2}>
+                      <textPath href="#pc2_bottomArc" startOffset="50%" textAnchor="middle">
+                        {bottomItems}
+                      </textPath>
+                    </text>
+                  )}
+
+                  {/* HAND — left arc (reads upward) */}
+                  {profile.hand && (
+                    <text fontSize="9" fontWeight="600" letterSpacing="1" fill="white" fontFamily={ff2}>
+                      <textPath href="#pc2_leftArc" startOffset="50%" textAnchor="middle">
+                        {profile.hand.toUpperCase()}-HANDED
+                      </textPath>
+                    </text>
+                  )}
+
+                  {/* SINCE — right arc (reads downward) */}
+                  {profile.playingSince && (
+                    <text fontSize="9" fontWeight="600" letterSpacing="1" fill="white" fontFamily={ff2}>
+                      <textPath href="#pc2_rightArc" startOffset="50%" textAnchor="middle">
+                        SINCE {profile.playingSince}
+                      </textPath>
+                    </text>
+                  )}
+                </svg>
+              </div>
+            );
+          })()}
+
           {/* Profile card */}
           <div style={{ background: "#fff", borderRadius: 18, padding: "14px 16px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", gap: 12 }}>
             <button
