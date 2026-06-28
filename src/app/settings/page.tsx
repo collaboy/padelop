@@ -255,37 +255,21 @@ export default function SettingsPage() {
               : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             }
           </button>
-          {[
-            {
-              icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
-              label: "Privacy & Security",
-              sub: null,
-            },
-            {
-              icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
-              label: "Language",
-              sub: "English (US)",
-            },
-            {
-              icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
-              label: "Support Center",
-              sub: null,
-            },
-          ].map(({ icon, label, sub }) => (
-            <button
-              key={label}
-              style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", borderTop: "1px solid #f4f4f6", cursor: "pointer" }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <span style={{ color: "var(--c-text-dim)" }}>{icon}</span>
-                <div style={{ textAlign: "left" }}>
-                  <span className="t-ui" style={{ color: "var(--c-text)", display: "block" }}>{label}</span>
-                  {sub && <span className="t-caption" style={{ color: "var(--c-hint)" }}>{sub}</span>}
-                </div>
+          <a
+            href="mailto:tiborboris@proton.me"
+            style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid #f4f4f6", textDecoration: "none" }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <span style={{ color: "var(--c-text-dim)" }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </span>
+              <div style={{ textAlign: "left" }}>
+                <span className="t-ui" style={{ color: "var(--c-text)", display: "block" }}>Contact Support</span>
+                <span className="t-caption" style={{ color: "var(--c-hint)" }}>tiborboris@proton.me</span>
               </div>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-          ))}
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
         </div>
       </section>
 
