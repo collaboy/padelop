@@ -1130,25 +1130,28 @@ export default function ProfilePage() {
           </div>
 
           {/* Profile card */}
-          <div style={{ background: "#fff", borderRadius: 18, padding: "20px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ background: "#fff", borderRadius: 18, padding: "14px 16px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", gap: 12 }}>
             <button
               onClick={() => setProfileTabEditOpen(o => !o)}
-              style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 16, width: "100%", textAlign: "left" }}
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 14, width: "100%", textAlign: "left" }}
             >
               {/* Photo */}
-              <div style={{ flex: "0 0 44%", aspectRatio: "1/1", borderRadius: "50%", background: "var(--c-blue)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+              <div style={{ flexShrink: 0, width: 62, height: 62, borderRadius: "50%", background: "var(--c-blue)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", border: "3px solid #00D455" }}>
                 {profile.avatar
-                  ? <img src={profile.avatar} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  : <span style={{ fontSize: "clamp(28px, 10vw, 44px)", fontWeight: 800, color: "#fff" }}>{initials(profile.name)}</span>
+                  ? <img src={profile.avatar} alt="avatar" style={{ width: 62, height: 62, objectFit: "cover", objectPosition: "center", display: "block", flexShrink: 0 }} />
+                  : <span style={{ fontSize: 22, fontWeight: 800, color: "#fff" }}>{initials(profile.name)}</span>
                 }
               </div>
               {/* Identity */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1, minWidth: 0 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2, flex: 1, minWidth: 0 }}>
                 <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, letterSpacing: "-0.02em" }}>{profile.name || "Your name"}</p>
-                {profile.position && <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "var(--c-teal)" }}>{profile.position}</p>}
-                {profile.level && <span style={{ alignSelf: "flex-start", fontSize: 11, fontWeight: 700, color: "var(--c-blue)", background: "var(--c-blue-tint)", padding: "3px 9px", borderRadius: 20 }}>{profile.level}</span>}
+                {(profile.position || profile.level) && (
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#6b7280" }}>
+                    {[profile.position, profile.level].filter(Boolean).join(" · ")}
+                  </p>
+                )}
                 {(profile.playingSince || profile.hand) && (
-                  <p style={{ margin: "4px 0 0", fontSize: 11, color: "#9aa0a6", fontWeight: 500 }}>
+                  <p style={{ margin: 0, fontSize: 12, color: "#9aa0a6", fontWeight: 400 }}>
                     {[profile.playingSince ? `Since ${profile.playingSince}` : null, profile.hand ? `${profile.hand}-handed` : null].filter(Boolean).join(" · ")}
                   </p>
                 )}
@@ -1269,14 +1272,14 @@ export default function ProfilePage() {
                           return (
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs>
-                                <path id="dayTypeTopArc" d="M 30,70 A 76,76 0 0,1 170,70" />
+                                <path id="dayTypeTopArc" d="M 30,76 A 76,76 0 0,1 170,76" />
                               </defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
                               <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: panelDayColor, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
                                 <textPath href="#dayTypeTopArc" startOffset="50%" textAnchor="middle">DAY TYPE</textPath>
                               </text>
                               <text
-                                x="100" y={dayWord ? "92" : "108"}
+                                x="100" y={dayWord ? "93" : "108"}
                                 textAnchor="middle"
                                 dominantBaseline="middle"
                                 fontSize="24"
@@ -1287,18 +1290,17 @@ export default function ProfilePage() {
                               </text>
                               {dayWord && (
                                 <text
-                                  x="100" y="124"
+                                  x="100" y="123"
                                   textAnchor="middle"
+                                  dominantBaseline="middle"
                                   fontSize="20"
-                                  fontWeight="600"
-                                  style={{ fill: panelDayColor, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", opacity: 0.65 } as React.CSSProperties}
+                                  fontWeight="800"
+                                  style={{ fill: panelDayColor, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}
                                 >
                                   {dayWord}
                                 </text>
                               )}
-                              <g style={{ transform: dayTypeInfoOpen ? "rotate(180deg)" : "none", transformOrigin: "100px 163px", transition: "transform 0.2s" } as React.CSSProperties}>
-                                <path d="M 88,157 L 100,169 L 112,157" fill="none" stroke={panelDayColor} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.45" />
-                              </g>
+                              <circle cx="100" cy="188" r="4" fill={panelDayColor} opacity={dayTypeInfoOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
                             </svg>
                           );
                         })()}
@@ -1311,14 +1313,14 @@ export default function ProfilePage() {
                       >
                         <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                           <defs>
-                            <path id="goalsTextArc" d="M 30,70 A 76,76 0 0,1 170,70" />
+                            <path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" />
                           </defs>
                           <circle cx="100" cy="100" r="99" fill="white" />
                           <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "var(--c-label)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
                             <textPath href="#goalsTextArc" startOffset="50%" textAnchor="middle">TODAY&apos;S GOALS</textPath>
                           </text>
                           <text
-                            x="100" y="112"
+                            x="100" y="108"
                             textAnchor="middle"
                             dominantBaseline="middle"
                             fontSize={pct === 100 ? "44" : "36"}
@@ -1379,14 +1381,14 @@ export default function ProfilePage() {
                           >
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs>
-                                <path id="streakTopArc" d="M 30,70 A 76,76 0 0,1 170,70" />
+                                <path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" />
                               </defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
                               <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
                                 <textPath href="#streakTopArc" startOffset="50%" textAnchor="middle">{stier.label.toUpperCase()}</textPath>
                               </text>
                               <text
-                                x="100" y="105"
+                                x="100" y="108"
                                 textAnchor="middle"
                                 dominantBaseline="middle"
                                 fontSize={streak >= 100 ? "34" : streak >= 10 ? "40" : "46"}
@@ -1396,7 +1398,7 @@ export default function ProfilePage() {
                                 {streak > 0 ? streak : "—"}
                               </text>
                               <text
-                                x="100" y="140"
+                                x="100" y="152"
                                 textAnchor="middle"
                                 fontSize="20"
                                 fontWeight="600"
