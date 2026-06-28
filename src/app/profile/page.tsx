@@ -1277,7 +1277,11 @@ export default function ProfilePage() {
               ];
               return (
                 <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-                  {total > 0 && (
+                  {total > 0 && (() => {
+                    // Add new panel states here to extend dimming to future circles
+                    const anyOpen = nextMatchPanelOpen || dayTypeInfoOpen || panelSchedOpen || streakPanelOpen || formScorePanelOpen || hydrationPanelOpen;
+                    const dim = (active: boolean) => ({ opacity: anyOpen && !active ? 0.3 : 1, transition: "opacity 0.2s" });
+                    return (
                     <>
                     {/* Row 1: Next Match · Day Type · Today's Goals */}
                     <div style={{ display: "flex", gap: 10 }}>
@@ -1292,7 +1296,7 @@ export default function ProfilePage() {
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                         return (
                           <button onClick={() => { setNextMatchPanelOpen(o => !o); setDayTypeInfoOpen(false); setPanelSchedOpen(false); setStreakPanelOpen(false); }}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}>
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(nextMatchPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 4px 20px rgba(38,83,212,0.35))", display: "block" }}>
                               <defs><path id="nextMatchTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#2653d4" />
@@ -1318,7 +1322,7 @@ export default function ProfilePage() {
 
                       {/* Day Type */}
                       <button onClick={() => { setDayTypeInfoOpen(o => !o); setPanelSchedOpen(false); setStreakPanelOpen(false); setNextMatchPanelOpen(false); }}
-                        style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}>
+                        style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(dayTypeInfoOpen) }}>
                         {(() => {
                           const parts = panelDayLabel.split(" ");
                           const mainLabel = parts.length > 1 ? parts.slice(0, -1).join(" ") : panelDayLabel;
@@ -1348,7 +1352,7 @@ export default function ProfilePage() {
 
                       {/* Today's Goals */}
                       <button onClick={() => { setPanelSchedOpen(o => !o); setDayTypeInfoOpen(false); setStreakPanelOpen(false); setNextMatchPanelOpen(false); }}
-                        style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}>
+                        style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(panelSchedOpen) }}>
                         <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                           <defs><path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                           <circle cx="100" cy="100" r="99" fill="white" />
@@ -1602,7 +1606,7 @@ export default function ProfilePage() {
                         const stier = [...STIERS].reverse().find(t => streak >= t.min) ?? STIERS[0];
                         return (
                           <button onClick={() => { setStreakPanelOpen(o => !o); setDayTypeInfoOpen(false); setPanelSchedOpen(false); setNextMatchPanelOpen(false); setFormScorePanelOpen(false); setHydrationPanelOpen(false); }}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}>
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(streakPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1631,7 +1635,7 @@ export default function ProfilePage() {
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                         return (
                           <button onClick={() => { setFormScorePanelOpen(o => !o); setStreakPanelOpen(false); setDayTypeInfoOpen(false); setPanelSchedOpen(false); setNextMatchPanelOpen(false); setHydrationPanelOpen(false); }}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}>
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(formScorePanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="formScoreArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1679,7 +1683,7 @@ export default function ProfilePage() {
                         const subText = pct !== null ? `${Math.round(pct * 100)}% of 2L` : "not logged";
                         return (
                           <button onClick={() => { setHydrationPanelOpen(o => !o); setStreakPanelOpen(false); setFormScorePanelOpen(false); setDayTypeInfoOpen(false); setPanelSchedOpen(false); setNextMatchPanelOpen(false); }}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}>
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(hydrationPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="hydrationArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1830,7 +1834,8 @@ export default function ProfilePage() {
                       );
                     })()}
 </>
-                  )}
+                    );
+                  })()}
                 </div>
                 );
               })()}
