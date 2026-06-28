@@ -1266,19 +1266,19 @@ export default function ProfilePage() {
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={panelDayColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, transition: "transform 0.2s", transform: dayTypeInfoOpen ? "rotate(180deg)" : "none" }}><polyline points="6 9 12 15 18 9"/></svg>
                       </button>
 
-                      {/* Right tile — Today's Goals */}
+                      {/* Right tile — Today's Goals (circle) */}
                       <button
                         onClick={() => setPanelSchedOpen(o => !o)}
-                        style={{ flex: 1, aspectRatio: "1/1", background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between", padding: "16px 12px 20px" }}
+                        style={{ flex: 1, aspectRatio: "1/1", background: "#fff", borderRadius: "50%", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-between", padding: "18px 16px 0", overflow: "hidden" }}
                       >
                         <span style={{ fontSize: 11, fontWeight: 700, color: "var(--c-label)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Today&apos;s Goals</span>
                         <span style={{ fontSize: "clamp(28px, 9vw, 40px)", fontWeight: 800, color: pct === 100 ? "#00D455" : "var(--c-text)", lineHeight: 1, letterSpacing: "-0.02em" }}>
                           {pct === 100 ? "✓" : `${done}/${total}`}
                         </span>
-                        <div style={{ width: "100%", display: "flex", gap: 3 }}>
+                        <div style={{ width: "100%", display: "flex", gap: 2, paddingBottom: 0 }}>
                           {schedule.map(item => {
                             const isDone = todayDoneSet.has(item.title);
-                            return <div key={item.title} style={{ flex: 1, height: 5, borderRadius: 3, background: isDone ? item.color : "#e0e2e5", transition: "background 0.3s" }} />;
+                            return <div key={item.title} style={{ flex: 1, height: 10, background: isDone ? item.color : "#e0e2e5", transition: "background 0.3s" }} />;
                           })}
                         </div>
                       </button>
