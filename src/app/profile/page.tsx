@@ -1185,6 +1185,9 @@ export default function ProfilePage() {
               profile.playingSince ? `SINCE ${profile.playingSince}` : null,
             ].filter(Boolean).join(" · ");
             return (
+              <>
+              <button onClick={() => setProfileTabEditOpen(o => !o)}
+                style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "block", width: "100%" }}>
               <div style={{ display: "flex", justifyContent: "center", padding: "8px 0 4px" }}>
                 <svg viewBox="0 0 300 300" width="96%" style={{ maxWidth: 400, display: "block", overflow: "visible" }}>
                   <defs>
@@ -1229,113 +1232,85 @@ export default function ProfilePage() {
                   )}
                 </svg>
               </div>
+              </button>
+              {profileTabEditOpen && (
+                <div style={{ background: "#fff", borderRadius: 18, padding: "14px 16px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", gap: 16 }}>
+                  <label htmlFor="avatar-upload2" className="cursor-pointer flex items-center gap-3 active:opacity-70 transition-opacity">
+                    <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#f0f4ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--c-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </div>
+                    <span className="t-ui" style={{ color: "var(--c-blue)" }}>Change Photo</span>
+                    <input id="avatar-upload2" type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
+                  </label>
+                  <div>
+                    <p className="t-label text-c-hint mb-2">Your name</p>
+                    <input type="text" value={profile.name} onChange={e => setField("name", e.target.value)} placeholder="e.g. Eddie"
+                      className="t-ui w-full px-4 py-3 rounded-2xl border-2 border-c-line text-c-text outline-none focus:border-c-blue transition-colors bg-c-bg-input focus:bg-white" />
+                  </div>
+                  <div>
+                    <p className="t-label text-c-hint mb-2">Playing since</p>
+                    <select value={profile.playingSince} onChange={e => setField("playingSince", e.target.value)}
+                      className="t-ui w-full px-4 py-3 rounded-2xl border-2 border-c-line text-c-text outline-none focus:border-c-blue transition-colors bg-c-bg-input focus:bg-white">
+                      <option value="">Select year</option>
+                      {Array.from({ length: new Date().getFullYear() - 1989 }, (_, i) => new Date().getFullYear() - i).map(y => (
+                        <option key={y} value={String(y)}>{y}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+                      <p className="t-label text-c-hint">Padel level</p>
+                      <span className="t-heading" style={{ color: profile.level ? "var(--c-blue)" : "var(--c-disabled)", lineHeight: 1 }}>{profile.level || "—"}</span>
+                    </div>
+                    <input type="range" min={0} max={LEVELS.length - 1} step={1}
+                      value={LEVELS.indexOf(profile.level) >= 0 ? LEVELS.indexOf(profile.level) : 0}
+                      onChange={e => setField("level", LEVELS[parseInt(e.target.value)])}
+                      className="w-full" style={{ accentColor: "var(--c-blue)", height: 4, cursor: "pointer" }} />
+                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
+                      <span className="t-tag font-medium" style={{ color: "#b0b8c1" }}>1.0</span>
+                      <span className="t-tag font-medium" style={{ color: "#b0b8c1" }}>5.0</span>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="t-label text-c-hint mb-2">Preferred position</p>
+                    <div className="flex gap-2">
+                      {POSITIONS.map(pos => {
+                        const sel = profile.position === pos;
+                        return (
+                          <button key={pos} onClick={() => setField("position", pos)}
+                            className="t-caption flex-1 py-2 rounded-xl border-2 font-bold transition-all active:scale-95"
+                            style={{ borderColor: sel ? "var(--c-blue)" : "var(--c-line)", background: sel ? "var(--c-blue-tint)" : "var(--c-bg-input)", color: sel ? "var(--c-blue)" : "var(--c-text-sub)" }}>
+                            {pos}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="t-label text-c-hint mb-2">Dominant hand</p>
+                    <div className="flex gap-2">
+                      {HANDS.map(h => {
+                        const sel = profile.hand === h;
+                        return (
+                          <button key={h} onClick={() => setField("hand", h)}
+                            className="t-body-sm flex-1 py-2 rounded-xl border-2 font-bold transition-all active:scale-95"
+                            style={{ borderColor: sel ? "var(--c-blue)" : "var(--c-line)", background: sel ? "var(--c-blue-tint)" : "var(--c-bg-input)", color: sel ? "var(--c-blue)" : "var(--c-text-sub)" }}>
+                            {h}-handed
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <button disabled={!canSave} onClick={() => { save(); setProfileTabEditOpen(false); }}
+                    className="t-ui w-full py-3.5 rounded-2xl font-bold transition-all active:scale-[0.98]"
+                    style={{ background: saved ? "var(--c-green)" : canSave ? "var(--c-blue)" : "var(--c-line)", color: canSave ? "#fff" : "#b0b3b3" }}>
+                    {saved ? "Saved ✓" : "Save profile"}
+                  </button>
+                </div>
+              )}
+              </>
             );
           })()}
-
-          {/* Profile card */}
-          <div style={{ background: "#fff", borderRadius: 18, padding: "14px 16px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", gap: 12 }}>
-            <button
-              onClick={() => setProfileTabEditOpen(o => !o)}
-              style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 14, width: "100%", textAlign: "left" }}
-            >
-              {/* Photo */}
-              <div style={{ flexShrink: 0, width: 62, height: 62, borderRadius: "50%", background: "var(--c-blue)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", }}>
-                {profile.avatar
-                  ? <img src={profile.avatar} alt="avatar" style={{ width: 62, height: 62, objectFit: "cover", objectPosition: "center", display: "block", flexShrink: 0 }} />
-                  : <span style={{ fontSize: 22, fontWeight: 800, color: "#fff" }}>{initials(profile.name)}</span>
-                }
-              </div>
-              {/* Identity */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 2, flex: 1, minWidth: 0 }}>
-                <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, letterSpacing: "-0.02em" }}>{profile.name || "Your name"}</p>
-                {(profile.position || profile.level) && (
-                  <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#6b7280" }}>
-                    {[profile.position, profile.level].filter(Boolean).join(" · ")}
-                  </p>
-                )}
-                {(profile.playingSince || profile.hand) && (
-                  <p style={{ margin: 0, fontSize: 12, color: "#9aa0a6", fontWeight: 400 }}>
-                    {[profile.playingSince ? `Since ${profile.playingSince}` : null, profile.hand ? `${profile.hand}-handed` : null].filter(Boolean).join(" · ")}
-                  </p>
-                )}
-              </div>
-            </button>
-            {profileTabEditOpen && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                <label htmlFor="avatar-upload2" className="cursor-pointer flex items-center gap-3 active:opacity-70 transition-opacity">
-                  <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#f0f4ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--c-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  </div>
-                  <span className="t-ui" style={{ color: "var(--c-blue)" }}>Change Photo</span>
-                  <input id="avatar-upload2" type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
-                </label>
-                <div>
-                  <p className="t-label text-c-hint mb-2">Your name</p>
-                  <input type="text" value={profile.name} onChange={e => setField("name", e.target.value)} placeholder="e.g. Eddie"
-                    className="t-ui w-full px-4 py-3 rounded-2xl border-2 border-c-line text-c-text outline-none focus:border-c-blue transition-colors bg-c-bg-input focus:bg-white" />
-                </div>
-                <div>
-                  <p className="t-label text-c-hint mb-2">Playing since</p>
-                  <select value={profile.playingSince} onChange={e => setField("playingSince", e.target.value)}
-                    className="t-ui w-full px-4 py-3 rounded-2xl border-2 border-c-line text-c-text outline-none focus:border-c-blue transition-colors bg-c-bg-input focus:bg-white">
-                    <option value="">Select year</option>
-                    {Array.from({ length: new Date().getFullYear() - 1989 }, (_, i) => new Date().getFullYear() - i).map(y => (
-                      <option key={y} value={String(y)}>{y}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
-                    <p className="t-label text-c-hint">Padel level</p>
-                    <span className="t-heading" style={{ color: profile.level ? "var(--c-blue)" : "var(--c-disabled)", lineHeight: 1 }}>{profile.level || "—"}</span>
-                  </div>
-                  <input type="range" min={0} max={LEVELS.length - 1} step={1}
-                    value={LEVELS.indexOf(profile.level) >= 0 ? LEVELS.indexOf(profile.level) : 0}
-                    onChange={e => setField("level", LEVELS[parseInt(e.target.value)])}
-                    className="w-full" style={{ accentColor: "var(--c-blue)", height: 4, cursor: "pointer" }} />
-                  <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-                    <span className="t-tag font-medium" style={{ color: "#b0b8c1" }}>1.0</span>
-                    <span className="t-tag font-medium" style={{ color: "#b0b8c1" }}>5.0</span>
-                  </div>
-                </div>
-                <div>
-                  <p className="t-label text-c-hint mb-2">Preferred position</p>
-                  <div className="flex gap-2">
-                    {POSITIONS.map(pos => {
-                      const sel = profile.position === pos;
-                      return (
-                        <button key={pos} onClick={() => setField("position", pos)}
-                          className="t-caption flex-1 py-2 rounded-xl border-2 font-bold transition-all active:scale-95"
-                          style={{ borderColor: sel ? "var(--c-blue)" : "var(--c-line)", background: sel ? "var(--c-blue-tint)" : "var(--c-bg-input)", color: sel ? "var(--c-blue)" : "var(--c-text-sub)" }}>
-                          {pos}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-                <div>
-                  <p className="t-label text-c-hint mb-2">Dominant hand</p>
-                  <div className="flex gap-2">
-                    {HANDS.map(h => {
-                      const sel = profile.hand === h;
-                      return (
-                        <button key={h} onClick={() => setField("hand", h)}
-                          className="t-body-sm flex-1 py-2 rounded-xl border-2 font-bold transition-all active:scale-95"
-                          style={{ borderColor: sel ? "var(--c-blue)" : "var(--c-line)", background: sel ? "var(--c-blue-tint)" : "var(--c-bg-input)", color: sel ? "var(--c-blue)" : "var(--c-text-sub)" }}>
-                          {h}-handed
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-                <button disabled={!canSave} onClick={() => { save(); setProfileTabEditOpen(false); }}
-                  className="t-ui w-full py-3.5 rounded-2xl font-bold transition-all active:scale-[0.98]"
-                  style={{ background: saved ? "var(--c-green)" : canSave ? "var(--c-blue)" : "var(--c-line)", color: canSave ? "#fff" : "#b0b3b3" }}>
-                  {saved ? "Saved ✓" : "Save profile"}
-                </button>
-              </div>
-            )}
-          </div>
 
           {panelSmartError && (
             <div style={{ background: "#fff5f5", border: "1.5px solid #fecaca", borderRadius: 12, padding: "10px 14px" }}>
