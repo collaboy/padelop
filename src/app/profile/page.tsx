@@ -1178,8 +1178,9 @@ export default function ProfilePage() {
             const ff2 = "-apple-system, BlinkMacSystemFont, sans-serif";
             // Ring geometry: circle at r=112, stroke-width=50 → outer edge=137, inner edge=87
             const bottomItems = [
-              profile.level   ? `LVL ${profile.level}` : null,
+              profile.level    ? `LVL ${profile.level}` : null,
               profile.position ? profile.position.toUpperCase() : null,
+              profile.playingSince ? `SINCE ${profile.playingSince}` : null,
             ].filter(Boolean).join("  ·  ");
             return (
               <div style={{ display: "flex", justifyContent: "center", padding: "8px 0 4px" }}>
@@ -1194,8 +1195,6 @@ export default function ProfilePage() {
                     <path id="pc2_bottomArc" d="M 53,206 A 112,112 0 0,0 247,206" />
                     {/* LEFT: 8 o'clock → 10 o'clock, clockwise through 9 (reads upward) */}
                     <path id="pc2_leftArc" d="M 53,206 A 112,112 0 0,1 53,94" />
-                    {/* RIGHT: 2 o'clock → 4 o'clock, clockwise through 3 (reads downward) */}
-                    <path id="pc2_rightArc" d="M 247,94 A 112,112 0 0,1 247,206" />
                   </defs>
 
                   {/* Black ring */}
@@ -1214,15 +1213,15 @@ export default function ProfilePage() {
                   )}
 
                   {/* NAME — top arc */}
-                  <text fontSize="13.5" fontWeight="700" letterSpacing="2" fill="white" fontFamily={ff2}>
+                  <text fontSize="16" fontWeight="700" letterSpacing="2.5" fill="white" fontFamily={ff2}>
                     <textPath href="#pc2_nameArc" startOffset="50%" textAnchor="middle">
                       {(profile.name || "YOUR NAME").toUpperCase()}
                     </textPath>
                   </text>
 
-                  {/* LEVEL + WALL — bottom arc (reads naturally L→R) */}
+                  {/* LEVEL · WALL · SINCE — bottom arc (reads naturally L→R) */}
                   {bottomItems && (
-                    <text fontSize="9.5" fontWeight="600" letterSpacing="1.2" fill="white" fontFamily={ff2}>
+                    <text fontSize="11" fontWeight="600" letterSpacing="1.2" fill="white" fontFamily={ff2}>
                       <textPath href="#pc2_bottomArc" startOffset="50%" textAnchor="middle">
                         {bottomItems}
                       </textPath>
@@ -1231,18 +1230,9 @@ export default function ProfilePage() {
 
                   {/* HAND — left arc (reads upward) */}
                   {profile.hand && (
-                    <text fontSize="9" fontWeight="600" letterSpacing="1" fill="white" fontFamily={ff2}>
+                    <text fontSize="11" fontWeight="600" letterSpacing="1" fill="white" fontFamily={ff2}>
                       <textPath href="#pc2_leftArc" startOffset="50%" textAnchor="middle">
                         {profile.hand.toUpperCase()}-HANDED
-                      </textPath>
-                    </text>
-                  )}
-
-                  {/* SINCE — right arc (reads downward) */}
-                  {profile.playingSince && (
-                    <text fontSize="9" fontWeight="600" letterSpacing="1" fill="white" fontFamily={ff2}>
-                      <textPath href="#pc2_rightArc" startOffset="50%" textAnchor="middle">
-                        SINCE {profile.playingSince}
                       </textPath>
                     </text>
                   )}
