@@ -297,24 +297,24 @@ export default function SettingsPage() {
       {/* Admin */}
       {userEmail.toLowerCase() === "evanderbijl@hotmail.com" && (
         <section>
-          <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px" }}>Admin</p>
-          <div style={{ background: "#fff", borderRadius: "var(--r-md)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
+          <p className="t-label" style={{ color: "#7c3aed", margin: "0 4px 10px" }}>Admin</p>
+          <div style={{ background: "#faf5ff", borderRadius: "var(--r-md)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid #e9d5ff" }}>
             {[
               { label: "Insights", sub: "Performance data & analytics", href: "/profile", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> },
             ].map(({ label, sub, href, icon }, i) => (
               <button
                 key={label}
                 onClick={() => router.push(href)}
-                style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", borderTop: i > 0 ? "1px solid var(--c-line-dim)" : "none", cursor: "pointer" }}
+                style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", borderTop: i > 0 ? "1px solid #ede9fe" : "none", cursor: "pointer" }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  <span style={{ color: "var(--c-text-dim)" }}>{icon}</span>
+                  <span style={{ color: "#7c3aed" }}>{icon}</span>
                   <div style={{ textAlign: "left" }}>
-                    <span className="t-ui" style={{ color: "var(--c-text)", display: "block" }}>{label}</span>
-                    <span className="t-caption" style={{ color: "var(--c-hint)" }}>{sub}</span>
+                    <span className="t-ui" style={{ color: "#7c3aed", display: "block" }}>{label}</span>
+                    <span className="t-caption" style={{ color: "#a78bfa" }}>{sub}</span>
                   </div>
                 </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4b5fd" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
               </button>
             ))}
           </div>
