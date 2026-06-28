@@ -249,37 +249,6 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      {/* Data Center */}
-      <section>
-        <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px" }}>Data Center</p>
-        <div style={{ background: "#fff", borderRadius: "var(--r-md)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
-          <button
-            onClick={() => router.push("/profile?tab=archive")}
-            style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", cursor: "pointer" }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <span style={{ color: "var(--c-text-dim)" }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              </span>
-              <span className="t-ui" style={{ color: "var(--c-text)" }}>Insights</span>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-          <button
-            onClick={() => router.push("/profile?tab=archive")}
-            style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", borderTop: "1px solid #f4f4f6", cursor: "pointer" }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <span style={{ color: "var(--c-text-dim)" }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
-              </span>
-              <span className="t-ui" style={{ color: "var(--c-text)" }}>Archive</span>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-        </div>
-      </section>
-
       {/* Preferences */}
       <section>
         <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px" }}>Preferences</p>
