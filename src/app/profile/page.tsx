@@ -526,14 +526,16 @@ export default function ProfilePage() {
 
   // Panel state (inline action panel below profile card)
   const [panelExpanded, setPanelExpanded] = useState(false);
-  const [panelSchedOpen, setPanelSchedOpen] = useState(false);
-  const [dayTypeInfoOpen, setDayTypeInfoOpen] = useState(false);
-  const [streakPanelOpen, setStreakPanelOpen] = useState(false);
+  const [openPanel, setOpenPanel] = useState<string | null>(null);
+  const nextMatchPanelOpen  = openPanel === 'nextMatch';
+  const dayTypeInfoOpen     = openPanel === 'dayType';
+  const panelSchedOpen      = openPanel === 'sched';
+  const streakPanelOpen     = openPanel === 'streak';
+  const formScorePanelOpen  = openPanel === 'formScore';
+  const hydrationPanelOpen  = openPanel === 'hydration';
+  const togglePanel = (name: string) => setOpenPanel(p => p === name ? null : name);
   const [formScore, setFormScore] = useState<FormScore | null>(null);
-  const [formScorePanelOpen, setFormScorePanelOpen] = useState(false);
-  const [hydrationPanelOpen, setHydrationPanelOpen] = useState(false);
   const [hydrationMl, setHydrationMl] = useState(0);
-  const [nextMatchPanelOpen, setNextMatchPanelOpen] = useState(false);
   const [nextMatchInfoMode, setNextMatchInfoMode] = useState<'edit'|'add'|null>(null);
   const [nmMatchForm, setNmMatchForm] = useState<MatchForm>(EMPTY_FORM);
   const nmUploadRef = useRef<HTMLInputElement>(null);
@@ -1300,7 +1302,7 @@ export default function ProfilePage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                   {total > 0 && (() => {
                     // Add new panel states here to extend dimming to future circles
-                    const anyOpen = nextMatchPanelOpen || dayTypeInfoOpen || panelSchedOpen || streakPanelOpen || formScorePanelOpen || hydrationPanelOpen;
+                    const anyOpen = openPanel !== null;
                     const dim = (active: boolean) => ({ opacity: anyOpen && !active ? 0.3 : 1, transition: "opacity 0.2s" });
                     return (
                     <>
@@ -1316,7 +1318,7 @@ export default function ProfilePage() {
                         const timeLabel = nextMatch?.time ?? "";
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                         return (
-                          <button onClick={() => { setNextMatchPanelOpen(o => !o); setDayTypeInfoOpen(false); setPanelSchedOpen(false); setStreakPanelOpen(false); }}
+                          <button onClick={() => togglePanel('nextMatch')}
                             style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(nextMatchPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 4px 20px rgba(38,83,212,0.35))", display: "block" }}>
                               <defs><path id="nextMatchTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
@@ -1342,7 +1344,7 @@ export default function ProfilePage() {
                       })()}
 
                       {/* Day Type */}
-                      <button onClick={() => { setDayTypeInfoOpen(o => !o); setPanelSchedOpen(false); setStreakPanelOpen(false); setNextMatchPanelOpen(false); }}
+                      <button onClick={() => togglePanel('dayType')}
                         style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(dayTypeInfoOpen) }}>
                         {(() => {
                           const parts = panelDayLabel.split(" ");
@@ -1372,7 +1374,7 @@ export default function ProfilePage() {
                       </button>
 
                       {/* Today's Goals */}
-                      <button onClick={() => { setPanelSchedOpen(o => !o); setDayTypeInfoOpen(false); setStreakPanelOpen(false); setNextMatchPanelOpen(false); }}
+                      <button onClick={() => togglePanel('sched')}
                         style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(panelSchedOpen) }}>
                         <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                           <defs><path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
@@ -1563,7 +1565,7 @@ export default function ProfilePage() {
                                   <button onClick={() => {
                                     if (!nextMatch) return;
                                     matchSaveList(upcomingMatches.filter(m => !(m.date === nextMatch.date && m.time === nextMatch.time)));
-                                    setNextMatchPanelOpen(false);
+                                    setOpenPanel(null);
                                     setNextMatchInfoMode(null);
                                   }} className="w-full py-3 rounded-2xl text-[14px] font-semibold" style={{ background: "#fef2f2", color: "#dc2626", border: "none", cursor: "pointer" }}>Delete match</button>
                                 </div>
@@ -1626,7 +1628,7 @@ export default function ProfilePage() {
                         ];
                         const stier = [...STIERS].reverse().find(t => streak >= t.min) ?? STIERS[0];
                         return (
-                          <button onClick={() => { setStreakPanelOpen(o => !o); setDayTypeInfoOpen(false); setPanelSchedOpen(false); setNextMatchPanelOpen(false); setFormScorePanelOpen(false); setHydrationPanelOpen(false); }}
+                          <button onClick={() => togglePanel('streak')}
                             style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(streakPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
@@ -1655,7 +1657,7 @@ export default function ProfilePage() {
                         const color = score === null ? "#9aa0a6" : score >= 70 ? "#16a34a" : score >= 50 ? "#d97706" : "#ef4444";
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                         return (
-                          <button onClick={() => { setFormScorePanelOpen(o => !o); setStreakPanelOpen(false); setDayTypeInfoOpen(false); setPanelSchedOpen(false); setNextMatchPanelOpen(false); setHydrationPanelOpen(false); }}
+                          <button onClick={() => togglePanel('formScore')}
                             style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(formScorePanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="formScoreArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
@@ -1690,7 +1692,7 @@ export default function ProfilePage() {
                           : "—";
                         const subText = pct !== null ? `${Math.round(pct * 100)}% of 2L` : "not logged";
                         return (
-                          <button onClick={() => { setHydrationPanelOpen(o => !o); setStreakPanelOpen(false); setFormScorePanelOpen(false); setDayTypeInfoOpen(false); setPanelSchedOpen(false); setNextMatchPanelOpen(false); }}
+                          <button onClick={() => togglePanel('hydration')}
                             style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(hydrationPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="hydrationArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
