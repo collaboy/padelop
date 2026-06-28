@@ -1177,9 +1177,11 @@ export default function ProfilePage() {
           {(() => {
             const ff2 = "-apple-system, BlinkMacSystemFont, sans-serif";
             // Ring geometry: circle at r=112, stroke-width=50 → outer edge=137, inner edge=87
+            // Ring geometry: r=112, stroke-width=46 → outer edge=135, inner edge=89
             const bottomItems = [
               profile.level    ? `LVL ${profile.level}` : null,
               profile.position ? profile.position.toUpperCase() : null,
+              profile.hand     ? `${profile.hand.toUpperCase()}-HANDED` : null,
               profile.playingSince ? `SINCE ${profile.playingSince}` : null,
             ].filter(Boolean).join("  ·  ");
             return (
@@ -1187,52 +1189,41 @@ export default function ProfilePage() {
                 <svg viewBox="0 0 300 300" width="75%" style={{ maxWidth: 280, display: "block", overflow: "visible" }}>
                   <defs>
                     <clipPath id="pc2_imgClip">
-                      <circle cx="150" cy="150" r="86" />
+                      <circle cx="150" cy="150" r="89" />
                     </clipPath>
                     {/* NAME: 10 o'clock → 2 o'clock, clockwise through 12 */}
                     <path id="pc2_nameArc" d="M 53,94 A 112,112 0 0,1 247,94" />
                     {/* BOTTOM: 8 o'clock → 4 o'clock, counter-clockwise through 6 (reads L→R) */}
                     <path id="pc2_bottomArc" d="M 53,206 A 112,112 0 0,0 247,206" />
-                    {/* LEFT: 8 o'clock → 10 o'clock, clockwise through 9 (reads upward) */}
-                    <path id="pc2_leftArc" d="M 53,206 A 112,112 0 0,1 53,94" />
                   </defs>
 
                   {/* Black ring */}
-                  <circle cx="150" cy="150" r="112" fill="none" stroke="#111" strokeWidth="50" />
+                  <circle cx="150" cy="150" r="112" fill="none" stroke="#111" strokeWidth="46" />
 
                   {/* Inner fill + image */}
                   {profile.avatar ? (
-                    <image href={profile.avatar} x="64" y="64" width="172" height="172"
+                    <image href={profile.avatar} x="61" y="61" width="178" height="178"
                       clipPath="url(#pc2_imgClip)" preserveAspectRatio="xMidYMid slice" />
                   ) : (
                     <>
-                      <circle cx="150" cy="150" r="86" fill="#2653d4" />
+                      <circle cx="150" cy="150" r="89" fill="#2653d4" />
                       <text x="150" y="164" textAnchor="middle" fontSize="46" fontWeight="800"
                         fill="white" fontFamily={ff2}>{initials(profile.name)}</text>
                     </>
                   )}
 
                   {/* NAME — top arc */}
-                  <text fontSize="16" fontWeight="700" letterSpacing="2.5" fill="white" fontFamily={ff2}>
+                  <text fontSize="17" fontWeight="700" letterSpacing="2.5" fill="white" fontFamily={ff2}>
                     <textPath href="#pc2_nameArc" startOffset="50%" textAnchor="middle">
                       {(profile.name || "YOUR NAME").toUpperCase()}
                     </textPath>
                   </text>
 
-                  {/* LEVEL · WALL · SINCE — bottom arc (reads naturally L→R) */}
+                  {/* LEVEL · WALL · HAND · SINCE — bottom arc */}
                   {bottomItems && (
-                    <text fontSize="11" fontWeight="600" letterSpacing="1.2" fill="white" fontFamily={ff2}>
+                    <text fontSize="11.5" fontWeight="600" letterSpacing="1.2" fill="white" fontFamily={ff2}>
                       <textPath href="#pc2_bottomArc" startOffset="50%" textAnchor="middle">
                         {bottomItems}
-                      </textPath>
-                    </text>
-                  )}
-
-                  {/* HAND — left arc (reads upward) */}
-                  {profile.hand && (
-                    <text fontSize="11" fontWeight="600" letterSpacing="1" fill="white" fontFamily={ff2}>
-                      <textPath href="#pc2_leftArc" startOffset="50%" textAnchor="middle">
-                        {profile.hand.toUpperCase()}-HANDED
                       </textPath>
                     </text>
                   )}
