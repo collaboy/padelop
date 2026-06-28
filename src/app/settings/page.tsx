@@ -295,7 +295,7 @@ export default function SettingsPage() {
       </section>
 
       {/* Admin */}
-      {userEmail === "eddievd@outlook.com" && (
+      {userEmail.toLowerCase() === "eddievd@outlook.com" && (
         <section>
           <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px" }}>Admin</p>
           <div style={{ background: "#fff", borderRadius: "var(--r-md)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)" }}>
