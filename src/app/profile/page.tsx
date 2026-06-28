@@ -474,7 +474,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile>(EMPTY);
   const [saved, setSaved]     = useState(false);
   const [userEmail, setUserEmail] = useState("");
-  const isAdmin = userEmail === "eddievd@outlook.com";
+  const isAdmin = userEmail.toLowerCase() === "evanderbijl@hotmail.com";
 
   // Matches
   const [logSheetOpen, setLogSheetOpen]       = useState(false);
