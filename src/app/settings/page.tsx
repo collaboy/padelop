@@ -289,6 +289,27 @@ export default function SettingsPage() {
         </div>
       </section>
 
+      {/* Log out */}
+      <section>
+        <form
+          action="/auth/signout"
+          method="post"
+          onSubmit={() => {
+            setSigningOut(true);
+            Object.keys(localStorage).filter(k => k.startsWith("padelop:")).forEach(k => localStorage.removeItem(k));
+          }}
+        >
+          <button
+            type="submit"
+            className="t-ui"
+            disabled={signingOut}
+            style={{ width: "100%", padding: "16px", color: signingOut ? "#fff" : "#ba1a1a", border: "1.5px solid rgba(186,26,26,0.2)", borderRadius: "var(--r-sm)", background: signingOut ? "#ba1a1a" : "#fff", cursor: signingOut ? "default" : "pointer", boxShadow: "var(--shadow-soft)", transition: "background 0.15s, color 0.15s" }}
+          >
+            {signingOut ? "Signing out…" : "Log Out"}
+          </button>
+        </form>
+      </section>
+
       {/* Danger zone */}
       <section>
         <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 4px 10px" }}>Danger Zone</p>
@@ -331,27 +352,6 @@ export default function SettingsPage() {
             </div>
           )}
         </div>
-      </section>
-
-      {/* Log out */}
-      <section>
-        <form
-          action="/auth/signout"
-          method="post"
-          onSubmit={() => {
-            setSigningOut(true);
-            Object.keys(localStorage).filter(k => k.startsWith("padelop:")).forEach(k => localStorage.removeItem(k));
-          }}
-        >
-          <button
-            type="submit"
-            className="t-ui"
-            disabled={signingOut}
-            style={{ width: "100%", padding: "16px", color: signingOut ? "#fff" : "#ba1a1a", border: "1.5px solid rgba(186,26,26,0.2)", borderRadius: "var(--r-sm)", background: signingOut ? "#ba1a1a" : "#fff", cursor: signingOut ? "default" : "pointer", boxShadow: "var(--shadow-soft)", transition: "background 0.15s, color 0.15s" }}
-          >
-            {signingOut ? "Signing out…" : "Log Out"}
-          </button>
-        </form>
       </section>
 
       <p className="t-caption" style={{ textAlign: "center", color: "var(--c-disabled)" }}>
