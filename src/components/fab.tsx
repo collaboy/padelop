@@ -216,7 +216,7 @@ export default function Fab() {
                     <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                   </button>
                 </div>
-                {isAdmin && <a href="/palt" style={{ display: "block", textAlign: "center", paddingTop: 10, fontSize: 13, fontWeight: 600, color: "#8a9096", textDecoration: "none", letterSpacing: "0.05em" }}>PALT</a>}
+                <a href="/palt" onClick={e => { e.preventDefault(); router.push("/palt"); }} style={{ display: "block", textAlign: "center", paddingTop: 10, fontSize: 13, fontWeight: 600, color: "#8a9096", textDecoration: "none", letterSpacing: "0.05em" }}>PALT</a>
 
                 {/* Log manually expanded */}
                 <div style={{ overflow: "hidden", maxHeight: fabExpanded ? 600 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
