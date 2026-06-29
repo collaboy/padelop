@@ -964,48 +964,8 @@ export default function Home8() {
             swipeDirRef.current = null;
           }}
         >
-          {/* Log panel */}
-          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingRight: 20, paddingLeft: 20 }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, transform: `translateX(${cardSnap === 'right' ? 50 : 0}px) translateY(calc(45dvh - 3 * (100vw - 40px) / 2 - 10px))`, transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
-              {/* Placeholder above */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "#fff", opacity: 0 }} />
-              {/* Main card */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "#fff", borderRadius: 24, marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-                  <div style={{ position: "relative", width: "60%", aspectRatio: "1 / 1" }}>
-                    <svg width="100%" height="100%" viewBox="0 0 160 160" style={{ display: "block", overflow: "visible" }}>
-                      <path d="M10 150 L10 10 L150 10 L150 150 L10 150" fill="none" stroke="#dce8f8" strokeWidth="5" strokeLinejoin="miter" />
-                      <path d="M10 150 L10 10 L150 10 L150 150 L10 150" fill="none" stroke="#3b9eff" strokeWidth="5" strokeLinejoin="miter"
-                        strokeDasharray="560" strokeDashoffset={breathDashOffset} />
-                    </svg>
-                    <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none", gap: "0.8vw" }}>
-                      <p style={{ fontSize: "clamp(16px, 5.25vw, 22px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>Breathe</p>
-                      <p style={{ fontSize: "clamp(11px, 3.5vw, 16px)", fontWeight: 500, color: "#9aa5b0", margin: 0, textAlign: "center", lineHeight: 1.3 }}>(4x4 box breath)</p>
-                    </div>
-                  </div>
-                  <div style={{ height: "clamp(24px, 6vw, 32px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    {(() => {
-                      const phases = [
-                        { label: "In (nose)" },
-                        { label: "Hold" },
-                        { label: "Out (mouth)" },
-                        { label: "Hold" },
-                      ];
-                      const p = phases[breathPhase];
-                      return (
-                        <p key={breathPhase} style={{ fontSize: "clamp(13px, 4vw, 18px)", color: "#3b9eff", margin: 0, lineHeight: 1, fontWeight: 600 }}>
-                          {p.label}
-                        </p>
-                      );
-                    })()}
-                  </div>
-                  <p style={{ fontSize: "clamp(10px, 2.8vw, 13px)", color: "#c8cdd3", margin: 0, textAlign: "center", lineHeight: 1.4 }}>Skip if you have a respiratory condition</p>
-                </div>
-              </div>
-              {/* Placeholder below */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "#fff", opacity: 0 }} />
-            </div>
-          </div>
+          {/* Log panel — emptied, content moved to top/bottom cards */}
+          <div style={{ width: "33.333%", flexShrink: 0, height: "100%" }} />
 
           {/* Carousel center — all schedule cards, doIdx in transform */}
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingLeft: 10, paddingRight: 10, position: "relative", zIndex: 2, overflow: "hidden" }}>
@@ -1021,58 +981,44 @@ export default function Home8() {
               {/* Structural spacer — keeps transform geometry intact */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", pointerEvents: "none" }} />
 
-              {/* Card 0: next match */}
+              {/* Card 0: hydration meter */}
               {(() => {
-                const today = now.toISOString().slice(0, 10);
+                const MAX = 3000;
+                const pct = Math.min(1, logHydrationMl / MAX);
+                const innerH = 118;
+                const fillH = pct * innerH;
+                const waterY = 130 - fillH;
+                const waveAmp = logHydrationMl > 0 ? 8 : 0;
+                const labelMl = logHydrationMl === 0 ? "Drink!" : logHydrationMl >= 1000 ? `${+(logHydrationMl / 1000).toFixed(1)}L` : `${logHydrationMl}ml`;
                 return (
-                  <div style={{ width: "100%", flexShrink: 0, height: "calc(100dvh - 120px)", borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px", zIndex: doIdx === -1 ? 2 : 1, pointerEvents: doIdx === -1 ? "auto" : "none", opacity: doIdx === -1 ? 1 : 0, transition: "opacity 0.3s" }}>
-                    {match ? (() => {
-                      const matchDate = new Date(match.date + "T12:00");
-                      const todayDate = new Date(today + "T12:00");
-                      const diffDays = Math.round((matchDate.getTime() - todayDate.getTime()) / 86400000);
-                      const countdownLabel = diffDays === 0 ? "TODAY" : diffDays === 1 ? "TOMORROW" : `IN ${diffDays} DAYS`;
-                      return (
-                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-                          <div style={{ position: "relative", width: "calc((100vw - 40px) * 0.65)", height: "calc((100vw - 40px) * 0.65)", flexShrink: 0 }}>
-                            <button onClick={() => setMatchInfoOpen(true)} style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, boxShadow: "0 4px 20px #2653d455" }}>
-                              <span style={{ fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 800, color: "rgba(255,255,255,0.85)", letterSpacing: "0.08em", textTransform: "uppercase", lineHeight: 1 }}>{countdownLabel}</span>
-                              <span style={{ fontSize: "clamp(30px, 7.7vw, 37px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.02em" }}>{match.time}</span>
-                            </button>
-                            <svg viewBox="0 0 100 100" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
-                              <defs>
-                                <path id="matchArc" d="M 12 50 A 38 38 0 0 1 88 50" />
-                              </defs>
-                              <text fill="rgba(255,255,255,0.7)" fontSize="9.5" fontWeight="700" letterSpacing="2.5" fontFamily="inherit">
-                                <textPath href="#matchArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
-                              </text>
-                            </svg>
-                          </div>
-                        </div>
-                      );
-                    })() : (
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-                        <div style={{ position: "relative", width: "calc((100vw - 40px) * 0.65)", height: "calc((100vw - 40px) * 0.65)", flexShrink: 0 }}>
-                          <button
-                            onClick={() => window.dispatchEvent(new Event("padelop:add-match"))}
-                            style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 20px #2653d455" }}
-                          >
-                            <svg width="18%" height="18%" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="2.5" strokeLinecap="round">
-                              <line x1="12" y1="5" x2="12" y2="19"/>
-                              <line x1="5" y1="12" x2="19" y2="12"/>
-                            </svg>
-                          </button>
-                          <svg viewBox="0 0 100 100" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
-                            <defs>
-                              <path id="noMatchArc" d="M 12 50 A 38 38 0 0 1 88 50" />
-                            </defs>
-                            <text fill="rgba(255,255,255,0.7)" fontSize="9.5" fontWeight="700" letterSpacing="2.5" fontFamily="inherit">
-                              <textPath href="#noMatchArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
-                            </text>
-                              <circle cx="50" cy="91" r="4" fill={dayColor} stroke="white" strokeWidth="1.5" />
-                          </svg>
-                        </div>
-                      </div>
-                    )}
+                  <div style={{ width: "100%", flexShrink: 0, height: "calc(100dvh - 120px)", borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, zIndex: doIdx === -1 ? 2 : 1, pointerEvents: doIdx === -1 ? "auto" : "none", opacity: doIdx === -1 ? 1 : 0, transition: "opacity 0.3s" }}>
+                    <svg viewBox="0 0 100 130" width="138" height="179" style={{ overflow: "visible" }}>
+                      <defs>
+                        <clipPath id="drop-clip-palt">
+                          <path d="M50 4 C72 22 94 58 94 84 A44 44 0 0 1 6 84 C6 58 28 22 50 4 Z"/>
+                        </clipPath>
+                      </defs>
+                      <path d="M50 4 C72 22 94 58 94 84 A44 44 0 0 1 6 84 C6 58 28 22 50 4 Z" fill="#dce8f8"/>
+                      <g clipPath="url(#drop-clip-palt)">
+                        <rect x="-10" y={waterY + waveAmp} width="120" height={fillH + 10} fill="#3b9eff" opacity="0.9"/>
+                        {logHydrationMl > 0 && (
+                          <>
+                            <g style={{ animation: "water-wave 3.5s linear infinite", willChange: "transform", transformBox: "fill-box" }}>
+                              <path d={`M0 ${waterY + 3} Q25 ${waterY + 3 + waveAmp} 50 ${waterY + 3} Q75 ${waterY + 3 - waveAmp} 100 ${waterY + 3} Q125 ${waterY + 3 + waveAmp} 150 ${waterY + 3} Q175 ${waterY + 3 - waveAmp} 200 ${waterY + 3} L200 130 L0 130 Z`} fill="#5aaeff" opacity="0.6"/>
+                            </g>
+                            <g style={{ animation: "water-wave 2.2s linear infinite", willChange: "transform", transformBox: "fill-box" }}>
+                              <path d={`M0 ${waterY} Q25 ${waterY - waveAmp} 50 ${waterY} Q75 ${waterY + waveAmp} 100 ${waterY} Q125 ${waterY - waveAmp} 150 ${waterY} Q175 ${waterY + waveAmp} 200 ${waterY} L200 130 L0 130 Z`} fill="#3b9eff" opacity="0.9"/>
+                            </g>
+                          </>
+                        )}
+                      </g>
+                      <text x="50" y="88" textAnchor="middle" fontSize="19" fontWeight="800" fill="#2653d4" fontFamily="inherit">{labelMl}</text>
+                    </svg>
+                    <div style={{ position: "relative", width: 52, height: 52 }}>
+                      <button onClick={() => { const next = Math.min(MAX, logHydrationMl + 250); setLogHydrationMl(next); saveLogHydration(next); }} style={{ width: 52, height: 52, borderRadius: "50%", background: logHydrationMl >= MAX ? "#e8f0e8" : "#3b9eff", border: "none", cursor: logHydrationMl >= MAX ? "default" : "pointer", fontSize: "clamp(22px, 5.6vw, 27px)", fontWeight: 700, color: logHydrationMl >= MAX ? "#16a34a" : "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
+                      <button onClick={() => { const next = Math.max(0, logHydrationMl - 250); setLogHydrationMl(next); saveLogHydration(next); }} style={{ position: "absolute", top: "50%", left: -26, transform: "translateY(-50%)", width: 20, height: 20, borderRadius: "50%", background: "#fff", border: "1.5px solid #dde2e8", boxShadow: "0 1px 4px rgba(0,0,0,0.10)", cursor: logHydrationMl <= 0 ? "default" : "pointer", fontSize: "clamp(13px, 3.4vw, 16px)", fontWeight: 700, color: logHydrationMl <= 0 ? "#c8cdd3" : "#6b7480", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: "1" }}>−</button>
+                    </div>
+                    <p style={{ fontSize: "clamp(13px, 3.4vw, 16px)", fontWeight: 600, color: "#3b9eff", margin: 0 }}>{logHydrationMl > 0 ? `${Math.round(logHydrationMl / 250)} glass${Math.round(logHydrationMl / 250) === 1 ? "" : "es"}` : "0 glasses"}</p>
                   </div>
                 );
               })()}
@@ -1302,45 +1248,40 @@ export default function Home8() {
                 );
               })()}
 
-              {/* Card 2: encouragement */}
-              {(() => {
-                const title =
-                  dayType === "match"     ? "Game on." :
-                  dayType === "pre-match" ? "Tomorrow is match day." :
-                  dayType === "recovery"  ? "Well played." :
-                  "Keep going.";
-                const sub =
-                  dayType === "match"
-                    ? "Trust your game and enjoy every point."
-                    : dayType === "pre-match"
-                    ? "Rest up, carb load, and get to bed early. The prep is done."
-                    : dayType === "recovery"
-                    ? "Rest is part of training. Let your body recover and come back stronger."
-                    : drillTag
-                    ? `Today focus on ${drillTag}. Small improvements compound into big gains.`
-                    : "Every session counts. Show up, put in the work, and trust the process.";
-                return (
-                  <div
-                    key="card2"
-                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px", gap: 2, zIndex: doIdx === 1 ? 2 : 1, height: "calc(100vw - 40px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", opacity: doIdx >= 1 ? 1 : 0, transition: "opacity 0.3s" }}
-                    onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
-                    onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
-                  >
-                    <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4", textAlign: "center" }}>
-                      {dayLabel}
-                    </p>
-                    <p style={{ margin: 0, fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>{title}</p>
-                    <p style={{ margin: 0, fontSize: "clamp(15px, 3.8vw, 18px)", color: "#6b7480", lineHeight: 1.6, textAlign: "center" }}>{sub}</p>
+              {/* Card 2: breathing */}
+              <div
+                key="card2"
+                style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: doIdx === 1 ? 2 : 1, overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", opacity: doIdx >= 1 ? 1 : 0, transition: "opacity 0.3s" }}
+                onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
+                onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
+              >
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                  <div style={{ position: "relative", width: "60%", aspectRatio: "1 / 1" }}>
+                    <svg width="100%" height="100%" viewBox="0 0 160 160" style={{ display: "block", overflow: "visible" }}>
+                      <path d="M10 150 L10 10 L150 10 L150 150 L10 150" fill="none" stroke="#dce8f8" strokeWidth="5" strokeLinejoin="miter" />
+                      <path d="M10 150 L10 10 L150 10 L150 150 L10 150" fill="none" stroke="#3b9eff" strokeWidth="5" strokeLinejoin="miter" strokeDasharray="560" strokeDashoffset={breathDashOffset} />
+                    </svg>
+                    <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none", gap: "0.8vw" }}>
+                      <p style={{ fontSize: "clamp(16px, 5.25vw, 22px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>Breathe</p>
+                      <p style={{ fontSize: "clamp(11px, 3.5vw, 16px)", fontWeight: 500, color: "#9aa5b0", margin: 0, textAlign: "center", lineHeight: 1.3 }}>(4x4 box breath)</p>
+                    </div>
                   </div>
-                );
-              })()}
+                  <div style={{ height: "clamp(24px, 6vw, 32px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {(() => {
+                      const phases = [{ label: "In (nose)" }, { label: "Hold" }, { label: "Out (mouth)" }, { label: "Hold" }];
+                      return <p key={breathPhase} style={{ fontSize: "clamp(13px, 4vw, 18px)", color: "#3b9eff", margin: 0, lineHeight: 1, fontWeight: 600 }}>{phases[breathPhase].label}</p>;
+                    })()}
+                  </div>
+                  <p style={{ fontSize: "clamp(10px, 2.8vw, 13px)", color: "#c8cdd3", margin: 0, textAlign: "center", lineHeight: 1.4 }}>Skip if you have a respiratory condition</p>
+                </div>
+              </div>
 
             </div>
           </div>
 
-          {/* Profile panel */}
-          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 20, paddingRight: 20, paddingTop: "calc(45dvh - (100vw - 40px) / 2)" }}>
-            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "#fff", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, padding: "16px 12px", marginLeft: cardSnap === 'left' ? 0 : -20, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+          {/* Profile panel — emptied, content moved to top/bottom cards */}
+          <div style={{ width: "33.333%", flexShrink: 0, height: "100%" }}>
+            <div style={{ display: "none" }}>
               {/* Hydration teardrop meter */}
               {(() => {
                 const MAX = 3000;
