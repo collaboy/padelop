@@ -313,7 +313,8 @@ export default function Home8() {
   const [drillTag, setDrillTag] = useState<string | null>(null);
   const [drillSteps, setDrillSteps] = useState<{ step: string; cue: string; reps: string }[] | null>(null);
   const [clientReady, setClientReady] = useState(false);
-  const [carouselIdx, setCarouselIdx] = useState(0);
+  const [carouselIdx, setCarouselIdx] = useState(1); // virtual: 0=clone-of-9, 1-10=real slides, 11=clone-of-0
+  const [carouselNoTransition, setCarouselNoTransition] = useState(false);
   const [paltOpenPanel, setPaltOpenPanel] = useState<string | null>(null);
   const [paltFormScore, setPaltFormScore] = useState<FormScore | null>(null);
   const [paltRacketName, setPaltRacketName] = useState<string | null>(null);
@@ -891,6 +892,18 @@ export default function Home8() {
     try { setPaltFormScore(computeFormScore()); } catch {}
   }, []);
 
+  // Infinite carousel: silently reposition after transition when on a clone slide
+  useEffect(() => {
+    if (carouselIdx !== 0 && carouselIdx !== 11) return;
+    const target = carouselIdx === 0 ? 10 : 1;
+    const t = setTimeout(() => {
+      setCarouselNoTransition(true);
+      setCarouselIdx(target);
+      requestAnimationFrame(() => requestAnimationFrame(() => setCarouselNoTransition(false)));
+    }, 320);
+    return () => clearTimeout(t);
+  }, [carouselIdx]);
+
   useEffect(() => {
     if (doIdx < 1) {
       setBreathPhase(0);
@@ -956,8 +969,8 @@ export default function Home8() {
             const dy = endY - touchStartYRef.current;
             if (swipeDirRef.current === 'h' && doIdx === 0) {
               setLiveX(0);
-              if (dx < -60) setCarouselIdx(i => (i + 1) % 10);
-              else if (dx > 60) setCarouselIdx(i => (i + 9) % 10);
+              if (dx < -60) setCarouselIdx(i => i + 1);
+              else if (dx > 60) setCarouselIdx(i => i - 1);
             } else if (swipeDirRef.current === 'v' && cardSnap === 'none') {
               setLiveY(0);
               if (!settlingRef.current) {
@@ -1034,7 +1047,7 @@ export default function Home8() {
 
               {/* ── Carousel: 10 slides — circles 0-3, green ball 4, circles 5-9 ── */}
               {(() => {
-                const NUM = 10;
+                const NUM = 12;
                 const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                 // Slide 0: Next Match
                 const nmToday = new Date().toISOString().slice(0, 10);
@@ -1085,11 +1098,24 @@ export default function Home8() {
                     <div style={{
                       display: "flex", width: `${NUM * 100}%`, height: "100%",
                       transform: `translateX(calc(-${carouselIdx} * (100vw - 40px) + ${doIdx === 0 ? liveX : 0}px))`,
-                      transition: liveX !== 0 ? "none" : "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
+                      transition: carouselNoTransition || liveX !== 0 ? "none" : "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
                       willChange: "transform",
                     }}>
 
-                      {/* Slide 0: Green Ball */}
+                      {/* Clone of Matches — virtual index 0, enables left-wrap from green ball */}
+                      <button onClick={() => toggle('matches')} style={{ width: slideW, flexShrink: 0, height: "100%", padding: 0, border: "none", background: "transparent", cursor: "pointer", display: "block" }}>
+                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                          <defs><path id="palt-arc-c0" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                          <circle cx="100" cy="100" r="99" fill="white" />
+                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "#2653d4", fontFamily: ff }}>
+                            <textPath href="#palt-arc-c0" startOffset="50%" textAnchor="middle">MATCHES</textPath>
+                          </text>
+                          <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="46" fontWeight="800" style={{ fill: "#2653d4", fontFamily: ff }}>{mCount}</text>
+                          <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: "#2653d4", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{mSub}</text>
+                        </svg>
+                      </button>
+
+                      {/* Slide 1 (virtual): Green Ball */}
                       <div style={{ width: slideW, flexShrink: 0, height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         {(() => {
                           const s = doItem;
@@ -1467,6 +1493,11 @@ export default function Home8() {
                         </svg>
                       </button>
 
+                      {/* Clone of Green Ball — virtual index 11, enables right-wrap from Matches */}
+                      <div style={{ width: slideW, flexShrink: 0, height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <div style={{ width: "100%", height: "calc(100vw - 40px)", borderRadius: "50%", background: "#00D455", flexShrink: 0 }} />
+                      </div>
+
                     </div>{/* /track */}
                   </div>
                 );
@@ -1481,7 +1512,7 @@ export default function Home8() {
                 const timeInCue = warmupCurrentTime - (cue?.from ?? 0);
                 void cueDuration; void timeInCue;
                 return (
-                  <div style={{ width: "100%", flexShrink: 0, minHeight: 64, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 32px", opacity: warmupPlaying && carouselIdx === 0 ? 1 : 0, transition: "opacity 0.4s", pointerEvents: "none" }}>
+                  <div style={{ width: "100%", flexShrink: 0, minHeight: 64, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 32px", opacity: warmupPlaying && (carouselIdx === 1 || carouselIdx === 11) ? 1 : 0, transition: "opacity 0.4s", pointerEvents: "none" }}>
                     <p style={{ margin: 0, fontSize: "clamp(15px, 3.8vw, 18px)", fontWeight: 500, color: "#1a1c1c", textAlign: "center", lineHeight: 1.6 }}>
                       {cue?.text ?? ""}
                     </p>
