@@ -956,8 +956,8 @@ export default function Home8() {
             const dy = endY - touchStartYRef.current;
             if (swipeDirRef.current === 'h' && doIdx === 0) {
               setLiveX(0);
-              if (dx < -60) setCarouselIdx(i => Math.min(i + 1, 9));
-              else if (dx > 60) setCarouselIdx(i => Math.max(i - 1, 0));
+              if (dx < -60) setCarouselIdx(i => (i + 1) % 10);
+              else if (dx > 60) setCarouselIdx(i => (i + 9) % 10);
             } else if (swipeDirRef.current === 'v' && cardSnap === 'none') {
               setLiveY(0);
               if (!settlingRef.current) {
