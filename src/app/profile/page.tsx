@@ -537,12 +537,6 @@ export default function ProfilePage() {
   const gearPanelOpen       = openPanel === 'gear';
   const matchesPanelOpen    = openPanel === 'matches';
   const togglePanel = (name: string) => setOpenPanel(p => p === name ? null : name);
-  const [profileCarouselIdx, setProfileCarouselIdx] = useState(1);
-  const [profileCarouselNoTransition, setProfileCarouselNoTransition] = useState(false);
-  const [profileLiveX, setProfileLiveX] = useState(0);
-  const profileTouchStartX = useRef(0);
-  const profileTouchStartY = useRef(0);
-  const profileSwipeDir = useRef<'h'|'v'|null>(null);
   const [formScore, setFormScore] = useState<FormScore | null>(null);
   const [hydrationMl, setHydrationMl] = useState(0);
   const [nextMatchInfoMode, setNextMatchInfoMode] = useState<'edit'|'add'|null>(null);
@@ -916,17 +910,6 @@ export default function ProfilePage() {
       })
       .catch(() => {});
   }, [todayMeals, nextMatch]);
-
-  useEffect(() => {
-    if (profileCarouselIdx !== 0 && profileCarouselIdx !== 10) return;
-    const target = profileCarouselIdx === 0 ? 9 : 1;
-    const t = setTimeout(() => {
-      setProfileCarouselNoTransition(true);
-      setProfileCarouselIdx(target);
-      requestAnimationFrame(() => requestAnimationFrame(() => setProfileCarouselNoTransition(false)));
-    }, 320);
-    return () => clearTimeout(t);
-  }, [profileCarouselIdx]);
 
   const [profileOpen, setProfileOpen] = useState(false); // info section toggle
   const [profileTabEditOpen, setProfileTabEditOpen] = useState(false);
@@ -1360,317 +1343,140 @@ export default function ProfilePage() {
                     const dim = (active: boolean) => ({ opacity: anyOpen && !active ? 0.3 : 1, transition: "opacity 0.2s" });
                     return (
                     <>
-                    {/* Peek carousel */}
-<div
-  style={{ overflow: "hidden", width: "100%", touchAction: "pan-y" }}
-  onTouchStart={e => {
-    profileTouchStartX.current = e.touches[0].clientX;
-    profileTouchStartY.current = e.touches[0].clientY;
-    profileSwipeDir.current = null;
-  }}
-  onTouchMove={e => {
-    const dx = e.touches[0].clientX - profileTouchStartX.current;
-    const dy = e.touches[0].clientY - profileTouchStartY.current;
-    if (profileSwipeDir.current === null && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) {
-      profileSwipeDir.current = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
-    }
-    if (profileSwipeDir.current === 'h') setProfileLiveX(dx);
-  }}
-  onTouchEnd={e => {
-    const dx = e.changedTouches[0].clientX - profileTouchStartX.current;
-    setProfileLiveX(0);
-    if (profileSwipeDir.current === 'h') {
-      if (dx < -50) setProfileCarouselIdx(i => i + 1);
-      else if (dx > 50) setProfileCarouselIdx(i => i - 1);
-    }
-    profileSwipeDir.current = null;
-  }}
->
-  <div style={{
-    display: "flex",
-    gap: 12,
-    padding: "4px 0 8px",
-    willChange: "transform",
-    transform: `translateX(calc((100vw - 40px) * 0.21 - ${profileCarouselIdx} * ((100vw - 40px) * 0.58 + 12px) + ${profileLiveX}px))`,
-    transition: profileCarouselNoTransition || profileLiveX !== 0 ? "none" : "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
-  }}>
-    {/* Slide 0: Clone of Matches */}
-    {(() => {
-      const color = "#2653d4";
-      const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-      const wins = reviews.filter(r => r.result === "win").length;
-      const losses = reviews.filter(r => r.result === "loss").length;
-      const totalM = wins + losses;
-      const centerText = reviews.length > 0 ? String(reviews.length) : "—";
-      const sub = totalM > 0 ? `${Math.round((wins / totalM) * 100)}% wins` : "no matches";
-      return (
-        <button onClick={() => togglePanel('matches')}
-          style={{ flexShrink: 0, width: "calc((100vw - 40px) * 0.58)", aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(matchesPanelOpen) }}>
-          <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-            <defs><path id="matchesArcC0" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-            <circle cx="100" cy="100" r="99" fill="white" />
-            <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}><textPath href="#matchesArcC0" startOffset="50%" textAnchor="middle">MATCHES</textPath></text>
-            <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{centerText}</text>
-            <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
-            <circle cx="100" cy="188" r="4" fill={color} opacity={matchesPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
-          </svg>
-        </button>
-      );
-    })()}
+                    {/* Row 1: Next Match · Day Type · Today's Goals */}
+                    <div style={{ display: "flex", gap: 10 }}>
+                      {/* Next Match */}
+                      {(() => {
+                        const today = new Date().toISOString().slice(0, 10);
+                        const diffDays = nextMatch
+                          ? Math.round((new Date(nextMatch.date + "T12:00").getTime() - new Date(today + "T12:00").getTime()) / 86400000)
+                          : null;
+                        const countdownLabel = diffDays === null ? "NO MATCH" : diffDays === 0 ? "TODAY" : diffDays === 1 ? "TOMORROW" : `IN ${diffDays} DAYS`;
+                        const timeLabel = nextMatch?.time ?? "";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        return (
+                          <button onClick={() => togglePanel('nextMatch')}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(nextMatchPanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 4px 20px rgba(38,83,212,0.35))", display: "block" }}>
+                              <defs><path id="nextMatchTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="#2653d4" />
+                              <text fontSize="19" fontWeight="700" letterSpacing="2.5" style={{ fill: "rgba(255,255,255,0.7)", fontFamily: ff }}>
+                                <textPath href="#nextMatchTopArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
+                              </text>
+                              <text x="100" y={timeLabel ? "93" : "108"} textAnchor="middle" dominantBaseline="middle"
+                                fontSize={countdownLabel.length > 7 ? "18" : "22"} fontWeight="800" letterSpacing="0.06em"
+                                style={{ fill: "rgba(255,255,255,0.9)", fontFamily: ff }}>
+                                {countdownLabel}
+                              </text>
+                              {timeLabel && (
+                                <text x="100" y="123" textAnchor="middle" dominantBaseline="middle"
+                                  fontSize="32" fontWeight="800" letterSpacing="-0.02em" style={{ fill: "#fff", fontFamily: ff }}>
+                                  {timeLabel}
+                                </text>
+                              )}
+                              <circle cx="100" cy="188" r="4" fill="rgba(255,255,255,0.7)" opacity={nextMatchPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                            </svg>
+                          </button>
+                        );
+                      })()}
 
-    {/* Slide 1: Next Match */}
-    {(() => {
-      const today = new Date().toISOString().slice(0, 10);
-      const diffDays = nextMatch
-        ? Math.round((new Date(nextMatch.date + "T12:00").getTime() - new Date(today + "T12:00").getTime()) / 86400000)
-        : null;
-      const countdownLabel = diffDays === null ? "NO MATCH" : diffDays === 0 ? "TODAY" : diffDays === 1 ? "TOMORROW" : `IN ${diffDays} DAYS`;
-      const timeLabel = nextMatch?.time ?? "";
-      const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-      return (
-        <button onClick={() => togglePanel('nextMatch')}
-          style={{ flexShrink: 0, width: "calc((100vw - 40px) * 0.58)", aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(nextMatchPanelOpen) }}>
-          <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 4px 20px rgba(38,83,212,0.35))", display: "block" }}>
-            <defs><path id="nextMatchTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-            <circle cx="100" cy="100" r="99" fill="#2653d4" />
-            <text fontSize="19" fontWeight="700" letterSpacing="2.5" style={{ fill: "rgba(255,255,255,0.7)", fontFamily: ff }}><textPath href="#nextMatchTopArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath></text>
-            <text x="100" y={timeLabel ? "93" : "108"} textAnchor="middle" dominantBaseline="middle"
-              fontSize={countdownLabel.length > 7 ? "18" : "22"} fontWeight="800" letterSpacing="0.06em"
-              style={{ fill: "rgba(255,255,255,0.9)", fontFamily: ff }}>{countdownLabel}</text>
-            {timeLabel && <text x="100" y="123" textAnchor="middle" dominantBaseline="middle" fontSize="32" fontWeight="800" letterSpacing="-0.02em" style={{ fill: "#fff", fontFamily: ff }}>{timeLabel}</text>}
-            <circle cx="100" cy="188" r="4" fill="rgba(255,255,255,0.7)" opacity={nextMatchPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
-          </svg>
-        </button>
-      );
-    })()}
+                      {/* Day Type */}
+                      <button onClick={() => togglePanel('dayType')}
+                        style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(dayTypeInfoOpen) }}>
+                        {(() => {
+                          const parts = panelDayLabel.split(" ");
+                          const mainLabel = parts.length > 1 ? parts.slice(0, -1).join(" ") : panelDayLabel;
+                          const dayWord = parts.length > 1 ? parts[parts.length - 1] : "";
+                          return (
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="dayTypeTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: panelDayColor, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                                <textPath href="#dayTypeTopArc" startOffset="50%" textAnchor="middle">DAY TYPE</textPath>
+                              </text>
+                              <text x="100" y={dayWord ? "93" : "108"} textAnchor="middle" dominantBaseline="middle"
+                                fontSize="24" fontWeight="800" style={{ fill: panelDayColor, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                                {mainLabel}
+                              </text>
+                              {dayWord && (
+                                <text x="100" y="123" textAnchor="middle" dominantBaseline="middle"
+                                  fontSize="20" fontWeight="800" style={{ fill: panelDayColor, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                                  {dayWord}
+                                </text>
+                              )}
+                              <circle cx="100" cy="188" r="4" fill={panelDayColor} opacity={dayTypeInfoOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                            </svg>
+                          );
+                        })()}
+                      </button>
 
-    {/* Slide 2: Day Type */}
-    <button onClick={() => togglePanel('dayType')}
-      style={{ flexShrink: 0, width: "calc((100vw - 40px) * 0.58)", aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(dayTypeInfoOpen) }}>
-      {(() => {
-        const parts = panelDayLabel.split(" ");
-        const mainLabel = parts.length > 1 ? parts.slice(0, -1).join(" ") : panelDayLabel;
-        const dayWord = parts.length > 1 ? parts[parts.length - 1] : "";
-        return (
-          <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-            <defs><path id="dayTypeTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-            <circle cx="100" cy="100" r="99" fill="white" />
-            <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: panelDayColor, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}><textPath href="#dayTypeTopArc" startOffset="50%" textAnchor="middle">DAY TYPE</textPath></text>
-            <text x="100" y={dayWord ? "93" : "108"} textAnchor="middle" dominantBaseline="middle" fontSize="24" fontWeight="800" style={{ fill: panelDayColor, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>{mainLabel}</text>
-            {dayWord && <text x="100" y="123" textAnchor="middle" dominantBaseline="middle" fontSize="20" fontWeight="800" style={{ fill: panelDayColor, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>{dayWord}</text>}
-            <circle cx="100" cy="188" r="4" fill={panelDayColor} opacity={dayTypeInfoOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
-          </svg>
-        );
-      })()}
-    </button>
+                      {/* Today's Goals */}
+                      <button onClick={() => togglePanel('sched')}
+                        style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(panelSchedOpen) }}>
+                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                          <defs><path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                          <circle cx="100" cy="100" r="99" fill="white" />
+                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "var(--c-label)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                            <textPath href="#goalsTextArc" startOffset="50%" textAnchor="middle">TODAY&apos;S GOALS</textPath>
+                          </text>
+                          <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
+                            fontSize={pct === 100 ? "44" : "36"} fontWeight="800"
+                            style={{ fill: pct === 100 ? "#00D455" : "var(--c-text)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                            {pct === 100 ? "✓" : `${done}/${total}`}
+                          </text>
+                          {(() => {
+                            const r = 88, cX = 100, cY = 100, totalDeg = 110, startDeg = 90 + totalDeg / 2, N = schedule.length;
+                            if (!N) return null;
+                            const gapDeg = 7, segDeg = (totalDeg - Math.max(0, N - 1) * gapDeg) / N;
+                            const toRad = (d: number) => d * Math.PI / 180;
+                            return schedule.map((item, i) => {
+                              const a1 = startDeg - i * (segDeg + gapDeg), a2 = a1 - segDeg;
+                              const x1 = (cX + r * Math.cos(toRad(a1))).toFixed(2), y1 = (cY + r * Math.sin(toRad(a1))).toFixed(2);
+                              const x2 = (cX + r * Math.cos(toRad(a2))).toFixed(2), y2 = (cY + r * Math.sin(toRad(a2))).toFixed(2);
+                              return <path key={item.title} d={`M ${x1},${y1} A ${r},${r} 0 0,0 ${x2},${y2}`}
+                                stroke={todayDoneSet.has(item.title) ? item.color : "#e0e2e5"} strokeWidth="9" fill="none" strokeLinecap="round" style={{ transition: "stroke 0.3s" }} />;
+                            });
+                          })()}
+                        </svg>
+                      </button>
+                    </div>
 
-    {/* Slide 3: Today's Goals */}
-    <button onClick={() => togglePanel('sched')}
-      style={{ flexShrink: 0, width: "calc((100vw - 40px) * 0.58)", aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(panelSchedOpen) }}>
-      <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-        <defs><path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-        <circle cx="100" cy="100" r="99" fill="white" />
-        <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "var(--c-label)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}><textPath href="#goalsTextArc" startOffset="50%" textAnchor="middle">TODAY&apos;S GOALS</textPath></text>
-        <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
-          fontSize={pct === 100 ? "44" : "36"} fontWeight="800"
-          style={{ fill: pct === 100 ? "#00D455" : "var(--c-text)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-          {pct === 100 ? "✓" : `${done}/${total}`}
-        </text>
-        {(() => {
-          const r = 88, cX = 100, cY = 100, totalDeg = 110, startDeg = 90 + totalDeg / 2, N = schedule.length;
-          if (!N) return null;
-          const gapDeg = 7, segDeg = (totalDeg - Math.max(0, N - 1) * gapDeg) / N;
-          const toRad = (d: number) => d * Math.PI / 180;
-          return schedule.map((item, i) => {
-            const a1 = startDeg - i * (segDeg + gapDeg), a2 = a1 - segDeg;
-            const x1 = (cX + r * Math.cos(toRad(a1))).toFixed(2), y1 = (cY + r * Math.sin(toRad(a1))).toFixed(2);
-            const x2 = (cX + r * Math.cos(toRad(a2))).toFixed(2), y2 = (cY + r * Math.sin(toRad(a2))).toFixed(2);
-            return <path key={item.title} d={`M ${x1},${y1} A ${r},${r} 0 0,0 ${x2},${y2}`}
-              stroke={todayDoneSet.has(item.title) ? item.color : "#e0e2e5"} strokeWidth="9" fill="none" strokeLinecap="round" style={{ transition: "stroke 0.3s" }} />;
-          });
-        })()}
-      </svg>
-    </button>
+                    {/* Panels for row 1 — full width below the row */}
+                    {dayTypeInfoOpen && (
+                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                        <div style={{ padding: "14px", display: "flex", flexDirection: "column", gap: 7 }}>
+                          {DAY_TYPE_INFO.map(dt => (
+                            <div key={dt.label} style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                              <span style={{ fontSize: 12, fontWeight: 700, color: dt.color, background: `${dt.color}18`, borderRadius: 5, padding: "1px 6px", flexShrink: 0, whiteSpace: "nowrap", minWidth: 108, textAlign: "center", display: "inline-block" }}>{dt.label}</span>
+                              <span style={{ fontSize: 14, color: "#5a6270", lineHeight: 1.4 }}>{dt.desc}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {panelSchedOpen && (
+                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                        <div style={{ padding: "10px 14px 8px" }}>
+                          {schedule.map((item, i) => {
+                            const isDone = (schedDone[todayKey] ?? []).includes(item.title);
+                            return (
+                              <div key={item.title}
+                                onClick={() => { if (SCHEDULE_DETAILS[item.title] || item.isDrill) setPanelSchedModalIdx(i); }}
+                                style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0", cursor: SCHEDULE_DETAILS[item.title] || item.isDrill ? "pointer" : "default", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f6" : "none" }}>
+                                <button onClick={e => { e.stopPropagation(); panelToggleDone(item.title); }}
+                                  style={{ width: 20, height: 20, borderRadius: 5, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s", cursor: "pointer" }}>
+                                  {isDone && <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                                </button>
+                                <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none", flex: 1 }}>{item.title}</p>
+                                <span style={{ fontSize: 13, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
 
-    {/* Slide 4: Streak */}
-    {(() => {
-      const STIERS = [
-        { min: 0,   label: "Beginner",  color: "#9aa0a6" },
-        { min: 5,   label: "Starter",   color: "#2653d4" },
-        { min: 15,  label: "Grinder",   color: "#059669" },
-        { min: 30,  label: "Dedicated", color: "#d97706" },
-        { min: 60,  label: "Elite",     color: "#7c3aed" },
-        { min: 100, label: "Legend",    color: "#0ea5e9" },
-      ];
-      const stier = [...STIERS].reverse().find(t => streak >= t.min) ?? STIERS[0];
-      return (
-        <button onClick={() => togglePanel('streak')}
-          style={{ flexShrink: 0, width: "calc((100vw - 40px) * 0.58)", aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(streakPanelOpen) }}>
-          <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-            <defs><path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-            <circle cx="100" cy="100" r="99" fill="white" />
-            <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}><textPath href="#streakTopArc" startOffset="50%" textAnchor="middle">{stier.label.toUpperCase()}</textPath></text>
-            <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
-              fontSize={streak >= 100 ? "34" : streak >= 10 ? "40" : "46"} fontWeight="800"
-              style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-              {streak > 0 ? streak : "—"}
-            </text>
-            <text x="100" y="152" textAnchor="middle" fontSize="20" fontWeight="600"
-              style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", opacity: 0.65 } as React.CSSProperties}>day streak</text>
-          </svg>
-        </button>
-      );
-    })()}
-
-    {/* Slide 5: Form Score */}
-    {(() => {
-      const fs = formScore;
-      const score = fs?.score ?? null;
-      const color = score === null ? "#9aa0a6" : score >= 70 ? "#16a34a" : score >= 50 ? "#d97706" : "#ef4444";
-      const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-      return (
-        <button onClick={() => togglePanel('formScore')}
-          style={{ flexShrink: 0, width: "calc((100vw - 40px) * 0.58)", aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(formScorePanelOpen) }}>
-          <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-            <defs><path id="formScoreArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-            <circle cx="100" cy="100" r="99" fill="white" />
-            <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}><textPath href="#formScoreArc" startOffset="50%" textAnchor="middle">MY FORM</textPath></text>
-            <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-              fontSize={score !== null ? "46" : "36"} fontWeight="800" style={{ fill: color, fontFamily: ff }}>
-              {score !== null ? score : "—"}
-            </text>
-            <text x="100" y="152" textAnchor="middle" fontSize="17" fontWeight="600"
-              style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
-              {score === null ? "no data" : score >= 70 ? "on track" : score >= 50 ? "building" : "needs work"}
-            </text>
-            <circle cx="100" cy="188" r="4" fill={color} opacity={formScorePanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
-          </svg>
-        </button>
-      );
-    })()}
-
-    {/* Slide 6: Hydration */}
-    {(() => {
-      const ml = hydrationMl;
-      const hasData = ml > 0;
-      const color = "#0ea5e9";
-      const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-      const centerText = hasData ? (ml >= 1000 ? `${(ml / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${ml}ml`) : "—";
-      const subText = hasData ? `${Math.round(Math.min(ml / 2000, 1) * 100)}% of 2L` : "not logged";
-      return (
-        <button onClick={() => togglePanel('hydration')}
-          style={{ flexShrink: 0, width: "calc((100vw - 40px) * 0.58)", aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(hydrationPanelOpen) }}>
-          <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-            <defs><path id="hydrationArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-            <circle cx="100" cy="100" r="99" fill="white" />
-            <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}><textPath href="#hydrationArc" startOffset="50%" textAnchor="middle">HYDRATION</textPath></text>
-            <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-              fontSize={centerText.length > 4 ? "28" : "38"} fontWeight="800"
-              style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff }}>{centerText}</text>
-            <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600"
-              style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{subText}</text>
-            <circle cx="100" cy="188" r="4" fill={color} opacity={hydrationPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
-          </svg>
-        </button>
-      );
-    })()}
-
-    {/* Slide 7: Insights */}
-    {(() => {
-      const color = "#f59e0b";
-      const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-      const wins = reviews.filter(r => r.result === "win").length;
-      const losses = reviews.filter(r => r.result === "loss").length;
-      const count = [wins + losses > 0, reviews.length >= 3, streak > 0, partnerCount >= 2, trainingSessions.length > 0].filter(Boolean).length;
-      return (
-        <button onClick={() => togglePanel('insights')}
-          style={{ flexShrink: 0, width: "calc((100vw - 40px) * 0.58)", aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(insightsPanelOpen) }}>
-          <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-            <defs><path id="insightsArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-            <circle cx="100" cy="100" r="99" fill="white" />
-            <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}><textPath href="#insightsArc" startOffset="50%" textAnchor="middle">INSIGHTS</textPath></text>
-            <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{count > 0 ? count : "—"}</text>
-            <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>featured</text>
-            <circle cx="100" cy="188" r="4" fill={color} opacity={insightsPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
-          </svg>
-        </button>
-      );
-    })()}
-
-    {/* Slide 8: Gear */}
-    {(() => {
-      const color = "#7c3aed";
-      const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-      const label = racketName ? racketName.split(" ").slice(0, 1).join("") : "—";
-      const sub = racketName ? "my racket" : "no gear";
-      return (
-        <button onClick={() => togglePanel('gear')}
-          style={{ flexShrink: 0, width: "calc((100vw - 40px) * 0.58)", aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(gearPanelOpen) }}>
-          <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-            <defs><path id="gearArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-            <circle cx="100" cy="100" r="99" fill="white" />
-            <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}><textPath href="#gearArc" startOffset="50%" textAnchor="middle">GEAR</textPath></text>
-            <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize={label.length > 5 ? "22" : "36"} fontWeight="800" style={{ fill: color, fontFamily: ff }}>{label}</text>
-            <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
-            <circle cx="100" cy="188" r="4" fill={color} opacity={gearPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
-          </svg>
-        </button>
-      );
-    })()}
-
-    {/* Slide 9: Matches */}
-    {(() => {
-      const color = "#2653d4";
-      const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-      const wins = reviews.filter(r => r.result === "win").length;
-      const losses = reviews.filter(r => r.result === "loss").length;
-      const totalM = wins + losses;
-      const centerText = reviews.length > 0 ? String(reviews.length) : "—";
-      const sub = totalM > 0 ? `${Math.round((wins / totalM) * 100)}% wins` : "no matches";
-      return (
-        <button onClick={() => togglePanel('matches')}
-          style={{ flexShrink: 0, width: "calc((100vw - 40px) * 0.58)", aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(matchesPanelOpen) }}>
-          <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-            <defs><path id="matchesArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-            <circle cx="100" cy="100" r="99" fill="white" />
-            <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}><textPath href="#matchesArc" startOffset="50%" textAnchor="middle">MATCHES</textPath></text>
-            <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{centerText}</text>
-            <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
-            <circle cx="100" cy="188" r="4" fill={color} opacity={matchesPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
-          </svg>
-        </button>
-      );
-    })()}
-
-    {/* Slide 10: Clone of Next Match */}
-    {(() => {
-      const today = new Date().toISOString().slice(0, 10);
-      const diffDays = nextMatch
-        ? Math.round((new Date(nextMatch.date + "T12:00").getTime() - new Date(today + "T12:00").getTime()) / 86400000)
-        : null;
-      const countdownLabel = diffDays === null ? "NO MATCH" : diffDays === 0 ? "TODAY" : diffDays === 1 ? "TOMORROW" : `IN ${diffDays} DAYS`;
-      const timeLabel = nextMatch?.time ?? "";
-      const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-      return (
-        <button onClick={() => togglePanel('nextMatch')}
-          style={{ flexShrink: 0, width: "calc((100vw - 40px) * 0.58)", aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(nextMatchPanelOpen) }}>
-          <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 4px 20px rgba(38,83,212,0.35))", display: "block" }}>
-            <defs><path id="nextMatchTopArcC10" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-            <circle cx="100" cy="100" r="99" fill="#2653d4" />
-            <text fontSize="19" fontWeight="700" letterSpacing="2.5" style={{ fill: "rgba(255,255,255,0.7)", fontFamily: ff }}><textPath href="#nextMatchTopArcC10" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath></text>
-            <text x="100" y={timeLabel ? "93" : "108"} textAnchor="middle" dominantBaseline="middle"
-              fontSize={countdownLabel.length > 7 ? "18" : "22"} fontWeight="800" letterSpacing="0.06em"
-              style={{ fill: "rgba(255,255,255,0.9)", fontFamily: ff }}>{countdownLabel}</text>
-            {timeLabel && <text x="100" y="123" textAnchor="middle" dominantBaseline="middle" fontSize="32" fontWeight="800" letterSpacing="-0.02em" style={{ fill: "#fff", fontFamily: ff }}>{timeLabel}</text>}
-            <circle cx="100" cy="188" r="4" fill="rgba(255,255,255,0.7)" opacity={nextMatchPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
-          </svg>
-        </button>
-      );
-    })()}
-  </div>
-</div>
-
-{/* Panels */}
+                    {/* Next Match panel — full width below row 1 */}
                     {nextMatchPanelOpen && (() => {
                       const today2 = new Date().toISOString().slice(0, 10);
                       const matchDate = nextMatch ? new Date(nextMatch.date + "T12:00") : null;
@@ -1846,40 +1652,108 @@ export default function ProfilePage() {
                       );
                     })()}
 
-                    {dayTypeInfoOpen && (
-                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-                        <div style={{ padding: "14px", display: "flex", flexDirection: "column", gap: 7 }}>
-                          {DAY_TYPE_INFO.map(dt => (
-                            <div key={dt.label} style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                              <span style={{ fontSize: 12, fontWeight: 700, color: dt.color, background: `${dt.color}18`, borderRadius: 5, padding: "1px 6px", flexShrink: 0, whiteSpace: "nowrap", minWidth: 108, textAlign: "center", display: "inline-block" }}>{dt.label}</span>
-                              <span style={{ fontSize: 14, color: "#5a6270", lineHeight: 1.4 }}>{dt.desc}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {panelSchedOpen && (
-                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-                        <div style={{ padding: "10px 14px 8px" }}>
-                          {schedule.map((item, i) => {
-                            const isDone = (schedDone[todayKey] ?? []).includes(item.title);
-                            return (
-                              <div key={item.title}
-                                onClick={() => { if (SCHEDULE_DETAILS[item.title] || item.isDrill) setPanelSchedModalIdx(i); }}
-                                style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0", cursor: SCHEDULE_DETAILS[item.title] || item.isDrill ? "pointer" : "default", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f6" : "none" }}>
-                                <button onClick={e => { e.stopPropagation(); panelToggleDone(item.title); }}
-                                  style={{ width: 20, height: 20, borderRadius: 5, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s", cursor: "pointer" }}>
-                                  {isDone && <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                                </button>
-                                <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none", flex: 1 }}>{item.title}</p>
-                                <span style={{ fontSize: 13, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
+                    {/* Row 2: Streak (+ future cards) */}
+                    <div style={{ display: "flex", gap: 10 }}>
+                      {(() => {
+                        const STIERS = [
+                          { min: 0,   label: "Beginner",  color: "#9aa0a6", grad: ["#f4f4f6","#eaecee"] },
+                          { min: 5,   label: "Starter",   color: "#2653d4", grad: ["#eef2ff","#dbe4ff"] },
+                          { min: 15,  label: "Grinder",   color: "#059669", grad: ["#ecfdf5","#d1fae5"] },
+                          { min: 30,  label: "Dedicated", color: "#d97706", grad: ["#fffbeb","#fde68a"] },
+                          { min: 60,  label: "Elite",     color: "#7c3aed", grad: ["#faf5ff","#ede9fe"] },
+                          { min: 100, label: "Legend",    color: "#0ea5e9", grad: ["#f0f9ff","#bae6fd"] },
+                        ];
+                        const stier = [...STIERS].reverse().find(t => streak >= t.min) ?? STIERS[0];
+                        return (
+                          <button onClick={() => togglePanel('streak')}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(streakPanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                                <textPath href="#streakTopArc" startOffset="50%" textAnchor="middle">{stier.label.toUpperCase()}</textPath>
+                              </text>
+                              <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
+                                fontSize={streak >= 100 ? "34" : streak >= 10 ? "40" : "46"} fontWeight="800"
+                                style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                                {streak > 0 ? streak : "—"}
+                              </text>
+                              <text x="100" y="152" textAnchor="middle" fontSize="20" fontWeight="600"
+                                style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", opacity: 0.65 } as React.CSSProperties}>
+                                day streak
+                              </text>
+                            </svg>
+                          </button>
+                        );
+                      })()}
 
+                      {/* Form Score */}
+                      {(() => {
+                        const fs = formScore;
+                        const score = fs?.score ?? null;
+                        const color = score === null ? "#9aa0a6" : score >= 70 ? "#16a34a" : score >= 50 ? "#d97706" : "#ef4444";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        return (
+                          <button onClick={() => togglePanel('formScore')}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(formScorePanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="formScoreArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#formScoreArc" startOffset="50%" textAnchor="middle">MY FORM</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
+                                fontSize={score !== null ? "46" : "36"} fontWeight="800"
+                                style={{ fill: color, fontFamily: ff }}>
+                                {score !== null ? score : "—"}
+                              </text>
+                              <text x="100" y="152" textAnchor="middle" fontSize="17" fontWeight="600"
+                                style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
+                                {score === null ? "no data" : score >= 70 ? "on track" : score >= 50 ? "building" : "needs work"}
+                              </text>
+                              <circle cx="100" cy="188" r="4" fill={color} opacity={formScorePanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                            </svg>
+                          </button>
+                        );
+                      })()}
+
+                      {/* Hydration */}
+                      {(() => {
+                        const ml = hydrationMl;
+                        const hasData = ml > 0;
+                        const color = "#0ea5e9";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        const pct = hasData ? Math.min(ml / 2000, 1) : null;
+                        const centerText = hasData
+                          ? (ml >= 1000 ? `${(ml / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${ml}ml`)
+                          : "—";
+                        const subText = pct !== null ? `${Math.round(pct * 100)}% of 2L` : "not logged";
+                        return (
+                          <button onClick={() => togglePanel('hydration')}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(hydrationPanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="hydrationArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#hydrationArc" startOffset="50%" textAnchor="middle">HYDRATION</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
+                                fontSize={centerText.length > 4 ? "28" : "38"} fontWeight="800"
+                                style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff }}>
+                                {centerText}
+                              </text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600"
+                                style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
+                                {subText}
+                              </text>
+                              <circle cx="100" cy="188" r="4" fill={color} opacity={hydrationPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                            </svg>
+                          </button>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Panel for row 2 */}
                     {streakPanelOpen && (() => {
                       const STIERS = [
                         { min: 0,   label: "Beginner",  color: "#9aa0a6", grad: ["#f4f4f6","#eaecee"] },
@@ -1916,6 +1790,7 @@ export default function ProfilePage() {
                       );
                     })()}
 
+                    {/* Form Score panel */}
                     {formScorePanelOpen && formScore && (() => {
                       const { score, components } = formScore;
                       const color = score >= 70 ? "#16a34a" : score >= 50 ? "#d97706" : "#ef4444";
@@ -1959,6 +1834,7 @@ export default function ProfilePage() {
                       );
                     })()}
 
+                    {/* Hydration panel */}
                     {hydrationPanelOpen && (() => {
                       const ml = hydrationMl;
                       const hLogs: HydrationEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch { return []; } })();
@@ -1993,6 +1869,84 @@ export default function ProfilePage() {
                         </div>
                       );
                     })()}
+
+                    {/* Row 3: Insights · Gear · Matches */}
+                    <div style={{ display: "flex", gap: 10 }}>
+                      {/* Insights circle */}
+                      {(() => {
+                        const color = "#f59e0b";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        const wins   = reviews.filter(r => r.result === "win").length;
+                        const losses = reviews.filter(r => r.result === "loss").length;
+                        const count  = [wins + losses > 0, reviews.length >= 3, streak > 0, partnerCount >= 2, trainingSessions.length > 0].filter(Boolean).length;
+                        return (
+                          <button onClick={() => togglePanel('insights')}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(insightsPanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="insightsArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#insightsArc" startOffset="50%" textAnchor="middle">INSIGHTS</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{count > 0 ? count : "—"}</text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>featured</text>
+                              <circle cx="100" cy="188" r="4" fill={color} opacity={insightsPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                            </svg>
+                          </button>
+                        );
+                      })()}
+
+                      {/* Gear circle */}
+                      {(() => {
+                        const color = "#7c3aed";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        const label = racketName ? racketName.split(" ").slice(0, 1).join("") : "—";
+                        const sub   = racketName ? "my racket" : "no gear";
+                        return (
+                          <button onClick={() => togglePanel('gear')}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(gearPanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="gearArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#gearArc" startOffset="50%" textAnchor="middle">GEAR</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize={label.length > 5 ? "22" : "36"} fontWeight="800" style={{ fill: color, fontFamily: ff }}>{label}</text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
+                              <circle cx="100" cy="188" r="4" fill={color} opacity={gearPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                            </svg>
+                          </button>
+                        );
+                      })()}
+
+                      {/* Matches circle */}
+                      {(() => {
+                        const color = "#2653d4";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        const wins   = reviews.filter(r => r.result === "win").length;
+                        const losses = reviews.filter(r => r.result === "loss").length;
+                        const total  = wins + losses;
+                        const centerText = reviews.length > 0 ? String(reviews.length) : "—";
+                        const sub = total > 0 ? `${Math.round((wins / total) * 100)}% wins` : "no matches";
+                        return (
+                          <button onClick={() => togglePanel('matches')}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(matchesPanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="matchesArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#matchesArc" startOffset="50%" textAnchor="middle">MATCHES</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{centerText}</text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
+                              <circle cx="100" cy="188" r="4" fill={color} opacity={matchesPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                            </svg>
+                          </button>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Insights panel */}
                     {insightsPanelOpen && (() => {
                       const wins   = reviews.filter(r => r.result === "win").length;
                       const losses = reviews.filter(r => r.result === "loss").length;
@@ -2082,6 +2036,7 @@ export default function ProfilePage() {
                       );
                     })()}
 
+                    {/* Gear panel */}
                     {gearPanelOpen && (
                       <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px 0" }}>
@@ -2161,6 +2116,7 @@ export default function ProfilePage() {
                       </div>
                     )}
 
+                    {/* Matches panel */}
                     {matchesPanelOpen && (
                       <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
                         <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>Matches</p>
