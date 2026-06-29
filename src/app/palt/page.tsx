@@ -880,7 +880,7 @@ export default function Home8() {
   }, [matchModalOpen]);
 
   useEffect(() => {
-    if (cardSnap !== 'right') {
+    if (doIdx < 1) {
       setBreathPhase(0);
       setBreathDashOffset(560);
       return;
@@ -892,7 +892,7 @@ export default function Home8() {
       setBreathDashOffset(560 - (elapsed / 16000) * 560);
     }, 50);
     return () => clearInterval(id);
-  }, [cardSnap]);
+  }, [doIdx]);
 
   const today = new Date().toISOString().slice(0, 10);
   const dayColor = dayType === "match" ? "#2653d4" : dayType === "pre-match" ? "#d97706" : dayType === "recovery" ? "#7c3aed" : dayType === "maintenance" ? "#0e7490" : "#16a34a";
