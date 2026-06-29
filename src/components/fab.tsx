@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { saveUpcomingMatch, saveNutritionToDb, saveNoteToDb, saveMatchReview, saveGearToDb } from "@/lib/db";
+import { createClient } from "@/lib/supabase/client";
 
 type StoredMatch = { date: string; time: string; club: string; court: string; player_1: string; player_2: string; player_3: string; player_4: string };
 
@@ -35,6 +36,7 @@ function nowTimeStr() {
 export default function Fab() {
   const router = useRouter();
   const pathname = usePathname();
+  const [isAdmin, setIsAdmin] = useState(false);
   const prevPathnameRef = useRef(pathname);
 
   const [logPickerOpen, setLogPickerOpen] = useState(false);
@@ -58,6 +60,12 @@ export default function Fab() {
       closeAll();
     }
   }, [pathname]);
+
+  useEffect(() => {
+    createClient().auth.getUser().then(({ data }) => {
+      setIsAdmin((data.user?.email ?? "").toLowerCase() === "evanderbijl@hotmail.com");
+    });
+  }, []);
 
   useEffect(() => {
     function handleOpen() { setSmartUploadError(null); setFabExpanded(false); setLogPickerOpen(true); }
@@ -208,7 +216,7 @@ export default function Fab() {
                     <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                   </button>
                 </div>
-                <a href="/palt" style={{ display: "block", textAlign: "center", paddingTop: 10, fontSize: 13, fontWeight: 600, color: "#8a9096", textDecoration: "none", letterSpacing: "0.05em" }}>PALT</a>
+                {isAdmin && <a href="/palt" style={{ display: "block", textAlign: "center", paddingTop: 10, fontSize: 13, fontWeight: 600, color: "#8a9096", textDecoration: "none", letterSpacing: "0.05em" }}>PALT</a>}
 
                 {/* Log manually expanded */}
                 <div style={{ overflow: "hidden", maxHeight: fabExpanded ? 600 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
