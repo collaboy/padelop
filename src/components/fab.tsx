@@ -243,9 +243,10 @@ export default function Fab() {
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: "auto" }}><polyline points="9 18 15 12 9 6"/></svg>
                     </button>
                   </div>
+                  <a href="/palt" style={{ display: "block", textAlign: "center", padding: "6px 0 2px", fontSize: 13, fontWeight: 600, color: "#8a9096", textDecoration: "none", letterSpacing: "0.05em" }}>PALT</a>
                 </div>
-
               </div>
+
             </div>
 
             {/* Food sub-modal */}
