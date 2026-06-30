@@ -1319,119 +1319,15 @@ export default function Home8() {
                     : drillTag
                     ? `Today focus on ${drillTag}. Small improvements compound into big gains.`
                     : "Every session counts. Show up, put in the work, and trust the process.";
-                {/* TEMP: scoreboard grid preview */}
-                const ff2 = "-apple-system, BlinkMacSystemFont, sans-serif";
-                const done2 = completed.size, total2 = schedule.length;
-                const pct2 = total2 > 0 ? Math.round((done2 / total2) * 100) : 0;
-                const hml = logHydrationMl;
-                const hText = hml >= 1000 ? `${+(hml/1000).toFixed(1)}L` : hml > 0 ? `${hml}ml` : "—";
-                const hSub = hml > 0 ? `${Math.round(Math.min(hml/2000,1)*100)}% of 2L` : "not logged";
-                const wins2 = reviews.filter((r: {result?: string}) => r.result === "win").length;
-                const mSub = reviews.length > 0 ? `${Math.round((wins2/reviews.length)*100)}% wins` : "no matches";
-                const nm = match;
-                const nmDiff = nm ? Math.round((new Date(nm.date+"T12:00").getTime()-new Date(today+"T12:00").getTime())/86400000) : null;
-                const nmLabel = nmDiff === null ? "NO MATCH" : nmDiff === 0 ? "TODAY" : nmDiff === 1 ? "TOMORROW" : `IN ${nmDiff} DAYS`;
-                const pName = (profile.name || "YOU").toUpperCase().slice(0, 10);
                 return (
                   <div
                     key="card2"
-                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", justifyContent: "center", padding: 8, gap: 6, zIndex: doIdx === 1 ? 2 : 1, height: "calc(100vw - 40px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", opacity: doIdx >= 1 ? 1 : 0, transition: "opacity 0.3s" }}
+                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", zIndex: doIdx === 1 ? 2 : 1, height: "calc(100vw - 40px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", opacity: doIdx >= 1 ? 1 : 0, transition: "opacity 0.3s" }}
                     onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
                     onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
                   >
-                    {/* Row 1: Profile · Next Match · Day Type */}
-                    <div style={{ display: "flex", gap: 6, flex: 1 }}>
-                      <svg viewBox="0 0 200 200" style={{ flex: 1 }}>
-                        <defs>
-                          <path id="h8c2_nameArc" d="M 34,62 A 76,76 0 0,1 166,62" />
-                          <path id="h8c2_botArc"  d="M 24,100 A 76,76 0 0,0 176,100" />
-                        </defs>
-                        <circle cx="100" cy="100" r="76" fill="none" stroke="#111" strokeWidth="37" />
-                        <circle cx="100" cy="100" r="59" fill="#2653d4" />
-                        <text fontSize="16" fontWeight="700" letterSpacing="0.5" fill="white" fontFamily={ff2}>
-                          <textPath href="#h8c2_nameArc" startOffset="50%" textAnchor="middle">{pName}</textPath>
-                        </text>
-                        <text fontSize="11" fontWeight="600" letterSpacing="0.3" fill="white" fontFamily={ff2} dominantBaseline="middle" dy="0">
-                          <textPath href="#h8c2_botArc" startOffset="50%" textAnchor="middle">{`LVL ${profile.level || "?"}`}</textPath>
-                        </text>
-                      </svg>
-                      <svg viewBox="0 0 200 200" style={{ flex: 1 }}>
-                        <defs><path id="h8c2_nmArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                        <circle cx="100" cy="100" r="99" fill="#2653d4" />
-                        <text fontSize="19" fontWeight="700" letterSpacing="2.5" fill="rgba(255,255,255,0.7)" fontFamily={ff2}>
-                          <textPath href="#h8c2_nmArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
-                        </text>
-                        <text x="100" y="108" textAnchor="middle" dominantBaseline="middle" fontSize={nmLabel.length > 7 ? "18" : "22"} fontWeight="800" fill="rgba(255,255,255,0.9)" fontFamily={ff2}>{nmLabel}</text>
-                        {nm?.time && <text x="100" y="140" textAnchor="middle" fontSize="22" fontWeight="800" fill="white" fontFamily={ff2}>{nm.time}</text>}
-                      </svg>
-                      <svg viewBox="0 0 200 200" style={{ flex: 1 }}>
-                        <defs><path id="h8c2_dtArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                        <circle cx="100" cy="100" r="99" fill="white" />
-                        <text fontSize="22" fontWeight="700" letterSpacing="0.03em" fill={dayColor} fontFamily={ff2}>
-                          <textPath href="#h8c2_dtArc" startOffset="50%" textAnchor="middle">DAY TYPE</textPath>
-                        </text>
-                        {(() => { const parts = dayLabel.split(" "); const main = parts.slice(0,-1).join(" "); const last = parts[parts.length-1]; return (<>
-                          <text x="100" y={last ? "93" : "108"} textAnchor="middle" dominantBaseline="middle" fontSize="24" fontWeight="800" fill={dayColor} fontFamily={ff2}>{main || dayLabel}</text>
-                          {last && main && <text x="100" y="123" textAnchor="middle" dominantBaseline="middle" fontSize="20" fontWeight="800" fill={dayColor} fontFamily={ff2}>{last}</text>}
-                        </>); })()}
-                      </svg>
-                    </div>
-                    {/* Row 2: Goals · Streak · Form */}
-                    <div style={{ display: "flex", gap: 6, flex: 1 }}>
-                      <svg viewBox="0 0 200 200" style={{ flex: 1 }}>
-                        <defs><path id="h8c2_glArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                        <circle cx="100" cy="100" r="99" fill="white" />
-                        <text fontSize="22" fontWeight="700" letterSpacing="0.03em" fill="var(--c-label)" fontFamily={ff2}>
-                          <textPath href="#h8c2_glArc" startOffset="50%" textAnchor="middle">TODAY&apos;S GOALS</textPath>
-                        </text>
-                        <text x="100" y="108" textAnchor="middle" dominantBaseline="middle" fontSize={pct2 === 100 ? "44" : "36"} fontWeight="800" fill={pct2 === 100 ? "#00D455" : "var(--c-text)"} fontFamily={ff2}>{pct2 === 100 ? "✓" : total2 > 0 ? `${done2}/${total2}` : "—"}</text>
-                      </svg>
-                      <svg viewBox="0 0 200 200" style={{ flex: 1 }}>
-                        <defs><path id="h8c2_stArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                        <circle cx="100" cy="100" r="99" fill="white" />
-                        <text fontSize="22" fontWeight="700" letterSpacing="0.03em" fill="#9aa0a6" fontFamily={ff2}>
-                          <textPath href="#h8c2_stArc" startOffset="50%" textAnchor="middle">STREAK</textPath>
-                        </text>
-                        <text x="100" y="108" textAnchor="middle" dominantBaseline="middle" fontSize="46" fontWeight="800" fill="#9aa0a6" fontFamily={ff2}>—</text>
-                      </svg>
-                      <svg viewBox="0 0 200 200" style={{ flex: 1 }}>
-                        <defs><path id="h8c2_fmArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                        <circle cx="100" cy="100" r="99" fill="white" />
-                        <text fontSize="22" fontWeight="700" letterSpacing="0.03em" fill="#9aa0a6" fontFamily={ff2}>
-                          <textPath href="#h8c2_fmArc" startOffset="50%" textAnchor="middle">MY FORM</textPath>
-                        </text>
-                        <text x="100" y="108" textAnchor="middle" dominantBaseline="middle" fontSize="46" fontWeight="800" fill="#9aa0a6" fontFamily={ff2}>—</text>
-                      </svg>
-                    </div>
-                    {/* Row 3: Hydration · Insights · Matches */}
-                    <div style={{ display: "flex", gap: 6, flex: 1 }}>
-                      <svg viewBox="0 0 200 200" style={{ flex: 1 }}>
-                        <defs><path id="h8c2_hyArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                        <circle cx="100" cy="100" r="99" fill="white" />
-                        <text fontSize="22" fontWeight="700" letterSpacing="0.03em" fill="#0ea5e9" fontFamily={ff2}>
-                          <textPath href="#h8c2_hyArc" startOffset="50%" textAnchor="middle">HYDRATION</textPath>
-                        </text>
-                        <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize={hml>=1000?"36":"44"} fontWeight="800" fill="#0ea5e9" fontFamily={ff2}>{hText}</text>
-                        <text x="100" y="152" textAnchor="middle" fontSize="17" fontWeight="600" fill="#0ea5e9" fontFamily={ff2} opacity="0.65">{hSub}</text>
-                      </svg>
-                      <svg viewBox="0 0 200 200" style={{ flex: 1 }}>
-                        <defs><path id="h8c2_inArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                        <circle cx="100" cy="100" r="99" fill="white" />
-                        <text fontSize="22" fontWeight="700" letterSpacing="0.03em" fill="#d97706" fontFamily={ff2}>
-                          <textPath href="#h8c2_inArc" startOffset="50%" textAnchor="middle">INSIGHTS</textPath>
-                        </text>
-                        <text x="100" y="108" textAnchor="middle" dominantBaseline="middle" fontSize="46" fontWeight="800" fill="#d97706" fontFamily={ff2}>—</text>
-                      </svg>
-                      <svg viewBox="0 0 200 200" style={{ flex: 1 }}>
-                        <defs><path id="h8c2_maArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                        <circle cx="100" cy="100" r="99" fill="white" />
-                        <text fontSize="22" fontWeight="700" letterSpacing="0.03em" fill="#2653d4" fontFamily={ff2}>
-                          <textPath href="#h8c2_maArc" startOffset="50%" textAnchor="middle">MATCHES</textPath>
-                        </text>
-                        <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="46" fontWeight="800" fill="#2653d4" fontFamily={ff2}>{reviews.length > 0 ? reviews.length : "—"}</text>
-                        <text x="100" y="152" textAnchor="middle" fontSize="17" fontWeight="600" fill="#2653d4" fontFamily={ff2} opacity="0.65">{mSub}</text>
-                      </svg>
-                    </div>
+                    {/* TEMP: scoreboard preview image */}
+                    <img src="/scoreboard-preview.png" alt="scoreboard preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   </div>
                 );
               })()}
