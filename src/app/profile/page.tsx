@@ -1203,13 +1203,18 @@ export default function ProfilePage() {
                     fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">{initials(profile.name)}</text>
                 </>
               )}
-              <text fontSize="20" fontWeight="700" letterSpacing="1.5" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dominantBaseline="middle" dy="0">
-                <textPath href="#pc_big_nameArc" startOffset="50%" textAnchor="middle">
-                  {(profile.name || "YOUR NAME").toUpperCase()}
-                </textPath>
-              </text>
+              {(() => {
+                const n = (profile.name || "YOUR NAME").toUpperCase();
+                const fs = n.length <= 8 ? 18 : n.length <= 12 ? 15 : n.length <= 16 ? 12 : 10;
+                const ls = n.length <= 8 ? "1.5" : "0.5";
+                return (
+                  <text fontSize={fs} fontWeight="700" letterSpacing={ls} fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dominantBaseline="middle" dy="0">
+                    <textPath href="#pc_big_nameArc" startOffset="50%" textAnchor="middle">{n}</textPath>
+                  </text>
+                );
+              })()}
               {(profile.level || profile.position || profile.hand || profile.playingSince) && (
-                <text fontSize="13" fontWeight="600" letterSpacing="0.5" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dominantBaseline="middle" dy="0">
+                <text fontSize="11" fontWeight="600" letterSpacing="0.3" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dominantBaseline="middle" dy="0">
                   <textPath href="#pc_big_bottomArc" startOffset="50%" textAnchor="middle">
                     {[profile.level ? `LVL ${profile.level}` : null, profile.position, profile.hand, profile.playingSince].filter(Boolean).join(" · ").toUpperCase()}
                   </textPath>
