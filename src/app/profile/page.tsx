@@ -1183,7 +1183,7 @@ export default function ProfilePage() {
           </div>
 
           {/* ── Big profile circle ─────────────────────────────────── */}
-          <div style={{ display: "flex", justifyContent: "center", paddingTop: 8, paddingBottom: 4 }}>
+          <button onClick={() => togglePanel('profileCircle')} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", justifyContent: "center", width: "100%", paddingTop: 8, paddingBottom: 4 }}>
             <svg viewBox="0 0 200 200" width="200" height="200" style={{ display: "block" }}>
               <defs>
                 <clipPath id="pc_big_imgClip"><circle cx="100" cy="100" r="52" /></clipPath>
@@ -1214,8 +1214,64 @@ export default function ProfilePage() {
                 </text>
               )}
             </svg>
-          </div>
+          </button>
           {/* ── End big profile circle ──────────────────────────────── */}
+          {profileCirclePanelOpen && (
+            <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
+              <div style={{ padding: "18px 18px 16px" }}>
+                <p style={{ margin: "0 0 14px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Edit Profile</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
+                  <label style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ width: 60, height: 60, borderRadius: "50%", overflow: "hidden", background: "#f0f2f5", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {profile.avatar
+                        // eslint-disable-next-line @next/next/no-img-element
+                        ? <img src={profile.avatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        : <span style={{ fontSize: 22, fontWeight: 800, color: "#2653d4" }}>{initials(profile.name)}</span>}
+                    </div>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: "#2653d4" }}>Change photo</span>
+                    <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleAvatar} />
+                  </label>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Name</label>
+                    <input value={profile.name} onChange={e => setField("name", e.target.value)} placeholder="Your name" style={{ padding: "9px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 15, outline: "none" }} />
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Playing since</label>
+                    <input value={profile.playingSince} onChange={e => setField("playingSince", e.target.value)} placeholder="e.g. 2019" style={{ padding: "9px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 15, outline: "none" }} />
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Level</label>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {LEVELS.map(l => (
+                        <button key={l} onClick={() => setField("level", l)} style={{ padding: "6px 12px", borderRadius: 20, border: "1.5px solid", fontSize: 13, fontWeight: 700, cursor: "pointer", borderColor: profile.level === l ? "#2653d4" : "#e2e5ea", background: profile.level === l ? "#eef2ff" : "transparent", color: profile.level === l ? "#2653d4" : "#6b7480" }}>{l}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+                      <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Position</label>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                        {POSITIONS.map(p => (
+                          <button key={p} onClick={() => setField("position", p)} style={{ padding: "7px 10px", borderRadius: 10, border: "1.5px solid", fontSize: 13, fontWeight: 600, cursor: "pointer", borderColor: profile.position === p ? "#2653d4" : "#e2e5ea", background: profile.position === p ? "#eef2ff" : "transparent", color: profile.position === p ? "#2653d4" : "#6b7480", textAlign: "left" }}>{p}</button>
+                        ))}
+                      </div>
+                    </div>
+                    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+                      <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Hand</label>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                        {HANDS.map(h => (
+                          <button key={h} onClick={() => setField("hand", h)} style={{ padding: "7px 10px", borderRadius: 10, border: "1.5px solid", fontSize: 13, fontWeight: 600, cursor: "pointer", borderColor: profile.hand === h ? "#2653d4" : "#e2e5ea", background: profile.hand === h ? "#eef2ff" : "transparent", color: profile.hand === h ? "#2653d4" : "#6b7480", textAlign: "left" }}>{h}</button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <button onClick={save} disabled={!canSave} style={{ padding: 11, borderRadius: 14, background: canSave ? "#2653d4" : "#c4c7c7", color: "#fff", border: "none", fontSize: 15, fontWeight: 700, cursor: canSave ? "pointer" : "default", marginTop: 4 }}>{saved ? "Saved ✓" : "Save"}</button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {panelSmartError && (
             <div style={{ background: "#fff5f5", border: "1.5px solid #fecaca", borderRadius: 12, padding: "10px 14px" }}>
@@ -1247,46 +1303,6 @@ export default function ProfilePage() {
                     <>
                     {/* Row 1: Profile · Next Match · Day Type */}
                     <div style={{ display: "flex", gap: 10 }}>
-                      {/* Profile tile */}
-                      {(() => {
-                        const tileBottomItems = profile.level ? `LVL ${profile.level}` : null;
-                        return (
-                          <button onClick={() => togglePanel('profileCircle')}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(profileCirclePanelOpen) }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs>
-                                <clipPath id="pc_tile_imgClip"><circle cx="100" cy="100" r="52" /></clipPath>
-                                <path id="pc_tile_nameArc" d="M 34,62 A 76,76 0 0,1 166,62" />
-                                <path id="pc_tile_bottomArc" d="M 24,100 A 76,76 0 0,0 176,100" />
-                              </defs>
-                              <circle cx="100" cy="100" r="76" fill="none" stroke="#111" strokeWidth="46" />
-                              {profile.avatar ? (
-                                <image href={profile.avatar} x="48" y="48" width="104" height="104"
-                                  clipPath="url(#pc_tile_imgClip)" preserveAspectRatio="xMidYMid slice" />
-                              ) : (
-                                <>
-                                  <circle cx="100" cy="100" r="52" fill="#2653d4" />
-                                  <text x="100" y="108" textAnchor="middle" fontSize="28" fontWeight="800"
-                                    fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">{initials(profile.name)}</text>
-                                </>
-                              )}
-                              <text fontSize="24" fontWeight="700" letterSpacing="1.5" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dominantBaseline="middle" dy="0">
-                                <textPath href="#pc_tile_nameArc" startOffset="50%" textAnchor="middle">
-                                  {(profile.name || "YOUR NAME").toUpperCase()}
-                                </textPath>
-                              </text>
-                              {tileBottomItems && (
-                                <text fontSize="20" fontWeight="600" letterSpacing="0.5" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dominantBaseline="middle" dy="0">
-                                  <textPath href="#pc_tile_bottomArc" startOffset="50%" textAnchor="middle">
-                                    {tileBottomItems}
-                                  </textPath>
-                                </text>
-                              )}
-                            </svg>
-                          </button>
-                        );
-                      })()}
-
                       {/* Next Match */}
                       {(() => {
                         const today = new Date().toISOString().slice(0, 10);
@@ -1353,137 +1369,6 @@ export default function ProfilePage() {
                       </button>
 
                     </div>
-
-                    {profileCirclePanelOpen && (
-                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-                        <div style={{ padding: "18px 18px 16px", borderBottom: "1px solid #f0f2f5" }}>
-                          <p style={{ margin: "0 0 14px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Edit Profile</p>
-                          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
-                            <label style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 10 }}>
-                              <div style={{ width: 60, height: 60, borderRadius: "50%", overflow: "hidden", background: "#f0f2f5", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                {profile.avatar
-                                  // eslint-disable-next-line @next/next/no-img-element
-                                  ? <img src={profile.avatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                  : <span style={{ fontSize: 22, fontWeight: 800, color: "#2653d4" }}>{initials(profile.name)}</span>}
-                              </div>
-                              <span style={{ fontSize: 14, fontWeight: 600, color: "#2653d4" }}>Change photo</span>
-                              <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleAvatar} />
-                            </label>
-                          </div>
-                          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                              <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Name</label>
-                              <input value={profile.name} onChange={e => setField("name", e.target.value)} placeholder="Your name" style={{ padding: "9px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 15, outline: "none" }} />
-                            </div>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                              <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Playing since</label>
-                              <input value={profile.playingSince} onChange={e => setField("playingSince", e.target.value)} placeholder="e.g. 2019" style={{ padding: "9px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 15, outline: "none" }} />
-                            </div>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                              <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Level</label>
-                              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                                {LEVELS.map(l => (
-                                  <button key={l} onClick={() => setField("level", l)} style={{ padding: "6px 12px", borderRadius: 20, border: "1.5px solid", fontSize: 13, fontWeight: 700, cursor: "pointer", borderColor: profile.level === l ? "#2653d4" : "#e2e5ea", background: profile.level === l ? "#eef2ff" : "transparent", color: profile.level === l ? "#2653d4" : "#6b7480" }}>{l}</button>
-                                ))}
-                              </div>
-                            </div>
-                            <div style={{ display: "flex", gap: 10 }}>
-                              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
-                                <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Position</label>
-                                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                                  {POSITIONS.map(p => (
-                                    <button key={p} onClick={() => setField("position", p)} style={{ padding: "7px 10px", borderRadius: 10, border: "1.5px solid", fontSize: 13, fontWeight: 600, cursor: "pointer", borderColor: profile.position === p ? "#2653d4" : "#e2e5ea", background: profile.position === p ? "#eef2ff" : "transparent", color: profile.position === p ? "#2653d4" : "#6b7480", textAlign: "left" }}>{p}</button>
-                                  ))}
-                                </div>
-                              </div>
-                              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
-                                <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Hand</label>
-                                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                                  {HANDS.map(h => (
-                                    <button key={h} onClick={() => setField("hand", h)} style={{ padding: "7px 10px", borderRadius: 10, border: "1.5px solid", fontSize: 13, fontWeight: 600, cursor: "pointer", borderColor: profile.hand === h ? "#2653d4" : "#e2e5ea", background: profile.hand === h ? "#eef2ff" : "transparent", color: profile.hand === h ? "#2653d4" : "#6b7480", textAlign: "left" }}>{h}</button>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                            <button onClick={save} disabled={!canSave} style={{ padding: 11, borderRadius: 14, background: canSave ? "#2653d4" : "#c4c7c7", color: "#fff", border: "none", fontSize: 15, fontWeight: 700, cursor: canSave ? "pointer" : "default", marginTop: 4 }}>{saved ? "Saved ✓" : "Save"}</button>
-                          </div>
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px 0" }}>
-                          <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>My Gear</p>
-                          <button onClick={() => setGearEditOpen(o => !o)} className="t-caption" style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 500, color: "var(--c-forest)" }}>{gearEditOpen ? "Done" : "Edit"}</button>
-                        </div>
-                        <div ref={racketRowRef} style={{ display: "flex", alignItems: "stretch", padding: 12, gap: 14 }}>
-                          <div style={{ position: "relative", flexShrink: 0, width: racketSlotSize, height: racketSlotSize }}>
-                            <label htmlFor="racket-img-upload-panel" style={{ cursor: "pointer", display: "block", width: "100%", height: "100%" }}>
-                              <div style={{ width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                {racketImage ? (
-                                  // eslint-disable-next-line @next/next/no-img-element
-                                  <img src={racketImage} alt="Racket" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                ) : (
-                                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c4c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                                )}
-                              </div>
-                            </label>
-                            <input id="racket-img-upload-panel" type="file" accept="image/*" style={{ display: "none" }} onChange={handleRacketImage} />
-                          </div>
-                          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 6 }}>
-                            {gearEditOpen ? (
-                              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                                <input placeholder="Racket name" value={racketName} onChange={e => { setRacketName(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketName = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
-                                <input placeholder="Racket type (e.g. Control)" value={racketType} onChange={e => { setRacketType(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketType = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
-                                <input placeholder="Using since (e.g. Jan 2024)" value={racketSince} onChange={e => { setRacketSince(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketSince = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
-                              </div>
-                            ) : (
-                              <>
-                                <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1a1c1c" }}>{racketName || <span style={{ color: "#b0b5ba" }}>No racket added</span>}</p>
-                                {racketType && <p style={{ margin: 0, fontSize: 13, color: "#6b7480" }}>{racketType}</p>}
-                                {racketSince && <p style={{ margin: 0, fontSize: 12, color: "#9aa0a6" }}>Since {racketSince}</p>}
-                              </>
-                            )}
-                          </div>
-                        </div>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "var(--c-line)", borderTop: "1px solid var(--c-line)" }}>
-                          <div style={{ background: "#fff", padding: "14px", display: "flex", flexDirection: "column" }}>
-                            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 10px" }}>My Shoes</p>
-                            <div style={{ position: "relative", flex: 1 }}>
-                              <label htmlFor="shoe-img-upload-panel" style={{ cursor: "pointer", display: "block" }}>
-                                <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: shoeImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                  {shoeImage
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    ? <img src={shoeImage} alt="Shoes" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 17h20v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-1z"/><path d="M2 17c0-3.5 2.5-6 6-6h2l3-2h3c2.2 0 4 1.5 4.5 3.5L21 17"/></svg>}
-                                </div>
-                              </label>
-                              {shoeImage && (
-                                <button onClick={() => { setShoeImage(""); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); delete g.shoeImage; localStorage.setItem("padelop:gear", JSON.stringify(g)); deleteGearImageFromStorage("shoe"); }} style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
-                                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                </button>
-                              )}
-                            </div>
-                            <input id="shoe-img-upload-panel" type="file" accept="image/*" className="hidden" onChange={handleShoeImage} />
-                          </div>
-                          <div style={{ background: "#fff", padding: "14px", display: "flex", flexDirection: "column" }}>
-                            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 10px" }}>My Kit</p>
-                            <div style={{ position: "relative", flex: 1 }}>
-                              <label htmlFor="kit-img-upload-panel" style={{ cursor: "pointer", display: "block" }}>
-                                <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: kitImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                  {kitImage
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    ? <img src={kitImage} alt="Kit" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg>}
-                                </div>
-                              </label>
-                              {kitImage && (
-                                <button onClick={() => { setKitImage(""); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); delete g.kitImage; localStorage.setItem("padelop:gear", JSON.stringify(g)); deleteGearImageFromStorage("kit"); }} style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
-                                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                </button>
-                              )}
-                            </div>
-                            <input id="kit-img-upload-panel" type="file" accept="image/*" className="hidden" onChange={handleKitImage} />
-                          </div>
-                        </div>
-                      </div>
-                    )}
 
                     {dayTypeInfoOpen && (
                       <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
@@ -1769,6 +1654,33 @@ export default function ProfilePage() {
                           </button>
                         );
                       })()}
+
+                      {/* Gear tile */}
+                      {(() => {
+                        const color = "#6b7480";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        const label = racketName || "—";
+                        return (
+                          <button onClick={() => togglePanel('gear')}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(gearPanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="gearArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#gearArc" startOffset="50%" textAnchor="middle">MY GEAR</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
+                                fontSize={label.length > 8 ? "16" : label.length > 5 ? "20" : "28"} fontWeight="800"
+                                style={{ fill: color, fontFamily: ff }}>{label}</text>
+                              {racketType ? (
+                                <text x="100" y="148" textAnchor="middle" fontSize="13" fontWeight="600"
+                                  style={{ fill: color, fontFamily: ff, opacity: 0.6 } as React.CSSProperties}>{racketType}</text>
+                              ) : null}
+                              <circle cx="100" cy="188" r="4" fill={color} opacity={gearPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                            </svg>
+                          </button>
+                        );
+                      })()}
                     </div>
 
                     {panelSchedOpen && (
@@ -1873,6 +1785,86 @@ export default function ProfilePage() {
                         </div>
                       );
                     })()}
+
+                    {/* Gear panel */}
+                    {gearPanelOpen && (
+                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px 10px" }}>
+                          <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>My Gear</p>
+                          <button onClick={() => setGearEditOpen(o => !o)} className="t-caption" style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 500, color: "var(--c-forest)" }}>{gearEditOpen ? "Done" : "Edit"}</button>
+                        </div>
+                        <div ref={racketRowRef} style={{ display: "flex", alignItems: "stretch", padding: "0 12px 12px", gap: 14 }}>
+                          <div style={{ position: "relative", flexShrink: 0, width: racketSlotSize, height: racketSlotSize }}>
+                            <label htmlFor="racket-img-upload-gear" style={{ cursor: "pointer", display: "block", width: "100%", height: "100%" }}>
+                              <div style={{ width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                {racketImage ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img src={racketImage} alt="Racket" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                ) : (
+                                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c4c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                )}
+                              </div>
+                            </label>
+                            <input id="racket-img-upload-gear" type="file" accept="image/*" style={{ display: "none" }} onChange={handleRacketImage} />
+                          </div>
+                          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 6 }}>
+                            {gearEditOpen ? (
+                              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                <input placeholder="Racket name" value={racketName} onChange={e => { setRacketName(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketName = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
+                                <input placeholder="Racket type (e.g. Control)" value={racketType} onChange={e => { setRacketType(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketType = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
+                                <input placeholder="Using since (e.g. Jan 2024)" value={racketSince} onChange={e => { setRacketSince(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketSince = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
+                              </div>
+                            ) : (
+                              <>
+                                <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1a1c1c" }}>{racketName || <span style={{ color: "#b0b5ba" }}>No racket added</span>}</p>
+                                {racketType && <p style={{ margin: 0, fontSize: 13, color: "#6b7480" }}>{racketType}</p>}
+                                {racketSince && <p style={{ margin: 0, fontSize: 12, color: "#9aa0a6" }}>Since {racketSince}</p>}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "var(--c-line)", borderTop: "1px solid var(--c-line)" }}>
+                          <div style={{ background: "#fff", padding: "14px", display: "flex", flexDirection: "column" }}>
+                            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 10px" }}>My Shoes</p>
+                            <div style={{ position: "relative", flex: 1 }}>
+                              <label htmlFor="shoe-img-upload-gear" style={{ cursor: "pointer", display: "block" }}>
+                                <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: shoeImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                  {shoeImage
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    ? <img src={shoeImage} alt="Shoes" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                    : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 17h20v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-1z"/><path d="M2 17c0-3.5 2.5-6 6-6h2l3-2h3c2.2 0 4 1.5 4.5 3.5L21 17"/></svg>}
+                                </div>
+                              </label>
+                              {shoeImage && (
+                                <button onClick={() => { setShoeImage(""); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); delete g.shoeImage; localStorage.setItem("padelop:gear", JSON.stringify(g)); deleteGearImageFromStorage("shoe"); }} style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
+                                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                              )}
+                            </div>
+                            <input id="shoe-img-upload-gear" type="file" accept="image/*" className="hidden" onChange={handleShoeImage} />
+                          </div>
+                          <div style={{ background: "#fff", padding: "14px", display: "flex", flexDirection: "column" }}>
+                            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 10px" }}>My Kit</p>
+                            <div style={{ position: "relative", flex: 1 }}>
+                              <label htmlFor="kit-img-upload-gear" style={{ cursor: "pointer", display: "block" }}>
+                                <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: kitImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                  {kitImage
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    ? <img src={kitImage} alt="Kit" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                    : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg>}
+                                </div>
+                              </label>
+                              {kitImage && (
+                                <button onClick={() => { setKitImage(""); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); delete g.kitImage; localStorage.setItem("padelop:gear", JSON.stringify(g)); deleteGearImageFromStorage("kit"); }} style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
+                                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                              )}
+                            </div>
+                            <input id="kit-img-upload-gear" type="file" accept="image/*" className="hidden" onChange={handleKitImage} />
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Row 3: Hydration · Insights · Matches */}
                     <div style={{ display: "flex", gap: 10 }}>
