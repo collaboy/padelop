@@ -1096,7 +1096,7 @@ export default function Home8() {
                 const contentOpacity = doIdx === 0 ? 1 : 0.2;
 
                 if (isSleepytime) return (
-                  <div key="active" style={{ ...cardStyle }}>
+                  <div key="active" className="animate-bounce-in" style={{ ...cardStyle }}>
                     <div style={{ position: "absolute", inset: 0, background: "rgba(10,12,30,0.65)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8 }}>
                       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#c9d6ff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
                       <p style={{ fontSize: "clamp(22px, 7vw, 30px)", fontWeight: 800, color: "#fff", margin: 0, letterSpacing: "-0.02em" }}>Sleepytime</p>

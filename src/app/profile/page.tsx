@@ -2887,8 +2887,8 @@ export default function ProfilePage() {
       )}
     </div>
     {navLoading === "settings" && (
-      <div style={{ position: "fixed", inset: 0, zIndex: 9998, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-        <svg className="animate-spin" width="36" height="36" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#d0d4da" strokeWidth="2.5"/><path d="M12 3a9 9 0 0 1 9 9" stroke="#9aa0a6" strokeWidth="2.5" strokeLinecap="round"/></svg>
+      <div style={{ position: "fixed", inset: 0, zIndex: 9998, background: "rgba(242,243,245,0.85)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ width: 36, height: 36, borderRadius: "50%", border: "3px solid rgba(0,160,60,0.2)", borderTopColor: "#00A83C", animation: "spin 0.8s linear infinite" }} />
       </div>
     )}
     <button
