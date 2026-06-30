@@ -2189,6 +2189,80 @@ export default function ProfilePage() {
                         )}
                       </div>
                     )}
+
+                    {/* Row 4: Good/Bad */}
+                    <div style={{ display: "flex", gap: 10 }}>
+                      {(() => {
+                        const color = "#e11d48";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        const wellCounts: Record<string, number> = {};
+                        const badCounts: Record<string, number> = {};
+                        reviews.forEach(r => {
+                          (r.wellDone ?? []).forEach(t => { wellCounts[t] = (wellCounts[t] ?? 0) + 1; });
+                          (r.improved ?? []).forEach(t => { badCounts[t] = (badCounts[t] ?? 0) + 1; });
+                        });
+                        const totalTags = Object.keys(wellCounts).length + Object.keys(badCounts).length;
+                        return (
+                          <button onClick={() => togglePanel('goodBad')}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(openPanel === 'goodBad') }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="goodBadArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#goodBadArc" startOffset="50%" textAnchor="middle">GOOD / BAD</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{totalTags > 0 ? totalTags : "—"}</text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>tags logged</text>
+                            </svg>
+                          </button>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Good/Bad panel */}
+                    {openPanel === 'goodBad' && (() => {
+                      const wellCounts: Record<string, number> = {};
+                      const badCounts: Record<string, number> = {};
+                      reviews.forEach(r => {
+                        (r.wellDone ?? []).forEach(t => { wellCounts[t] = (wellCounts[t] ?? 0) + 1; });
+                        (r.improved ?? []).forEach(t => { badCounts[t] = (badCounts[t] ?? 0) + 1; });
+                      });
+                      const wellTags = Object.entries(wellCounts).sort((a, b) => b[1] - a[1]);
+                      const badTags  = Object.entries(badCounts).sort((a, b) => b[1] - a[1]);
+                      if (wellTags.length === 0 && badTags.length === 0) {
+                        return <div style={{ background: "#fff", borderRadius: 18, padding: "20px 16px", textAlign: "center", color: "#9aa0a6", fontSize: 15 }}>No tags yet — log match reviews to see your patterns.</div>;
+                      }
+                      return (
+                        <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden", padding: "16px 16px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
+                          {wellTags.length > 0 && (
+                            <div>
+                              <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#16a34a" }}>What&apos;s Working</p>
+                              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                                {wellTags.map(([tag, count]) => (
+                                  <span key={tag} style={{ display: "flex", alignItems: "center", gap: 5, background: "#f0fdf4", borderRadius: 999, padding: "6px 12px" }}>
+                                    <span style={{ fontSize: 15, fontWeight: 600, color: "#15803d" }}>{tag}</span>
+                                    <span style={{ fontSize: 12, fontWeight: 700, color: "#16a34a", background: "#dcfce7", borderRadius: 999, padding: "1px 7px" }}>{count}</span>
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {badTags.length > 0 && (
+                            <div>
+                              <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#e11d48" }}>Needs Work</p>
+                              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                                {badTags.map(([tag, count]) => (
+                                  <span key={tag} style={{ display: "flex", alignItems: "center", gap: 5, background: "#fff1f2", borderRadius: 999, padding: "6px 12px" }}>
+                                    <span style={{ fontSize: 15, fontWeight: 600, color: "#be123c" }}>{tag}</span>
+                                    <span style={{ fontSize: 12, fontWeight: 700, color: "#e11d48", background: "#ffe4e6", borderRadius: 999, padding: "1px 7px" }}>{count}</span>
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
 </>
                     );
                   })()}
