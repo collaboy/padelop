@@ -1348,8 +1348,6 @@ export default function ProfilePage() {
                       {(() => {
                         const tileBottomItems = [
                           profile.level    ? `LVL ${profile.level}` : null,
-                          profile.position ? profile.position.toUpperCase() : null,
-                          profile.hand     ? `${profile.hand.toUpperCase()}-HANDED` : null,
                           profile.playingSince ? `SINCE ${profile.playingSince}` : null,
                         ].filter(Boolean).join(" · ");
                         return (
