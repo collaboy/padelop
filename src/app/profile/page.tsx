@@ -1343,8 +1343,52 @@ export default function ProfilePage() {
                     const dim = (active: boolean) => ({ opacity: anyOpen && !active ? 0.3 : 1, transition: "opacity 0.2s" });
                     return (
                     <>
-                    {/* Row 1: Next Match · Day Type · Today's Goals */}
-                    <div style={{ display: "flex", gap: 10 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+                      {/* Profile tile */}
+                      {(() => {
+                        const tileBottomItems = [
+                          profile.level    ? `LVL ${profile.level}` : null,
+                          profile.position ? profile.position.toUpperCase() : null,
+                          profile.hand     ? `${profile.hand.toUpperCase()}-HANDED` : null,
+                          profile.playingSince ? `SINCE ${profile.playingSince}` : null,
+                        ].filter(Boolean).join(" · ");
+                        return (
+                          <button onClick={() => setProfileTabEditOpen(o => !o)}
+                            style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
+                              <defs>
+                                <clipPath id="pc_tile_imgClip"><circle cx="100" cy="100" r="61" /></clipPath>
+                                <path id="pc_tile_nameArc" d="M 35,63 A 75,75 0 0,1 165,63" />
+                                <path id="pc_tile_bottomArc" d="M 25,100 A 75,75 0 0,0 175,100" />
+                              </defs>
+                              <circle cx="100" cy="100" r="75" fill="none" stroke="#111" strokeWidth="28" />
+                              {profile.avatar ? (
+                                <image href={profile.avatar} x="39" y="39" width="122" height="122"
+                                  clipPath="url(#pc_tile_imgClip)" preserveAspectRatio="xMidYMid slice" />
+                              ) : (
+                                <>
+                                  <circle cx="100" cy="100" r="61" fill="#2653d4" />
+                                  <text x="100" y="109" textAnchor="middle" fontSize="31" fontWeight="800"
+                                    fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">{initials(profile.name)}</text>
+                                </>
+                              )}
+                              <text fontSize="12" fontWeight="700" letterSpacing="1.5" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dy="4">
+                                <textPath href="#pc_tile_nameArc" startOffset="50%" textAnchor="middle">
+                                  {(profile.name || "YOUR NAME").toUpperCase()}
+                                </textPath>
+                              </text>
+                              {tileBottomItems && (
+                                <text fontSize="7" fontWeight="600" letterSpacing="0.5" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dy="3">
+                                  <textPath href="#pc_tile_bottomArc" startOffset="50%" textAnchor="middle">
+                                    {tileBottomItems}
+                                  </textPath>
+                                </text>
+                              )}
+                            </svg>
+                          </button>
+                        );
+                      })()}
+
                       {/* Next Match */}
                       {(() => {
                         const today = new Date().toISOString().slice(0, 10);
@@ -1356,7 +1400,7 @@ export default function ProfilePage() {
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                         return (
                           <button onClick={() => togglePanel('nextMatch')}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(nextMatchPanelOpen) }}>
+                            style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(nextMatchPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 4px 20px rgba(38,83,212,0.35))", display: "block" }}>
                               <defs><path id="nextMatchTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#2653d4" />
@@ -1382,7 +1426,7 @@ export default function ProfilePage() {
 
                       {/* Day Type */}
                       <button onClick={() => togglePanel('dayType')}
-                        style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(dayTypeInfoOpen) }}>
+                        style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(dayTypeInfoOpen) }}>
                         {(() => {
                           const parts = panelDayLabel.split(" ");
                           const mainLabel = parts.length > 1 ? parts.slice(0, -1).join(" ") : panelDayLabel;
@@ -1412,7 +1456,7 @@ export default function ProfilePage() {
 
                       {/* Today's Goals */}
                       <button onClick={() => togglePanel('sched')}
-                        style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(panelSchedOpen) }}>
+                        style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(panelSchedOpen) }}>
                         <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                           <defs><path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                           <circle cx="100" cy="100" r="99" fill="white" />
@@ -1439,6 +1483,179 @@ export default function ProfilePage() {
                           })()}
                         </svg>
                       </button>
+
+
+                      {/* Streak */}
+                      {(() => {
+                        const STIERS = [
+                          { min: 0,   label: "Beginner",  color: "#9aa0a6", grad: ["#f4f4f6","#eaecee"] },
+                          { min: 5,   label: "Starter",   color: "#2653d4", grad: ["#eef2ff","#dbe4ff"] },
+                          { min: 15,  label: "Grinder",   color: "#059669", grad: ["#ecfdf5","#d1fae5"] },
+                          { min: 30,  label: "Dedicated", color: "#d97706", grad: ["#fffbeb","#fde68a"] },
+                          { min: 60,  label: "Elite",     color: "#7c3aed", grad: ["#faf5ff","#ede9fe"] },
+                          { min: 100, label: "Legend",    color: "#0ea5e9", grad: ["#f0f9ff","#bae6fd"] },
+                        ];
+                        const stier = [...STIERS].reverse().find(t => streak >= t.min) ?? STIERS[0];
+                        return (
+                          <button onClick={() => togglePanel('streak')}
+                            style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(streakPanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                                <textPath href="#streakTopArc" startOffset="50%" textAnchor="middle">{stier.label.toUpperCase()}</textPath>
+                              </text>
+                              <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
+                                fontSize={streak >= 100 ? "34" : streak >= 10 ? "40" : "46"} fontWeight="800"
+                                style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                                {streak > 0 ? streak : "—"}
+                              </text>
+                              <text x="100" y="152" textAnchor="middle" fontSize="20" fontWeight="600"
+                                style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", opacity: 0.65 } as React.CSSProperties}>
+                                day streak
+                              </text>
+                            </svg>
+                          </button>
+                        );
+                      })()}
+
+                      {/* Form Score */}
+                      {(() => {
+                        const fs = formScore;
+                        const score = fs?.score ?? null;
+                        const color = score === null ? "#9aa0a6" : score >= 70 ? "#16a34a" : score >= 50 ? "#d97706" : "#ef4444";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        return (
+                          <button onClick={() => togglePanel('formScore')}
+                            style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(formScorePanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="formScoreArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#formScoreArc" startOffset="50%" textAnchor="middle">MY FORM</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
+                                fontSize={score !== null ? "46" : "36"} fontWeight="800"
+                                style={{ fill: color, fontFamily: ff }}>
+                                {score !== null ? score : "—"}
+                              </text>
+                              <text x="100" y="152" textAnchor="middle" fontSize="17" fontWeight="600"
+                                style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
+                                {score === null ? "no data" : score >= 70 ? "on track" : score >= 50 ? "building" : "needs work"}
+                              </text>
+                              <circle cx="100" cy="188" r="4" fill={color} opacity={formScorePanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                            </svg>
+                          </button>
+                        );
+                      })()}
+
+                      {/* Hydration */}
+                      {(() => {
+                        const ml = hydrationMl;
+                        const hasData = ml > 0;
+                        const color = "#0ea5e9";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        const pct = hasData ? Math.min(ml / 2000, 1) : null;
+                        const centerText = hasData
+                          ? (ml >= 1000 ? `${(ml / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${ml}ml`)
+                          : "—";
+                        const subText = pct !== null ? `${Math.round(pct * 100)}% of 2L` : "not logged";
+                        return (
+                          <button onClick={() => togglePanel('hydration')}
+                            style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(hydrationPanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="hydrationArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#hydrationArc" startOffset="50%" textAnchor="middle">HYDRATION</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
+                                fontSize={centerText.length > 4 ? "28" : "38"} fontWeight="800"
+                                style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff }}>
+                                {centerText}
+                              </text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600"
+                                style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
+                                {subText}
+                              </text>
+                              <circle cx="100" cy="188" r="4" fill={color} opacity={hydrationPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                            </svg>
+                          </button>
+                        );
+                      })()}
+
+                    {/* Insights */}
+                    {(() => {
+                      const color = "#f59e0b";
+                      const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                      const wins   = reviews.filter(r => r.result === "win").length;
+                      const losses = reviews.filter(r => r.result === "loss").length;
+                      const count  = [wins + losses > 0, reviews.length >= 3, streak > 0, partnerCount >= 2, trainingSessions.length > 0].filter(Boolean).length;
+                      return (
+                        <button onClick={() => togglePanel('insights')}
+                          style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(insightsPanelOpen) }}>
+                          <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                            <defs><path id="insightsArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                            <circle cx="100" cy="100" r="99" fill="white" />
+                            <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                              <textPath href="#insightsArc" startOffset="50%" textAnchor="middle">INSIGHTS</textPath>
+                            </text>
+                            <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{count > 0 ? count : "—"}</text>
+                            <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>featured</text>
+                            <circle cx="100" cy="188" r="4" fill={color} opacity={insightsPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                          </svg>
+                        </button>
+                      );
+                    })()}
+
+                    {/* Gear */}
+                    {(() => {
+                      const color = "#7c3aed";
+                      const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                      const label = racketName ? racketName.split(" ").slice(0, 1).join("") : "—";
+                      const sub   = racketName ? "my racket" : "no gear";
+                      return (
+                        <button onClick={() => togglePanel('gear')}
+                          style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(gearPanelOpen) }}>
+                          <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                            <defs><path id="gearArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                            <circle cx="100" cy="100" r="99" fill="white" />
+                            <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                              <textPath href="#gearArc" startOffset="50%" textAnchor="middle">GEAR</textPath>
+                            </text>
+                            <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize={label.length > 5 ? "22" : "36"} fontWeight="800" style={{ fill: color, fontFamily: ff }}>{label}</text>
+                            <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
+                            <circle cx="100" cy="188" r="4" fill={color} opacity={gearPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                          </svg>
+                        </button>
+                      );
+                    })()}
+
+                    {/* Matches */}
+                    {(() => {
+                      const color = "#2653d4";
+                      const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                      const wins   = reviews.filter(r => r.result === "win").length;
+                      const losses = reviews.filter(r => r.result === "loss").length;
+                      const total  = wins + losses;
+                      const centerText = reviews.length > 0 ? String(reviews.length) : "—";
+                      const sub = total > 0 ? `${Math.round((wins / total) * 100)}% wins` : "no matches";
+                      return (
+                        <button onClick={() => togglePanel('matches')}
+                          style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(matchesPanelOpen) }}>
+                          <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                            <defs><path id="matchesArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                            <circle cx="100" cy="100" r="99" fill="white" />
+                            <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                              <textPath href="#matchesArc" startOffset="50%" textAnchor="middle">MATCHES</textPath>
+                            </text>
+                            <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{centerText}</text>
+                            <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
+                            <circle cx="100" cy="188" r="4" fill={color} opacity={matchesPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                          </svg>
+                        </button>
+                      );
+                    })()}
                     </div>
 
                     {/* Panels for row 1 — full width below the row */}
@@ -1651,107 +1868,6 @@ export default function ProfilePage() {
                         </div>
                       );
                     })()}
-
-                    {/* Row 2: Streak (+ future cards) */}
-                    <div style={{ display: "flex", gap: 10 }}>
-                      {(() => {
-                        const STIERS = [
-                          { min: 0,   label: "Beginner",  color: "#9aa0a6", grad: ["#f4f4f6","#eaecee"] },
-                          { min: 5,   label: "Starter",   color: "#2653d4", grad: ["#eef2ff","#dbe4ff"] },
-                          { min: 15,  label: "Grinder",   color: "#059669", grad: ["#ecfdf5","#d1fae5"] },
-                          { min: 30,  label: "Dedicated", color: "#d97706", grad: ["#fffbeb","#fde68a"] },
-                          { min: 60,  label: "Elite",     color: "#7c3aed", grad: ["#faf5ff","#ede9fe"] },
-                          { min: 100, label: "Legend",    color: "#0ea5e9", grad: ["#f0f9ff","#bae6fd"] },
-                        ];
-                        const stier = [...STIERS].reverse().find(t => streak >= t.min) ?? STIERS[0];
-                        return (
-                          <button onClick={() => togglePanel('streak')}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(streakPanelOpen) }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                              <defs><path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                                <textPath href="#streakTopArc" startOffset="50%" textAnchor="middle">{stier.label.toUpperCase()}</textPath>
-                              </text>
-                              <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
-                                fontSize={streak >= 100 ? "34" : streak >= 10 ? "40" : "46"} fontWeight="800"
-                                style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                                {streak > 0 ? streak : "—"}
-                              </text>
-                              <text x="100" y="152" textAnchor="middle" fontSize="20" fontWeight="600"
-                                style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", opacity: 0.65 } as React.CSSProperties}>
-                                day streak
-                              </text>
-                            </svg>
-                          </button>
-                        );
-                      })()}
-
-                      {/* Form Score */}
-                      {(() => {
-                        const fs = formScore;
-                        const score = fs?.score ?? null;
-                        const color = score === null ? "#9aa0a6" : score >= 70 ? "#16a34a" : score >= 50 ? "#d97706" : "#ef4444";
-                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        return (
-                          <button onClick={() => togglePanel('formScore')}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(formScorePanelOpen) }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                              <defs><path id="formScoreArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#formScoreArc" startOffset="50%" textAnchor="middle">MY FORM</textPath>
-                              </text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-                                fontSize={score !== null ? "46" : "36"} fontWeight="800"
-                                style={{ fill: color, fontFamily: ff }}>
-                                {score !== null ? score : "—"}
-                              </text>
-                              <text x="100" y="152" textAnchor="middle" fontSize="17" fontWeight="600"
-                                style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
-                                {score === null ? "no data" : score >= 70 ? "on track" : score >= 50 ? "building" : "needs work"}
-                              </text>
-                              <circle cx="100" cy="188" r="4" fill={color} opacity={formScorePanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
-                            </svg>
-                          </button>
-                        );
-                      })()}
-
-                      {/* Hydration */}
-                      {(() => {
-                        const ml = hydrationMl;
-                        const hasData = ml > 0;
-                        const color = "#0ea5e9";
-                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        const pct = hasData ? Math.min(ml / 2000, 1) : null;
-                        const centerText = hasData
-                          ? (ml >= 1000 ? `${(ml / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${ml}ml`)
-                          : "—";
-                        const subText = pct !== null ? `${Math.round(pct * 100)}% of 2L` : "not logged";
-                        return (
-                          <button onClick={() => togglePanel('hydration')}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(hydrationPanelOpen) }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                              <defs><path id="hydrationArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#hydrationArc" startOffset="50%" textAnchor="middle">HYDRATION</textPath>
-                              </text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-                                fontSize={centerText.length > 4 ? "28" : "38"} fontWeight="800"
-                                style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff }}>
-                                {centerText}
-                              </text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600"
-                                style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
-                                {subText}
-                              </text>
-                              <circle cx="100" cy="188" r="4" fill={color} opacity={hydrationPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
-                            </svg>
-                          </button>
-                        );
-                      })()}
-                    </div>
 
                     {/* Panel for row 2 */}
                     {streakPanelOpen && (() => {
