@@ -2905,7 +2905,7 @@ export default function ProfilePage() {
     </div>
     {navLoading === "settings" && (
       <div style={{ position: "fixed", inset: 0, zIndex: 9998, background: "rgba(242,243,245,0.85)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ width: 36, height: 36, borderRadius: "50%", border: "3px solid rgba(0,160,60,0.2)", borderTopColor: "#00A83C", animation: "spin 0.8s linear infinite" }} />
+        <div style={{ width: 36, height: 36, borderRadius: "50%", border: "3px solid rgba(0,212,85,0.25)", borderTopColor: "#00D455", animation: "spin 0.8s linear infinite" }} />
       </div>
     )}
     <button
