@@ -1095,13 +1095,16 @@ export default function Home8() {
                 const isSleepytime = now.getHours() < 7 || curMins >= toMins(schedule[schedule.length - 1].time);
                 const contentOpacity = doIdx === 0 ? 1 : 0.2;
 
-                const sleepOverlay = isSleepytime ? (
-                  <div style={{ position: "absolute", inset: 0, background: "rgba(10,12,30,0.82)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#c9d6ff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                    <p style={{ fontSize: "clamp(22px, 7vw, 30px)", fontWeight: 800, color: "#fff", margin: 0, letterSpacing: "-0.02em" }}>Sleepytime</p>
-                    <p style={{ fontSize: "clamp(13px, 4vw, 17px)", fontWeight: 500, color: "rgba(200,210,255,0.75)", margin: 0 }}>See you at 7am</p>
+                if (isSleepytime) return (
+                  <div key="active" style={{ ...cardStyle, background: "rgb(10,12,30)" }}>
+                    <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#c9d6ff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                      <p style={{ fontSize: "clamp(22px, 7vw, 30px)", fontWeight: 800, color: "#fff", margin: 0, letterSpacing: "-0.02em" }}>Sleepytime</p>
+                      <p style={{ fontSize: "clamp(13px, 4vw, 17px)", fontWeight: 500, color: "rgba(200,210,255,0.75)", margin: 0 }}>See you at 7am</p>
+                    </div>
                   </div>
-                ) : null;
+                );
+
                 if (isDone) {
                   if (!nextSlide) return (
                     <div key="active" style={{ ...cardStyle, background: "rgb(10,12,30)" }}>
