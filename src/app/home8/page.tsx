@@ -1068,7 +1068,6 @@ export default function Home8() {
                             <text fill="rgba(255,255,255,0.7)" fontSize="9.5" fontWeight="700" letterSpacing="2.5" fontFamily="inherit">
                               <textPath href="#noMatchArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
                             </text>
-                              <circle cx="50" cy="91" r="4" fill={dayColor} stroke="white" strokeWidth="1.5" />
                           </svg>
                         </div>
                       </div>
