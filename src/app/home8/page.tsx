@@ -1322,12 +1322,15 @@ export default function Home8() {
                 return (
                   <div
                     key="card2"
-                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", zIndex: doIdx === 1 ? 2 : 1, height: "calc(100vw - 40px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", opacity: doIdx >= 1 ? 1 : 0, transition: "opacity 0.3s" }}
+                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px", gap: 2, zIndex: doIdx === 1 ? 2 : 1, height: "calc(100vw - 40px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", opacity: doIdx >= 1 ? 1 : 0, transition: "opacity 0.3s" }}
                     onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
                     onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
                   >
-                    {/* TEMP: scoreboard preview image */}
-                    <img src="/scoreboard-preview.png" alt="scoreboard preview" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4", textAlign: "center" }}>
+                      {dayLabel}
+                    </p>
+                    <p style={{ margin: 0, fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>{title}</p>
+                    <p style={{ margin: 0, fontSize: "clamp(15px, 3.8vw, 18px)", color: "#6b7480", lineHeight: 1.6, textAlign: "center" }}>{sub}</p>
                   </div>
                 );
               })()}
