@@ -1340,7 +1340,6 @@ export default function ProfilePage() {
                                   {timeLabel}
                                 </text>
                               )}
-                              <circle cx="100" cy="188" r="4" fill="rgba(255,255,255,0.7)" opacity={nextMatchPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
                             </svg>
                           </button>
                         );
@@ -1370,7 +1369,6 @@ export default function ProfilePage() {
                                   {dayWord}
                                 </text>
                               )}
-                              <circle cx="100" cy="188" r="4" fill={panelDayColor} opacity={dayTypeInfoOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
                             </svg>
                           );
                         })()}
@@ -1679,7 +1677,6 @@ export default function ProfilePage() {
                                 style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
                                 {score === null ? "no data" : score >= 70 ? "on track" : score >= 50 ? "building" : "needs work"}
                               </text>
-                              <circle cx="100" cy="188" r="4" fill={color} opacity={formScorePanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
                             </svg>
                           </button>
                         );
@@ -1706,7 +1703,6 @@ export default function ProfilePage() {
                                 <text x="100" y="148" textAnchor="middle" fontSize="13" fontWeight="600"
                                   style={{ fill: color, fontFamily: ff, opacity: 0.6 } as React.CSSProperties}>{racketType}</text>
                               ) : null}
-                              <circle cx="100" cy="188" r="4" fill={color} opacity={gearPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
                             </svg>
                           </button>
                         );
@@ -1905,7 +1901,6 @@ export default function ProfilePage() {
                                 style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
                                 {subText}
                               </text>
-                              <circle cx="100" cy="188" r="4" fill={color} opacity={hydrationPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
                             </svg>
                           </button>
                         );
@@ -1929,7 +1924,6 @@ export default function ProfilePage() {
                               </text>
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{count > 0 ? count : "—"}</text>
                               <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>featured</text>
-                              <circle cx="100" cy="188" r="4" fill={color} opacity={insightsPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
                             </svg>
                           </button>
                         );
@@ -1955,7 +1949,6 @@ export default function ProfilePage() {
                               </text>
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{centerText}</text>
                               <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
-                              <circle cx="100" cy="188" r="4" fill={color} opacity={matchesPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
                             </svg>
                           </button>
                         );
