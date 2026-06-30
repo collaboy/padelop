@@ -517,6 +517,23 @@ export default function ProfilePage() {
   const [schedNow, setSchedNow] = useState(new Date());
   const [gameDays, setGameDays] = useState<string[]>([]);
   const dayType = useMemo(() => getDayType(gameDays, nextMatch, upcomingMatches), [gameDays, nextMatch, upcomingMatches]);
+
+  // Cache dayType per calendar day so it shows instantly on return visits (no "Today" flash)
+  const [cachedDayType] = useState<string | null>(() => {
+    try {
+      const raw = localStorage.getItem("padelop:day-type-cache");
+      if (!raw) return null;
+      const { date, dayType: dt } = JSON.parse(raw);
+      return date === new Date().toISOString().slice(0, 10) ? dt : null;
+    } catch { return null; }
+  });
+  const effectiveDayType = dayType !== "training" || gameDays.length > 0 ? dayType : (cachedDayType ?? dayType);
+  useEffect(() => {
+    const known = ["match", "pre-match", "recovery", "maintenance", "training"];
+    if (known.includes(dayType)) {
+      localStorage.setItem("padelop:day-type-cache", JSON.stringify({ date: new Date().toISOString().slice(0, 10), dayType }));
+    }
+  }, [dayType]);
   const [schedule, setSchedule] = useState<ReturnType<typeof getScheduleData>["schedule"]>([]);
   const [schedCurrentIdx, setSchedCurrentIdx] = useState(0);
   const [drillTag, setDrillTag] = useState<string | null>(null);
@@ -618,16 +635,16 @@ export default function ProfilePage() {
   }
 
   const panelDayLabel =
-    dayType === "match"     ? "Match Day" :
-    dayType === "pre-match" ? "Pre-Match Day" :
-    dayType === "recovery"  ? "Recovery Day" :
-    dayType === "maintenance" ? "Maintenance Day" :
-    dayType === "training"  ? "Training Day" : "Today";
+    effectiveDayType === "match"     ? "Match Day" :
+    effectiveDayType === "pre-match" ? "Pre-Match Day" :
+    effectiveDayType === "recovery"  ? "Recovery Day" :
+    effectiveDayType === "maintenance" ? "Maintenance Day" :
+    effectiveDayType === "training"  ? "Training Day" : "Today";
   const panelDayColor =
-    dayType === "match"     ? "#2653d4" :
-    dayType === "pre-match" ? "#d97706" :
-    dayType === "recovery"  ? "#7c3aed" :
-    dayType === "maintenance" ? "#0e7490" : "#16a34a";
+    effectiveDayType === "match"     ? "#2653d4" :
+    effectiveDayType === "pre-match" ? "#d97706" :
+    effectiveDayType === "recovery"  ? "#7c3aed" :
+    effectiveDayType === "maintenance" ? "#0e7490" : "#16a34a";
   const panelInputSt: React.CSSProperties = { width: "100%", padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", outline: "none", fontFamily: "inherit", background: "#f8f9fa", boxSizing: "border-box" };
   const panelLabelSt: React.CSSProperties = { fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#8a9096", marginBottom: 4, display: "block" };
 
@@ -1127,16 +1144,16 @@ export default function ProfilePage() {
   const schedDetail = schedModalItem ? SCHEDULE_DETAILS[schedModalItem.title] : null;
   const schedDrillSteps = schedModalItem?.isDrill ? (DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).steps : null;
   const dayLabel =
-    dayType === "match"     ? "Match Day" :
-    dayType === "pre-match" ? "Pre-Match Day" :
-    dayType === "recovery"  ? "Recovery Day" :
-    dayType === "maintenance" ? "Maintenance Day" :
-    dayType === "training"  ? "Training Day" : "Today";
+    effectiveDayType === "match"     ? "Match Day" :
+    effectiveDayType === "pre-match" ? "Pre-Match Day" :
+    effectiveDayType === "recovery"  ? "Recovery Day" :
+    effectiveDayType === "maintenance" ? "Maintenance Day" :
+    effectiveDayType === "training"  ? "Training Day" : "Today";
   const dayColor =
-    dayType === "match"     ? "#2653d4" :
-    dayType === "pre-match" ? "#d97706" :
-    dayType === "recovery"  ? "#7c3aed" :
-    dayType === "maintenance" ? "#0e7490" : "#16a34a";
+    effectiveDayType === "match"     ? "#2653d4" :
+    effectiveDayType === "pre-match" ? "#d97706" :
+    effectiveDayType === "recovery"  ? "#7c3aed" :
+    effectiveDayType === "maintenance" ? "#0e7490" : "#16a34a";
 
   const swipeStartX = useRef(0);
   const swipeStartY = useRef(0);
