@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
         <div className="mx-auto w-full max-w-[480px] flex flex-col min-h-full">
           <SwipeNav>
-            <main className="vt-page-content flex-1 pb-24">
+            <main className="vt-page-content flex-1 pb-16">
               {children}
             </main>
           </SwipeNav>
