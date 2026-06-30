@@ -1190,7 +1190,6 @@ export default function ProfilePage() {
               <defs>
                 <clipPath id="pc_big_imgClip"><circle cx="100" cy="100" r="54" /></clipPath>
                 <path id="pc_big_nameArc"   d="M 34,62  A 76,76 0 0,1 166,62" />
-                <path id="pc_big_midArc"    d="M 30,130 A 76,76 0 0,0 170,130" />
                 <path id="pc_big_bottomArc" d="M 24,100 A 76,76 0 0,0 176,100" />
               </defs>
               <circle cx="100" cy="100" r="76" fill="none" stroke="#111" strokeWidth="46" />
@@ -1209,17 +1208,10 @@ export default function ProfilePage() {
                   {(profile.name || "YOUR NAME").toUpperCase()}
                 </textPath>
               </text>
-              {(profile.position || profile.hand) && (
-                <text fontSize="13" fontWeight="600" letterSpacing="0.8" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dominantBaseline="middle" dy="0">
-                  <textPath href="#pc_big_midArc" startOffset="50%" textAnchor="middle">
-                    {[profile.position, profile.hand].filter(Boolean).join(" · ").toUpperCase()}
-                  </textPath>
-                </text>
-              )}
-              {profile.level && (
-                <text fontSize="16" fontWeight="600" letterSpacing="0.5" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dominantBaseline="middle" dy="0">
+              {(profile.level || profile.position || profile.hand || profile.playingSince) && (
+                <text fontSize="13" fontWeight="600" letterSpacing="0.5" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dominantBaseline="middle" dy="0">
                   <textPath href="#pc_big_bottomArc" startOffset="50%" textAnchor="middle">
-                    {`LVL ${profile.level}`}{profile.playingSince ? ` · ${profile.playingSince}` : ""}
+                    {[profile.level ? `LVL ${profile.level}` : null, profile.position, profile.hand, profile.playingSince].filter(Boolean).join(" · ").toUpperCase()}
                   </textPath>
                 </text>
               )}
