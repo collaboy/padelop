@@ -1183,10 +1183,10 @@ export default function ProfilePage() {
           </div>
 
           {/* ── Green card: big profile circle only ──────────────────── */}
-          <div style={{ background: "#00D455", borderRadius: 20 }}>
+          <div style={{ background: "#00D455", borderRadius: 20, aspectRatio: "1/1", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
           {/* ── Big profile circle ─────────────────────────────────── */}
-          <button onClick={() => togglePanel('profileCircle')} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", justifyContent: "center", width: "100%", paddingTop: 20, paddingBottom: 20 }}>
-            <svg viewBox="0 0 200 200" width="200" height="200" style={{ display: "block" }}>
+          <button onClick={() => togglePanel('profileCircle')} style={{ background: "none", border: "none", padding: 20, cursor: "pointer", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
               <defs>
                 <clipPath id="pc_big_imgClip"><circle cx="100" cy="100" r="54" /></clipPath>
                 <path id="pc_big_nameArc"   d="M 34,62  A 76,76 0 0,1 166,62" />
