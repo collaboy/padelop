@@ -118,6 +118,11 @@ export default function Fab() {
 
   return (
     <>
+      {navLoading && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 9998, background: "rgba(242,243,245,0.85)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ width: 36, height: 36, borderRadius: "50%", border: "3px solid rgba(0,160,60,0.2)", borderTopColor: "#00A83C", animation: "spin 0.8s linear infinite" }} />
+        </div>
+      )}
       {/* FAB button */}
       <button
         onClick={() => { setSmartUploadError(null); setFabExpanded(false); setLogPickerOpen(true); }}
@@ -198,9 +203,7 @@ export default function Fab() {
                     className="active:scale-95 transition-transform"
                     style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
                   >
-                    {navLoading === "home"
-                      ? <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#c4c7cc" strokeWidth="2.5"/><path d="M12 3a9 9 0 0 1 9 9" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"/></svg>
-                      : <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>}
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                     <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
                   </button>
                   <button
@@ -208,9 +211,7 @@ export default function Fab() {
                     className="active:scale-95 transition-transform"
                     style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
                   >
-                    {navLoading === "profile"
-                      ? <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#c4c7cc" strokeWidth="2.5"/><path d="M12 3a9 9 0 0 1 9 9" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"/></svg>
-                      : <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>}
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>
                     <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>My Profile</span>
                   </button>
                   <button
