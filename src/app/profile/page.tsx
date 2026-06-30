@@ -2219,6 +2219,8 @@ export default function ProfilePage() {
                           </button>
                         );
                       })()}
+                      <div style={{ flex: 1 }} />
+                      <div style={{ flex: 1 }} />
                     </div>
 
                     {/* Good/Bad panel */}
