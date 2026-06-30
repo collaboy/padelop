@@ -1412,7 +1412,7 @@ export default function ProfilePage() {
                           {DAY_TYPE_INFO.map(dt => (
                             <div key={dt.label} style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
                               <span style={{ fontSize: 12, fontWeight: 700, color: dt.color, background: `${dt.color}18`, borderRadius: 5, padding: "1px 6px", flexShrink: 0, whiteSpace: "nowrap", minWidth: 108, textAlign: "center", display: "inline-block" }}>{dt.label}</span>
-                              <span style={{ fontSize: 14, color: "#5a6270", lineHeight: 1.4 }}>{dt.desc}</span>
+                              <span style={{ fontSize: 16, color: "#5a6270", lineHeight: 1.4 }}>{dt.desc}</span>
                             </div>
                           ))}
                         </div>
@@ -1727,8 +1727,8 @@ export default function ProfilePage() {
                           <div style={{ background: `linear-gradient(145deg, ${stier.grad[0]}, ${stier.grad[1]})`, padding: "20px 20px 16px", textAlign: "center" }}>
                             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: stier.color }}>{stier.label}</span>
                             <p style={{ margin: "6px 0 3px", fontSize: 44, fontWeight: 800, color: stier.color, lineHeight: 1 }}>{streak}</p>
-                            <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: stier.color, opacity: 0.7 }}>day streak</p>
-                            <p style={{ margin: "10px 0 0", fontSize: 13, fontWeight: 500, color: "#4b5563" }}>{msg}</p>
+                            <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: stier.color, opacity: 0.7 }}>day streak</p>
+                            <p style={{ margin: "10px 0 0", fontSize: 15, fontWeight: 500, color: "#4b5563" }}>{msg}</p>
                           </div>
                           <div style={{ background: "#fff", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 4 }}>
                             {STIERS.map(t => {
@@ -1779,7 +1779,7 @@ export default function ProfilePage() {
                             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                               {rows.map(r => (
                                 <div key={r.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                  <span style={{ fontSize: 13, color: "#6b7480", fontWeight: 500, minWidth: 80 }}>{r.label}</span>
+                                  <span style={{ fontSize: 15, color: "#6b7480", fontWeight: 500, minWidth: 80 }}>{r.label}</span>
                                   {bar(r.value)}
                                   <span style={{ fontSize: 10, color: "#c0c7d0", fontWeight: 500, minWidth: 28, textAlign: "right" }}>{r.weight}</span>
                                 </div>
@@ -1821,8 +1821,8 @@ export default function ProfilePage() {
                             ) : (
                               <>
                                 <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1a1c1c" }}>{racketName || <span style={{ color: "#b0b5ba" }}>No racket added</span>}</p>
-                                {racketType && <p style={{ margin: 0, fontSize: 13, color: "#6b7480" }}>{racketType}</p>}
-                                {racketSince && <p style={{ margin: 0, fontSize: 12, color: "#9aa0a6" }}>Since {racketSince}</p>}
+                                {racketType && <p style={{ margin: 0, fontSize: 15, color: "#6b7480" }}>{racketType}</p>}
+                                {racketSince && <p style={{ margin: 0, fontSize: 14, color: "#9aa0a6" }}>Since {racketSince}</p>}
                               </>
                             )}
                           </div>
@@ -1975,16 +1975,16 @@ export default function ProfilePage() {
                                 <div style={{ height: 7, borderRadius: 99, background: "#f0f0f0", marginBottom: 6 }}>
                                   <div style={{ width: `${Math.round(pct * 100)}%`, height: "100%", borderRadius: 99, background: pct >= 1 ? "#16a34a" : "#0ea5e9", transition: "width 0.4s" }} />
                                 </div>
-                                <span style={{ fontSize: 12, color: "#9aa0a6", fontWeight: 500 }}>{Math.round(pct * 100)}% of {target / 1000}L daily target</span>
+                                <span style={{ fontSize: 15, color: "#9aa0a6", fontWeight: 500 }}>{Math.round(pct * 100)}% of {target / 1000}L daily target</span>
                               </>
                             )}
                             {todayLog?.quality && (
                               <div style={{ marginTop: 10 }}>
-                                <span style={{ fontSize: 12, color: "#6b7480" }}>Feeling: <strong style={{ color: todayLog.quality === "great" ? "#16a34a" : todayLog.quality === "bad" ? "#ef4444" : "#d97706" }}>{todayLog.quality}</strong></span>
+                                <span style={{ fontSize: 15, color: "#6b7480" }}>Feeling: <strong style={{ color: todayLog.quality === "great" ? "#16a34a" : todayLog.quality === "bad" ? "#ef4444" : "#d97706" }}>{todayLog.quality}</strong></span>
                               </div>
                             )}
                             {!displayMl && !todayLog && (
-                              <p style={{ margin: 0, fontSize: 13, color: "#9aa0a6" }}>No hydration logged today. Log from the home screen or check-in.</p>
+                              <p style={{ margin: 0, fontSize: 15, color: "#9aa0a6" }}>No hydration logged today. Log from the home screen or check-in.</p>
                             )}
                           </div>
                         </div>
@@ -2066,7 +2066,7 @@ export default function ProfilePage() {
                             onClick={() => setFeaturedIdx(i => (i + 1) % pool.length)}
                             style={{ width: "100%", background: "none", border: "none", padding: "12px 16px 16px", cursor: "pointer", textAlign: "left" }}
                           >
-                            <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-blue)" }}>{insight.label}</p>
+                            <p style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-blue)" }}>{insight.label}</p>
                             <p style={{ margin: "0 0 12px", fontSize: 16, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{insight.body}</p>
                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                               <div style={{ display: "flex", gap: 4 }}>
@@ -2074,7 +2074,7 @@ export default function ProfilePage() {
                                   <div key={i} style={{ width: i === idx ? 14 : 5, height: 5, borderRadius: 3, background: i === idx ? "var(--c-blue)" : "#e2e5ea", transition: "width 0.2s" }} />
                                 ))}
                               </div>
-                              <span style={{ fontSize: 12, color: "var(--c-hint)", fontWeight: 500 }}>Tap for next</span>
+                              <span style={{ fontSize: 14, color: "var(--c-hint)", fontWeight: 500 }}>Tap for next</span>
                             </div>
                           </button>
                         </div>
@@ -2087,7 +2087,7 @@ export default function ProfilePage() {
                         <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>Matches</p>
                         {matchAddOpen && (
                           <div style={{ background: "#f8f9fa", borderRadius: 20, padding: "18px 16px" }}>
-                            <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "#1a1c1c" }}>New match</p>
+                            <p style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#1a1c1c" }}>New match</p>
                             <MatchFormWidget form={matchAddForm} onChange={setMatchAddForm} onSave={matchSaveAdd} saveLabel="Save match" saveColor="#16a34a" />
                           </div>
                         )}
@@ -2110,10 +2110,10 @@ export default function ProfilePage() {
                                     </div>
                                     <div style={{ flex: 1, minWidth: 0 }}>
                                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-                                        <span style={{ fontSize: 15, fontWeight: 800, color: "#1a1c1c" }}>{m.time || "—"}</span>
-                                        {m.club && <span style={{ fontSize: 13, color: "#8a9096", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>· {m.club}{m.court ? ` #${m.court}` : ""}</span>}
+                                        <span style={{ fontSize: 16, fontWeight: 800, color: "#1a1c1c" }}>{m.time || "—"}</span>
+                                        {m.club && <span style={{ fontSize: 15, color: "#8a9096", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>· {m.club}{m.court ? ` #${m.court}` : ""}</span>}
                                       </div>
-                                      {players.length > 0 && <p style={{ margin: 0, fontSize: 12, color: "#8a9096", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{players.join(", ")}</p>}
+                                      {players.length > 0 && <p style={{ margin: 0, fontSize: 14, color: "#8a9096", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{players.join(", ")}</p>}
                                       <span style={{ display: "inline-block", marginTop: 5, fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: isToday2 ? "#eef2ff" : "#f4f6f8", color: isToday2 ? "#2653d4" : "#8a9096" }}>{countdown}</span>
                                     </div>
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: expanded ? "rotate(180deg)" : "rotate(0deg)" }}><path d="M6 9l6 6 6-6"/></svg>
@@ -2129,8 +2129,8 @@ export default function ProfilePage() {
                           </div>
                         ) : !matchAddOpen && (
                           <div style={{ background: "#f8f9fa", borderRadius: 20, padding: "24px 20px", textAlign: "center" }}>
-                            <p style={{ margin: "0 0 6px", fontSize: 15, fontWeight: 800, color: "#1a1c1c" }}>No upcoming matches</p>
-                            <p style={{ margin: "0 0 14px", fontSize: 13, color: "#8a9096" }}>Schedule your next game</p>
+                            <p style={{ margin: "0 0 6px", fontSize: 16, fontWeight: 800, color: "#1a1c1c" }}>No upcoming matches</p>
+                            <p style={{ margin: "0 0 14px", fontSize: 15, color: "#8a9096" }}>Schedule your next game</p>
                           </div>
                         )}
                         <button
@@ -2154,9 +2154,9 @@ export default function ProfilePage() {
                                   </div>
                                   <div style={{ flex: 1, minWidth: 0 }}>
                                     {opponentNames ? (
-                                      <p style={{ margin: "0 0 2px", fontSize: 14, fontWeight: 700, color: "#1a1c1c", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>vs {opponentNames}</p>
+                                      <p style={{ margin: "0 0 2px", fontSize: 16, fontWeight: 700, color: "#1a1c1c", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>vs {opponentNames}</p>
                                     ) : (
-                                      r.feeling && <p style={{ margin: "0 0 2px", fontSize: 13, color: "#8a9096" }}>{r.feeling}</p>
+                                      r.feeling && <p style={{ margin: "0 0 2px", fontSize: 15, color: "#8a9096" }}>{r.feeling}</p>
                                     )}
                                     {(r.wellDone?.length > 0 || r.improved?.length > 0) && (
                                       <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
