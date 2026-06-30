@@ -1697,11 +1697,11 @@ export default function ProfilePage() {
                                 <textPath href="#gearArc" startOffset="50%" textAnchor="middle">MY GEAR</textPath>
                               </text>
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-                                fontSize={label.length > 8 ? "16" : label.length > 5 ? "20" : "28"} fontWeight="800"
+                                fontSize={label.length > 8 ? "24" : label.length > 5 ? "36" : "46"} fontWeight="800"
                                 style={{ fill: color, fontFamily: ff }}>{label}</text>
                               {racketType ? (
-                                <text x="100" y="148" textAnchor="middle" fontSize="13" fontWeight="600"
-                                  style={{ fill: color, fontFamily: ff, opacity: 0.6 } as React.CSSProperties}>{racketType}</text>
+                                <text x="100" y="152" textAnchor="middle" fontSize="17" fontWeight="600"
+                                  style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{racketType}</text>
                               ) : null}
                             </svg>
                           </button>
