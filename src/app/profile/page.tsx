@@ -537,6 +537,7 @@ export default function ProfilePage() {
   const gearPanelOpen       = openPanel === 'gear';
   const matchesPanelOpen    = openPanel === 'matches';
   const togglePanel = (name: string) => setOpenPanel(p => p === name ? null : name);
+  const profileCirclePanelOpen = openPanel === 'profileCircle';
   const [formScore, setFormScore] = useState<FormScore | null>(null);
   const [hydrationMl, setHydrationMl] = useState(0);
   const [nextMatchInfoMode, setNextMatchInfoMode] = useState<'edit'|'add'|null>(null);
@@ -1176,144 +1177,6 @@ export default function ProfilePage() {
             </button>
           </div>
 
-          {/* Profile card v2 — ring style (comparison) */}
-          {(() => {
-            const ff2 = "-apple-system, BlinkMacSystemFont, sans-serif";
-            // Ring geometry: r=112, strokeWidth=42 → outer=133, inner=91
-            // Bottom arc: full 180° half-circle (9→3 o'clock, 352px) to fit all 4 items
-            const bottomItems = [
-              profile.level    ? `LVL ${profile.level}` : null,
-              profile.position ? profile.position.toUpperCase() : null,
-              profile.hand     ? `${profile.hand.toUpperCase()}-HANDED` : null,
-              profile.playingSince ? `SINCE ${profile.playingSince}` : null,
-            ].filter(Boolean).join(" · ");
-            return (
-              <>
-              <button onClick={() => setProfileTabEditOpen(o => !o)}
-                style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "block", width: "100%" }}>
-              <div style={{ display: "flex", justifyContent: "center", padding: "8px 0 4px" }}>
-                <svg viewBox="0 0 300 300" width="96%" style={{ maxWidth: 400, display: "block", overflow: "visible" }}>
-                  <defs>
-                    <clipPath id="pc2_imgClip">
-                      <circle cx="150" cy="150" r="91" />
-                    </clipPath>
-                    {/* NAME: 10 o'clock → 2 o'clock, CW through 12 */}
-                    <path id="pc2_nameArc" d="M 53,94 A 112,112 0 0,1 247,94" />
-                    {/* BOTTOM: 9 o'clock → 3 o'clock, CCW through 6 (full 180°, 352px, reads L→R) */}
-                    <path id="pc2_bottomArc" d="M 38,150 A 112,112 0 0,0 262,150" />
-                  </defs>
-
-                  {/* Black ring */}
-                  <circle cx="150" cy="150" r="112" fill="none" stroke="#111" strokeWidth="42" />
-
-                  {/* Inner fill + image */}
-                  {profile.avatar ? (
-                    <image href={profile.avatar} x="59" y="59" width="182" height="182"
-                      clipPath="url(#pc2_imgClip)" preserveAspectRatio="xMidYMid slice" />
-                  ) : (
-                    <>
-                      <circle cx="150" cy="150" r="91" fill="#2653d4" />
-                      <text x="150" y="164" textAnchor="middle" fontSize="46" fontWeight="800"
-                        fill="white" fontFamily={ff2}>{initials(profile.name)}</text>
-                    </>
-                  )}
-
-                  {/* NAME — top arc, dy centers text vertically in the ring */}
-                  <text fontSize="18" fontWeight="700" letterSpacing="2.5" fill="white" fontFamily={ff2} dy="6">
-                    <textPath href="#pc2_nameArc" startOffset="50%" textAnchor="middle">
-                      {(profile.name || "YOUR NAME").toUpperCase()}
-                    </textPath>
-                  </text>
-
-                  {/* LEVEL · WALL · HAND · SINCE — full bottom half-circle arc */}
-                  {bottomItems && (
-                    <text fontSize="10" fontWeight="600" letterSpacing="0.8" fill="white" fontFamily={ff2} dy="4">
-                      <textPath href="#pc2_bottomArc" startOffset="50%" textAnchor="middle">
-                        {bottomItems}
-                      </textPath>
-                    </text>
-                  )}
-                </svg>
-              </div>
-              </button>
-              {profileTabEditOpen && (
-                <div style={{ background: "#fff", borderRadius: 18, padding: "14px 16px", boxShadow: "0 2px 12px rgba(0,0,0,0.07)", display: "flex", flexDirection: "column", gap: 16 }}>
-                  <label htmlFor="avatar-upload2" className="cursor-pointer flex items-center gap-3 active:opacity-70 transition-opacity">
-                    <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#f0f4ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--c-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </div>
-                    <span className="t-ui" style={{ color: "var(--c-blue)" }}>Change Photo</span>
-                    <input id="avatar-upload2" type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
-                  </label>
-                  <div>
-                    <p className="t-label text-c-hint mb-2">Your name</p>
-                    <input type="text" value={profile.name} onChange={e => setField("name", e.target.value)} placeholder="e.g. Eddie"
-                      className="t-ui w-full px-4 py-3 rounded-2xl border-2 border-c-line text-c-text outline-none focus:border-c-blue transition-colors bg-c-bg-input focus:bg-white" />
-                  </div>
-                  <div>
-                    <p className="t-label text-c-hint mb-2">Playing since</p>
-                    <select value={profile.playingSince} onChange={e => setField("playingSince", e.target.value)}
-                      className="t-ui w-full px-4 py-3 rounded-2xl border-2 border-c-line text-c-text outline-none focus:border-c-blue transition-colors bg-c-bg-input focus:bg-white">
-                      <option value="">Select year</option>
-                      {Array.from({ length: new Date().getFullYear() - 1989 }, (_, i) => new Date().getFullYear() - i).map(y => (
-                        <option key={y} value={String(y)}>{y}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
-                      <p className="t-label text-c-hint">Padel level</p>
-                      <span className="t-heading" style={{ color: profile.level ? "var(--c-blue)" : "var(--c-disabled)", lineHeight: 1 }}>{profile.level || "—"}</span>
-                    </div>
-                    <input type="range" min={0} max={LEVELS.length - 1} step={1}
-                      value={LEVELS.indexOf(profile.level) >= 0 ? LEVELS.indexOf(profile.level) : 0}
-                      onChange={e => setField("level", LEVELS[parseInt(e.target.value)])}
-                      className="w-full" style={{ accentColor: "var(--c-blue)", height: 4, cursor: "pointer" }} />
-                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-                      <span className="t-tag font-medium" style={{ color: "#b0b8c1" }}>1.0</span>
-                      <span className="t-tag font-medium" style={{ color: "#b0b8c1" }}>5.0</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="t-label text-c-hint mb-2">Preferred position</p>
-                    <div className="flex gap-2">
-                      {POSITIONS.map(pos => {
-                        const sel = profile.position === pos;
-                        return (
-                          <button key={pos} onClick={() => setField("position", pos)}
-                            className="t-caption flex-1 py-2 rounded-xl border-2 font-bold transition-all active:scale-95"
-                            style={{ borderColor: sel ? "var(--c-blue)" : "var(--c-line)", background: sel ? "var(--c-blue-tint)" : "var(--c-bg-input)", color: sel ? "var(--c-blue)" : "var(--c-text-sub)" }}>
-                            {pos}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="t-label text-c-hint mb-2">Dominant hand</p>
-                    <div className="flex gap-2">
-                      {HANDS.map(h => {
-                        const sel = profile.hand === h;
-                        return (
-                          <button key={h} onClick={() => setField("hand", h)}
-                            className="t-body-sm flex-1 py-2 rounded-xl border-2 font-bold transition-all active:scale-95"
-                            style={{ borderColor: sel ? "var(--c-blue)" : "var(--c-line)", background: sel ? "var(--c-blue-tint)" : "var(--c-bg-input)", color: sel ? "var(--c-blue)" : "var(--c-text-sub)" }}>
-                            {h}-handed
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                  <button disabled={!canSave} onClick={() => { save(); setProfileTabEditOpen(false); }}
-                    className="t-ui w-full py-3.5 rounded-2xl font-bold transition-all active:scale-[0.98]"
-                    style={{ background: saved ? "var(--c-green)" : canSave ? "var(--c-blue)" : "var(--c-line)", color: canSave ? "#fff" : "#b0b3b3" }}>
-                    {saved ? "Saved ✓" : "Save profile"}
-                  </button>
-                </div>
-              )}
-              </>
-            );
-          })()}
 
           {panelSmartError && (
             <div style={{ background: "#fff5f5", border: "1.5px solid #fecaca", borderRadius: 12, padding: "10px 14px" }}>
@@ -1343,13 +1206,14 @@ export default function ProfilePage() {
                     const dim = (active: boolean) => ({ opacity: anyOpen && !active ? 0.3 : 1, transition: "opacity 0.2s" });
                     return (
                     <>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+                    {/* Row 1: Profile · Next Match · Day Type */}
+                    <div style={{ display: "flex", gap: 10 }}>
                       {/* Profile tile */}
                       {(() => {
                         const tileBottomItems = profile.level ? `LVL ${profile.level}` : null;
                         return (
-                          <button onClick={() => setProfileTabEditOpen(o => !o)}
-                            style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}>
+                          <button onClick={() => togglePanel('profileCircle')}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(profileCirclePanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs>
                                 <clipPath id="pc_tile_imgClip"><circle cx="100" cy="100" r="52" /></clipPath>
@@ -1395,7 +1259,7 @@ export default function ProfilePage() {
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                         return (
                           <button onClick={() => togglePanel('nextMatch')}
-                            style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(nextMatchPanelOpen) }}>
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(nextMatchPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 4px 20px rgba(38,83,212,0.35))", display: "block" }}>
                               <defs><path id="nextMatchTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#2653d4" />
@@ -1421,7 +1285,7 @@ export default function ProfilePage() {
 
                       {/* Day Type */}
                       <button onClick={() => togglePanel('dayType')}
-                        style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(dayTypeInfoOpen) }}>
+                        style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(dayTypeInfoOpen) }}>
                         {(() => {
                           const parts = panelDayLabel.split(" ");
                           const mainLabel = parts.length > 1 ? parts.slice(0, -1).join(" ") : panelDayLabel;
@@ -1449,211 +1313,139 @@ export default function ProfilePage() {
                         })()}
                       </button>
 
-                      {/* Today's Goals */}
-                      <button onClick={() => togglePanel('sched')}
-                        style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(panelSchedOpen) }}>
-                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                          <defs><path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                          <circle cx="100" cy="100" r="99" fill="white" />
-                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "var(--c-label)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                            <textPath href="#goalsTextArc" startOffset="50%" textAnchor="middle">TODAY&apos;S GOALS</textPath>
-                          </text>
-                          <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
-                            fontSize={pct === 100 ? "44" : "36"} fontWeight="800"
-                            style={{ fill: pct === 100 ? "#00D455" : "var(--c-text)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                            {pct === 100 ? "✓" : `${done}/${total}`}
-                          </text>
-                          {(() => {
-                            const r = 88, cX = 100, cY = 100, totalDeg = 110, startDeg = 90 + totalDeg / 2, N = schedule.length;
-                            if (!N) return null;
-                            const gapDeg = 7, segDeg = (totalDeg - Math.max(0, N - 1) * gapDeg) / N;
-                            const toRad = (d: number) => d * Math.PI / 180;
-                            return schedule.map((item, i) => {
-                              const a1 = startDeg - i * (segDeg + gapDeg), a2 = a1 - segDeg;
-                              const x1 = (cX + r * Math.cos(toRad(a1))).toFixed(2), y1 = (cY + r * Math.sin(toRad(a1))).toFixed(2);
-                              const x2 = (cX + r * Math.cos(toRad(a2))).toFixed(2), y2 = (cY + r * Math.sin(toRad(a2))).toFixed(2);
-                              return <path key={item.title} d={`M ${x1},${y1} A ${r},${r} 0 0,0 ${x2},${y2}`}
-                                stroke={todayDoneSet.has(item.title) ? item.color : "#e0e2e5"} strokeWidth="9" fill="none" strokeLinecap="round" style={{ transition: "stroke 0.3s" }} />;
-                            });
-                          })()}
-                        </svg>
-                      </button>
-
-
-                      {/* Streak */}
-                      {(() => {
-                        const STIERS = [
-                          { min: 0,   label: "Beginner",  color: "#9aa0a6", grad: ["#f4f4f6","#eaecee"] },
-                          { min: 5,   label: "Starter",   color: "#2653d4", grad: ["#eef2ff","#dbe4ff"] },
-                          { min: 15,  label: "Grinder",   color: "#059669", grad: ["#ecfdf5","#d1fae5"] },
-                          { min: 30,  label: "Dedicated", color: "#d97706", grad: ["#fffbeb","#fde68a"] },
-                          { min: 60,  label: "Elite",     color: "#7c3aed", grad: ["#faf5ff","#ede9fe"] },
-                          { min: 100, label: "Legend",    color: "#0ea5e9", grad: ["#f0f9ff","#bae6fd"] },
-                        ];
-                        const stier = [...STIERS].reverse().find(t => streak >= t.min) ?? STIERS[0];
-                        return (
-                          <button onClick={() => togglePanel('streak')}
-                            style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(streakPanelOpen) }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                              <defs><path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                                <textPath href="#streakTopArc" startOffset="50%" textAnchor="middle">{stier.label.toUpperCase()}</textPath>
-                              </text>
-                              <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
-                                fontSize={streak >= 100 ? "34" : streak >= 10 ? "40" : "46"} fontWeight="800"
-                                style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                                {streak > 0 ? streak : "—"}
-                              </text>
-                              <text x="100" y="152" textAnchor="middle" fontSize="20" fontWeight="600"
-                                style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", opacity: 0.65 } as React.CSSProperties}>
-                                day streak
-                              </text>
-                            </svg>
-                          </button>
-                        );
-                      })()}
-
-                      {/* Form Score */}
-                      {(() => {
-                        const fs = formScore;
-                        const score = fs?.score ?? null;
-                        const color = score === null ? "#9aa0a6" : score >= 70 ? "#16a34a" : score >= 50 ? "#d97706" : "#ef4444";
-                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        return (
-                          <button onClick={() => togglePanel('formScore')}
-                            style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(formScorePanelOpen) }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                              <defs><path id="formScoreArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#formScoreArc" startOffset="50%" textAnchor="middle">MY FORM</textPath>
-                              </text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-                                fontSize={score !== null ? "46" : "36"} fontWeight="800"
-                                style={{ fill: color, fontFamily: ff }}>
-                                {score !== null ? score : "—"}
-                              </text>
-                              <text x="100" y="152" textAnchor="middle" fontSize="17" fontWeight="600"
-                                style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
-                                {score === null ? "no data" : score >= 70 ? "on track" : score >= 50 ? "building" : "needs work"}
-                              </text>
-                              <circle cx="100" cy="188" r="4" fill={color} opacity={formScorePanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
-                            </svg>
-                          </button>
-                        );
-                      })()}
-
-                      {/* Hydration */}
-                      {(() => {
-                        const ml = hydrationMl;
-                        const hasData = ml > 0;
-                        const color = "#0ea5e9";
-                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        const pct = hasData ? Math.min(ml / 2000, 1) : null;
-                        const centerText = hasData
-                          ? (ml >= 1000 ? `${(ml / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${ml}ml`)
-                          : "—";
-                        const subText = pct !== null ? `${Math.round(pct * 100)}% of 2L` : "not logged";
-                        return (
-                          <button onClick={() => togglePanel('hydration')}
-                            style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(hydrationPanelOpen) }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                              <defs><path id="hydrationArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#hydrationArc" startOffset="50%" textAnchor="middle">HYDRATION</textPath>
-                              </text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-                                fontSize={centerText.length > 4 ? "28" : "38"} fontWeight="800"
-                                style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff }}>
-                                {centerText}
-                              </text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600"
-                                style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
-                                {subText}
-                              </text>
-                              <circle cx="100" cy="188" r="4" fill={color} opacity={hydrationPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
-                            </svg>
-                          </button>
-                        );
-                      })()}
-
-                    {/* Insights */}
-                    {(() => {
-                      const color = "#f59e0b";
-                      const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                      const wins   = reviews.filter(r => r.result === "win").length;
-                      const losses = reviews.filter(r => r.result === "loss").length;
-                      const count  = [wins + losses > 0, reviews.length >= 3, streak > 0, partnerCount >= 2, trainingSessions.length > 0].filter(Boolean).length;
-                      return (
-                        <button onClick={() => togglePanel('insights')}
-                          style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(insightsPanelOpen) }}>
-                          <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                            <defs><path id="insightsArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                            <circle cx="100" cy="100" r="99" fill="white" />
-                            <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
-                              <textPath href="#insightsArc" startOffset="50%" textAnchor="middle">INSIGHTS</textPath>
-                            </text>
-                            <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{count > 0 ? count : "—"}</text>
-                            <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>featured</text>
-                            <circle cx="100" cy="188" r="4" fill={color} opacity={insightsPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
-                          </svg>
-                        </button>
-                      );
-                    })()}
-
-                    {/* Gear */}
-                    {(() => {
-                      const color = "#7c3aed";
-                      const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                      const label = racketName ? racketName.split(" ").slice(0, 1).join("") : "—";
-                      const sub   = racketName ? "my racket" : "no gear";
-                      return (
-                        <button onClick={() => togglePanel('gear')}
-                          style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(gearPanelOpen) }}>
-                          <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                            <defs><path id="gearArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                            <circle cx="100" cy="100" r="99" fill="white" />
-                            <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
-                              <textPath href="#gearArc" startOffset="50%" textAnchor="middle">GEAR</textPath>
-                            </text>
-                            <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize={label.length > 5 ? "22" : "36"} fontWeight="800" style={{ fill: color, fontFamily: ff }}>{label}</text>
-                            <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
-                            <circle cx="100" cy="188" r="4" fill={color} opacity={gearPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
-                          </svg>
-                        </button>
-                      );
-                    })()}
-
-                    {/* Matches */}
-                    {(() => {
-                      const color = "#2653d4";
-                      const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                      const wins   = reviews.filter(r => r.result === "win").length;
-                      const losses = reviews.filter(r => r.result === "loss").length;
-                      const total  = wins + losses;
-                      const centerText = reviews.length > 0 ? String(reviews.length) : "—";
-                      const sub = total > 0 ? `${Math.round((wins / total) * 100)}% wins` : "no matches";
-                      return (
-                        <button onClick={() => togglePanel('matches')}
-                          style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(matchesPanelOpen) }}>
-                          <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                            <defs><path id="matchesArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                            <circle cx="100" cy="100" r="99" fill="white" />
-                            <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
-                              <textPath href="#matchesArc" startOffset="50%" textAnchor="middle">MATCHES</textPath>
-                            </text>
-                            <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{centerText}</text>
-                            <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
-                            <circle cx="100" cy="188" r="4" fill={color} opacity={matchesPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
-                          </svg>
-                        </button>
-                      );
-                    })()}
                     </div>
 
-                    {/* Panels for row 1 — full width below the row */}
+                    {profileCirclePanelOpen && (
+                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                        <div style={{ padding: "18px 18px 16px", borderBottom: "1px solid #f0f2f5" }}>
+                          <p style={{ margin: "0 0 14px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Edit Profile</p>
+                          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
+                            <label style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 10 }}>
+                              <div style={{ width: 60, height: 60, borderRadius: "50%", overflow: "hidden", background: "#f0f2f5", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                {profile.avatar
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  ? <img src={profile.avatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                  : <span style={{ fontSize: 22, fontWeight: 800, color: "#2653d4" }}>{initials(profile.name)}</span>}
+                              </div>
+                              <span style={{ fontSize: 14, fontWeight: 600, color: "#2653d4" }}>Change photo</span>
+                              <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleAvatar} />
+                            </label>
+                          </div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                              <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Name</label>
+                              <input value={profile.name} onChange={e => setField("name", e.target.value)} placeholder="Your name" style={{ padding: "9px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 15, outline: "none" }} />
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                              <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Playing since</label>
+                              <input value={profile.playingSince} onChange={e => setField("playingSince", e.target.value)} placeholder="e.g. 2019" style={{ padding: "9px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 15, outline: "none" }} />
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                              <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Level</label>
+                              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                                {LEVELS.map(l => (
+                                  <button key={l} onClick={() => setField("level", l)} style={{ padding: "6px 12px", borderRadius: 20, border: "1.5px solid", fontSize: 13, fontWeight: 700, cursor: "pointer", borderColor: profile.level === l ? "#2653d4" : "#e2e5ea", background: profile.level === l ? "#eef2ff" : "transparent", color: profile.level === l ? "#2653d4" : "#6b7480" }}>{l}</button>
+                                ))}
+                              </div>
+                            </div>
+                            <div style={{ display: "flex", gap: 10 }}>
+                              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+                                <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Position</label>
+                                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                                  {POSITIONS.map(p => (
+                                    <button key={p} onClick={() => setField("position", p)} style={{ padding: "7px 10px", borderRadius: 10, border: "1.5px solid", fontSize: 13, fontWeight: 600, cursor: "pointer", borderColor: profile.position === p ? "#2653d4" : "#e2e5ea", background: profile.position === p ? "#eef2ff" : "transparent", color: profile.position === p ? "#2653d4" : "#6b7480", textAlign: "left" }}>{p}</button>
+                                  ))}
+                                </div>
+                              </div>
+                              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+                                <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Hand</label>
+                                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                                  {HANDS.map(h => (
+                                    <button key={h} onClick={() => setField("hand", h)} style={{ padding: "7px 10px", borderRadius: 10, border: "1.5px solid", fontSize: 13, fontWeight: 600, cursor: "pointer", borderColor: profile.hand === h ? "#2653d4" : "#e2e5ea", background: profile.hand === h ? "#eef2ff" : "transparent", color: profile.hand === h ? "#2653d4" : "#6b7480", textAlign: "left" }}>{h}</button>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                            <button onClick={save} disabled={!canSave} style={{ padding: 11, borderRadius: 14, background: canSave ? "#2653d4" : "#c4c7c7", color: "#fff", border: "none", fontSize: 15, fontWeight: 700, cursor: canSave ? "pointer" : "default", marginTop: 4 }}>{saved ? "Saved ✓" : "Save"}</button>
+                          </div>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px 0" }}>
+                          <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>My Gear</p>
+                          <button onClick={() => setGearEditOpen(o => !o)} className="t-caption" style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 500, color: "var(--c-forest)" }}>{gearEditOpen ? "Done" : "Edit"}</button>
+                        </div>
+                        <div ref={racketRowRef} style={{ display: "flex", alignItems: "stretch", padding: 12, gap: 14 }}>
+                          <div style={{ position: "relative", flexShrink: 0, width: racketSlotSize, height: racketSlotSize }}>
+                            <label htmlFor="racket-img-upload-panel" style={{ cursor: "pointer", display: "block", width: "100%", height: "100%" }}>
+                              <div style={{ width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                {racketImage ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img src={racketImage} alt="Racket" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                ) : (
+                                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c4c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                )}
+                              </div>
+                            </label>
+                            <input id="racket-img-upload-panel" type="file" accept="image/*" style={{ display: "none" }} onChange={handleRacketImage} />
+                          </div>
+                          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 6 }}>
+                            {gearEditOpen ? (
+                              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                <input placeholder="Racket name" value={racketName} onChange={e => { setRacketName(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketName = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
+                                <input placeholder="Racket type (e.g. Control)" value={racketType} onChange={e => { setRacketType(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketType = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
+                                <input placeholder="Using since (e.g. Jan 2024)" value={racketSince} onChange={e => { setRacketSince(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketSince = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
+                              </div>
+                            ) : (
+                              <>
+                                <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1a1c1c" }}>{racketName || <span style={{ color: "#b0b5ba" }}>No racket added</span>}</p>
+                                {racketType && <p style={{ margin: 0, fontSize: 13, color: "#6b7480" }}>{racketType}</p>}
+                                {racketSince && <p style={{ margin: 0, fontSize: 12, color: "#9aa0a6" }}>Since {racketSince}</p>}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "var(--c-line)", borderTop: "1px solid var(--c-line)" }}>
+                          <div style={{ background: "#fff", padding: "14px", display: "flex", flexDirection: "column" }}>
+                            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 10px" }}>My Shoes</p>
+                            <div style={{ position: "relative", flex: 1 }}>
+                              <label htmlFor="shoe-img-upload-panel" style={{ cursor: "pointer", display: "block" }}>
+                                <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: shoeImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                  {shoeImage
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    ? <img src={shoeImage} alt="Shoes" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                    : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 17h20v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-1z"/><path d="M2 17c0-3.5 2.5-6 6-6h2l3-2h3c2.2 0 4 1.5 4.5 3.5L21 17"/></svg>}
+                                </div>
+                              </label>
+                              {shoeImage && (
+                                <button onClick={() => { setShoeImage(""); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); delete g.shoeImage; localStorage.setItem("padelop:gear", JSON.stringify(g)); deleteGearImageFromStorage("shoe"); }} style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
+                                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                              )}
+                            </div>
+                            <input id="shoe-img-upload-panel" type="file" accept="image/*" className="hidden" onChange={handleShoeImage} />
+                          </div>
+                          <div style={{ background: "#fff", padding: "14px", display: "flex", flexDirection: "column" }}>
+                            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 10px" }}>My Kit</p>
+                            <div style={{ position: "relative", flex: 1 }}>
+                              <label htmlFor="kit-img-upload-panel" style={{ cursor: "pointer", display: "block" }}>
+                                <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: kitImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                  {kitImage
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    ? <img src={kitImage} alt="Kit" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                    : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg>}
+                                </div>
+                              </label>
+                              {kitImage && (
+                                <button onClick={() => { setKitImage(""); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); delete g.kitImage; localStorage.setItem("padelop:gear", JSON.stringify(g)); deleteGearImageFromStorage("kit"); }} style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
+                                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                              )}
+                            </div>
+                            <input id="kit-img-upload-panel" type="file" accept="image/*" className="hidden" onChange={handleKitImage} />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {dayTypeInfoOpen && (
                       <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
                         <div style={{ padding: "14px", display: "flex", flexDirection: "column", gap: 7 }}>
@@ -1663,27 +1455,6 @@ export default function ProfilePage() {
                               <span style={{ fontSize: 14, color: "#5a6270", lineHeight: 1.4 }}>{dt.desc}</span>
                             </div>
                           ))}
-                        </div>
-                      </div>
-                    )}
-                    {panelSchedOpen && (
-                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-                        <div style={{ padding: "10px 14px 8px" }}>
-                          {schedule.map((item, i) => {
-                            const isDone = (schedDone[todayKey] ?? []).includes(item.title);
-                            return (
-                              <div key={item.title}
-                                onClick={() => { if (SCHEDULE_DETAILS[item.title] || item.isDrill) setPanelSchedModalIdx(i); }}
-                                style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0", cursor: SCHEDULE_DETAILS[item.title] || item.isDrill ? "pointer" : "default", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f6" : "none" }}>
-                                <button onClick={e => { e.stopPropagation(); panelToggleDone(item.title); }}
-                                  style={{ width: 20, height: 20, borderRadius: 5, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s", cursor: "pointer" }}>
-                                  {isDone && <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                                </button>
-                                <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none", flex: 1 }}>{item.title}</p>
-                                <span style={{ fontSize: 13, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
-                              </div>
-                            );
-                          })}
                         </div>
                       </div>
                     )}
@@ -1864,6 +1635,125 @@ export default function ProfilePage() {
                       );
                     })()}
 
+                    {/* Row 2: Today's Goals · Streak · Form Score */}
+                    <div style={{ display: "flex", gap: 10 }}>
+                      {/* Today's Goals */}
+                      <button onClick={() => togglePanel('sched')}
+                        style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(panelSchedOpen) }}>
+                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                          <defs><path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                          <circle cx="100" cy="100" r="99" fill="white" />
+                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "var(--c-label)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                            <textPath href="#goalsTextArc" startOffset="50%" textAnchor="middle">TODAY&apos;S GOALS</textPath>
+                          </text>
+                          <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
+                            fontSize={pct === 100 ? "44" : "36"} fontWeight="800"
+                            style={{ fill: pct === 100 ? "#00D455" : "var(--c-text)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                            {pct === 100 ? "✓" : `${done}/${total}`}
+                          </text>
+                          {(() => {
+                            const r = 88, cX = 100, cY = 100, totalDeg = 110, startDeg = 90 + totalDeg / 2, N = schedule.length;
+                            if (!N) return null;
+                            const gapDeg = 7, segDeg = (totalDeg - Math.max(0, N - 1) * gapDeg) / N;
+                            const toRad = (d: number) => d * Math.PI / 180;
+                            return schedule.map((item, i) => {
+                              const a1 = startDeg - i * (segDeg + gapDeg), a2 = a1 - segDeg;
+                              const x1 = (cX + r * Math.cos(toRad(a1))).toFixed(2), y1 = (cY + r * Math.sin(toRad(a1))).toFixed(2);
+                              const x2 = (cX + r * Math.cos(toRad(a2))).toFixed(2), y2 = (cY + r * Math.sin(toRad(a2))).toFixed(2);
+                              return <path key={item.title} d={`M ${x1},${y1} A ${r},${r} 0 0,0 ${x2},${y2}`}
+                                stroke={todayDoneSet.has(item.title) ? item.color : "#e0e2e5"} strokeWidth="9" fill="none" strokeLinecap="round" style={{ transition: "stroke 0.3s" }} />;
+                            });
+                          })()}
+                        </svg>
+                      </button>
+
+                      {/* Streak */}
+                      {(() => {
+                        const STIERS = [
+                          { min: 0,   label: "Beginner",  color: "#9aa0a6", grad: ["#f4f4f6","#eaecee"] },
+                          { min: 5,   label: "Starter",   color: "#2653d4", grad: ["#eef2ff","#dbe4ff"] },
+                          { min: 15,  label: "Grinder",   color: "#059669", grad: ["#ecfdf5","#d1fae5"] },
+                          { min: 30,  label: "Dedicated", color: "#d97706", grad: ["#fffbeb","#fde68a"] },
+                          { min: 60,  label: "Elite",     color: "#7c3aed", grad: ["#faf5ff","#ede9fe"] },
+                          { min: 100, label: "Legend",    color: "#0ea5e9", grad: ["#f0f9ff","#bae6fd"] },
+                        ];
+                        const stier = [...STIERS].reverse().find(t => streak >= t.min) ?? STIERS[0];
+                        return (
+                          <button onClick={() => togglePanel('streak')}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(streakPanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                                <textPath href="#streakTopArc" startOffset="50%" textAnchor="middle">{stier.label.toUpperCase()}</textPath>
+                              </text>
+                              <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
+                                fontSize={streak >= 100 ? "34" : streak >= 10 ? "40" : "46"} fontWeight="800"
+                                style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                                {streak > 0 ? streak : "—"}
+                              </text>
+                              <text x="100" y="152" textAnchor="middle" fontSize="20" fontWeight="600"
+                                style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", opacity: 0.65 } as React.CSSProperties}>
+                                day streak
+                              </text>
+                            </svg>
+                          </button>
+                        );
+                      })()}
+
+                      {/* Form Score */}
+                      {(() => {
+                        const fs = formScore;
+                        const score = fs?.score ?? null;
+                        const color = score === null ? "#9aa0a6" : score >= 70 ? "#16a34a" : score >= 50 ? "#d97706" : "#ef4444";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        return (
+                          <button onClick={() => togglePanel('formScore')}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(formScorePanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="formScoreArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#formScoreArc" startOffset="50%" textAnchor="middle">MY FORM</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
+                                fontSize={score !== null ? "46" : "36"} fontWeight="800"
+                                style={{ fill: color, fontFamily: ff }}>
+                                {score !== null ? score : "—"}
+                              </text>
+                              <text x="100" y="152" textAnchor="middle" fontSize="17" fontWeight="600"
+                                style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
+                                {score === null ? "no data" : score >= 70 ? "on track" : score >= 50 ? "building" : "needs work"}
+                              </text>
+                              <circle cx="100" cy="188" r="4" fill={color} opacity={formScorePanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                            </svg>
+                          </button>
+                        );
+                      })()}
+                    </div>
+
+                    {panelSchedOpen && (
+                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                        <div style={{ padding: "10px 14px 8px" }}>
+                          {schedule.map((item, i) => {
+                            const isDone = (schedDone[todayKey] ?? []).includes(item.title);
+                            return (
+                              <div key={item.title}
+                                onClick={() => { if (SCHEDULE_DETAILS[item.title] || item.isDrill) setPanelSchedModalIdx(i); }}
+                                style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0", cursor: SCHEDULE_DETAILS[item.title] || item.isDrill ? "pointer" : "default", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f6" : "none" }}>
+                                <button onClick={e => { e.stopPropagation(); panelToggleDone(item.title); }}
+                                  style={{ width: 20, height: 20, borderRadius: 5, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s", cursor: "pointer" }}>
+                                  {isDone && <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                                </button>
+                                <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none", flex: 1 }}>{item.title}</p>
+                                <span style={{ fontSize: 13, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Panel for row 2 */}
                     {streakPanelOpen && (() => {
                       const STIERS = [
@@ -1945,6 +1835,94 @@ export default function ProfilePage() {
                       );
                     })()}
 
+                    {/* Row 3: Hydration · Insights · Matches */}
+                    <div style={{ display: "flex", gap: 10 }}>
+                      {/* Hydration */}
+                      {(() => {
+                        const ml = hydrationMl;
+                        const hasData = ml > 0;
+                        const color = "#0ea5e9";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        const pct = hasData ? Math.min(ml / 2000, 1) : null;
+                        const centerText = hasData
+                          ? (ml >= 1000 ? `${(ml / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${ml}ml`)
+                          : "—";
+                        const subText = pct !== null ? `${Math.round(pct * 100)}% of 2L` : "not logged";
+                        return (
+                          <button onClick={() => togglePanel('hydration')}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(hydrationPanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="hydrationArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#hydrationArc" startOffset="50%" textAnchor="middle">HYDRATION</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
+                                fontSize={centerText.length > 4 ? "28" : "38"} fontWeight="800"
+                                style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff }}>
+                                {centerText}
+                              </text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600"
+                                style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
+                                {subText}
+                              </text>
+                              <circle cx="100" cy="188" r="4" fill={color} opacity={hydrationPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                            </svg>
+                          </button>
+                        );
+                      })()}
+
+                      {/* Insights circle */}
+                      {(() => {
+                        const color = "#f59e0b";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        const wins   = reviews.filter(r => r.result === "win").length;
+                        const losses = reviews.filter(r => r.result === "loss").length;
+                        const count  = [wins + losses > 0, reviews.length >= 3, streak > 0, partnerCount >= 2, trainingSessions.length > 0].filter(Boolean).length;
+                        return (
+                          <button onClick={() => togglePanel('insights')}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(insightsPanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="insightsArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#insightsArc" startOffset="50%" textAnchor="middle">INSIGHTS</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{count > 0 ? count : "—"}</text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>featured</text>
+                              <circle cx="100" cy="188" r="4" fill={color} opacity={insightsPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                            </svg>
+                          </button>
+                        );
+                      })()}
+
+                      {/* Matches circle */}
+                      {(() => {
+                        const color = "#2653d4";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        const wins   = reviews.filter(r => r.result === "win").length;
+                        const losses = reviews.filter(r => r.result === "loss").length;
+                        const total  = wins + losses;
+                        const centerText = reviews.length > 0 ? String(reviews.length) : "—";
+                        const sub = total > 0 ? `${Math.round((wins / total) * 100)}% wins` : "no matches";
+                        return (
+                          <button onClick={() => togglePanel('matches')}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(matchesPanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="matchesArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#matchesArc" startOffset="50%" textAnchor="middle">MATCHES</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{centerText}</text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
+                              <circle cx="100" cy="188" r="4" fill={color} opacity={matchesPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
+                            </svg>
+                          </button>
+                        );
+                      })()}
+                    </div>
+
                     {/* Hydration panel */}
                     {hydrationPanelOpen && (() => {
                       const ml = hydrationMl;
@@ -1980,82 +1958,6 @@ export default function ProfilePage() {
                         </div>
                       );
                     })()}
-
-                    {/* Row 3: Insights · Gear · Matches */}
-                    <div style={{ display: "flex", gap: 10 }}>
-                      {/* Insights circle */}
-                      {(() => {
-                        const color = "#f59e0b";
-                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        const wins   = reviews.filter(r => r.result === "win").length;
-                        const losses = reviews.filter(r => r.result === "loss").length;
-                        const count  = [wins + losses > 0, reviews.length >= 3, streak > 0, partnerCount >= 2, trainingSessions.length > 0].filter(Boolean).length;
-                        return (
-                          <button onClick={() => togglePanel('insights')}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(insightsPanelOpen) }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                              <defs><path id="insightsArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#insightsArc" startOffset="50%" textAnchor="middle">INSIGHTS</textPath>
-                              </text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{count > 0 ? count : "—"}</text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>featured</text>
-                              <circle cx="100" cy="188" r="4" fill={color} opacity={insightsPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
-                            </svg>
-                          </button>
-                        );
-                      })()}
-
-                      {/* Gear circle */}
-                      {(() => {
-                        const color = "#7c3aed";
-                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        const label = racketName ? racketName.split(" ").slice(0, 1).join("") : "—";
-                        const sub   = racketName ? "my racket" : "no gear";
-                        return (
-                          <button onClick={() => togglePanel('gear')}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(gearPanelOpen) }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                              <defs><path id="gearArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#gearArc" startOffset="50%" textAnchor="middle">GEAR</textPath>
-                              </text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize={label.length > 5 ? "22" : "36"} fontWeight="800" style={{ fill: color, fontFamily: ff }}>{label}</text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
-                              <circle cx="100" cy="188" r="4" fill={color} opacity={gearPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
-                            </svg>
-                          </button>
-                        );
-                      })()}
-
-                      {/* Matches circle */}
-                      {(() => {
-                        const color = "#2653d4";
-                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        const wins   = reviews.filter(r => r.result === "win").length;
-                        const losses = reviews.filter(r => r.result === "loss").length;
-                        const total  = wins + losses;
-                        const centerText = reviews.length > 0 ? String(reviews.length) : "—";
-                        const sub = total > 0 ? `${Math.round((wins / total) * 100)}% wins` : "no matches";
-                        return (
-                          <button onClick={() => togglePanel('matches')}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(matchesPanelOpen) }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                              <defs><path id="matchesArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#matchesArc" startOffset="50%" textAnchor="middle">MATCHES</textPath>
-                              </text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{centerText}</text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
-                              <circle cx="100" cy="188" r="4" fill={color} opacity={matchesPanelOpen ? "0.9" : "0.35"} style={{ transition: "opacity 0.2s" }} />
-                            </svg>
-                          </button>
-                        );
-                      })()}
-                    </div>
 
                     {/* Insights panel */}
                     {insightsPanelOpen && (() => {
@@ -2146,86 +2048,6 @@ export default function ProfilePage() {
                         </div>
                       );
                     })()}
-
-                    {/* Gear panel */}
-                    {gearPanelOpen && (
-                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px 0" }}>
-                          <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>My Gear</p>
-                          <button onClick={() => setGearEditOpen(o => !o)} className="t-caption" style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 500, color: "var(--c-forest)" }}>{gearEditOpen ? "Done" : "Edit"}</button>
-                        </div>
-                        <div ref={racketRowRef} style={{ display: "flex", alignItems: "stretch", padding: 12, gap: 14 }}>
-                          <div style={{ position: "relative", flexShrink: 0, width: racketSlotSize, height: racketSlotSize }}>
-                            <label htmlFor="racket-img-upload-panel" style={{ cursor: "pointer", display: "block", width: "100%", height: "100%" }}>
-                              <div style={{ width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                {racketImage ? (
-                                  // eslint-disable-next-line @next/next/no-img-element
-                                  <img src={racketImage} alt="Racket" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                ) : (
-                                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c4c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                                )}
-                              </div>
-                            </label>
-                            <input id="racket-img-upload-panel" type="file" accept="image/*" style={{ display: "none" }} onChange={handleRacketImage} />
-                          </div>
-                          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 6 }}>
-                            {gearEditOpen ? (
-                              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                                <input placeholder="Racket name" value={racketName} onChange={e => { setRacketName(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketName = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
-                                <input placeholder="Racket type (e.g. Control)" value={racketType} onChange={e => { setRacketType(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketType = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
-                                <input placeholder="Using since (e.g. Jan 2024)" value={racketSince} onChange={e => { setRacketSince(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketSince = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
-                              </div>
-                            ) : (
-                              <>
-                                <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1a1c1c" }}>{racketName || <span style={{ color: "#b0b5ba" }}>No racket added</span>}</p>
-                                {racketType && <p style={{ margin: 0, fontSize: 13, color: "#6b7480" }}>{racketType}</p>}
-                                {racketSince && <p style={{ margin: 0, fontSize: 12, color: "#9aa0a6" }}>Since {racketSince}</p>}
-                              </>
-                            )}
-                          </div>
-                        </div>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "var(--c-line)", borderTop: "1px solid var(--c-line)" }}>
-                          <div style={{ background: "#fff", padding: "14px", display: "flex", flexDirection: "column" }}>
-                            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 10px" }}>My Shoes</p>
-                            <div style={{ position: "relative", flex: 1 }}>
-                              <label htmlFor="shoe-img-upload-panel" style={{ cursor: "pointer", display: "block" }}>
-                                <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: shoeImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                  {shoeImage
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    ? <img src={shoeImage} alt="Shoes" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 17h20v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-1z"/><path d="M2 17c0-3.5 2.5-6 6-6h2l3-2h3c2.2 0 4 1.5 4.5 3.5L21 17"/></svg>}
-                                </div>
-                              </label>
-                              {shoeImage && (
-                                <button onClick={() => { setShoeImage(""); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); delete g.shoeImage; localStorage.setItem("padelop:gear", JSON.stringify(g)); deleteGearImageFromStorage("shoe"); }} style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
-                                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                </button>
-                              )}
-                            </div>
-                            <input id="shoe-img-upload-panel" type="file" accept="image/*" className="hidden" onChange={handleShoeImage} />
-                          </div>
-                          <div style={{ background: "#fff", padding: "14px", display: "flex", flexDirection: "column" }}>
-                            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 10px" }}>My Kit</p>
-                            <div style={{ position: "relative", flex: 1 }}>
-                              <label htmlFor="kit-img-upload-panel" style={{ cursor: "pointer", display: "block" }}>
-                                <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: kitImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                  {kitImage
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    ? <img src={kitImage} alt="Kit" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg>}
-                                </div>
-                              </label>
-                              {kitImage && (
-                                <button onClick={() => { setKitImage(""); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); delete g.kitImage; localStorage.setItem("padelop:gear", JSON.stringify(g)); deleteGearImageFromStorage("kit"); }} style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
-                                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                </button>
-                              )}
-                            </div>
-                            <input id="kit-img-upload-panel" type="file" accept="image/*" className="hidden" onChange={handleKitImage} />
-                          </div>
-                        </div>
-                      </div>
-                    )}
 
                     {/* Matches panel */}
                     {matchesPanelOpen && (
