@@ -1358,10 +1358,10 @@ export default function ProfilePage() {
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs>
                                 <clipPath id="pc_tile_imgClip"><circle cx="100" cy="100" r="52" /></clipPath>
-                                <path id="pc_tile_nameArc" d="M 26,58 A 85,85 0 0,1 174,58" />
-                                <path id="pc_tile_bottomArc" d="M 15,100 A 85,85 0 0,0 185,100" />
+                                <path id="pc_tile_nameArc" d="M 34,62 A 76,76 0 0,1 166,62" />
+                                <path id="pc_tile_bottomArc" d="M 24,100 A 76,76 0 0,0 176,100" />
                               </defs>
-                              <circle cx="100" cy="100" r="85" fill="none" stroke="#111" strokeWidth="28" />
+                              <circle cx="100" cy="100" r="76" fill="none" stroke="#111" strokeWidth="46" />
                               {profile.avatar ? (
                                 <image href={profile.avatar} x="48" y="48" width="104" height="104"
                                   clipPath="url(#pc_tile_imgClip)" preserveAspectRatio="xMidYMid slice" />
