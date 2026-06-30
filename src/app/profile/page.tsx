@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { saveGearToDb, uploadGearImageToStorage, deleteGearImageFromStorage, saveProfileToDb, saveNutritionInsightToDb, saveUpcomingMatch, saveScheduleDoneToDb, saveScoreSnapshotToDb, saveNutritionToDb, saveNoteToDb, saveMatchReview } from "@/lib/db";
@@ -518,15 +518,22 @@ export default function ProfilePage() {
   const [gameDays, setGameDays] = useState<string[]>([]);
   const dayType = useMemo(() => getDayType(gameDays, nextMatch, upcomingMatches), [gameDays, nextMatch, upcomingMatches]);
 
-  // Cache dayType per calendar day so it shows instantly on return visits (no "Today" flash)
-  const [cachedDayType] = useState<string | null>(() => {
+  // Cache dayType per calendar day — read synchronously before first paint to avoid flash
+  const readDayTypeCache = (): string | null => {
     try {
       const raw = localStorage.getItem("padelop:day-type-cache");
       if (!raw) return null;
       const { date, dayType: dt } = JSON.parse(raw);
       return date === new Date().toISOString().slice(0, 10) ? dt : null;
     } catch { return null; }
+  };
+  const [cachedDayType, setCachedDayType] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return readDayTypeCache();
   });
+  useLayoutEffect(() => {
+    if (cachedDayType === null) setCachedDayType(readDayTypeCache());
+  }, []);
   const effectiveDayType = dayType === "baseline" ? (cachedDayType ?? dayType) : dayType;
   useEffect(() => {
     const known = ["match", "pre-match", "recovery", "maintenance", "training"];
