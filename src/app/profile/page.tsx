@@ -527,7 +527,7 @@ export default function ProfilePage() {
       return date === new Date().toISOString().slice(0, 10) ? dt : null;
     } catch { return null; }
   });
-  const effectiveDayType = dayType !== "training" || gameDays.length > 0 ? dayType : (cachedDayType ?? dayType);
+  const effectiveDayType = dayType === "baseline" ? (cachedDayType ?? dayType) : dayType;
   useEffect(() => {
     const known = ["match", "pre-match", "recovery", "maintenance", "training"];
     if (known.includes(dayType)) {
