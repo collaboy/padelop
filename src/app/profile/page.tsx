@@ -1378,7 +1378,7 @@ export default function ProfilePage() {
                                 </textPath>
                               </text>
                               {tileBottomItems && (
-                                <text fontSize="7" fontWeight="600" letterSpacing="0.5" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dy="3">
+                                <text fontSize="12" fontWeight="600" letterSpacing="0.5" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dominantBaseline="middle" dy="0">
                                   <textPath href="#pc_tile_bottomArc" startOffset="50%" textAnchor="middle">
                                     {tileBottomItems}
                                   </textPath>
