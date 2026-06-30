@@ -59,6 +59,7 @@ export default function Fab() {
     if (pathname !== prevPathnameRef.current) {
       prevPathnameRef.current = pathname;
       closeAll();
+      setNavLoading(null);
     }
   }, [pathname]);
 
