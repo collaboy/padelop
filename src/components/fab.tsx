@@ -39,6 +39,7 @@ export default function Fab() {
   const [isAdmin, setIsAdmin] = useState(false);
   const prevPathnameRef = useRef(pathname);
 
+  const [navLoading, setNavLoading] = useState<string | null>(null);
   const [logPickerOpen, setLogPickerOpen] = useState(false);
   const [logPickerSub, setLogPickerSub] = useState<"nutrition" | "matchreview" | "upload-confirm" | null>(null);
   const [fabExpanded, setFabExpanded] = useState(false);
@@ -193,19 +194,23 @@ export default function Fab() {
                 {/* Top row — Home, My Profile, Upload a photo */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
                   <button
-                    onClick={() => { router.push("/home8"); }}
+                    onClick={() => { setNavLoading("home"); router.push("/home8"); }}
                     className="active:scale-95 transition-transform"
                     style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
                   >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    {navLoading === "home"
+                      ? <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#c4c7cc" strokeWidth="2.5"/><path d="M12 3a9 9 0 0 1 9 9" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"/></svg>
+                      : <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>}
                     <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
                   </button>
                   <button
-                    onClick={() => { router.push("/profile?tab=profile"); }}
+                    onClick={() => { setNavLoading("profile"); router.push("/profile?tab=profile"); }}
                     className="active:scale-95 transition-transform"
                     style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
                   >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>
+                    {navLoading === "profile"
+                      ? <svg className="animate-spin" width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#c4c7cc" strokeWidth="2.5"/><path d="M12 3a9 9 0 0 1 9 9" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"/></svg>
+                      : <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>}
                     <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>My Profile</span>
                   </button>
                   <button
@@ -216,7 +221,10 @@ export default function Fab() {
                     <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                   </button>
                 </div>
-                <a href="/palt" onClick={e => { e.preventDefault(); router.push("/palt"); }} style={{ display: "block", textAlign: "center", paddingTop: 10, fontSize: 13, fontWeight: 600, color: "#8a9096", textDecoration: "none", letterSpacing: "0.05em" }}>PALT</a>
+                <a href="/palt" onClick={e => { e.preventDefault(); setNavLoading("palt"); router.push("/palt"); }} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, paddingTop: 10, fontSize: 13, fontWeight: 600, color: "#8a9096", textDecoration: "none", letterSpacing: "0.05em" }}>
+                  {navLoading === "palt" && <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#d0d4da" strokeWidth="2.5"/><path d="M12 3a9 9 0 0 1 9 9" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round"/></svg>}
+                  PALT
+                </a>
 
                 {/* Log manually expanded */}
                 <div style={{ overflow: "hidden", maxHeight: fabExpanded ? 600 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
