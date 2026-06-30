@@ -1357,22 +1357,22 @@ export default function ProfilePage() {
                             style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs>
-                                <clipPath id="pc_tile_imgClip"><circle cx="100" cy="100" r="71" /></clipPath>
+                                <clipPath id="pc_tile_imgClip"><circle cx="100" cy="100" r="52" /></clipPath>
                                 <path id="pc_tile_nameArc" d="M 26,58 A 85,85 0 0,1 174,58" />
                                 <path id="pc_tile_bottomArc" d="M 15,100 A 85,85 0 0,0 185,100" />
                               </defs>
                               <circle cx="100" cy="100" r="85" fill="none" stroke="#111" strokeWidth="28" />
                               {profile.avatar ? (
-                                <image href={profile.avatar} x="29" y="29" width="142" height="142"
+                                <image href={profile.avatar} x="48" y="48" width="104" height="104"
                                   clipPath="url(#pc_tile_imgClip)" preserveAspectRatio="xMidYMid slice" />
                               ) : (
                                 <>
-                                  <circle cx="100" cy="100" r="71" fill="#2653d4" />
-                                  <text x="100" y="111" textAnchor="middle" fontSize="36" fontWeight="800"
+                                  <circle cx="100" cy="100" r="52" fill="#2653d4" />
+                                  <text x="100" y="108" textAnchor="middle" fontSize="28" fontWeight="800"
                                     fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">{initials(profile.name)}</text>
                                 </>
                               )}
-                              <text fontSize="12" fontWeight="700" letterSpacing="1.5" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dy="4">
+                              <text fontSize="16" fontWeight="700" letterSpacing="1.5" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dy="4">
                                 <textPath href="#pc_tile_nameArc" startOffset="50%" textAnchor="middle">
                                   {(profile.name || "YOUR NAME").toUpperCase()}
                                 </textPath>
