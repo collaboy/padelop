@@ -1372,7 +1372,7 @@ export default function ProfilePage() {
                                     fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">{initials(profile.name)}</text>
                                 </>
                               )}
-                              <text fontSize="32" fontWeight="700" letterSpacing="1.5" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dy="4">
+                              <text fontSize="24" fontWeight="700" letterSpacing="1.5" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dominantBaseline="middle" dy="0">
                                 <textPath href="#pc_tile_nameArc" startOffset="50%" textAnchor="middle">
                                   {(profile.name || "YOUR NAME").toUpperCase()}
                                 </textPath>
