@@ -1302,7 +1302,7 @@ export default function ProfilePage() {
                 { label: "Maintenance Day", color: "#0e7490", desc: "Between cycles. Stay loose and let the body absorb the work." },
               ];
               return (
-                <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 20, background: "#ADD8E6", padding: 10, borderRadius: 20 }}>
                   {total > 0 && (() => {
                     // Add new panel states here to extend dimming to future circles
                     const anyOpen = openPanel !== null;
