@@ -1673,7 +1673,7 @@ export default function ProfilePage() {
                                 style={{ fill: color, fontFamily: ff }}>
                                 {score !== null ? score : "—"}
                               </text>
-                              <text x="100" y="152" textAnchor="middle" fontSize="17" fontWeight="600"
+                              <text x="100" y="152" textAnchor="middle" fontSize="19" fontWeight="600"
                                 style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
                                 {score === null ? "no data" : score >= 70 ? "on track" : score >= 50 ? "building" : "needs work"}
                               </text>
@@ -1700,7 +1700,7 @@ export default function ProfilePage() {
                                 fontSize={label.length > 8 ? "24" : label.length > 5 ? "36" : "46"} fontWeight="800"
                                 style={{ fill: color, fontFamily: ff }}>{label}</text>
                               {racketType ? (
-                                <text x="100" y="152" textAnchor="middle" fontSize="17" fontWeight="600"
+                                <text x="100" y="152" textAnchor="middle" fontSize="19" fontWeight="600"
                                   style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{racketType}</text>
                               ) : null}
                             </svg>
@@ -1897,7 +1897,7 @@ export default function ProfilePage() {
                                 style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff }}>
                                 {centerText}
                               </text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600"
+                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600"
                                 style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
                                 {subText}
                               </text>
@@ -1923,7 +1923,7 @@ export default function ProfilePage() {
                                 <textPath href="#insightsArc" startOffset="50%" textAnchor="middle">INSIGHTS</textPath>
                               </text>
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{count > 0 ? count : "—"}</text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>featured</text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>featured</text>
                             </svg>
                           </button>
                         );
@@ -1948,7 +1948,7 @@ export default function ProfilePage() {
                                 <textPath href="#matchesArc" startOffset="50%" textAnchor="middle">MATCHES</textPath>
                               </text>
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{centerText}</text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
                             </svg>
                           </button>
                         );
