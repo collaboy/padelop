@@ -1097,7 +1097,7 @@ export default function Home8() {
 
                 if (isSleepytime) return (
                   <div key="active" style={{ ...cardStyle }}>
-                    <div style={{ position: "absolute", inset: 0, background: "rgba(10,12,30,0.82)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                    <div style={{ position: "absolute", inset: 0, background: "rgba(10,12,30,0.65)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8 }}>
                       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#c9d6ff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
                       <p style={{ fontSize: "clamp(22px, 7vw, 30px)", fontWeight: 800, color: "#fff", margin: 0, letterSpacing: "-0.02em" }}>Sleepytime</p>
                       <p style={{ fontSize: "clamp(13px, 4vw, 17px)", fontWeight: 500, color: "rgba(200,210,255,0.75)", margin: 0 }}>See you at 7am</p>
@@ -1106,11 +1106,7 @@ export default function Home8() {
                 );
 
                 if (isDone) {
-                  if (!nextSlide) return (
-                    <div key="active" style={{ ...cardStyle, background: "rgb(10,12,30)" }}>
-                      {sleepOverlay}
-                    </div>
-                  );
+                  if (!nextSlide) return null;
                   let p = 0;
                   if (nextSlide) {
                     const doneAt = doneAtRef.current.get(currentIdx);
@@ -1221,8 +1217,6 @@ export default function Home8() {
                       ref={warmupVizRef}
                       style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block", opacity: warmupPlaying ? 1 : 0, transition: "opacity 0.5s" }}
                     />
-                    {sleepOverlay}
-
                     {/* INFO STATE: fades out when playing */}
                     <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: warmupPlaying ? 0 : isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.35s", pointerEvents: warmupPlaying ? "none" : "auto" }}>
                       {!isSleepytime && <p className="text-[14px] tracking-wide leading-none" style={{ color: "#000", fontWeight: 600, background: "#fff", padding: 4, borderRadius: 4 }}>Do this now</p>}
