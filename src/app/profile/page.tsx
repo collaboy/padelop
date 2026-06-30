@@ -2208,8 +2208,10 @@ export default function ProfilePage() {
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="goodBadArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#goodBadArc" startOffset="50%" textAnchor="middle">GOOD / BAD</textPath>
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" fontFamily={ff}>
+                                <textPath href="#goodBadArc" startOffset="50%" textAnchor="middle">
+                                  <tspan fill="#16a34a">GOOD</tspan><tspan fill="#9aa0a6"> / </tspan><tspan fill={color}>BAD</tspan>
+                                </textPath>
                               </text>
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{totalTags > 0 ? totalTags : "—"}</text>
                               <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>tags logged</text>
