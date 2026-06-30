@@ -1188,17 +1188,17 @@ export default function ProfilePage() {
           <button onClick={() => togglePanel('profileCircle')} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", width: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
               <defs>
-                <clipPath id="pc_big_imgClip"><circle cx="100" cy="100" r="63" /></clipPath>
+                <clipPath id="pc_big_imgClip"><circle cx="100" cy="100" r="59" /></clipPath>
                 <path id="pc_big_nameArc"   d="M 34,62  A 76,76 0 0,1 166,62" />
                 <path id="pc_big_bottomArc" d="M 24,100 A 76,76 0 0,0 176,100" />
               </defs>
-              <circle cx="100" cy="100" r="76" fill="none" stroke="#111" strokeWidth="28" />
+              <circle cx="100" cy="100" r="76" fill="none" stroke="#111" strokeWidth="37" />
               {profile.avatar ? (
-                <image href={profile.avatar} x="37" y="37" width="126" height="126"
+                <image href={profile.avatar} x="41" y="41" width="118" height="118"
                   clipPath="url(#pc_big_imgClip)" preserveAspectRatio="xMidYMid slice" />
               ) : (
                 <>
-                  <circle cx="100" cy="100" r="63" fill="#2653d4" />
+                  <circle cx="100" cy="100" r="59" fill="#2653d4" />
                   <text x="100" y="108" textAnchor="middle" fontSize="28" fontWeight="800"
                     fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">{initials(profile.name)}</text>
                 </>
