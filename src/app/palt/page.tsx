@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import LogSheet from "@/components/log-sheet";
 import ReadinessSheet from "@/components/readiness-sheet";
 import PushPrompt from "@/components/push-prompt";
-import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, computeMatchReadiness, loadMorningLog, improveTips, computeFormScore, type FormScore, type MatchReadinessResult, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
+import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, computeMatchReadiness, loadMorningLog, improveTips, type MatchReadinessResult, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
 import { pad, addMins, toMins, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag, getDayType, ITEM_COLORS, type ScheduleItem, type DayType, getScheduleData, SCHEDULE_DETAILS } from "@/lib/schedule-data";
 import { saveUpcomingMatch, saveNutritionToDb, saveHydrationToDb, saveNoteToDb, saveMatchReview, saveGearToDb, saveScheduleDoneToDb, saveTrainingToDb, deleteUpcomingMatchFromDb } from "@/lib/db";
 import { hydrateFromSupabase } from "@/lib/sync";
@@ -313,11 +313,6 @@ export default function Home8() {
   const [drillTag, setDrillTag] = useState<string | null>(null);
   const [drillSteps, setDrillSteps] = useState<{ step: string; cue: string; reps: string }[] | null>(null);
   const [clientReady, setClientReady] = useState(false);
-  const [carouselIdx, setCarouselIdx] = useState(1); // virtual: 0=clone-of-9, 1-10=real slides, 11=clone-of-0
-  const [carouselNoTransition, setCarouselNoTransition] = useState(false);
-  const [paltOpenPanel, setPaltOpenPanel] = useState<string | null>(null);
-  const [paltFormScore, setPaltFormScore] = useState<FormScore | null>(null);
-  const [paltRacketName, setPaltRacketName] = useState<string | null>(null);
 
   // Seed cache-backed state synchronously on client before first paint (avoids SSR mismatch + flash)
   useLayoutEffect(() => {
@@ -885,26 +880,6 @@ export default function Home8() {
   }, [matchModalOpen]);
 
   useEffect(() => {
-    try {
-      const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}");
-      if (g.racketName) setPaltRacketName(g.racketName);
-    } catch {}
-    try { setPaltFormScore(computeFormScore()); } catch {}
-  }, []);
-
-  // Infinite carousel: silently reposition after transition when on a clone slide
-  useEffect(() => {
-    if (carouselIdx !== 0 && carouselIdx !== 11) return;
-    const target = carouselIdx === 0 ? 10 : 1;
-    const t = setTimeout(() => {
-      setCarouselNoTransition(true);
-      setCarouselIdx(target);
-      requestAnimationFrame(() => requestAnimationFrame(() => setCarouselNoTransition(false)));
-    }, 320);
-    return () => clearTimeout(t);
-  }, [carouselIdx]);
-
-  useEffect(() => {
     if (doIdx < 1) {
       setBreathPhase(0);
       setBreathDashOffset(560);
@@ -941,8 +916,8 @@ export default function Home8() {
           style={{
             display: "flex", width: "300%", marginLeft: "-100%",
             height: "100dvh", touchAction: doIdx >= 1 ? "pan-y" : "manipulation",
-            transform: "translateX(0)",
-            transition: "none",
+            transform: cardSnap === 'right' ? `translateX(calc(33.333% - 50px + ${liveX}px))` : cardSnap === 'left' ? `translateX(calc(-33.333% + 50px + ${liveX}px))` : `translateX(${liveX}px)`,
+            transition: liveX !== 0 ? "none" : "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
           }}
           onTouchStart={e => {
             touchStartYRef.current = e.touches[0].clientY;
@@ -969,8 +944,11 @@ export default function Home8() {
             const dy = endY - touchStartYRef.current;
             if (swipeDirRef.current === 'h' && doIdx === 0) {
               setLiveX(0);
-              if (dx < -60) setCarouselIdx(i => i + 1);
-              else if (dx > 60) setCarouselIdx(i => i - 1);
+              if (cardSnap === 'none') {
+                if (dx < -60) setCardSnap('left');
+                else if (dx > 60) setCardSnap('right');
+              } else if (cardSnap === 'left' && dx > 60) setCardSnap('none');
+              else if (cardSnap === 'right' && dx < -60) setCardSnap('none');
             } else if (swipeDirRef.current === 'v' && cardSnap === 'none') {
               setLiveY(0);
               if (!settlingRef.current) {
@@ -1045,80 +1023,9 @@ export default function Home8() {
                 );
               })()}
 
-              {/* ── Carousel: 10 slides — circles 0-3, green ball 4, circles 5-9 ── */}
+              {/* Card 1: do-this-now */}
               {(() => {
-                const NUM = 12;
-                const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                // Slide 0: Next Match
-                const nmToday = new Date().toISOString().slice(0, 10);
-                const nmDiff = match ? Math.round((new Date(match.date + "T12:00").getTime() - new Date(nmToday + "T12:00").getTime()) / 86400000) : null;
-                const nmLabel = nmDiff === null ? "NO MATCH" : nmDiff === 0 ? "TODAY" : nmDiff === 1 ? "TOMORROW" : `IN ${nmDiff} DAYS`;
-                const nmTime = match?.time ?? "";
-                // Slide 2: Schedule
-                const schedDone = completed.size;
-                const schedTotal = schedule.length;
-                const schedPct = schedTotal ? Math.round((schedDone / schedTotal) * 100) : 0;
-                // Slide 3: Streak tier
-                const STIERS = [
-                  { min: 0, label: "BEGINNER", color: "#9aa0a6" },
-                  { min: 5, label: "STARTER", color: "#2653d4" },
-                  { min: 15, label: "GRINDER", color: "#059669" },
-                  { min: 30, label: "DEDICATED", color: "#d97706" },
-                  { min: 60, label: "ELITE", color: "#7c3aed" },
-                  { min: 100, label: "LEGEND", color: "#0ea5e9" },
-                ] as const;
-                const stier = [...STIERS].reverse().find(t => streak >= t.min) ?? STIERS[0];
-                // Slide 5: Form Score
-                const fsScore = paltFormScore?.score ?? null;
-                const fsColor = fsScore === null ? "#9aa0a6" : fsScore >= 70 ? "#16a34a" : fsScore >= 50 ? "#d97706" : "#ef4444";
-                const fsLabel = fsScore === null ? "no data" : fsScore >= 70 ? "on track" : fsScore >= 50 ? "building" : "needs work";
-                // Slide 6: Hydration
-                const hydText = logHydrationMl >= 1000 ? `${+(logHydrationMl / 1000).toFixed(1)}L` : logHydrationMl > 0 ? `${logHydrationMl}ml` : "—";
-                const hydSub = logHydrationMl > 0 ? `${Math.round(Math.min(logHydrationMl / 2000, 1) * 100)}% of 2L` : "not logged";
-                // Slide 7: Insights count
-                const iWins = reviews.filter(r => r.result === "win").length;
-                const iLoss = reviews.filter(r => r.result === "loss").length;
-                const insightsCnt = [iWins + iLoss > 0, reviews.length >= 3, streak > 0].filter(Boolean).length;
-                // Slide 8: Gear
-                const gearLabel = paltRacketName ? paltRacketName.split(" ")[0] : "—";
-                const gearSub = paltRacketName ? "my racket" : "no gear";
-                // Slide 9: Matches
-                const mWins = reviews.filter(r => r.result === "win").length;
-                const mLoss = reviews.filter(r => r.result === "loss").length;
-                const mDecided = mWins + mLoss;
-                const mCount = reviews.length > 0 ? String(reviews.length) : "—";
-                const mSub = mDecided > 0 ? `${Math.round((mWins / mDecided) * 100)}% wins` : "no matches";
-
-                const dim = (key: string) => ({ opacity: paltOpenPanel && paltOpenPanel !== key ? 0.4 : 1, transition: "opacity 0.2s" } as React.CSSProperties);
-                const toggle = (key: string) => setPaltOpenPanel(p => p === key ? null : key);
-                const slideW = `${100 / NUM}%`;
-
-                return (
-                  <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", overflow: "hidden", position: "relative" }}>
-                    <div style={{
-                      display: "flex", width: `${NUM * 100}%`, height: "100%",
-                      transform: `translateX(calc(-${carouselIdx} * (100vw - 40px) + ${doIdx === 0 ? liveX : 0}px))`,
-                      transition: carouselNoTransition || liveX !== 0 ? "none" : "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
-                      willChange: "transform",
-                    }}>
-
-                      {/* Clone of Matches — virtual index 0, enables left-wrap from green ball */}
-                      <button onClick={() => toggle('matches')} style={{ width: slideW, flexShrink: 0, height: "100%", padding: 0, border: "none", background: "transparent", cursor: "pointer", display: "block" }}>
-                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                          <defs><path id="palt-arc-c0" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                          <circle cx="100" cy="100" r="99" fill="white" />
-                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "#2653d4", fontFamily: ff }}>
-                            <textPath href="#palt-arc-c0" startOffset="50%" textAnchor="middle">MATCHES</textPath>
-                          </text>
-                          <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="46" fontWeight="800" style={{ fill: "#2653d4", fontFamily: ff }}>{mCount}</text>
-                          <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600" style={{ fill: "#2653d4", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{mSub}</text>
-                        </svg>
-                      </button>
-
-                      {/* Slide 1 (virtual): Green Ball */}
-                      <div style={{ width: slideW, flexShrink: 0, height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        {(() => {
-                          const s = doItem;
+                const s = doItem;
                 const isDone = completed.has(currentIdx);
                 const isReady = curMins >= toMins(s.time);
                 const nextSlide = schedule[currentIdx + 1];
@@ -1322,186 +1229,6 @@ export default function Home8() {
                   </div>
                 );
               })()}
-                      </div>{/* /Slide 0: Green Ball */}
-
-                      {/* Slide 1: Next Match */}
-                      <button onClick={() => toggle('nextMatch')} style={{ width: slideW, flexShrink: 0, height: "100%", padding: 0, border: "none", background: "transparent", cursor: "pointer", display: "block", ...dim('nextMatch') }}>
-                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 4px 20px rgba(38,83,212,0.35))", display: "block" }}>
-                          <defs><path id="palt-arc-1" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                          <circle cx="100" cy="100" r="99" fill="#2653d4" />
-                          <text fontSize="19" fontWeight="700" letterSpacing="2.5" style={{ fill: "rgba(255,255,255,0.7)", fontFamily: ff }}>
-                            <textPath href="#palt-arc-1" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
-                          </text>
-                          <text x="100" y={nmTime ? "90" : "108"} textAnchor="middle" dominantBaseline="middle"
-                            fontSize={nmLabel.length > 9 ? "15" : nmLabel.length > 6 ? "18" : "22"} fontWeight="800" letterSpacing="0.04em"
-                            style={{ fill: "rgba(255,255,255,0.9)", fontFamily: ff }}>{nmLabel}</text>
-                          {nmTime && <text x="100" y="123" textAnchor="middle" dominantBaseline="middle"
-                            fontSize="26" fontWeight="800" style={{ fill: "#fff", fontFamily: ff }}>{nmTime}</text>}
-                          <circle cx="100" cy="188" r="4" fill="rgba(255,255,255,0.7)" opacity={paltOpenPanel === 'nextMatch' ? 0.9 : 0.35} style={{ transition: "opacity 0.2s" }} />
-                        </svg>
-                      </button>
-
-                      {/* Slide 2: Day Type */}
-                      <button onClick={() => toggle('dayType')} style={{ width: slideW, flexShrink: 0, height: "100%", padding: 0, border: "none", background: "transparent", cursor: "pointer", display: "block", ...dim('dayType') }}>
-                        {(() => {
-                          const parts = dayLabel.split(" ");
-                          const main = parts.length > 1 ? parts.slice(0, -1).join(" ") : dayLabel;
-                          const last = parts.length > 1 ? parts[parts.length - 1] : "";
-                          return (
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                              <defs><path id="palt-arc-2" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: dayColor, fontFamily: ff }}>
-                                <textPath href="#palt-arc-2" startOffset="50%" textAnchor="middle">DAY TYPE</textPath>
-                              </text>
-                              <text x="100" y={last ? "93" : "108"} textAnchor="middle" dominantBaseline="middle"
-                                fontSize="24" fontWeight="800" style={{ fill: dayColor, fontFamily: ff }}>{main}</text>
-                              {last && <text x="100" y="123" textAnchor="middle" dominantBaseline="middle"
-                                fontSize="20" fontWeight="800" style={{ fill: dayColor, fontFamily: ff }}>{last}</text>}
-                              <circle cx="100" cy="188" r="4" fill={dayColor} opacity={paltOpenPanel === 'dayType' ? 0.9 : 0.35} style={{ transition: "opacity 0.2s" }} />
-                            </svg>
-                          );
-                        })()}
-                      </button>
-
-                      {/* Slide 3: Schedule */}
-                      <button onClick={() => toggle('sched')} style={{ width: slideW, flexShrink: 0, height: "100%", padding: 0, border: "none", background: "transparent", cursor: "pointer", display: "block", ...dim('sched') }}>
-                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                          <defs><path id="palt-arc-3" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                          <circle cx="100" cy="100" r="99" fill="white" />
-                          <text fontSize="19" fontWeight="700" letterSpacing="0.03em" style={{ fill: "#5a6270", fontFamily: ff }}>
-                            <textPath href="#palt-arc-3" startOffset="50%" textAnchor="middle">TODAY&apos;S GOALS</textPath>
-                          </text>
-                          <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
-                            fontSize={schedPct === 100 ? "44" : "36"} fontWeight="800"
-                            style={{ fill: schedPct === 100 ? "#00D455" : "#1a1c1c", fontFamily: ff }}>
-                            {schedPct === 100 ? "✓" : `${schedDone}/${schedTotal}`}
-                          </text>
-                          {(() => {
-                            const r = 88, cX = 100, cY = 100, totalDeg = 110, startDeg = 90 + totalDeg / 2, N = schedule.length;
-                            if (!N) return null;
-                            const gapDeg = 7, segDeg = (totalDeg - Math.max(0, N - 1) * gapDeg) / N;
-                            const toRad = (d: number) => d * Math.PI / 180;
-                            return schedule.map((item, i) => {
-                              const a1 = startDeg - i * (segDeg + gapDeg), a2 = a1 - segDeg;
-                              const x1 = (cX + r * Math.cos(toRad(a1))).toFixed(2), y1 = (cY + r * Math.sin(toRad(a1))).toFixed(2);
-                              const x2 = (cX + r * Math.cos(toRad(a2))).toFixed(2), y2 = (cY + r * Math.sin(toRad(a2))).toFixed(2);
-                              return <path key={item.title} d={`M ${x1},${y1} A ${r},${r} 0 0,0 ${x2},${y2}`}
-                                stroke={completed.has(i) ? item.color : "#e0e2e5"} strokeWidth="9" fill="none" strokeLinecap="round" />;
-                            });
-                          })()}
-                          <circle cx="100" cy="188" r="4" fill="#16a34a" opacity={paltOpenPanel === 'sched' ? 0.9 : 0.35} style={{ transition: "opacity 0.2s" }} />
-                        </svg>
-                      </button>
-
-                      {/* Slide 4: Streak */}
-                      <button onClick={() => toggle('streak')} style={{ width: slideW, flexShrink: 0, height: "100%", padding: 0, border: "none", background: "transparent", cursor: "pointer", display: "block", ...dim('streak') }}>
-                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                          <defs><path id="palt-arc-4" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                          <circle cx="100" cy="100" r="99" fill="white" />
-                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: stier.color, fontFamily: ff }}>
-                            <textPath href="#palt-arc-4" startOffset="50%" textAnchor="middle">{stier.label}</textPath>
-                          </text>
-                          <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
-                            fontSize={streak >= 100 ? "34" : streak >= 10 ? "40" : "46"} fontWeight="800"
-                            style={{ fill: stier.color, fontFamily: ff }}>{streak > 0 ? streak : "—"}</text>
-                          <text x="100" y="152" textAnchor="middle" fontSize="20" fontWeight="600"
-                            style={{ fill: stier.color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>day streak</text>
-                        </svg>
-                      </button>
-
-                      {/* Slide 5: Form Score */}
-                      <button onClick={() => toggle('formScore')} style={{ width: slideW, flexShrink: 0, height: "100%", padding: 0, border: "none", background: "transparent", cursor: "pointer", display: "block", ...dim('formScore') }}>
-                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                          <defs><path id="palt-arc-5" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                          <circle cx="100" cy="100" r="99" fill="white" />
-                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: fsColor, fontFamily: ff }}>
-                            <textPath href="#palt-arc-5" startOffset="50%" textAnchor="middle">MY FORM</textPath>
-                          </text>
-                          <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-                            fontSize={fsScore !== null ? "46" : "36"} fontWeight="800"
-                            style={{ fill: fsColor, fontFamily: ff }}>{fsScore !== null ? fsScore : "—"}</text>
-                          <text x="100" y="152" textAnchor="middle" fontSize="17" fontWeight="600"
-                            style={{ fill: fsColor, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{fsLabel}</text>
-                          <circle cx="100" cy="188" r="4" fill={fsColor} opacity={paltOpenPanel === 'formScore' ? 0.9 : 0.35} style={{ transition: "opacity 0.2s" }} />
-                        </svg>
-                      </button>
-
-                      {/* Slide 6: Hydration */}
-                      <button onClick={() => toggle('hydration')} style={{ width: slideW, flexShrink: 0, height: "100%", padding: 0, border: "none", background: "transparent", cursor: "pointer", display: "block", ...dim('hydration') }}>
-                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                          <defs><path id="palt-arc-6" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                          <circle cx="100" cy="100" r="99" fill="white" />
-                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "#0ea5e9", fontFamily: ff }}>
-                            <textPath href="#palt-arc-6" startOffset="50%" textAnchor="middle">HYDRATION</textPath>
-                          </text>
-                          <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-                            fontSize={hydText.length > 4 ? "28" : "38"} fontWeight="800"
-                            style={{ fill: logHydrationMl > 0 ? "#0ea5e9" : "#9aa0a6", fontFamily: ff }}>{hydText}</text>
-                          <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600"
-                            style={{ fill: logHydrationMl > 0 ? "#0ea5e9" : "#9aa0a6", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{hydSub}</text>
-                          <circle cx="100" cy="188" r="4" fill="#0ea5e9" opacity={paltOpenPanel === 'hydration' ? 0.9 : 0.35} style={{ transition: "opacity 0.2s" }} />
-                        </svg>
-                      </button>
-
-                      {/* Slide 7: Insights */}
-                      <button onClick={() => toggle('insights')} style={{ width: slideW, flexShrink: 0, height: "100%", padding: 0, border: "none", background: "transparent", cursor: "pointer", display: "block", ...dim('insights') }}>
-                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                          <defs><path id="palt-arc-7" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                          <circle cx="100" cy="100" r="99" fill="white" />
-                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "#f59e0b", fontFamily: ff }}>
-                            <textPath href="#palt-arc-7" startOffset="50%" textAnchor="middle">INSIGHTS</textPath>
-                          </text>
-                          <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-                            fontSize="44" fontWeight="800" style={{ fill: "#f59e0b", fontFamily: ff }}>{insightsCnt > 0 ? insightsCnt : "—"}</text>
-                          <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600"
-                            style={{ fill: "#f59e0b", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>featured</text>
-                          <circle cx="100" cy="188" r="4" fill="#f59e0b" opacity={paltOpenPanel === 'insights' ? 0.9 : 0.35} style={{ transition: "opacity 0.2s" }} />
-                        </svg>
-                      </button>
-
-                      {/* Slide 8: Gear */}
-                      <button onClick={() => toggle('gear')} style={{ width: slideW, flexShrink: 0, height: "100%", padding: 0, border: "none", background: "transparent", cursor: "pointer", display: "block", ...dim('gear') }}>
-                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                          <defs><path id="palt-arc-8" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                          <circle cx="100" cy="100" r="99" fill="white" />
-                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "#7c3aed", fontFamily: ff }}>
-                            <textPath href="#palt-arc-8" startOffset="50%" textAnchor="middle">GEAR</textPath>
-                          </text>
-                          <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-                            fontSize={gearLabel.length > 5 ? "22" : "36"} fontWeight="800"
-                            style={{ fill: "#7c3aed", fontFamily: ff }}>{gearLabel}</text>
-                          <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600"
-                            style={{ fill: "#7c3aed", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{gearSub}</text>
-                          <circle cx="100" cy="188" r="4" fill="#7c3aed" opacity={paltOpenPanel === 'gear' ? 0.9 : 0.35} style={{ transition: "opacity 0.2s" }} />
-                        </svg>
-                      </button>
-
-                      {/* Slide 9: Matches */}
-                      <button onClick={() => toggle('matches')} style={{ width: slideW, flexShrink: 0, height: "100%", padding: 0, border: "none", background: "transparent", cursor: "pointer", display: "block", ...dim('matches') }}>
-                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                          <defs><path id="palt-arc-9" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                          <circle cx="100" cy="100" r="99" fill="white" />
-                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "#2653d4", fontFamily: ff }}>
-                            <textPath href="#palt-arc-9" startOffset="50%" textAnchor="middle">MATCHES</textPath>
-                          </text>
-                          <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-                            fontSize="46" fontWeight="800" style={{ fill: "#2653d4", fontFamily: ff }}>{mCount}</text>
-                          <text x="100" y="148" textAnchor="middle" fontSize="15" fontWeight="600"
-                            style={{ fill: "#2653d4", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{mSub}</text>
-                          <circle cx="100" cy="188" r="4" fill="#2653d4" opacity={paltOpenPanel === 'matches' ? 0.9 : 0.35} style={{ transition: "opacity 0.2s" }} />
-                        </svg>
-                      </button>
-
-                      {/* Clone of Green Ball — virtual index 11, enables right-wrap from Matches */}
-                      <div style={{ width: slideW, flexShrink: 0, height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <div style={{ width: "100%", height: "calc(100vw - 40px)", borderRadius: "50%", background: "#00D455", flexShrink: 0 }} />
-                      </div>
-
-                    </div>{/* /track */}
-                  </div>
-                );
-              })()}
 
               {/* Captions — shown below ball when warmup audio is playing */}
               {(() => {
@@ -1509,10 +1236,11 @@ export default function Home8() {
                 const cue = WARMUP_CUES[cueIdx];
                 const nextCue = WARMUP_CUES[cueIdx + 1];
                 const cueDuration = nextCue ? nextCue.from - cue.from : 3;
+                const words = (cue?.text ?? "").split(" ");
                 const timeInCue = warmupCurrentTime - (cue?.from ?? 0);
-                void cueDuration; void timeInCue;
+                const activeWord = Math.min(words.length - 1, Math.floor((timeInCue / cueDuration) * words.length));
                 return (
-                  <div style={{ width: "100%", flexShrink: 0, minHeight: 64, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 32px", opacity: warmupPlaying && (carouselIdx === 1 || carouselIdx === 11) ? 1 : 0, transition: "opacity 0.4s", pointerEvents: "none" }}>
+                  <div style={{ width: "100%", flexShrink: 0, minHeight: 64, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 32px", opacity: warmupPlaying ? 1 : 0, transition: "opacity 0.4s", pointerEvents: "none" }}>
                     <p style={{ margin: 0, fontSize: "clamp(15px, 3.8vw, 18px)", fontWeight: 500, color: "#1a1c1c", textAlign: "center", lineHeight: 1.6 }}>
                       {cue?.text ?? ""}
                     </p>
@@ -2544,153 +2272,6 @@ export default function Home8() {
 
 
       </main>
-
-      {/* ── PALT Panel Modal Overlay ── */}
-      {paltOpenPanel && (
-        <div
-          onClick={() => setPaltOpenPanel(null)}
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 200, display: "flex", alignItems: "flex-end" }}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{ width: "100%", maxHeight: "65vh", background: "#fff", borderRadius: "24px 24px 0 0", padding: "20px 20px 40px", overflowY: "auto", fontFamily: "Inter, sans-serif" }}
-          >
-            <div style={{ width: 36, height: 4, borderRadius: 2, background: "#dde2e8", margin: "0 auto 16px" }} />
-
-            {paltOpenPanel === 'nextMatch' && (() => {
-              return (
-                <div>
-                  <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "#9aa0a6", margin: "0 0 6px", textTransform: "uppercase" }}>Next Match</p>
-                  {match ? (
-                    <>
-                      <p style={{ fontSize: 28, fontWeight: 800, color: "#2653d4", margin: "0 0 4px" }}>{match.date}</p>
-                      <p style={{ fontSize: 20, fontWeight: 600, color: "#1a1c1c", margin: 0 }}>{match.time}{match.club ? ` · ${match.club}` : ""}</p>
-                    </>
-                  ) : (
-                    <p style={{ fontSize: 20, fontWeight: 600, color: "#9aa0a6", margin: 0 }}>No upcoming match scheduled.</p>
-                  )}
-                </div>
-              );
-            })()}
-
-            {paltOpenPanel === 'dayType' && (() => {
-              const DAY_TYPE_INFO = [
-                { label: "Match Day", color: "#2653d4", desc: "Play day. Hydrate early, eat light, warm up well." },
-                { label: "Pre-Match Day", color: "#d97706", desc: "Match tomorrow. Carb up tonight, sleep early." },
-                { label: "Recovery Day", color: "#7c3aed", desc: "Rest and recover. Protein and hydration are key." },
-                { label: "Maintenance Day", color: "#0e7490", desc: "Maintain form. Light training, good habits." },
-                { label: "Training Day", color: "#16a34a", desc: "Push today. Small habits compound." },
-              ];
-              const cur = DAY_TYPE_INFO.find(d => d.label === dayLabel);
-              return (
-                <div>
-                  <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "#9aa0a6", margin: "0 0 6px", textTransform: "uppercase" }}>Day Type</p>
-                  <p style={{ fontSize: 26, fontWeight: 800, color: dayColor, margin: "0 0 8px" }}>{dayLabel}</p>
-                  {cur && <p style={{ fontSize: 16, color: "#5a6270", margin: 0 }}>{cur.desc}</p>}
-                </div>
-              );
-            })()}
-
-            {paltOpenPanel === 'sched' && (
-              <div>
-                <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "#9aa0a6", margin: "0 0 12px", textTransform: "uppercase" }}>Today&apos;s Goals</p>
-                {schedule.map((item, i) => (
-                  <div key={item.title} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: "1px solid #f0f2f5" }}>
-                    <div style={{ width: 10, height: 10, borderRadius: "50%", background: completed.has(i) ? item.color : "#e0e2e5", flexShrink: 0 }} />
-                    <p style={{ margin: 0, fontSize: 16, fontWeight: 500, color: completed.has(i) ? "#1a1c1c" : "#9aa0a6", textDecoration: completed.has(i) ? "none" : "none" }}>{item.title}</p>
-                    <p style={{ margin: "0 0 0 auto", fontSize: 13, color: "#9aa0a6" }}>{item.time}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {paltOpenPanel === 'streak' && (() => {
-              const STIERS2 = [
-                { min: 0, label: "Beginner", color: "#9aa0a6" },
-                { min: 5, label: "Starter", color: "#2653d4" },
-                { min: 15, label: "Grinder", color: "#059669" },
-                { min: 30, label: "Dedicated", color: "#d97706" },
-                { min: 60, label: "Elite", color: "#7c3aed" },
-                { min: 100, label: "Legend", color: "#0ea5e9" },
-              ];
-              const st = [...STIERS2].reverse().find(t => streak >= t.min) ?? STIERS2[0];
-              const next = STIERS2.find(t => t.min > streak);
-              return (
-                <div>
-                  <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "#9aa0a6", margin: "0 0 6px", textTransform: "uppercase" }}>Streak</p>
-                  <p style={{ fontSize: 48, fontWeight: 800, color: st.color, margin: "0 0 4px", lineHeight: 1 }}>{streak > 0 ? streak : "0"}</p>
-                  <p style={{ fontSize: 16, fontWeight: 600, color: st.color, margin: "0 0 8px" }}>{st.label} · day streak</p>
-                  {next && <p style={{ fontSize: 14, color: "#9aa0a6", margin: 0 }}>{next.min - streak} more days to reach {next.label}</p>}
-                </div>
-              );
-            })()}
-
-            {paltOpenPanel === 'formScore' && (() => {
-              const score = paltFormScore?.score ?? null;
-              const color2 = score === null ? "#9aa0a6" : score >= 70 ? "#16a34a" : score >= 50 ? "#d97706" : "#ef4444";
-              const label2 = score === null ? "No data yet" : score >= 70 ? "On track" : score >= 50 ? "Building" : "Needs work";
-              return (
-                <div>
-                  <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "#9aa0a6", margin: "0 0 6px", textTransform: "uppercase" }}>My Form</p>
-                  <p style={{ fontSize: 48, fontWeight: 800, color: color2, margin: "0 0 4px", lineHeight: 1 }}>{score !== null ? score : "—"}</p>
-                  <p style={{ fontSize: 16, fontWeight: 600, color: color2, margin: 0 }}>{label2}</p>
-                </div>
-              );
-            })()}
-
-            {paltOpenPanel === 'hydration' && (
-              <div>
-                <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "#9aa0a6", margin: "0 0 6px", textTransform: "uppercase" }}>Hydration</p>
-                <p style={{ fontSize: 48, fontWeight: 800, color: "#0ea5e9", margin: "0 0 4px", lineHeight: 1 }}>{logHydrationMl >= 1000 ? `${+(logHydrationMl / 1000).toFixed(1)}L` : `${logHydrationMl}ml`}</p>
-                <p style={{ fontSize: 16, color: "#9aa0a6", margin: 0 }}>Target: 2–3L per day</p>
-              </div>
-            )}
-
-            {paltOpenPanel === 'insights' && (
-              <div>
-                <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "#9aa0a6", margin: "0 0 12px", textTransform: "uppercase" }}>Insights</p>
-                {reviews.length > 0 && (
-                  <div style={{ padding: "10px 14px", background: "#fffbeb", borderRadius: 12, marginBottom: 10 }}>
-                    <p style={{ fontSize: 15, fontWeight: 600, color: "#92400e", margin: 0 }}>
-                      {reviews.filter(r => r.result === "win").length} wins · {reviews.filter(r => r.result === "loss").length} losses from {reviews.length} matches
-                    </p>
-                  </div>
-                )}
-                {streak > 0 && (
-                  <div style={{ padding: "10px 14px", background: "#f0fdf4", borderRadius: 12, marginBottom: 10 }}>
-                    <p style={{ fontSize: 15, fontWeight: 600, color: "#166534", margin: 0 }}>{streak}-day streak 🔥 Keep it going.</p>
-                  </div>
-                )}
-                {reviews.length === 0 && streak === 0 && (
-                  <p style={{ fontSize: 16, color: "#9aa0a6", margin: 0 }}>Log matches and build your streak to unlock insights.</p>
-                )}
-              </div>
-            )}
-
-            {paltOpenPanel === 'gear' && (
-              <div>
-                <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "#9aa0a6", margin: "0 0 6px", textTransform: "uppercase" }}>Gear</p>
-                <p style={{ fontSize: 28, fontWeight: 800, color: "#7c3aed", margin: "0 0 4px" }}>{paltRacketName || "No racket added"}</p>
-                <p style={{ fontSize: 14, color: "#9aa0a6", margin: 0 }}>Update gear in your Profile.</p>
-              </div>
-            )}
-
-            {paltOpenPanel === 'matches' && (() => {
-              const mW = reviews.filter(r => r.result === "win").length;
-              const mL = reviews.filter(r => r.result === "loss").length;
-              const mD = mW + mL;
-              return (
-                <div>
-                  <p style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.08em", color: "#9aa0a6", margin: "0 0 6px", textTransform: "uppercase" }}>Matches</p>
-                  <p style={{ fontSize: 48, fontWeight: 800, color: "#2653d4", margin: "0 0 4px", lineHeight: 1 }}>{reviews.length}</p>
-                  <p style={{ fontSize: 16, color: "#9aa0a6", margin: 0 }}>{mD > 0 ? `${mW}W · ${mL}L · ${Math.round((mW / mD) * 100)}% wins` : "No recorded results yet"}</p>
-                </div>
-              );
-            })()}
-
-          </div>
-        </div>
-      )}
     </>
   );
 }
