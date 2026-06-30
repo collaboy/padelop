@@ -1183,7 +1183,7 @@ export default function ProfilePage() {
           </div>
 
           {/* ── Green card: big profile circle only ──────────────────── */}
-          <div style={{ background: "#00D455", borderRadius: 20, aspectRatio: "1/1", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+          <div style={{ background: "#dbeafe", borderRadius: 20, aspectRatio: "1/1", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
           {/* ── Big profile circle ─────────────────────────────────── */}
           <button onClick={() => togglePanel('profileCircle')} style={{ background: "none", border: "none", padding: 20, cursor: "pointer", width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
