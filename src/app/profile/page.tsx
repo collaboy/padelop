@@ -1186,7 +1186,7 @@ export default function ProfilePage() {
               <defs>
                 <clipPath id="pc_big_imgClip"><circle cx="100" cy="100" r="59" /></clipPath>
                 <path id="pc_big_nameArc"   d="M 34,62  A 76,76 0 0,1 166,62" />
-                <path id="pc_big_bottomArc" d="M 24,100 A 76,76 0 0,0 176,100" />
+                <path id="pc_big_bottomArc" d="M 25,113 A 76,76 0 0,0 175,113" />
               </defs>
               <circle cx="100" cy="100" r="76" fill="none" stroke="#00D455" strokeWidth="37" />
               {profile.avatar ? (
@@ -1210,7 +1210,7 @@ export default function ProfilePage() {
                 );
               })()}
               {(profile.level || profile.position || profile.hand || profile.playingSince) && (
-                <text fontSize="11" fontWeight="600" letterSpacing="0.3" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dominantBaseline="middle" dy="0">
+                <text fontSize="11" fontWeight="600" letterSpacing="0.3" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">
                   <textPath href="#pc_big_bottomArc" startOffset="50%" textAnchor="middle">
                     {[profile.level ? `LVL ${profile.level}` : null, profile.position, profile.hand, profile.playingSince].filter(Boolean).join(" · ").toUpperCase()}
                   </textPath>
