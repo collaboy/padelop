@@ -1168,7 +1168,7 @@ export default function ProfilePage() {
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--c-text)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
-            <h1 className="t-heading" style={{ color: "var(--c-text)", margin: 0, flex: 1 }}>Profile</h1>
+            <h1 className="t-heading" style={{ color: "var(--c-text)", margin: 0, flex: 1 }}>Scoreboard</h1>
             <button
               onClick={() => router.push("/settings")}
               style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--c-bg)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
