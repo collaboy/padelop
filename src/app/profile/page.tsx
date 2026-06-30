@@ -1701,7 +1701,7 @@ export default function ProfilePage() {
                                 style={{ fill: color, fontFamily: ff }}>{label}</text>
                               {racketType ? (
                                 <text x="100" y="152" textAnchor="middle" fontSize="19" fontWeight="600"
-                                  style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{racketType}</text>
+                                  style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{racketType.slice(0, 10)}</text>
                               ) : null}
                             </svg>
                           </button>
