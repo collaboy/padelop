@@ -1301,7 +1301,7 @@ export default function ProfilePage() {
                     const dim = (active: boolean) => ({ opacity: anyOpen && !active ? 0.3 : 1, transition: "opacity 0.2s" });
                     return (
                     <>
-                    {/* Row 1: Profile · Next Match · Day Type */}
+                    {/* Row 1: Next Match · Day Type · Goals */}
                     <div style={{ display: "flex", gap: 10 }}>
                       {/* Next Match */}
                       {(() => {
@@ -1366,6 +1366,36 @@ export default function ProfilePage() {
                             </svg>
                           );
                         })()}
+                      </button>
+
+                      {/* Today's Goals */}
+                      <button onClick={() => togglePanel('sched')}
+                        style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(panelSchedOpen) }}>
+                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                          <defs><path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                          <circle cx="100" cy="100" r="99" fill="white" />
+                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "var(--c-label)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                            <textPath href="#goalsTextArc" startOffset="50%" textAnchor="middle">TODAY&apos;S GOALS</textPath>
+                          </text>
+                          <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
+                            fontSize={pct === 100 ? "44" : "36"} fontWeight="800"
+                            style={{ fill: pct === 100 ? "#00D455" : "var(--c-text)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                            {pct === 100 ? "✓" : `${done}/${total}`}
+                          </text>
+                          {(() => {
+                            const r = 88, cX = 100, cY = 100, totalDeg = 110, startDeg = 90 + totalDeg / 2, N = schedule.length;
+                            if (!N) return null;
+                            const gapDeg = 7, segDeg = (totalDeg - Math.max(0, N - 1) * gapDeg) / N;
+                            const toRad = (d: number) => d * Math.PI / 180;
+                            return schedule.map((item, i) => {
+                              const a1 = startDeg - i * (segDeg + gapDeg), a2 = a1 - segDeg;
+                              const x1 = (cX + r * Math.cos(toRad(a1))).toFixed(2), y1 = (cY + r * Math.sin(toRad(a1))).toFixed(2);
+                              const x2 = (cX + r * Math.cos(toRad(a2))).toFixed(2), y2 = (cY + r * Math.sin(toRad(a2))).toFixed(2);
+                              return <path key={item.title} d={`M ${x1},${y1} A ${r},${r} 0 0,0 ${x2},${y2}`}
+                                stroke={todayDoneSet.has(item.title) ? item.color : "#e0e2e5"} strokeWidth="9" fill="none" strokeLinecap="round" style={{ transition: "stroke 0.3s" }} />;
+                            });
+                          })()}
+                        </svg>
                       </button>
 
                     </div>
@@ -1559,38 +1589,30 @@ export default function ProfilePage() {
                       );
                     })()}
 
-                    {/* Row 2: Today's Goals · Streak · Form Score */}
-                    <div style={{ display: "flex", gap: 10 }}>
-                      {/* Today's Goals */}
-                      <button onClick={() => togglePanel('sched')}
-                        style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(panelSchedOpen) }}>
-                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                          <defs><path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                          <circle cx="100" cy="100" r="99" fill="white" />
-                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "var(--c-label)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                            <textPath href="#goalsTextArc" startOffset="50%" textAnchor="middle">TODAY&apos;S GOALS</textPath>
-                          </text>
-                          <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
-                            fontSize={pct === 100 ? "44" : "36"} fontWeight="800"
-                            style={{ fill: pct === 100 ? "#00D455" : "var(--c-text)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                            {pct === 100 ? "✓" : `${done}/${total}`}
-                          </text>
-                          {(() => {
-                            const r = 88, cX = 100, cY = 100, totalDeg = 110, startDeg = 90 + totalDeg / 2, N = schedule.length;
-                            if (!N) return null;
-                            const gapDeg = 7, segDeg = (totalDeg - Math.max(0, N - 1) * gapDeg) / N;
-                            const toRad = (d: number) => d * Math.PI / 180;
-                            return schedule.map((item, i) => {
-                              const a1 = startDeg - i * (segDeg + gapDeg), a2 = a1 - segDeg;
-                              const x1 = (cX + r * Math.cos(toRad(a1))).toFixed(2), y1 = (cY + r * Math.sin(toRad(a1))).toFixed(2);
-                              const x2 = (cX + r * Math.cos(toRad(a2))).toFixed(2), y2 = (cY + r * Math.sin(toRad(a2))).toFixed(2);
-                              return <path key={item.title} d={`M ${x1},${y1} A ${r},${r} 0 0,0 ${x2},${y2}`}
-                                stroke={todayDoneSet.has(item.title) ? item.color : "#e0e2e5"} strokeWidth="9" fill="none" strokeLinecap="round" style={{ transition: "stroke 0.3s" }} />;
-                            });
-                          })()}
-                        </svg>
-                      </button>
+                    {panelSchedOpen && (
+                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                        <div style={{ padding: "10px 14px 8px" }}>
+                          {schedule.map((item, i) => {
+                            const isDone = (schedDone[todayKey] ?? []).includes(item.title);
+                            return (
+                              <div key={item.title}
+                                onClick={() => { if (SCHEDULE_DETAILS[item.title] || item.isDrill) setPanelSchedModalIdx(i); }}
+                                style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0", cursor: SCHEDULE_DETAILS[item.title] || item.isDrill ? "pointer" : "default", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f6" : "none" }}>
+                                <button onClick={e => { e.stopPropagation(); panelToggleDone(item.title); }}
+                                  style={{ width: 20, height: 20, borderRadius: 5, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s", cursor: "pointer" }}>
+                                  {isDone && <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                                </button>
+                                <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none", flex: 1 }}>{item.title}</p>
+                                <span style={{ fontSize: 13, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
 
+                    {/* Row 2: Streak · Form Score · Gear */}
+                    <div style={{ display: "flex", gap: 10 }}>
                       {/* Streak */}
                       {(() => {
                         const STIERS = [
@@ -1682,28 +1704,6 @@ export default function ProfilePage() {
                         );
                       })()}
                     </div>
-
-                    {panelSchedOpen && (
-                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-                        <div style={{ padding: "10px 14px 8px" }}>
-                          {schedule.map((item, i) => {
-                            const isDone = (schedDone[todayKey] ?? []).includes(item.title);
-                            return (
-                              <div key={item.title}
-                                onClick={() => { if (SCHEDULE_DETAILS[item.title] || item.isDrill) setPanelSchedModalIdx(i); }}
-                                style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0", cursor: SCHEDULE_DETAILS[item.title] || item.isDrill ? "pointer" : "default", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f6" : "none" }}>
-                                <button onClick={e => { e.stopPropagation(); panelToggleDone(item.title); }}
-                                  style={{ width: 20, height: 20, borderRadius: 5, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s", cursor: "pointer" }}>
-                                  {isDone && <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                                </button>
-                                <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none", flex: 1 }}>{item.title}</p>
-                                <span style={{ fontSize: 13, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
 
                     {/* Panel for row 2 */}
                     {streakPanelOpen && (() => {
