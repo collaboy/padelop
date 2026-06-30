@@ -1182,21 +1182,24 @@ export default function ProfilePage() {
             </button>
           </div>
 
+          {/* ── Green card: profile circle + scoreboard ─────────────── */}
+          <div style={{ background: "#00D455", borderRadius: 20, padding: "0 16px 20px" }}>
+
           {/* ── Big profile circle ─────────────────────────────────── */}
-          <button onClick={() => togglePanel('profileCircle')} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", justifyContent: "center", width: "100%", paddingTop: 8, paddingBottom: 4 }}>
+          <button onClick={() => togglePanel('profileCircle')} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", justifyContent: "center", width: "100%", paddingTop: 20, paddingBottom: 20 }}>
             <svg viewBox="0 0 200 200" width="200" height="200" style={{ display: "block" }}>
               <defs>
-                <clipPath id="pc_big_imgClip"><circle cx="100" cy="100" r="52" /></clipPath>
+                <clipPath id="pc_big_imgClip"><circle cx="100" cy="100" r="54" /></clipPath>
                 <path id="pc_big_nameArc" d="M 34,62 A 76,76 0 0,1 166,62" />
                 <path id="pc_big_bottomArc" d="M 24,100 A 76,76 0 0,0 176,100" />
               </defs>
               <circle cx="100" cy="100" r="76" fill="none" stroke="#111" strokeWidth="46" />
               {profile.avatar ? (
-                <image href={profile.avatar} x="48" y="48" width="104" height="104"
+                <image href={profile.avatar} x="46" y="46" width="108" height="108"
                   clipPath="url(#pc_big_imgClip)" preserveAspectRatio="xMidYMid slice" />
               ) : (
                 <>
-                  <circle cx="100" cy="100" r="52" fill="#2653d4" />
+                  <circle cx="100" cy="100" r="54" fill="#2653d4" />
                   <text x="100" y="108" textAnchor="middle" fontSize="28" fontWeight="800"
                     fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">{initials(profile.name)}</text>
                 </>
@@ -2182,7 +2185,7 @@ export default function ProfilePage() {
                 );
               })()}
 
-
+          </div>{/* ── End green card ── */}
         </div>
 
 
