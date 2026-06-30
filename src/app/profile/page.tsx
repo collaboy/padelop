@@ -1156,7 +1156,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="w-full pb-6" style={{ background: "#fff" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
+    <div className="w-full pb-6" style={{ background: "#f2f3f5" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
 
       {/* ── Profile ──────────────────────────────────────────────────────── */}
         <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
@@ -1192,7 +1192,7 @@ export default function ProfilePage() {
                 <path id="pc_big_nameArc"   d="M 34,62  A 76,76 0 0,1 166,62" />
                 <path id="pc_big_bottomArc" d="M 24,100 A 76,76 0 0,0 176,100" />
               </defs>
-              <circle cx="100" cy="100" r="76" fill="none" stroke="#111" strokeWidth="37" />
+              <circle cx="100" cy="100" r="76" fill="none" stroke="#00D455" strokeWidth="37" />
               {profile.avatar ? (
                 <image href={profile.avatar} x="41" y="41" width="118" height="118"
                   clipPath="url(#pc_big_imgClip)" preserveAspectRatio="xMidYMid slice" />
