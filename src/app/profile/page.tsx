@@ -1346,10 +1346,7 @@ export default function ProfilePage() {
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
                       {/* Profile tile */}
                       {(() => {
-                        const tileBottomItems = [
-                          profile.level    ? `LVL ${profile.level}` : null,
-                          profile.playingSince ? `SINCE ${profile.playingSince}` : null,
-                        ].filter(Boolean).join(" · ");
+                        const tileBottomItems = profile.level ? `LVL ${profile.level}` : null;
                         return (
                           <button onClick={() => setProfileTabEditOpen(o => !o)}
                             style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}>
@@ -1376,7 +1373,7 @@ export default function ProfilePage() {
                                 </textPath>
                               </text>
                               {tileBottomItems && (
-                                <text fontSize="12" fontWeight="600" letterSpacing="0.5" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dominantBaseline="middle" dy="0">
+                                <text fontSize="16" fontWeight="600" letterSpacing="0.5" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dominantBaseline="middle" dy="0">
                                   <textPath href="#pc_tile_bottomArc" startOffset="50%" textAnchor="middle">
                                     {tileBottomItems}
                                   </textPath>
