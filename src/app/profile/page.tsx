@@ -1182,8 +1182,40 @@ export default function ProfilePage() {
             </button>
           </div>
 
-
-
+          {/* ── Big profile circle ─────────────────────────────────── */}
+          <div style={{ display: "flex", justifyContent: "center", paddingTop: 8, paddingBottom: 4 }}>
+            <svg viewBox="0 0 200 200" width="200" height="200" style={{ display: "block" }}>
+              <defs>
+                <clipPath id="pc_big_imgClip"><circle cx="100" cy="100" r="52" /></clipPath>
+                <path id="pc_big_nameArc" d="M 34,62 A 76,76 0 0,1 166,62" />
+                <path id="pc_big_bottomArc" d="M 24,100 A 76,76 0 0,0 176,100" />
+              </defs>
+              <circle cx="100" cy="100" r="76" fill="none" stroke="#111" strokeWidth="46" />
+              {profile.avatar ? (
+                <image href={profile.avatar} x="48" y="48" width="104" height="104"
+                  clipPath="url(#pc_big_imgClip)" preserveAspectRatio="xMidYMid slice" />
+              ) : (
+                <>
+                  <circle cx="100" cy="100" r="52" fill="#2653d4" />
+                  <text x="100" y="108" textAnchor="middle" fontSize="28" fontWeight="800"
+                    fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">{initials(profile.name)}</text>
+                </>
+              )}
+              <text fontSize="24" fontWeight="700" letterSpacing="1.5" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dominantBaseline="middle" dy="0">
+                <textPath href="#pc_big_nameArc" startOffset="50%" textAnchor="middle">
+                  {(profile.name || "YOUR NAME").toUpperCase()}
+                </textPath>
+              </text>
+              {profile.level && (
+                <text fontSize="20" fontWeight="600" letterSpacing="0.5" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dominantBaseline="middle" dy="0">
+                  <textPath href="#pc_big_bottomArc" startOffset="50%" textAnchor="middle">
+                    {`LVL ${profile.level}`}
+                  </textPath>
+                </text>
+              )}
+            </svg>
+          </div>
+          {/* ── End big profile circle ──────────────────────────────── */}
 
           {panelSmartError && (
             <div style={{ background: "#fff5f5", border: "1.5px solid #fecaca", borderRadius: 12, padding: "10px 14px" }}>
