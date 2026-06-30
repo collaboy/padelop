@@ -221,11 +221,6 @@ export default function Fab() {
                     <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                   </button>
                 </div>
-                <a href="/palt" onClick={e => { e.preventDefault(); setNavLoading("palt"); router.push("/palt"); }} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, paddingTop: 10, fontSize: 13, fontWeight: 600, color: "#8a9096", textDecoration: "none", letterSpacing: "0.05em" }}>
-                  {navLoading === "palt" && <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#d0d4da" strokeWidth="2.5"/><path d="M12 3a9 9 0 0 1 9 9" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round"/></svg>}
-                  PALT
-                </a>
-
                 {/* Log manually expanded */}
                 <div style={{ overflow: "hidden", maxHeight: fabExpanded ? 600 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingTop: 10, paddingBottom: 10 }}>
