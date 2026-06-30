@@ -1357,18 +1357,18 @@ export default function ProfilePage() {
                             style={{ aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block" }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs>
-                                <clipPath id="pc_tile_imgClip"><circle cx="100" cy="100" r="61" /></clipPath>
-                                <path id="pc_tile_nameArc" d="M 35,63 A 75,75 0 0,1 165,63" />
-                                <path id="pc_tile_bottomArc" d="M 25,100 A 75,75 0 0,0 175,100" />
+                                <clipPath id="pc_tile_imgClip"><circle cx="100" cy="100" r="71" /></clipPath>
+                                <path id="pc_tile_nameArc" d="M 26,58 A 85,85 0 0,1 174,58" />
+                                <path id="pc_tile_bottomArc" d="M 15,100 A 85,85 0 0,0 185,100" />
                               </defs>
-                              <circle cx="100" cy="100" r="75" fill="none" stroke="#111" strokeWidth="28" />
+                              <circle cx="100" cy="100" r="85" fill="none" stroke="#111" strokeWidth="28" />
                               {profile.avatar ? (
-                                <image href={profile.avatar} x="39" y="39" width="122" height="122"
+                                <image href={profile.avatar} x="29" y="29" width="142" height="142"
                                   clipPath="url(#pc_tile_imgClip)" preserveAspectRatio="xMidYMid slice" />
                               ) : (
                                 <>
-                                  <circle cx="100" cy="100" r="61" fill="#2653d4" />
-                                  <text x="100" y="109" textAnchor="middle" fontSize="31" fontWeight="800"
+                                  <circle cx="100" cy="100" r="71" fill="#2653d4" />
+                                  <text x="100" y="111" textAnchor="middle" fontSize="36" fontWeight="800"
                                     fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">{initials(profile.name)}</text>
                                 </>
                               )}
