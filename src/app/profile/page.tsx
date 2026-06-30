@@ -1912,7 +1912,20 @@ export default function ProfilePage() {
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                         const wins   = reviews.filter(r => r.result === "win").length;
                         const losses = reviews.filter(r => r.result === "loss").length;
-                        const count  = [wins + losses > 0, reviews.length >= 3, streak > 0, partnerCount >= 2, trainingSessions.length > 0].filter(Boolean).length;
+                        const last5i = [...reviews].sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 5);
+                        const hasTopWellDone = reviews.flatMap(r => r.wellDone ?? []).length > 0;
+                        const hasTopImprove  = reviews.flatMap(r => r.improved ?? []).length > 0;
+                        const count  = [
+                          reviews.length >= 3 && wins + losses > 0,
+                          last5i.length >= 3,
+                          hasTopWellDone,
+                          hasTopImprove,
+                          streak > 0,
+                          partnerCount >= 2,
+                          trainingSessions.length > 0,
+                          thisWeekAvg !== null && lastWeekAvg !== null,
+                          tournamentCount > 0,
+                        ].filter(Boolean).length;
                         return (
                           <button onClick={() => togglePanel('insights')}
                             style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(insightsPanelOpen) }}>
