@@ -1113,7 +1113,7 @@ export default function Home8() {
 
                   // Dark overlay is always the base; done flash fades out on top
                   return (
-                    <div key="active" style={{ ...cardStyle }}>
+                    <div key="active" style={{ ...cardStyle }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
                       {/* Base: dark veil countdown */}
                       <div style={{ position: "absolute", inset: 0, background: "rgba(10,12,30,0.65)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4 }}>
                         <p style={{ fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#fff", margin: 0, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", minWidth: "7ch", textAlign: "center" }}>{fmtTime(secsUntilNext)}</p>
