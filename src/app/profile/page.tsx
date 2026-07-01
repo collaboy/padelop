@@ -1186,8 +1186,8 @@ export default function ProfilePage() {
         <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
 
           {/* ── Profile identity card ────────────────────────────────── */}
-          <div onClick={() => togglePanel('profileCircle')} style={{ background: "#fff", borderRadius: 20, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, boxShadow: "0 2px 12px rgba(0,0,0,0.06)", padding: "20px 18px 18px", cursor: "pointer" }}>
-            <div style={{ width: 80, height: 80, borderRadius: "50%", overflow: "hidden", background: profile.avatar ? "transparent" : "#f0f2f5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <div onClick={() => togglePanel('profileCircle')} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "20px 18px 18px", cursor: "pointer" }}>
+            <div style={{ width: 50, height: 50, borderRadius: "50%", overflow: "hidden", background: profile.avatar ? "transparent" : "#f0f2f5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               {profile.avatar
                 // eslint-disable-next-line @next/next/no-img-element
                 ? <img src={profile.avatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
