@@ -1208,13 +1208,13 @@ export default function ProfilePage() {
           {/* ── Green card: big profile circle only ──────────────────── */}
           {/* ── Big profile circle ─────────────────────────────────── */}
           <button onClick={() => togglePanel('profileCircle')} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "block" }}>
-            <svg viewBox="5 5 190 190" width="100%" height="100%" style={{ display: "block" }}>
+            <svg viewBox="9 9 182 182" width="100%" height="100%" style={{ display: "block" }}>
               <defs>
                 <clipPath id="pc_big_imgClip"><circle cx="100" cy="100" r="59" /></clipPath>
                 <path id="pc_big_nameArc"   d="M 34,62  A 76,76 0 0,1 166,62" />
                 <path id="pc_big_bottomArc" d="M 25,113 A 76,76 0 0,0 175,113" />
               </defs>
-              <circle cx="100" cy="100" r="76" fill="none" stroke="#00D455" strokeWidth="37" />
+              <circle cx="100" cy="100" r="76" fill="none" stroke="#00D455" strokeWidth="30" />
               {profile.avatar ? (
                 <image href={profile.avatar} x="41" y="41" width="118" height="118"
                   clipPath="url(#pc_big_imgClip)" preserveAspectRatio="xMidYMid slice" />
@@ -1236,7 +1236,7 @@ export default function ProfilePage() {
                 );
               })()}
               {(profile.level || profile.position || profile.hand || profile.playingSince) && (
-                <text fontSize="11" fontWeight="600" letterSpacing="0.3" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">
+                <text fontSize="11" fontWeight="600" letterSpacing="0.3" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dominantBaseline="middle">
                   <textPath href="#pc_big_bottomArc" startOffset="50%" textAnchor="middle">
                     {[profile.level ? `LVL ${profile.level}` : null, profile.position, profile.hand, profile.playingSince].filter(Boolean).join(" · ").toUpperCase()}
                   </textPath>
