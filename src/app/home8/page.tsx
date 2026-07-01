@@ -1106,36 +1106,34 @@ export default function Home8() {
 
                 if (isDone) {
                   if (!nextSlide) return null;
-                  let p = 0;
-                  if (nextSlide) {
-                    const doneAt = doneAtRef.current.get(currentIdx);
-                    const [nh, nm] = nextSlide.time.split(":").map(Number);
-                    const nextMs = new Date(now.getFullYear(), now.getMonth(), now.getDate(), nh, nm, 0).getTime();
-                    if (doneAt && nextMs > doneAt) {
-                      p = Math.min(1, Math.max(0, (Date.now() - doneAt) / (nextMs - doneAt)));
-                    }
-                  }
-                  const ri = Math.round(255 * (1 - p));
-                  const gi = Math.round(255 - 43 * p);
-                  const bi = Math.round(255 - 170 * p);
-                  const ballBg = `rgb(${ri}, ${gi}, ${bi})`;
+                  const doneAt = doneAtRef.current.get(currentIdx);
+                  const justDone = doneAt && (Date.now() - doneAt < 2000);
+                  const completedTitle = s.title === "Lunch" ? "Lunchtime" : s.title === "Dinner" ? "Dinnertime" : s.title;
+                  const nextTitle = nextSlide.title === "Lunch" ? "Lunchtime" : nextSlide.title === "Dinner" ? "Dinnertime" : nextSlide.title;
+
+                  // 2-second done flash: green ball + checkmark + completed task name
+                  if (justDone) return (
+                    <div key="active" className="animate-bounce-in" style={{ ...cardStyle }}>
+                      {textureOverlay}
+                      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                        <p style={{ fontSize: "clamp(22px, 7vw, 30px)", fontWeight: 800, color: "#1a1c1c", margin: 0, letterSpacing: "-0.02em", background: "#fff", padding: "3px 8px", borderRadius: 4 }}>{completedTitle}</p>
+                        <p style={{ fontSize: "clamp(13px, 4vw, 17px)", fontWeight: 700, color: "#1a1c1c", margin: 0, letterSpacing: "0.04em" }}>Done</p>
+                      </div>
+                    </div>
+                  );
+
+                  // Dark overlay countdown: green ball underneath, veil on top
                   return (
-                    <div key="active" className="animate-bounce-in animate-done-breathe" style={{ ...cardStyle, background: ballBg, borderWidth: "2px", borderStyle: "solid", boxShadow: "none" }} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
-                      {p > 0.05 && <div style={{ position: "absolute", inset: 0, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E")`, backgroundSize: "200px 200px", pointerEvents: "none", mixBlendMode: "overlay" as React.CSSProperties["mixBlendMode"], opacity: p }} />}
-                      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: -4 }}><path d="M5 13l4 4L19 7"/></svg>
-                        <p style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 600, color: "#1a1c1c", margin: 0, letterSpacing: "0.04em" }}>see you in</p>
-                        <p style={{ fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.02em", margin: 0, fontVariantNumeric: "tabular-nums", minWidth: "7ch", textAlign: "center" }}>
-                          {nextSlide ? fmtTime(secsUntilNext) : "—"}
+                    <div key="active" style={{ ...cardStyle }}>
+                      <div style={{ position: "absolute", inset: 0, background: "rgba(10,12,30,0.65)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4 }}>
+                        <p style={{ fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#fff", margin: 0, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", minWidth: "7ch", textAlign: "center" }}>{fmtTime(secsUntilNext)}</p>
+                        <p style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(200,210,255,0.75)", margin: 0, letterSpacing: "0.04em" }}>until</p>
+                        <p style={{ fontSize: "clamp(16px, 5vw, 22px)", fontWeight: 700, color: "#fff", margin: 0, textAlign: "center", padding: "0 clamp(16px, 5vw, 24px)" }}>
+                          {nextTitle.includes(" & ")
+                            ? <>{nextTitle.split(" & ")[0]}<br />{"& " + nextTitle.split(" & ").slice(1).join(" & ")}</>
+                            : nextTitle}
                         </p>
-                        {nextSlide && (
-                          <p style={{ color: "#1a1c1c", fontWeight: 700, fontSize: "clamp(11px, 3vw, 13px)", lineHeight: 1.2, textAlign: "center", margin: 0, padding: "0 clamp(16px, 5vw, 24px)" }}>
-                            <span style={{ color: "#1a1c1c", fontWeight: 500 }}>for </span>
-                            {nextSlide.title.includes(" & ")
-                              ? <>{nextSlide.title.split(" & ")[0]}<br />{"& " + nextSlide.title.split(" & ").slice(1).join(" & ")}</>
-                              : nextSlide.title}
-                          </p>
-                        )}
                       </div>
                     </div>
                   );
