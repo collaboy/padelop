@@ -1186,22 +1186,22 @@ export default function ProfilePage() {
         <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
 
           {/* ── Profile identity card ────────────────────────────────── */}
-          <div style={{ background: "#fff", borderRadius: 20, display: "flex", alignItems: "center", gap: 14, boxShadow: "0 2px 12px rgba(0,0,0,0.06)", padding: "12px 18px 12px 12px" }}>
-            <div style={{ flexShrink: 0, width: 80, height: 80, borderRadius: "50%", overflow: "hidden", background: profile.avatar ? "transparent" : "#f0f2f5", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ background: "#fff", borderRadius: 20, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, boxShadow: "0 2px 12px rgba(0,0,0,0.06)", padding: "20px 18px 18px" }}>
+            <div style={{ width: 80, height: 80, borderRadius: "50%", overflow: "hidden", background: profile.avatar ? "transparent" : "#f0f2f5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               {profile.avatar
                 // eslint-disable-next-line @next/next/no-img-element
                 ? <img src={profile.avatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 : <span style={{ fontSize: 24, fontWeight: 800, color: "#2653d4" }}>{initials(profile.name)}</span>}
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 1, flex: 1, minWidth: 0 }}>
-              <p style={{ margin: 0, fontSize: 19, fontWeight: 700, color: "#1a1c1c", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{profile.name || "Your Name"}</p>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+              <p style={{ margin: 0, fontSize: 19, fontWeight: 700, color: "#1a1c1c", textAlign: "center" }}>{profile.name || "Your Name"}</p>
               {(profile.level || profile.position) && (
-                <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#6b7480", lineHeight: 1.4 }}>
+                <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#6b7480", textAlign: "center" }}>
                   {[profile.level ? `Level ${profile.level}` : null, profile.position].filter(Boolean).join(" · ")}
                 </p>
               )}
-              {profile.hand         && <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#6b7480", lineHeight: 1.4 }}>{profile.hand}-handed</p>}
-              {profile.playingSince && <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#6b7480", lineHeight: 1.4 }}>Since {profile.playingSince}</p>}
+              {profile.hand         && <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#6b7480", textAlign: "center" }}>{profile.hand}-handed</p>}
+              {profile.playingSince && <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#6b7480", textAlign: "center" }}>Since {profile.playingSince}</p>}
             </div>
           </div>
 
