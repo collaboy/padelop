@@ -208,7 +208,7 @@ export default function Fab() {
                     <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
                   </button>
                   <button
-                    onClick={() => { setNavLoading("profile"); router.push("/profile?tab=profile"); }}
+                    onClick={() => { if (pathname.startsWith("/profile")) { setLogPickerOpen(false); return; } setNavLoading("profile"); router.push("/profile?tab=profile"); }}
                     className="active:scale-95 transition-transform"
                     style={{ background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
                   >
