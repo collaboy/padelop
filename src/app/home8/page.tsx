@@ -1116,8 +1116,8 @@ export default function Home8() {
                       {textureOverlay}
                       {/* Dark timer overlay — fades in after green flash */}
                       <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle, rgba(10,12,30,0.22) 0%, rgba(10,12,30,0.44) 65%, rgba(10,12,30,0.58) 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0, animation: justDone ? "fade-in 1.5s ease-out 1s both" : undefined }}>
-                        <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#fff", margin: 0, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", textAlign: "center", lineHeight: 1.05 }}>{fmtTime(secsUntilNext)}</p>
-                        <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 6 }}>
+                        <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#fff", margin: 0, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", textAlign: "center", lineHeight: 1.0 }}>{fmtTime(secsUntilNext)}</p>
+                        <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 2 }}>
                           <span style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(200,210,255,0.75)", letterSpacing: "0.04em" }}>until</span>
                           <span style={{ fontSize: "clamp(14px, 4vw, 17px)", fontWeight: 700, color: "#fff" }}>{nextTitle}</span>
                         </div>
