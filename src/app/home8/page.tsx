@@ -1112,19 +1112,19 @@ export default function Home8() {
                   const nextTitle = nextSlide.title === "Lunch" ? "Lunchtime" : nextSlide.title === "Dinner" ? "Dinnertime" : nextSlide.title;
 
                   return (
-                    <div key="done-card" style={{ ...cardStyle }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
+                    <div key="done-card" style={{ ...cardStyle, background: "#00A040" }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
                       {textureOverlay}
-                      {/* Timer — no overlay, text sits directly on green ball */}
-                      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 0, animation: justDone ? "fade-in 0.9s ease-out 1.1s both" : undefined }}>
+                      {/* Timer sits underneath the done flash, revealed as it fades out */}
+                      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
                         <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#000", margin: 0, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", textAlign: "center", lineHeight: 1.0, background: "#fff", padding: "2px 8px", borderRadius: 6 }}>{fmtTime(secsUntilNext)}</p>
                         <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 2 }}>
                           <span style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(0,0,0,0.55)", letterSpacing: "0.04em" }}>until</span>
                           <span style={{ fontSize: "clamp(14px, 4vw, 17px)", fontWeight: 700, color: "#000" }}>{nextTitle}</span>
                         </div>
                       </div>
-                      {/* Done flash: green overlay on top, fades out over 2s */}
+                      {/* Done flash: explicitly on top via z-index, fades out over 2s revealing timer */}
                       {justDone && (
-                        <div style={{ position: "absolute", inset: 0, background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, animation: "done-flash-out 2s ease-in forwards" }}>
+                        <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, animation: "done-flash-out 2s ease-in forwards" }}>
                           {textureOverlay}
                           <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M5 13l4 4L19 7" style={{ strokeDasharray: 30, strokeDashoffset: 30, animation: "draw-check 0.5s ease-out 0.1s forwards" }}/>
