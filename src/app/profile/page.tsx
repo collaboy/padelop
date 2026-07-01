@@ -1188,11 +1188,11 @@ export default function ProfilePage() {
           {/* ── Profile identity card ────────────────────────────────── */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "12px 18px 18px" }}>
             <div style={{ position: "relative", flexShrink: 0 }}>
-              <div style={{ width: 65, height: 65, borderRadius: "50%", overflow: "hidden", background: profile.avatar ? "transparent" : "#f0f2f5", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: 84, height: 84, borderRadius: "50%", overflow: "hidden", background: profile.avatar ? "transparent" : "#f0f2f5", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {profile.avatar
                   // eslint-disable-next-line @next/next/no-img-element
                   ? <img src={profile.avatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  : <span style={{ fontSize: 22, fontWeight: 800, color: "#2653d4" }}>{initials(profile.name)}</span>}
+                  : <span style={{ fontSize: 30, fontWeight: 800, color: "#2653d4" }}>{initials(profile.name)}</span>}
               </div>
               <button onClick={() => togglePanel('profileCircle')} style={{ position: "absolute", top: -2, right: -2, width: 20, height: 20, borderRadius: "50%", background: "#8a9096", border: "2px solid #f4f4f6", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}>
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1201,14 +1201,14 @@ export default function ProfilePage() {
               </button>
             </div>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
-              <p style={{ margin: 0, fontSize: 19, fontWeight: 700, color: "#1a1c1c", textAlign: "center", lineHeight: 1.2 }}>{profile.name || "Your Name"}</p>
+              <p style={{ margin: 0, fontSize: "clamp(20px, 5.1vw, 25px)", fontWeight: 700, color: "#1a1c1c", textAlign: "center", lineHeight: 1.2 }}>{profile.name || "Your Name"}</p>
               {(profile.level || profile.position) && (
-                <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#6b7480", textAlign: "center", lineHeight: 1.3 }}>
+                <p style={{ margin: 0, fontSize: "clamp(15px, 3.8vw, 18px)", fontWeight: 500, color: "#6b7480", textAlign: "center", lineHeight: 1.3 }}>
                   {[profile.level ? `Level ${profile.level}` : null, profile.position].filter(Boolean).join(" · ")}
                 </p>
               )}
-              {profile.hand         && <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#6b7480", textAlign: "center", lineHeight: 1.3 }}>{profile.hand}-handed</p>}
-              {profile.playingSince && <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#6b7480", textAlign: "center", lineHeight: 1.3 }}>Since {profile.playingSince}</p>}
+              {profile.hand         && <p style={{ margin: 0, fontSize: "clamp(15px, 3.8vw, 18px)", fontWeight: 500, color: "#6b7480", textAlign: "center", lineHeight: 1.3 }}>{profile.hand}-handed</p>}
+              {profile.playingSince && <p style={{ margin: 0, fontSize: "clamp(15px, 3.8vw, 18px)", fontWeight: 500, color: "#6b7480", textAlign: "center", lineHeight: 1.3 }}>Since {profile.playingSince}</p>}
             </div>
           </div>
           {profileCirclePanelOpen && (
