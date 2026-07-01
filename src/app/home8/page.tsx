@@ -1114,15 +1114,13 @@ export default function Home8() {
                   // Dark overlay is always the base; done flash fades out on top
                   return (
                     <div key="done-card" style={{ ...cardStyle }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
-                      {/* Base: dark veil countdown — fades in over 2s to cross-fade with the green flash */}
-                      <div style={{ position: "absolute", inset: 0, background: "rgba(10,12,30,0.65)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, animation: justDone ? "fade-in 1.5s ease-out 1s both" : undefined }}>
-                        <p style={{ fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#fff", margin: 0, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", minWidth: "7ch", textAlign: "center" }}>{fmtTime(secsUntilNext)}</p>
-                        <p style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(200,210,255,0.75)", margin: 0, letterSpacing: "0.04em" }}>until</p>
-                        <p style={{ fontSize: "clamp(16px, 5vw, 22px)", fontWeight: 700, color: "#fff", margin: 0, textAlign: "center", padding: "0 clamp(16px, 5vw, 24px)" }}>
-                          {nextTitle.includes(" & ")
-                            ? <>{nextTitle.split(" & ")[0]}<br />{"& " + nextTitle.split(" & ").slice(1).join(" & ")}</>
-                            : nextTitle}
-                        </p>
+                      {/* Base: dark veil countdown — fades in over 1.5s after 1s delay */}
+                      <div style={{ position: "absolute", inset: 0, background: "rgba(10,12,30,0.65)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0, animation: justDone ? "fade-in 1.5s ease-out 1s both" : undefined }}>
+                        <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#fff", margin: 0, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", textAlign: "center", lineHeight: 1.05 }}>{fmtTime(secsUntilNext)}</p>
+                        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", width: "calc(100% - clamp(28px, 8vw, 40px))", marginTop: 6 }}>
+                          <span style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(200,210,255,0.75)", letterSpacing: "0.04em", flexShrink: 0 }}>until</span>
+                          <span style={{ fontSize: "clamp(14px, 4vw, 17px)", fontWeight: 700, color: "#fff", textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "72%" }}>{nextTitle}</span>
+                        </div>
                       </div>
                       {/* Done flash: green overlay on top, fades out over 2s */}
                       {justDone && (
