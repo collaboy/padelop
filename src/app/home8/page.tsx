@@ -1527,8 +1527,9 @@ export default function Home8() {
                       <div className="flex flex-col pt-4">
                         <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#8a9096" }}>{detail.focus}</p>
                         {detail.options.map((meal, i) => (
-                          <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "6px 0" }}>
-                            <p style={{ margin: 0, fontSize: 16, fontWeight: 500, color: "#1a1c1c", lineHeight: 1.4 }}>{meal.title}</p>
+                          <div key={i} className="flex flex-col p-3">
+                            <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: "#1a1c1c", lineHeight: 1.3 }}>{meal.title}</p>
+                            {meal.detail && <p style={{ margin: "3px 0 0", fontSize: 13, color: "#6b7480", lineHeight: 1.45 }}>{meal.detail}</p>}
                           </div>
                         ))}
                       </div>
