@@ -1112,29 +1112,29 @@ export default function Home8() {
                   const nextTitle = nextSlide.title === "Lunch" ? "Lunchtime" : nextSlide.title === "Dinner" ? "Dinnertime" : nextSlide.title;
 
                   return (
-                    <div key="done-card" style={{ ...cardStyle, background: "#2a4438" }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
+                    <div key="done-card" style={{ ...cardStyle }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
                       {textureOverlay}
-                      {/* Timer at true circle centre; label floats above it */}
-                      <div style={{ position: "absolute", inset: 0, zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+
+                      {/* Timer layer — beneath flash, fades in as flash fades out */}
+                      <div style={{ position: "absolute", inset: 0, zIndex: 1, display: "flex", alignItems: "center", justifyContent: "center", animation: justDone ? "fade-in 0.9s ease-out 1.1s both" : undefined }}>
                         <div style={{ position: "relative" }}>
                           <div style={{ position: "absolute", bottom: "100%", left: 0, right: 0, display: "flex", justifyContent: "center", alignItems: "baseline", gap: 5, paddingBottom: 5 }}>
-                            <span style={{ fontSize: "clamp(14px, 4vw, 17px)", fontWeight: 700, color: "#fff" }}>{nextTitle}</span>
-                            <span style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(255,255,255,0.55)", letterSpacing: "0.04em" }}>in</span>
+                            <span style={{ fontSize: "clamp(14px, 4vw, 17px)", fontWeight: 700, color: "#1a1c1c" }}>{nextTitle}</span>
+                            <span style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(0,0,0,0.45)", letterSpacing: "0.04em" }}>in</span>
                           </div>
-                          <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#000", margin: 0, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", textAlign: "center", lineHeight: 1.0, background: "#fff", padding: "2px 8px", borderRadius: 6 }}>{fmtTime(secsUntilNext)}</p>
+                          <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", margin: 0, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", textAlign: "center", lineHeight: 1.0, background: "#fff", padding: "2px 8px", borderRadius: 6 }}>{fmtTime(secsUntilNext)}</p>
                         </div>
                       </div>
-                      {/* Done flash: explicitly on top via z-index, fades out over 2s revealing timer */}
-                      {justDone && (
-                        <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, animation: "done-flash-out 2s ease-in forwards" }}>
-                          {textureOverlay}
-                          <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M5 13l4 4L19 7" style={{ strokeDasharray: 30, strokeDashoffset: 30, animation: "draw-check 0.5s ease-out 0.1s forwards" }}/>
-                          </svg>
-                          <p style={{ fontSize: "clamp(22px, 7vw, 30px)", fontWeight: 800, color: "#1a1c1c", margin: 0, letterSpacing: "-0.02em", background: "#fff", padding: "3px 8px", borderRadius: 4 }}>{completedTitle}</p>
-                          <p style={{ fontSize: "clamp(13px, 4vw, 17px)", fontWeight: 700, color: "#1a1c1c", margin: 0, letterSpacing: "0.04em" }}>Done</p>
-                        </div>
-                      )}
+
+                      {/* Done flash — on top, cross-fades out into timer */}
+                      <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, opacity: justDone ? undefined : 0, animation: justDone ? "done-flash-out 2s ease-in forwards" : undefined }}>
+                        {textureOverlay}
+                        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M5 13l4 4L19 7" style={{ strokeDasharray: 30, strokeDashoffset: 30, animation: justDone ? "draw-check 0.5s ease-out 0.1s forwards" : undefined }}/>
+                        </svg>
+                        <p style={{ fontSize: "clamp(22px, 7vw, 30px)", fontWeight: 800, color: "#1a1c1c", margin: 0, letterSpacing: "-0.02em", background: "#fff", padding: "3px 8px", borderRadius: 4 }}>{completedTitle}</p>
+                        <p style={{ fontSize: "clamp(13px, 4vw, 17px)", fontWeight: 700, color: "#1a1c1c", margin: 0, letterSpacing: "0.04em" }}>Done</p>
+                      </div>
                     </div>
                   );
                 }
