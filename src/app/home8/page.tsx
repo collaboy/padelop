@@ -1111,10 +1111,23 @@ export default function Home8() {
                   const completedTitle = s.title === "Lunch" ? "Lunchtime" : s.title === "Dinner" ? "Dinnertime" : s.title;
                   const nextTitle = nextSlide.title === "Lunch" ? "Lunchtime" : nextSlide.title === "Dinner" ? "Dinnertime" : nextSlide.title;
 
-                  // Dark overlay is always the base; done flash fades out on top
                   return (
                     <div key="done-card" style={{ ...cardStyle }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
-                      {/* Base: dark veil countdown — fades in over 1.5s after 1s delay */}
+                      {textureOverlay}
+                      {/* Next task content — dimmed behind the overlay for depth */}
+                      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: 0.2, pointerEvents: "none" }}>
+                        <p className="text-[14px] tracking-wide leading-none" style={{ color: "#000", fontWeight: 600, background: "#fff", padding: 4, borderRadius: 4 }}>Do this now</p>
+                        <p style={{ color: "#000", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, background: "#fff", padding: "3px 6px", borderRadius: 4, display: "inline-block", textAlign: "center", margin: 0 }}>
+                          {nextTitle.includes(" & ")
+                            ? <>{nextTitle.split(" & ")[0]}<br />{"& " + nextTitle.split(" & ").slice(1).join(" & ")}</>
+                            : nextTitle}
+                        </p>
+                        <button className="mt-2 font-semibold px-4 py-1.5 rounded-full flex items-center gap-1.5" style={{ background: `${nextSlide.color}40`, color: "#fff", fontSize: "clamp(13px, 4vw, 18px)", border: "none" }}>
+                          Show me
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><path d="M15 6l6 6-6 6"/></svg>
+                        </button>
+                      </div>
+                      {/* Dark timer overlay — fades in after green flash */}
                       <div style={{ position: "absolute", inset: 0, background: "rgba(10,12,30,0.65)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0, animation: justDone ? "fade-in 1.5s ease-out 1s both" : undefined }}>
                         <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#fff", margin: 0, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", textAlign: "center", lineHeight: 1.05 }}>{fmtTime(secsUntilNext)}</p>
                         <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 6 }}>
