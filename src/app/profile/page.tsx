@@ -1180,7 +1180,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <><div className="w-full pb-6" style={{ background: "#f2f3f5", minHeight: "100dvh", position: "relative", backgroundImage: "url('/padel-court-bg.png')", backgroundRepeat: "no-repeat", backgroundPosition: "bottom center", backgroundSize: "100% auto" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
+    <><div className="w-full pb-6" style={{ backgroundColor: "#f2f3f5", minHeight: "100dvh", position: "relative", backgroundImage: "linear-gradient(rgba(242,243,245,0.88), rgba(242,243,245,0.88)), url('/padel-court-top.png'), url('/padel-court-bg.png')", backgroundRepeat: "no-repeat, no-repeat, no-repeat", backgroundPosition: "center, center, bottom center", backgroundSize: "cover, cover, 100% auto" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
       {/* Home — top left */}
       <button
         onClick={() => router.push("/home8")}
