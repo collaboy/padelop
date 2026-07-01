@@ -1186,12 +1186,19 @@ export default function ProfilePage() {
         <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
 
           {/* ── Profile identity card ────────────────────────────────── */}
-          <div onClick={() => togglePanel('profileCircle')} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "12px 18px 18px", cursor: "pointer" }}>
-            <div style={{ width: 50, height: 50, borderRadius: "50%", overflow: "hidden", background: profile.avatar ? "transparent" : "#f0f2f5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              {profile.avatar
-                // eslint-disable-next-line @next/next/no-img-element
-                ? <img src={profile.avatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                : <span style={{ fontSize: 24, fontWeight: 800, color: "#2653d4" }}>{initials(profile.name)}</span>}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "12px 18px 18px" }}>
+            <div style={{ position: "relative", flexShrink: 0 }}>
+              <div style={{ width: 55, height: 55, borderRadius: "50%", overflow: "hidden", background: profile.avatar ? "transparent" : "#f0f2f5", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {profile.avatar
+                  // eslint-disable-next-line @next/next/no-img-element
+                  ? <img src={profile.avatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  : <span style={{ fontSize: 22, fontWeight: 800, color: "#2653d4" }}>{initials(profile.name)}</span>}
+              </div>
+              <button onClick={() => togglePanel('profileCircle')} style={{ position: "absolute", top: -2, right: -2, width: 20, height: 20, borderRadius: "50%", background: "#2653d4", border: "2px solid #f4f4f6", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
             </div>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
               <p style={{ margin: 0, fontSize: 19, fontWeight: 700, color: "#1a1c1c", textAlign: "center", lineHeight: 1.2 }}>{profile.name || "Your Name"}</p>
