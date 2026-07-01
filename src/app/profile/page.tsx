@@ -1185,6 +1185,23 @@ export default function ProfilePage() {
       {/* ── Profile ──────────────────────────────────────────────────────── */}
         <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
 
+          {/* ── Profile identity card ────────────────────────────────── */}
+          <div style={{ background: "#fff", borderRadius: 20, padding: "16px 18px", display: "flex", alignItems: "center", gap: 16, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+            <div style={{ width: 72, height: 72, borderRadius: 16, overflow: "hidden", flexShrink: 0, background: "#f0f2f5", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {profile.avatar
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img src={profile.avatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                : <span style={{ fontSize: 24, fontWeight: 800, color: "#2653d4" }}>{initials(profile.name)}</span>}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 3, flex: 1, minWidth: 0 }}>
+              <p style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#1a1c1c", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{profile.name || "Your Name"}</p>
+              {profile.level       && <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#6b7480" }}>Level {profile.level}</p>}
+              {profile.position    && <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#6b7480" }}>{profile.position}</p>}
+              {profile.hand        && <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#6b7480" }}>{profile.hand}-handed</p>}
+              {profile.playingSince && <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#6b7480" }}>Since {profile.playingSince}</p>}
+            </div>
+          </div>
+
           {/* ── Green card: big profile circle only ──────────────────── */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
           {/* ── Big profile circle ─────────────────────────────────── */}
