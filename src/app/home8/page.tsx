@@ -1115,13 +1115,17 @@ export default function Home8() {
                     <div key="done-card" style={{ ...cardStyle }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
                       {textureOverlay}
 
-                      {/* Timer layer — plain column so it centres at same Y as done flash */}
-                      <div style={{ position: "absolute", inset: 0, zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, animation: justDone ? "fade-in 0.9s ease-out 1.1s both" : undefined }}>
-                        <div style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
+                      {/* Timer layer — 3 rows matching done flash slot heights exactly */}
+                      <div style={{ position: "absolute", inset: 0, zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, animation: justDone ? "fade-in 0.9s ease-out 1.1s both" : undefined }}>
+                        {/* Row 1: same height as checkmark SVG (38px) */}
+                        <div style={{ height: 38, display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
                           <span style={{ fontSize: "clamp(14px, 4vw, 17px)", fontWeight: 700, color: "#1a1c1c" }}>{nextTitle}</span>
                           <span style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(0,0,0,0.45)", letterSpacing: "0.04em" }}>in</span>
                         </div>
-                        <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#1a1c1c", margin: 0, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", textAlign: "center", lineHeight: 1.0, background: "#fff", padding: "3px 8px", borderRadius: 6 }}>{fmtTime(secsUntilNext)}</p>
+                        {/* Row 2: same font + padding as Breakfast pill → same height */}
+                        <p style={{ fontSize: "clamp(22px, 7vw, 30px)", fontWeight: 800, color: "#1a1c1c", margin: 0, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", textAlign: "center", lineHeight: 1.2, background: "#fff", padding: "3px 8px", borderRadius: 4 }}>{fmtTime(secsUntilNext)}</p>
+                        {/* Row 3: invisible spacer matching "Done" text height */}
+                        <p style={{ fontSize: "clamp(13px, 4vw, 17px)", margin: 0, color: "transparent" }} aria-hidden>Done</p>
                       </div>
 
                       {/* Done flash — on top, cross-fades out into timer */}
