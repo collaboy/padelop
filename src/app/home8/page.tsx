@@ -1117,8 +1117,8 @@ export default function Home8() {
 
                       {/* Timer layer — 3 rows matching done flash slot heights exactly */}
                       <div style={{ position: "absolute", inset: 0, zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, animation: justDone ? "fade-in 0.9s ease-out 1.1s both" : undefined }}>
-                        {/* Row 1: same height as checkmark SVG (38px), settles toward timer after fade */}
-                        <div style={{ height: 38, display: "flex", alignItems: "center", justifyContent: "center", gap: 5, animation: "label-settle 0.5s ease-out 2.3s both" }}>
+                        {/* Row 1: same height as checkmark SVG (38px) */}
+                        <div style={{ height: 38, display: "flex", alignItems: "flex-end", justifyContent: "center", gap: 5 }}>
                           <span style={{ fontSize: "clamp(14px, 4vw, 17px)", fontWeight: 700, color: "#1a1c1c" }}>{nextTitle}</span>
                           <span style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(0,0,0,0.45)", letterSpacing: "0.04em" }}>in</span>
                         </div>
