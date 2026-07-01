@@ -1188,7 +1188,7 @@ export default function ProfilePage() {
           {/* ── Profile identity card ────────────────────────────────── */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "12px 18px 18px" }}>
             <div style={{ position: "relative", flexShrink: 0 }}>
-              <div style={{ width: 55, height: 55, borderRadius: "50%", overflow: "hidden", background: profile.avatar ? "transparent" : "#f0f2f5", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: 65, height: 65, borderRadius: "50%", overflow: "hidden", background: profile.avatar ? "transparent" : "#f0f2f5", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {profile.avatar
                   // eslint-disable-next-line @next/next/no-img-element
                   ? <img src={profile.avatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
