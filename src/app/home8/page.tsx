@@ -1113,9 +1113,9 @@ export default function Home8() {
 
                   // Dark overlay is always the base; done flash fades out on top
                   return (
-                    <div key="active" style={{ ...cardStyle }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
-                      {/* Base: dark veil countdown */}
-                      <div style={{ position: "absolute", inset: 0, background: "rgba(10,12,30,0.65)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4 }}>
+                    <div key="done-card" style={{ ...cardStyle }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
+                      {/* Base: dark veil countdown — fades in over 2s to cross-fade with the green flash */}
+                      <div style={{ position: "absolute", inset: 0, background: "rgba(10,12,30,0.65)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, animation: justDone ? "fade-in 2s ease-out both" : undefined }}>
                         <p style={{ fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#fff", margin: 0, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", minWidth: "7ch", textAlign: "center" }}>{fmtTime(secsUntilNext)}</p>
                         <p style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(200,210,255,0.75)", margin: 0, letterSpacing: "0.04em" }}>until</p>
                         <p style={{ fontSize: "clamp(16px, 5vw, 22px)", fontWeight: 700, color: "#fff", margin: 0, textAlign: "center", padding: "0 clamp(16px, 5vw, 24px)" }}>
@@ -1128,7 +1128,9 @@ export default function Home8() {
                       {justDone && (
                         <div style={{ position: "absolute", inset: 0, background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, animation: "done-flash-out 2s ease-in forwards" }}>
                           {textureOverlay}
-                          <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ strokeDasharray: 30, strokeDashoffset: 30, animation: "draw-check 0.5s ease-out 0.1s forwards" }}><path d="M5 13l4 4L19 7"/></svg>
+                          <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M5 13l4 4L19 7" style={{ strokeDasharray: 30, strokeDashoffset: 30, animation: "draw-check 0.5s ease-out 0.1s forwards" }}/>
+                          </svg>
                           <p style={{ fontSize: "clamp(22px, 7vw, 30px)", fontWeight: 800, color: "#1a1c1c", margin: 0, letterSpacing: "-0.02em", background: "#fff", padding: "3px 8px", borderRadius: 4 }}>{completedTitle}</p>
                           <p style={{ fontSize: "clamp(13px, 4vw, 17px)", fontWeight: 700, color: "#1a1c1c", margin: 0, letterSpacing: "0.04em" }}>Done</p>
                         </div>
