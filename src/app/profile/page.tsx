@@ -1186,7 +1186,7 @@ export default function ProfilePage() {
         <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
 
           {/* ── Profile identity card ────────────────────────────────── */}
-          <div style={{ background: "#fff", borderRadius: 20, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, boxShadow: "0 2px 12px rgba(0,0,0,0.06)", padding: "20px 18px 18px" }}>
+          <div onClick={() => togglePanel('profileCircle')} style={{ background: "#fff", borderRadius: 20, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, boxShadow: "0 2px 12px rgba(0,0,0,0.06)", padding: "20px 18px 18px", cursor: "pointer" }}>
             <div style={{ width: 80, height: 80, borderRadius: "50%", overflow: "hidden", background: profile.avatar ? "transparent" : "#f0f2f5", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               {profile.avatar
                 // eslint-disable-next-line @next/next/no-img-element
@@ -1204,48 +1204,6 @@ export default function ProfilePage() {
               {profile.playingSince && <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#6b7480", textAlign: "center" }}>Since {profile.playingSince}</p>}
             </div>
           </div>
-
-          {/* ── Green card: big profile circle only ──────────────────── */}
-          {/* ── Big profile circle ─────────────────────────────────── */}
-          <button onClick={() => togglePanel('profileCircle')} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "block" }}>
-            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-              <defs>
-                <clipPath id="pc_big_imgClip"><circle cx="100" cy="100" r="65" /></clipPath>
-                <path id="pc_big_nameArc"   d="M 34,62  A 76,76 0 0,1 166,62" />
-                <path id="pc_big_bottomArc" d="M 25,113 A 76,76 0 0,0 175,113" />
-              </defs>
-              {/* Green ball */}
-              <circle cx="100" cy="100" r="100" fill="#00D455" />
-              {profile.avatar ? (
-                <image href={profile.avatar} x="35" y="35" width="130" height="130"
-                  clipPath="url(#pc_big_imgClip)" preserveAspectRatio="xMidYMid slice" />
-              ) : (
-                <>
-                  <circle cx="100" cy="100" r="65" fill="#2653d4" />
-                  <text x="100" y="108" textAnchor="middle" fontSize="28" fontWeight="800"
-                    fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif">{initials(profile.name)}</text>
-                </>
-              )}
-              {(() => {
-                const n = (profile.name || "YOUR NAME").toUpperCase();
-                const fs = n.length <= 8 ? 18 : n.length <= 12 ? 15 : n.length <= 16 ? 12 : 10;
-                const ls = n.length <= 8 ? "1.5" : "0.5";
-                return (
-                  <text fontSize={fs} fontWeight="700" letterSpacing={ls} fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dominantBaseline="middle" dy="0">
-                    <textPath href="#pc_big_nameArc" startOffset="50%" textAnchor="middle">{n}</textPath>
-                  </text>
-                );
-              })()}
-              {(profile.level || profile.position || profile.hand || profile.playingSince) && (
-                <text fontSize="11" fontWeight="600" letterSpacing="0.3" fill="white" fontFamily="-apple-system, BlinkMacSystemFont, sans-serif" dominantBaseline="middle">
-                  <textPath href="#pc_big_bottomArc" startOffset="50%" textAnchor="middle">
-                    {[profile.level ? `LVL ${profile.level}` : null, profile.position, profile.hand, profile.playingSince].filter(Boolean).join(" · ").toUpperCase()}
-                  </textPath>
-                </text>
-              )}
-            </svg>
-          </button>
-          {/* ── End green card ──────────────────────────────────────── */}
           {profileCirclePanelOpen && (
             <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
               <div style={{ padding: "18px 18px 16px" }}>
