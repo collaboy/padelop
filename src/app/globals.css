@@ -233,6 +233,8 @@ body {
 @keyframes done-breathe { 0%, 100% { border-color: rgba(0,212,85,0.3); } 50% { border-color: rgba(0,212,85,0.9); } }
 .animate-done-breathe { animation: done-breathe 3s ease-in-out infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+@keyframes draw-check { from { stroke-dashoffset: 30; } to { stroke-dashoffset: 0; } }
+@keyframes done-flash-out { 0%, 55% { opacity: 1; } 100% { opacity: 0; } }
 
 /* Root: no animation (background stays put) */
 ::view-transition-old(root),

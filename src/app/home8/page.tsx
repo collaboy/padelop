@@ -1111,21 +1111,10 @@ export default function Home8() {
                   const completedTitle = s.title === "Lunch" ? "Lunchtime" : s.title === "Dinner" ? "Dinnertime" : s.title;
                   const nextTitle = nextSlide.title === "Lunch" ? "Lunchtime" : nextSlide.title === "Dinner" ? "Dinnertime" : nextSlide.title;
 
-                  // 2-second done flash: green ball + checkmark + completed task name
-                  if (justDone) return (
-                    <div key="active" className="animate-bounce-in" style={{ ...cardStyle }}>
-                      {textureOverlay}
-                      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
-                        <p style={{ fontSize: "clamp(22px, 7vw, 30px)", fontWeight: 800, color: "#1a1c1c", margin: 0, letterSpacing: "-0.02em", background: "#fff", padding: "3px 8px", borderRadius: 4 }}>{completedTitle}</p>
-                        <p style={{ fontSize: "clamp(13px, 4vw, 17px)", fontWeight: 700, color: "#1a1c1c", margin: 0, letterSpacing: "0.04em" }}>Done</p>
-                      </div>
-                    </div>
-                  );
-
-                  // Dark overlay countdown: green ball underneath, veil on top
+                  // Dark overlay is always the base; done flash fades out on top
                   return (
                     <div key="active" style={{ ...cardStyle }}>
+                      {/* Base: dark veil countdown */}
                       <div style={{ position: "absolute", inset: 0, background: "rgba(10,12,30,0.65)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4 }}>
                         <p style={{ fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#fff", margin: 0, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", minWidth: "7ch", textAlign: "center" }}>{fmtTime(secsUntilNext)}</p>
                         <p style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(200,210,255,0.75)", margin: 0, letterSpacing: "0.04em" }}>until</p>
@@ -1135,6 +1124,15 @@ export default function Home8() {
                             : nextTitle}
                         </p>
                       </div>
+                      {/* Done flash: green overlay on top, fades out over 2s */}
+                      {justDone && (
+                        <div style={{ position: "absolute", inset: 0, background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, animation: "done-flash-out 2s ease-in forwards" }}>
+                          {textureOverlay}
+                          <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ strokeDasharray: 30, strokeDashoffset: 30, animation: "draw-check 0.5s ease-out 0.1s forwards" }}><path d="M5 13l4 4L19 7"/></svg>
+                          <p style={{ fontSize: "clamp(22px, 7vw, 30px)", fontWeight: 800, color: "#1a1c1c", margin: 0, letterSpacing: "-0.02em", background: "#fff", padding: "3px 8px", borderRadius: 4 }}>{completedTitle}</p>
+                          <p style={{ fontSize: "clamp(13px, 4vw, 17px)", fontWeight: 700, color: "#1a1c1c", margin: 0, letterSpacing: "0.04em" }}>Done</p>
+                        </div>
+                      )}
                     </div>
                   );
                 }
