@@ -236,6 +236,7 @@ body {
 @keyframes draw-check { from { stroke-dashoffset: 30; } to { stroke-dashoffset: 0; } }
 @keyframes done-flash-out { 0%, 55% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes label-settle { from { transform: translateY(0); } to { transform: translateY(8px); } }
 
 /* Root: no animation (background stays put) */
 ::view-transition-old(root),
