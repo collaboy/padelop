@@ -200,7 +200,7 @@ body {
 /* View transition name helpers */
 .vt-header       { view-transition-name: vt-header; }
 .vt-footer       { view-transition-name: vt-footer; }
-.vt-page-content { view-transition-name: vt-page-content; background: #fff; }
+.vt-page-content { view-transition-name: vt-page-content; background: #f2f3f5; }
 
 /* Swipe page transitions — content area only */
 
