@@ -1115,7 +1115,7 @@ export default function Home8() {
                   return (
                     <div key="done-card" style={{ ...cardStyle }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
                       {/* Base: dark veil countdown — fades in over 2s to cross-fade with the green flash */}
-                      <div style={{ position: "absolute", inset: 0, background: "rgba(10,12,30,0.65)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, animation: justDone ? "fade-in 2s ease-out both" : undefined }}>
+                      <div style={{ position: "absolute", inset: 0, background: "rgba(10,12,30,0.65)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, animation: justDone ? "fade-in 1.5s ease-out 1s both" : undefined }}>
                         <p style={{ fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#fff", margin: 0, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", minWidth: "7ch", textAlign: "center" }}>{fmtTime(secsUntilNext)}</p>
                         <p style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(200,210,255,0.75)", margin: 0, letterSpacing: "0.04em" }}>until</p>
                         <p style={{ fontSize: "clamp(16px, 5vw, 22px)", fontWeight: 700, color: "#fff", margin: 0, textAlign: "center", padding: "0 clamp(16px, 5vw, 24px)" }}>
