@@ -1193,15 +1193,15 @@ export default function ProfilePage() {
                 ? <img src={profile.avatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 : <span style={{ fontSize: 24, fontWeight: 800, color: "#2653d4" }}>{initials(profile.name)}</span>}
             </div>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-              <p style={{ margin: 0, fontSize: 19, fontWeight: 700, color: "#1a1c1c", textAlign: "center" }}>{profile.name || "Your Name"}</p>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
+              <p style={{ margin: 0, fontSize: 19, fontWeight: 700, color: "#1a1c1c", textAlign: "center", lineHeight: 1.2 }}>{profile.name || "Your Name"}</p>
               {(profile.level || profile.position) && (
-                <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#6b7480", textAlign: "center" }}>
+                <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#6b7480", textAlign: "center", lineHeight: 1.3 }}>
                   {[profile.level ? `Level ${profile.level}` : null, profile.position].filter(Boolean).join(" · ")}
                 </p>
               )}
-              {profile.hand         && <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#6b7480", textAlign: "center" }}>{profile.hand}-handed</p>}
-              {profile.playingSince && <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#6b7480", textAlign: "center" }}>Since {profile.playingSince}</p>}
+              {profile.hand         && <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#6b7480", textAlign: "center", lineHeight: 1.3 }}>{profile.hand}-handed</p>}
+              {profile.playingSince && <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "#6b7480", textAlign: "center", lineHeight: 1.3 }}>Since {profile.playingSince}</p>}
             </div>
           </div>
           {profileCirclePanelOpen && (
