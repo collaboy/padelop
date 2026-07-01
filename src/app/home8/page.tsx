@@ -1115,7 +1115,7 @@ export default function Home8() {
                     <div key="done-card" style={{ ...cardStyle }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
                       {textureOverlay}
                       {/* Timer — no overlay, text sits directly on green ball */}
-                      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 0, animation: justDone ? "fade-in 1.5s ease-out 1s both" : undefined }}>
+                      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 0, animation: justDone ? "fade-in 0.9s ease-out 1.1s both" : undefined }}>
                         <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#000", margin: 0, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", textAlign: "center", lineHeight: 1.0, background: "#fff", padding: "2px 8px", borderRadius: 6 }}>{fmtTime(secsUntilNext)}</p>
                         <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 2 }}>
                           <span style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(0,0,0,0.55)", letterSpacing: "0.04em" }}>until</span>
