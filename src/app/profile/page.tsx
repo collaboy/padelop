@@ -1181,6 +1181,14 @@ export default function ProfilePage() {
 
   return (
     <><div className="w-full pb-6" style={{ background: "#f2f3f5", minHeight: "100dvh", position: "relative" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
+      {/* Home — top left */}
+      <button
+        onClick={() => router.push("/home8")}
+        style={{ position: "absolute", top: 14, left: 14, background: "none", border: "none", cursor: "pointer", padding: 8, display: "flex", alignItems: "center", zIndex: 10 }}
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9.5z"/><polyline points="9 21 9 12 15 12 15 21"/></svg>
+      </button>
+
       {/* Settings — top right */}
       <button
         onClick={() => { setNavLoading("settings"); router.push("/settings"); }}
