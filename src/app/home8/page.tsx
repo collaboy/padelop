@@ -1112,15 +1112,15 @@ export default function Home8() {
                   const nextTitle = nextSlide.title === "Lunch" ? "Lunchtime" : nextSlide.title === "Dinner" ? "Dinnertime" : nextSlide.title;
 
                   return (
-                    <div key="done-card" style={{ ...cardStyle, background: "#00A040" }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
+                    <div key="done-card" style={{ ...cardStyle, background: "#2a4438" }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
                       {textureOverlay}
                       {/* Timer sits underneath the done flash, revealed as it fades out */}
                       <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
-                        <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#000", margin: 0, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", textAlign: "center", lineHeight: 1.0, background: "#fff", padding: "2px 8px", borderRadius: 6 }}>{fmtTime(secsUntilNext)}</p>
-                        <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 2 }}>
-                          <span style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(0,0,0,0.55)", letterSpacing: "0.04em" }}>until</span>
-                          <span style={{ fontSize: "clamp(14px, 4vw, 17px)", fontWeight: 700, color: "#000" }}>{nextTitle}</span>
+                        <div style={{ display: "flex", alignItems: "baseline", gap: 5, marginBottom: 4 }}>
+                          <span style={{ fontSize: "clamp(14px, 4vw, 17px)", fontWeight: 700, color: "#fff" }}>{nextTitle}</span>
+                          <span style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(255,255,255,0.55)", letterSpacing: "0.04em" }}>in</span>
                         </div>
+                        <p style={{ fontSize: "clamp(26px, 7vw, 34px)", fontWeight: 800, color: "#000", margin: 0, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", textAlign: "center", lineHeight: 1.0, background: "#fff", padding: "2px 8px", borderRadius: 6 }}>{fmtTime(secsUntilNext)}</p>
                       </div>
                       {/* Done flash: explicitly on top via z-index, fades out over 2s revealing timer */}
                       {justDone && (
