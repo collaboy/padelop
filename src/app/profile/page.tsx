@@ -1176,7 +1176,7 @@ export default function ProfilePage() {
     const dx = e.changedTouches[0].clientX - swipeStartX.current;
     const dy = e.changedTouches[0].clientY - swipeStartY.current;
     if (Math.abs(dx) < 60 || Math.abs(dy) > Math.abs(dx) * 0.8) return;
-    if (dx < -80) { router.push("/home8"); return; }
+    if (dx > 80) { router.push("/home8"); return; }
   }
 
   return (
