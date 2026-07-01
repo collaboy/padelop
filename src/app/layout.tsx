@@ -3,7 +3,6 @@ import { Geist } from "next/font/google";
 import { Hanken_Grotesk } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
-import BottomNav from "@/components/bottom-nav";
 import SwipeNav from "@/components/swipe-nav";
 import WeekPlanModal from "@/components/week-plan-modal";
 import Fab from "@/components/fab";
@@ -41,12 +40,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
         <div className="mx-auto w-full max-w-[480px] flex flex-col min-h-full">
           <SwipeNav>
-            <main className="vt-page-content flex-1 pb-16">
+            <main className="vt-page-content flex-1">
               {children}
             </main>
           </SwipeNav>
-          <BottomNav />
-          <Fab />
+<Fab />
           <WeekPlanModal />
           <Analytics />
         </div>
