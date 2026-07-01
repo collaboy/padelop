@@ -1112,7 +1112,7 @@ export default function Home8() {
                   const nextTitle = nextSlide.title === "Lunch" ? "Lunchtime" : nextSlide.title === "Dinner" ? "Dinnertime" : nextSlide.title;
 
                   return (
-                    <div key="done-card" className="animate-circle-breathe" style={{ ...cardStyle, background: "#e8e9ea" }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
+                    <div key="done-card" className="animate-circle-breathe" style={{ ...cardStyle, background: "#c8cacc" }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
                       {textureOverlay}
 
                       {/* Timer layer — 3 rows matching done flash slot heights exactly */}
