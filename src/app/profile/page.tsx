@@ -1207,7 +1207,7 @@ export default function ProfilePage() {
 
           {/* ── Green card: big profile circle only ──────────────────── */}
           {/* ── Big profile circle ─────────────────────────────────── */}
-          <button onClick={() => togglePanel('profileCircle')} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", width: "100%", display: "block" }}>
+          <button onClick={() => togglePanel('profileCircle')} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "block" }}>
             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
               <defs>
                 <clipPath id="pc_big_imgClip"><circle cx="100" cy="100" r="59" /></clipPath>
