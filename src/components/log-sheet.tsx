@@ -32,6 +32,7 @@ interface Props {
   onClose: () => void;
   defaultSub?: Sub;
   startWizard?: boolean;
+  previewMode?: boolean;
 }
 
 const PURPLE = "var(--c-purple)";
@@ -59,7 +60,7 @@ function Face({ v, sel, color }: { v: string; sel: boolean; color: string }) {
   );
 }
 
-export default function LogSheet({ open, onClose, defaultSub, startWizard }: Props) {
+export default function LogSheet({ open, onClose, defaultSub, startWizard, previewMode }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const uploadRef = useRef<HTMLInputElement>(null);
@@ -522,7 +523,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
     function pick(key: string, val: string | number) {
       const next = { ...morningData, [key]: val };
       setMorningData(next);
-      if (key === "water" && val === "yes") {
+      if (!previewMode && key === "water" && val === "yes") {
         try {
           const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
           const titles = sd[todayYMD] ?? [];
@@ -551,6 +552,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
     }
 
     function saveCombined(next: Record<string, string | number>) {
+      if (previewMode) { onClose(); return; }
       try {
         const ci = {
           sleep:      Number(next.sleep)      || 3,
