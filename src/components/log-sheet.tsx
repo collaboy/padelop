@@ -200,7 +200,6 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
     const NIGHT_STEPS = [
       { key: "stress",           type: "scale", question: "Stress level today?",          lo: "Very stressed", hi: "No stress" },
       { key: "nutritionQuality", type: "face",  question: "How well did you eat?",         opts: [["bad","Poorly"],["ok","OK"],["great","Well"]] as [string,string][] },
-      { key: "protein",          type: "opts3", question: "Did you eat enough protein? (~1.6g per kg bodyweight)", opts: [["yes","Yes"],["notSure","Not sure"],["no","No"]] as [string,string][] },
       { key: "hydrationLitres",  type: "opts",  question: "How much did you drink today?", opts: ["<1L","1–1.5L","1.5–2L","2–2.5L","2.5–3L","3L+"] },
       { key: "urineColour",      type: "urine", question: "Urine colour?",
         opts: [
@@ -352,20 +351,6 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                 })}
               </div>
             )}
-            {nightStepDef.type === "opts3" && "opts" in nightStepDef && (
-              <div className="flex gap-2">
-                {(nightStepDef.opts as [string,string][]).map(([v, label]) => {
-                  const sel = nightData[nightStepDef.key] === v;
-                  return (
-                    <button key={v} onClick={() => nightPick(nightStepDef.key, v)}
-                      className="flex-1 rounded-2xl text-[16px] font-bold transition-all active:scale-95"
-                      style={{ height: 48, background: sel ? PURPLE : "var(--c-bg)", color: sel ? "#fff" : "var(--c-text-sub)" }}>
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
             {nightStepDef.type === "opts" && "opts" in nightStepDef && (
               <div className="flex flex-wrap gap-2">
                 {(nightStepDef.opts as unknown as string[]).map((o: string) => {
@@ -481,7 +466,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
   }
 
   if (sub === "checkin") {
-    const NIGHT_COUNT = 8;
+    const NIGHT_COUNT = 7;
     const MORNING_COUNT = 5;
 
     type CStep =
@@ -499,7 +484,6 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
       { key: "sleepHours",       section: "night",   type: "opts",  question: "How many hours?",                    opts: ["5h","6h","7h","8h","9h+"]             },
       { key: "stress",           section: "night",   type: "scale", question: "Stress level yesterday?",            lo: "Very stressed",  hi: "No stress"   },
       { key: "nutritionQuality", section: "night",   type: "face",  question: "How well did you eat yesterday?",    opts: [["bad","Poorly"],["ok","OK"],["great","Well"]] },
-      { key: "protein",          section: "night",   type: "opts3", question: "Did you eat enough protein? (~1.6g per kg bodyweight)",   opts: [["yes","Yes"],["notSure","Not sure"],["no","No"]] },
       { key: "hydrationLitres",  section: "night",   type: "opts",  question: "How much did you drink yesterday?",  opts: ["<1L","1–1.5L","1.5–2L","2–2.5L","2.5–3L","3L+"] },
       { key: "habits",           section: "night",   type: "habits", question: "Which habits did you complete?" },
       // ── This morning ─────────────────────────────────────────────────────
