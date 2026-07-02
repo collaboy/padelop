@@ -456,6 +456,31 @@ export default function Home8() {
       }
       void todayStr;
     } catch {}
+    // Seal yesterday's water meter into hydration-logs and reset the meter
+    try {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+      const hq = JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null");
+      if (hq?.date && hq.date < todayStr && hq.ml > 0) {
+        const logs: { ts: string; litres: string; urine: string; quality: string; timing: string[] }[] =
+          JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]");
+        const alreadySealed = logs.some(l => l.ts?.startsWith(hq.date));
+        if (!alreadySealed) {
+          const mlToLitres = (ml: number) => {
+            if (ml < 1000) return "<1L";
+            if (ml < 1500) return "1–1.5L";
+            if (ml < 2000) return "1.5–2L";
+            if (ml < 2500) return "2–2.5L";
+            if (ml < 3000) return "2.5–3L";
+            return "3L+";
+          };
+          logs.unshift({ ts: `${hq.date}T23:59:00.000Z`, litres: mlToLitres(hq.ml), urine: "", quality: "ok", timing: [] });
+          localStorage.setItem("padelop:hydration-logs", JSON.stringify(logs.slice(0, 90)));
+        }
+        localStorage.setItem("padelop:hydration-quick", JSON.stringify({ date: todayStr, ml: 0 }));
+      }
+      void yesterday;
+    } catch {}
     // Re-sync when user switches back to this tab/app
     let lastSync = Date.now();
     const onVisible = () => {
