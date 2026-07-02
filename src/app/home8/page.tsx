@@ -1531,6 +1531,7 @@ export default function Home8() {
                     {isMeal && detail?.type === 'meal' && (
                       <div className="flex flex-col pt-4">
                         <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#8a9096" }}>{detail.focus}</p>
+                        <p style={{ fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 600, color: "#1a1c1c", margin: "0 0 8px" }}>What did you eat?</p>
                         {detail.options.map((meal, i) => (
                           <div key={i}>
                             <button
