@@ -1118,9 +1118,12 @@ export default function Home8() {
                       {/* Timer layer — 3 rows matching done flash slot heights exactly */}
                       <div style={{ position: "absolute", inset: 0, zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, animation: justDone ? "fade-in 0.9s ease-out 1.1s both" : undefined }}>
                         {/* Row 1: same height as checkmark SVG (38px) */}
-                        <div style={{ height: 38, display: "flex", alignItems: "flex-end", justifyContent: "center", gap: 5 }}>
-                          <span style={{ fontSize: "clamp(14px, 4vw, 17px)", fontWeight: 700, color: "#1a1c1c" }}>{nextTitle}</span>
-                          <span style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(0,0,0,0.45)", letterSpacing: "0.04em" }}>in</span>
+                        <div style={{ height: 52, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end" }}>
+                          <div style={{ display: "flex", alignItems: "flex-end", gap: 5 }}>
+                            <span style={{ fontSize: "clamp(14px, 4vw, 17px)", fontWeight: 700, color: "#1a1c1c" }}>See you</span>
+                            <span style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(0,0,0,0.45)", letterSpacing: "0.04em" }}>in</span>
+                          </div>
+                          <span style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(0,0,0,0.45)", letterSpacing: "0.04em" }}>for {nextTitle}</span>
                         </div>
                         {/* Row 2: same font + padding as Breakfast pill → same height */}
                         <p style={{ fontSize: "clamp(22px, 7vw, 30px)", fontWeight: 800, color: "#1a1c1c", margin: 0, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", textAlign: "center", lineHeight: 1.2, background: "#fff", padding: "3px 8px", borderRadius: 4 }}>{fmtTime(secsUntilNext)}</p>
