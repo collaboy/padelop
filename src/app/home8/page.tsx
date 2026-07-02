@@ -292,6 +292,7 @@ export default function Home8() {
   const [preMatchChecked, setPreMatchChecked] = useState<string[]>([]);
   const [preMatchDuration, setPreMatchDuration] = useState("");
   const [morningDone, setMorningDone] = useState(false);
+  const [expandedMealIdx, setExpandedMealIdx] = useState<number | null>(null);
   const [streak, setStreak] = useState(0);
   const [profile, setProfile] = useState<{ name: string; level: string }>({ name: "", level: "Recreational" });
   const [matchCount, setMatchCount] = useState(0);
@@ -1529,22 +1530,35 @@ export default function Home8() {
                     {isMeal && detail?.type === 'meal' && (
                       <div className="flex flex-col pt-4">
                         <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#8a9096" }}>{detail.focus}</p>
-                        <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-                          <button className="active:scale-95 transition-transform" style={{ flex: 1, aspectRatio: "1/1", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-                            <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Meal suggestions</span>
-                          </button>
-                          <button className="active:scale-95 transition-transform" style={{ flex: 1, aspectRatio: "1/1", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                            <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c", textAlign: "center", lineHeight: 1.2 }}>+ log<br />what you ate</span>
-                          </button>
-                        </div>
                         {detail.options.map((meal, i) => (
-                          <div key={i} className="flex flex-col p-3">
-                            <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: "#1a1c1c", lineHeight: 1.3 }}>{meal.title}</p>
-                            {meal.detail && <p style={{ margin: "3px 0 0", fontSize: 13, color: "#6b7480", lineHeight: 1.45 }}>{meal.detail}</p>}
+                          <div key={i}>
+                            <button
+                              onClick={() => setExpandedMealIdx(expandedMealIdx === i ? null : i)}
+                              style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "10px 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}
+                            >
+                              <span style={{ fontSize: 15, fontWeight: 600, color: "#1a1c1c", lineHeight: 1.3, textAlign: "left" }}>{meal.title}</span>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: expandedMealIdx === i ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                            {expandedMealIdx === i && meal.detail && (
+                              <p style={{ margin: "0 0 8px", fontSize: 13, color: "#6b7480", lineHeight: 1.5 }}>{meal.detail}</p>
+                            )}
+                            {i < detail.options.length - 1 && <div style={{ height: 1, background: "#f0f0f0" }} />}
                           </div>
                         ))}
+                        <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 8 }}>
+                          <textarea
+                            value={mealText}
+                            onChange={e => setMealText(e.target.value)}
+                            placeholder="What did you eat?"
+                            rows={3}
+                            style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box", background: "#f8f9fa" }}
+                          />
+                          <button
+                            onClick={() => { saveMealEntry(mealTime || new Date().toTimeString().slice(0,5), mealText); }}
+                            disabled={!mealText.trim()}
+                            style={{ alignSelf: "flex-start", padding: "9px 22px", borderRadius: 999, background: mealText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: mealText.trim() ? "pointer" : "default", fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 700, color: mealText.trim() ? "#fff" : "#b0b8c1" }}
+                          >Save</button>
+                        </div>
                       </div>
                     )}
                     {(isInfo || isExercise || isDrill) && (
