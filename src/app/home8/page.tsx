@@ -1530,11 +1530,13 @@ export default function Home8() {
                       <div className="flex flex-col pt-4">
                         <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#8a9096" }}>{detail.focus}</p>
                         <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-                          <button style={{ flex: 1, aspectRatio: "1/1", borderRadius: 14, background: "#f4f4f6", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <span style={{ fontSize: "clamp(13px, 3.5vw, 15px)", fontWeight: 600, color: "#1a1c1c", textAlign: "center", lineHeight: 1.3 }}>Meal suggestions</span>
+                          <button className="active:scale-95 transition-transform" style={{ flex: 1, aspectRatio: "1/1", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                            <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Meal suggestions</span>
                           </button>
-                          <button style={{ flex: 1, aspectRatio: "1/1", borderRadius: 14, background: "#f4f4f6", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <span style={{ fontSize: "clamp(13px, 3.5vw, 15px)", fontWeight: 600, color: "#1a1c1c", textAlign: "center", lineHeight: 1.3 }}>+ note</span>
+                          <button className="active:scale-95 transition-transform" style={{ flex: 1, aspectRatio: "1/1", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                            <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>+ note</span>
                           </button>
                         </div>
                         {detail.options.map((meal, i) => (
