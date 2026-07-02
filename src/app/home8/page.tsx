@@ -1536,7 +1536,7 @@ export default function Home8() {
                           </button>
                           <button className="active:scale-95 transition-transform" style={{ flex: 1, aspectRatio: "1/1", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8 }}>
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                            <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>+ log what you ate</span>
+                            <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c", textAlign: "center", lineHeight: 1.2 }}>+ log<br />what you ate</span>
                           </button>
                         </div>
                         {detail.options.map((meal, i) => (
