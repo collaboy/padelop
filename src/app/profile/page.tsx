@@ -2256,6 +2256,7 @@ export default function ProfilePage() {
                       const entries = Object.entries(breakdown).sort((a, b) => b[1] - a[1]);
                       return (
                         <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden", padding: "16px 16px 20px" }}>
+                          <p style={{ margin: "0 0 16px", fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>Total lifetime PADLA points: <span style={{ color: "#d97706" }}>{allCompletions.length}</span></p>
                           <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#d97706" }}>Activity breakdown</p>
                           {entries.length === 0 ? (
                             <p style={{ margin: 0, fontSize: 15, color: "#9aa0a6" }}>No activities completed yet. Start swiping on the home screen.</p>

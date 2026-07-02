@@ -1110,7 +1110,7 @@ export default function Home8() {
                 const isReady = curMins >= toMins(s.time);
                 const nextSlide = schedule[currentIdx + 1];
                 const secsUntilNext = nextSlide ? toMins(nextSlide.time) * 60 - (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) : 0;
-                const fmtTime = (s: number) => { if (s <= 0) return "a moment"; const h = Math.floor(s / 3600), rem = s % 3600, m = Math.floor(rem / 60), sec = rem % 60; const ss = String(sec).padStart(2, "0"); if (h > 0) return `${h}h ${String(m).padStart(2,"0")}m ${ss}s`; return m > 0 ? `${m}m ${ss}s` : `${sec}s`; };
+                const fmtTime = (s: number) => { if (s <= 0) return "a moment"; const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60); if (h > 0) return `${h}h ${String(m).padStart(2,"0")}m`; return m > 0 ? `${m}m` : "a moment"; };
                 const cardStyle: React.CSSProperties = { position: "relative", width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", zIndex: 3, boxShadow: "none" };
                 if (!clientReady) return (
                   <div key="active" style={{ ...cardStyle, background: "#fff" }}>
@@ -1139,23 +1139,29 @@ export default function Home8() {
                   const nextTitle = nextSlide.title === "Lunch" ? "Lunchtime" : nextSlide.title === "Dinner" ? "Dinnertime" : nextSlide.title;
 
                   return (
-                    <div key="done-card" style={{ ...cardStyle, background: "#c8cacc", animation: "ball-drop 0.9s 0.1s both, circle-breathe 4s ease-in-out 1.1s infinite" }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
+                    <div key="done-card" style={{ ...cardStyle, background: "#e8ddd0", animation: "ball-drop 0.9s 0.1s both, circle-breathe 4s ease-in-out 1.1s infinite" }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
                       {textureOverlay}
 
-                      {/* Timer layer — 3 rows matching done flash slot heights exactly */}
-                      <div style={{ position: "absolute", inset: 0, zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 5, animation: justDone ? "fade-in 0.9s ease-out 1.1s both" : undefined }}>
-                        {/* Row 1: "See you in" on one line */}
-                        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 5 }}>
-                          <span style={{ fontSize: "clamp(14px, 4vw, 17px)", fontWeight: 700, color: "#1a1c1c" }}>See you</span>
-                          <span style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(0,0,0,0.45)", letterSpacing: "0.04em" }}>in</span>
-                        </div>
-                        {/* Row 2: same font + padding as Breakfast pill → same height */}
-                        <p style={{ fontSize: "clamp(22px, 7vw, 30px)", fontWeight: 800, color: "#1a1c1c", margin: 0, letterSpacing: "-0.02em", fontVariantNumeric: "tabular-nums", textAlign: "center", lineHeight: 1.2, background: "#fff", padding: "3px 8px", borderRadius: 4 }}>{fmtTime(secsUntilNext)}</p>
-                        {/* Row 3: "for {nextTitle}" matching "Done" text height */}
-                        <p style={{ fontSize: "clamp(13px, 4vw, 17px)", margin: 0, color: "#1a1c1c" }}>
-                          <span style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(0,0,0,0.45)", letterSpacing: "0.04em" }}>for </span>
-                          <span style={{ fontWeight: 700 }}>{nextTitle}</span>
-                        </p>
+                      {/* Timer layer */}
+                      <div style={{ position: "absolute", inset: 0, zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0, animation: justDone ? "fade-in 0.9s ease-out 1.1s both" : undefined }}>
+                        {/* Curved top + bottom text */}
+                        {(() => { const ff = "-apple-system, BlinkMacSystemFont, sans-serif"; return (
+                        <svg viewBox="0 0 200 200" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
+                          <defs>
+                            <path id="doneTopArc" d="M 30,64 A 76,76 0 0,1 170,64" />
+                            <path id="doneBottomArc" d="M 30,136 A 76,76 0 0,0 170,136" />
+                          </defs>
+                          <text fontSize="11" fontWeight="700" letterSpacing="1" style={{ fill: "rgba(0,0,0,0.45)", fontFamily: ff }}>
+                            <textPath href="#doneTopArc" startOffset="50%" textAnchor="middle">GOOD JOB,</textPath>
+                          </text>
+                          <text fontSize="11" fontWeight="700" letterSpacing="1" style={{ fill: "rgba(0,0,0,0.45)", fontFamily: ff }}>
+                            <textPath href="#doneBottomArc" startOffset="50%" textAnchor="middle">{`${completedTitle.toUpperCase()} COMPLETED.`}</textPath>
+                          </text>
+                        </svg>
+                        ); })()}
+                        <p style={{ margin: 0, fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(0,0,0,0.45)" }}>Next activity:</p>
+                        <p style={{ margin: 0, fontSize: "clamp(18px, 5.5vw, 24px)", fontWeight: 800, color: "#1a1c1c", letterSpacing: "-0.02em" }}>{nextTitle}.</p>
+                        <p style={{ margin: 0, fontSize: "clamp(13px, 3.8vw, 16px)", fontWeight: 600, color: "#1a1c1c", fontVariantNumeric: "tabular-nums" }}>In {fmtTime(secsUntilNext)}</p>
                       </div>
 
                       {/* Done flash — on top, cross-fades out into timer */}
@@ -1484,20 +1490,21 @@ export default function Home8() {
 
           const handleDone = () => {
             // Update data immediately
+            const isDrill = !isComplete && modalItem.isDrill;
+            if (isDrill) {
+              try {
+                const entry = { ts: new Date().toISOString(), sessionType: ["Drills"], drillFocus: drillTag ? [drillTag] : [], duration: "6", intensity: "moderate" };
+                const prev2 = JSON.parse(localStorage.getItem("padelop:training-logs") || "[]");
+                localStorage.setItem("padelop:training-logs", JSON.stringify([entry, ...prev2].slice(0, 50)));
+                window.dispatchEvent(new Event("storage"));
+              } catch {}
+              saveTrainingToDb({ date: new Date().toISOString().slice(0, 10), drill_focus: drillTag ?? undefined, duration_mins: 6 });
+            }
             setCompleted(prev => {
               const n = new Set(prev);
               if (!isComplete) {
                 n.add(modalIdx);
                 doneAtRef.current.set(modalIdx, Date.now());
-                if (modalItem.isDrill) {
-                  try {
-                    const entry = { ts: new Date().toISOString(), sessionType: ["Drills"], drillFocus: drillTag ? [drillTag] : [], duration: "6", intensity: "moderate" };
-                    const prev2 = JSON.parse(localStorage.getItem("padelop:training-logs") || "[]");
-                    localStorage.setItem("padelop:training-logs", JSON.stringify([entry, ...prev2].slice(0, 50)));
-                    window.dispatchEvent(new Event("storage"));
-                  } catch {}
-                  saveTrainingToDb({ date: new Date().toISOString().slice(0, 10), drill_focus: drillTag ?? undefined, duration_mins: 6 });
-                }
               } else {
                 n.delete(modalIdx);
               }
