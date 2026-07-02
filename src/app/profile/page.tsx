@@ -1304,6 +1304,8 @@ export default function ProfilePage() {
                 { label: "Maintenance Day", color: "#0e7490", desc: "Between cycles. Stay loose and let the body absorb the work." },
               ];
               return (
+                <>
+                {openPanel !== null && <div onClick={() => setOpenPanel(null)} style={{ position: "fixed", inset: 0, zIndex: 35 }} />}
                 <div style={{ display: "flex", flexDirection: "column", gap: 20, position: "relative", zIndex: openPanel !== null ? 36 : "auto" }}>
                   {total > 0 && (() => {
                     // Add new panel states here to extend dimming to future circles
@@ -1311,7 +1313,6 @@ export default function ProfilePage() {
                     const dim = (active: boolean) => ({ opacity: anyOpen && !active ? 0.3 : 1, transition: "opacity 0.2s" });
                     return (
                     <>
-                    {anyOpen && <div onClick={() => setOpenPanel(null)} style={{ position: "fixed", inset: 0, zIndex: 35 }} />}
                     {/* Row 1: Next Match · Day Type · Goals */}
                     <div style={{ display: "flex", gap: 10 }}>
                       {/* Next Match */}
@@ -2320,6 +2321,7 @@ export default function ProfilePage() {
                     );
                   })()}
                 </div>
+                </>
                 );
               })()}
 
