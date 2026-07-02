@@ -1116,9 +1116,9 @@ export default function Home8() {
                       {textureOverlay}
 
                       {/* Timer layer — 3 rows matching done flash slot heights exactly */}
-                      <div style={{ position: "absolute", inset: 0, zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, animation: justDone ? "fade-in 0.9s ease-out 1.1s both" : undefined }}>
-                        {/* Row 1: "See you in" on one line, matching SVG height */}
-                        <div style={{ height: 38, display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
+                      <div style={{ position: "absolute", inset: 0, zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 5, animation: justDone ? "fade-in 0.9s ease-out 1.1s both" : undefined }}>
+                        {/* Row 1: "See you in" on one line */}
+                        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 5 }}>
                           <span style={{ fontSize: "clamp(14px, 4vw, 17px)", fontWeight: 700, color: "#1a1c1c" }}>See you</span>
                           <span style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(0,0,0,0.45)", letterSpacing: "0.04em" }}>in</span>
                         </div>
