@@ -1311,8 +1311,9 @@ export default function ProfilePage() {
                     const dim = (active: boolean) => ({ opacity: anyOpen && !active ? 0.3 : 1, transition: "opacity 0.2s" });
                     return (
                     <>
+                    {anyOpen && <div onClick={() => setOpenPanel(null)} style={{ position: "fixed", inset: 0, zIndex: 5 }} />}
                     {/* Row 1: Next Match · Day Type · Goals */}
-                    <div style={{ display: "flex", gap: 10 }}>
+                    <div style={{ display: "flex", gap: 10, position: "relative", zIndex: 6 }}>
                       {/* Next Match */}
                       {(() => {
                         const today = new Date().toISOString().slice(0, 10);
@@ -1620,7 +1621,7 @@ export default function ProfilePage() {
                     )}
 
                     {/* Row 2: Streak · Form Score · Gear */}
-                    <div style={{ display: "flex", gap: 10 }}>
+                    <div style={{ display: "flex", gap: 10, position: "relative", zIndex: 6 }}>
                       {/* Streak */}
                       {(() => {
                         const STIERS = [
@@ -1873,7 +1874,7 @@ export default function ProfilePage() {
                     )}
 
                     {/* Row 3: Hydration · Insights · Matches */}
-                    <div style={{ display: "flex", gap: 10 }}>
+                    <div style={{ display: "flex", gap: 10, position: "relative", zIndex: 6 }}>
                       {/* Hydration */}
                       {(() => {
                         const ml = hydrationMl;
@@ -2193,7 +2194,7 @@ export default function ProfilePage() {
                     )}
 
                     {/* Row 4: Good/Bad */}
-                    <div style={{ display: "flex", gap: 10 }}>
+                    <div style={{ display: "flex", gap: 10, position: "relative", zIndex: 6 }}>
                       {(() => {
                         const color = "#e11d48";
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
