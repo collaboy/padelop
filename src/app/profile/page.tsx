@@ -2221,9 +2221,55 @@ export default function ProfilePage() {
                           </button>
                         );
                       })()}
-                      <div style={{ flex: 1 }} />
+                      {/* PADLA Points circle */}
+                      {(() => {
+                        const color = "#d97706";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        const schedDone: Record<string, string[]> = (() => { try { return JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}"); } catch { return {}; } })();
+                        const totalPts = Object.values(schedDone).flat().length;
+                        return (
+                          <button onClick={() => togglePanel('padlaPoints')}
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(openPanel === 'padlaPoints') }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
+                              <defs><path id="padlaArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <text fontSize="18" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#padlaArc" startOffset="50%" textAnchor="middle">PADLA SCORE</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize={String(totalPts).length > 3 ? "34" : "44"} fontWeight="800" style={{ fill: color, fontFamily: ff }}>{totalPts > 0 ? totalPts : "—"}</text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>pts earned</text>
+                            </svg>
+                          </button>
+                        );
+                      })()}
                       <div style={{ flex: 1 }} />
                     </div>
+
+                    {/* PADLA Points panel */}
+                    {openPanel === 'padlaPoints' && (() => {
+                      const schedDone: Record<string, string[]> = (() => { try { return JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}"); } catch { return {}; } })();
+                      const allCompletions = Object.values(schedDone).flat();
+                      const breakdown: Record<string, number> = {};
+                      allCompletions.forEach(t => { breakdown[t] = (breakdown[t] ?? 0) + 1; });
+                      const entries = Object.entries(breakdown).sort((a, b) => b[1] - a[1]);
+                      return (
+                        <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden", padding: "16px 16px 20px" }}>
+                          <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#d97706" }}>Activity breakdown</p>
+                          {entries.length === 0 ? (
+                            <p style={{ margin: 0, fontSize: 15, color: "#9aa0a6" }}>No activities completed yet. Start swiping on the home screen.</p>
+                          ) : (
+                            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                              {entries.map(([title, count]) => (
+                                <div key={title} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                  <span style={{ fontSize: 15, fontWeight: 500, color: "#1a1c1c" }}>{title}</span>
+                                  <span style={{ fontSize: 13, fontWeight: 700, color: "#d97706", background: "#fef3c7", borderRadius: 999, padding: "2px 10px" }}>×{count}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
 
                     {/* Good/Bad panel */}
                     {openPanel === 'goodBad' && (() => {
