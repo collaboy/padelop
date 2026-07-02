@@ -199,7 +199,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
     const NIGHT_STEPS = [
       { key: "stress",           type: "scale", question: "Stress level today?",          lo: "Very stressed", hi: "No stress" },
       { key: "nutritionQuality", type: "face",  question: "How well did you eat?",         opts: [["bad","Poorly"],["ok","OK"],["great","Well"]] as [string,string][] },
-      { key: "protein",          type: "opts3", question: "Did you hit your protein target?", opts: [["yes","Yes"],["notSure","Not sure"],["no","No"]] as [string,string][] },
+      { key: "protein",          type: "opts3", question: "Did you eat enough protein? (~1.6g per kg bodyweight)", opts: [["yes","Yes"],["notSure","Not sure"],["no","No"]] as [string,string][] },
       { key: "hydrationLitres",  type: "opts",  question: "How much did you drink today?", opts: ["<1L","1–1.5L","1.5–2L","2–2.5L","2.5–3L","3L+"] },
       { key: "urineColour",      type: "urine", question: "Urine colour?",
         opts: [
@@ -256,7 +256,6 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
         };
         const prevNutrition = JSON.parse(localStorage.getItem("padelop:nutrition-logs") || "[]");
         localStorage.setItem("padelop:nutrition-logs", JSON.stringify([nutritionEntry, ...prevNutrition].slice(0, 50)));
-        saveNutritionToDb({ date: todayYMD, meal_type: "dinner", description: nutritionQuality });
 
         const hydrationEntry = { ts, litres: hydrationLitres, urine: urineColour, quality: "ok", timing: [] as string[] };
         const prevHydration = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]");
@@ -499,7 +498,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
       { key: "sleepHours",       section: "night",   type: "opts",  question: "How many hours?",                    opts: ["5h","6h","7h","8h","9h+"]             },
       { key: "stress",           section: "night",   type: "scale", question: "Stress level yesterday?",            lo: "Very stressed",  hi: "No stress"   },
       { key: "nutritionQuality", section: "night",   type: "face",  question: "How well did you eat yesterday?",    opts: [["bad","Poorly"],["ok","OK"],["great","Well"]] },
-      { key: "protein",          section: "night",   type: "opts3", question: "Did you hit your protein target?",   opts: [["yes","Yes"],["notSure","Not sure"],["no","No"]] },
+      { key: "protein",          section: "night",   type: "opts3", question: "Did you eat enough protein? (~1.6g per kg bodyweight)",   opts: [["yes","Yes"],["notSure","Not sure"],["no","No"]] },
       { key: "hydrationLitres",  section: "night",   type: "opts",  question: "How much did you drink yesterday?",  opts: ["<1L","1–1.5L","1.5–2L","2–2.5L","2.5–3L","3L+"] },
       { key: "habits",           section: "night",   type: "habits", question: "Which habits did you complete?" },
       // ── This morning ─────────────────────────────────────────────────────
@@ -620,7 +619,6 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard }: Pro
         };
         const prevNutrition = JSON.parse(localStorage.getItem("padelop:nutrition-logs") || "[]");
         localStorage.setItem("padelop:nutrition-logs", JSON.stringify([nutritionEntry, ...prevNutrition].slice(0, 50)));
-        saveNutritionToDb({ date: todayYMD, meal_type: "dinner", description: nutritionQuality });
 
         const hydrationLitres = String(next.hydrationLitres ?? "");
         if (hydrationLitres) {
