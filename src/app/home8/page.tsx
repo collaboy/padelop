@@ -293,6 +293,7 @@ export default function Home8() {
   const [preMatchDuration, setPreMatchDuration] = useState("");
   const [morningDone, setMorningDone] = useState(false);
   const [expandedMealIdx, setExpandedMealIdx] = useState<number | null>(null);
+  const [checkedMeals, setCheckedMeals] = useState<Set<number>>(new Set());
   const [streak, setStreak] = useState(0);
   const [profile, setProfile] = useState<{ name: string; level: string }>({ name: "", level: "Recreational" });
   const [matchCount, setMatchCount] = useState(0);
@@ -1537,7 +1538,12 @@ export default function Home8() {
                               style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "10px 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}
                             >
                               <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-5"/></svg>
+                                <button
+                                  onClick={e => { e.stopPropagation(); setCheckedMeals(prev => { const next = new Set(prev); next.has(i) ? next.delete(i) : next.add(i); return next; }); }}
+                                  style={{ flexShrink: 0, width: 20, height: 20, borderRadius: 5, border: `2px solid ${checkedMeals.has(i) ? "#16a34a" : "#c4c7c7"}`, background: checkedMeals.has(i) ? "#16a34a" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}
+                                >
+                                  {checkedMeals.has(i) && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>}
+                                </button>
                                 <span style={{ fontSize: 15, fontWeight: 600, color: "#1a1c1c", lineHeight: 1.3, textAlign: "left" }}>{meal.title}</span>
                               </div>
                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: expandedMealIdx === i ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
