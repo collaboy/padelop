@@ -692,18 +692,27 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
               </div>
             )}
             {step.type === "face" && (
-              <div className="flex gap-3">
-                {step.opts.map(([v, label]) => {
-                  const sel = morningData[step.key] === v;
-                  return (
-                    <button key={v} onClick={() => pick(step.key, v)}
-                      className="flex-1 flex flex-col items-center gap-2 py-3 rounded-2xl border-2 transition-all active:scale-95"
-                      style={{ borderColor: sel ? accent : "var(--c-line)", background: sel ? (isNight ? "#f5f3ff" : "#eff6ff") : "var(--c-bg-input)" }}>
-                      <Face v={v} sel={sel} color={accent}/>
-                      <span className="text-[13px] font-bold" style={{ color: sel ? accent : "var(--c-text-sub)" }}>{label}</span>
-                    </button>
-                  );
-                })}
+              <div className="flex flex-col gap-3">
+                <div className="flex gap-3">
+                  {step.opts.map(([v, label]) => {
+                    const sel = morningData[step.key] === v;
+                    return (
+                      <button key={v} onClick={() => pick(step.key, v)}
+                        className="flex-1 flex flex-col items-center gap-2 py-3 rounded-2xl border-2 transition-all active:scale-95"
+                        style={{ borderColor: sel ? accent : "var(--c-line)", background: sel ? (isNight ? "#f5f3ff" : "#eff6ff") : "var(--c-bg-input)" }}>
+                        <Face v={v} sel={sel} color={accent}/>
+                        <span className="text-[13px] font-bold" style={{ color: sel ? accent : "var(--c-text-sub)" }}>{label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {step.key === "nutritionQuality" && (
+                  <div className="flex gap-3 text-center">
+                    <p className="flex-1 text-[11px] leading-tight" style={{ color: "var(--c-hint)" }}>Skipped meals, processed food, low protein</p>
+                    <p className="flex-1 text-[11px] leading-tight" style={{ color: "var(--c-hint)" }}>Ate enough but not optimal — some snacks or gaps</p>
+                    <p className="flex-1 text-[11px] leading-tight" style={{ color: "var(--c-hint)" }}>Balanced meals, good protein, fruit or veg</p>
+                  </div>
+                )}
               </div>
             )}
             {step.type === "opts3" && (
