@@ -699,10 +699,17 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                   })}
                 </div>
                 {step.key === "nutritionQuality" && (
-                  <div className="flex gap-3 text-center">
-                    <p className="flex-1 text-[11px] leading-tight" style={{ color: "var(--c-hint)" }}>Skipped meals, processed food, low protein</p>
-                    <p className="flex-1 text-[11px] leading-tight" style={{ color: "var(--c-hint)" }}>Ate enough but not optimal — some snacks or gaps</p>
-                    <p className="flex-1 text-[11px] leading-tight" style={{ color: "var(--c-hint)" }}>Balanced meals, good protein, fruit or veg</p>
+                  <div className="flex flex-col gap-1.5 mt-3">
+                    {[
+                      ["Poorly", "Skipped meals, processed food, low protein"],
+                      ["OK",     "Ate enough but not optimal — some snacks or gaps"],
+                      ["Well",   "Balanced meals, good protein, fruit or veg"],
+                    ].map(([label, def]) => (
+                      <div key={label} className="flex gap-2 items-baseline">
+                        <span style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text-sub)", minWidth: 40 }}>{label}</span>
+                        <span style={{ fontSize: 12, color: "var(--c-hint)", lineHeight: 1.4 }}>{def}</span>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -802,7 +809,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                 <button onClick={() => saveCombined(morningData)}
                   className="w-full rounded-2xl text-white text-[16px] font-bold transition-all active:scale-95"
                   style={{ height: 56, background: BLUE }}>
-                  Save check-in
+                  Save check-in (+1 pt)
                 </button>
               </div>
             )}
