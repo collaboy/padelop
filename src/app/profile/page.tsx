@@ -1304,7 +1304,7 @@ export default function ProfilePage() {
                 { label: "Maintenance Day", color: "#0e7490", desc: "Between cycles. Stay loose and let the body absorb the work." },
               ];
               return (
-                <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 20, position: "relative", zIndex: openPanel !== null ? 6 : "auto" }}>
                   {total > 0 && (() => {
                     // Add new panel states here to extend dimming to future circles
                     const anyOpen = openPanel !== null;
@@ -1313,7 +1313,7 @@ export default function ProfilePage() {
                     <>
                     {anyOpen && <div onClick={() => setOpenPanel(null)} style={{ position: "fixed", inset: 0, zIndex: 5 }} />}
                     {/* Row 1: Next Match · Day Type · Goals */}
-                    <div style={{ display: "flex", gap: 10, position: "relative", zIndex: 6 }}>
+                    <div style={{ display: "flex", gap: 10 }}>
                       {/* Next Match */}
                       {(() => {
                         const today = new Date().toISOString().slice(0, 10);
@@ -1621,7 +1621,7 @@ export default function ProfilePage() {
                     )}
 
                     {/* Row 2: Streak · Form Score · Gear */}
-                    <div style={{ display: "flex", gap: 10, position: "relative", zIndex: 6 }}>
+                    <div style={{ display: "flex", gap: 10 }}>
                       {/* Streak */}
                       {(() => {
                         const STIERS = [
@@ -1874,7 +1874,7 @@ export default function ProfilePage() {
                     )}
 
                     {/* Row 3: Hydration · Insights · Matches */}
-                    <div style={{ display: "flex", gap: 10, position: "relative", zIndex: 6 }}>
+                    <div style={{ display: "flex", gap: 10 }}>
                       {/* Hydration */}
                       {(() => {
                         const ml = hydrationMl;
@@ -2194,7 +2194,7 @@ export default function ProfilePage() {
                     )}
 
                     {/* Row 4: Good/Bad */}
-                    <div style={{ display: "flex", gap: 10, position: "relative", zIndex: 6 }}>
+                    <div style={{ display: "flex", gap: 10 }}>
                       {(() => {
                         const color = "#e11d48";
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
