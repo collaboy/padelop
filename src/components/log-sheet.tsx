@@ -103,6 +103,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
   const [nightStep, setNightStep] = useState(0);
   const [nightData, setNightData] = useState<Record<string, string | number>>({});
   const [nightHabits, setNightHabits] = useState<string[]>([]);
+  const [painAreas, setPainAreas] = useState<string[]>([]);
   const [nightQuickMl, setNightQuickMl] = useState(0);
 
   const todayYMD = new Date().toISOString().slice(0, 10);
@@ -485,7 +486,9 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
       | { key: string; section: "night" | "morning"; type: "face";  question: string; opts: [string,string][] }
       | { key: string; section: "night" | "morning"; type: "opts3"; question: string; opts: [string,string][] }
       | { key: string; section: "night" | "morning"; type: "habits"; question: string }
-      | { key: string; section: "night" | "morning"; type: "yesno"; question: string };
+      | { key: string; section: "night" | "morning"; type: "yesno"; question: string }
+      | { key: string; section: "morning"; type: "painArea"; question: string }
+      | { key: string; section: "morning"; type: "complete"; question: string };
 
     const COMBINED_STEPS: CStep[] = [
       { key: "bedtime",          section: "night",   type: "opts",  question: "When did you go to bed last night?",  opts: ["9pm","10pm","10:30pm","11pm","After 11"] },
@@ -497,9 +500,11 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
       ...(hasYesterdayHabits ? [] : [{ key: "habits", section: "night" as const, type: "habits" as const, question: "Which habits did you complete?" }]),
       { key: "soreness",         section: "morning", type: "scale", question: "How does your body feel right now?",   lo: "Very sore",    hi: "No soreness" },
       { key: "pain",             section: "morning", type: "opts3", question: "Any pain or injury today?",            opts: [["none","None"],["minor","Minor"],["yes","Yes"]] },
+      ...((morningData.pain === "minor" || morningData.pain === "yes") ? [{ key: "painArea", section: "morning" as const, type: "painArea" as const, question: "Where?" }] : []),
       { key: "energy",           section: "morning", type: "scale", question: "Current energy level?",                lo: "Exhausted",    hi: "Energised"   },
       { key: "motivation",       section: "morning", type: "scale", question: "Motivated today?",                     lo: "None",         hi: "Fired up"    },
       { key: "water",            section: "morning", type: "yesno", question: "Did you drink 500ml of water on waking?" },
+      { key: "complete",         section: "morning", type: "complete", question: "" },
     ];
 
     const totalSteps = COMBINED_STEPS.length;
@@ -556,6 +561,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
           date: todayYMD,
           sleepHours: next.sleepHours,
           pain: next.pain ?? "none",
+          painAreas,
           waterOnWaking: next.water === "yes",
         }));
 
@@ -675,13 +681,6 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                   <span className="text-[11px] text-c-label">{step.lo}</span>
                   <span className="text-[11px] text-c-label">{step.hi}</span>
                 </div>
-                {isLastStep && morningData[step.key] !== undefined && (
-                  <button onClick={() => saveCombined(morningData)}
-                    className="w-full rounded-2xl text-white text-[16px] font-bold transition-all active:scale-95 mt-4"
-                    style={{ height: 52, background: accent }}>
-                    Save check-in
-                  </button>
-                )}
               </div>
             )}
             {step.type === "face" && (
@@ -736,6 +735,28 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                 })}
               </div>
             )}
+            {step.type === "painArea" && (
+              <div>
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  {["Knee","Shoulder","Ankle","Back","Hip","Elbow","Wrist","Neck","Muscle"].map(area => {
+                    const sel = painAreas.includes(area);
+                    return (
+                      <button key={area} onClick={() => setPainAreas(a => sel ? a.filter(x => x !== area) : [...a, area])}
+                        className="flex items-center justify-center gap-1.5 rounded-2xl text-[14px] font-bold transition-all active:scale-95"
+                        style={{ height: 44, background: sel ? accent : "var(--c-bg)", color: sel ? "#fff" : "var(--c-text-sub)" }}>
+                        {sel && <span style={{ fontSize: 11 }}>✓</span>}
+                        {area}
+                      </button>
+                    );
+                  })}
+                </div>
+                <button onClick={advance}
+                  className="w-full rounded-2xl text-white text-[16px] font-bold transition-all active:scale-95"
+                  style={{ height: 52, background: accent }}>
+                  Next →
+                </button>
+              </div>
+            )}
             {step.type === "habits" && (
               <div>
                 <div className="grid grid-cols-2 gap-2 mb-4">
@@ -770,13 +791,19 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                     </button>
                   );
                 })}
-                {isLastStep && morningData[step.key] !== undefined && (
-                  <button onClick={() => saveCombined(morningData)}
-                    className="w-full rounded-2xl text-white text-[16px] font-bold transition-all active:scale-95 mt-2"
-                    style={{ height: 52, background: accent }}>
-                    Save check-in
-                  </button>
-                )}
+              </div>
+            )}
+            {step.type === "complete" && (
+              <div className="flex flex-col items-center gap-6 pt-4">
+                <div style={{ width: 72, height: 72, borderRadius: "50%", background: "#eff6ff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={BLUE} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <p style={{ fontSize: "clamp(22px, 6vw, 28px)", fontWeight: 800, color: "#1a1c1c" }}>Check-in complete</p>
+                <button onClick={() => saveCombined(morningData)}
+                  className="w-full rounded-2xl text-white text-[16px] font-bold transition-all active:scale-95"
+                  style={{ height: 56, background: BLUE }}>
+                  Save check-in
+                </button>
               </div>
             )}
           </div>
