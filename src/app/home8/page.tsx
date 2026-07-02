@@ -1556,7 +1556,7 @@ export default function Home8() {
                           </div>
                         ))}
                         <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 8 }}>
-                          <p style={{ margin: "0 0 4px", fontSize: 12, fontWeight: 600, color: "#8a9096", letterSpacing: "0.02em" }}>or, just log what you actually ate</p>
+                          <p style={{ margin: "0 0 4px", fontSize: 12, fontWeight: 600, color: "#8a9096", letterSpacing: "0.02em" }}>or, add manually</p>
                           <textarea
                             value={mealText}
                             onChange={e => setMealText(e.target.value)}
