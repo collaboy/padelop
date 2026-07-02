@@ -1530,10 +1530,10 @@ export default function Home8() {
                       <div className="flex flex-col pt-4">
                         <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#8a9096" }}>{detail.focus}</p>
                         <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-                          <button style={{ flex: 1, minHeight: 52, borderRadius: 14, background: "#f4f4f6", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <button style={{ flex: 1, aspectRatio: "1/1", borderRadius: 14, background: "#f4f4f6", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
                             <span style={{ fontSize: "clamp(13px, 3.5vw, 15px)", fontWeight: 600, color: "#1a1c1c", textAlign: "center", lineHeight: 1.3 }}>Meal suggestions</span>
                           </button>
-                          <button style={{ flex: 1, minHeight: 52, borderRadius: 14, background: "#f4f4f6", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <button style={{ flex: 1, aspectRatio: "1/1", borderRadius: 14, background: "#f4f4f6", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
                             <span style={{ fontSize: "clamp(13px, 3.5vw, 15px)", fontWeight: 600, color: "#1a1c1c", textAlign: "center", lineHeight: 1.3 }}>+ note</span>
                           </button>
                         </div>
