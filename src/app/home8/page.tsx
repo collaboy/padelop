@@ -1139,7 +1139,7 @@ export default function Home8() {
                   const nextTitle = nextSlide.title === "Lunch" ? "Lunchtime" : nextSlide.title === "Dinner" ? "Dinnertime" : nextSlide.title;
 
                   return (
-                    <div key="done-card" style={{ ...cardStyle, background: "#e8ddd0", animation: "ball-drop 0.9s 0.1s both, circle-breathe 4s ease-in-out 1.1s infinite" }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
+                    <div key="done-card" style={{ ...cardStyle, background: "#e8ddd0", animation: "ball-drop 0.9s 0.1s both" }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
                       {textureOverlay}
 
                       {/* Timer layer */}
@@ -1149,12 +1149,12 @@ export default function Home8() {
                         <svg viewBox="0 0 200 200" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
                           <defs>
                             <path id="doneTopArc" d="M 30,64 A 76,76 0 0,1 170,64" />
-                            <path id="doneBottomArc" d="M 30,136 A 76,76 0 0,0 170,136" />
+                            <path id="doneBottomArc" d="M 30,136 A 76,76 0 0,1 170,136" />
                           </defs>
-                          <text fontSize="11" fontWeight="700" letterSpacing="1" style={{ fill: "rgba(0,0,0,0.45)", fontFamily: ff }}>
-                            <textPath href="#doneTopArc" startOffset="50%" textAnchor="middle">GOOD JOB,</textPath>
+                          <text fontSize="14" fontWeight="700" letterSpacing="1" style={{ fill: "rgba(0,0,0,0.45)", fontFamily: ff }}>
+                            <textPath href="#doneTopArc" startOffset="50%" textAnchor="middle">GOOD JOB</textPath>
                           </text>
-                          <text fontSize="11" fontWeight="700" letterSpacing="1" style={{ fill: "rgba(0,0,0,0.45)", fontFamily: ff }}>
+                          <text fontSize="11" fontWeight="700" letterSpacing="0.5" style={{ fill: "rgba(0,0,0,0.45)", fontFamily: ff }}>
                             <textPath href="#doneBottomArc" startOffset="50%" textAnchor="middle">{`${completedTitle.toUpperCase()} COMPLETED.`}</textPath>
                           </text>
                         </svg>
