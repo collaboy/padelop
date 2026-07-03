@@ -43,8 +43,6 @@ export default function Fab() {
   const [logPickerOpen, setLogPickerOpen] = useState(false);
   const [logPickerSub, setLogPickerSub] = useState<"nutrition" | "matchreview" | "upload-confirm" | null>(null);
   const [fabExpanded, setFabExpanded] = useState(false);
-  const [topRowSwiped, setTopRowSwiped] = useState(false);
-  const topRowTouchX = useRef(0);
   const [insertUploadLoading, setInsertUploadLoading] = useState(false);
   const [insertUploadCategory, setInsertUploadCategory] = useState<string | null>(null);
   const [smartUploadResult, setSmartUploadResult] = useState<{ category: string; label: string; confidence: string; data: Record<string, string> } | null>(null);
@@ -114,7 +112,6 @@ export default function Fab() {
     setLogPickerSub(null);
     setFabExpanded(false);
     setSmartUploadError(null);
-    setTopRowSwiped(false);
   }
 
   const inputSt: React.CSSProperties = { width: "100%", padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", outline: "none", fontFamily: "inherit", background: "#f8f9fa", boxSizing: "border-box" };
@@ -200,22 +197,9 @@ export default function Fab() {
                   </div>
                 )}
 
-                {/* Top row — Home, My Profile, +, [Settings hidden] */}
-                <div
-                  style={{ overflow: "hidden" }}
-                  onTouchStart={e => { topRowTouchX.current = e.touches[0].clientX; }}
-                  onTouchEnd={e => {
-                    const dx = e.changedTouches[0].clientX - topRowTouchX.current;
-                    if (dx < -40) setTopRowSwiped(true);
-                    if (dx > 40) setTopRowSwiped(false);
-                  }}
-                >
-                  <div style={{
-                    display: "flex", gap: 10,
-                    width: "calc((400vw - 118px) / 3)",
-                    transform: topRowSwiped ? "translateX(calc(-(100vw - 22px) / 3))" : "translateX(0)",
-                    transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
-                  }}>
+                {/* Top row — Home, My Profile, +, [Settings — swipe left to reveal] */}
+                <div style={{ overflowX: "scroll", scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}>
+                  <div style={{ display: "flex", gap: 10 }}>
                     <button
                       onClick={() => { setNavLoading("home"); router.push("/home8"); }}
                       className="active:scale-95 transition-transform"
@@ -242,7 +226,7 @@ export default function Fab() {
                     <button
                       onClick={() => { closeAll(); router.push("/settings"); }}
                       className="active:scale-95 transition-transform"
-                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1", opacity: topRowSwiped ? 1 : 0, transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}
+                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
                     >
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                       <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Settings</span>
