@@ -3,10 +3,8 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { saveGearToDb, uploadGearImageToStorage, deleteGearImageFromStorage, saveProfileToDb, saveNutritionInsightToDb, saveUpcomingMatch, saveScheduleDoneToDb, saveScoreSnapshotToDb, saveNutritionToDb, saveNoteToDb, saveMatchReview } from "@/lib/db";
-import { resizeImage } from "@/lib/image";
+import { saveGearToDb, uploadGearImageToStorage, deleteGearImageFromStorage, saveNutritionInsightToDb, saveUpcomingMatch, saveScheduleDoneToDb, saveScoreSnapshotToDb, saveNutritionToDb, saveNoteToDb, saveMatchReview } from "@/lib/db";
 import LogSheet from "@/components/log-sheet";
-import AvatarCropModal from "@/components/avatar-crop-modal";
 import { hydrateFromSupabase } from "@/lib/sync";
 import { analyzeMeals, compareMealsToSchedule, foodGrade, loadFoodHistory, type MealEntry } from "@/lib/food-scoring";
 import {
@@ -473,7 +471,6 @@ export default function ProfilePage() {
 
   // Profile
   const [profile, setProfile] = useState<Profile>(EMPTY);
-  const [saved, setSaved]     = useState(false);
   const [navLoading, setNavLoading] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState("");
   const isAdmin = userEmail.toLowerCase() === "evanderbijl@hotmail.com";
@@ -562,7 +559,6 @@ export default function ProfilePage() {
   const gearPanelOpen       = openPanel === 'gear';
   const matchesPanelOpen    = openPanel === 'matches';
   const togglePanel = (name: string) => setOpenPanel(p => p === name ? null : name);
-  const profileCirclePanelOpen = openPanel === 'profileCircle';
   const [formScore, setFormScore] = useState<FormScore | null>(null);
   const [hydrationMl, setHydrationMl] = useState(0);
   const [nextMatchInfoMode, setNextMatchInfoMode] = useState<'edit'|'add'|null>(null);
@@ -947,7 +943,6 @@ export default function ProfilePage() {
   const [trendOpen, setTrendOpen] = useState(false);
   const [featuredIdx, setFeaturedIdx] = useState(() => Math.floor(Math.random() * 8));
   const [gearEditOpen, setGearEditOpen] = useState(false);
-  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [racketName, setRacketName] = useState("Wilson Carbon Pro v2");
   const [racketType, setRacketType] = useState("Power & Control Hybrid");
   const [racketImage, setRacketImage] = useState("");
@@ -1028,47 +1023,6 @@ export default function ProfilePage() {
     reader.readAsDataURL(file);
     e.target.value = "";
   };
-
-  const setField = (k: keyof Profile, v: string) => { setSaved(false); setProfile(p => ({ ...p, [k]: v })); };
-  const handleAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setCropSrc(reader.result as string);
-    reader.readAsDataURL(file);
-    e.target.value = "";
-  };
-  const saveAvatar = (croppedDataUrl: string) => {
-    setCropSrc(null);
-    resizeImage(croppedDataUrl, 320, 0.80).then(resized => {
-      setField("avatar", resized);
-      const updated = { ...profile, avatar: resized };
-      localStorage.setItem(PROFILE_KEY, JSON.stringify(updated));
-      window.dispatchEvent(new Event("storage"));
-      saveProfileToDb({ display_name: updated.name, avatar_url: resized });
-      setSaved(true);
-    }).catch(() => {
-      setField("avatar", croppedDataUrl);
-      const updated = { ...profile, avatar: croppedDataUrl };
-      localStorage.setItem(PROFILE_KEY, JSON.stringify(updated));
-      window.dispatchEvent(new Event("storage"));
-      saveProfileToDb({ display_name: updated.name, avatar_url: croppedDataUrl });
-      setSaved(true);
-    });
-  };
-  const save = () => {
-    localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
-    window.dispatchEvent(new Event("storage"));
-    saveProfileToDb({
-      display_name:  profile.name,
-      dominant_hand: profile.hand         || undefined,
-      play_level:    profile.level        || undefined,
-      position:      profile.position     || undefined,
-      playing_since: profile.playingSince || undefined,
-    });
-    setSaved(true);
-  };
-  const canSave = profile.name.trim().length > 0;
 
   // Matches tab helpers
   function matchSaveList(list: StoredMatch[]) {
@@ -1166,6 +1120,8 @@ export default function ProfilePage() {
   const swipeStartY = useRef(0);
   const [schedSwipeX, setSchedSwipeX] = useState(0);
   const schedSwipeTrackRef = useRef<HTMLDivElement>(null);
+  const [panelExpandedMealIdx, setPanelExpandedMealIdx] = useState<number | null>(null);
+  const [panelCheckedMeals, setPanelCheckedMeals] = useState<Set<number>>(new Set());
 
   function onSwipeStart(e: React.TouchEvent) {
     swipeStartX.current = e.touches[0].clientX;
@@ -1198,90 +1154,7 @@ export default function ProfilePage() {
       </button>
 
       {/* ── Profile ──────────────────────────────────────────────────────── */}
-        <div style={{ padding: "20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
-
-          {/* ── Profile identity card ────────────────────────────────── */}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "12px 18px 18px" }}>
-            <div style={{ position: "relative", flexShrink: 0 }}>
-              <div style={{ width: 84, height: 84, borderRadius: "50%", overflow: "hidden", background: profile.avatar ? "transparent" : "#f0f2f5", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {profile.avatar
-                  // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={profile.avatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  : <span style={{ fontSize: 30, fontWeight: 800, color: "#2653d4" }}>{initials(profile.name)}</span>}
-              </div>
-              <button onClick={() => togglePanel('profileCircle')} style={{ position: "absolute", top: -2, right: -2, width: 20, height: 20, borderRadius: "50%", background: "#8a9096", border: "2px solid #f4f4f6", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                </svg>
-              </button>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
-              <p style={{ margin: 0, fontSize: "clamp(20px, 5.1vw, 25px)", fontWeight: 700, color: "#1a1c1c", textAlign: "center", lineHeight: 1.2 }}>{profile.name || "Your Name"}</p>
-              {(profile.level || profile.position) && (
-                <p style={{ margin: 0, fontSize: "clamp(15px, 3.8vw, 18px)", fontWeight: 500, color: "#6b7480", textAlign: "center", lineHeight: 1.3 }}>
-                  {[profile.level ? `Level ${profile.level}` : null, profile.position].filter(Boolean).join(" · ")}
-                </p>
-              )}
-              {profile.hand         && <p style={{ margin: 0, fontSize: "clamp(15px, 3.8vw, 18px)", fontWeight: 500, color: "#6b7480", textAlign: "center", lineHeight: 1.3 }}>{profile.hand}-handed</p>}
-              {profile.playingSince && <p style={{ margin: 0, fontSize: "clamp(15px, 3.8vw, 18px)", fontWeight: 500, color: "#6b7480", textAlign: "center", lineHeight: 1.3 }}>Since {profile.playingSince}</p>}
-            </div>
-          </div>
-          {profileCirclePanelOpen && (
-            <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-              <div style={{ padding: "18px 18px 16px" }}>
-                <p style={{ margin: "0 0 14px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Edit Profile</p>
-                <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
-                  <label style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 60, height: 60, borderRadius: "50%", overflow: "hidden", background: "#f0f2f5", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      {profile.avatar
-                        // eslint-disable-next-line @next/next/no-img-element
-                        ? <img src={profile.avatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        : <span style={{ fontSize: 22, fontWeight: 800, color: "#2653d4" }}>{initials(profile.name)}</span>}
-                    </div>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: "#2653d4" }}>Change photo</span>
-                    <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleAvatar} />
-                  </label>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                    <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Name</label>
-                    <input value={profile.name} onChange={e => setField("name", e.target.value)} placeholder="Your name" style={{ padding: "9px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 15, outline: "none" }} />
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                    <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Playing since</label>
-                    <input value={profile.playingSince} onChange={e => setField("playingSince", e.target.value)} placeholder="e.g. 2019" style={{ padding: "9px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 15, outline: "none" }} />
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                    <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Level</label>
-                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                      {LEVELS.map(l => (
-                        <button key={l} onClick={() => setField("level", l)} style={{ padding: "6px 12px", borderRadius: 20, border: "1.5px solid", fontSize: 13, fontWeight: 700, cursor: "pointer", borderColor: profile.level === l ? "#2653d4" : "#e2e5ea", background: profile.level === l ? "#eef2ff" : "transparent", color: profile.level === l ? "#2653d4" : "#6b7480" }}>{l}</button>
-                      ))}
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", gap: 10 }}>
-                    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
-                      <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Position</label>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                        {POSITIONS.map(p => (
-                          <button key={p} onClick={() => setField("position", p)} style={{ padding: "7px 10px", borderRadius: 10, border: "1.5px solid", fontSize: 13, fontWeight: 600, cursor: "pointer", borderColor: profile.position === p ? "#2653d4" : "#e2e5ea", background: profile.position === p ? "#eef2ff" : "transparent", color: profile.position === p ? "#2653d4" : "#6b7480", textAlign: "left" }}>{p}</button>
-                        ))}
-                      </div>
-                    </div>
-                    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
-                      <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Hand</label>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                        {HANDS.map(h => (
-                          <button key={h} onClick={() => setField("hand", h)} style={{ padding: "7px 10px", borderRadius: 10, border: "1.5px solid", fontSize: 13, fontWeight: 600, cursor: "pointer", borderColor: profile.hand === h ? "#2653d4" : "#e2e5ea", background: profile.hand === h ? "#eef2ff" : "transparent", color: profile.hand === h ? "#2653d4" : "#6b7480", textAlign: "left" }}>{h}</button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <button onClick={save} disabled={!canSave} style={{ padding: 11, borderRadius: 14, background: canSave ? "#2653d4" : "#c4c7c7", color: "#fff", border: "none", fontSize: 15, fontWeight: 700, cursor: canSave ? "pointer" : "default", marginTop: 4 }}>{saved ? "Saved ✓" : "Save"}</button>
-                </div>
-              </div>
-            </div>
-          )}
+        <div style={{ padding: "62px 20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
 
           {panelSmartError && (
             <div style={{ background: "#fff5f5", border: "1.5px solid #fecaca", borderRadius: 12, padding: "10px 14px" }}>
@@ -1606,7 +1479,7 @@ export default function ProfilePage() {
                             const isDone = (schedDone[todayKey] ?? []).includes(item.title);
                             return (
                               <div key={item.title}
-                                onClick={() => { if (SCHEDULE_DETAILS[item.title] || item.isDrill) setPanelSchedModalIdx(i); }}
+                                onClick={() => { if (SCHEDULE_DETAILS[item.title] || item.isDrill) { setPanelSchedModalIdx(i); setPanelExpandedMealIdx(null); setPanelCheckedMeals(new Set()); } }}
                                 style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0", cursor: SCHEDULE_DETAILS[item.title] || item.isDrill ? "pointer" : "default", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f6" : "none" }}>
                                 <button onClick={e => { e.stopPropagation(); panelToggleDone(item.title); }}
                                   style={{ width: 20, height: 20, borderRadius: 5, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s", cursor: "pointer" }}>
@@ -2625,12 +2498,41 @@ export default function ProfilePage() {
                 <p style={{ margin: "20px 0 4px", fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.15 }}>{item.title}</p>
                 {isMeal && detail?.type === 'meal' && (
                   <div className="flex flex-col pt-4">
-                    <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#8a9096" }}>{detail.focus}</p>
+                    <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#8a9096" }}>{detail.focus}</p>
+                    <p style={{ fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 600, color: "#1a1c1c", margin: "0 0 8px" }}>What did you eat?</p>
                     {detail.options.map((meal, i) => (
-                      <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "6px 0" }}>
-                        <p style={{ margin: 0, fontSize: 16, fontWeight: 500, color: "#1a1c1c", lineHeight: 1.4 }}>{meal.title}</p>
+                      <div key={i}>
+                        <button
+                          onClick={() => setPanelExpandedMealIdx(panelExpandedMealIdx === i ? null : i)}
+                          style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "10px 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
+                            <button
+                              onClick={e => { e.stopPropagation(); setPanelCheckedMeals(prev => { const next = new Set(prev); next.has(i) ? next.delete(i) : next.add(i); return next; }); }}
+                              style={{ flexShrink: 0, width: 20, height: 20, borderRadius: 5, border: `2px solid ${panelCheckedMeals.has(i) ? "#16a34a" : "#c4c7c7"}`, background: panelCheckedMeals.has(i) ? "#16a34a" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}
+                            >
+                              {panelCheckedMeals.has(i) && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>}
+                            </button>
+                            <span style={{ fontSize: 15, fontWeight: 600, color: "#1a1c1c", lineHeight: 1.3, textAlign: "left" }}>{meal.title}</span>
+                          </div>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: panelExpandedMealIdx === i ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        {panelExpandedMealIdx === i && meal.detail && (
+                          <p style={{ margin: "0 0 8px", fontSize: 13, color: "#6b7480", lineHeight: 1.5 }}>{meal.detail}</p>
+                        )}
+                        {i < detail.options.length - 1 && <div style={{ height: 1, background: "#f0f0f0" }} />}
                       </div>
                     ))}
+                    <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 6 }}>
+                      <p style={{ margin: "0 0 2px", fontSize: 12, fontWeight: 600, color: "#8a9096", letterSpacing: "0.02em" }}>or, add manually</p>
+                      <textarea
+                        value={panelMealText}
+                        onChange={e => setPanelMealText(e.target.value)}
+                        placeholder="What did you eat?"
+                        rows={3}
+                        style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box", background: "#f8f9fa" }}
+                      />
+                    </div>
                   </div>
                 )}
                 {isInfo && detail?.type === 'info' && (
@@ -2951,13 +2853,6 @@ export default function ProfilePage() {
         loadAll();
       }} defaultSub={logTab ?? undefined} />
 
-      {cropSrc && (
-        <AvatarCropModal
-          imageSrc={cropSrc}
-          onSave={saveAvatar}
-          onClose={() => setCropSrc(null)}
-        />
-      )}
     </div>
     {navLoading === "settings" && (
       <div style={{ position: "fixed", inset: 0, zIndex: 9998, background: "rgba(242,243,245,0.85)", display: "flex", alignItems: "center", justifyContent: "center" }}>

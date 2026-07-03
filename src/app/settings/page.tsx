@@ -3,6 +3,21 @@
 import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { saveProfileToDb } from "@/lib/db";
+import { resizeImage } from "@/lib/image";
+import AvatarCropModal from "@/components/avatar-crop-modal";
+
+const PROFILE_KEY = "padelop:profile";
+type Profile = { name: string; level: string; position: string; hand: string; avatar: string; playingSince: string };
+const EMPTY_PROFILE: Profile = { name: "", level: "", position: "", hand: "", avatar: "", playingSince: "" };
+const LEVELS    = ["1.0","1.5","2.0","2.5","3.0","3.5","4.0","4.5","5.0"];
+const POSITIONS = ["Left wall","Right wall","Both"];
+const HANDS     = ["Right","Left"];
+
+function initials(name: string) {
+  if (!name) return "?";
+  return name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+}
 
 async function subscribeAndSave() {
   const reg = await navigator.serviceWorker.register("/sw.js");
@@ -52,11 +67,59 @@ export default function SettingsPage() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  const [profile, setProfile] = useState<Profile>(EMPTY_PROFILE);
+  const [profileSaved, setProfileSaved] = useState(false);
+  const [profilePanelOpen, setProfilePanelOpen] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+
   useEffect(() => {
     createClient().auth.getUser().then(({ data: { user } }) => {
       if (user?.email) setUserEmail(user.email);
     });
+    const raw = localStorage.getItem(PROFILE_KEY);
+    if (raw) setProfile(JSON.parse(raw));
   }, []);
+
+  const setField = (k: keyof Profile, v: string) => { setProfileSaved(false); setProfile(p => ({ ...p, [k]: v })); };
+  const handleAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setCropSrc(reader.result as string);
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+  const saveAvatar = (croppedDataUrl: string) => {
+    setCropSrc(null);
+    resizeImage(croppedDataUrl, 320, 0.80).then(resized => {
+      setField("avatar", resized);
+      const updated = { ...profile, avatar: resized };
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(updated));
+      window.dispatchEvent(new Event("storage"));
+      saveProfileToDb({ display_name: updated.name, avatar_url: resized });
+      setProfileSaved(true);
+    }).catch(() => {
+      setField("avatar", croppedDataUrl);
+      const updated = { ...profile, avatar: croppedDataUrl };
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(updated));
+      window.dispatchEvent(new Event("storage"));
+      saveProfileToDb({ display_name: updated.name, avatar_url: croppedDataUrl });
+      setProfileSaved(true);
+    });
+  };
+  const saveProfile = () => {
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+    window.dispatchEvent(new Event("storage"));
+    saveProfileToDb({
+      display_name:  profile.name,
+      dominant_hand: profile.hand         || undefined,
+      play_level:    profile.level        || undefined,
+      position:      profile.position     || undefined,
+      playing_since: profile.playingSince || undefined,
+    });
+    setProfileSaved(true);
+  };
+  const canSaveProfile = profile.name.trim().length > 0;
 
   async function handleEmailChange() {
     if (!newEmail.trim() || newEmail === userEmail) return;
@@ -147,7 +210,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="px-5 pt-6 pb-24 max-w-lg mx-auto flex flex-col gap-6">
+    <><div className="px-5 pt-6 pb-24 max-w-lg mx-auto flex flex-col gap-6">
 
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -159,6 +222,88 @@ export default function SettingsPage() {
         </button>
         <h1 className="t-heading" style={{ color: "var(--c-text)", margin: 0 }}>Settings</h1>
       </div>
+
+      {/* Profile card */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "12px 18px 4px" }}>
+        <div style={{ position: "relative", flexShrink: 0 }}>
+          <div onClick={() => setProfilePanelOpen(v => !v)} style={{ width: 84, height: 84, borderRadius: "50%", overflow: "hidden", background: profile.avatar ? "transparent" : "#f0f2f5", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+            {profile.avatar
+              // eslint-disable-next-line @next/next/no-img-element
+              ? <img src={profile.avatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              : <span style={{ fontSize: 30, fontWeight: 800, color: "#2653d4" }}>{initials(profile.name)}</span>}
+          </div>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
+          <p style={{ margin: 0, fontSize: "clamp(20px, 5.1vw, 25px)", fontWeight: 700, color: "var(--c-text)", textAlign: "center", lineHeight: 1.2 }}>{profile.name || "Your Name"}</p>
+          {(profile.level || profile.position) && (
+            <p style={{ margin: 0, fontSize: "clamp(14px, 3.5vw, 16px)", fontWeight: 500, color: "var(--c-hint)", textAlign: "center", lineHeight: 1.3 }}>
+              {[profile.level ? `Level ${profile.level}` : null, profile.position].filter(Boolean).join(" · ")}
+            </p>
+          )}
+          {profile.hand         && <p style={{ margin: 0, fontSize: "clamp(14px, 3.5vw, 16px)", fontWeight: 500, color: "var(--c-hint)", textAlign: "center", lineHeight: 1.3 }}>{profile.hand}-handed</p>}
+          {profile.playingSince && <p style={{ margin: 0, fontSize: "clamp(14px, 3.5vw, 16px)", fontWeight: 500, color: "var(--c-hint)", textAlign: "center", lineHeight: 1.3 }}>Since {profile.playingSince}</p>}
+        </div>
+        <button onClick={() => setProfilePanelOpen(v => !v)} style={{ marginTop: 2, fontSize: 13, fontWeight: 600, color: "#2653d4", background: "none", border: "none", cursor: "pointer", padding: "2px 0" }}>
+          {profilePanelOpen ? "Done" : "Edit profile"}
+        </button>
+      </div>
+
+      {profilePanelOpen && (
+        <div style={{ background: "#fff", borderRadius: "var(--r-md)", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)", overflow: "hidden" }}>
+          <div style={{ padding: "18px 18px 16px" }}>
+            <p style={{ margin: "0 0 14px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-hint)" }}>Edit Profile</p>
+            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 16 }}>
+              <label style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 60, height: 60, borderRadius: "50%", overflow: "hidden", background: "#f0f2f5", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {profile.avatar
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img src={profile.avatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    : <span style={{ fontSize: 22, fontWeight: 800, color: "#2653d4" }}>{initials(profile.name)}</span>}
+                </div>
+                <span style={{ fontSize: 14, fontWeight: 600, color: "#2653d4" }}>Change photo</span>
+                <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleAvatar} />
+              </label>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-hint)" }}>Name</label>
+                <input value={profile.name} onChange={e => setField("name", e.target.value)} placeholder="Your name" style={{ padding: "9px 12px", borderRadius: 10, border: "1.5px solid var(--c-line)", background: "var(--c-bg-input)", fontSize: 15, color: "var(--c-text)", outline: "none" }} />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-hint)" }}>Playing since</label>
+                <input value={profile.playingSince} onChange={e => setField("playingSince", e.target.value)} placeholder="e.g. 2019" style={{ padding: "9px 12px", borderRadius: 10, border: "1.5px solid var(--c-line)", background: "var(--c-bg-input)", fontSize: 15, color: "var(--c-text)", outline: "none" }} />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-hint)" }}>Level</label>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {LEVELS.map(l => (
+                    <button key={l} onClick={() => setField("level", l)} style={{ padding: "6px 12px", borderRadius: 20, border: "1.5px solid", fontSize: 13, fontWeight: 700, cursor: "pointer", borderColor: profile.level === l ? "#2653d4" : "var(--c-line)", background: profile.level === l ? "#eef2ff" : "transparent", color: profile.level === l ? "#2653d4" : "var(--c-hint)" }}>{l}</button>
+                  ))}
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 10 }}>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-hint)" }}>Position</label>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    {POSITIONS.map(p => (
+                      <button key={p} onClick={() => setField("position", p)} style={{ padding: "7px 10px", borderRadius: 10, border: "1.5px solid", fontSize: 13, fontWeight: 600, cursor: "pointer", borderColor: profile.position === p ? "#2653d4" : "var(--c-line)", background: profile.position === p ? "#eef2ff" : "transparent", color: profile.position === p ? "#2653d4" : "var(--c-hint)", textAlign: "left" }}>{p}</button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-hint)" }}>Hand</label>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    {HANDS.map(h => (
+                      <button key={h} onClick={() => setField("hand", h)} style={{ padding: "7px 10px", borderRadius: 10, border: "1.5px solid", fontSize: 13, fontWeight: 600, cursor: "pointer", borderColor: profile.hand === h ? "#2653d4" : "var(--c-line)", background: profile.hand === h ? "#eef2ff" : "transparent", color: profile.hand === h ? "#2653d4" : "var(--c-hint)", textAlign: "left" }}>{h}</button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <button onClick={saveProfile} disabled={!canSaveProfile} style={{ padding: 11, borderRadius: 14, background: canSaveProfile ? "#2653d4" : "#c4c7c7", color: "#fff", border: "none", fontSize: 15, fontWeight: 700, cursor: canSaveProfile ? "pointer" : "default", marginTop: 4 }}>{profileSaved ? "Saved ✓" : "Save"}</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Account */}
       <section>
@@ -391,5 +536,14 @@ export default function SettingsPage() {
       </p>
 
     </div>
+
+    {cropSrc && (
+      <AvatarCropModal
+        imageSrc={cropSrc}
+        onSave={saveAvatar}
+        onClose={() => setCropSrc(null)}
+      />
+    )}
+  </>
   );
 }
