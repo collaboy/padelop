@@ -559,8 +559,6 @@ export default function ProfilePage() {
   const gearPanelOpen       = openPanel === 'gear';
   const matchesPanelOpen    = openPanel === 'matches';
   const togglePanel = (name: string) => setOpenPanel(p => p === name ? null : name);
-  const [row2Swiped, setRow2Swiped] = useState(false);
-  const row2TouchX = useRef(0);
   const [formScore, setFormScore] = useState<FormScore | null>(null);
   const [hydrationMl, setHydrationMl] = useState(0);
   const [nextMatchInfoMode, setNextMatchInfoMode] = useState<'edit'|'add'|null>(null);
@@ -1496,22 +1494,8 @@ export default function ProfilePage() {
                       </div>
                     )}
 
-                    {/* Row 2: Streak · Form Score · Gear · [Settings hidden] */}
-                    <div
-                      style={{ overflow: "hidden" }}
-                      onTouchStart={e => { row2TouchX.current = e.touches[0].clientX; }}
-                      onTouchEnd={e => {
-                        const dx = e.changedTouches[0].clientX - row2TouchX.current;
-                        if (dx < -40) setRow2Swiped(true);
-                        if (dx > 40) setRow2Swiped(false);
-                      }}
-                    >
-                      <div style={{
-                        display: "flex", gap: 10,
-                        width: "calc((400vw - 150px) / 3)",
-                        transform: row2Swiped ? "translateX(calc(-(100vw - 30px) / 3))" : "translateX(0)",
-                        transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)",
-                      }}>
+                    {/* Row 2: Streak · Form Score · Gear */}
+                    <div style={{ display: "flex", gap: 10 }}>
                       {/* Streak */}
                       {(() => {
                         const STIERS = [
@@ -1525,7 +1509,7 @@ export default function ProfilePage() {
                         const stier = [...STIERS].reverse().find(t => streak >= t.min) ?? STIERS[0];
                         return (
                           <button onClick={() => togglePanel('streak')}
-                            style={{ flex: "0 0 calc((100vw - 60px) / 3)", aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(streakPanelOpen) }}>
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(streakPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1554,7 +1538,7 @@ export default function ProfilePage() {
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                         return (
                           <button onClick={() => togglePanel('formScore')}
-                            style={{ flex: "0 0 calc((100vw - 60px) / 3)", aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(formScorePanelOpen) }}>
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(formScorePanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="formScoreArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1582,7 +1566,7 @@ export default function ProfilePage() {
                         const label = racketName || "—";
                         return (
                           <button onClick={() => togglePanel('gear')}
-                            style={{ flex: "0 0 calc((100vw - 60px) / 3)", aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(gearPanelOpen) }}>
+                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", ...dim(gearPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="gearArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1600,23 +1584,6 @@ export default function ProfilePage() {
                           </button>
                         );
                       })()}
-
-                      {/* Settings tile — invisible until swiped left */}
-                      <button
-                        onClick={() => router.push("/settings")}
-                        style={{ flex: "0 0 calc((100vw - 60px) / 3)", aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", opacity: row2Swiped ? 1 : 0, transition: "opacity 0.35s cubic-bezier(0.4,0,0.2,1)" }}
-                      >
-                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                          <defs><path id="settingsArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                          <circle cx="100" cy="100" r="99" fill="white" />
-                          <text fontSize="19" fontWeight="700" letterSpacing="2.5" style={{ fill: "#9aa0a6", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                            <textPath href="#settingsArc" startOffset="50%" textAnchor="middle">SETTINGS</textPath>
-                          </text>
-                          <path d="M100 85 a8 8 0 1 0 0.001 0 Z" fill="none" stroke="#9aa0a6" strokeWidth="6" />
-                          <path d="M100 75 L100 69 M100 131 L100 125 M115.6 79.4 L119.8 75.2 M80.4 120.6 L84.6 116.4 M125 95 L131 95 M69 105 L75 105 M115.6 120.6 L119.8 124.8 M80.4 79.4 L84.6 83.6" fill="none" stroke="#9aa0a6" strokeWidth="6" strokeLinecap="round" />
-                        </svg>
-                      </button>
-                      </div>
                     </div>
 
                     {/* Panel for row 2 */}
