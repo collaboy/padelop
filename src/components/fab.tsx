@@ -225,7 +225,7 @@ export default function Fab() {
                     <button
                       onClick={() => { startNavLoad(); router.push("/home8"); }}
                       className="active:scale-95 transition-transform"
-                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1", opacity: fabExpanded ? 0.35 : 1, transition: "opacity 0.2s" }}
+                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", height: fabExpanded ? "calc((100vw - 52px) / 6)" : "calc((100vw - 52px) / 3)", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, overflow: "hidden", opacity: fabExpanded ? 0.35 : 1, transition: "height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s" }}
                     >
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                       <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
@@ -233,7 +233,7 @@ export default function Fab() {
                     <button
                       onClick={() => { if (pathname.startsWith("/my-game")) { setLogPickerOpen(false); return; } startNavLoad(); router.push("/my-game"); }}
                       className="active:scale-95 transition-transform"
-                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1", opacity: fabExpanded ? 0.35 : 1, transition: "opacity 0.2s" }}
+                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", height: fabExpanded ? "calc((100vw - 52px) / 6)" : "calc((100vw - 52px) / 3)", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, overflow: "hidden", opacity: fabExpanded ? 0.35 : 1, transition: "height 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s" }}
                     >
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                       <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>My Game</span>
@@ -241,7 +241,7 @@ export default function Fab() {
                     <button
                       onClick={() => setFabExpanded(v => !v)}
                       className="active:scale-95 transition-transform"
-                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", background: fabExpanded ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
+                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", height: fabExpanded ? "calc((100vw - 52px) / 6)" : "calc((100vw - 52px) / 3)", background: fabExpanded ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, overflow: "hidden", transition: "height 0.3s cubic-bezier(0.4,0,0.2,1)" }}
                     >
                       <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     </button>
