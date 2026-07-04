@@ -210,17 +210,17 @@ export default function SettingsPage() {
   };
 
   return (
-    <><div className="px-5 pt-6 pb-24 max-w-lg mx-auto flex flex-col gap-6">
+    <><div className="px-5 pt-9 pb-24 max-w-lg mx-auto flex flex-col gap-6">
 
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
         <button
           onClick={() => router.back()}
-          style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--c-bg)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+          style={{ width: 36, height: 36, borderRadius: "50%", background: "#e8eaed", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--c-text)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
-        <h1 className="t-heading" style={{ color: "var(--c-text)", margin: 0 }}>Settings</h1>
+        <h1 style={{ fontSize: "clamp(20px, 5.5vw, 26px)", fontWeight: 800, color: "#1a1c1c", margin: "5px 0 0", letterSpacing: "-0.02em" }}>Settings</h1>
       </div>
 
       {/* Profile card */}

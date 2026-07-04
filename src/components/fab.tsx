@@ -239,7 +239,7 @@ export default function Fab() {
                       className="active:scale-95 transition-transform"
                       style={{ flex: "0 0 calc((100vw - 52px) / 3)", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
                     >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                       <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>My Game</span>
                     </button>
                     <button
