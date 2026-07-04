@@ -1199,7 +1199,7 @@ export default function ProfilePage() {
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                         return (
                           <div onClick={() => togglePanel('nextMatch')}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.35s both", ...dim(nextMatchPanelOpen) }}>
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.45s ease-out 0s both", ...dim(nextMatchPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 4px 20px rgba(38,83,212,0.35))", display: "block" }}>
                               <defs><path id="nextMatchTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#2653d4" />
@@ -1224,7 +1224,7 @@ export default function ProfilePage() {
 
                       {/* Day Type */}
                       <div onClick={() => togglePanel('dayType')}
-                        style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.42s both", ...dim(dayTypeInfoOpen) }}>
+                        style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.45s ease-out 0.03s both", ...dim(dayTypeInfoOpen) }}>
                         {(() => {
                           const parts = panelDayLabel.split(" ");
                           const mainLabel = parts.length > 1 ? parts.slice(0, -1).join(" ") : panelDayLabel;
@@ -1253,7 +1253,7 @@ export default function ProfilePage() {
 
                       {/* Today's Goals */}
                       <div onClick={() => togglePanel('sched')}
-                        style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.49s both", ...dim(panelSchedOpen) }}>
+                        style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.45s ease-out 0.06s both", ...dim(panelSchedOpen) }}>
                         <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                           <defs><path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                           <circle cx="100" cy="100" r="99" fill="white" />
@@ -1509,7 +1509,7 @@ export default function ProfilePage() {
                         const stier = [...STIERS].reverse().find(t => streak >= t.min) ?? STIERS[0];
                         return (
                           <div onClick={() => togglePanel('streak')}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.56s both", ...dim(streakPanelOpen) }}>
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.45s ease-out 0.09s both", ...dim(streakPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1538,7 +1538,7 @@ export default function ProfilePage() {
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                         return (
                           <div onClick={() => togglePanel('formScore')}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.63s both", ...dim(formScorePanelOpen) }}>
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.45s ease-out 0.12s both", ...dim(formScorePanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="formScoreArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1566,7 +1566,7 @@ export default function ProfilePage() {
                         const label = racketName || "—";
                         return (
                           <div onClick={() => togglePanel('gear')}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.70s both", ...dim(gearPanelOpen) }}>
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.45s ease-out 0.15s both", ...dim(gearPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="gearArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1762,7 +1762,7 @@ export default function ProfilePage() {
                         const subText = pct !== null ? `${Math.round(pct * 100)}% of 2L` : "not logged";
                         return (
                           <div onClick={() => togglePanel('hydration')}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.40s both", ...dim(hydrationPanelOpen) }}>
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.45s ease-out 0.03s both", ...dim(hydrationPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="hydrationArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1805,7 +1805,7 @@ export default function ProfilePage() {
                         ].filter(Boolean).length;
                         return (
                           <div onClick={() => togglePanel('insights')}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.47s both", ...dim(insightsPanelOpen) }}>
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.45s ease-out 0.06s both", ...dim(insightsPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="insightsArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1830,7 +1830,7 @@ export default function ProfilePage() {
                         const sub = total > 0 ? `${Math.round((wins / total) * 100)}% wins` : "no matches";
                         return (
                           <div onClick={() => togglePanel('matches')}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.54s both", ...dim(matchesPanelOpen) }}>
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.45s ease-out 0.09s both", ...dim(matchesPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="matchesArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -2081,7 +2081,7 @@ export default function ProfilePage() {
                         const totalTags = Object.keys(wellCounts).length + Object.keys(badCounts).length;
                         return (
                           <div onClick={() => togglePanel('goodBad')}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.61s both", ...dim(openPanel === 'goodBad') }}>
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.45s ease-out 0.12s both", ...dim(openPanel === 'goodBad') }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="goodBadArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -2102,7 +2102,7 @@ export default function ProfilePage() {
                         const totalPts = Object.values(schedDone).flat().length;
                         return (
                           <div onClick={() => togglePanel('padlaPoints')}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.68s both", ...dim(openPanel === 'padlaPoints') }}>
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.45s ease-out 0.15s both", ...dim(openPanel === 'padlaPoints') }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="padlaArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
