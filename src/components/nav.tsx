@@ -13,7 +13,7 @@ export default function Nav() {
     return () => clearInterval(id);
   }, []);
 
-  if (pathname === "/profile") return null;
+  if (pathname === "/my-game") return null;
 
   return (
     <div className="fixed top-4 left-4 z-[70]">

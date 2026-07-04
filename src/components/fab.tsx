@@ -223,7 +223,7 @@ export default function Fab() {
                   </div>
                 )}
 
-                {/* Top row — Home, My Profile, +, [Settings — swipe left to reveal] */}
+                {/* Top row — Home, My Game, +, [Settings — swipe left to reveal] */}
                 <div ref={tileRowRef} onScroll={e => setTileScrolled((e.currentTarget.scrollLeft) > 30)} style={{ overflowX: "scroll", scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}>
                   <div style={{ display: "flex", gap: 10 }}>
                     <button
@@ -235,12 +235,12 @@ export default function Fab() {
                       <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
                     </button>
                     <button
-                      onClick={() => { if (pathname.startsWith("/profile")) { setLogPickerOpen(false); return; } setNavLoading("profile"); router.push("/profile?tab=profile"); }}
+                      onClick={() => { if (pathname.startsWith("/my-game")) { setLogPickerOpen(false); return; } setNavLoading("profile"); router.push("/my-game?tab=profile"); }}
                       className="active:scale-95 transition-transform"
                       style={{ flex: "0 0 calc((100vw - 52px) / 3)", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
                     >
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="8" r="4"/><path d="M5 20c0-4 3.1-7 7-7s7 3 7 7"/></svg>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>My Profile</span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>My Game</span>
                     </button>
                     <button
                       onClick={() => setFabExpanded(v => !v)}
@@ -261,8 +261,8 @@ export default function Fab() {
                 </div>
                 {/* Swipe hint dots */}
                 <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: 4 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#1a1c1c", opacity: tileScrolled ? 0.15 : 0.4, transition: "opacity 0.2s" }} />
-                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#1a1c1c", opacity: tileScrolled ? 0.4 : 0.15, transition: "opacity 0.2s" }} />
+                  <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#1a1c1c", opacity: tileScrolled ? 0.05 : 0.12, transition: "opacity 0.2s" }} />
+                  <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#1a1c1c", opacity: tileScrolled ? 0.12 : 0.05, transition: "opacity 0.2s" }} />
                 </div>
                 {/* Log manually expanded */}
                 <div style={{ overflow: "hidden", maxHeight: fabExpanded ? 600 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>

@@ -1145,6 +1145,16 @@ export default function ProfilePage() {
 
       {/* ── Profile ──────────────────────────────────────────────────────── */}
         <div style={{ padding: "36px 20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
+          {/* Header */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button
+              onClick={() => router.back()}
+              style={{ width: 36, height: 36, borderRadius: "50%", background: "#e8eaed", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <h1 style={{ fontSize: "clamp(20px, 5.5vw, 26px)", fontWeight: 800, color: "#1a1c1c", margin: "5px 0 0", letterSpacing: "-0.02em" }}>My Game</h1>
+          </div>
 
           {panelSmartError && (
             <div style={{ background: "#fff5f5", border: "1.5px solid #fecaca", borderRadius: 12, padding: "10px 14px" }}>
@@ -1224,7 +1234,7 @@ export default function ProfilePage() {
                               <defs><path id="dayTypeTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
                               <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: panelDayColor, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                                <textPath href="#dayTypeTopArc" startOffset="50%" textAnchor="middle">DAY TYPE</textPath>
+                                <textPath href="#dayTypeTopArc" startOffset="50%" textAnchor="middle">TODAY</textPath>
                               </text>
                               <text x="100" y={dayWord ? "93" : "108"} textAnchor="middle" dominantBaseline="middle"
                                 fontSize="24" fontWeight="800" style={{ fill: panelDayColor, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
@@ -1504,7 +1514,7 @@ export default function ProfilePage() {
                               <defs><path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
                               <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                                <textPath href="#streakTopArc" startOffset="50%" textAnchor="middle">{stier.label.toUpperCase()}</textPath>
+                                <textPath href="#streakTopArc" startOffset="50%" textAnchor="middle">STREAK</textPath>
                               </text>
                               <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
                                 fontSize={streak >= 100 ? "34" : streak >= 10 ? "40" : "46"} fontWeight="800"
@@ -2075,10 +2085,8 @@ export default function ProfilePage() {
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="goodBadArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" fontFamily={ff}>
-                                <textPath href="#goodBadArc" startOffset="50%" textAnchor="middle">
-                                  <tspan fill="#16a34a">GOOD</tspan><tspan fill="#9aa0a6"> / </tspan><tspan fill={color}>BAD</tspan>
-                                </textPath>
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#goodBadArc" startOffset="50%" textAnchor="middle">TAGS</textPath>
                               </text>
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{totalTags > 0 ? totalTags : "—"}</text>
                               <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>tags logged</text>
