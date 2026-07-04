@@ -1275,7 +1275,7 @@ export default function ProfilePage() {
                               const x1 = (cX + r * Math.cos(toRad(a1))).toFixed(2), y1 = (cY + r * Math.sin(toRad(a1))).toFixed(2);
                               const x2 = (cX + r * Math.cos(toRad(a2))).toFixed(2), y2 = (cY + r * Math.sin(toRad(a2))).toFixed(2);
                               return <path key={item.title} d={`M ${x1},${y1} A ${r},${r} 0 0,0 ${x2},${y2}`}
-                                stroke={todayDoneSet.has(item.title) ? item.color : "rgba(255,255,255,0.25)"} strokeWidth="9" fill="none" strokeLinecap="round" style={{ transition: "stroke 0.3s" }} />;
+                                stroke={todayDoneSet.has(item.title) ? "white" : "rgba(255,255,255,0.25)"} strokeWidth="9" fill="none" strokeLinecap="round" style={{ transition: "stroke 0.3s" }} />;
                             });
                           })()}
                         </svg>
