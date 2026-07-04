@@ -1580,7 +1580,7 @@ export default function ProfilePage() {
                                 <textPath href="#hydrationArc" startOffset="50%" textAnchor="middle">HYDRATION</textPath>
                               </text>
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-                                fontSize={centerText.length > 4 ? "28" : "38"} fontWeight="800"
+                                fontSize={centerText.length > 4 ? "34" : centerText.length > 2 ? "42" : "46"} fontWeight="800"
                                 style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff }}>
                                 {centerText}
                               </text>
