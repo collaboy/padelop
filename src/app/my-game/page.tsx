@@ -1494,7 +1494,7 @@ export default function ProfilePage() {
                       </div>
                     )}
 
-                    {/* Row 2: Streak · Form Score · Gear */}
+                    {/* Row 2: Streak · Form Score · Hydration */}
                     <div style={{ display: "flex", gap: 10 }}>
                       {/* Streak */}
                       {(() => {
@@ -1559,31 +1559,40 @@ export default function ProfilePage() {
                         );
                       })()}
 
-                      {/* Gear tile */}
+                      {/* Hydration */}
                       {(() => {
-                        const color = "#6b7480";
+                        const ml = hydrationMl;
+                        const hasData = ml > 0;
+                        const color = "#0ea5e9";
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        const label = racketName || "—";
+                        const pct = hasData ? Math.min(ml / 2000, 1) : null;
+                        const centerText = hasData
+                          ? (ml >= 1000 ? `${(ml / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${ml}ml`)
+                          : "—";
+                        const subText = pct !== null ? `${Math.round(pct * 100)}% of 2L` : "not logged";
                         return (
-                          <div onClick={() => togglePanel('gear')}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(gearPanelOpen) }}>
+                          <div onClick={() => togglePanel('hydration')}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(hydrationPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                              <defs><path id="gearArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <defs><path id="hydrationArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
                               <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#gearArc" startOffset="50%" textAnchor="middle">MY GEAR</textPath>
+                                <textPath href="#hydrationArc" startOffset="50%" textAnchor="middle">HYDRATION</textPath>
                               </text>
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-                                fontSize={label.length > 8 ? "24" : label.length > 5 ? "36" : "46"} fontWeight="800"
-                                style={{ fill: color, fontFamily: ff }}>{label}</text>
-                              {racketType ? (
-                                <text x="100" y="152" textAnchor="middle" fontSize="19" fontWeight="600"
-                                  style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{racketType.slice(0, 10)}</text>
-                              ) : null}
+                                fontSize={centerText.length > 4 ? "28" : "38"} fontWeight="800"
+                                style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff }}>
+                                {centerText}
+                              </text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600"
+                                style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
+                                {subText}
+                              </text>
                             </svg>
                           </div>
                         );
                       })()}
+
                     </div>
 
                     {/* Panel for row 2 */}
@@ -1667,117 +1676,64 @@ export default function ProfilePage() {
                       );
                     })()}
 
-                    {/* Gear panel */}
-                    {gearPanelOpen && (
-                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px 10px" }}>
-                          <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>My Gear</p>
-                          <button onClick={() => setGearEditOpen(o => !o)} className="t-caption" style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 500, color: "var(--c-forest)" }}>{gearEditOpen ? "Done" : "Edit"}</button>
-                        </div>
-                        <div ref={racketRowRef} style={{ display: "flex", alignItems: "stretch", padding: "0 12px 12px", gap: 14 }}>
-                          <div style={{ position: "relative", flexShrink: 0, width: racketSlotSize, height: racketSlotSize }}>
-                            <label htmlFor="racket-img-upload-gear" style={{ cursor: "pointer", display: "block", width: "100%", height: "100%" }}>
-                              <div style={{ width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                {racketImage ? (
-                                  // eslint-disable-next-line @next/next/no-img-element
-                                  <img src={racketImage} alt="Racket" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                ) : (
-                                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c4c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                                )}
-                              </div>
-                            </label>
-                            <input id="racket-img-upload-gear" type="file" accept="image/*" style={{ display: "none" }} onChange={handleRacketImage} />
-                          </div>
-                          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 6 }}>
-                            {gearEditOpen ? (
-                              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                                <input placeholder="Racket name" value={racketName} onChange={e => { setRacketName(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketName = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
-                                <input placeholder="Racket type (e.g. Control)" value={racketType} onChange={e => { setRacketType(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketType = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
-                                <input placeholder="Using since (e.g. Jan 2024)" value={racketSince} onChange={e => { setRacketSince(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketSince = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
-                              </div>
-                            ) : (
+                    {/* Hydration panel */}
+                    {hydrationPanelOpen && (() => {
+                      const ml = hydrationMl;
+                      const hLogs: HydrationEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch { return []; } })();
+                      const todayLog = hLogs.find(e => new Date(e.ts).toISOString().slice(0, 10) === new Date().toISOString().slice(0, 10)) ?? null;
+                      const target = 2000;
+                      const pct = ml > 0 ? Math.min(ml / target, 1) : null;
+                      const displayMl = ml > 0 ? (ml >= 1000 ? `${(ml / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${ml}ml`) : null;
+                      return (
+                        <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                          <div style={{ padding: "18px 18px 16px" }}>
+                            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
+                              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Hydration today</span>
+                              <span style={{ fontSize: 28, fontWeight: 800, color: "#0ea5e9", lineHeight: 1 }}>{displayMl ?? "—"}</span>
+                            </div>
+                            {pct !== null && (
                               <>
-                                <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1a1c1c" }}>{racketName || <span style={{ color: "#b0b5ba" }}>No racket added</span>}</p>
-                                {racketType && <p style={{ margin: 0, fontSize: 15, color: "#6b7480" }}>{racketType}</p>}
-                                {racketSince && <p style={{ margin: 0, fontSize: 14, color: "#9aa0a6" }}>Since {racketSince}</p>}
+                                <div style={{ height: 7, borderRadius: 99, background: "#f0f0f0", marginBottom: 6 }}>
+                                  <div style={{ width: `${Math.round(pct * 100)}%`, height: "100%", borderRadius: 99, background: pct >= 1 ? "#16a34a" : "#0ea5e9", transition: "width 0.4s" }} />
+                                </div>
+                                <span style={{ fontSize: 15, color: "#9aa0a6", fontWeight: 500 }}>{Math.round(pct * 100)}% of {target / 1000}L daily target</span>
                               </>
+                            )}
+                            {todayLog?.quality && (
+                              <div style={{ marginTop: 10 }}>
+                                <span style={{ fontSize: 15, color: "#6b7480" }}>Feeling: <strong style={{ color: todayLog.quality === "great" ? "#16a34a" : todayLog.quality === "bad" ? "#ef4444" : "#d97706" }}>{todayLog.quality}</strong></span>
+                              </div>
+                            )}
+                            {!displayMl && !todayLog && (
+                              <p style={{ margin: 0, fontSize: 15, color: "#9aa0a6" }}>No hydration logged today. Log from the home screen or check-in.</p>
                             )}
                           </div>
                         </div>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "var(--c-line)", borderTop: "1px solid var(--c-line)" }}>
-                          <div style={{ background: "#fff", padding: "14px", display: "flex", flexDirection: "column" }}>
-                            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 10px" }}>My Shoes</p>
-                            <div style={{ position: "relative", flex: 1 }}>
-                              <label htmlFor="shoe-img-upload-gear" style={{ cursor: "pointer", display: "block" }}>
-                                <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: shoeImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                  {shoeImage
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    ? <img src={shoeImage} alt="Shoes" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 17h20v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-1z"/><path d="M2 17c0-3.5 2.5-6 6-6h2l3-2h3c2.2 0 4 1.5 4.5 3.5L21 17"/></svg>}
-                                </div>
-                              </label>
-                              {shoeImage && (
-                                <button onClick={() => { setShoeImage(""); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); delete g.shoeImage; localStorage.setItem("padelop:gear", JSON.stringify(g)); deleteGearImageFromStorage("shoe"); }} style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
-                                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                </button>
-                              )}
-                            </div>
-                            <input id="shoe-img-upload-gear" type="file" accept="image/*" className="hidden" onChange={handleShoeImage} />
-                          </div>
-                          <div style={{ background: "#fff", padding: "14px", display: "flex", flexDirection: "column" }}>
-                            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 10px" }}>My Kit</p>
-                            <div style={{ position: "relative", flex: 1 }}>
-                              <label htmlFor="kit-img-upload-gear" style={{ cursor: "pointer", display: "block" }}>
-                                <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: kitImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                  {kitImage
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    ? <img src={kitImage} alt="Kit" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg>}
-                                </div>
-                              </label>
-                              {kitImage && (
-                                <button onClick={() => { setKitImage(""); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); delete g.kitImage; localStorage.setItem("padelop:gear", JSON.stringify(g)); deleteGearImageFromStorage("kit"); }} style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
-                                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                </button>
-                              )}
-                            </div>
-                            <input id="kit-img-upload-gear" type="file" accept="image/*" className="hidden" onChange={handleKitImage} />
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                      );
+                    })()}
 
-                    {/* Row 3: Hydration · Insights · Matches */}
+                    {/* Row 3: Matches · Insights · Gear */}
                     <div style={{ display: "flex", gap: 10 }}>
-                      {/* Hydration */}
+                      {/* Matches circle */}
                       {(() => {
-                        const ml = hydrationMl;
-                        const hasData = ml > 0;
-                        const color = "#0ea5e9";
+                        const color = "#2653d4";
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        const pct = hasData ? Math.min(ml / 2000, 1) : null;
-                        const centerText = hasData
-                          ? (ml >= 1000 ? `${(ml / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${ml}ml`)
-                          : "—";
-                        const subText = pct !== null ? `${Math.round(pct * 100)}% of 2L` : "not logged";
+                        const wins   = reviews.filter(r => r.result === "win").length;
+                        const losses = reviews.filter(r => r.result === "loss").length;
+                        const total  = wins + losses;
+                        const centerText = reviews.length > 0 ? String(reviews.length) : "—";
+                        const sub = total > 0 ? `${Math.round((wins / total) * 100)}% wins` : "no matches";
                         return (
-                          <div onClick={() => togglePanel('hydration')}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(hydrationPanelOpen) }}>
+                          <div onClick={() => togglePanel('matches')}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(matchesPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                              <defs><path id="hydrationArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <defs><path id="matchesArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
                               <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#hydrationArc" startOffset="50%" textAnchor="middle">HYDRATION</textPath>
+                                <textPath href="#matchesArc" startOffset="50%" textAnchor="middle">MATCHES</textPath>
                               </text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-                                fontSize={centerText.length > 4 ? "28" : "38"} fontWeight="800"
-                                style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff }}>
-                                {centerText}
-                              </text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600"
-                                style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
-                                {subText}
-                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{centerText}</text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
                             </svg>
                           </div>
                         );
@@ -1819,157 +1775,32 @@ export default function ProfilePage() {
                         );
                       })()}
 
-                      {/* Matches circle */}
+                      {/* Gear tile */}
                       {(() => {
-                        const color = "#2653d4";
+                        const color = "#6b7480";
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        const wins   = reviews.filter(r => r.result === "win").length;
-                        const losses = reviews.filter(r => r.result === "loss").length;
-                        const total  = wins + losses;
-                        const centerText = reviews.length > 0 ? String(reviews.length) : "—";
-                        const sub = total > 0 ? `${Math.round((wins / total) * 100)}% wins` : "no matches";
+                        const label = racketName || "—";
                         return (
-                          <div onClick={() => togglePanel('matches')}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(matchesPanelOpen) }}>
+                          <div onClick={() => togglePanel('gear')}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(gearPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                              <defs><path id="matchesArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <defs><path id="gearArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
                               <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#matchesArc" startOffset="50%" textAnchor="middle">MATCHES</textPath>
+                                <textPath href="#gearArc" startOffset="50%" textAnchor="middle">MY GEAR</textPath>
                               </text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{centerText}</text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
+                                fontSize={label.length > 8 ? "24" : label.length > 5 ? "36" : "46"} fontWeight="800"
+                                style={{ fill: color, fontFamily: ff }}>{label}</text>
+                              {racketType ? (
+                                <text x="100" y="152" textAnchor="middle" fontSize="19" fontWeight="600"
+                                  style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{racketType.slice(0, 10)}</text>
+                              ) : null}
                             </svg>
                           </div>
                         );
                       })()}
                     </div>
-
-                    {/* Hydration panel */}
-                    {hydrationPanelOpen && (() => {
-                      const ml = hydrationMl;
-                      const hLogs: HydrationEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch { return []; } })();
-                      const todayLog = hLogs.find(e => new Date(e.ts).toISOString().slice(0, 10) === new Date().toISOString().slice(0, 10)) ?? null;
-                      const target = 2000;
-                      const pct = ml > 0 ? Math.min(ml / target, 1) : null;
-                      const displayMl = ml > 0 ? (ml >= 1000 ? `${(ml / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${ml}ml`) : null;
-                      return (
-                        <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-                          <div style={{ padding: "18px 18px 16px" }}>
-                            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
-                              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Hydration today</span>
-                              <span style={{ fontSize: 28, fontWeight: 800, color: "#0ea5e9", lineHeight: 1 }}>{displayMl ?? "—"}</span>
-                            </div>
-                            {pct !== null && (
-                              <>
-                                <div style={{ height: 7, borderRadius: 99, background: "#f0f0f0", marginBottom: 6 }}>
-                                  <div style={{ width: `${Math.round(pct * 100)}%`, height: "100%", borderRadius: 99, background: pct >= 1 ? "#16a34a" : "#0ea5e9", transition: "width 0.4s" }} />
-                                </div>
-                                <span style={{ fontSize: 15, color: "#9aa0a6", fontWeight: 500 }}>{Math.round(pct * 100)}% of {target / 1000}L daily target</span>
-                              </>
-                            )}
-                            {todayLog?.quality && (
-                              <div style={{ marginTop: 10 }}>
-                                <span style={{ fontSize: 15, color: "#6b7480" }}>Feeling: <strong style={{ color: todayLog.quality === "great" ? "#16a34a" : todayLog.quality === "bad" ? "#ef4444" : "#d97706" }}>{todayLog.quality}</strong></span>
-                              </div>
-                            )}
-                            {!displayMl && !todayLog && (
-                              <p style={{ margin: 0, fontSize: 15, color: "#9aa0a6" }}>No hydration logged today. Log from the home screen or check-in.</p>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })()}
-
-                    {/* Insights panel */}
-                    {insightsPanelOpen && (() => {
-                      const wins   = reviews.filter(r => r.result === "win").length;
-                      const losses = reviews.filter(r => r.result === "loss").length;
-                      const last5  = [...reviews].sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 5);
-                      const last5Wins = last5.filter(r => r.result === "win").length;
-                      const topWellDone = (() => {
-                        const counts: Record<string, number> = {};
-                        reviews.flatMap(r => r.wellDone ?? []).forEach(t => { counts[t] = (counts[t] ?? 0) + 1; });
-                        return Object.entries(counts).sort((a, b) => b[1] - a[1])[0] ?? null;
-                      })();
-                      const topImprove = (() => {
-                        const counts: Record<string, number> = {};
-                        reviews.flatMap(r => r.improved ?? []).forEach(t => { counts[t] = (counts[t] ?? 0) + 1; });
-                        return Object.entries(counts).sort((a, b) => b[1] - a[1])[0] ?? null;
-                      })();
-                      const pool: { label: string; body: string }[] = [
-                        reviews.length >= 3 && wins + losses > 0
-                          ? { label: "Win rate", body: `You've won ${wins} out of ${wins + losses} recorded matches — a ${Math.round((wins / (wins + losses)) * 100)}% win rate. ${wins > losses ? "Keep it going." : "Every loss is data. Use it."}` }
-                          : null,
-                        last5.length >= 3
-                          ? { label: "Recent form", body: `In your last ${last5.length} matches you won ${last5Wins}. ${last5Wins >= 3 ? "Strong run — confidence should be high going into your next game." : last5Wins === 0 ? "Tough stretch. Look back at what you improved on and build from there." : "Mixed results — small consistency gains will tip the balance."}` }
-                          : null,
-                        topWellDone
-                          ? { label: "Your strength", body: `"${topWellDone[0]}" is the thing you've done well in most often — flagged across ${topWellDone[1]} match${topWellDone[1] > 1 ? "es" : ""}. That's your weapon. Keep sharpening it.` }
-                          : null,
-                        topImprove
-                          ? { label: "Your focus area", body: `"${topImprove[0]}" is the area you've logged as needing work most — ${topImprove[1]} time${topImprove[1] > 1 ? "s" : ""}. Targeted practice on this one will move your game the fastest.` }
-                          : null,
-                        streak > 0
-                          ? { label: "Streak", body: streak >= 7 ? `${streak} days and counting. A week-plus streak means habits are forming — that's where real gains live.` : streak >= 3 ? `${streak}-day streak. You're building momentum. Don't break the chain.` : `${streak} day${streak > 1 ? "s" : ""} in a row. Small start, big potential — log tomorrow and keep it going.` }
-                          : null,
-                        partnerCount >= 2
-                          ? { label: "Partners", body: `You've played with ${partnerCount} different partners. Variety in partners exposes you to different styles and speeds up your adaptability on court.` }
-                          : null,
-                        trainingSessions.length > 0
-                          ? { label: "Training", body: `${trainingSessions.length} training session${trainingSessions.length > 1 ? "s" : ""} logged so far. Players who train consistently between matches typically improve 2–3× faster than those who only play.` }
-                          : null,
-                        thisWeekAvg !== null && lastWeekAvg !== null
-                          ? (() => {
-                              const band = (n: number) => n >= 85 ? "Strong" : n >= 75 ? "Good" : n >= 65 ? "Steady" : "Low";
-                              const thisLabel = band(thisWeekAvg);
-                              const lastLabel = band(lastWeekAvg);
-                              const avgPillar = (snaps: ScoreSnapshot[], key: keyof ScoreSnapshot) => snaps.length ? snaps.reduce((a, s) => a + (s[key] as number), 0) / snaps.length : 0;
-                              const pillars = ["recovery", "nutrition", "training", "wellbeing"] as const;
-                              const pillarNames: Record<string, string> = { recovery: "Recovery", nutrition: "Nutrition", training: "Training", wellbeing: "Wellbeing" };
-                              const deltas = pillars.map(p => ({ p, delta: avgPillar(thisWeekSnaps, p) - avgPillar(lastWeekSnaps, p) }));
-                              const bestGain = deltas.filter(d => d.delta > 2).reduce((a, b) => b.delta > a.delta ? b : a, { p: "", delta: -Infinity });
-                              const worstDrop = deltas.filter(d => d.delta < -2).reduce((a, b) => b.delta < a.delta ? b : a, { p: "", delta: Infinity });
-                              const body = thisLabel === lastLabel
-                                ? thisWeekAvg > lastWeekAvg
-                                  ? `Still ${thisLabel} — you improved slightly this week${bestGain.p ? `, with ${pillarNames[bestGain.p].toLowerCase()} leading the way` : ""}. You're close to breaking into ${band(thisWeekAvg + 5)} territory.`
-                                  : thisWeekAvg < lastWeekAvg
-                                    ? `Still ${thisLabel}, but your scores dipped slightly this week${worstDrop.p ? ` — ${pillarNames[worstDrop.p].toLowerCase()} was the weakest area` : ""}. Nothing alarming, but worth keeping an eye on.`
-                                    : `Exactly the same as last week — your routine is holding steady. ${thisLabel === "Strong" ? "That's a great place to be." : "Improving your sleep or hydration consistency is usually the quickest way to move forward."}`
-                                : thisWeekAvg > lastWeekAvg
-                                  ? `You moved from ${lastLabel} to ${thisLabel} this week${bestGain.p ? ` — ${pillarNames[bestGain.p].toLowerCase()} improved the most` : ""}. That's real progress.`
-                                  : `Your scores dropped from ${lastLabel} to ${thisLabel} this week${worstDrop.p ? ` — ${pillarNames[worstDrop.p].toLowerCase()} took the biggest hit` : ""}. A dip happens; focus on getting your sleep and recovery back on track.`;
-                              return { label: "Week on week", body };
-                            })()
-                          : null,
-                        tournamentCount > 0
-                          ? { label: "Tournaments", body: `You've entered ${tournamentCount} tournament${tournamentCount > 1 ? "s" : ""}. Competitive pressure is one of the best accelerators — the nerves, the intensity, the opponents. Keep entering.` }
-                          : null,
-                      ].filter((x): x is { label: string; body: string } => x !== null);
-                      if (pool.length === 0) return <div style={{ borderRadius: 18, background: "#fff", padding: "20px 16px", textAlign: "center", color: "#9aa0a6", fontSize: 14 }}>No insights yet — log some matches and check-ins to unlock.</div>;
-                      const idx = featuredIdx % pool.length;
-                      const insight = pool[idx];
-                      return (
-                        <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-                          <p style={{ margin: 0, padding: "14px 16px 0", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--c-label)" }}>Featured Insights</p>
-                          <button
-                            onClick={() => setFeaturedIdx(i => (i + 1) % pool.length)}
-                            style={{ width: "100%", background: "none", border: "none", padding: "12px 16px 16px", cursor: "pointer", textAlign: "left" }}
-                          >
-                            <p style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-blue)" }}>{insight.label}</p>
-                            <p style={{ margin: "0 0 12px", fontSize: 16, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{insight.body}</p>
-                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                              <div style={{ display: "flex", gap: 4 }}>
-                                {pool.map((_, i) => (
-                                  <div key={i} style={{ width: i === idx ? 14 : 5, height: 5, borderRadius: 3, background: i === idx ? "var(--c-blue)" : "#e2e5ea", transition: "width 0.2s" }} />
-                                ))}
-                              </div>
-                              <span style={{ fontSize: 14, color: "var(--c-hint)", fontWeight: 500 }}>Tap for next</span>
-                            </div>
-                          </button>
-                        </div>
-                      );
-                    })()}
 
                     {/* Matches panel */}
                     {matchesPanelOpen && (
@@ -2064,6 +1895,176 @@ export default function ProfilePage() {
                             })}
                           </div>
                         )}
+                      </div>
+                    )}
+
+                    {/* Insights panel */}
+                    {insightsPanelOpen && (() => {
+                      const wins   = reviews.filter(r => r.result === "win").length;
+                      const losses = reviews.filter(r => r.result === "loss").length;
+                      const last5  = [...reviews].sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 5);
+                      const last5Wins = last5.filter(r => r.result === "win").length;
+                      const topWellDone = (() => {
+                        const counts: Record<string, number> = {};
+                        reviews.flatMap(r => r.wellDone ?? []).forEach(t => { counts[t] = (counts[t] ?? 0) + 1; });
+                        return Object.entries(counts).sort((a, b) => b[1] - a[1])[0] ?? null;
+                      })();
+                      const topImprove = (() => {
+                        const counts: Record<string, number> = {};
+                        reviews.flatMap(r => r.improved ?? []).forEach(t => { counts[t] = (counts[t] ?? 0) + 1; });
+                        return Object.entries(counts).sort((a, b) => b[1] - a[1])[0] ?? null;
+                      })();
+                      const pool: { label: string; body: string }[] = [
+                        reviews.length >= 3 && wins + losses > 0
+                          ? { label: "Win rate", body: `You've won ${wins} out of ${wins + losses} recorded matches — a ${Math.round((wins / (wins + losses)) * 100)}% win rate. ${wins > losses ? "Keep it going." : "Every loss is data. Use it."}` }
+                          : null,
+                        last5.length >= 3
+                          ? { label: "Recent form", body: `In your last ${last5.length} matches you won ${last5Wins}. ${last5Wins >= 3 ? "Strong run — confidence should be high going into your next game." : last5Wins === 0 ? "Tough stretch. Look back at what you improved on and build from there." : "Mixed results — small consistency gains will tip the balance."}` }
+                          : null,
+                        topWellDone
+                          ? { label: "Your strength", body: `"${topWellDone[0]}" is the thing you've done well in most often — flagged across ${topWellDone[1]} match${topWellDone[1] > 1 ? "es" : ""}. That's your weapon. Keep sharpening it.` }
+                          : null,
+                        topImprove
+                          ? { label: "Your focus area", body: `"${topImprove[0]}" is the area you've logged as needing work most — ${topImprove[1]} time${topImprove[1] > 1 ? "s" : ""}. Targeted practice on this one will move your game the fastest.` }
+                          : null,
+                        streak > 0
+                          ? { label: "Streak", body: streak >= 7 ? `${streak} days and counting. A week-plus streak means habits are forming — that's where real gains live.` : streak >= 3 ? `${streak}-day streak. You're building momentum. Don't break the chain.` : `${streak} day${streak > 1 ? "s" : ""} in a row. Small start, big potential — log tomorrow and keep it going.` }
+                          : null,
+                        partnerCount >= 2
+                          ? { label: "Partners", body: `You've played with ${partnerCount} different partners. Variety in partners exposes you to different styles and speeds up your adaptability on court.` }
+                          : null,
+                        trainingSessions.length > 0
+                          ? { label: "Training", body: `${trainingSessions.length} training session${trainingSessions.length > 1 ? "s" : ""} logged so far. Players who train consistently between matches typically improve 2–3× faster than those who only play.` }
+                          : null,
+                        thisWeekAvg !== null && lastWeekAvg !== null
+                          ? (() => {
+                              const band = (n: number) => n >= 85 ? "Strong" : n >= 75 ? "Good" : n >= 65 ? "Steady" : "Low";
+                              const thisLabel = band(thisWeekAvg);
+                              const lastLabel = band(lastWeekAvg);
+                              const avgPillar = (snaps: ScoreSnapshot[], key: keyof ScoreSnapshot) => snaps.length ? snaps.reduce((a, s) => a + (s[key] as number), 0) / snaps.length : 0;
+                              const pillars = ["recovery", "nutrition", "training", "wellbeing"] as const;
+                              const pillarNames: Record<string, string> = { recovery: "Recovery", nutrition: "Nutrition", training: "Training", wellbeing: "Wellbeing" };
+                              const deltas = pillars.map(p => ({ p, delta: avgPillar(thisWeekSnaps, p) - avgPillar(lastWeekSnaps, p) }));
+                              const bestGain = deltas.filter(d => d.delta > 2).reduce((a, b) => b.delta > a.delta ? b : a, { p: "", delta: -Infinity });
+                              const worstDrop = deltas.filter(d => d.delta < -2).reduce((a, b) => b.delta < a.delta ? b : a, { p: "", delta: Infinity });
+                              const body = thisLabel === lastLabel
+                                ? thisWeekAvg > lastWeekAvg
+                                  ? `Still ${thisLabel} — you improved slightly this week${bestGain.p ? `, with ${pillarNames[bestGain.p].toLowerCase()} leading the way` : ""}. You're close to breaking into ${band(thisWeekAvg + 5)} territory.`
+                                  : thisWeekAvg < lastWeekAvg
+                                    ? `Still ${thisLabel}, but your scores dipped slightly this week${worstDrop.p ? ` — ${pillarNames[worstDrop.p].toLowerCase()} was the weakest area` : ""}. Nothing alarming, but worth keeping an eye on.`
+                                    : `Exactly the same as last week — your routine is holding steady. ${thisLabel === "Strong" ? "That's a great place to be." : "Improving your sleep or hydration consistency is usually the quickest way to move forward."}`
+                                : thisWeekAvg > lastWeekAvg
+                                  ? `You moved from ${lastLabel} to ${thisLabel} this week${bestGain.p ? ` — ${pillarNames[bestGain.p].toLowerCase()} improved the most` : ""}. That's real progress.`
+                                  : `Your scores dropped from ${lastLabel} to ${thisLabel} this week${worstDrop.p ? ` — ${pillarNames[worstDrop.p].toLowerCase()} took the biggest hit` : ""}. A dip happens; focus on getting your sleep and recovery back on track.`;
+                              return { label: "Week on week", body };
+                            })()
+                          : null,
+                        tournamentCount > 0
+                          ? { label: "Tournaments", body: `You've entered ${tournamentCount} tournament${tournamentCount > 1 ? "s" : ""}. Competitive pressure is one of the best accelerators — the nerves, the intensity, the opponents. Keep entering.` }
+                          : null,
+                      ].filter((x): x is { label: string; body: string } => x !== null);
+                      if (pool.length === 0) return <div style={{ borderRadius: 18, background: "#fff", padding: "20px 16px", textAlign: "center", color: "#9aa0a6", fontSize: 14 }}>No insights yet — log some matches and check-ins to unlock.</div>;
+                      const idx = featuredIdx % pool.length;
+                      const insight = pool[idx];
+                      return (
+                        <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                          <p style={{ margin: 0, padding: "14px 16px 0", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--c-label)" }}>Featured Insights</p>
+                          <button
+                            onClick={() => setFeaturedIdx(i => (i + 1) % pool.length)}
+                            style={{ width: "100%", background: "none", border: "none", padding: "12px 16px 16px", cursor: "pointer", textAlign: "left" }}
+                          >
+                            <p style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-blue)" }}>{insight.label}</p>
+                            <p style={{ margin: "0 0 12px", fontSize: 16, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{insight.body}</p>
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                              <div style={{ display: "flex", gap: 4 }}>
+                                {pool.map((_, i) => (
+                                  <div key={i} style={{ width: i === idx ? 14 : 5, height: 5, borderRadius: 3, background: i === idx ? "var(--c-blue)" : "#e2e5ea", transition: "width 0.2s" }} />
+                                ))}
+                              </div>
+                              <span style={{ fontSize: 14, color: "var(--c-hint)", fontWeight: 500 }}>Tap for next</span>
+                            </div>
+                          </button>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Gear panel */}
+                    {gearPanelOpen && (
+                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px 10px" }}>
+                          <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>My Gear</p>
+                          <button onClick={() => setGearEditOpen(o => !o)} className="t-caption" style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 500, color: "var(--c-forest)" }}>{gearEditOpen ? "Done" : "Edit"}</button>
+                        </div>
+                        <div ref={racketRowRef} style={{ display: "flex", alignItems: "stretch", padding: "0 12px 12px", gap: 14 }}>
+                          <div style={{ position: "relative", flexShrink: 0, width: racketSlotSize, height: racketSlotSize }}>
+                            <label htmlFor="racket-img-upload-gear" style={{ cursor: "pointer", display: "block", width: "100%", height: "100%" }}>
+                              <div style={{ width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                {racketImage ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img src={racketImage} alt="Racket" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                ) : (
+                                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c4c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                )}
+                              </div>
+                            </label>
+                            <input id="racket-img-upload-gear" type="file" accept="image/*" style={{ display: "none" }} onChange={handleRacketImage} />
+                          </div>
+                          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 6 }}>
+                            {gearEditOpen ? (
+                              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                <input placeholder="Racket name" value={racketName} onChange={e => { setRacketName(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketName = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
+                                <input placeholder="Racket type (e.g. Control)" value={racketType} onChange={e => { setRacketType(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketType = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
+                                <input placeholder="Using since (e.g. Jan 2024)" value={racketSince} onChange={e => { setRacketSince(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketSince = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
+                              </div>
+                            ) : (
+                              <>
+                                <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1a1c1c" }}>{racketName || <span style={{ color: "#b0b5ba" }}>No racket added</span>}</p>
+                                {racketType && <p style={{ margin: 0, fontSize: 15, color: "#6b7480" }}>{racketType}</p>}
+                                {racketSince && <p style={{ margin: 0, fontSize: 14, color: "#9aa0a6" }}>Since {racketSince}</p>}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "var(--c-line)", borderTop: "1px solid var(--c-line)" }}>
+                          <div style={{ background: "#fff", padding: "14px", display: "flex", flexDirection: "column" }}>
+                            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 10px" }}>My Shoes</p>
+                            <div style={{ position: "relative", flex: 1 }}>
+                              <label htmlFor="shoe-img-upload-gear" style={{ cursor: "pointer", display: "block" }}>
+                                <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: shoeImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                  {shoeImage
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    ? <img src={shoeImage} alt="Shoes" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                    : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 17h20v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-1z"/><path d="M2 17c0-3.5 2.5-6 6-6h2l3-2h3c2.2 0 4 1.5 4.5 3.5L21 17"/></svg>}
+                                </div>
+                              </label>
+                              {shoeImage && (
+                                <button onClick={() => { setShoeImage(""); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); delete g.shoeImage; localStorage.setItem("padelop:gear", JSON.stringify(g)); deleteGearImageFromStorage("shoe"); }} style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
+                                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                              )}
+                            </div>
+                            <input id="shoe-img-upload-gear" type="file" accept="image/*" className="hidden" onChange={handleShoeImage} />
+                          </div>
+                          <div style={{ background: "#fff", padding: "14px", display: "flex", flexDirection: "column" }}>
+                            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 10px" }}>My Kit</p>
+                            <div style={{ position: "relative", flex: 1 }}>
+                              <label htmlFor="kit-img-upload-gear" style={{ cursor: "pointer", display: "block" }}>
+                                <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: kitImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                  {kitImage
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    ? <img src={kitImage} alt="Kit" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                                    : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg>}
+                                </div>
+                              </label>
+                              {kitImage && (
+                                <button onClick={() => { setKitImage(""); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); delete g.kitImage; localStorage.setItem("padelop:gear", JSON.stringify(g)); deleteGearImageFromStorage("kit"); }} style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
+                                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                              )}
+                            </div>
+                            <input id="kit-img-upload-gear" type="file" accept="image/*" className="hidden" onChange={handleKitImage} />
+                          </div>
+                        </div>
                       </div>
                     )}
 
