@@ -286,7 +286,7 @@ export default function Fab() {
                     <button
                       onClick={() => setLogPickerSub("matchreview")}
                       className="active:scale-95 transition-transform"
-                      style={{ width: "100%", background: "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, textAlign: "left" }}
+                      style={{ width: "100%", background: "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14, textAlign: "left", minHeight: 96 }}
                     >
                       <div style={{ width: 38, height: 38, borderRadius: 10, background: "#eaebec", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
