@@ -40,6 +40,9 @@ export default function Fab() {
   const prevPathnameRef = useRef(pathname);
 
   const [navLoading, setNavLoading] = useState<string | null>(null);
+  const [hiddenForModal, setHiddenForModal] = useState(false);
+  const [tileScrolled, setTileScrolled] = useState(false);
+  const tileRowRef = useRef<HTMLDivElement>(null);
   const [logPickerOpen, setLogPickerOpen] = useState(false);
   const [logPickerSub, setLogPickerSub] = useState<"nutrition" | "matchreview" | "upload-confirm" | null>(null);
   const [fabExpanded, setFabExpanded] = useState(false);
@@ -62,6 +65,28 @@ export default function Fab() {
       setNavLoading(null);
     }
   }, [pathname]);
+
+  useEffect(() => {
+    let prev = false;
+    const check = () => {
+      // Detect any visible fixed overlay (modal/sheet) by computed style.
+      // z-index 100–8999 covers modals; 9000+ is the "open on phone" layout div.
+      let found = false;
+      for (const el of Array.from(document.querySelectorAll('div'))) {
+        const s = window.getComputedStyle(el);
+        if (s.position !== 'fixed') continue;
+        if (s.display === 'none' || s.visibility === 'hidden') continue;
+        const z = parseInt(s.zIndex, 10);
+        if (isNaN(z) || z < 100 || z >= 9000) continue;
+        found = true; break;
+      }
+      if (found !== prev) { prev = found; setHiddenForModal(found); }
+    };
+    const obs = new MutationObserver(check);
+    obs.observe(document.body, { childList: true, subtree: true });
+    const id = setInterval(check, 200);
+    return () => { obs.disconnect(); clearInterval(id); };
+  }, []);
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data }) => {
@@ -112,6 +137,7 @@ export default function Fab() {
     setLogPickerSub(null);
     setFabExpanded(false);
     setSmartUploadError(null);
+    setTileScrolled(false);
   }
 
   const inputSt: React.CSSProperties = { width: "100%", padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", outline: "none", fontFamily: "inherit", background: "#f8f9fa", boxSizing: "border-box" };
@@ -128,7 +154,7 @@ export default function Fab() {
       <button
         onClick={() => { setSmartUploadError(null); setFabExpanded(false); setLogPickerOpen(true); }}
         className="fixed z-[30] flex items-center justify-center active:scale-90 transition-transform"
-        style={{ bottom: "calc(6rem + env(safe-area-inset-bottom))", right: "1.5rem", width: 54, height: 54, borderRadius: 27, background: "#e2e4e7", boxShadow: "0 2px 8px rgba(0,0,0,0.12)" }}
+        style={{ bottom: "calc(6rem + env(safe-area-inset-bottom))", right: "1.5rem", width: 54, height: 54, borderRadius: 27, background: "#e2e4e7", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", visibility: hiddenForModal ? "hidden" : undefined, pointerEvents: hiddenForModal ? "none" : undefined }}
         aria-label="Add"
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -198,7 +224,7 @@ export default function Fab() {
                 )}
 
                 {/* Top row — Home, My Profile, +, [Settings — swipe left to reveal] */}
-                <div style={{ overflowX: "scroll", scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}>
+                <div ref={tileRowRef} onScroll={e => setTileScrolled((e.currentTarget.scrollLeft) > 30)} style={{ overflowX: "scroll", scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}>
                   <div style={{ display: "flex", gap: 10 }}>
                     <button
                       onClick={() => { setNavLoading("home"); router.push("/home8"); }}
@@ -232,6 +258,11 @@ export default function Fab() {
                       <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Settings</span>
                     </button>
                   </div>
+                </div>
+                {/* Swipe hint dots */}
+                <div style={{ display: "flex", justifyContent: "center", gap: 5, marginTop: 4 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#1a1c1c", opacity: tileScrolled ? 0.15 : 0.4, transition: "opacity 0.2s" }} />
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#1a1c1c", opacity: tileScrolled ? 0.4 : 0.15, transition: "opacity 0.2s" }} />
                 </div>
                 {/* Log manually expanded */}
                 <div style={{ overflow: "hidden", maxHeight: fabExpanded ? 600 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>

@@ -1149,13 +1149,13 @@ export default function Home8() {
                         <svg viewBox="0 0 200 200" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
                           <defs>
                             <path id="doneTopArc" d="M 30,64 A 76,76 0 0,1 170,64" />
-                            <path id="doneBottomArc" d="M 30,136 A 76,76 0 0,1 170,136" />
+                            <path id="doneBottomArc" d="M 7.6,100 A 92.4,92.4 0 0,0 192.4,100" />
                           </defs>
                           <text fontSize="14" fontWeight="700" letterSpacing="1" style={{ fill: "rgba(0,0,0,0.45)", fontFamily: ff }}>
                             <textPath href="#doneTopArc" startOffset="50%" textAnchor="middle">GOOD JOB</textPath>
                           </text>
                           <text fontSize="11" fontWeight="700" letterSpacing="0.5" style={{ fill: "rgba(0,0,0,0.45)", fontFamily: ff }}>
-                            <textPath href="#doneBottomArc" startOffset="50%" textAnchor="middle">{`${completedTitle.toUpperCase()} COMPLETED.`}</textPath>
+                            <textPath href="#doneBottomArc" startOffset="50%" textAnchor="middle">{`${completedTitle.toUpperCase()} COMPLETED`}</textPath>
                           </text>
                         </svg>
                         ); })()}
@@ -1649,7 +1649,7 @@ export default function Home8() {
                           {/* Green fill */}
                           <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: swipeX, background: "#00D455", transition: swipeX === 0 ? "width 0.3s" : "none" }} />
                           {/* Label */}
-                          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+                          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", paddingLeft: 36, pointerEvents: "none" }}>
                             <span style={{ fontSize: 14, fontWeight: 600, color: "#8a9096", opacity: Math.max(0, 1 - swipeX / 80), transition: "opacity 0.1s" }}>Save and complete (+1 pt)</span>
                           </div>
                           {/* Thumb */}
