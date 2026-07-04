@@ -1141,7 +1141,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <><div className="w-full pb-6" style={{ backgroundColor: "#f2f3f5", minHeight: "100dvh", position: "relative" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
+    <><div className="w-full pb-32" style={{ backgroundColor: "#f2f3f5", minHeight: "100dvh", position: "relative" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
 
       {/* ── Profile ──────────────────────────────────────────────────────── */}
         <div style={{ padding: "36px 20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
