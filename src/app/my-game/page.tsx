@@ -1806,6 +1806,51 @@ export default function ProfilePage() {
                     {matchesPanelOpen && (
                       <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
                         <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>Matches</p>
+
+                        {/* Match record card */}
+                        {reviews.length > 0 && (() => {
+                          const last7 = reviews.slice(0, 7);
+                          const wins = last7.filter(r => r.result === "win").length;
+                          const winRate = Math.round((wins / last7.length) * 100);
+                          const ringColor = winRate >= 60 ? "#16a34a" : winRate >= 40 ? "#f59e0b" : "#dc2626";
+                          const rr = 32, stroke = 7, size = 80;
+                          const circ = 2 * Math.PI * rr;
+                          const offset = circ * (1 - winRate / 100);
+                          return (
+                            <div style={{ background: "#f8f9fa", borderRadius: 16, padding: "14px 16px" }}>
+                              <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#8a9096" }}>Match Record</p>
+                              <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                                <div style={{ position: "relative", flexShrink: 0 }}>
+                                  <svg width={size} height={size}>
+                                    <circle cx={size/2} cy={size/2} r={rr} fill="none" stroke="#e2e8f0" strokeWidth={stroke} />
+                                    <circle cx={size/2} cy={size/2} r={rr} fill="none" stroke={ringColor} strokeWidth={stroke} strokeLinecap="round"
+                                      strokeDasharray={circ} strokeDashoffset={offset}
+                                      style={{ transform: "rotate(-90deg)", transformOrigin: "50% 50%", transition: "stroke-dashoffset 0.8s ease" }} />
+                                  </svg>
+                                  <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                                    <span style={{ fontSize: 17, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{winRate}%</span>
+                                    <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#8a9096" }}>wins</span>
+                                  </div>
+                                </div>
+                                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+                                  {last7.map((rev, i) => (
+                                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                      <span style={{ fontSize: 11, fontWeight: 600, color: "#8a9096", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                        {new Date(rev.ts).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}
+                                      </span>
+                                      <div style={{ height: 22, borderRadius: 8, display: "flex", alignItems: "center", padding: "0 8px", flexShrink: 0, background: rev.result === "win" ? "#dcfce7" : rev.result === "draw" ? "#fef9c3" : "#fee2e2" }}>
+                                        <span style={{ fontSize: 11, fontWeight: 700, textTransform: "capitalize", color: rev.result === "win" ? "#16a34a" : rev.result === "draw" ? "#a16207" : "#dc2626" }}>
+                                          {rev.result}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })()}
+
                         {matchAddOpen && (
                           <div style={{ background: "#f8f9fa", borderRadius: 20, padding: "18px 16px" }}>
                             <p style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#1a1c1c" }}>New match</p>
