@@ -1232,17 +1232,17 @@ export default function ProfilePage() {
                           return (
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="dayTypeTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: panelDayColor, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                              <circle cx="100" cy="100" r="99" fill={panelDayColor} />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
                                 <textPath href="#dayTypeTopArc" startOffset="50%" textAnchor="middle">TODAY</textPath>
                               </text>
                               <text x="100" y={dayWord ? "93" : "108"} textAnchor="middle" dominantBaseline="middle"
-                                fontSize="24" fontWeight="800" style={{ fill: panelDayColor, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                                fontSize="24" fontWeight="800" style={{ fill: "white", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
                                 {mainLabel}
                               </text>
                               {dayWord && (
                                 <text x="100" y="123" textAnchor="middle" dominantBaseline="middle"
-                                  fontSize="20" fontWeight="800" style={{ fill: panelDayColor, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                                  fontSize="20" fontWeight="800" style={{ fill: "white", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
                                   {dayWord}
                                 </text>
                               )}
