@@ -1516,8 +1516,8 @@ export default function ProfilePage() {
                               <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
                                 <textPath href="#streakTopArc" startOffset="50%" textAnchor="middle">STREAK</textPath>
                               </text>
-                              <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
-                                fontSize={streak >= 100 ? "34" : streak >= 10 ? "40" : "46"} fontWeight="800"
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
+                                fontSize={streak >= 100 ? "34" : streak >= 10 ? "46" : "46"} fontWeight="800"
                                 style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
                                 {streak > 0 ? streak : "—"}
                               </text>
