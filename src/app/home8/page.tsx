@@ -940,7 +940,7 @@ export default function Home8() {
 
   return (
     <>
-      <main className="padla-wm" style={{ ...S, position: "fixed", inset: 0, paddingTop: 0, paddingLeft: 10, paddingRight: 10, paddingBottom: 0, overflow: "hidden", background: "#fff", zIndex: 60 }}>
+      <main style={{ ...S, position: "fixed", inset: 0, paddingTop: 0, paddingLeft: 10, paddingRight: 10, paddingBottom: 0, overflow: "hidden", background: "#fff", zIndex: 60 }}>
 
         {/* Horizontal strip: [readiness | carousel | log] */}
         <div
