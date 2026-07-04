@@ -1199,7 +1199,7 @@ export default function ProfilePage() {
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                         return (
                           <button onClick={() => togglePanel('nextMatch')}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animation: "ball-settle 0.8s ease-out 0.35s both", ...dim(nextMatchPanelOpen) }}>
+                            className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.35s", ...dim(nextMatchPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 4px 20px rgba(38,83,212,0.35))", display: "block" }}>
                               <defs><path id="nextMatchTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#2653d4" />
@@ -1224,7 +1224,7 @@ export default function ProfilePage() {
 
                       {/* Day Type */}
                       <button onClick={() => togglePanel('dayType')}
-                        style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animation: "ball-settle 0.8s ease-out 0.42s both", ...dim(dayTypeInfoOpen) }}>
+                        className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.42s", ...dim(dayTypeInfoOpen) }}>
                         {(() => {
                           const parts = panelDayLabel.split(" ");
                           const mainLabel = parts.length > 1 ? parts.slice(0, -1).join(" ") : panelDayLabel;
@@ -1253,7 +1253,7 @@ export default function ProfilePage() {
 
                       {/* Today's Goals */}
                       <button onClick={() => togglePanel('sched')}
-                        style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animation: "ball-settle 0.8s ease-out 0.49s both", ...dim(panelSchedOpen) }}>
+                        className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.49s", ...dim(panelSchedOpen) }}>
                         <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                           <defs><path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                           <circle cx="100" cy="100" r="99" fill="white" />
@@ -1509,7 +1509,7 @@ export default function ProfilePage() {
                         const stier = [...STIERS].reverse().find(t => streak >= t.min) ?? STIERS[0];
                         return (
                           <button onClick={() => togglePanel('streak')}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animation: "ball-settle 0.8s ease-out 0.56s both", ...dim(streakPanelOpen) }}>
+                            className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.56s", ...dim(streakPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1538,7 +1538,7 @@ export default function ProfilePage() {
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                         return (
                           <button onClick={() => togglePanel('formScore')}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animation: "ball-settle 0.8s ease-out 0.63s both", ...dim(formScorePanelOpen) }}>
+                            className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.63s", ...dim(formScorePanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="formScoreArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1566,7 +1566,7 @@ export default function ProfilePage() {
                         const label = racketName || "—";
                         return (
                           <button onClick={() => togglePanel('gear')}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animation: "ball-settle 0.8s ease-out 0.70s both", ...dim(gearPanelOpen) }}>
+                            className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.70s", ...dim(gearPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="gearArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1762,7 +1762,7 @@ export default function ProfilePage() {
                         const subText = pct !== null ? `${Math.round(pct * 100)}% of 2L` : "not logged";
                         return (
                           <button onClick={() => togglePanel('hydration')}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animation: "ball-settle 0.8s ease-out 0.40s both", ...dim(hydrationPanelOpen) }}>
+                            className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.40s", ...dim(hydrationPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="hydrationArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1805,7 +1805,7 @@ export default function ProfilePage() {
                         ].filter(Boolean).length;
                         return (
                           <button onClick={() => togglePanel('insights')}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animation: "ball-settle 0.8s ease-out 0.47s both", ...dim(insightsPanelOpen) }}>
+                            className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.47s", ...dim(insightsPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="insightsArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1830,7 +1830,7 @@ export default function ProfilePage() {
                         const sub = total > 0 ? `${Math.round((wins / total) * 100)}% wins` : "no matches";
                         return (
                           <button onClick={() => togglePanel('matches')}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animation: "ball-settle 0.8s ease-out 0.54s both", ...dim(matchesPanelOpen) }}>
+                            className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.54s", ...dim(matchesPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="matchesArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -2081,7 +2081,7 @@ export default function ProfilePage() {
                         const totalTags = Object.keys(wellCounts).length + Object.keys(badCounts).length;
                         return (
                           <button onClick={() => togglePanel('goodBad')}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animation: "ball-settle 0.8s ease-out 0.61s both", ...dim(openPanel === 'goodBad') }}>
+                            className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.61s", ...dim(openPanel === 'goodBad') }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="goodBadArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -2102,7 +2102,7 @@ export default function ProfilePage() {
                         const totalPts = Object.values(schedDone).flat().length;
                         return (
                           <button onClick={() => togglePanel('padlaPoints')}
-                            style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animation: "ball-settle 0.8s ease-out 0.68s both", ...dim(openPanel === 'padlaPoints') }}>
+                            className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.68s", ...dim(openPanel === 'padlaPoints') }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="padlaArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
