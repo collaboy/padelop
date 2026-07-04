@@ -1198,8 +1198,8 @@ export default function ProfilePage() {
                         const timeLabel = nextMatch?.time ?? "";
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                         return (
-                          <button onClick={() => togglePanel('nextMatch')}
-                            className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.35s", ...dim(nextMatchPanelOpen) }}>
+                          <div onClick={() => togglePanel('nextMatch')}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.35s both", ...dim(nextMatchPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 4px 20px rgba(38,83,212,0.35))", display: "block" }}>
                               <defs><path id="nextMatchTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#2653d4" />
@@ -1218,13 +1218,13 @@ export default function ProfilePage() {
                                 </text>
                               )}
                             </svg>
-                          </button>
+                          </div>
                         );
                       })()}
 
                       {/* Day Type */}
-                      <button onClick={() => togglePanel('dayType')}
-                        className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.42s", ...dim(dayTypeInfoOpen) }}>
+                      <div onClick={() => togglePanel('dayType')}
+                        style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.42s both", ...dim(dayTypeInfoOpen) }}>
                         {(() => {
                           const parts = panelDayLabel.split(" ");
                           const mainLabel = parts.length > 1 ? parts.slice(0, -1).join(" ") : panelDayLabel;
@@ -1249,11 +1249,11 @@ export default function ProfilePage() {
                             </svg>
                           );
                         })()}
-                      </button>
+                      </div>
 
                       {/* Today's Goals */}
-                      <button onClick={() => togglePanel('sched')}
-                        className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.49s", ...dim(panelSchedOpen) }}>
+                      <div onClick={() => togglePanel('sched')}
+                        style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.49s both", ...dim(panelSchedOpen) }}>
                         <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                           <defs><path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                           <circle cx="100" cy="100" r="99" fill="white" />
@@ -1279,7 +1279,7 @@ export default function ProfilePage() {
                             });
                           })()}
                         </svg>
-                      </button>
+                      </div>
 
                     </div>
 
@@ -1508,8 +1508,8 @@ export default function ProfilePage() {
                         ];
                         const stier = [...STIERS].reverse().find(t => streak >= t.min) ?? STIERS[0];
                         return (
-                          <button onClick={() => togglePanel('streak')}
-                            className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.56s", ...dim(streakPanelOpen) }}>
+                          <div onClick={() => togglePanel('streak')}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.56s both", ...dim(streakPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1526,7 +1526,7 @@ export default function ProfilePage() {
                                 day streak
                               </text>
                             </svg>
-                          </button>
+                          </div>
                         );
                       })()}
 
@@ -1537,8 +1537,8 @@ export default function ProfilePage() {
                         const color = score === null ? "#9aa0a6" : score >= 70 ? "#16a34a" : score >= 50 ? "#d97706" : "#ef4444";
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                         return (
-                          <button onClick={() => togglePanel('formScore')}
-                            className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.63s", ...dim(formScorePanelOpen) }}>
+                          <div onClick={() => togglePanel('formScore')}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.63s both", ...dim(formScorePanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="formScoreArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1555,7 +1555,7 @@ export default function ProfilePage() {
                                 {score === null ? "no data" : score >= 70 ? "on track" : score >= 50 ? "building" : "needs work"}
                               </text>
                             </svg>
-                          </button>
+                          </div>
                         );
                       })()}
 
@@ -1565,8 +1565,8 @@ export default function ProfilePage() {
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                         const label = racketName || "—";
                         return (
-                          <button onClick={() => togglePanel('gear')}
-                            className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.70s", ...dim(gearPanelOpen) }}>
+                          <div onClick={() => togglePanel('gear')}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.70s both", ...dim(gearPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="gearArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1581,7 +1581,7 @@ export default function ProfilePage() {
                                   style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{racketType.slice(0, 10)}</text>
                               ) : null}
                             </svg>
-                          </button>
+                          </div>
                         );
                       })()}
                     </div>
@@ -1761,8 +1761,8 @@ export default function ProfilePage() {
                           : "—";
                         const subText = pct !== null ? `${Math.round(pct * 100)}% of 2L` : "not logged";
                         return (
-                          <button onClick={() => togglePanel('hydration')}
-                            className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.40s", ...dim(hydrationPanelOpen) }}>
+                          <div onClick={() => togglePanel('hydration')}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.40s both", ...dim(hydrationPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="hydrationArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1779,7 +1779,7 @@ export default function ProfilePage() {
                                 {subText}
                               </text>
                             </svg>
-                          </button>
+                          </div>
                         );
                       })()}
 
@@ -1804,8 +1804,8 @@ export default function ProfilePage() {
                           tournamentCount > 0,
                         ].filter(Boolean).length;
                         return (
-                          <button onClick={() => togglePanel('insights')}
-                            className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.47s", ...dim(insightsPanelOpen) }}>
+                          <div onClick={() => togglePanel('insights')}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.47s both", ...dim(insightsPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="insightsArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1815,7 +1815,7 @@ export default function ProfilePage() {
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{count > 0 ? count : "—"}</text>
                               <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>featured</text>
                             </svg>
-                          </button>
+                          </div>
                         );
                       })()}
 
@@ -1829,8 +1829,8 @@ export default function ProfilePage() {
                         const centerText = reviews.length > 0 ? String(reviews.length) : "—";
                         const sub = total > 0 ? `${Math.round((wins / total) * 100)}% wins` : "no matches";
                         return (
-                          <button onClick={() => togglePanel('matches')}
-                            className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.54s", ...dim(matchesPanelOpen) }}>
+                          <div onClick={() => togglePanel('matches')}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.54s both", ...dim(matchesPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="matchesArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -1840,7 +1840,7 @@ export default function ProfilePage() {
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{centerText}</text>
                               <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
                             </svg>
-                          </button>
+                          </div>
                         );
                       })()}
                     </div>
@@ -2080,8 +2080,8 @@ export default function ProfilePage() {
                         });
                         const totalTags = Object.keys(wellCounts).length + Object.keys(badCounts).length;
                         return (
-                          <button onClick={() => togglePanel('goodBad')}
-                            className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.61s", ...dim(openPanel === 'goodBad') }}>
+                          <div onClick={() => togglePanel('goodBad')}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.61s both", ...dim(openPanel === 'goodBad') }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="goodBadArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -2091,7 +2091,7 @@ export default function ProfilePage() {
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{totalTags > 0 ? totalTags : "—"}</text>
                               <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>tags logged</text>
                             </svg>
-                          </button>
+                          </div>
                         );
                       })()}
                       {/* PADLA Points circle */}
@@ -2101,8 +2101,8 @@ export default function ProfilePage() {
                         const schedDone: Record<string, string[]> = (() => { try { return JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}"); } catch { return {}; } })();
                         const totalPts = Object.values(schedDone).flat().length;
                         return (
-                          <button onClick={() => togglePanel('padlaPoints')}
-                            className="circle-settle" style={{ flex: 1, aspectRatio: "1/1", background: "transparent", border: "none", cursor: "pointer", padding: 0, display: "block", animationDelay: "0.68s", ...dim(openPanel === 'padlaPoints') }}>
+                          <div onClick={() => togglePanel('padlaPoints')}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, animation: "ball-settle 0.8s ease-out 0.68s both", ...dim(openPanel === 'padlaPoints') }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="padlaArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="white" />
@@ -2112,7 +2112,7 @@ export default function ProfilePage() {
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize={String(totalPts).length > 3 ? "34" : "44"} fontWeight="800" style={{ fill: color, fontFamily: ff }}>{totalPts > 0 ? totalPts : "—"}</text>
                               <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>pts earned</text>
                             </svg>
-                          </button>
+                          </div>
                         );
                       })()}
                       <div style={{ flex: 1 }} />
