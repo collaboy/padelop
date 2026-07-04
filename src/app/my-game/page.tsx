@@ -1256,13 +1256,13 @@ export default function ProfilePage() {
                         style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(panelSchedOpen) }}>
                         <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                           <defs><path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                          <circle cx="100" cy="100" r="99" fill="white" />
-                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "var(--c-label)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                          <circle cx="100" cy="100" r="99" fill="#16a34a" />
+                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
                             <textPath href="#goalsTextArc" startOffset="50%" textAnchor="middle">TODAY&apos;S GOALS</textPath>
                           </text>
                           <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
                             fontSize={pct === 100 ? "44" : "36"} fontWeight="800"
-                            style={{ fill: pct === 100 ? "#00D455" : "var(--c-text)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                            style={{ fill: "white", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
                             {pct === 100 ? "✓" : `${done}/${total}`}
                           </text>
                           {(() => {
@@ -1275,7 +1275,7 @@ export default function ProfilePage() {
                               const x1 = (cX + r * Math.cos(toRad(a1))).toFixed(2), y1 = (cY + r * Math.sin(toRad(a1))).toFixed(2);
                               const x2 = (cX + r * Math.cos(toRad(a2))).toFixed(2), y2 = (cY + r * Math.sin(toRad(a2))).toFixed(2);
                               return <path key={item.title} d={`M ${x1},${y1} A ${r},${r} 0 0,0 ${x2},${y2}`}
-                                stroke={todayDoneSet.has(item.title) ? item.color : "#e0e2e5"} strokeWidth="9" fill="none" strokeLinecap="round" style={{ transition: "stroke 0.3s" }} />;
+                                stroke={todayDoneSet.has(item.title) ? item.color : "rgba(255,255,255,0.25)"} strokeWidth="9" fill="none" strokeLinecap="round" style={{ transition: "stroke 0.3s" }} />;
                             });
                           })()}
                         </svg>
