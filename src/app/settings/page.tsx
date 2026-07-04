@@ -224,29 +224,21 @@ export default function SettingsPage() {
       </div>
 
       {/* Profile card */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "12px 18px 4px" }}>
-        <div style={{ position: "relative", flexShrink: 0 }}>
-          <div onClick={() => setProfilePanelOpen(v => !v)} style={{ width: 84, height: 84, borderRadius: "50%", overflow: "hidden", background: profile.avatar ? "transparent" : "#f0f2f5", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-            {profile.avatar
-              // eslint-disable-next-line @next/next/no-img-element
-              ? <img src={profile.avatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              : <span style={{ fontSize: 30, fontWeight: 800, color: "#2653d4" }}>{initials(profile.name)}</span>}
-          </div>
+      <button onClick={() => setProfilePanelOpen(v => !v)} style={{ display: "flex", alignItems: "center", gap: 14, padding: "4px 0", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
+        <div style={{ width: 52, height: 52, borderRadius: "50%", overflow: "hidden", background: "#f0f2f5", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          {profile.avatar
+            // eslint-disable-next-line @next/next/no-img-element
+            ? <img src={profile.avatar} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            : <span style={{ fontSize: 20, fontWeight: 800, color: "#2653d4" }}>{initials(profile.name)}</span>}
         </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
-          <p style={{ margin: 0, fontSize: "clamp(20px, 5.1vw, 25px)", fontWeight: 700, color: "var(--c-text)", textAlign: "center", lineHeight: 1.2 }}>{profile.name || "Your Name"}</p>
-          {(profile.level || profile.position) && (
-            <p style={{ margin: 0, fontSize: "clamp(14px, 3.5vw, 16px)", fontWeight: 500, color: "var(--c-hint)", textAlign: "center", lineHeight: 1.3 }}>
-              {[profile.level ? `Level ${profile.level}` : null, profile.position].filter(Boolean).join(" · ")}
-            </p>
-          )}
-          {profile.hand         && <p style={{ margin: 0, fontSize: "clamp(14px, 3.5vw, 16px)", fontWeight: 500, color: "var(--c-hint)", textAlign: "center", lineHeight: 1.3 }}>{profile.hand}-handed</p>}
-          {profile.playingSince && <p style={{ margin: 0, fontSize: "clamp(14px, 3.5vw, 16px)", fontWeight: 500, color: "var(--c-hint)", textAlign: "center", lineHeight: 1.3 }}>Since {profile.playingSince}</p>}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "var(--c-text)", lineHeight: 1.2 }}>{profile.name || "Your Name"}</p>
+          <p style={{ margin: "2px 0 0", fontSize: 13, fontWeight: 500, color: "var(--c-hint)", lineHeight: 1.3 }}>
+            {[profile.level ? `Level ${profile.level}` : null, profile.position, profile.hand ? `${profile.hand}-handed` : null].filter(Boolean).join(" · ") || "Tap to edit profile"}
+          </p>
         </div>
-        <button onClick={() => setProfilePanelOpen(v => !v)} style={{ marginTop: 2, fontSize: 13, fontWeight: 600, color: "#2653d4", background: "none", border: "none", cursor: "pointer", padding: "2px 0" }}>
-          {profilePanelOpen ? "Done" : "Edit profile"}
-        </button>
-      </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
 
       {profilePanelOpen && (
         <div style={{ background: "#fff", borderRadius: "var(--r-md)", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)", overflow: "hidden" }}>
