@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { startNavLoad } from "@/lib/nav-events";
 import { saveUpcomingMatch } from "@/lib/db";
 import { hydrateFromSupabase } from "@/lib/sync";
 
@@ -193,7 +194,7 @@ export default function MatchesPage() {
       <div style={{ position: "sticky", top: 0, zIndex: 50, background: "var(--c-bg, #f0f2f5)", paddingTop: "env(safe-area-inset-top)" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px 12px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button onClick={() => router.back()} style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--c-bg, #f0f2f5)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <button onClick={() => { startNavLoad(); router.back(); }} style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--c-bg, #f0f2f5)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--c-text, #1a1c1c)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
             <h1 className="t-heading" style={{ color: "var(--c-text, #1a1c1c)", margin: 0 }}>Matches</h1>

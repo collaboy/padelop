@@ -1,12 +1,13 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { startNavLoad } from "@/lib/nav-events";
 
 export default function PrivacyPage() {
   const router = useRouter();
   return (
     <div className="px-5 pt-6 pb-24 max-w-lg mx-auto" style={{ userSelect: "text", WebkitUserSelect: "text" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28 }}>
-        <button onClick={() => router.back()} style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--c-bg)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <button onClick={() => { startNavLoad(); router.back(); }} style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--c-bg)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--c-text)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
         <h1 className="t-heading" style={{ margin: 0 }}>Privacy Policy</h1>

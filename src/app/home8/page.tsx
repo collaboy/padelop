@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { startNavLoad } from "@/lib/nav-events";
 import LogSheet from "@/components/log-sheet";
 import ReadinessSheet from "@/components/readiness-sheet";
 import PushPrompt from "@/components/push-prompt";
@@ -2105,7 +2106,7 @@ export default function Home8() {
                 );
               })()}
               {/* See all matches */}
-              <button onClick={() => { setMatchActionOpen(false); setMatchActionMode(null); router.push("/matches"); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
+              <button onClick={() => { setMatchActionOpen(false); setMatchActionMode(null); startNavLoad(); router.push("/matches"); }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f9f9f9] transition-colors">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#f4f4f6" }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 </div>

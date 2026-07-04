@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { saveCheckIn, computeScores, loadScoringData } from "@/lib/scoring";
 import { downloadSnapshot, importData } from "@/lib/storage";
 import { saveMatchReview, saveCheckInToDb, saveHydrationToDb, seedHydrationToDb, saveNutritionToDb, saveTrainingToDb, saveScheduleDoneToDb } from "@/lib/db";
+import { startNavLoad } from "@/lib/nav-events";
 
 function rangeToMl(range: string): number {
   if (range === "<1L")    return 750;
@@ -1439,8 +1440,8 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                 <p className="t-label text-c-label mb-3">More</p>
                 <div className="flex flex-col" style={{ background: "var(--c-bg-input)", borderRadius: 16, overflow: "hidden" }}>
                   {[
-                    { label: "My Profile", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>, action: () => { handleClose(); router.push("/profile"); } },
-                    { label: "Weekly Shopping List", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>, action: () => { handleClose(); router.push("/shopping-list"); } },
+                    { label: "My Profile", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>, action: () => { handleClose(); startNavLoad(); router.push("/profile"); } },
+                    { label: "Weekly Shopping List", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>, action: () => { handleClose(); startNavLoad(); router.push("/shopping-list"); } },
                     { label: "Export my data", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>, action: () => { downloadSnapshot(); handleClose(); } },
                     { label: importDone ? "Data restored ✓" : "Import backup", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>, action: () => importRef.current?.click() },
                   ].map((item, i, arr) => (

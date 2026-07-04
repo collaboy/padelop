@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useRef } from "react";
+import { startNavLoad } from "@/lib/nav-events";
 
 const NAV_ORDER = ["/", "/wellbeing", "/training", "/matches", "/recovery", "/optimizer", "/my-game"];
 
@@ -16,6 +17,7 @@ export default function SwipeNav({ children }: { children: React.ReactNode }) {
   const touchStartY = useRef(0);
 
   function navigate(to: string, dir: 1 | -1) {
+    startNavLoad();
     const html = document.documentElement;
     html.classList.toggle("nav-forward", dir === 1);
     html.classList.toggle("nav-backward", dir === -1);

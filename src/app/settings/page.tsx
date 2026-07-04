@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { startNavLoad } from "@/lib/nav-events";
 import { createClient } from "@/lib/supabase/client";
 import { saveProfileToDb } from "@/lib/db";
 import { resizeImage } from "@/lib/image";
@@ -421,7 +422,7 @@ export default function SettingsPage() {
           ].map(({ label, href }, i) => (
             <button
               key={label}
-              onClick={() => router.push(href)}
+              onClick={() => { startNavLoad(); router.push(href); }}
               style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", borderTop: i > 0 ? "1px solid var(--c-line-dim)" : "none", cursor: "pointer" }}
             >
               <span className="t-ui" style={{ color: "var(--c-text)" }}>{label}</span>
@@ -441,7 +442,7 @@ export default function SettingsPage() {
             ].map(({ label, sub, href, icon }, i) => (
               <button
                 key={label}
-                onClick={() => router.push(href)}
+                onClick={() => { startNavLoad(); router.push(href); }}
                 style={{ width: "100%", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", borderTop: i > 0 ? "1px solid #ede9fe" : "none", cursor: "pointer" }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>

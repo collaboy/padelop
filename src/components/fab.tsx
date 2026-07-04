@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { saveUpcomingMatch, saveNutritionToDb, saveNoteToDb, saveMatchReview, saveGearToDb } from "@/lib/db";
 import { createClient } from "@/lib/supabase/client";
+import { startNavLoad } from "@/lib/nav-events";
 
 type StoredMatch = { date: string; time: string; club: string; court: string; player_1: string; player_2: string; player_3: string; player_4: string };
 
@@ -39,7 +40,6 @@ export default function Fab() {
   const [isAdmin, setIsAdmin] = useState(false);
   const prevPathnameRef = useRef(pathname);
 
-  const [navLoading, setNavLoading] = useState<string | null>(null);
   const [hiddenForModal, setHiddenForModal] = useState(false);
   const [tileScrolled, setTileScrolled] = useState(false);
   const tileRowRef = useRef<HTMLDivElement>(null);
@@ -62,7 +62,6 @@ export default function Fab() {
     if (pathname !== prevPathnameRef.current) {
       prevPathnameRef.current = pathname;
       closeAll();
-      setNavLoading(null);
     }
   }, [pathname]);
 
@@ -147,11 +146,6 @@ export default function Fab() {
 
   return (
     <>
-      {navLoading && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 9998, background: "rgba(242,243,245,0.85)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ width: 36, height: 36, borderRadius: "50%", border: "3px solid rgba(0,212,85,0.25)", borderTopColor: "#00D455", animation: "spin 0.8s linear infinite" }} />
-        </div>
-      )}
       {/* FAB button */}
       <button
         onClick={() => { setSmartUploadError(null); setFabExpanded(false); setLogPickerOpen(true); }}
@@ -229,7 +223,7 @@ export default function Fab() {
                 <div ref={tileRowRef} onScroll={e => setTileScrolled((e.currentTarget.scrollLeft) > 30)} style={{ overflowX: "scroll", scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}>
                   <div style={{ display: "flex", gap: 10 }}>
                     <button
-                      onClick={() => { setNavLoading("home"); router.push("/home8"); }}
+                      onClick={() => { startNavLoad(); router.push("/home8"); }}
                       className="active:scale-95 transition-transform"
                       style={{ flex: "0 0 calc((100vw - 52px) / 3)", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1", opacity: fabExpanded ? 0.35 : 1, transition: "opacity 0.2s" }}
                     >
@@ -237,7 +231,7 @@ export default function Fab() {
                       <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
                     </button>
                     <button
-                      onClick={() => { if (pathname.startsWith("/my-game")) { setLogPickerOpen(false); return; } setNavLoading("my-game"); router.push("/my-game"); }}
+                      onClick={() => { if (pathname.startsWith("/my-game")) { setLogPickerOpen(false); return; } startNavLoad(); router.push("/my-game"); }}
                       className="active:scale-95 transition-transform"
                       style={{ flex: "0 0 calc((100vw - 52px) / 3)", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1", opacity: fabExpanded ? 0.35 : 1, transition: "opacity 0.2s" }}
                     >
@@ -252,7 +246,7 @@ export default function Fab() {
                       <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     </button>
                     <button
-                      onClick={() => { closeAll(); router.push("/settings"); }}
+                      onClick={() => { closeAll(); startNavLoad(); router.push("/settings"); }}
                       className="active:scale-95 transition-transform"
                       style={{ flex: "0 0 calc((100vw - 52px) / 3)", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
                     >
