@@ -272,9 +272,9 @@ export default function Home8() {
   const [upcomingCount, setUpcomingCount] = useState(0);
   const [now, setNow] = useState(new Date());
   const lastDateRef = useRef(new Date().toISOString().slice(0, 10));
-  const doneAtRef = useRef<Map<number, number>>(new Map());
+  const doneAtRef = useRef<Map<string, number>>(new Map());
   const [doIdx, setDoIdx] = useState(0); // -1 = top holder, 0 = do-this-now, 1 = see schedule
-  const [completed, setCompleted] = useState<Set<number>>(new Set());
+  const [completed, setCompleted] = useState<Set<string>>(new Set());
   const [readiness, setReadiness] = useState(65);
   const [readinessDone, setReadinessDone] = useState(0);
   const [readinessItems, setReadinessItems] = useState([false, false, false, false]);
@@ -334,6 +334,17 @@ export default function Home8() {
     }
     setDayType(dt);
     try { const t = getTopNeedsWorkTag(); if (t) setDrillTag(t); } catch {}
+    // Seed completed set before first paint — title-based so immune to schedule reordering
+    try {
+      const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
+      const doneTitles = sd[today] ?? [];
+      if (doneTitles.length > 0) setCompleted(new Set(doneTitles));
+    } catch {}
+    try {
+      const dat: Record<string, Record<string, number>> = JSON.parse(localStorage.getItem("padelop:done-at") || "{}");
+      const todayDat = dat[today] ?? {};
+      Object.entries(todayDat).forEach(([title, ts]) => doneAtRef.current.set(title, ts));
+    } catch {}
     setClientReady(true);
   }, []);
 
@@ -575,36 +586,29 @@ export default function Home8() {
           setCheckinNudgeOpen(false);
         }
       } catch { setMorningDone(false); }
-      // Seed completed Set from padelop:schedule-done + waterOnWaking
+      // Seed completed Set from padelop:schedule-done + waterOnWaking (title-based)
       try {
         const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
-        const doneTitles = sd[todayStr] ?? [];
-        const sched = getScheduleData(dayTypeRef.current, match?.time ?? null, drillTagRef.current).schedule;
-        const indices = new Set<number>();
-        sched.forEach((item, i) => { if (doneTitles.includes(item.title)) indices.add(i); });
+        const doneTitles = new Set(sd[todayStr] ?? []);
         try {
           const dat: Record<string, Record<string, number>> = JSON.parse(localStorage.getItem("padelop:done-at") || "{}");
           const todayDat = dat[todayStr] ?? {};
-          sched.forEach((item, i) => { if (todayDat[item.title]) doneAtRef.current.set(i, todayDat[item.title]); });
+          Object.entries(todayDat).forEach(([title, ts]) => doneAtRef.current.set(title, ts));
         } catch {}
-        // Directly merge waterOnWaking into indices without going through schedule-done
+        // Merge waterOnWaking
         try {
           const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null");
           if (ml?.date === todayStr && ml?.waterOnWaking === true) {
-            const wakeIdx = sched.findIndex(item => item.title === "Wake up");
-            if (wakeIdx >= 0) {
-              indices.add(wakeIdx);
-              // Persist to schedule-done + DB if not already there
-              if (!doneTitles.includes("Wake up")) {
-                const updated = [...doneTitles, "Wake up"];
-                sd[todayStr] = updated;
-                localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
-                saveScheduleDoneToDb(todayStr, updated);
-              }
+            if (!doneTitles.has("Wake up")) {
+              doneTitles.add("Wake up");
+              const updated = [...doneTitles];
+              sd[todayStr] = updated;
+              localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
+              saveScheduleDoneToDb(todayStr, updated);
             }
           }
         } catch {}
-        setCompleted(indices);
+        setCompleted(doneTitles);
       } catch {}
     }
     function loadMatch() {
@@ -1106,7 +1110,7 @@ export default function Home8() {
               {/* Card 1: do-this-now */}
               {(() => {
                 const s = doItem;
-                const isDone = completed.has(currentIdx);
+                const isDone = completed.has(s.title);
                 const isReady = curMins >= toMins(s.time);
                 const nextSlide = schedule[currentIdx + 1];
                 const secsUntilNext = nextSlide ? toMins(nextSlide.time) * 60 - (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) : 0;
@@ -1133,17 +1137,17 @@ export default function Home8() {
 
                 if (isDone) {
                   if (!nextSlide) return null;
-                  const doneAt = doneAtRef.current.get(currentIdx);
+                  const doneAt = doneAtRef.current.get(s.title);
                   const justDone = doneAt && (Date.now() - doneAt < 2000);
-                  const completedTitle = s.title === "Lunch" ? "Lunchtime" : s.title === "Dinner" ? "Dinnertime" : s.title;
-                  const nextTitle = nextSlide.title === "Lunch" ? "Lunchtime" : nextSlide.title === "Dinner" ? "Dinnertime" : nextSlide.title;
+                  const completedTitle = s.title;
+                  const nextTitle = nextSlide.title;
 
                   return (
                     <div key="done-card" style={{ ...cardStyle, background: "#e8ddd0", animation: "ball-drop 0.9s 0.1s both" }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
                       {textureOverlay}
 
                       {/* Timer layer */}
-                      <div style={{ position: "absolute", inset: 0, zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0, animation: justDone ? "fade-in 0.9s ease-out 1.1s both" : undefined }}>
+                      <div style={{ position: "absolute", inset: 0, zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0 }}>
                         {/* Curved top + bottom text */}
                         {(() => { const ff = "-apple-system, BlinkMacSystemFont, sans-serif"; return (
                         <svg viewBox="0 0 200 200" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
@@ -1152,16 +1156,15 @@ export default function Home8() {
                             <path id="doneBottomArc" d="M 7.6,100 A 92.4,92.4 0 0,0 192.4,100" />
                           </defs>
                           <text fontSize="14" fontWeight="700" letterSpacing="1" style={{ fill: "rgba(0,0,0,0.45)", fontFamily: ff }}>
-                            <textPath href="#doneTopArc" startOffset="50%" textAnchor="middle">GOOD JOB</textPath>
+                            <textPath href="#doneTopArc" startOffset="50%" textAnchor="middle">NICE WORK</textPath>
                           </text>
                           <text fontSize="11" fontWeight="700" letterSpacing="0.5" style={{ fill: "rgba(0,0,0,0.45)", fontFamily: ff }}>
-                            <textPath href="#doneBottomArc" startOffset="50%" textAnchor="middle">{`${completedTitle.toUpperCase()} COMPLETED`}</textPath>
+                            <textPath href="#doneBottomArc" startOffset="50%" textAnchor="middle">{`${nextTitle} in ${fmtTime(secsUntilNext)}`}</textPath>
                           </text>
                         </svg>
                         ); })()}
-                        <p style={{ margin: 0, fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 500, color: "rgba(0,0,0,0.45)" }}>Next activity:</p>
-                        <p style={{ margin: 0, fontSize: "clamp(18px, 5.5vw, 24px)", fontWeight: 800, color: "#1a1c1c", letterSpacing: "-0.02em" }}>{nextTitle}.</p>
-                        <p style={{ margin: 0, fontSize: "clamp(13px, 3.8vw, 16px)", fontWeight: 600, color: "#1a1c1c", fontVariantNumeric: "tabular-nums" }}>In {fmtTime(secsUntilNext)}</p>
+                        <p style={{ margin: 0, fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#1a1c1c", letterSpacing: "-0.02em", textAlign: "center", lineHeight: 1.1 }}>{completedTitle}</p>
+                        <p style={{ margin: "4px 0 0", fontSize: "clamp(13px, 3.8vw, 16px)", fontWeight: 500, color: "rgba(0,0,0,0.45)", textAlign: "center", lineHeight: 1.1 }}>completed</p>
                       </div>
 
                       {/* Done flash — on top, cross-fades out into timer */}
@@ -1471,7 +1474,7 @@ export default function Home8() {
 
         {/* Complete modal */}
         {doModalOpen && modalItem && (() => {
-          const isComplete = completed.has(modalIdx);
+          const isComplete = completed.has(modalItem.title);
           const detail = SCHEDULE_DETAILS[modalItem.title];
           const isMeal = detail?.type === 'meal';
           const isExercise = detail?.type === 'exercise';
@@ -1503,10 +1506,10 @@ export default function Home8() {
             setCompleted(prev => {
               const n = new Set(prev);
               if (!isComplete) {
-                n.add(modalIdx);
-                doneAtRef.current.set(modalIdx, Date.now());
+                n.add(modalItem.title);
+                doneAtRef.current.set(modalItem.title, Date.now());
               } else {
-                n.delete(modalIdx);
+                n.delete(modalItem.title);
               }
               return n;
             });
