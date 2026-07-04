@@ -235,7 +235,7 @@ export default function Fab() {
                       <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Home</span>
                     </button>
                     <button
-                      onClick={() => { if (pathname.startsWith("/my-game")) { setLogPickerOpen(false); return; } setNavLoading("profile"); router.push("/my-game?tab=profile"); }}
+                      onClick={() => { if (pathname.startsWith("/my-game")) { setLogPickerOpen(false); return; } setNavLoading("my-game"); router.push("/my-game"); }}
                       className="active:scale-95 transition-transform"
                       style={{ flex: "0 0 calc((100vw - 52px) / 3)", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, aspectRatio: "1" }}
                     >
