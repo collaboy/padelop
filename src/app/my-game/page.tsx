@@ -1552,7 +1552,7 @@ export default function ProfilePage() {
                               </text>
                               <text x="100" y="152" textAnchor="middle" fontSize="19" fontWeight="600"
                                 style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
-                                {score === null ? "no data" : score >= 70 ? "on track" : score >= 50 ? "building" : "needs work"}
+                                {score === null ? "no data" : score >= 70 ? "on track" : "building"}
                               </text>
                             </svg>
                           </div>
