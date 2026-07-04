@@ -141,16 +141,6 @@
 
 * { box-sizing: border-box; }
 
-/* PADLA watermark — sits below page content, visible in background gaps */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dominant-baseline='middle' font-family='-apple-system%2C BlinkMacSystemFont%2C sans-serif' font-size='18' font-weight='800' fill='%23b0b0b0' transform='rotate(-30%2C70%2C70)'%3EPADLA%3C%2Ftext%3E%3C%2Fsvg%3E");
-  background-repeat: repeat;
-}
 
 /* Prevent iOS long-press text selection across the whole app */
 html, body {
@@ -211,7 +201,7 @@ body {
 /* View transition name helpers */
 .vt-header       { view-transition-name: vt-header; }
 .vt-footer       { view-transition-name: vt-footer; }
-.vt-page-content { view-transition-name: vt-page-content; background: #f2f3f5; }
+.vt-page-content { view-transition-name: vt-page-content; background-color: #f2f3f5; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dominant-baseline='middle' font-family='-apple-system%2C BlinkMacSystemFont%2C sans-serif' font-size='18' font-weight='800' fill='%23a8a8a8' transform='rotate(-30%2C70%2C70)'%3EPADLA%3C%2Ftext%3E%3C%2Fsvg%3E"); background-repeat: repeat; }
 
 /* Swipe page transitions — content area only */
 
