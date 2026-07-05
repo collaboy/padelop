@@ -1782,31 +1782,6 @@ export default function ProfilePage() {
                         );
                       })()}
 
-                      {/* Gear tile */}
-                      {(() => {
-                        const color = "#6b7480";
-                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        const label = racketName || "—";
-                        return (
-                          <div onClick={() => togglePanel('gear')}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(gearPanelOpen) }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                              <defs><path id="gearArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#gearArc" startOffset="50%" textAnchor="middle">MY GEAR</textPath>
-                              </text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-                                fontSize={label.length > 8 ? "24" : label.length > 5 ? "36" : "46"} fontWeight="800"
-                                style={{ fill: color, fontFamily: ff }}>{label}</text>
-                              {racketType ? (
-                                <text x="100" y="152" textAnchor="middle" fontSize="19" fontWeight="600"
-                                  style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{racketType.slice(0, 10)}</text>
-                              ) : null}
-                            </svg>
-                          </div>
-                        );
-                      })()}
                     </div>
 
                     {/* Matches panel */}
@@ -2040,85 +2015,6 @@ export default function ProfilePage() {
                       );
                     })()}
 
-                    {/* Gear panel */}
-                    {gearPanelOpen && (
-                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px 10px" }}>
-                          <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>My Gear</p>
-                          <button onClick={() => setGearEditOpen(o => !o)} className="t-caption" style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 500, color: "var(--c-forest)" }}>{gearEditOpen ? "Done" : "Edit"}</button>
-                        </div>
-                        <div ref={racketRowRef} style={{ display: "flex", alignItems: "stretch", padding: "0 12px 12px", gap: 14 }}>
-                          <div style={{ position: "relative", flexShrink: 0, width: racketSlotSize, height: racketSlotSize }}>
-                            <label htmlFor="racket-img-upload-gear" style={{ cursor: "pointer", display: "block", width: "100%", height: "100%" }}>
-                              <div style={{ width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                {racketImage ? (
-                                  // eslint-disable-next-line @next/next/no-img-element
-                                  <img src={racketImage} alt="Racket" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                ) : (
-                                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c4c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                                )}
-                              </div>
-                            </label>
-                            <input id="racket-img-upload-gear" type="file" accept="image/*" style={{ display: "none" }} onChange={handleRacketImage} />
-                          </div>
-                          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 6 }}>
-                            {gearEditOpen ? (
-                              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                                <input placeholder="Racket name" value={racketName} onChange={e => { setRacketName(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketName = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
-                                <input placeholder="Racket type (e.g. Control)" value={racketType} onChange={e => { setRacketType(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketType = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
-                                <input placeholder="Using since (e.g. Jan 2024)" value={racketSince} onChange={e => { setRacketSince(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketSince = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
-                              </div>
-                            ) : (
-                              <>
-                                <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1a1c1c" }}>{racketName || <span style={{ color: "#b0b5ba" }}>No racket added</span>}</p>
-                                {racketType && <p style={{ margin: 0, fontSize: 15, color: "#6b7480" }}>{racketType}</p>}
-                                {racketSince && <p style={{ margin: 0, fontSize: 14, color: "#9aa0a6" }}>Since {racketSince}</p>}
-                              </>
-                            )}
-                          </div>
-                        </div>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "var(--c-line)", borderTop: "1px solid var(--c-line)" }}>
-                          <div style={{ background: "#fff", padding: "14px", display: "flex", flexDirection: "column" }}>
-                            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 10px" }}>My Shoes</p>
-                            <div style={{ position: "relative", flex: 1 }}>
-                              <label htmlFor="shoe-img-upload-gear" style={{ cursor: "pointer", display: "block" }}>
-                                <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: shoeImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                  {shoeImage
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    ? <img src={shoeImage} alt="Shoes" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 17h20v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-1z"/><path d="M2 17c0-3.5 2.5-6 6-6h2l3-2h3c2.2 0 4 1.5 4.5 3.5L21 17"/></svg>}
-                                </div>
-                              </label>
-                              {shoeImage && (
-                                <button onClick={() => { setShoeImage(""); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); delete g.shoeImage; localStorage.setItem("padelop:gear", JSON.stringify(g)); deleteGearImageFromStorage("shoe"); }} style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
-                                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                </button>
-                              )}
-                            </div>
-                            <input id="shoe-img-upload-gear" type="file" accept="image/*" className="hidden" onChange={handleShoeImage} />
-                          </div>
-                          <div style={{ background: "#fff", padding: "14px", display: "flex", flexDirection: "column" }}>
-                            <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 10px" }}>My Kit</p>
-                            <div style={{ position: "relative", flex: 1 }}>
-                              <label htmlFor="kit-img-upload-gear" style={{ cursor: "pointer", display: "block" }}>
-                                <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: kitImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                  {kitImage
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    ? <img src={kitImage} alt="Kit" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                    : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg>}
-                                </div>
-                              </label>
-                              {kitImage && (
-                                <button onClick={() => { setKitImage(""); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); delete g.kitImage; localStorage.setItem("padelop:gear", JSON.stringify(g)); deleteGearImageFromStorage("kit"); }} style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
-                                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                </button>
-                              )}
-                            </div>
-                            <input id="kit-img-upload-gear" type="file" accept="image/*" className="hidden" onChange={handleKitImage} />
-                          </div>
-                        </div>
-                      </div>
-                    )}
 
                     {/* Row 4: Good/Bad */}
                     <div style={{ display: "flex", gap: 10 }}>

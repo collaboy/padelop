@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { startNavLoad } from "@/lib/nav-events";
 import { createClient } from "@/lib/supabase/client";
-import { saveProfileToDb } from "@/lib/db";
+import { saveProfileToDb, saveGearToDb, uploadGearImageToStorage, deleteGearImageFromStorage } from "@/lib/db";
 import { resizeImage } from "@/lib/image";
 import AvatarCropModal from "@/components/avatar-crop-modal";
 
@@ -72,6 +72,15 @@ export default function SettingsPage() {
   const [profileSaved, setProfileSaved] = useState(false);
   const [profilePanelOpen, setProfilePanelOpen] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [gearEditOpen, setGearEditOpen] = useState(false);
+  const [racketName, setRacketName] = useState("");
+  const [racketType, setRacketType] = useState("");
+  const [racketSince, setRacketSince] = useState("");
+  const [racketImage, setRacketImage] = useState("");
+  const [shoeImage, setShoeImage] = useState("");
+  const [kitImage, setKitImage] = useState("");
+  const racketRowRef = useRef<HTMLDivElement>(null);
+  const [racketSlotSize, setRacketSlotSize] = useState(80);
 
   useEffect(() => {
     createClient().auth.getUser().then(({ data: { user } }) => {
@@ -79,7 +88,80 @@ export default function SettingsPage() {
     });
     const raw = localStorage.getItem(PROFILE_KEY);
     if (raw) setProfile(JSON.parse(raw));
+    try {
+      const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}");
+      if (g.racketName)  setRacketName(g.racketName);
+      if (g.racketType)  setRacketType(g.racketType);
+      if (g.racketSince) setRacketSince(g.racketSince);
+      if (g.racketImage) setRacketImage(g.racketImage);
+      if (g.shoeImage)   setShoeImage(g.shoeImage);
+      if (g.kitImage)    setKitImage(g.kitImage);
+    } catch {}
   }, []);
+
+  useEffect(() => {
+    const el = racketRowRef.current;
+    if (!el) return;
+    const measure = () => setRacketSlotSize(el.offsetHeight - 24);
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    measure();
+    return () => ro.disconnect();
+  }, []);
+
+  const handleKitImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = reader.result as string;
+      setKitImage(img);
+      uploadGearImageToStorage("kit", img).then(url => {
+        const src = url ?? img;
+        setKitImage(src);
+        try { const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); localStorage.setItem("padelop:gear", JSON.stringify({ ...g, kitImage: src })); } catch {}
+        if (url) saveGearToDb({ type: "kit", photo_url: url });
+      });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const handleShoeImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = reader.result as string;
+      setShoeImage(img);
+      uploadGearImageToStorage("shoe", img).then(url => {
+        const src = url ?? img;
+        setShoeImage(src);
+        try { const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); localStorage.setItem("padelop:gear", JSON.stringify({ ...g, shoeImage: src })); } catch {}
+        if (url) saveGearToDb({ type: "shoe", photo_url: url });
+      });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const handleRacketImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = reader.result as string;
+      setRacketImage(img);
+      uploadGearImageToStorage("racket", img).then(url => {
+        const src = url ?? img;
+        setRacketImage(src);
+        try { const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); localStorage.setItem("padelop:gear", JSON.stringify({ ...g, racketImage: src })); } catch {}
+        if (url) saveGearToDb({ type: "racket", photo_url: url });
+      });
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
 
   const setField = (k: keyof Profile, v: string) => { setProfileSaved(false); setProfile(p => ({ ...p, [k]: v })); };
   const handleAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -297,6 +379,82 @@ export default function SettingsPage() {
           </div>
         </div>
       )}
+
+      {/* My Gear */}
+      <div style={{ background: "#fff", borderRadius: "var(--r-md)", boxShadow: "var(--shadow-soft)", border: "1px solid var(--c-border-card)", overflow: "hidden" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px 10px" }}>
+          <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>My Gear</p>
+          <button onClick={() => setGearEditOpen(o => !o)} style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 500, color: "var(--c-forest)", fontSize: 13 }}>{gearEditOpen ? "Done" : "Edit"}</button>
+        </div>
+        <div ref={racketRowRef} style={{ display: "flex", alignItems: "stretch", padding: "0 12px 12px", gap: 14 }}>
+          <div style={{ position: "relative", flexShrink: 0, width: racketSlotSize, height: racketSlotSize }}>
+            <label htmlFor="settings-racket-img" style={{ cursor: "pointer", display: "block", width: "100%", height: "100%" }}>
+              <div style={{ width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {racketImage
+                  // eslint-disable-next-line @next/next/no-img-element
+                  ? <img src={racketImage} alt="Racket" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c4c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>}
+              </div>
+            </label>
+            <input id="settings-racket-img" type="file" accept="image/*" style={{ display: "none" }} onChange={handleRacketImage} />
+          </div>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 6 }}>
+            {gearEditOpen ? (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <input placeholder="Racket name" value={racketName} onChange={e => { setRacketName(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketName = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
+                <input placeholder="Racket type (e.g. Control)" value={racketType} onChange={e => { setRacketType(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketType = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
+                <input placeholder="Using since (e.g. Jan 2024)" value={racketSince} onChange={e => { setRacketSince(e.target.value); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); g.racketSince = e.target.value; localStorage.setItem("padelop:gear", JSON.stringify(g)); }} style={{ padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e2e5ea", fontSize: 14, outline: "none" }} />
+              </div>
+            ) : (
+              <>
+                <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1a1c1c" }}>{racketName || <span style={{ color: "#b0b5ba" }}>No racket added</span>}</p>
+                {racketType && <p style={{ margin: 0, fontSize: 15, color: "#6b7480" }}>{racketType}</p>}
+                {racketSince && <p style={{ margin: 0, fontSize: 14, color: "#9aa0a6" }}>Since {racketSince}</p>}
+              </>
+            )}
+          </div>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "var(--c-line)", borderTop: "1px solid var(--c-line)" }}>
+          <div style={{ background: "#fff", padding: "14px", display: "flex", flexDirection: "column" }}>
+            <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--c-label)" }}>My Shoes</p>
+            <div style={{ position: "relative", flex: 1 }}>
+              <label htmlFor="settings-shoe-img" style={{ cursor: "pointer", display: "block" }}>
+                <div style={{ aspectRatio: "1/1", borderRadius: 8, overflow: "hidden", background: "var(--c-bg)", border: shoeImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {shoeImage
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img src={shoeImage} alt="Shoes" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 17h20v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-1z"/><path d="M2 17c0-3.5 2.5-6 6-6h2l3-2h3c2.2 0 4 1.5 4.5 3.5L21 17"/></svg>}
+                </div>
+              </label>
+              {shoeImage && (
+                <button onClick={() => { setShoeImage(""); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); delete g.shoeImage; localStorage.setItem("padelop:gear", JSON.stringify(g)); deleteGearImageFromStorage("shoe"); }} style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              )}
+              <input id="settings-shoe-img" type="file" accept="image/*" style={{ display: "none" }} onChange={handleShoeImage} />
+            </div>
+          </div>
+          <div style={{ background: "#fff", padding: "14px", display: "flex", flexDirection: "column" }}>
+            <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--c-label)" }}>My Kit</p>
+            <div style={{ position: "relative", flex: 1 }}>
+              <label htmlFor="settings-kit-img" style={{ cursor: "pointer", display: "block" }}>
+                <div style={{ aspectRatio: "1/1", borderRadius: 8, overflow: "hidden", background: "var(--c-bg)", border: kitImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {kitImage
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img src={kitImage} alt="Kit" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg>}
+                </div>
+              </label>
+              {kitImage && (
+                <button onClick={() => { setKitImage(""); const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); delete g.kitImage; localStorage.setItem("padelop:gear", JSON.stringify(g)); deleteGearImageFromStorage("kit"); }} style={{ position: "absolute", top: 4, right: 4, width: 22, height: 22, borderRadius: "50%", background: "rgba(0,0,0,0.55)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              )}
+              <input id="settings-kit-img" type="file" accept="image/*" style={{ display: "none" }} onChange={handleKitImage} />
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Account */}
       <section>
