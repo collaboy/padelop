@@ -23,13 +23,12 @@ export default function PlusOne() {
     const onPlusOne = (e: Event) => {
       const delay = (e as CustomEvent).detail?.delay ?? 2500;
       const id = ++_id;
+      // Mount immediately but invisible; CSS delay handles the wait
+      setAnims(p => [...p, { id, delay }]);
       setTimeout(() => {
-        setAnims(p => [...p, { id, delay }]);
-        setTimeout(() => {
-          setAnims(p => p.filter(a => a.id !== id));
-          setScore(readPadlaScore());
-        }, DURATION);
-      }, delay);
+        setAnims(p => p.filter(a => a.id !== id));
+        setScore(readPadlaScore());
+      }, delay + DURATION + 100);
     };
 
     const onStorage = () => {
@@ -75,8 +74,9 @@ export default function PlusOne() {
             <div key={a.id} style={{
               ...numStyle,
               color: "#16a34a",
+              opacity: 0,
               willChange: "transform, opacity",
-              animation: `p1-float ${DURATION}ms ease-out both`,
+              animation: `p1-float ${DURATION}ms ease-out ${a.delay}ms forwards`,
             }}>
               +1
             </div>
