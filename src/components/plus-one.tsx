@@ -35,13 +35,15 @@ function PadlaSheet({ onClose }: { onClose: () => void }) {
       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }} />
       <div style={{ position: "relative", width: "100%", maxWidth: 480, background: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: "12px 20px 48px", animation: "padla-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", maxHeight: "70dvh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
         <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "0 auto 24px" }} />
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-          <p className="t-label" style={{ color: "#d97706", margin: 0 }}>Lifetime Padla Points</p>
-          <div style={{ width: 52, height: 52, borderRadius: "50%", background: "#fef3c7", border: "2px solid #fcd34d", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+          <div>
+            <p className="t-label" style={{ color: "#d97706", margin: "0 0 3px" }}>Lifetime Padla Points</p>
+            <p style={{ margin: 0, fontSize: 12, color: "#9aa0a6", lineHeight: 1.4 }}>Every Padla point represents one positive action completed.</p>
+          </div>
+          <div style={{ width: 52, height: 52, borderRadius: "50%", background: "#fef3c7", border: "2px solid #fcd34d", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginLeft: 12 }}>
             <span style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-0.02em", color: "#d97706", lineHeight: 1 }}>{allCompletions.length}</span>
           </div>
         </div>
-        <p style={{ margin: "0 0 12px", fontSize: 15, color: "#4a5050", lineHeight: 1.5 }}>Every Padla point represents one positive action completed.</p>
         {nextMilestone !== null && (
           <div style={{ margin: "0 0 20px", padding: "12px 14px", borderRadius: 14, background: "#fef3c7", display: "flex", flexDirection: "column", gap: 2 }}>
             <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#d97706" }}>Next milestone: {nextMilestone}</p>
