@@ -24,6 +24,10 @@ function PadlaSheet({ onClose }: { onClose: () => void }) {
   const entries = Object.entries(breakdown).sort((a, b) => b[1] - a[1]);
   const visible = showAll ? entries : entries.slice(0, 5);
   const hasMore = entries.length > 5;
+  const score = allCompletions.length;
+  const MILESTONES = [10, 25, 50, 75, 100, 250, 500, 1000];
+  const nextMilestone = MILESTONES.find(m => m > score) ?? null;
+  const toNext = nextMilestone !== null ? nextMilestone - score : null;
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 9990, display: "flex", alignItems: "flex-end", justifyContent: "center" }} onClick={onClose}>
@@ -35,7 +39,13 @@ function PadlaSheet({ onClose }: { onClose: () => void }) {
           <p className="t-label" style={{ color: "#d97706", margin: 0 }}>Lifetime Padla Points</p>
           <p style={{ margin: 0, fontSize: 22, fontWeight: 800, letterSpacing: "-0.02em", color: "#1a1c1c", lineHeight: 1 }}>{allCompletions.length}</p>
         </div>
-        <p style={{ margin: "0 0 20px", fontSize: 15, color: "#4a5050", lineHeight: 1.5 }}>You&apos;ve completed {allCompletions.length} positive actions.</p>
+        <p style={{ margin: "0 0 12px", fontSize: 15, color: "#4a5050", lineHeight: 1.5 }}>You&apos;ve completed {score} positive actions.</p>
+        {nextMilestone !== null && (
+          <div style={{ margin: "0 0 20px", padding: "12px 14px", borderRadius: 14, background: "#fef3c7", display: "flex", flexDirection: "column", gap: 2 }}>
+            <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#d97706" }}>Next milestone: {nextMilestone}</p>
+            <p style={{ margin: 0, fontSize: 13, color: "#92400e" }}>{toNext} action{toNext === 1 ? "" : "s"} to go</p>
+          </div>
+        )}
         <p className="t-label" style={{ color: "#8a9096", margin: "0 0 14px" }}>Your journey</p>
         {entries.length === 0 ? (
           <p style={{ fontSize: 15, color: "#9aa0a6", margin: 0 }}>No activities yet. Start completing tasks on the home screen.</p>
