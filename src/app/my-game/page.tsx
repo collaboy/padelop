@@ -1846,7 +1846,10 @@ export default function ProfilePage() {
 
                     {/* Breathe */}
                     <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <p style={{ margin: 0, fontSize: "clamp(28px, 7vw, 36px)", fontWeight: 300, letterSpacing: "0.18em", color: "#dde1e5" }}>breathe</p>
+                      <div style={{ textAlign: "center" }}>
+                        <p style={{ margin: "0 0 2px", fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 400, letterSpacing: "0.12em", color: "#e8ebed", lineHeight: 1 }}>remember to</p>
+                        <p style={{ margin: 0, fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 300, letterSpacing: "0.18em", color: "#dde1e5", lineHeight: 1 }}>breathe</p>
+                      </div>
                     </div>
 
                     {/* Matches panel */}
