@@ -1143,10 +1143,10 @@ export default function ProfilePage() {
   }
 
   return (
-    <><div className="w-full pb-32" style={{ backgroundColor: "#f2f3f5", minHeight: "100dvh", position: "relative" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
+    <><div className="w-full" style={{ backgroundColor: "#f2f3f5", height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
 
       {/* ── Profile ──────────────────────────────────────────────────────── */}
-        <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
+        <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 20, flex: 1, minHeight: 0, overflow: "hidden" }}>
           {/* Header */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -1186,7 +1186,7 @@ export default function ProfilePage() {
               return (
                 <>
                 {openPanel !== null && <div onClick={() => setOpenPanel(null)} style={{ position: "fixed", inset: 0, zIndex: 35 }} />}
-                <div style={{ display: "flex", flexDirection: "column", gap: 20, position: "relative", zIndex: openPanel !== null ? 36 : "auto" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 20, position: "relative", zIndex: openPanel !== null ? 36 : "auto", flex: 1, justifyContent: "center" }}>
                   {total > 0 && (() => {
                     // Add new panel states here to extend dimming to future circles
                     const anyOpen = openPanel !== null;
@@ -1291,14 +1291,22 @@ export default function ProfilePage() {
                     </div>
 
                     {dayTypeInfoOpen && (
-                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-                        <div style={{ padding: "14px", display: "flex", flexDirection: "column", gap: 7 }}>
-                          {DAY_TYPE_INFO.map(dt => (
-                            <div key={dt.label} style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                              <span style={{ fontSize: 12, fontWeight: 700, color: dt.color, background: `${dt.color}18`, borderRadius: 5, padding: "1px 6px", flexShrink: 0, whiteSpace: "nowrap", minWidth: 108, textAlign: "center", display: "inline-block" }}>{dt.label}</span>
-                              <span style={{ fontSize: 16, color: "#5a6270", lineHeight: 1.4 }}>{dt.desc}</span>
+                      <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
+                        <style>{`@keyframes mg-sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+                        <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                          <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
+                          <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px" }}>
+                            <p style={{ margin: "0 0 14px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Day Types</p>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                              {DAY_TYPE_INFO.map(dt => (
+                                <div key={dt.label} style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                                  <span style={{ fontSize: 12, fontWeight: 700, color: dt.color, background: `${dt.color}18`, borderRadius: 5, padding: "1px 6px", flexShrink: 0, whiteSpace: "nowrap", minWidth: 108, textAlign: "center", display: "inline-block" }}>{dt.label}</span>
+                                  <span style={{ fontSize: 16, color: "#5a6270", lineHeight: 1.4 }}>{dt.desc}</span>
+                                </div>
+                              ))}
                             </div>
-                          ))}
+                          </div>
                         </div>
                       </div>
                     )}
@@ -1329,7 +1337,12 @@ export default function ProfilePage() {
                         setNextMatchInfoMode(null);
                       };
                       return (
-                        <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                        <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
+                          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                          <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
+                          <div className="overflow-y-auto flex-1" style={{ minHeight: 0 }}>
+                        <div style={{ overflow: "hidden" }}>
                           {/* hidden file input for screenshot upload */}
                           <input ref={nmUploadRef} type="file" accept="image/*" style={{ display: "none" }} onChange={async e => {
                             const file = e.target.files?.[0];
@@ -1476,27 +1489,35 @@ export default function ProfilePage() {
                             )}
                           </div>
                         </div>
+                          </div>
+                          </div>
+                        </div>
                       );
                     })()}
 
                     {panelSchedOpen && (
-                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-                        <div style={{ padding: "10px 14px 8px" }}>
-                          {schedule.map((item, i) => {
-                            const isDone = (schedDone[todayKey] ?? []).includes(item.title);
-                            return (
-                              <div key={item.title}
-                                onClick={() => { if (SCHEDULE_DETAILS[item.title] || item.isDrill) { setPanelSchedModalIdx(i); setPanelExpandedMealIdx(null); setPanelCheckedMeals(new Set()); } }}
-                                style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0", cursor: SCHEDULE_DETAILS[item.title] || item.isDrill ? "pointer" : "default", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f6" : "none" }}>
-                                <button onClick={e => { e.stopPropagation(); panelToggleDone(item.title); }}
-                                  style={{ width: 20, height: 20, borderRadius: 5, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s", cursor: "pointer" }}>
-                                  {isDone && <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-                                </button>
-                                <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none", flex: 1 }}>{item.title}</p>
-                                <span style={{ fontSize: 13, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
-                              </div>
-                            );
-                          })}
+                      <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+                        <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                          <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
+                          <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px" }}>
+                            <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Today&apos;s Schedule</p>
+                            {schedule.map((item, i) => {
+                              const isDone = (schedDone[todayKey] ?? []).includes(item.title);
+                              return (
+                                <div key={item.title}
+                                  onClick={() => { if (SCHEDULE_DETAILS[item.title] || item.isDrill) { setPanelSchedModalIdx(i); setPanelExpandedMealIdx(null); setPanelCheckedMeals(new Set()); } }}
+                                  style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 0", cursor: SCHEDULE_DETAILS[item.title] || item.isDrill ? "pointer" : "default", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f6" : "none" }}>
+                                  <button onClick={e => { e.stopPropagation(); panelToggleDone(item.title); }}
+                                    style={{ width: 22, height: 22, borderRadius: 6, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s", cursor: "pointer" }}>
+                                    {isDone && <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                                  </button>
+                                  <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none", flex: 1 }}>{item.title}</p>
+                                  <span style={{ fontSize: 13, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
                       </div>
                     )}
@@ -1616,24 +1637,30 @@ export default function ProfilePage() {
                       const snext = STIERS[STIERS.indexOf(stier) + 1];
                       const msg = streak === 0 ? "Log your first check-in to start your streak." : streak === 1 ? "Day one. Come back tomorrow to keep it going." : !snext ? "Legend status. You're in a league of your own." : `${snext.min - streak} day${snext.min - streak === 1 ? "" : "s"} to ${snext.label}.`;
                       return (
-                        <div style={{ borderRadius: 18, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
-                          <div style={{ background: `linear-gradient(145deg, ${stier.grad[0]}, ${stier.grad[1]})`, padding: "20px 20px 16px", textAlign: "center" }}>
-                            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: stier.color }}>{stier.label}</span>
-                            <p style={{ margin: "6px 0 3px", fontSize: 44, fontWeight: 800, color: stier.color, lineHeight: 1 }}>{streak}</p>
-                            <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: stier.color, opacity: 0.7 }}>day streak</p>
-                            <p style={{ margin: "10px 0 0", fontSize: 15, fontWeight: 500, color: "#4b5563" }}>{msg}</p>
-                          </div>
-                          <div style={{ background: "#fff", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 4 }}>
-                            {STIERS.map(t => {
-                              const active = t.label === stier.label, unlocked = streak >= t.min;
-                              return (
-                                <div key={t.label} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                                  <div style={{ width: "100%", height: 3, borderRadius: 99, background: unlocked ? t.color : "#e5e7eb", opacity: unlocked ? 1 : 0.4 }} />
-                                  <span style={{ fontSize: 9, fontWeight: active ? 800 : 600, color: active ? t.color : "#9aa0a6", textAlign: "center", lineHeight: 1.2, letterSpacing: "0.04em" }}>{t.label}</span>
-                                  <span style={{ fontSize: 9, color: "#b0b8c1", fontWeight: 500 }}>{t.min === 0 ? "0" : `${t.min}d`}</span>
-                                </div>
-                              );
-                            })}
+                        <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
+                          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                            <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
+                            <div className="overflow-y-auto flex-1" style={{ minHeight: 0 }}>
+                              <div style={{ background: `linear-gradient(145deg, ${stier.grad[0]}, ${stier.grad[1]})`, padding: "20px 20px 16px", textAlign: "center" }}>
+                                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: stier.color }}>{stier.label}</span>
+                                <p style={{ margin: "6px 0 3px", fontSize: 44, fontWeight: 800, color: stier.color, lineHeight: 1 }}>{streak}</p>
+                                <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: stier.color, opacity: 0.7 }}>day streak</p>
+                                <p style={{ margin: "10px 0 0", fontSize: 15, fontWeight: 500, color: "#4b5563" }}>{msg}</p>
+                              </div>
+                              <div style={{ background: "#fff", padding: "14px 16px 40px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 4 }}>
+                                {STIERS.map(t => {
+                                  const active = t.label === stier.label, unlocked = streak >= t.min;
+                                  return (
+                                    <div key={t.label} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                                      <div style={{ width: "100%", height: 3, borderRadius: 99, background: unlocked ? t.color : "#e5e7eb", opacity: unlocked ? 1 : 0.4 }} />
+                                      <span style={{ fontSize: 9, fontWeight: active ? 800 : 600, color: active ? t.color : "#9aa0a6", textAlign: "center", lineHeight: 1.2, letterSpacing: "0.04em" }}>{t.label}</span>
+                                      <span style={{ fontSize: 9, color: "#b0b8c1", fontWeight: 500 }}>{t.min === 0 ? "0" : `${t.min}d`}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       );
@@ -1663,20 +1690,24 @@ export default function ProfilePage() {
                         );
                       };
                       return (
-                        <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-                          <div style={{ padding: "18px 18px 16px" }}>
-                            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14 }}>
-                              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>My Form</span>
-                              <span style={{ fontSize: 32, fontWeight: 800, color, lineHeight: 1 }}>{score}</span>
-                            </div>
-                            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                              {rows.map(r => (
-                                <div key={r.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                  <span style={{ fontSize: 15, color: "#6b7480", fontWeight: 500, minWidth: 80 }}>{r.label}</span>
-                                  {bar(r.value)}
-                                  <span style={{ fontSize: 10, color: "#c0c7d0", fontWeight: 500, minWidth: 28, textAlign: "right" }}>{r.weight}</span>
-                                </div>
-                              ))}
+                        <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
+                          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                            <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
+                            <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 18px 40px" }}>
+                              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14 }}>
+                                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>My Form</span>
+                                <span style={{ fontSize: 32, fontWeight: 800, color, lineHeight: 1 }}>{score}</span>
+                              </div>
+                              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                                {rows.map(r => (
+                                  <div key={r.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                    <span style={{ fontSize: 15, color: "#6b7480", fontWeight: 500, minWidth: 80 }}>{r.label}</span>
+                                    {bar(r.value)}
+                                    <span style={{ fontSize: 10, color: "#c0c7d0", fontWeight: 500, minWidth: 28, textAlign: "right" }}>{r.weight}</span>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1692,28 +1723,32 @@ export default function ProfilePage() {
                       const pct = ml > 0 ? Math.min(ml / target, 1) : null;
                       const displayMl = ml > 0 ? (ml >= 1000 ? `${(ml / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${ml}ml`) : null;
                       return (
-                        <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-                          <div style={{ padding: "18px 18px 16px" }}>
-                            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
-                              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Hydration today</span>
-                              <span style={{ fontSize: 28, fontWeight: 800, color: "#0ea5e9", lineHeight: 1 }}>{displayMl ?? "—"}</span>
-                            </div>
-                            {pct !== null && (
-                              <>
-                                <div style={{ height: 7, borderRadius: 99, background: "#f0f0f0", marginBottom: 6 }}>
-                                  <div style={{ width: `${Math.round(pct * 100)}%`, height: "100%", borderRadius: 99, background: pct >= 1 ? "#16a34a" : "#0ea5e9", transition: "width 0.4s" }} />
-                                </div>
-                                <span style={{ fontSize: 15, color: "#9aa0a6", fontWeight: 500 }}>{Math.round(pct * 100)}% of {target / 1000}L daily target</span>
-                              </>
-                            )}
-                            {todayLog?.quality && (
-                              <div style={{ marginTop: 10 }}>
-                                <span style={{ fontSize: 15, color: "#6b7480" }}>Feeling: <strong style={{ color: todayLog.quality === "great" ? "#16a34a" : todayLog.quality === "bad" ? "#ef4444" : "#d97706" }}>{todayLog.quality}</strong></span>
+                        <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
+                          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                            <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
+                            <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 18px 40px" }}>
+                              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
+                                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Hydration today</span>
+                                <span style={{ fontSize: 28, fontWeight: 800, color: "#0ea5e9", lineHeight: 1 }}>{displayMl ?? "—"}</span>
                               </div>
-                            )}
-                            {!displayMl && !todayLog && (
-                              <p style={{ margin: 0, fontSize: 15, color: "#9aa0a6" }}>No hydration logged today. Log from the home screen or check-in.</p>
-                            )}
+                              {pct !== null && (
+                                <>
+                                  <div style={{ height: 7, borderRadius: 99, background: "#f0f0f0", marginBottom: 6 }}>
+                                    <div style={{ width: `${Math.round(pct * 100)}%`, height: "100%", borderRadius: 99, background: pct >= 1 ? "#16a34a" : "#0ea5e9", transition: "width 0.4s" }} />
+                                  </div>
+                                  <span style={{ fontSize: 15, color: "#9aa0a6", fontWeight: 500 }}>{Math.round(pct * 100)}% of {target / 1000}L daily target</span>
+                                </>
+                              )}
+                              {todayLog?.quality && (
+                                <div style={{ marginTop: 10 }}>
+                                  <span style={{ fontSize: 15, color: "#6b7480" }}>Feeling: <strong style={{ color: todayLog.quality === "great" ? "#16a34a" : todayLog.quality === "bad" ? "#ef4444" : "#d97706" }}>{todayLog.quality}</strong></span>
+                                </div>
+                              )}
+                              {!displayMl && !todayLog && (
+                                <p style={{ margin: 0, fontSize: 15, color: "#9aa0a6" }}>No hydration logged today. Log from the home screen or check-in.</p>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
@@ -1812,8 +1847,12 @@ export default function ProfilePage() {
 
                     {/* Matches panel */}
                     {matchesPanelOpen && (
-                      <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
-                        <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>Matches</p>
+                      <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+                        <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "88dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                          <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
+                          <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "4px 16px 40px", display: "flex", flexDirection: "column", gap: 10 }}>
+                        <p className="t-label" style={{ color: "var(--c-label)", margin: "10px 0 0" }}>Matches</p>
 
                         {/* Match record card */}
                         {reviews.length > 0 && (() => {
@@ -1948,6 +1987,8 @@ export default function ProfilePage() {
                             })}
                           </div>
                         )}
+                          </div>
+                        </div>
                       </div>
                     )}
 
@@ -2016,27 +2057,41 @@ export default function ProfilePage() {
                           ? { label: "Tournaments", body: `You've entered ${tournamentCount} tournament${tournamentCount > 1 ? "s" : ""}. Competitive pressure is one of the best accelerators — the nerves, the intensity, the opponents. Keep entering.` }
                           : null,
                       ].filter((x): x is { label: string; body: string } => x !== null);
-                      if (pool.length === 0) return <div style={{ borderRadius: 18, background: "#fff", padding: "20px 16px", textAlign: "center", color: "#9aa0a6", fontSize: 14 }}>No insights yet — log some matches and check-ins to unlock.</div>;
-                      const idx = featuredIdx % pool.length;
-                      const insight = pool[idx];
+                      const sheetContent = pool.length === 0
+                        ? <p style={{ fontSize: 15, color: "#9aa0a6", margin: 0 }}>No insights yet — log some matches and check-ins to unlock.</p>
+                        : (() => {
+                            const idx = featuredIdx % pool.length;
+                            const insight = pool[idx];
+                            return (
+                              <>
+                                <p style={{ margin: "0 0 14px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Featured Insights</p>
+                                <button
+                                  onClick={() => setFeaturedIdx(i => (i + 1) % pool.length)}
+                                  style={{ width: "100%", background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" }}
+                                >
+                                  <p style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-blue)" }}>{insight.label}</p>
+                                  <p style={{ margin: "0 0 16px", fontSize: 16, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{insight.body}</p>
+                                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                    <div style={{ display: "flex", gap: 4 }}>
+                                      {pool.map((_, i) => (
+                                        <div key={i} style={{ width: i === idx ? 14 : 5, height: 5, borderRadius: 3, background: i === idx ? "var(--c-blue)" : "#e2e5ea", transition: "width 0.2s" }} />
+                                      ))}
+                                    </div>
+                                    <span style={{ fontSize: 14, color: "var(--c-hint)", fontWeight: 500 }}>Tap for next</span>
+                                  </div>
+                                </button>
+                              </>
+                            );
+                          })();
                       return (
-                        <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden" }}>
-                          <p style={{ margin: 0, padding: "14px 16px 0", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--c-label)" }}>Featured Insights</p>
-                          <button
-                            onClick={() => setFeaturedIdx(i => (i + 1) % pool.length)}
-                            style={{ width: "100%", background: "none", border: "none", padding: "12px 16px 16px", cursor: "pointer", textAlign: "left" }}
-                          >
-                            <p style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-blue)" }}>{insight.label}</p>
-                            <p style={{ margin: "0 0 12px", fontSize: 16, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{insight.body}</p>
-                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                              <div style={{ display: "flex", gap: 4 }}>
-                                {pool.map((_, i) => (
-                                  <div key={i} style={{ width: i === idx ? 14 : 5, height: 5, borderRadius: 3, background: i === idx ? "var(--c-blue)" : "#e2e5ea", transition: "width 0.2s" }} />
-                                ))}
-                              </div>
-                              <span style={{ fontSize: 14, color: "var(--c-hint)", fontWeight: 500 }}>Tap for next</span>
+                        <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
+                          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                            <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
+                            <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px" }}>
+                              {sheetContent}
                             </div>
-                          </button>
+                          </div>
                         </div>
                       );
                     })()}
@@ -2054,37 +2109,46 @@ export default function ProfilePage() {
                       });
                       const wellTags = Object.entries(wellCounts).sort((a, b) => b[1] - a[1]);
                       const badTags  = Object.entries(badCounts).sort((a, b) => b[1] - a[1]);
-                      if (wellTags.length === 0 && badTags.length === 0) {
-                        return <div style={{ background: "#fff", borderRadius: 18, padding: "20px 16px", textAlign: "center", color: "#9aa0a6", fontSize: 15 }}>No tags yet — log match reviews to see your patterns.</div>;
-                      }
                       return (
-                        <div style={{ background: "#fff", borderRadius: 18, boxShadow: "0 2px 12px rgba(0,0,0,0.07)", overflow: "hidden", padding: "16px 16px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
-                          {wellTags.length > 0 && (
-                            <div>
-                              <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#16a34a" }}>What&apos;s Working</p>
-                              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                                {wellTags.map(([tag, count]) => (
-                                  <span key={tag} style={{ display: "flex", alignItems: "center", gap: 5, background: "#f0fdf4", borderRadius: 999, padding: "6px 12px" }}>
-                                    <span style={{ fontSize: 15, fontWeight: 600, color: "#15803d" }}>{tag}</span>
-                                    <span style={{ fontSize: 12, fontWeight: 700, color: "#16a34a", background: "#dcfce7", borderRadius: 999, padding: "1px 7px" }}>{count}</span>
-                                  </span>
-                                ))}
-                              </div>
+                        <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
+                          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                            <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
+                            <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px", display: "flex", flexDirection: "column", gap: 16 }}>
+                              {wellTags.length === 0 && badTags.length === 0 ? (
+                                <p style={{ fontSize: 15, color: "#9aa0a6", margin: 0 }}>No tags yet — log match reviews to see your patterns.</p>
+                              ) : (
+                                <>
+                                  {wellTags.length > 0 && (
+                                    <div>
+                                      <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#16a34a" }}>What&apos;s Working</p>
+                                      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                                        {wellTags.map(([tag, count]) => (
+                                          <span key={tag} style={{ display: "flex", alignItems: "center", gap: 5, background: "#f0fdf4", borderRadius: 999, padding: "6px 12px" }}>
+                                            <span style={{ fontSize: 15, fontWeight: 600, color: "#15803d" }}>{tag}</span>
+                                            <span style={{ fontSize: 12, fontWeight: 700, color: "#16a34a", background: "#dcfce7", borderRadius: 999, padding: "1px 7px" }}>{count}</span>
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  {badTags.length > 0 && (
+                                    <div>
+                                      <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#e11d48" }}>Needs Work</p>
+                                      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                                        {badTags.map(([tag, count]) => (
+                                          <span key={tag} style={{ display: "flex", alignItems: "center", gap: 5, background: "#fff1f2", borderRadius: 999, padding: "6px 12px" }}>
+                                            <span style={{ fontSize: 15, fontWeight: 600, color: "#be123c" }}>{tag}</span>
+                                            <span style={{ fontSize: 12, fontWeight: 700, color: "#e11d48", background: "#ffe4e6", borderRadius: 999, padding: "1px 7px" }}>{count}</span>
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </>
+                              )}
                             </div>
-                          )}
-                          {badTags.length > 0 && (
-                            <div>
-                              <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#e11d48" }}>Needs Work</p>
-                              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                                {badTags.map(([tag, count]) => (
-                                  <span key={tag} style={{ display: "flex", alignItems: "center", gap: 5, background: "#fff1f2", borderRadius: 999, padding: "6px 12px" }}>
-                                    <span style={{ fontSize: 15, fontWeight: 600, color: "#be123c" }}>{tag}</span>
-                                    <span style={{ fontSize: 12, fontWeight: 700, color: "#e11d48", background: "#ffe4e6", borderRadius: 999, padding: "1px 7px" }}>{count}</span>
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
+                          </div>
                         </div>
                       );
                     })()}
