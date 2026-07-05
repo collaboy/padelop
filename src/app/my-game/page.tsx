@@ -1844,100 +1844,10 @@ export default function ProfilePage() {
                       })()}
                     </div>
 
-                    {/* Coach's Note */}
-                    {(() => {
-                      const today = new Date().toISOString().slice(0, 10);
-                      const seed = today.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
-                      const pick = <T,>(arr: T[]) => arr[seed % arr.length];
-
-                      const matchToday = nextMatch?.date === today;
-                      const diffDays = nextMatch
-                        ? Math.round((new Date(nextMatch.date + "T12:00").getTime() - new Date(today + "T12:00").getTime()) / 86400000)
-                        : null;
-                      const matchTomorrow = diffDays === 1;
-
-                      const improveCounts: Record<string, number> = {};
-                      reviews.forEach(r => { (r.improved ?? []).forEach(t => { improveCounts[t] = (improveCounts[t] ?? 0) + 1; }); });
-                      const topImprove = Object.entries(improveCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
-
-                      const wellCounts2: Record<string, number> = {};
-                      reviews.forEach(r => { (r.wellDone ?? []).forEach(t => { wellCounts2[t] = (wellCounts2[t] ?? 0) + 1; }); });
-                      const topStrength = Object.entries(wellCounts2).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
-
-                      let title: string;
-                      let body: string;
-
-                      if (matchToday) {
-                        [title, body] = pick([
-                          ["Game on.", nextMatch?.club && nextMatch?.time ? `You're on at ${nextMatch.time} at ${nextMatch.club}. Trust your prep and enjoy every point.` : "Match day. Trust your prep, stay present, and enjoy every point."],
-                          ["This is what you trained for.", "Everything you've done in the gym, on the court, in the sessions — it's already in you. Go play."],
-                          ["Play your game.", "Don't adjust to their rhythm. Make them adjust to yours. Stick to what works and back yourself."],
-                        ]);
-                      } else if (matchTomorrow) {
-                        [title, body] = pick([
-                          ["Match tomorrow.", "Rest up tonight. Keep hydration high, eat well, sleep early. The prep is done — let the body recover."],
-                          ["One sleep away.", "Don't train hard today. Loose movement, early bed, plenty of water. Show up fresh."],
-                          ["The work is done.", "Nothing you do today will meaningfully improve your game for tomorrow. Rest is the session."],
-                        ]);
-                      } else if (diffDays !== null && diffDays <= 7 && topImprove) {
-                        [title, body] = pick([
-                          [`Work on ${topImprove}.`, `Match in ${diffDays} day${diffDays === 1 ? "" : "s"}. You've flagged "${topImprove}" most in your reviews — build that into the next few sessions deliberately.`],
-                          [`${topImprove} first.`, `With ${diffDays} day${diffDays === 1 ? "" : "s"} to go, targeted work on "${topImprove}" will do more than general hitting. Keep the sessions short and focused.`],
-                          [`Close the gap.`, `"${topImprove}" is the area you've flagged most. ${diffDays} day${diffDays === 1 ? "" : "s"} is enough time to put in a few sharp, deliberate reps on it.`],
-                        ]);
-                      } else if (diffDays !== null && diffDays <= 7 && topStrength) {
-                        [title, body] = pick([
-                          ["Keep building.", `Match in ${diffDays} day${diffDays === 1 ? "" : "s"}. "${topStrength}" is your strongest area — keep sharpening it and trust what you've built.`],
-                          ["Play to your strengths.", `"${topStrength}" is what your data shows. Going into this match, lean on it. Don't try to be a different player.`],
-                        ]);
-                      } else if (topImprove && streak >= 3) {
-                        [title, body] = pick([
-                          ["Streak meets focus.", `${streak} days in a row. Now channel that consistency into "${topImprove}" — small deliberate reps every session compound fast.`],
-                          ["Use the momentum.", `You've built a ${streak}-day habit. Point it at "${topImprove}" this week and you'll move faster than you think.`],
-                          ["Consistency + intent.", `${streak} days is the consistency. "${topImprove}" is the intent. Together they're how players actually improve.`],
-                        ]);
-                      } else if (topImprove) {
-                        [title, body] = pick([
-                          ["Your focus area.", `"${topImprove}" keeps coming up in your reviews. Target it deliberately in your next sessions — that's where your fastest gains are.`],
-                          [`Work on ${topImprove}.`, `Your match reviews are clear: "${topImprove}" is the thing that costs you most. Isolate it in practice and track whether it shows up less.`],
-                          ["One thing at a time.", `"${topImprove}" is the lever. You don't need to fix everything — just that. Focused reps beat general hitting every time.`],
-                          ["Data doesn't lie.", `You've flagged "${topImprove}" enough times that the pattern is clear. The next step is deliberate practice, not more matches.`],
-                        ]);
-                      } else if (streak >= 14) {
-                        [title, body] = pick([
-                          [`${streak} days.`, "That's not luck — that's discipline. The players who show up every day regardless of how they feel are the ones who improve fastest."],
-                          ["Habit is compound interest.", `${streak} days and counting. Most players quit before this point. You haven't. That's already an edge.`],
-                          ["This is what elite looks like.", `A ${streak}-day streak isn't exciting. It's boring, consistent, and exactly right. Keep going.`],
-                        ]);
-                      } else if (streak >= 3) {
-                        [title, body] = pick([
-                          ["Don't break the chain.", `${streak} days in a row. The habit is forming — the hardest part is already behind you.`],
-                          ["Keep showing up.", `${streak} consecutive days. It's still early but the pattern is real. One day at a time.`],
-                          ["Small streaks become big ones.", `${streak} days. Don't overthink it — just make sure tomorrow is ${streak + 1}.`],
-                        ]);
-                      } else if (formScore && formScore.score >= 70) {
-                        [title, body] = pick([
-                          ["You're on form.", "Your scores are solid right now. This is the window to push harder in training and make real gains."],
-                          ["Strike while the iron is hot.", `Form score of ${formScore.score}. Your body is ready — load up the sessions and let it compound.`],
-                          ["Good form is a window.", "It doesn't stay open forever. Use this period to build something that sticks past when the scores dip."],
-                        ]);
-                      } else {
-                        [title, body] = pick([
-                          ["Every session counts.", "Log a match review after your next game — the more data you add, the sharper the insights and coaching notes get."],
-                          ["Start with one thing.", "Pick one area to focus on this week. Not three — one. Narrow attention moves faster than broad effort."],
-                          ["Show up.", "Progress in padel doesn't come from the sessions you feel good about. It comes from the ones you show up for anyway."],
-                          ["Data is your edge.", "Log your matches, check-ins, and sessions. Players who track improve faster — not because tracking is magic, but because it forces honesty."],
-                          ["The game rewards patience.", "Most improvement is invisible for weeks, then suddenly obvious. Trust the process even when you can't see it working."],
-                        ]);
-                      }
-
-                      return (
-                        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "0 24px" }}>
-                          <p style={{ margin: "0 0 10px", fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#b0b8c1" }}>Coach&apos;s Note</p>
-                          <p style={{ margin: 0, fontSize: "clamp(15px, 4vw, 17px)", fontWeight: 400, color: "#8a9096", lineHeight: 1.7, maxWidth: 280 }}>{body}</p>
-                        </div>
-                      );
-                    })()}
+                    {/* Breathe */}
+                    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <p style={{ margin: 0, fontSize: "clamp(28px, 7vw, 36px)", fontWeight: 300, letterSpacing: "0.18em", color: "#dde1e5" }}>breathe</p>
+                    </div>
 
                     {/* Matches panel */}
                     {matchesPanelOpen && (
