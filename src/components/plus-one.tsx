@@ -132,7 +132,7 @@ export default function PlusOne() {
         }
       `}</style>
 
-      {score !== null && (
+      {score !== null && !sheetOpen && (
         <div style={{ position: "fixed", top: 20, right: 24, zIndex: 9997, pointerEvents: "auto" }}>
           <div
             onClick={() => setSheetOpen(p => !p)}
