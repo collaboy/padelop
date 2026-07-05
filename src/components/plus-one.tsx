@@ -44,7 +44,7 @@ export default function PlusOne() {
     fontSize: 20,
     fontWeight: 800,
     letterSpacing: "-0.02em",
-    fontFamily: "var(--font-geist-sans)",
+    fontFamily: "var(--font-hanken)",
     lineHeight: 1,
   };
 
@@ -61,7 +61,7 @@ export default function PlusOne() {
 
       {score !== null && (
         <div style={{ position: "fixed", top: 14, right: 6, zIndex: 9997, pointerEvents: "none" }}>
-          <div style={{ ...numStyle, color: "rgba(0,0,0,0.18)" }}>{score}</div>
+          <div style={{ ...numStyle, color: "rgba(0,0,0,0.10)" }}>{score}</div>
         </div>
       )}
 
