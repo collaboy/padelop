@@ -15,11 +15,46 @@ function readPadlaScore(): number {
   } catch { return 0; }
 }
 
+function PadlaSheet({ onClose }: { onClose: () => void }) {
+  const sd: Record<string, string[]> = (() => { try { return JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}"); } catch { return {}; } })();
+  const allCompletions = Object.values(sd).flat();
+  const breakdown: Record<string, number> = {};
+  allCompletions.forEach(t => { breakdown[t] = (breakdown[t] ?? 0) + 1; });
+  const entries = Object.entries(breakdown).sort((a, b) => b[1] - a[1]);
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 9990, display: "flex", alignItems: "flex-end", justifyContent: "center" }} onClick={onClose}>
+      <style>{`@keyframes padla-sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }} />
+      <div style={{ position: "relative", width: "100%", maxWidth: 480, background: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: "12px 20px 48px", animation: "padla-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", maxHeight: "70dvh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+        <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "0 auto 24px" }} />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+          <p className="t-label" style={{ color: "#d97706", margin: 0 }}>Lifetime Padla Points</p>
+          <p style={{ margin: 0, fontSize: 22, fontWeight: 800, letterSpacing: "-0.02em", color: "#1a1c1c", lineHeight: 1 }}>{allCompletions.length}</p>
+        </div>
+        <p className="t-label" style={{ color: "#8a9096", margin: "0 0 14px" }}>Activity breakdown</p>
+        {entries.length === 0 ? (
+          <p style={{ fontSize: 15, color: "#9aa0a6", margin: 0 }}>No activities yet. Start completing tasks on the home screen.</p>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {entries.map(([title, count]) => (
+              <div key={title} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 15, fontWeight: 500, color: "#1a1c1c" }}>{title}</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "#d97706", background: "#fef3c7", borderRadius: 999, padding: "2px 10px" }}>×{count}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function PlusOne() {
   const [anims, setAnims] = useState<Anim[]>([]);
   const [score, setScore] = useState<number | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const pathname = usePathname();
-  const onMyGame = pathname === "/my-game";
 
   useEffect(() => {
     setScore(readPadlaScore());
@@ -27,7 +62,6 @@ export default function PlusOne() {
     const onPlusOne = (e: Event) => {
       const delay = (e as CustomEvent).detail?.delay ?? 2500;
       const id = ++_id;
-      // Mount immediately but invisible; CSS delay handles the wait
       setAnims(p => [...p, { id, delay }]);
       setTimeout(() => {
         setAnims(p => p.filter(a => a.id !== id));
@@ -40,11 +74,15 @@ export default function PlusOne() {
       setScore(prev => (prev !== null && latest < prev) ? latest : prev);
     };
 
+    const onOpenPanel = () => setSheetOpen(p => !p);
+
     window.addEventListener("padelop:plus-one", onPlusOne);
     window.addEventListener("storage", onStorage);
+    window.addEventListener("padelop:open-padla-panel", onOpenPanel);
     return () => {
       window.removeEventListener("padelop:plus-one", onPlusOne);
       window.removeEventListener("storage", onStorage);
+      window.removeEventListener("padelop:open-padla-panel", onOpenPanel);
     };
   }, []);
 
@@ -67,10 +105,10 @@ export default function PlusOne() {
       `}</style>
 
       {score !== null && (
-        <div style={{ position: "fixed", top: 20, right: 24, zIndex: 9997, pointerEvents: onMyGame ? "auto" : "none" }}>
+        <div style={{ position: "fixed", top: 20, right: 24, zIndex: 9997, pointerEvents: "auto" }}>
           <div
-            onClick={onMyGame ? openPadlaPanel : undefined}
-            style={{ ...numStyle, color: "rgba(0,0,0,0.10)", cursor: onMyGame ? "pointer" : "default" }}
+            onClick={() => setSheetOpen(p => !p)}
+            style={{ ...numStyle, color: "rgba(0,0,0,0.10)", cursor: "pointer" }}
           >
             {score}
           </div>
@@ -92,6 +130,8 @@ export default function PlusOne() {
           ))}
         </div>
       )}
+
+      {sheetOpen && <PadlaSheet onClose={() => setSheetOpen(false)} />}
     </>
   );
 }

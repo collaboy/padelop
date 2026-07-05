@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { saveGearToDb, uploadGearImageToStorage, deleteGearImageFromStorage, saveNutritionInsightToDb, saveUpcomingMatch, saveScheduleDoneToDb, saveScoreSnapshotToDb, saveNutritionToDb, saveNoteToDb, saveMatchReview } from "@/lib/db";
 import LogSheet from "@/components/log-sheet";
 import { hydrateFromSupabase } from "@/lib/sync";
-import { startPlusOne, startPlusOneFast } from "@/lib/nav-events";
+import { startPlusOne, startPlusOneFast, openPadlaPanel } from "@/lib/nav-events";
 import { analyzeMeals, compareMealsToSchedule, foodGrade, loadFoodHistory, type MealEntry } from "@/lib/food-scoring";
 import {
   computeScores, loadScoringData, saveScoreSnapshot, loadScoreHistory,
@@ -555,7 +555,6 @@ export default function ProfilePage() {
   // Panel state (inline action panel below profile card)
   const [panelExpanded, setPanelExpanded] = useState(false);
   const [openPanel, setOpenPanel] = useState<string | null>(null);
-  const [padlaSheetOpen, setPadlaSheetOpen] = useState(false);
   const nextMatchPanelOpen  = openPanel === 'nextMatch';
   const dayTypeInfoOpen     = openPanel === 'dayType';
   const panelSchedOpen      = openPanel === 'sched';
@@ -902,12 +901,6 @@ export default function ProfilePage() {
     }
     setSchedCurrentIdx(idx);
   }, [schedNow, schedule]);
-
-  useEffect(() => {
-    const handler = () => setPadlaSheetOpen(p => !p);
-    window.addEventListener("padelop:open-padla-panel", handler);
-    return () => window.removeEventListener("padelop:open-padla-panel", handler);
-  }, []);
 
   useEffect(() => {
     if (!todayMeals.length) { setAiInsight(null); return; }
@@ -2156,7 +2149,7 @@ export default function ProfilePage() {
                         const schedDone: Record<string, string[]> = (() => { try { return JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}"); } catch { return {}; } })();
                         const totalPts = Object.values(schedDone).flat().length;
                         return (
-                          <div onClick={() => setPadlaSheetOpen(p => !p)}
+                          <div onClick={() => openPadlaPanel()}
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0 }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                               <defs><path id="padlaArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
@@ -2881,39 +2874,6 @@ export default function ProfilePage() {
       }} defaultSub={logTab ?? undefined} />
 
     </div>
-    {padlaSheetOpen && (() => {
-      const sd: Record<string, string[]> = (() => { try { return JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}"); } catch { return {}; } })();
-      const allCompletions = Object.values(sd).flat();
-      const breakdown: Record<string, number> = {};
-      allCompletions.forEach(t => { breakdown[t] = (breakdown[t] ?? 0) + 1; });
-      const entries = Object.entries(breakdown).sort((a, b) => b[1] - a[1]);
-      return (
-        <div style={{ position: "fixed", inset: 0, zIndex: 9990, display: "flex", alignItems: "flex-end", justifyContent: "center" }} onClick={() => setPadlaSheetOpen(false)}>
-          <style>{`@keyframes padla-sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
-          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }} />
-          <div style={{ position: "relative", width: "100%", maxWidth: 480, background: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: "12px 20px 48px", animation: "padla-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", maxHeight: "70dvh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
-            <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "0 auto 24px" }} />
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-              <p className="t-label" style={{ color: "#d97706", margin: 0 }}>Lifetime Padla Points</p>
-              <p style={{ margin: 0, fontSize: 32, fontWeight: 800, letterSpacing: "-0.02em", color: "#1a1c1c", lineHeight: 1 }}>{allCompletions.length}</p>
-            </div>
-            <p className="t-label" style={{ color: "#8a9096", margin: "0 0 14px" }}>Activity breakdown</p>
-            {entries.length === 0 ? (
-              <p style={{ fontSize: 15, color: "#9aa0a6", margin: 0 }}>No activities yet. Start completing tasks on the home screen.</p>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {entries.map(([title, count]) => (
-                  <div key={title} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 15, fontWeight: 500, color: "#1a1c1c" }}>{title}</span>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#d97706", background: "#fef3c7", borderRadius: 999, padding: "2px 10px" }}>×{count}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      );
-    })()}
 
     {navLoading === "settings" && (
       <div style={{ position: "fixed", inset: 0, zIndex: 9998, background: "rgba(242,243,245,0.85)", display: "flex", alignItems: "center", justifyContent: "center" }}>
