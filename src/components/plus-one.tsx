@@ -33,15 +33,18 @@ function PadlaSheet({ onClose }: { onClose: () => void }) {
     <div style={{ position: "fixed", inset: 0, zIndex: 9990, display: "flex", alignItems: "flex-end", justifyContent: "center" }} onClick={onClose}>
       <style>{`@keyframes padla-sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }} />
-      <div style={{ position: "relative", width: "100%", maxWidth: 480, background: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: "12px 20px 48px", animation: "padla-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", maxHeight: "70dvh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
-        <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "0 auto 24px" }} />
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", marginBottom: 20 }}>
-          <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#fef3c7", border: "2px solid #fcd34d", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 10 }}>
-            <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-0.02em", color: "#d97706", lineHeight: 1 }}>{allCompletions.length}</span>
+      <div style={{ position: "relative", width: "100%", maxWidth: 480, background: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28, animation: "padla-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", maxHeight: "70dvh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
+        {/* Hero block */}
+        <div style={{ background: "#1a1c1c", borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: "20px 20px 24px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+          <div style={{ width: 40, height: 4, borderRadius: 999, background: "rgba(255,255,255,0.2)", margin: "0 auto 20px" }} />
+          <div style={{ width: 68, height: 68, borderRadius: "50%", background: "rgba(255,255,255,0.08)", border: "2px solid rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
+            <span style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-0.02em", color: "#fff", lineHeight: 1 }}>{allCompletions.length}</span>
           </div>
-          <p className="t-label" style={{ color: "#d97706", margin: "0 0 4px" }}>Lifetime Padla Points</p>
-          <p style={{ margin: 0, fontSize: 12, color: "#9aa0a6", lineHeight: 1.4 }}>Every Padla point represents one positive action completed.</p>
+          <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.5)" }}>Lifetime Padla Points</p>
+          <p style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.4)", lineHeight: 1.4 }}>Every Padla point represents one positive action completed.</p>
         </div>
+        {/* Milestone + journey */}
+        <div style={{ padding: "20px 20px 48px" }}>
         {nextMilestone !== null && (
           <div style={{ margin: "0 0 20px", padding: "12px 14px", borderRadius: 14, background: "#fef3c7", display: "flex", flexDirection: "column", gap: 2 }}>
             <p style={{ margin: 0, fontSize: 12, color: "#92400e", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", textAlign: "center" }}>
@@ -72,6 +75,7 @@ function PadlaSheet({ onClose }: { onClose: () => void }) {
             )}
           </div>
         )}
+        </div>
       </div>
     </div>
   );
