@@ -1,10 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 
-const DELAY = 2500;
 const DURATION = 950;
 
-type Anim = { id: number };
+type Anim = { id: number; delay: number };
 let _id = 0;
 
 function readPadlaScore(): number {
@@ -21,13 +20,14 @@ export default function PlusOne() {
   useEffect(() => {
     setScore(readPadlaScore());
 
-    const onPlusOne = () => {
+    const onPlusOne = (e: Event) => {
+      const delay = (e as CustomEvent).detail?.delay ?? 2500;
       const id = ++_id;
-      setAnims(p => [...p, { id }]);
+      setAnims(p => [...p, { id, delay }]);
       setTimeout(() => {
         setAnims(p => p.filter(a => a.id !== id));
         setScore(readPadlaScore());
-      }, DELAY + DURATION);
+      }, delay + DURATION);
     };
 
     const onStorage = () => {
@@ -74,7 +74,7 @@ export default function PlusOne() {
               ...numStyle,
               color: "#16a34a",
               willChange: "transform, opacity",
-              animation: `p1-float ${DURATION}ms ease-out ${DELAY}ms both`,
+              animation: `p1-float ${DURATION}ms ease-out ${a.delay}ms both`,
             }}>
               +1
             </div>
