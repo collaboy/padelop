@@ -44,8 +44,7 @@ function PadlaSheet({ onClose }: { onClose: () => void }) {
         </div>
         {nextMilestone !== null && (
           <div style={{ margin: "0 0 20px", padding: "12px 14px", borderRadius: 14, background: "#fef3c7", display: "flex", flexDirection: "column", gap: 2 }}>
-            <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#d97706" }}>Next milestone: {nextMilestone}</p>
-            <p style={{ margin: 0, fontSize: 13, color: "#92400e" }}>{toNext} action{toNext === 1 ? "" : "s"} to go</p>
+            <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: "#92400e", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Next milestone: {nextMilestone} &middot; {toNext} action{toNext === 1 ? "" : "s"} to go</p>
           </div>
         )}
         <p className="t-label" style={{ color: "#8a9096", margin: "0 0 14px" }}>Your journey</p>
