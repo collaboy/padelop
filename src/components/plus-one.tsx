@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { openPadlaPanel } from "@/lib/nav-events";
 
 const DURATION = 950;
 
@@ -16,6 +18,8 @@ function readPadlaScore(): number {
 export default function PlusOne() {
   const [anims, setAnims] = useState<Anim[]>([]);
   const [score, setScore] = useState<number | null>(null);
+  const pathname = usePathname();
+  const onMyGame = pathname === "/my-game";
 
   useEffect(() => {
     setScore(readPadlaScore());
@@ -63,8 +67,13 @@ export default function PlusOne() {
       `}</style>
 
       {score !== null && (
-        <div style={{ position: "fixed", top: 20, right: 24, zIndex: 9997, pointerEvents: "none" }}>
-          <div style={{ ...numStyle, color: "rgba(0,0,0,0.10)" }}>{score}</div>
+        <div style={{ position: "fixed", top: 20, right: 24, zIndex: 9997, pointerEvents: onMyGame ? "auto" : "none" }}>
+          <div
+            onClick={onMyGame ? openPadlaPanel : undefined}
+            style={{ ...numStyle, color: "rgba(0,0,0,0.10)", cursor: onMyGame ? "pointer" : "default" }}
+          >
+            {score}
+          </div>
         </div>
       )}
 

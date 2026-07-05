@@ -15,3 +15,9 @@ export function startPlusOneFast() {
     window.dispatchEvent(new CustomEvent("padelop:plus-one", { detail: { delay: 300 } }));
   }
 }
+
+export function openPadlaPanel() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("padelop:open-padla-panel"));
+  }
+}

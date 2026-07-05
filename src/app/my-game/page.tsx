@@ -903,6 +903,12 @@ export default function ProfilePage() {
   }, [schedNow, schedule]);
 
   useEffect(() => {
+    const handler = () => setOpenPanel('padlaPoints');
+    window.addEventListener("padelop:open-padla-panel", handler);
+    return () => window.removeEventListener("padelop:open-padla-panel", handler);
+  }, []);
+
+  useEffect(() => {
     if (!todayMeals.length) { setAiInsight(null); return; }
     const todayStr = new Date().toISOString().slice(0, 10);
     const cacheKey = "padelop:nutrition-ai-insight";
