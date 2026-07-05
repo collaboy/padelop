@@ -37,7 +37,9 @@ function PadlaSheet({ onClose }: { onClose: () => void }) {
         <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "0 auto 24px" }} />
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
           <p className="t-label" style={{ color: "#d97706", margin: 0 }}>Lifetime Padla Points</p>
-          <p style={{ margin: 0, fontSize: 22, fontWeight: 800, letterSpacing: "-0.02em", color: "#1a1c1c", lineHeight: 1 }}>{allCompletions.length}</p>
+          <div style={{ width: 52, height: 52, borderRadius: "50%", background: "#fef3c7", border: "2px solid #fcd34d", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-0.02em", color: "#d97706", lineHeight: 1 }}>{allCompletions.length}</span>
+          </div>
         </div>
         <p style={{ margin: "0 0 12px", fontSize: 15, color: "#4a5050", lineHeight: 1.5 }}>You&apos;ve completed {score} positive actions.</p>
         {nextMilestone !== null && (
