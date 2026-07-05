@@ -36,7 +36,7 @@ export default function PlusOne() {
             fontWeight: 800,
             color: "#16a34a",
             letterSpacing: "-0.02em",
-            fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+            fontFamily: "var(--font-geist-sans)",
             animation: "p1-float 0.95s cubic-bezier(0.16,1,0.3,1) 2.5s both",
           }}>
             +1
