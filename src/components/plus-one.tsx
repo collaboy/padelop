@@ -32,7 +32,7 @@ export default function PlusOne() {
       <div style={{ position: "fixed", top: 56, right: 20, zIndex: 9998, pointerEvents: "none" }}>
         {anims.map(a => (
           <div key={a.id} style={{
-            fontSize: 36,
+            fontSize: 22,
             fontWeight: 800,
             color: "#16a34a",
             letterSpacing: "-0.02em",
