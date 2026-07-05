@@ -28,10 +28,11 @@ function PadlaSheet({ onClose }: { onClose: () => void }) {
       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }} />
       <div style={{ position: "relative", width: "100%", maxWidth: 480, background: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: "12px 20px 48px", animation: "padla-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", maxHeight: "70dvh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
         <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "0 auto 24px" }} />
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
           <p className="t-label" style={{ color: "#d97706", margin: 0 }}>Lifetime Padla Points</p>
           <p style={{ margin: 0, fontSize: 22, fontWeight: 800, letterSpacing: "-0.02em", color: "#1a1c1c", lineHeight: 1 }}>{allCompletions.length}</p>
         </div>
+        <p style={{ margin: "0 0 20px", fontSize: 15, color: "#4a5050", lineHeight: 1.5 }}>You&apos;ve completed {allCompletions.length} positive actions.</p>
         <p className="t-label" style={{ color: "#8a9096", margin: "0 0 14px" }}>Activity breakdown</p>
         {entries.length === 0 ? (
           <p style={{ fontSize: 15, color: "#9aa0a6", margin: 0 }}>No activities yet. Start completing tasks on the home screen.</p>
