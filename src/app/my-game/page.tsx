@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { saveGearToDb, uploadGearImageToStorage, deleteGearImageFromStorage, saveNutritionInsightToDb, saveUpcomingMatch, saveScheduleDoneToDb, saveScoreSnapshotToDb, saveNutritionToDb, saveNoteToDb, saveMatchReview } from "@/lib/db";
 import LogSheet from "@/components/log-sheet";
 import { hydrateFromSupabase } from "@/lib/sync";
+import { startPlusOne } from "@/lib/nav-events";
 import { analyzeMeals, compareMealsToSchedule, foodGrade, loadFoodHistory, type MealEntry } from "@/lib/food-scoring";
 import {
   computeScores, loadScoringData, saveScoreSnapshot, loadScoreHistory,
@@ -599,6 +600,7 @@ export default function ProfilePage() {
   }
 
   function panelToggleDone(title: string) {
+    if (!(schedDone[todayKey] ?? []).includes(title)) startPlusOne();
     toggleSchedDone(todayKey, title);
   }
 

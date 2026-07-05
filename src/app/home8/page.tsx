@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { startNavLoad } from "@/lib/nav-events";
+import { startNavLoad, startPlusOne } from "@/lib/nav-events";
 import LogSheet from "@/components/log-sheet";
 import ReadinessSheet from "@/components/readiness-sheet";
 import PushPrompt from "@/components/push-prompt";
@@ -1533,6 +1533,7 @@ export default function Home8() {
             } catch {}
             // A: if marking complete, pause so circle shows green, then B: fade modal out
             if (!isComplete) {
+              startPlusOne();
               setTimeout(closeModal, 350);
             } else {
               closeModal();

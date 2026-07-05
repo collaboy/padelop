@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { saveCheckIn, computeScores, loadScoringData } from "@/lib/scoring";
 import { downloadSnapshot, importData } from "@/lib/storage";
 import { saveMatchReview, saveCheckInToDb, saveHydrationToDb, seedHydrationToDb, saveNutritionToDb, saveTrainingToDb, saveScheduleDoneToDb } from "@/lib/db";
-import { startNavLoad } from "@/lib/nav-events";
+import { startNavLoad, startPlusOne } from "@/lib/nav-events";
 
 function rangeToMl(range: string): number {
   if (range === "<1L")    return 750;
@@ -628,6 +628,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
         }
       } catch {}
 
+      startPlusOne();
       afterSave();
     }
 
@@ -1237,6 +1238,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                   localStorage.setItem("padelop:match-reviews", JSON.stringify([entry, ...prev].slice(0, 50)));
                   saveMatchReview(entry);
                 } catch {}
+                startPlusOne();
                 afterSave();
               }}
               className="w-full py-3.5 rounded-2xl t-ui text-white active:scale-[0.98] transition-transform"
