@@ -63,13 +63,13 @@ export default function PlusOne() {
       `}</style>
 
       {score !== null && (
-        <div style={{ position: "fixed", top: 14, right: 6, zIndex: 9997, pointerEvents: "none" }}>
+        <div style={{ position: "fixed", top: 20, right: 16, zIndex: 9997, pointerEvents: "none" }}>
           <div style={{ ...numStyle, color: "rgba(0,0,0,0.10)" }}>{score}</div>
         </div>
       )}
 
       {anims.length > 0 && (
-        <div style={{ position: "fixed", top: 14, right: 6, zIndex: 9998, pointerEvents: "none" }}>
+        <div style={{ position: "fixed", top: 20, right: 16, zIndex: 9998, pointerEvents: "none" }}>
           {anims.map(a => (
             <div key={a.id} style={{
               ...numStyle,
