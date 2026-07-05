@@ -30,8 +30,17 @@ export default function PlusOne() {
       }, DELAY + DURATION);
     };
 
+    const onStorage = () => {
+      const latest = readPadlaScore();
+      setScore(prev => (prev !== null && latest < prev) ? latest : prev);
+    };
+
     window.addEventListener("padelop:plus-one", onPlusOne);
-    return () => window.removeEventListener("padelop:plus-one", onPlusOne);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("padelop:plus-one", onPlusOne);
+      window.removeEventListener("storage", onStorage);
+    };
   }, []);
 
   const numStyle: React.CSSProperties = {
