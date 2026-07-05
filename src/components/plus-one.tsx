@@ -35,13 +35,15 @@ function PadlaSheet({ onClose }: { onClose: () => void }) {
       <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }} />
       <div style={{ position: "relative", width: "100%", maxWidth: 480, background: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: "12px 20px 48px", animation: "padla-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", maxHeight: "70dvh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
         {/* Hero block */}
-        <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "0 auto 24px" }} />
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", marginBottom: 20 }}>
-          <div style={{ width: 68, height: 68, borderRadius: "50%", background: "#00D455", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
+        <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "0 auto 16px" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+          <div style={{ flexShrink: 0, width: 68, height: 68, borderRadius: "50%", background: "#00D455", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <span style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-0.02em", color: "#fff", lineHeight: 1 }}>{allCompletions.length}</span>
           </div>
-          <p style={{ margin: "0 0 4px", fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, letterSpacing: "-0.02em", color: "#d97706", lineHeight: 1.15 }}>Lifetime Padla Points</p>
-          <p style={{ margin: 0, fontSize: 12, color: "#9aa0a6", lineHeight: 1.4 }}>Every Padla Point represents one completed positive action.</p>
+          <div>
+            <p style={{ margin: "0 0 4px", fontSize: "clamp(20px, 5.5vw, 26px)", fontWeight: 800, letterSpacing: "-0.02em", color: "#d97706", lineHeight: 1.15 }}>Lifetime Padla Points</p>
+            <p style={{ margin: 0, fontSize: 12, color: "#9aa0a6", lineHeight: 1.4 }}>Every Padla Point represents one completed positive action.</p>
+          </div>
         </div>
         {nextMilestone !== null && (
           <div style={{ margin: "0 0 20px", padding: "12px 14px", borderRadius: 14, background: "#fef3c7", display: "flex", flexDirection: "column", gap: 2 }}>
