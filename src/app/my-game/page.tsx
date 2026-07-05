@@ -1143,10 +1143,10 @@ export default function ProfilePage() {
   }
 
   return (
-    <><div className="w-full" style={{ backgroundColor: "#f2f3f5", height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
+    <><div className="w-full pb-32" style={{ backgroundColor: "#f2f3f5", minHeight: "100dvh", position: "relative" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
 
       {/* ── Profile ──────────────────────────────────────────────────────── */}
-        <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 20, flex: 1, minHeight: 0, overflow: "hidden" }}>
+        <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
           {/* Header */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -1186,7 +1186,7 @@ export default function ProfilePage() {
               return (
                 <>
                 {openPanel !== null && <div onClick={() => setOpenPanel(null)} style={{ position: "fixed", inset: 0, zIndex: 35 }} />}
-                <div style={{ display: "flex", flexDirection: "column", gap: 20, position: "relative", zIndex: openPanel !== null ? 36 : "auto", flex: 1, justifyContent: "center" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 20, position: "relative", zIndex: openPanel !== null ? 36 : "auto" }}>
                   {total > 0 && (() => {
                     // Add new panel states here to extend dimming to future circles
                     const anyOpen = openPanel !== null;
