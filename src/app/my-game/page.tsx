@@ -2147,27 +2147,6 @@ export default function ProfilePage() {
                           </div>
                         );
                       })()}
-                      {/* PADLA Points circle */}
-                      {(() => {
-                        const color = "#d97706";
-                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        const schedDone: Record<string, string[]> = (() => { try { return JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}"); } catch { return {}; } })();
-                        const totalPts = Object.values(schedDone).flat().length;
-                        return (
-                          <div onClick={() => openPadlaPanel()}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0 }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
-                              <defs><path id="padlaArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
-                              <text fontSize="18" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#padlaArc" startOffset="50%" textAnchor="middle">PADLA SCORE</textPath>
-                              </text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize={String(totalPts).length > 3 ? "34" : "44"} fontWeight="800" style={{ fill: color, fontFamily: ff }}>{totalPts > 0 ? totalPts : "—"}</text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>pts earned</text>
-                            </svg>
-                          </div>
-                        );
-                      })()}
                       <div style={{ flex: 1 }} />
                     </div>
 
