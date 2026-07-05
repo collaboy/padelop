@@ -23,11 +23,13 @@ export default function PlusOne() {
     const onPlusOne = (e: Event) => {
       const delay = (e as CustomEvent).detail?.delay ?? 2500;
       const id = ++_id;
-      setAnims(p => [...p, { id, delay }]);
       setTimeout(() => {
-        setAnims(p => p.filter(a => a.id !== id));
-        setScore(readPadlaScore());
-      }, delay + DURATION);
+        setAnims(p => [...p, { id, delay }]);
+        setTimeout(() => {
+          setAnims(p => p.filter(a => a.id !== id));
+          setScore(readPadlaScore());
+        }, DURATION);
+      }, delay);
     };
 
     const onStorage = () => {
@@ -74,7 +76,7 @@ export default function PlusOne() {
               ...numStyle,
               color: "#16a34a",
               willChange: "transform, opacity",
-              animation: `p1-float ${DURATION}ms ease-out ${a.delay}ms both`,
+              animation: `p1-float ${DURATION}ms ease-out both`,
             }}>
               +1
             </div>
