@@ -30,14 +30,8 @@ export default function PlusOne() {
       }, DELAY + DURATION);
     };
 
-    const onStorage = () => setScore(readPadlaScore());
-
     window.addEventListener("padelop:plus-one", onPlusOne);
-    window.addEventListener("storage", onStorage);
-    return () => {
-      window.removeEventListener("padelop:plus-one", onPlusOne);
-      window.removeEventListener("storage", onStorage);
-    };
+    return () => window.removeEventListener("padelop:plus-one", onPlusOne);
   }, []);
 
   const numStyle: React.CSSProperties = {
