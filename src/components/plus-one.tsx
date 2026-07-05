@@ -41,7 +41,7 @@ function PadlaSheet({ onClose }: { onClose: () => void }) {
             <span style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-0.02em", color: "#d97706", lineHeight: 1 }}>{allCompletions.length}</span>
           </div>
         </div>
-        <p style={{ margin: "0 0 12px", fontSize: 15, color: "#4a5050", lineHeight: 1.5 }}>You&apos;ve completed {score} positive actions.</p>
+        <p style={{ margin: "0 0 12px", fontSize: 15, color: "#4a5050", lineHeight: 1.5 }}>Every Padla point represents one positive action completed.</p>
         {nextMilestone !== null && (
           <div style={{ margin: "0 0 20px", padding: "12px 14px", borderRadius: 14, background: "#fef3c7", display: "flex", flexDirection: "column", gap: 2 }}>
             <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: "#d97706" }}>Next milestone: {nextMilestone}</p>
