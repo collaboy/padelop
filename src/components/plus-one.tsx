@@ -51,7 +51,7 @@ function PadlaSheet({ onClose }: { onClose: () => void }) {
             </p>
           </div>
         )}
-        <p className="t-label" style={{ color: "#8a9096", margin: "0 0 14px" }}>Your journey</p>
+        <p className="t-label" style={{ color: "#8a9096", margin: "0 0 14px" }}>Activity breakdown</p>
         {entries.length === 0 ? (
           <p style={{ fontSize: 15, color: "#9aa0a6", margin: 0 }}>No activities yet. Start completing tasks on the home screen.</p>
         ) : (
