@@ -11,7 +11,7 @@ export default function PlusOne() {
     const handler = () => {
       const id = ++_id;
       setAnims(p => [...p, { id }]);
-      setTimeout(() => setAnims(p => p.filter(a => a.id !== id)), 1350);
+      setTimeout(() => setAnims(p => p.filter(a => a.id !== id)), 2000);
     };
     window.addEventListener("padelop:plus-one", handler);
     return () => window.removeEventListener("padelop:plus-one", handler);
@@ -38,7 +38,7 @@ export default function PlusOne() {
             color: "#16a34a",
             letterSpacing: "-0.02em",
             fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
-            animation: "p1-float 0.95s cubic-bezier(0.16,1,0.3,1) 0.4s both",
+            animation: "p1-float 0.95s cubic-bezier(0.16,1,0.3,1) 1s both",
           }}>
             +1
           </div>
