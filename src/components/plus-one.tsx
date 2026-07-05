@@ -55,10 +55,9 @@ export default function PlusOne() {
     <>
       <style>{`
         @keyframes p1-float {
-          0%   { opacity: 0; transform: translateY(0) scale(0.3); }
-          18%  { opacity: 1; transform: translateY(-10px) scale(1.25); }
-          36%  { opacity: 1; transform: translateY(-20px) scale(1); }
-          100% { opacity: 0; transform: translateY(-80px) scale(0.95); }
+          0%   { opacity: 0; transform: translate3d(0, 6px, 0) scale(0.85); }
+          20%  { opacity: 1; transform: translate3d(0, -6px, 0) scale(1.05); }
+          100% { opacity: 0; transform: translate3d(0, -60px, 0) scale(1); }
         }
       `}</style>
 
@@ -74,7 +73,8 @@ export default function PlusOne() {
             <div key={a.id} style={{
               ...numStyle,
               color: "#16a34a",
-              animation: `p1-float ${DURATION}ms cubic-bezier(0.16,1,0.3,1) ${DELAY}ms both`,
+              willChange: "transform, opacity",
+              animation: `p1-float ${DURATION}ms ease-out ${DELAY}ms both`,
             }}>
               +1
             </div>
