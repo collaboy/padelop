@@ -530,7 +530,7 @@ export default function Home8() {
         }
         // Final fallback: morning check-in water on waking = at least 500ml
         if (hml === 0) {
-          const morningLog = JSON.parse(localStorage.getItem("padelop:morning-log") || "null");
+          const morningLog = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null");
           if (morningLog?.date === todayKey && morningLog?.waterOnWaking === true) hml = 500;
         }
         setLogHydrationMl(hml);
@@ -578,7 +578,7 @@ export default function Home8() {
       const matchToday = m?.date === todayStr;
       setPillarStates(computePillarStates(d.checkIn, d.hydration, d.nutrition, d.habits, d.training, matchToday));
       try {
-        const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null");
+        const ml = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null");
         const done = ml?.date === todayStr;
         setMorningDone(done);
         const hour = new Date().getHours();
@@ -598,7 +598,7 @@ export default function Home8() {
         } catch {}
         // Merge waterOnWaking
         try {
-          const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null");
+          const ml = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null");
           if (ml?.date === todayStr && ml?.waterOnWaking === true) {
             if (!doneTitles.has("Wake up")) {
               doneTitles.add("Wake up");
@@ -712,7 +712,7 @@ export default function Home8() {
       loadReadiness();
       loadMatch();
       const todayStr = new Date().toISOString().slice(0, 10);
-      const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null");
+      const ml = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null");
       const done = ml?.date === todayStr;
       const nudgeDismissed = localStorage.getItem("padelop:checkin-nudge-dismissed") === todayStr;
       const hour = new Date().getHours();

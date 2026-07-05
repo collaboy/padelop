@@ -116,19 +116,18 @@ export async function hydrateFromSupabase(): Promise<SyncResult | null> {
 
     if (todayCI) {
       localStorage.setItem("padelop:daily-checkin", JSON.stringify({
-        date:       todayCI.date,
-        sleep:      todayCI.sleep ?? 3,
-        energy:     todayCI.energy ?? 3,
-        soreness:   3,
-        hydration:  todayCI.hydration ?? 3,
-        stress:     todayCI.stress ?? 3,
-        motivation: 3,
+        date:          todayCI.date,
+        sleep:         todayCI.sleep ?? 3,
+        energy:        todayCI.energy ?? 3,
+        soreness:      3,
+        hydration:     todayCI.hydration ?? 3,
+        stress:        todayCI.stress ?? 3,
+        motivation:    3,
+        sleepHours:    todayCI.sleep_hours ?? undefined,
+        pain:          todayCI.pain ?? undefined,
+        painAreas:     todayCI.pain_areas ?? undefined,
+        waterOnWaking: todayCI.water_on_waking ?? undefined,
       }));
-      // Mark morning log done so the nudge doesn't re-fire
-      const existingML = JSON.parse(localStorage.getItem("padelop:morning-log") || "null");
-      if (!existingML || existingML.date !== today) {
-        localStorage.setItem("padelop:morning-log", JSON.stringify({ date: today }));
-      }
     }
 
     // ── Habits (full history from all check-ins) ──────────────────────────

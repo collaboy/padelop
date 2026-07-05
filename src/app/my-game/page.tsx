@@ -667,7 +667,7 @@ export default function ProfilePage() {
       const logs = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]") as HydrationEntry[];
       const todayLog = logs.find(e => new Date(e.ts).toISOString().slice(0, 10) === today);
       if (todayLog) return LITRE_ML[todayLog.litres] ?? 0;
-      const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null");
+      const ml = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null");
       if (ml?.date === today && ml?.waterOnWaking === true) return 500;
     } catch {}
     return 0;
@@ -812,7 +812,7 @@ export default function ProfilePage() {
     let m2: { date: string } | null = null;
     try { m2 = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch {}
     setPillarStates(computePillarStates(d.checkIn, d.hydration, d.nutrition, d.habits, d.training, m2?.date === todayStr));
-    try { const ml = JSON.parse(localStorage.getItem("padelop:morning-log") || "null"); setCheckinDone(ml?.date === todayStr); } catch {}
+    try { const ml = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null"); setCheckinDone(ml?.date === todayStr); } catch {}
     // Food quality
     try {
       const allMeals: MealEntry[] = JSON.parse(localStorage.getItem("padelop:meal-log") || "[]");

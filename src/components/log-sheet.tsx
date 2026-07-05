@@ -555,16 +555,22 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
           motivation: Number(next.motivation) || 3,
           stress:     Number(next.stress)     || 3,
         };
-        savePartialCheckIn(ci);
-        saveCheckInToDb({ date: todayYMD, sleep: ci.sleep, energy: ci.energy });
-
-        localStorage.setItem("padelop:morning-log", JSON.stringify({
-          date: todayYMD,
-          sleepHours: next.sleepHours,
-          pain: next.pain ?? "none",
+        savePartialCheckIn({
+          ...ci,
+          sleepHours:    String(next.sleepHours ?? ""),
+          pain:          String(next.pain ?? "none"),
           painAreas,
           waterOnWaking: next.water === "yes",
-        }));
+        });
+        saveCheckInToDb({
+          date:            todayYMD,
+          sleep:           ci.sleep,
+          energy:          ci.energy,
+          sleep_hours:     String(next.sleepHours ?? ""),
+          pain:            String(next.pain ?? "none"),
+          pain_areas:      painAreas,
+          water_on_waking: next.water === "yes",
+        });
 
         // Auto-mark "Wake up" as done only if they drank water on waking
         if (next.water === "yes") {

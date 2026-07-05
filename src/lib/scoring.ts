@@ -6,6 +6,10 @@ export type DailyCheckIn = {
   hydration: number;  // 1–5 subjective feeling (5 = well hydrated)
   stress: number;     // 1–5 (5 = low stress = good)
   motivation: number; // 1–5 (5 = high motivation)
+  sleepHours?: string;       // "5h"|"6h"|"7h"|"8h"|"9h+"
+  pain?: string;             // "none"|"minor"|"yes"
+  painAreas?: string[];
+  waterOnWaking?: boolean;
 };
 
 export type HydrationEntry = {
@@ -335,12 +339,7 @@ export function saveCheckIn(ci: Omit<DailyCheckIn, "date">): void {
   localStorage.setItem("padelop:daily-checkin", JSON.stringify(entry));
 }
 
-export type MorningLog = {
-  date?: string;
-  sleepHours?: string; // "5h"|"6h"|"7h"|"8h"|"9h+"
-  pain?: string;       // "none"|"minor"|"yes"
-  waterOnWaking?: boolean;
-};
+export type MorningLog = Pick<DailyCheckIn, "sleepHours" | "pain" | "painAreas" | "waterOnWaking"> & { date?: string };
 
 export type MatchReadinessResult = {
   color: "green" | "yellow" | "orange" | "red";
@@ -353,11 +352,11 @@ export type MatchReadinessResult = {
 export function loadMorningLog(): MorningLog | null {
   try {
     const todayYMD = new Date().toISOString().slice(0, 10);
-    const raw = localStorage.getItem("padelop:morning-log");
+    const raw = localStorage.getItem("padelop:daily-checkin");
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as MorningLog;
+    const parsed = JSON.parse(raw) as DailyCheckIn;
     if (parsed.date !== todayYMD) return null;
-    return parsed;
+    return { date: parsed.date, sleepHours: parsed.sleepHours, pain: parsed.pain, painAreas: parsed.painAreas, waterOnWaking: parsed.waterOnWaking };
   } catch { return null; }
 }
 
@@ -765,7 +764,7 @@ export function computeFormScore(): FormScore {
       if (todayLog) ml = LITRE_ML[todayLog.litres] ?? 0;
     }
     if (ml === 0) {
-      const mLog = JSON.parse(localStorage.getItem("padelop:morning-log") || "null");
+      const mLog = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null");
       if (mLog?.date === todayYMD && mLog?.waterOnWaking === true) ml = 500;
     }
     if (ml > 0) hydration = Math.round(c01(ml / 2000) * 100);

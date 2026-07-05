@@ -180,6 +180,10 @@ export async function saveCheckInToDb(data: {
   hydration?: number;
   energy?: number;
   stress?: number;
+  sleep_hours?: string;
+  pain?: string;
+  pain_areas?: string[];
+  water_on_waking?: boolean;
 }) {
   try {
     const supabase = createClient();
@@ -187,13 +191,17 @@ export async function saveCheckInToDb(data: {
     if (!user) return;
 
     await supabase.from("check_ins").upsert({
-      user_id:   user.id,
-      date:      data.date,
-      sleep:     data.sleep ?? null,
-      nutrition: data.nutrition ?? null,
-      hydration: data.hydration ?? null,
-      energy:    data.energy ?? null,
-      stress:    data.stress ?? null,
+      user_id:         user.id,
+      date:            data.date,
+      sleep:           data.sleep ?? null,
+      nutrition:       data.nutrition ?? null,
+      hydration:       data.hydration ?? null,
+      energy:          data.energy ?? null,
+      stress:          data.stress ?? null,
+      sleep_hours:     data.sleep_hours ?? null,
+      pain:            data.pain ?? null,
+      pain_areas:      data.pain_areas ?? null,
+      water_on_waking: data.water_on_waking ?? null,
     }, { onConflict: "user_id,date" });
   } catch {}
 }
