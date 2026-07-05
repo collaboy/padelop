@@ -16,11 +16,14 @@ function readPadlaScore(): number {
 }
 
 function PadlaSheet({ onClose }: { onClose: () => void }) {
+  const [showAll, setShowAll] = useState(false);
   const sd: Record<string, string[]> = (() => { try { return JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}"); } catch { return {}; } })();
   const allCompletions = Object.values(sd).flat();
   const breakdown: Record<string, number> = {};
   allCompletions.forEach(t => { breakdown[t] = (breakdown[t] ?? 0) + 1; });
   const entries = Object.entries(breakdown).sort((a, b) => b[1] - a[1]);
+  const visible = showAll ? entries : entries.slice(0, 5);
+  const hasMore = entries.length > 5;
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 9990, display: "flex", alignItems: "flex-end", justifyContent: "center" }} onClick={onClose}>
@@ -33,17 +36,26 @@ function PadlaSheet({ onClose }: { onClose: () => void }) {
           <p style={{ margin: 0, fontSize: 22, fontWeight: 800, letterSpacing: "-0.02em", color: "#1a1c1c", lineHeight: 1 }}>{allCompletions.length}</p>
         </div>
         <p style={{ margin: "0 0 20px", fontSize: 15, color: "#4a5050", lineHeight: 1.5 }}>You&apos;ve completed {allCompletions.length} positive actions.</p>
-        <p className="t-label" style={{ color: "#8a9096", margin: "0 0 14px" }}>Activity breakdown</p>
+        <p className="t-label" style={{ color: "#8a9096", margin: "0 0 14px" }}>Your journey</p>
         {entries.length === 0 ? (
           <p style={{ fontSize: 15, color: "#9aa0a6", margin: 0 }}>No activities yet. Start completing tasks on the home screen.</p>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {entries.map(([title, count]) => (
+            {visible.map(([title, count]) => (
               <div key={title} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <span style={{ fontSize: 15, fontWeight: 500, color: "#1a1c1c" }}>{title}</span>
                 <span style={{ fontSize: 13, fontWeight: 700, color: "#d97706", background: "#fef3c7", borderRadius: 999, padding: "2px 10px" }}>×{count}</span>
               </div>
             ))}
+            {hasMore && (
+              <button
+                onClick={e => { e.stopPropagation(); setShowAll(p => !p); }}
+                style={{ display: "flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: "4px 0", color: "#8a9096", fontSize: 13, fontWeight: 600 }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ transition: "transform 0.2s", transform: showAll ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
+                {showAll ? "Show less" : `Show all ${entries.length}`}
+              </button>
+            )}
           </div>
         )}
       </div>
