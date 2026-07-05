@@ -2891,7 +2891,7 @@ export default function ProfilePage() {
         <div style={{ position: "fixed", inset: 0, zIndex: 9990, display: "flex", alignItems: "flex-end", justifyContent: "center" }} onClick={() => setPadlaSheetOpen(false)}>
           <style>{`@keyframes padla-sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
           <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }} />
-          <div style={{ position: "relative", width: "100%", maxWidth: 480, background: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: "12px 20px 48px", animation: "padla-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)" }} onClick={e => e.stopPropagation()}>
+          <div style={{ position: "relative", width: "100%", maxWidth: 480, background: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: "12px 20px 48px", animation: "padla-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", maxHeight: "70dvh", overflowY: "auto" }} onClick={e => e.stopPropagation()}>
             <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "0 auto 24px" }} />
             <p className="t-label" style={{ color: "#d97706", margin: "0 0 6px" }}>Padla Score</p>
             <p style={{ margin: "0 0 24px", fontSize: 40, fontWeight: 800, letterSpacing: "-0.02em", color: "#1a1c1c", lineHeight: 1 }}>
