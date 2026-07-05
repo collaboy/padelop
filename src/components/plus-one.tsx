@@ -29,7 +29,7 @@ export default function PlusOne() {
           100% { opacity: 0; transform: translateY(-80px) scale(0.95); }
         }
       `}</style>
-      <div style={{ position: "fixed", inset: 0, zIndex: 9998, pointerEvents: "none", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ position: "fixed", inset: 0, zIndex: 9998, pointerEvents: "none", display: "flex", alignItems: "flex-start", justifyContent: "flex-end", paddingTop: 56, paddingRight: 20 }}>
         {anims.map(a => (
           <div key={a.id} style={{
             position: "absolute",
