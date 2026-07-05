@@ -1143,10 +1143,10 @@ export default function ProfilePage() {
   }
 
   return (
-    <><div className="w-full pb-32" style={{ backgroundColor: "#f2f3f5", minHeight: "100dvh", position: "relative" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
+    <><style>{`@keyframes mg-sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style><div className="w-full" style={{ backgroundColor: "#f2f3f5", height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
 
       {/* ── Profile ──────────────────────────────────────────────────────── */}
-        <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
+        <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 20, flex: 1, minHeight: 0 }}>
           {/* Header */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -1186,7 +1186,7 @@ export default function ProfilePage() {
               return (
                 <>
                 {openPanel !== null && <div onClick={() => setOpenPanel(null)} style={{ position: "fixed", inset: 0, zIndex: 35 }} />}
-                <div style={{ display: "flex", flexDirection: "column", gap: 20, position: "relative", zIndex: openPanel !== null ? 36 : "auto" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 20, position: "relative", zIndex: openPanel !== null ? 36 : "auto", flex: 1 }}>
                   {total > 0 && (() => {
                     // Add new panel states here to extend dimming to future circles
                     const anyOpen = openPanel !== null;
@@ -1292,16 +1292,15 @@ export default function ProfilePage() {
 
                     {dayTypeInfoOpen && (
                       <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
-                        <style>{`@keyframes mg-sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
                         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                        <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                        <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
                           <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
                           <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px" }}>
                             <p style={{ margin: "0 0 14px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Day Types</p>
                             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                               {DAY_TYPE_INFO.map(dt => (
                                 <div key={dt.label} style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                                  <span style={{ fontSize: 12, fontWeight: 700, color: dt.color, background: `${dt.color}18`, borderRadius: 5, padding: "1px 6px", flexShrink: 0, whiteSpace: "nowrap", minWidth: 108, textAlign: "center", display: "inline-block" }}>{dt.label}</span>
+                                  <span style={{ fontSize: 14, fontWeight: 700, color: dt.color, background: `${dt.color}18`, borderRadius: 5, padding: "2px 8px", flexShrink: 0, whiteSpace: "nowrap", minWidth: 114, textAlign: "center", display: "inline-block" }}>{dt.label}</span>
                                   <span style={{ fontSize: 16, color: "#5a6270", lineHeight: 1.4 }}>{dt.desc}</span>
                                 </div>
                               ))}
@@ -1339,7 +1338,7 @@ export default function ProfilePage() {
                       return (
                         <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
                           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
                           <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
                           <div className="overflow-y-auto flex-1" style={{ minHeight: 0 }}>
                         <div style={{ overflow: "hidden" }}>
@@ -1388,16 +1387,16 @@ export default function ProfilePage() {
                             <div style={{ textAlign: "center", marginBottom: 6, paddingTop: 4 }}>
                               <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4" }}>Next Match</span>
                               <p style={{ margin: "6px 0 8px", fontSize: "clamp(28px, 7vw, 38px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{cdLabel}</p>
-                              {nextMatch && <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500 }}>{dateStr} · {nextMatch.time}</span>}
+                              {nextMatch && <span style={{ fontSize: 16, color: "#6b7480", fontWeight: 500 }}>{dateStr} · {nextMatch.time}</span>}
                             </div>
 
                             {/* Detail rows */}
                             {nextMatch && (
                               <div style={{ display: "flex", flexDirection: "column", textAlign: "center", gap: 4, marginBottom: 4 }}>
-                                {nextMatch.club && <span style={{ fontSize: 13, fontWeight: 500, color: "#8a9096" }}>({nextMatch.club})</span>}
+                                {nextMatch.club && <span style={{ fontSize: 15, fontWeight: 500, color: "#8a9096" }}>({nextMatch.club})</span>}
                                 {nextMatch.court && (() => { const n = nextMatch.court.match(/\d+/)?.[0]; return n ? <span style={{ fontSize: 17, fontWeight: 700, color: "#1a1c1c", lineHeight: 1.4, marginTop: 2 }}>#{n}</span> : null; })()}
                                 {[nextMatch.player_1, nextMatch.player_2, nextMatch.player_3, nextMatch.player_4].filter(Boolean).length > 0 && (
-                                  <span style={{ fontSize: 13, color: "#6b7480", marginTop: 4 }}>
+                                  <span style={{ fontSize: 15, color: "#6b7480", marginTop: 4 }}>
                                     {[nextMatch.player_1, nextMatch.player_2, nextMatch.player_3, nextMatch.player_4].filter(Boolean).map(p => p.slice(0, 2)).join(' · ')}
                                   </span>
                                 )}
@@ -1498,7 +1497,7 @@ export default function ProfilePage() {
                     {panelSchedOpen && (
                       <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
                         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                        <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                        <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
                           <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
                           <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px" }}>
                             <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Today&apos;s Schedule</p>
@@ -1513,7 +1512,7 @@ export default function ProfilePage() {
                                     {isDone && <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                                   </button>
                                   <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none", flex: 1 }}>{item.title}</p>
-                                  <span style={{ fontSize: 13, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
+                                  <span style={{ fontSize: 15, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
                                 </div>
                               );
                             })}
@@ -1639,14 +1638,14 @@ export default function ProfilePage() {
                       return (
                         <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
                           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
                             <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
                             <div className="overflow-y-auto flex-1" style={{ minHeight: 0 }}>
                               <div style={{ background: `linear-gradient(145deg, ${stier.grad[0]}, ${stier.grad[1]})`, padding: "20px 20px 16px", textAlign: "center" }}>
                                 <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: stier.color }}>{stier.label}</span>
                                 <p style={{ margin: "6px 0 3px", fontSize: 44, fontWeight: 800, color: stier.color, lineHeight: 1 }}>{streak}</p>
-                                <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: stier.color, opacity: 0.7 }}>day streak</p>
-                                <p style={{ margin: "10px 0 0", fontSize: 15, fontWeight: 500, color: "#4b5563" }}>{msg}</p>
+                                <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: stier.color, opacity: 0.7 }}>day streak</p>
+                                <p style={{ margin: "10px 0 0", fontSize: 16, fontWeight: 500, color: "#4b5563" }}>{msg}</p>
                               </div>
                               <div style={{ background: "#fff", padding: "14px 16px 40px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 4 }}>
                                 {STIERS.map(t => {
@@ -1678,21 +1677,21 @@ export default function ProfilePage() {
                         { label: "Hydration",   value: components.hydration,   weight: "10%" },
                       ];
                       const bar = (v: number | null) => {
-                        if (v === null) return <span style={{ fontSize: 12, color: "#b0b8c1" }}>no data</span>;
+                        if (v === null) return <span style={{ fontSize: 15, color: "#b0b8c1" }}>no data</span>;
                         const c = v >= 70 ? "#16a34a" : v >= 50 ? "#d97706" : "#ef4444";
                         return (
                           <div style={{ display: "flex", alignItems: "center", gap: 6, flex: 1 }}>
                             <div style={{ flex: 1, height: 5, borderRadius: 99, background: "#f0f0f0" }}>
                               <div style={{ width: `${v}%`, height: "100%", borderRadius: 99, background: c, transition: "width 0.4s" }} />
                             </div>
-                            <span style={{ fontSize: 13, fontWeight: 700, color: c, minWidth: 26, textAlign: "right" }}>{v}</span>
+                            <span style={{ fontSize: 15, fontWeight: 700, color: c, minWidth: 26, textAlign: "right" }}>{v}</span>
                           </div>
                         );
                       };
                       return (
                         <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
                           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
                             <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
                             <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 18px 40px" }}>
                               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14 }}>
@@ -1702,9 +1701,9 @@ export default function ProfilePage() {
                               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                                 {rows.map(r => (
                                   <div key={r.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                    <span style={{ fontSize: 15, color: "#6b7480", fontWeight: 500, minWidth: 80 }}>{r.label}</span>
+                                    <span style={{ fontSize: 16, color: "#6b7480", fontWeight: 500, minWidth: 80 }}>{r.label}</span>
                                     {bar(r.value)}
-                                    <span style={{ fontSize: 10, color: "#c0c7d0", fontWeight: 500, minWidth: 28, textAlign: "right" }}>{r.weight}</span>
+                                    <span style={{ fontSize: 11, color: "#c0c7d0", fontWeight: 500, minWidth: 28, textAlign: "right" }}>{r.weight}</span>
                                   </div>
                                 ))}
                               </div>
@@ -1725,7 +1724,7 @@ export default function ProfilePage() {
                       return (
                         <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
                           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
                             <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
                             <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 18px 40px" }}>
                               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
@@ -1737,16 +1736,16 @@ export default function ProfilePage() {
                                   <div style={{ height: 7, borderRadius: 99, background: "#f0f0f0", marginBottom: 6 }}>
                                     <div style={{ width: `${Math.round(pct * 100)}%`, height: "100%", borderRadius: 99, background: pct >= 1 ? "#16a34a" : "#0ea5e9", transition: "width 0.4s" }} />
                                   </div>
-                                  <span style={{ fontSize: 15, color: "#9aa0a6", fontWeight: 500 }}>{Math.round(pct * 100)}% of {target / 1000}L daily target</span>
+                                  <span style={{ fontSize: 16, color: "#9aa0a6", fontWeight: 500 }}>{Math.round(pct * 100)}% of {target / 1000}L daily target</span>
                                 </>
                               )}
                               {todayLog?.quality && (
                                 <div style={{ marginTop: 10 }}>
-                                  <span style={{ fontSize: 15, color: "#6b7480" }}>Feeling: <strong style={{ color: todayLog.quality === "great" ? "#16a34a" : todayLog.quality === "bad" ? "#ef4444" : "#d97706" }}>{todayLog.quality}</strong></span>
+                                  <span style={{ fontSize: 16, color: "#6b7480" }}>Feeling: <strong style={{ color: todayLog.quality === "great" ? "#16a34a" : todayLog.quality === "bad" ? "#ef4444" : "#d97706" }}>{todayLog.quality}</strong></span>
                                 </div>
                               )}
                               {!displayMl && !todayLog && (
-                                <p style={{ margin: 0, fontSize: 15, color: "#9aa0a6" }}>No hydration logged today. Log from the home screen or check-in.</p>
+                                <p style={{ margin: 0, fontSize: 16, color: "#9aa0a6" }}>No hydration logged today. Log from the home screen or check-in.</p>
                               )}
                             </div>
                           </div>
@@ -1845,11 +1844,106 @@ export default function ProfilePage() {
                       })()}
                     </div>
 
+                    {/* Coach's Note */}
+                    {(() => {
+                      const today = new Date().toISOString().slice(0, 10);
+                      const seed = today.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
+                      const pick = <T,>(arr: T[]) => arr[seed % arr.length];
+
+                      const matchToday = nextMatch?.date === today;
+                      const diffDays = nextMatch
+                        ? Math.round((new Date(nextMatch.date + "T12:00").getTime() - new Date(today + "T12:00").getTime()) / 86400000)
+                        : null;
+                      const matchTomorrow = diffDays === 1;
+
+                      const improveCounts: Record<string, number> = {};
+                      reviews.forEach(r => { (r.improved ?? []).forEach(t => { improveCounts[t] = (improveCounts[t] ?? 0) + 1; }); });
+                      const topImprove = Object.entries(improveCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+
+                      const wellCounts2: Record<string, number> = {};
+                      reviews.forEach(r => { (r.wellDone ?? []).forEach(t => { wellCounts2[t] = (wellCounts2[t] ?? 0) + 1; }); });
+                      const topStrength = Object.entries(wellCounts2).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+
+                      let title: string;
+                      let body: string;
+
+                      if (matchToday) {
+                        [title, body] = pick([
+                          ["Game on.", nextMatch?.club && nextMatch?.time ? `You're on at ${nextMatch.time} at ${nextMatch.club}. Trust your prep and enjoy every point.` : "Match day. Trust your prep, stay present, and enjoy every point."],
+                          ["This is what you trained for.", "Everything you've done in the gym, on the court, in the sessions — it's already in you. Go play."],
+                          ["Play your game.", "Don't adjust to their rhythm. Make them adjust to yours. Stick to what works and back yourself."],
+                        ]);
+                      } else if (matchTomorrow) {
+                        [title, body] = pick([
+                          ["Match tomorrow.", "Rest up tonight. Keep hydration high, eat well, sleep early. The prep is done — let the body recover."],
+                          ["One sleep away.", "Don't train hard today. Loose movement, early bed, plenty of water. Show up fresh."],
+                          ["The work is done.", "Nothing you do today will meaningfully improve your game for tomorrow. Rest is the session."],
+                        ]);
+                      } else if (diffDays !== null && diffDays <= 7 && topImprove) {
+                        [title, body] = pick([
+                          [`Work on ${topImprove}.`, `Match in ${diffDays} day${diffDays === 1 ? "" : "s"}. You've flagged "${topImprove}" most in your reviews — build that into the next few sessions deliberately.`],
+                          [`${topImprove} first.`, `With ${diffDays} day${diffDays === 1 ? "" : "s"} to go, targeted work on "${topImprove}" will do more than general hitting. Keep the sessions short and focused.`],
+                          [`Close the gap.`, `"${topImprove}" is the area you've flagged most. ${diffDays} day${diffDays === 1 ? "" : "s"} is enough time to put in a few sharp, deliberate reps on it.`],
+                        ]);
+                      } else if (diffDays !== null && diffDays <= 7 && topStrength) {
+                        [title, body] = pick([
+                          ["Keep building.", `Match in ${diffDays} day${diffDays === 1 ? "" : "s"}. "${topStrength}" is your strongest area — keep sharpening it and trust what you've built.`],
+                          ["Play to your strengths.", `"${topStrength}" is what your data shows. Going into this match, lean on it. Don't try to be a different player.`],
+                        ]);
+                      } else if (topImprove && streak >= 3) {
+                        [title, body] = pick([
+                          ["Streak meets focus.", `${streak} days in a row. Now channel that consistency into "${topImprove}" — small deliberate reps every session compound fast.`],
+                          ["Use the momentum.", `You've built a ${streak}-day habit. Point it at "${topImprove}" this week and you'll move faster than you think.`],
+                          ["Consistency + intent.", `${streak} days is the consistency. "${topImprove}" is the intent. Together they're how players actually improve.`],
+                        ]);
+                      } else if (topImprove) {
+                        [title, body] = pick([
+                          ["Your focus area.", `"${topImprove}" keeps coming up in your reviews. Target it deliberately in your next sessions — that's where your fastest gains are.`],
+                          [`Work on ${topImprove}.`, `Your match reviews are clear: "${topImprove}" is the thing that costs you most. Isolate it in practice and track whether it shows up less.`],
+                          ["One thing at a time.", `"${topImprove}" is the lever. You don't need to fix everything — just that. Focused reps beat general hitting every time.`],
+                          ["Data doesn't lie.", `You've flagged "${topImprove}" enough times that the pattern is clear. The next step is deliberate practice, not more matches.`],
+                        ]);
+                      } else if (streak >= 14) {
+                        [title, body] = pick([
+                          [`${streak} days.`, "That's not luck — that's discipline. The players who show up every day regardless of how they feel are the ones who improve fastest."],
+                          ["Habit is compound interest.", `${streak} days and counting. Most players quit before this point. You haven't. That's already an edge.`],
+                          ["This is what elite looks like.", `A ${streak}-day streak isn't exciting. It's boring, consistent, and exactly right. Keep going.`],
+                        ]);
+                      } else if (streak >= 3) {
+                        [title, body] = pick([
+                          ["Don't break the chain.", `${streak} days in a row. The habit is forming — the hardest part is already behind you.`],
+                          ["Keep showing up.", `${streak} consecutive days. It's still early but the pattern is real. One day at a time.`],
+                          ["Small streaks become big ones.", `${streak} days. Don't overthink it — just make sure tomorrow is ${streak + 1}.`],
+                        ]);
+                      } else if (formScore && formScore.score >= 70) {
+                        [title, body] = pick([
+                          ["You're on form.", "Your scores are solid right now. This is the window to push harder in training and make real gains."],
+                          ["Strike while the iron is hot.", `Form score of ${formScore.score}. Your body is ready — load up the sessions and let it compound.`],
+                          ["Good form is a window.", "It doesn't stay open forever. Use this period to build something that sticks past when the scores dip."],
+                        ]);
+                      } else {
+                        [title, body] = pick([
+                          ["Every session counts.", "Log a match review after your next game — the more data you add, the sharper the insights and coaching notes get."],
+                          ["Start with one thing.", "Pick one area to focus on this week. Not three — one. Narrow attention moves faster than broad effort."],
+                          ["Show up.", "Progress in padel doesn't come from the sessions you feel good about. It comes from the ones you show up for anyway."],
+                          ["Data is your edge.", "Log your matches, check-ins, and sessions. Players who track improve faster — not because tracking is magic, but because it forces honesty."],
+                          ["The game rewards patience.", "Most improvement is invisible for weeks, then suddenly obvious. Trust the process even when you can't see it working."],
+                        ]);
+                      }
+
+                      return (
+                        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "0 24px" }}>
+                          <p style={{ margin: "0 0 10px", fontSize: 10, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "#b0b8c1" }}>Coach&apos;s Note</p>
+                          <p style={{ margin: 0, fontSize: "clamp(15px, 4vw, 17px)", fontWeight: 400, color: "#8a9096", lineHeight: 1.7, maxWidth: 280 }}>{body}</p>
+                        </div>
+                      );
+                    })()}
+
                     {/* Matches panel */}
                     {matchesPanelOpen && (
                       <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
                         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                        <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "88dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                        <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "88dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
                           <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
                           <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "4px 16px 40px", display: "flex", flexDirection: "column", gap: 10 }}>
                         <p className="t-label" style={{ color: "var(--c-label)", margin: "10px 0 0" }}>Matches</p>
@@ -1926,7 +2020,7 @@ export default function ProfilePage() {
                                         <span style={{ fontSize: 16, fontWeight: 800, color: "#1a1c1c" }}>{m.time || "—"}</span>
                                         {m.club && <span style={{ fontSize: 15, color: "#8a9096", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>· {m.club}{m.court ? ` #${m.court}` : ""}</span>}
                                       </div>
-                                      {players.length > 0 && <p style={{ margin: 0, fontSize: 14, color: "#8a9096", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{players.join(", ")}</p>}
+                                      {players.length > 0 && <p style={{ margin: 0, fontSize: 15, color: "#8a9096", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{players.join(", ")}</p>}
                                       <span style={{ display: "inline-block", marginTop: 5, fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: isToday2 ? "#eef2ff" : "#f4f6f8", color: isToday2 ? "#2653d4" : "#8a9096" }}>{countdown}</span>
                                     </div>
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: expanded ? "rotate(180deg)" : "rotate(0deg)" }}><path d="M6 9l6 6 6-6"/></svg>
@@ -1948,7 +2042,7 @@ export default function ProfilePage() {
                         )}
                         <button
                           onClick={() => { setMatchAddOpen(o => !o); setMatchExpandedIdx(null); if (!matchAddOpen) setMatchAddForm(EMPTY_FORM); }}
-                          style={{ alignSelf: "flex-start", background: matchAddOpen ? "#e8edf8" : "#2653d4", border: "none", borderRadius: 20, padding: "7px 16px", fontSize: 14, fontWeight: 700, color: matchAddOpen ? "#2653d4" : "#fff", cursor: "pointer" }}
+                          style={{ alignSelf: "flex-start", background: matchAddOpen ? "#e8edf8" : "#2653d4", border: "none", borderRadius: 20, padding: "7px 16px", fontSize: 15, fontWeight: 700, color: matchAddOpen ? "#2653d4" : "#fff", cursor: "pointer" }}
                         >
                           {matchAddOpen ? "Cancel" : "+ Add"}
                         </button>
@@ -2069,7 +2163,7 @@ export default function ProfilePage() {
                                   onClick={() => setFeaturedIdx(i => (i + 1) % pool.length)}
                                   style={{ width: "100%", background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" }}
                                 >
-                                  <p style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-blue)" }}>{insight.label}</p>
+                                  <p style={{ margin: "0 0 6px", fontSize: 15, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-blue)" }}>{insight.label}</p>
                                   <p style={{ margin: "0 0 16px", fontSize: 16, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{insight.body}</p>
                                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                                     <div style={{ display: "flex", gap: 4 }}>
@@ -2077,7 +2171,7 @@ export default function ProfilePage() {
                                         <div key={i} style={{ width: i === idx ? 14 : 5, height: 5, borderRadius: 3, background: i === idx ? "var(--c-blue)" : "#e2e5ea", transition: "width 0.2s" }} />
                                       ))}
                                     </div>
-                                    <span style={{ fontSize: 14, color: "var(--c-hint)", fontWeight: 500 }}>Tap for next</span>
+                                    <span style={{ fontSize: 15, color: "var(--c-hint)", fontWeight: 500 }}>Tap for next</span>
                                   </div>
                                 </button>
                               </>
@@ -2086,7 +2180,7 @@ export default function ProfilePage() {
                       return (
                         <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
                           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
                             <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
                             <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px" }}>
                               {sheetContent}
@@ -2112,11 +2206,11 @@ export default function ProfilePage() {
                       return (
                         <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
                           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
                             <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
                             <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px", display: "flex", flexDirection: "column", gap: 16 }}>
                               {wellTags.length === 0 && badTags.length === 0 ? (
-                                <p style={{ fontSize: 15, color: "#9aa0a6", margin: 0 }}>No tags yet — log match reviews to see your patterns.</p>
+                                <p style={{ fontSize: 16, color: "#9aa0a6", margin: 0 }}>No tags yet — log match reviews to see your patterns.</p>
                               ) : (
                                 <>
                                   {wellTags.length > 0 && (
@@ -2125,8 +2219,8 @@ export default function ProfilePage() {
                                       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                                         {wellTags.map(([tag, count]) => (
                                           <span key={tag} style={{ display: "flex", alignItems: "center", gap: 5, background: "#f0fdf4", borderRadius: 999, padding: "6px 12px" }}>
-                                            <span style={{ fontSize: 15, fontWeight: 600, color: "#15803d" }}>{tag}</span>
-                                            <span style={{ fontSize: 12, fontWeight: 700, color: "#16a34a", background: "#dcfce7", borderRadius: 999, padding: "1px 7px" }}>{count}</span>
+                                            <span style={{ fontSize: 16, fontWeight: 600, color: "#15803d" }}>{tag}</span>
+                                            <span style={{ fontSize: 13, fontWeight: 700, color: "#16a34a", background: "#dcfce7", borderRadius: 999, padding: "1px 7px" }}>{count}</span>
                                           </span>
                                         ))}
                                       </div>
@@ -2138,8 +2232,8 @@ export default function ProfilePage() {
                                       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                                         {badTags.map(([tag, count]) => (
                                           <span key={tag} style={{ display: "flex", alignItems: "center", gap: 5, background: "#fff1f2", borderRadius: 999, padding: "6px 12px" }}>
-                                            <span style={{ fontSize: 15, fontWeight: 600, color: "#be123c" }}>{tag}</span>
-                                            <span style={{ fontSize: 12, fontWeight: 700, color: "#e11d48", background: "#ffe4e6", borderRadius: 999, padding: "1px 7px" }}>{count}</span>
+                                            <span style={{ fontSize: 16, fontWeight: 600, color: "#be123c" }}>{tag}</span>
+                                            <span style={{ fontSize: 13, fontWeight: 700, color: "#e11d48", background: "#ffe4e6", borderRadius: 999, padding: "1px 7px" }}>{count}</span>
                                           </span>
                                         ))}
                                       </div>
@@ -2182,7 +2276,7 @@ export default function ProfilePage() {
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
             <div
               className="relative w-full bg-white flex flex-col"
-              style={{ borderRadius: "28px 28px 0 0", maxHeight: "88dvh", animation: "reviewUp 0.32s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -4px 40px rgba(0,0,0,0.18)" }}
+              style={{ borderRadius: "28px 28px 0 0", maxHeight: "88dvh", minHeight: "50dvh", animation: "reviewUp 0.32s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -4px 40px rgba(0,0,0,0.18)" }}
               onClick={e => e.stopPropagation()}
             >
               {/* Drag handle */}
@@ -2452,7 +2546,7 @@ export default function ProfilePage() {
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: panelSchedModalClosing ? "mgsheet-fade-out 0.28s cubic-bezier(0.4,0,1,1) both" : undefined }} />
             <div
               className="relative w-full bg-white flex flex-col"
-              style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: panelSchedModalClosing ? "mgsheet-down 0.28s cubic-bezier(0.4,0,1,1) both" : "mgsheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }}
+              style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: panelSchedModalClosing ? "mgsheet-down 0.28s cubic-bezier(0.4,0,1,1) both" : "mgsheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }}
               onClick={e => e.stopPropagation()}
             >
               <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
