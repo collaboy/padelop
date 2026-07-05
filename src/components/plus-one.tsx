@@ -134,7 +134,7 @@ export default function PlusOne() {
         }
       `}</style>
 
-      {score !== null && !sheetOpen && (
+      {score !== null && !sheetOpen && pathname !== "/my-game" && (
         <div style={{ position: "fixed", top: 20, right: 24, zIndex: 9997, pointerEvents: "auto" }}>
           <div
             onClick={() => setSheetOpen(p => !p)}

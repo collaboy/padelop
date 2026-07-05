@@ -1146,16 +1146,21 @@ export default function ProfilePage() {
     <><div className="w-full pb-32" style={{ backgroundColor: "#f2f3f5", minHeight: "100dvh", position: "relative" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
 
       {/* ── Profile ──────────────────────────────────────────────────────── */}
-        <div style={{ padding: "36px 20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
+        <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 20 }}>
           {/* Header */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button
-              onClick={() => router.back()}
-              style={{ width: 36, height: 36, borderRadius: "50%", background: "#e8eaed", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-            </button>
-            <h1 style={{ fontSize: "clamp(20px, 5.5vw, 26px)", fontWeight: 800, color: "#1a1c1c", margin: "5px 0 0", letterSpacing: "-0.02em" }}>My Game</h1>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <button
+                onClick={() => router.back()}
+                style={{ width: 36, height: 36, borderRadius: "50%", background: "#e8eaed", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <h1 style={{ fontSize: "clamp(20px, 5.5vw, 26px)", fontWeight: 800, color: "#1a1c1c", margin: 0, letterSpacing: "-0.02em" }}>My Game</h1>
+            </div>
+            <div onClick={() => openPadlaPanel()} style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.02em", fontFamily: "var(--font-hanken)", color: "rgba(0,0,0,0.10)", cursor: "pointer", lineHeight: 1 }}>
+              {Object.values(schedDone).flat().length}
+            </div>
           </div>
 
           {panelSmartError && (
