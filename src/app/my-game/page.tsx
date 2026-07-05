@@ -2506,15 +2506,16 @@ export default function ProfilePage() {
         );
 
         return (
-          <div className="fixed inset-0 z-[300] flex items-center justify-center px-6" style={{ paddingTop: 24, paddingBottom: 24 }} onClick={panelCloseSchedModal}>
-            <style>{`@keyframes guideIn{from{transform:scale(0.94);opacity:0}to{transform:scale(1);opacity:1}}@keyframes guideOut{from{transform:scale(1);opacity:1}to{transform:scale(0.94);opacity:0}}`}</style>
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: panelSchedModalClosing ? "guideOut 0.2s cubic-bezier(0.4,0,1,1) both" : undefined }} />
+          <div className="fixed inset-0 z-[300] flex items-end justify-center" onClick={panelCloseSchedModal}>
+            <style>{`@keyframes mgsheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes mgsheet-down{from{transform:translateY(0)}to{transform:translateY(100%)}}@keyframes mgsheet-fade-out{from{opacity:1}to{opacity:0}}`}</style>
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: panelSchedModalClosing ? "mgsheet-fade-out 0.28s cubic-bezier(0.4,0,1,1) both" : undefined }} />
             <div
               className="relative w-full bg-white flex flex-col"
-              style={{ borderRadius: 28, maxHeight: "85dvh", animation: panelSchedModalClosing ? "guideOut 0.2s cubic-bezier(0.4,0,1,1) both" : "guideIn 0.22s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 8px 40px rgba(0,0,0,0.22)", overflow: "hidden" }}
+              style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: panelSchedModalClosing ? "mgsheet-down 0.28s cubic-bezier(0.4,0,1,1) both" : "mgsheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }}
               onClick={e => e.stopPropagation()}
             >
-              <div className="overflow-y-auto flex-1 px-6 pb-6" style={{ minHeight: 0 }}>
+              <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
+              <div className="overflow-y-auto flex-1 px-6 pb-4" style={{ minHeight: 0 }}>
                 <p style={{ margin: "20px 0 4px", fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.15 }}>{item.title}</p>
                 {isMeal && detail?.type === 'meal' && (
                   <div className="flex flex-col pt-4">
@@ -2573,47 +2574,47 @@ export default function ProfilePage() {
                     {renderSteps(drillDef.steps)}
                   </div>
                 )}
-                <div style={{ paddingTop: 24 }}>
-                  {isComplete ? (
-                    <button
-                      onClick={panelHandleSchedDone}
-                      style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", height: 56, borderRadius: 28, border: "2px solid #00D455", background: "transparent", cursor: "pointer" }}
-                    >
-                      <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#00D455", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M5 13l4 4L19 7"/></svg>
-                      </div>
-                      <span style={{ fontSize: 15, fontWeight: 600, color: "#00D455" }}>Done</span>
-                    </button>
-                  ) : (
-                    <div
-                      ref={schedSwipeTrackRef}
-                      style={{ position: "relative", height: 56, borderRadius: 28, background: "#f0f1f3", overflow: "hidden", touchAction: "none" }}
-                      onTouchStart={e => { setSchedSwipeX(0); const track = schedSwipeTrackRef.current as (HTMLDivElement & { _startX?: number }) | null; if (track) track._startX = e.touches[0].clientX; }}
-                      onTouchMove={e => {
-                        const track = schedSwipeTrackRef.current as (HTMLDivElement & { _startX?: number }) | null;
-                        if (!track) return;
-                        const maxX = track.offsetWidth - 56;
-                        const startX = track._startX ?? e.touches[0].clientX;
-                        setSchedSwipeX(Math.max(0, Math.min(maxX, e.touches[0].clientX - startX)));
-                      }}
-                      onTouchEnd={() => {
-                        const track = schedSwipeTrackRef.current;
-                        if (!track) return;
-                        const maxX = track.offsetWidth - 56;
-                        if (schedSwipeX >= maxX * 0.82) { panelHandleSchedDone(); }
-                        setSchedSwipeX(0);
-                      }}
-                    >
-                      <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: schedSwipeX, background: "#00D455", transition: schedSwipeX === 0 ? "width 0.3s" : "none" }} />
-                      <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-                        <span style={{ fontSize: 14, fontWeight: 600, color: "#8a9096", opacity: Math.max(0, 1 - schedSwipeX / 80), transition: "opacity 0.1s" }}>Swipe to complete</span>
-                      </div>
-                      <div style={{ position: "absolute", top: 4, left: 4 + schedSwipeX, width: 48, height: 48, borderRadius: "50%", background: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", justifyContent: "center", transition: schedSwipeX === 0 ? "left 0.3s" : "none", pointerEvents: "none" }}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/><path d="M13 6l6 6-6 6"/></svg>
-                      </div>
+              </div>
+              <div style={{ padding: "12px 24px 40px", flexShrink: 0 }}>
+                {isComplete ? (
+                  <button
+                    onClick={panelHandleSchedDone}
+                    style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", height: 56, borderRadius: 28, border: "2px solid #00D455", background: "transparent", cursor: "pointer" }}
+                  >
+                    <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#00D455", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M5 13l4 4L19 7"/></svg>
                     </div>
-                  )}
-                </div>
+                    <span style={{ fontSize: 15, fontWeight: 600, color: "#00D455" }}>Done</span>
+                  </button>
+                ) : (
+                  <div
+                    ref={schedSwipeTrackRef}
+                    style={{ position: "relative", height: 56, borderRadius: 28, background: "#f0f1f3", overflow: "hidden", touchAction: "none" }}
+                    onTouchStart={e => { setSchedSwipeX(0); const track = schedSwipeTrackRef.current as (HTMLDivElement & { _startX?: number }) | null; if (track) track._startX = e.touches[0].clientX; }}
+                    onTouchMove={e => {
+                      const track = schedSwipeTrackRef.current as (HTMLDivElement & { _startX?: number }) | null;
+                      if (!track) return;
+                      const maxX = track.offsetWidth - 56;
+                      const startX = track._startX ?? e.touches[0].clientX;
+                      setSchedSwipeX(Math.max(0, Math.min(maxX, e.touches[0].clientX - startX)));
+                    }}
+                    onTouchEnd={() => {
+                      const track = schedSwipeTrackRef.current;
+                      if (!track) return;
+                      const maxX = track.offsetWidth - 56;
+                      if (schedSwipeX >= maxX * 0.82) { panelHandleSchedDone(); }
+                      setSchedSwipeX(0);
+                    }}
+                  >
+                    <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: schedSwipeX, background: "#00D455", transition: schedSwipeX === 0 ? "width 0.3s" : "none" }} />
+                    <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: "#8a9096", opacity: Math.max(0, 1 - schedSwipeX / 80), transition: "opacity 0.1s" }}>Swipe to complete</span>
+                    </div>
+                    <div style={{ position: "absolute", top: 4, left: 4 + schedSwipeX, width: 48, height: 48, borderRadius: "50%", background: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", justifyContent: "center", transition: schedSwipeX === 0 ? "left 0.3s" : "none", pointerEvents: "none" }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/><path d="M13 6l6 6-6 6"/></svg>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
