@@ -50,10 +50,10 @@ export default function PlusOne() {
         }
       `}</style>
 
-      {/* Persistent score — always at top-right, hidden at 0 */}
-      {score !== null && score > 0 && (
+      {/* Persistent score — always visible */}
+      {score !== null && (
         <div style={{ position: "fixed", top: 56, right: 20, zIndex: 9997, pointerEvents: "none" }}>
-          <div style={{ ...numStyle, color: "rgba(0,0,0,0.08)" }}>{score}</div>
+          <div style={{ ...numStyle, color: "rgba(0,0,0,0.18)" }}>{score}</div>
         </div>
       )}
 
