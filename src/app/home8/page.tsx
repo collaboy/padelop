@@ -1553,75 +1553,77 @@ export default function Home8() {
           );
 
           return (
-            <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "24px", paddingBottom: "24px" }} onClick={closeModal} onTouchStart={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
-              <style>{`@keyframes guideIn{from{transform:scale(0.94);opacity:0}to{transform:scale(1);opacity:1}}@keyframes guideOut{from{transform:scale(1);opacity:1}to{transform:scale(0.94);opacity:0}}`}</style>
-              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: modalClosing ? "guideOut 0.2s cubic-bezier(0.4,0,1,1) both" : undefined }} />
+            <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={closeModal} onTouchStart={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
+              <style>{`@keyframes sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes sheet-down{from{transform:translateY(0)}to{transform:translateY(100%)}}@keyframes sheet-fade-out{from{opacity:1}to{opacity:0}}`}</style>
+              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: modalClosing ? "sheet-fade-out 0.28s cubic-bezier(0.4,0,1,1) both" : undefined }} />
               <div
                 className="relative w-full bg-white flex flex-col"
-                style={{ borderRadius: 28, maxHeight: "85dvh", animation: modalClosing ? "guideOut 0.2s cubic-bezier(0.4,0,1,1) both" : "guideIn 0.22s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 8px 40px rgba(0,0,0,0.22)", overflow: "hidden" }}
+                style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: modalClosing ? "sheet-down 0.28s cubic-bezier(0.4,0,1,1) both" : "sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }}
                 onClick={e => e.stopPropagation()}
               >
-                {/* Detail content + inline complete button */}
                 {(isMeal || isExercise || isDrill || isInfo) && (
-                  <div className="overflow-y-auto flex-1 px-6 pb-6" style={{ minHeight: 0 }}>
-                    <p className="font-bold" style={{ color: "#1a1c1c", fontSize: "clamp(22px, 6.5vw, 30px)", lineHeight: 1.15, margin: "20px 0 4px" }}>{modalItem.title}</p>
-                    {isMeal && detail?.type === 'meal' && (
-                      <div className="flex flex-col pt-4">
-                        <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#8a9096" }}>{detail.focus}</p>
-                        <p style={{ fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 600, color: "#1a1c1c", margin: "0 0 8px" }}>What did you eat?</p>
-                        {detail.options.map((meal, i) => (
-                          <div key={i}>
-                            <button
-                              onClick={() => setExpandedMealIdx(expandedMealIdx === i ? null : i)}
-                              style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "10px 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}
-                            >
-                              <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
-                                <div
-                                  onClick={e => { e.stopPropagation(); setCheckedMeals(prev => { const next = new Set(prev); next.has(i) ? next.delete(i) : next.add(i); return next; }); }}
-                                  style={{ flexShrink: 0, width: 20, height: 20, borderRadius: 5, border: `2px solid ${checkedMeals.has(i) ? "#16a34a" : "#c4c7c7"}`, background: checkedMeals.has(i) ? "#16a34a" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}
-                                >
-                                  {checkedMeals.has(i) && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>}
+                  <>
+                    <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
+                    <div className="overflow-y-auto flex-1 px-6 pb-4" style={{ minHeight: 0 }}>
+                      <p className="font-bold" style={{ color: "#1a1c1c", fontSize: "clamp(22px, 6.5vw, 30px)", lineHeight: 1.15, margin: "20px 0 4px" }}>{modalItem.title}</p>
+                      {isMeal && detail?.type === 'meal' && (
+                        <div className="flex flex-col pt-4">
+                          <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#8a9096" }}>{detail.focus}</p>
+                          <p style={{ fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 600, color: "#1a1c1c", margin: "0 0 8px" }}>What did you eat?</p>
+                          {detail.options.map((meal, i) => (
+                            <div key={i}>
+                              <button
+                                onClick={() => setExpandedMealIdx(expandedMealIdx === i ? null : i)}
+                                style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "10px 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}
+                              >
+                                <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
+                                  <div
+                                    onClick={e => { e.stopPropagation(); setCheckedMeals(prev => { const next = new Set(prev); next.has(i) ? next.delete(i) : next.add(i); return next; }); }}
+                                    style={{ flexShrink: 0, width: 20, height: 20, borderRadius: 5, border: `2px solid ${checkedMeals.has(i) ? "#16a34a" : "#c4c7c7"}`, background: checkedMeals.has(i) ? "#16a34a" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}
+                                  >
+                                    {checkedMeals.has(i) && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>}
+                                  </div>
+                                  <span style={{ fontSize: 15, fontWeight: 600, color: "#1a1c1c", lineHeight: 1.3, textAlign: "left" }}>{meal.title}</span>
                                 </div>
-                                <span style={{ fontSize: 15, fontWeight: 600, color: "#1a1c1c", lineHeight: 1.3, textAlign: "left" }}>{meal.title}</span>
-                              </div>
-                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: expandedMealIdx === i ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
-                            </button>
-                            {expandedMealIdx === i && meal.detail && (
-                              <p style={{ margin: "0 0 8px", fontSize: 13, color: "#6b7480", lineHeight: 1.5 }}>{meal.detail}</p>
-                            )}
-                            {i < detail.options.length - 1 && <div style={{ height: 1, background: "#f0f0f0" }} />}
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: expandedMealIdx === i ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
+                              </button>
+                              {expandedMealIdx === i && meal.detail && (
+                                <p style={{ margin: "0 0 8px", fontSize: 13, color: "#6b7480", lineHeight: 1.5 }}>{meal.detail}</p>
+                              )}
+                              {i < detail.options.length - 1 && <div style={{ height: 1, background: "#f0f0f0" }} />}
+                            </div>
+                          ))}
+                          <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 6 }}>
+                            <p style={{ margin: "0 0 2px", fontSize: 12, fontWeight: 600, color: "#8a9096", letterSpacing: "0.02em" }}>or, add manually</p>
+                            <textarea
+                              value={mealText}
+                              onChange={e => setMealText(e.target.value)}
+                              placeholder="What did you eat?"
+                              rows={3}
+                              style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box", background: "#f8f9fa" }}
+                            />
                           </div>
-                        ))}
-                        <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 6 }}>
-                          <p style={{ margin: "0 0 2px", fontSize: 12, fontWeight: 600, color: "#8a9096", letterSpacing: "0.02em" }}>or, add manually</p>
-                          <textarea
-                            value={mealText}
-                            onChange={e => setMealText(e.target.value)}
-                            placeholder="What did you eat?"
-                            rows={3}
-                            style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box", background: "#f8f9fa" }}
-                          />
                         </div>
-                      </div>
-                    )}
-                    {(isInfo || isExercise || isDrill) && (
-                      <div className="pt-4">
-                        {isInfo && detail?.type === 'info' && (
-                          <>
-                            <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#1a1c1c" }}>{detail.focus}</p>
-                            <p className="text-[17px] text-[#4a5050] leading-snug">{detail.text}</p>
-                          </>
-                        )}
-                        {isExercise && detail?.type === 'exercise' && renderSteps(detail.steps)}
-                        {isDrill && drillSteps && (
-                          <>
-                            <p className="text-[11px] font-bold uppercase tracking-widest pb-1 text-left" style={{ color: "#1a1c1c" }}>{(DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).focus}</p>
-                            {renderSteps(drillSteps)}
-                          </>
-                        )}
-                      </div>
-                    )}
-                    <div style={{ padding: "24px 0 4px" }}>
+                      )}
+                      {(isInfo || isExercise || isDrill) && (
+                        <div className="pt-4">
+                          {isInfo && detail?.type === 'info' && (
+                            <>
+                              <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#1a1c1c" }}>{detail.focus}</p>
+                              <p className="text-[17px] text-[#4a5050] leading-snug">{detail.text}</p>
+                            </>
+                          )}
+                          {isExercise && detail?.type === 'exercise' && renderSteps(detail.steps)}
+                          {isDrill && drillSteps && (
+                            <>
+                              <p className="text-[11px] font-bold uppercase tracking-widest pb-1 text-left" style={{ color: "#1a1c1c" }}>{(DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).focus}</p>
+                              {renderSteps(drillSteps)}
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ padding: "12px 24px 40px", flexShrink: 0 }}>
                       {isComplete ? (
                         <button
                           onClick={handleDone}
@@ -1651,20 +1653,17 @@ export default function Home8() {
                             setSwipeX(0);
                           }}
                         >
-                          {/* Green fill */}
                           <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: swipeX, background: "#00D455", transition: swipeX === 0 ? "width 0.3s" : "none" }} />
-                          {/* Label */}
                           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", paddingLeft: 36, pointerEvents: "none" }}>
                             <span style={{ fontSize: 14, fontWeight: 600, color: "#8a9096", opacity: Math.max(0, 1 - swipeX / 80), transition: "opacity 0.1s" }}>Save and complete (+1 pt)</span>
                           </div>
-                          {/* Thumb */}
                           <div style={{ position: "absolute", top: 4, left: 4 + swipeX, width: 48, height: 48, borderRadius: "50%", background: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", justifyContent: "center", transition: swipeX === 0 ? "left 0.3s" : "none", pointerEvents: "none" }}>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/><path d="M13 6l6 6-6 6"/></svg>
                           </div>
                         </div>
                       )}
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
             </div>
