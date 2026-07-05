@@ -37,7 +37,7 @@ function PadlaSheet({ onClose }: { onClose: () => void }) {
         {/* Hero block */}
         <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "0 auto 24px" }} />
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", marginBottom: 20 }}>
-          <div style={{ width: 68, height: 68, borderRadius: "50%", background: "#1a1c1c", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
+          <div style={{ width: 68, height: 68, borderRadius: "50%", background: "#00D455", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
             <span style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-0.02em", color: "#fff", lineHeight: 1 }}>{allCompletions.length}</span>
           </div>
           <p className="t-label" style={{ color: "#d97706", margin: "0 0 4px" }}>Lifetime Padla Points</p>
