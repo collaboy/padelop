@@ -41,11 +41,8 @@ export default function Fab() {
   const prevPathnameRef = useRef(pathname);
 
   const [hiddenForModal, setHiddenForModal] = useState(false);
-  const [tileScrolled, setTileScrolled] = useState(false);
-  const tileRowRef = useRef<HTMLDivElement>(null);
   const [logPickerOpen, setLogPickerOpen] = useState(false);
   const [logPickerSub, setLogPickerSub] = useState<"nutrition" | "matchreview" | "upload-confirm" | null>(null);
-  const [fabExpanded, setFabExpanded] = useState(false);
   const [insertUploadLoading, setInsertUploadLoading] = useState(false);
   const [insertUploadCategory, setInsertUploadCategory] = useState<string | null>(null);
   const [smartUploadResult, setSmartUploadResult] = useState<{ category: string; label: string; confidence: string; data: Record<string, string> } | null>(null);
@@ -111,7 +108,7 @@ export default function Fab() {
   }, []);
 
   useEffect(() => {
-    function handleOpen() { setSmartUploadError(null); setFabExpanded(false); setLogPickerOpen(true); }
+    function handleOpen() { setSmartUploadError(null); setLogPickerOpen(true); }
     function handleAddMatch() {
       setSmartUploadResult({ category: "match_schedule", label: "Schedule a match", confidence: "high", data: { date: "", time: "", club: "", court: "", player_1: "", player_2: "", player_3: "", player_4: "" } });
       setLogPickerSub("upload-confirm");
@@ -151,27 +148,73 @@ export default function Fab() {
   function closeAll() {
     setLogPickerOpen(false);
     setLogPickerSub(null);
-    setFabExpanded(false);
     setSmartUploadError(null);
-    setTileScrolled(false);
   }
 
   const inputSt: React.CSSProperties = { width: "100%", padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", outline: "none", fontFamily: "inherit", background: "#f8f9fa", boxSizing: "border-box" };
   const labelSt: React.CSSProperties = { fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#8a9096", marginBottom: 4, display: "block" };
 
-  if (pathname === "/settings") return null;
-
   return (
     <>
-      {/* FAB button */}
-      <button
-        onClick={() => { setSmartUploadError(null); setFabExpanded(false); setLogPickerOpen(true); }}
-        className="fixed z-[30] flex items-center justify-center active:scale-90 transition-transform"
-        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.5rem", width: 54, height: 54, borderRadius: 27, background: "#e2e4e7", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", visibility: hiddenForModal ? "hidden" : undefined, pointerEvents: hiddenForModal ? "none" : undefined }}
-        aria-label="Add"
+      {/* Spacer so page content clears the tab bar */}
+      <div style={{ height: "calc(56px + env(safe-area-inset-bottom))" }} aria-hidden="true" />
+
+      {/* Bottom tab bar */}
+      <div
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 20,
+          background: "rgba(255,255,255,0.88)",
+          backdropFilter: "blur(20px) saturate(180%)",
+          WebkitBackdropFilter: "blur(20px) saturate(180%)",
+          borderTop: "0.5px solid rgba(0,0,0,0.08)",
+          display: "flex",
+          alignItems: "stretch",
+          paddingBottom: "env(safe-area-inset-bottom)",
+          visibility: hiddenForModal ? "hidden" : undefined,
+          pointerEvents: hiddenForModal ? "none" : undefined,
+        }}
       >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </button>
+        {/* Home */}
+        <button
+          onClick={() => { if (!pathname.startsWith("/home8")) { startNavLoad(); router.push("/home8"); } }}
+          style={{ flex: 1, background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, height: 56, padding: 0 }}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={pathname.startsWith("/home8") ? "#2653d4" : "#9aa5b0"} strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span style={{ fontSize: 10, fontWeight: 600, color: pathname.startsWith("/home8") ? "#2653d4" : "#9aa5b0", letterSpacing: "0.01em" }}>Home</span>
+        </button>
+
+        {/* My Game */}
+        <button
+          onClick={() => { if (!pathname.startsWith("/my-game")) { startNavLoad(); router.push("/my-game"); } }}
+          style={{ flex: 1, background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, height: 56, padding: 0 }}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={pathname.startsWith("/my-game") ? "#2653d4" : "#9aa5b0"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span style={{ fontSize: 10, fontWeight: 600, color: pathname.startsWith("/my-game") ? "#2653d4" : "#9aa5b0", letterSpacing: "0.01em" }}>My Game</span>
+        </button>
+
+        {/* Log */}
+        <button
+          onClick={() => { setSmartUploadError(null); setLogPickerOpen(true); }}
+          style={{ flex: 1, background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0, height: 56, padding: 0 }}
+        >
+          <div style={{ width: 40, height: 40, borderRadius: 20, background: logPickerOpen ? "#e0e2e6" : "#edeef0", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.4" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+        </button>
+
+        {/* Settings */}
+        <button
+          onClick={() => { if (pathname !== "/settings") { startNavLoad(); router.push("/settings"); } }}
+          style={{ flex: 1, background: "none", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, height: 56, padding: 0 }}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={pathname === "/settings" ? "#2653d4" : "#9aa5b0"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span style={{ fontSize: 10, fontWeight: 600, color: pathname === "/settings" ? "#2653d4" : "#9aa5b0", letterSpacing: "0.01em" }}>Settings</span>
+        </button>
+      </div>
 
       {/* Always-mounted file input */}
       <input
@@ -227,8 +270,10 @@ export default function Fab() {
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" />
           <div className="relative w-full bg-white rounded-t-[28px] shadow-2xl" style={{ animation: "sheetUp 0.3s cubic-bezier(0.22,1,0.36,1)", overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "85dvh", paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
 
+            <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-[#e0e0e0]" /></div>
+
             <div style={{ overflowY: "auto", minHeight: 0 }}>
-              <div style={{ padding: "16px 16px 24px", display: "flex", flexDirection: "column", gap: fabExpanded ? 8 : 10 }}>
+              <div style={{ padding: "8px 16px 24px", display: "flex", flexDirection: "column", gap: 8 }}>
 
                 {smartUploadError && (
                   <div style={{ background: "#fff5f5", border: "1.5px solid #fecaca", borderRadius: 12, padding: "10px 14px" }}>
@@ -236,99 +281,54 @@ export default function Fab() {
                   </div>
                 )}
 
-                {/* Top row — Home, My Game, +, [Settings — swipe left to reveal] */}
-                <div ref={tileRowRef} onScroll={e => setTileScrolled((e.currentTarget.scrollLeft) > 30)} style={{ overflowX: "scroll", scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}>
-                  <div style={{ display: "flex", gap: 10 }}>
-                    <button
-                      onClick={() => { startNavLoad(); router.push("/home8"); }}
-                      className="active:scale-95 transition-transform"
-                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", height: fabExpanded ? "calc((100vw - 52px) / 6)" : "calc((100vw - 52px) / 3)", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, overflow: "hidden", transition: "height 0.3s cubic-bezier(0.4,0,0.2,1)" }}
-                    >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                      {!fabExpanded && <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Home</span>}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                  {([
+                    { label: "Match", sub: "Schedule", bg: "#eef2ff", color: "#2653d4", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>, action: () => { setSmartUploadResult({ category: "match_schedule", label: "Schedule a match", confidence: "high", data: { date: "", time: "", club: "", court: "", player_1: "", player_2: "", player_3: "", player_4: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
+                    { label: "Food", sub: "Meal or snack", bg: "#f0fdf4", color: "#16a34a", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>, action: () => { setSmartUploadResult({ category: "meal", label: "Add a meal", confidence: "high", data: { description: "", meal_type: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
+                    { label: "Gear", sub: "Racket, shoes…", bg: "#f5f0ff", color: "#7c3aed", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, action: () => { setSmartUploadResult({ category: "gear", label: "Add gear", confidence: "high", data: { type: "", brand: "", name: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
+                    { label: "Results", sub: "Match result", bg: "#fff7ed", color: "#ea580c", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, action: () => { setSmartUploadResult({ category: "match_result", label: "Add match result", confidence: "high", data: { result: "", score: "", opponent_names: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
+                  ]).map(({ label, sub, bg, color, icon, action }) => (
+                    <button key={label} onClick={action} className="active:scale-95 transition-transform" style={{ background: bg, border: "none", borderRadius: 16, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14, textAlign: "left" }}>
+                      {icon}
+                      <div>
+                        <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>+ {label}</p>
+                        <p style={{ fontSize: 12, fontWeight: 600, color, margin: "2px 0 0" }}>{sub}</p>
+                      </div>
                     </button>
-                    <button
-                      onClick={() => { if (pathname.startsWith("/my-game")) { setLogPickerOpen(false); return; } startNavLoad(); router.push("/my-game"); }}
-                      className="active:scale-95 transition-transform"
-                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", height: fabExpanded ? "calc((100vw - 52px) / 6)" : "calc((100vw - 52px) / 3)", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, overflow: "hidden", transition: "height 0.3s cubic-bezier(0.4,0,0.2,1)" }}
-                    >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                      {!fabExpanded && <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>My Game</span>}
-                    </button>
-                    <button
-                      onClick={() => setFabExpanded(v => !v)}
-                      className="active:scale-95 transition-transform"
-                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", height: fabExpanded ? "calc((100vw - 52px) / 6)" : "calc((100vw - 52px) / 3)", background: fabExpanded ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, overflow: "hidden", transition: "height 0.3s cubic-bezier(0.4,0,0.2,1)" }}
-                    >
-                      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    </button>
-                    <button
-                      onClick={() => { closeAll(); startNavLoad(); router.push("/settings"); }}
-                      className="active:scale-95 transition-transform"
-                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", height: fabExpanded ? "calc((100vw - 52px) / 6)" : "calc((100vw - 52px) / 3)", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, overflow: "hidden", transition: "height 0.3s cubic-bezier(0.4,0,0.2,1)" }}
-                    >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                      {!fabExpanded && <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Settings</span>}
-                    </button>
-                  </div>
+                  ))}
                 </div>
-                {/* Swipe hint dots */}
-                <div style={{ display: fabExpanded ? "none" : "flex", justifyContent: "center", gap: 5, marginTop: 4 }}>
-                  <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#1a1c1c", opacity: tileScrolled ? 0.05 : 0.12, transition: "opacity 0.2s" }} />
-                  <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#1a1c1c", opacity: tileScrolled ? 0.12 : 0.05, transition: "opacity 0.2s" }} />
-                </div>
-                {/* Log manually expanded */}
-                <div style={{ overflow: "hidden", maxHeight: fabExpanded ? 600 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingTop: 0, paddingBottom: 10 }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                      {([
-                        { label: "Match", sub: "Schedule", bg: "#eef2ff", color: "#2653d4", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>, action: () => { setSmartUploadResult({ category: "match_schedule", label: "Schedule a match", confidence: "high", data: { date: "", time: "", club: "", court: "", player_1: "", player_2: "", player_3: "", player_4: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
-                        { label: "Food", sub: "Meal or snack", bg: "#f0fdf4", color: "#16a34a", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>, action: () => { setSmartUploadResult({ category: "meal", label: "Add a meal", confidence: "high", data: { description: "", meal_type: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
-                        { label: "Gear", sub: "Racket, shoes…", bg: "#f5f0ff", color: "#7c3aed", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, action: () => { setSmartUploadResult({ category: "gear", label: "Add gear", confidence: "high", data: { type: "", brand: "", name: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
-                        { label: "Results", sub: "Match result", bg: "#fff7ed", color: "#ea580c", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, action: () => { setSmartUploadResult({ category: "match_result", label: "Add match result", confidence: "high", data: { result: "", score: "", opponent_names: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
-                      ]).map(({ label, sub, bg, color, icon, action }) => (
-                        <button key={label} onClick={action} className="active:scale-95 transition-transform" style={{ background: bg, border: "none", borderRadius: 16, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14, textAlign: "left" }}>
-                          {icon}
-                          <div>
-                            <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>+ {label}</p>
-                            <p style={{ fontSize: 12, fontWeight: 600, color, margin: "2px 0 0" }}>{sub}</p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-                      <button
-                        onClick={() => setLogPickerSub("matchreview")}
-                        className="active:scale-95 transition-transform"
-                        style={{ background: "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14, textAlign: "left" }}
-                      >
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                        <div>
-                          <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>+ Note</p>
-                          <p style={{ fontSize: 12, fontWeight: 600, color: "#8a9096", margin: "2px 0 0" }}>Thoughts, feelings, ideas</p>
-                        </div>
-                      </button>
-                      <button
-                        onClick={() => { if (!checkinDone) { window.dispatchEvent(new CustomEvent("padelop:open-checkin")); setLogPickerOpen(false); setFabExpanded(false); } }}
-                        className="active:scale-95 transition-transform"
-                        style={{ background: checkinDone ? "#f5f6f7" : "#f0f4ff", border: "none", borderRadius: 16, padding: "14px 14px", cursor: checkinDone ? "default" : "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14, textAlign: "left", position: "relative", opacity: checkinDone ? 0.5 : 1 }}
-                      >
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={checkinDone ? "#6b7480" : "#2653d4"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-                        <div>
-                          <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{checkinDone ? "Check-in" : "+ Check-in"}</p>
-                          <p style={{ fontSize: 12, fontWeight: 600, color: checkinDone ? "#8a9096" : "#2653d4", margin: "2px 0 0" }}>{checkinDone ? "Done today" : "Morning log"}</p>
-                        </div>
-                        {checkinDone && (
-                          <div style={{ position: "absolute", top: 10, right: 10 }}>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                          </div>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                  </div>
-              </div>
 
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                  <button
+                    onClick={() => setLogPickerSub("matchreview")}
+                    className="active:scale-95 transition-transform"
+                    style={{ background: "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14, textAlign: "left" }}
+                  >
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    <div>
+                      <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>+ Note</p>
+                      <p style={{ fontSize: 12, fontWeight: 600, color: "#8a9096", margin: "2px 0 0" }}>Thoughts, feelings, ideas</p>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => { if (!checkinDone) { window.dispatchEvent(new CustomEvent("padelop:open-checkin")); setLogPickerOpen(false); } }}
+                    className="active:scale-95 transition-transform"
+                    style={{ background: checkinDone ? "#f5f6f7" : "#f0f4ff", border: "none", borderRadius: 16, padding: "14px 14px", cursor: checkinDone ? "default" : "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14, textAlign: "left", position: "relative", opacity: checkinDone ? 0.5 : 1 }}
+                  >
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={checkinDone ? "#6b7480" : "#2653d4"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+                    <div>
+                      <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{checkinDone ? "Check-in" : "+ Check-in"}</p>
+                      <p style={{ fontSize: 12, fontWeight: 600, color: checkinDone ? "#8a9096" : "#2653d4", margin: "2px 0 0" }}>{checkinDone ? "Done today" : "Morning log"}</p>
+                    </div>
+                    {checkinDone && (
+                      <div style={{ position: "absolute", top: 10, right: 10 }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                    )}
+                  </button>
+                </div>
+
+              </div>
             </div>
 
             {/* Food sub-modal */}
