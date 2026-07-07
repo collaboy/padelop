@@ -1300,9 +1300,6 @@ export default function ProfilePage() {
               </button>
               <h1 style={{ fontSize: "clamp(20px, 5.5vw, 26px)", fontWeight: 800, color: "#1a1c1c", margin: 0, letterSpacing: "-0.02em" }}>My Game</h1>
             </div>
-            <div onClick={() => openPadlaPanel()} style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.02em", fontFamily: "var(--font-hanken)", color: "rgba(0,0,0,0.10)", cursor: "pointer", lineHeight: 1 }}>
-              {Object.values(schedDone).flat().length}
-            </div>
           </div>
 
           {panelSmartError && (
