@@ -1300,6 +1300,9 @@ export default function ProfilePage() {
               </button>
               <h1 style={{ fontSize: "clamp(20px, 5.5vw, 26px)", fontWeight: 800, color: "#1a1c1c", margin: 0, letterSpacing: "-0.02em" }}>My Game</h1>
             </div>
+            <div onClick={() => openPadlaPanel()} style={{ width: 44, height: 44, borderRadius: "50%", background: "#1a7a3f", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+              <span style={{ fontSize: 16, fontWeight: 700, color: "#fff" }}>{Object.values(schedDone).flat().length}</span>
+            </div>
           </div>
 
           {panelSmartError && (
@@ -2342,13 +2345,7 @@ export default function ProfilePage() {
                         </div>
                       );
                     })()}
-                    {/* Padla points badge */}
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, margin: "32px 0 0" }}>
-                      <div onClick={() => openPadlaPanel()} style={{ width: 64, height: 64, borderRadius: "50%", background: "#1a7a3f", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer" }}>
-                        <span style={{ fontSize: 20, fontWeight: 700, color: "#fff" }}>{Object.values(schedDone).flat().length}</span>
-                      </div>
-                      <span style={{ fontSize: 13, fontWeight: 400, color: "#1a1c1c" }}>Lifetime Points</span>
-                    </div>
+
 </>
                     );
                   })()}
