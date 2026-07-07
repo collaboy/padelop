@@ -1400,14 +1400,14 @@ export default function ProfilePage() {
                         })()}
                       </div>
 
-                      {/* Today's Schedule */}
+                      {/* Today's Goals */}
                       <div onClick={() => togglePanel('sched')}
                         style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(panelSchedOpen) }}>
                         <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.08))", display: "block" }}>
                           <defs><path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                           <circle cx="100" cy="100" r="99" fill="#16a34a" />
                           <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                            <textPath href="#goalsTextArc" startOffset="50%" textAnchor="middle">TODAY&apos;S SCHEDULE</textPath>
+                            <textPath href="#goalsTextArc" startOffset="50%" textAnchor="middle">TODAY&apos;S GOALS</textPath>
                           </text>
                           <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
                             fontSize={pct === 100 ? "44" : "36"} fontWeight="800"
