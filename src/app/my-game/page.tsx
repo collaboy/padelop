@@ -1676,7 +1676,7 @@ export default function ProfilePage() {
                     )}
 
                     {/* Row 2: Streak · Form Score · Hydration */}
-                    <div style={{ display: "flex", gap: 10 }}>
+                    <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
                       {/* Streak */}
                       {(() => {
                         const STIERS = [
