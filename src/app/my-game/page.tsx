@@ -1340,7 +1340,7 @@ export default function ProfilePage() {
                       <div onClick={() => openPadlaPanel()} style={{ width: 64, height: 64, borderRadius: "50%", background: "#16a34a", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer" }}>
                         <span style={{ fontSize: 20, fontWeight: 700, color: "#fff" }}>{Object.values(schedDone).flat().length}</span>
                       </div>
-                      <span style={{ fontSize: 13, fontWeight: 500, color: "#6b7480" }}>Lifetime Points</span>
+                      <span style={{ fontSize: 13, fontWeight: 500, color: "#1a1c1c" }}>Lifetime Points</span>
                     </div>
                     {/* Coach's note */}
                     {matchInsight ? (
