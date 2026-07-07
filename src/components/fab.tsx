@@ -238,37 +238,20 @@ export default function Fab() {
                 {/* Top row — Home, My Game, +, [Settings — swipe left to reveal] */}
                 <div ref={tileRowRef} onScroll={e => setTileScrolled((e.currentTarget.scrollLeft) > 30)} style={{ overflowX: "scroll", scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}>
                   <div style={{ display: "flex", gap: 10 }}>
-                    <button
-                      onClick={() => { startNavLoad(); router.push("/home8"); }}
-                      className="active:scale-95 transition-transform"
-                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", height: fabExpanded ? "calc((100vw - 52px) / 6)" : "calc((100vw - 52px) / 3)", background: "#f0f1f4", border: "none", borderRadius: 24, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, overflow: "hidden", transition: "height 0.3s cubic-bezier(0.4,0,0.2,1)" }}
-                    >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                      {!fabExpanded && <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Home</span>}
-                    </button>
-                    <button
-                      onClick={() => { if (pathname.startsWith("/my-game")) { setLogPickerOpen(false); return; } startNavLoad(); router.push("/my-game"); }}
-                      className="active:scale-95 transition-transform"
-                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", height: fabExpanded ? "calc((100vw - 52px) / 6)" : "calc((100vw - 52px) / 3)", background: "#f0f1f4", border: "none", borderRadius: 24, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, overflow: "hidden", transition: "height 0.3s cubic-bezier(0.4,0,0.2,1)" }}
-                    >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-                      {!fabExpanded && <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>My Game</span>}
-                    </button>
-                    <button
-                      onClick={() => setFabExpanded(v => !v)}
-                      className="active:scale-95 transition-transform"
-                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", height: fabExpanded ? "calc((100vw - 52px) / 6)" : "calc((100vw - 52px) / 3)", background: fabExpanded ? "#eaebec" : "#f0f1f4", border: "none", borderRadius: 24, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, overflow: "hidden", transition: "height 0.3s cubic-bezier(0.4,0,0.2,1)" }}
-                    >
-                      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    </button>
-                    <button
-                      onClick={() => { closeAll(); startNavLoad(); router.push("/settings"); }}
-                      className="active:scale-95 transition-transform"
-                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", height: fabExpanded ? "calc((100vw - 52px) / 6)" : "calc((100vw - 52px) / 3)", background: "#f0f1f4", border: "none", borderRadius: 24, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, overflow: "hidden", transition: "height 0.3s cubic-bezier(0.4,0,0.2,1)" }}
-                    >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                      {!fabExpanded && <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Settings</span>}
-                    </button>
+                    {([
+                      { label: "Home", action: () => { startNavLoad(); router.push("/home8"); }, icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
+                      { label: "My Game", action: () => { if (pathname.startsWith("/my-game")) { setLogPickerOpen(false); return; } startNavLoad(); router.push("/my-game"); }, icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> },
+                      { label: "Log", action: () => setFabExpanded(v => !v), icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>, active: fabExpanded },
+                      { label: "Settings", action: () => { closeAll(); startNavLoad(); router.push("/settings"); }, icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
+                    ] as { label: string; action: () => void; icon: React.ReactNode; active?: boolean }[]).map(({ label, action, icon, active }) => (
+                      <button key={label} onClick={action} className="active:scale-95 transition-transform"
+                        style={{ flex: "0 0 calc((100vw - 52px) / 3)", background: "none", border: "none", padding: "10px 0 8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+                        <div style={{ width: 60, height: 60, borderRadius: "50%", background: active ? "#e0e2e6" : "#f0f1f4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          {icon}
+                        </div>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>{label}</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
                 {/* Swipe hint dots */}
