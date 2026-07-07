@@ -37,7 +37,7 @@ function PadlaSheet({ onClose }: { onClose: () => void }) {
         {/* Hero block */}
         <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "0 auto 16px" }} />
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
-          <div style={{ flexShrink: 0, width: 68, height: 68, borderRadius: "50%", background: "#00D455", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ flexShrink: 0, width: 68, height: 68, borderRadius: "50%", background: "#1a7a3f", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <span style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-0.02em", color: "#fff", lineHeight: 1 }}>{allCompletions.length}</span>
           </div>
           <div>
