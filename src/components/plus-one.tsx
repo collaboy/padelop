@@ -134,18 +134,7 @@ export default function PlusOne() {
         }
       `}</style>
 
-      {score !== null && !sheetOpen && pathname !== "/my-game" && (
-        <div style={{ position: "fixed", top: 20, right: 24, zIndex: 9997, pointerEvents: "auto" }}>
-          <div
-            onClick={() => setSheetOpen(p => !p)}
-            style={{ ...numStyle, color: "rgba(0,0,0,0.10)", cursor: "pointer" }}
-          >
-            {score}
-          </div>
-        </div>
-      )}
-
-      {anims.length > 0 && (
+{anims.length > 0 && (
         <div style={{ position: "fixed", top: 20, right: 24, zIndex: 9998, pointerEvents: "none" }}>
           {anims.map(a => (
             <div key={a.id} style={{
