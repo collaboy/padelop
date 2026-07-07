@@ -534,7 +534,7 @@ export default function ProfilePage() {
   }, []);
   useEffect(() => {
     const prev = document.body.style.background;
-    document.body.style.background = "#f2f3f5";
+    document.body.style.background = "#e8eaed";
     return () => { document.body.style.background = prev; };
   }, []);
   const effectiveDayType = dayType === "baseline" ? (cachedDayType ?? dayType) : dayType;
@@ -1285,7 +1285,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <><style>{`@keyframes mg-sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style><div className="w-full" style={{ backgroundColor: "#f2f3f5", height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
+    <><style>{`@keyframes mg-sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style><div className="w-full" style={{ backgroundColor: "#e8eaed", height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
 
       {/* ── Profile ──────────────────────────────────────────────────────── */}
         <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 20, flex: 1, minHeight: 0 }}>
