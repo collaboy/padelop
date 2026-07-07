@@ -248,7 +248,7 @@ export default function Fab() {
                         style={{ flex: "0 0 calc((100vw - 52px) / 3)", background: "none", border: "none", padding: 0, cursor: "pointer" }}>
                         <div style={{ width: "100%", aspectRatio: "1/1", borderRadius: "50%", background: active ? "#e0e2e6" : "#f0f1f4", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 5 }}>
                           {icon}
-                          <span style={{ fontSize: 10, fontWeight: 500, color: "#9aa5b0", letterSpacing: "0.01em" }}>{label}</span>
+                          <span style={{ fontSize: 12, fontWeight: 500, color: "#9aa5b0", letterSpacing: "0.01em" }}>{label}</span>
                         </div>
                       </button>
                     ))}
