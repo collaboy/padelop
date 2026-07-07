@@ -1333,12 +1333,6 @@ export default function ProfilePage() {
                     return (
                     <>
                     {/* Padla points badge */}
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, marginBottom: 2 }}>
-                      <div onClick={() => openPadlaPanel()} style={{ width: 64, height: 64, borderRadius: "50%", background: "#1a7a3f", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer" }}>
-                        <span style={{ fontSize: 20, fontWeight: 700, color: "#fff" }}>{Object.values(schedDone).flat().length}</span>
-                      </div>
-                      <span style={{ fontSize: 13, fontWeight: 400, color: "#1a1c1c" }}>Lifetime Points</span>
-                    </div>
                     {/* Coach's note */}
                     {matchInsight ? (
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: "14px 0 18px" }} onClick={() => setInsightSheetOpen(true)}>
@@ -1679,6 +1673,13 @@ export default function ProfilePage() {
                       </div>
                     )}
 
+                    {/* Padla points badge */}
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, margin: "24px 0 8px" }}>
+                      <div onClick={() => openPadlaPanel()} style={{ width: 64, height: 64, borderRadius: "50%", background: "#1a7a3f", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer" }}>
+                        <span style={{ fontSize: 20, fontWeight: 700, color: "#fff" }}>{Object.values(schedDone).flat().length}</span>
+                      </div>
+                      <span style={{ fontSize: 13, fontWeight: 400, color: "#1a1c1c" }}>Lifetime Points</span>
+                    </div>
                     {/* Row 2: Streak · Form Score · Hydration */}
                     <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
                       {/* Streak */}
