@@ -1336,11 +1336,11 @@ export default function ProfilePage() {
                     return (
                     <>
                     {/* Padla points badge */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
-                      <div onClick={() => openPadlaPanel()} style={{ width: 36, height: 36, borderRadius: "50%", background: "#16a34a", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer" }}>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>{Object.values(schedDone).flat().length}</span>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 6, marginBottom: 2 }}>
+                      <div onClick={() => openPadlaPanel()} style={{ width: 64, height: 64, borderRadius: "50%", background: "#16a34a", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer" }}>
+                        <span style={{ fontSize: 20, fontWeight: 700, color: "#fff" }}>{Object.values(schedDone).flat().length}</span>
                       </div>
-                      <span style={{ fontSize: 13, fontWeight: 500, color: "#6b7480" }}>Lifetime Padla Points</span>
+                      <span style={{ fontSize: 13, fontWeight: 500, color: "#6b7480" }}>Lifetime Points</span>
                     </div>
                     {/* Coach's note */}
                     {matchInsight ? (
