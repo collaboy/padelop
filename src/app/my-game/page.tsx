@@ -534,7 +534,7 @@ export default function ProfilePage() {
   }, []);
   useEffect(() => {
     const prev = document.body.style.background;
-    document.body.style.background = "#e8eaed";
+    document.body.style.background = "#ffffff";
     return () => { document.body.style.background = prev; };
   }, []);
   const effectiveDayType = dayType === "baseline" ? (cachedDayType ?? dayType) : dayType;
@@ -656,7 +656,7 @@ export default function ProfilePage() {
     effectiveDayType === "pre-match" ? "#d97706" :
     effectiveDayType === "recovery"  ? "#7c3aed" :
     effectiveDayType === "maintenance" ? "#0e7490" : "#16a34a";
-  const panelInputSt: React.CSSProperties = { width: "100%", padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", outline: "none", fontFamily: "inherit", background: "#f8f9fa", boxSizing: "border-box" };
+  const panelInputSt: React.CSSProperties = { width: "100%", padding: "8px 12px", borderRadius: 10, border: "1.5px solid #ffffff", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", outline: "none", fontFamily: "inherit", background: "#f8f9fa", boxSizing: "border-box" };
   const panelLabelSt: React.CSSProperties = { fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#8a9096", marginBottom: 4, display: "block" };
 
   function readHydrationMl(): number {
@@ -1285,7 +1285,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <><style>{`@keyframes mg-sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style><div className="w-full" style={{ backgroundColor: "#e8eaed", height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
+    <><style>{`@keyframes mg-sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style><div className="w-full" style={{ backgroundColor: "#ffffff", height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
 
       {/* ── Profile ──────────────────────────────────────────────────────── */}
         <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 20, flex: 1, minHeight: 0 }}>
@@ -1294,7 +1294,7 @@ export default function ProfilePage() {
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <button
                 onClick={() => router.back()}
-                style={{ width: 36, height: 36, borderRadius: "50%", background: "#e8eaed", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+                style={{ width: 36, height: 36, borderRadius: "50%", background: "#ffffff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
               </button>
@@ -1681,7 +1681,7 @@ export default function ProfilePage() {
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(streakPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
                               <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
                                 <textPath href="#streakTopArc" startOffset="50%" textAnchor="middle">STREAK</textPath>
                               </text>
@@ -1710,7 +1710,7 @@ export default function ProfilePage() {
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(formScorePanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="formScoreArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
                               <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
                                 <textPath href="#formScoreArc" startOffset="50%" textAnchor="middle">MY FORM</textPath>
                               </text>
@@ -1744,7 +1744,7 @@ export default function ProfilePage() {
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(hydrationPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="hydrationArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
                               <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
                                 <textPath href="#hydrationArc" startOffset="50%" textAnchor="middle">HYDRATION</textPath>
                               </text>
@@ -1911,7 +1911,7 @@ export default function ProfilePage() {
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(matchesPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="matchesArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
                               <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
                                 <textPath href="#matchesArc" startOffset="50%" textAnchor="middle">MATCHES</textPath>
                               </text>
@@ -1947,7 +1947,7 @@ export default function ProfilePage() {
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(insightsPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="insightsArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
                               <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
                                 <textPath href="#insightsArc" startOffset="50%" textAnchor="middle">INSIGHTS</textPath>
                               </text>
@@ -1974,7 +1974,7 @@ export default function ProfilePage() {
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(openPanel === 'goodBad') }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="goodBadArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="white" />
+                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
                               <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
                                 <textPath href="#goodBadArc" startOffset="50%" textAnchor="middle">GOOD/BAD</textPath>
                               </text>
@@ -2684,7 +2684,7 @@ export default function ProfilePage() {
                         onChange={e => setPanelMealText(e.target.value)}
                         placeholder="What did you eat?"
                         rows={3}
-                        style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box", background: "#f8f9fa" }}
+                        style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #ffffff", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box", background: "#f8f9fa" }}
                       />
                     </div>
                   </div>
@@ -2763,15 +2763,15 @@ export default function ProfilePage() {
             <div style={{ padding: "12px 20px 4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <p style={{ fontSize: "clamp(18px, 4.6vw, 22px)", fontWeight: 800, color: "#1a1c1c", margin: 0 }}>Food &amp; Snacks</p>
-                <input type="time" value={panelMealTime || nowTimeStr()} onChange={e => setPanelMealTime(e.target.value)} onClick={() => { if (!panelMealTime) setPanelMealTime(nowTimeStr()); }} style={{ padding: "4px 8px", borderRadius: 8, border: "1.5px solid #e8eaed", fontSize: "clamp(13px, 3.4vw, 15px)", color: "#6b7480", outline: "none", background: "#f8f9fa" }} />
+                <input type="time" value={panelMealTime || nowTimeStr()} onChange={e => setPanelMealTime(e.target.value)} onClick={() => { if (!panelMealTime) setPanelMealTime(nowTimeStr()); }} style={{ padding: "4px 8px", borderRadius: 8, border: "1.5px solid #ffffff", fontSize: "clamp(13px, 3.4vw, 15px)", color: "#6b7480", outline: "none", background: "#f8f9fa" }} />
               </div>
               <button onClick={() => setPanelLogSub(null)} style={{ background: "rgba(0,0,0,0.06)", border: "none", borderRadius: "50%", width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
             <div style={{ padding: "12px 20px 20px" }}>
-              <textarea value={panelMealText} onChange={e => setPanelMealText(e.target.value)} placeholder="What are you actually eating?" rows={4} autoFocus style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: "clamp(16px, 4.1vw, 19px)", color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box" }} />
-              <button onClick={() => panelSaveMealEntry(panelMealTime || nowTimeStr(), panelMealText)} style={{ marginTop: 8, padding: "10px 22px", borderRadius: 999, background: panelMealText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: panelMealText.trim() ? "pointer" : "default", fontSize: "clamp(14px, 3.6vw, 17px)", fontWeight: 700, color: panelMealText.trim() ? "#fff" : "#b0b8c1" }}>Save</button>
+              <textarea value={panelMealText} onChange={e => setPanelMealText(e.target.value)} placeholder="What are you actually eating?" rows={4} autoFocus style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #ffffff", fontSize: "clamp(16px, 4.1vw, 19px)", color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box" }} />
+              <button onClick={() => panelSaveMealEntry(panelMealTime || nowTimeStr(), panelMealText)} style={{ marginTop: 8, padding: "10px 22px", borderRadius: 999, background: panelMealText.trim() ? "#2653d4" : "#ffffff", border: "none", cursor: panelMealText.trim() ? "pointer" : "default", fontSize: "clamp(14px, 3.6vw, 17px)", fontWeight: 700, color: panelMealText.trim() ? "#fff" : "#b0b8c1" }}>Save</button>
               {panelMealsToday.length > 0 && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 5, marginTop: 16 }}>
                   {panelMealsToday.map(m => (
@@ -2800,8 +2800,8 @@ export default function ProfilePage() {
               </button>
             </div>
             <div style={{ padding: "12px 20px 20px" }}>
-              <textarea value={panelNoteText} onChange={e => setPanelNoteText(e.target.value)} placeholder="What&apos;s on your mind?" rows={4} style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: "clamp(16px, 4.1vw, 19px)", color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box" }} />
-              <button onClick={() => { panelSaveNote(panelNoteText); setPanelLogSub(null); }} style={{ marginTop: 8, padding: "10px 22px", borderRadius: 999, background: panelNoteText.trim() ? "#2653d4" : "#e8eaed", border: "none", cursor: panelNoteText.trim() ? "pointer" : "default", fontSize: "clamp(14px, 3.6vw, 17px)", fontWeight: 700, color: panelNoteText.trim() ? "#fff" : "#b0b8c1" }}>Save</button>
+              <textarea value={panelNoteText} onChange={e => setPanelNoteText(e.target.value)} placeholder="What&apos;s on your mind?" rows={4} style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #ffffff", fontSize: "clamp(16px, 4.1vw, 19px)", color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box" }} />
+              <button onClick={() => { panelSaveNote(panelNoteText); setPanelLogSub(null); }} style={{ marginTop: 8, padding: "10px 22px", borderRadius: 999, background: panelNoteText.trim() ? "#2653d4" : "#ffffff", border: "none", cursor: panelNoteText.trim() ? "pointer" : "default", fontSize: "clamp(14px, 3.6vw, 17px)", fontWeight: 700, color: panelNoteText.trim() ? "#fff" : "#b0b8c1" }}>Save</button>
             </div>
           </div>
         </div>
@@ -2880,7 +2880,7 @@ export default function ProfilePage() {
                     return (
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
                         {options.map(opt => (
-                          <button key={opt.key} onClick={() => { setPanelSmartResult(r => r ? { ...r, category: opt.key, data: emptyData[opt.key] ?? {} } : r); setPanelUploadCatPickerOpen(false); }} style={{ padding: "4px 10px", borderRadius: 6, border: `1.5px solid ${opt.key === category ? opt.color : "#e8eaed"}`, background: opt.key === category ? opt.color + "18" : "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700, color: opt.key === category ? opt.color : "#6b7480" }}>
+                          <button key={opt.key} onClick={() => { setPanelSmartResult(r => r ? { ...r, category: opt.key, data: emptyData[opt.key] ?? {} } : r); setPanelUploadCatPickerOpen(false); }} style={{ padding: "4px 10px", borderRadius: 6, border: `1.5px solid ${opt.key === category ? opt.color : "#ffffff"}`, background: opt.key === category ? opt.color + "18" : "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700, color: opt.key === category ? opt.color : "#6b7480" }}>
                             {opt.title}
                           </button>
                         ))}
@@ -2986,12 +2986,12 @@ export default function ProfilePage() {
               </div>
               <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
                 {category !== "unknown" && (
-                  <button onClick={handleConfirm} disabled={!canConfirm} style={{ padding: "13px 20px", borderRadius: 999, background: canConfirm ? meta.color : "#e8eaed", border: "none", cursor: canConfirm ? "pointer" : "default", fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 700, color: canConfirm ? "#fff" : "#b0b8c1", width: "100%" }}>
+                  <button onClick={handleConfirm} disabled={!canConfirm} style={{ padding: "13px 20px", borderRadius: 999, background: canConfirm ? meta.color : "#ffffff", border: "none", cursor: canConfirm ? "pointer" : "default", fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 700, color: canConfirm ? "#fff" : "#b0b8c1", width: "100%" }}>
                     {category === "match_schedule" ? "Save match" : category === "meal" ? "Log meal" : category === "match_result" ? "Save result" : "Save"}
                   </button>
                 )}
                 {category !== "gear" && (
-                  <button onClick={handleEditManually} style={{ padding: "10px 20px", borderRadius: 999, background: "none", border: "1.5px solid #e8eaed", cursor: "pointer", fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 600, color: "#6b7480", width: "100%" }}>
+                  <button onClick={handleEditManually} style={{ padding: "10px 20px", borderRadius: 999, background: "none", border: "1.5px solid #ffffff", cursor: "pointer", fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 600, color: "#6b7480", width: "100%" }}>
                     {category === "unknown" ? "Enter manually" : "Edit manually"}
                   </button>
                 )}
