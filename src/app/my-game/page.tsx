@@ -1336,7 +1336,7 @@ export default function ProfilePage() {
                     return (
                     <>
                     {/* Padla points badge */}
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 6, marginBottom: 2 }}>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, marginBottom: 2 }}>
                       <div onClick={() => openPadlaPanel()} style={{ width: 64, height: 64, borderRadius: "50%", background: "#16a34a", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer" }}>
                         <span style={{ fontSize: 20, fontWeight: 700, color: "#fff" }}>{Object.values(schedDone).flat().length}</span>
                       </div>
