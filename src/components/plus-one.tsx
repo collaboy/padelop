@@ -47,7 +47,7 @@ function PadlaSheet({ onClose }: { onClose: () => void }) {
         </div>
         {nextMilestone !== null && (
           <div style={{ margin: "0 0 20px", padding: "10px 16px", borderRadius: 999, background: "#dcfce7", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1a7a3f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="#1a7a3f" stroke="#1a7a3f" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             <span style={{ fontSize: 13, fontWeight: 600, color: "#1a7a3f", whiteSpace: "nowrap" }}>{toNext} points until your next milestone</span>
           </div>
         )}
