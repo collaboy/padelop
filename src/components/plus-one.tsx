@@ -41,7 +41,7 @@ function PadlaSheet({ onClose }: { onClose: () => void }) {
             <span style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-0.02em", color: "#fff", lineHeight: 1 }}>{allCompletions.length}</span>
           </div>
           <div>
-            <p style={{ margin: "0 0 4px", fontSize: "clamp(20px, 5.5vw, 26px)", fontWeight: 800, letterSpacing: "-0.02em", color: "#d97706", lineHeight: 1.15 }}>Lifetime Padla Points</p>
+            <p style={{ margin: "0 0 4px", fontSize: "clamp(20px, 5.5vw, 26px)", fontWeight: 800, letterSpacing: "-0.02em", color: "#1a7a3f", lineHeight: 1.15 }}>Lifetime Padla Points</p>
             <p style={{ margin: 0, fontSize: 12, color: "#9aa0a6", lineHeight: 1.4 }}>Every positive action earns a Padla Point.</p>
           </div>
         </div>
@@ -59,7 +59,7 @@ function PadlaSheet({ onClose }: { onClose: () => void }) {
             {visible.map(([title, count]) => (
               <div key={title} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <span style={{ fontSize: 15, fontWeight: 500, color: "#1a1c1c" }}>{title}</span>
-                <span style={{ fontSize: 13, fontWeight: 700, color: "#d97706", background: "#fef3c7", borderRadius: 999, padding: "2px 10px" }}>×{count}</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "#1a7a3f", background: "#fef3c7", borderRadius: 999, padding: "2px 10px" }}>×{count}</span>
               </div>
             ))}
             {hasMore && (
