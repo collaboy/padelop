@@ -1968,7 +1968,7 @@ export default function ProfilePage() {
                                 <textPath href="#insightsArc" startOffset="50%" textAnchor="middle">INSIGHTS</textPath>
                               </text>
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{count > 0 ? count : "—"}</text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>featured</text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>notes</text>
                             </svg>
                           </div>
                         );
