@@ -1300,7 +1300,7 @@ export default function ProfilePage() {
               </button>
               <h1 style={{ fontSize: "clamp(20px, 5.5vw, 26px)", fontWeight: 800, color: "#1a1c1c", margin: 0, letterSpacing: "-0.02em" }}>My Game</h1>
             </div>
-            <div onClick={() => openPadlaPanel()} style={{ width: 32, height: 32, borderRadius: "50%", background: "#2e8a53", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+            <div onClick={() => openPadlaPanel()} style={{ width: 32, height: 32, borderRadius: "50%", background: "#1f6b40", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: "#fff", lineHeight: 1 }}>{Object.values(schedDone).flat().length}</span>
             </div>
           </div>
