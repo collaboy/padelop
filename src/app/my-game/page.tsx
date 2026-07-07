@@ -1335,6 +1335,13 @@ export default function ProfilePage() {
                     const dim = (active: boolean) => ({ opacity: anyOpen && !active ? 0.3 : 1, transition: "opacity 0.2s" });
                     return (
                     <>
+                    {/* Padla points badge */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
+                      <div onClick={() => openPadlaPanel()} style={{ width: 36, height: 36, borderRadius: "50%", background: "#16a34a", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer" }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>{Object.values(schedDone).flat().length}</span>
+                      </div>
+                      <span style={{ fontSize: 13, fontWeight: 500, color: "#9aa5b0" }}>lifetime padla points</span>
+                    </div>
                     {/* Coach's note */}
                     {matchInsight ? (
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: "14px 0 18px" }} onClick={() => setInsightSheetOpen(true)}>
