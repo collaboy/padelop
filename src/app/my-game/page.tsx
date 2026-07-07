@@ -1288,7 +1288,7 @@ export default function ProfilePage() {
     <><style>{`@keyframes mg-sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style><div className="w-full" style={{ backgroundColor: "#ffffff", height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
 
       {/* ── Profile ──────────────────────────────────────────────────────── */}
-        <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 20, flex: 1, minHeight: 0 }}>
+        <div style={{ padding: "16px 20px 120px", display: "flex", flexDirection: "column", gap: 20, flex: 1, minHeight: 0, overflowY: "auto" }}>
           {/* Header */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
