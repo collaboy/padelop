@@ -1637,7 +1637,7 @@ export default function ProfilePage() {
                     })()}
 
                     {panelSchedOpen && (
-                      <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
+                      <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)} onTouchStart={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
                         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
                         <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
                           <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
@@ -2642,7 +2642,7 @@ export default function ProfilePage() {
         );
 
         return (
-          <div className="fixed inset-0 z-[300] flex items-end justify-center" onClick={panelCloseSchedModal}>
+          <div className="fixed inset-0 z-[300] flex items-end justify-center" onClick={panelCloseSchedModal} onTouchStart={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
             <style>{`@keyframes mgsheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes mgsheet-down{from{transform:translateY(0)}to{transform:translateY(100%)}}@keyframes mgsheet-fade-out{from{opacity:1}to{opacity:0}}`}</style>
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: panelSchedModalClosing ? "mgsheet-fade-out 0.28s cubic-bezier(0.4,0,1,1) both" : undefined }} />
             <div
