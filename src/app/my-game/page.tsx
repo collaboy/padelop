@@ -1881,10 +1881,14 @@ export default function ProfilePage() {
                                   <span style={{ fontSize: 16, color: "#9aa0a6", fontWeight: 500 }}>{Math.round(pct * 100)}% of {target / 1000}L daily target</span>
                                 </>
                               )}
-                              {todayLog?.quality && (
-                                <div style={{ marginTop: 10 }}>
-                                  <span style={{ fontSize: 16, color: "#6b7480" }}>Feeling: <strong style={{ color: todayLog.quality === "great" ? "#16a34a" : todayLog.quality === "bad" ? "#ef4444" : "#d97706" }}>{todayLog.quality}</strong></span>
-                                </div>
+                              {pct !== null && pct < 1 && (
+                                <p style={{ margin: "14px 0 0", fontSize: 16, color: "#0ea5e9", fontWeight: 600 }}>
+                                  {pct === 0 ? "Start with a glass of water." :
+                                   pct < 0.25 ? "Have a big glass right now." :
+                                   pct < 0.5 ? "Drink up — you're less than halfway." :
+                                   pct < 0.75 ? "Keep it going, almost there." :
+                                   "One more glass and you're done."}
+                                </p>
                               )}
                               {!displayMl && !todayLog && (
                                 <p style={{ margin: 0, fontSize: 16, color: "#9aa0a6" }}>No hydration logged today. Log from the home screen or check-in.</p>
