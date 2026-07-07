@@ -1908,13 +1908,6 @@ export default function ProfilePage() {
                       );
                     })()}
 
-                    {/* Padla points badge */}
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, margin: "24px 0 8px" }}>
-                      <div onClick={() => openPadlaPanel()} style={{ width: 64, height: 64, borderRadius: "50%", background: "#1a7a3f", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer" }}>
-                        <span style={{ fontSize: 20, fontWeight: 700, color: "#fff" }}>{Object.values(schedDone).flat().length}</span>
-                      </div>
-                      <span style={{ fontSize: 13, fontWeight: 400, color: "#1a1c1c" }}>Lifetime Points</span>
-                    </div>
                     {/* Row 3: Matches · Insights · Tags */}
                     <div style={{ display: "flex", gap: 10 }}>
                       {/* Matches circle */}
@@ -2349,6 +2342,13 @@ export default function ProfilePage() {
                         </div>
                       );
                     })()}
+                    {/* Padla points badge */}
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1, margin: "32px 0 0" }}>
+                      <div onClick={() => openPadlaPanel()} style={{ width: 64, height: 64, borderRadius: "50%", background: "#1a7a3f", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer" }}>
+                        <span style={{ fontSize: 20, fontWeight: 700, color: "#fff" }}>{Object.values(schedDone).flat().length}</span>
+                      </div>
+                      <span style={{ fontSize: 13, fontWeight: 400, color: "#1a1c1c" }}>Lifetime Points</span>
+                    </div>
 </>
                     );
                   })()}
