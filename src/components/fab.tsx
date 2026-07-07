@@ -241,7 +241,7 @@ export default function Fab() {
                     <button
                       onClick={() => { startNavLoad(); router.push("/home8"); }}
                       className="active:scale-95 transition-transform"
-                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", height: fabExpanded ? "calc((100vw - 52px) / 6)" : "calc((100vw - 52px) / 3)", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, overflow: "hidden", transition: "height 0.3s cubic-bezier(0.4,0,0.2,1)" }}
+                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", height: fabExpanded ? "calc((100vw - 52px) / 6)" : "calc((100vw - 52px) / 3)", background: "#f0f1f4", border: "none", borderRadius: 24, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, overflow: "hidden", transition: "height 0.3s cubic-bezier(0.4,0,0.2,1)" }}
                     >
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                       {!fabExpanded && <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Home</span>}
@@ -249,22 +249,22 @@ export default function Fab() {
                     <button
                       onClick={() => { if (pathname.startsWith("/my-game")) { setLogPickerOpen(false); return; } startNavLoad(); router.push("/my-game"); }}
                       className="active:scale-95 transition-transform"
-                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", height: fabExpanded ? "calc((100vw - 52px) / 6)" : "calc((100vw - 52px) / 3)", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, overflow: "hidden", transition: "height 0.3s cubic-bezier(0.4,0,0.2,1)" }}
+                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", height: fabExpanded ? "calc((100vw - 52px) / 6)" : "calc((100vw - 52px) / 3)", background: "#f0f1f4", border: "none", borderRadius: 24, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, overflow: "hidden", transition: "height 0.3s cubic-bezier(0.4,0,0.2,1)" }}
                     >
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
                       {!fabExpanded && <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>My Game</span>}
                     </button>
                     <button
                       onClick={() => setFabExpanded(v => !v)}
                       className="active:scale-95 transition-transform"
-                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", height: fabExpanded ? "calc((100vw - 52px) / 6)" : "calc((100vw - 52px) / 3)", background: fabExpanded ? "#eaebec" : "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, overflow: "hidden", transition: "height 0.3s cubic-bezier(0.4,0,0.2,1)" }}
+                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", height: fabExpanded ? "calc((100vw - 52px) / 6)" : "calc((100vw - 52px) / 3)", background: fabExpanded ? "#eaebec" : "#f0f1f4", border: "none", borderRadius: 24, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, overflow: "hidden", transition: "height 0.3s cubic-bezier(0.4,0,0.2,1)" }}
                     >
                       <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     </button>
                     <button
                       onClick={() => { closeAll(); startNavLoad(); router.push("/settings"); }}
                       className="active:scale-95 transition-transform"
-                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", height: fabExpanded ? "calc((100vw - 52px) / 6)" : "calc((100vw - 52px) / 3)", background: "#f5f6f7", border: "none", borderRadius: 18, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, overflow: "hidden", transition: "height 0.3s cubic-bezier(0.4,0,0.2,1)" }}
+                      style={{ flex: "0 0 calc((100vw - 52px) / 3)", height: fabExpanded ? "calc((100vw - 52px) / 6)" : "calc((100vw - 52px) / 3)", background: "#f0f1f4", border: "none", borderRadius: 24, padding: "16px 10px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, overflow: "hidden", transition: "height 0.3s cubic-bezier(0.4,0,0.2,1)" }}
                     >
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                       {!fabExpanded && <span style={{ fontSize: 12, fontWeight: 700, color: "#1a1c1c" }}>Settings</span>}
@@ -286,7 +286,7 @@ export default function Fab() {
                         { label: "Gear", sub: "Racket, shoes…", bg: "#f5f0ff", color: "#7c3aed", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>, action: () => { setSmartUploadResult({ category: "gear", label: "Add gear", confidence: "high", data: { type: "", brand: "", name: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
                         { label: "Results", sub: "Match result", bg: "#fff7ed", color: "#ea580c", icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>, action: () => { setSmartUploadResult({ category: "match_result", label: "Add match result", confidence: "high", data: { result: "", score: "", opponent_names: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
                       ]).map(({ label, sub, bg, color, icon, action }) => (
-                        <button key={label} onClick={action} className="active:scale-95 transition-transform" style={{ background: bg, border: "none", borderRadius: 16, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14, textAlign: "left" }}>
+                        <button key={label} onClick={action} className="active:scale-95 transition-transform" style={{ background: bg, border: "none", borderRadius: 24, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14, textAlign: "left" }}>
                           {icon}
                           <div>
                             <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>+ {label}</p>
@@ -299,7 +299,7 @@ export default function Fab() {
                       <button
                         onClick={() => setLogPickerSub("matchreview")}
                         className="active:scale-95 transition-transform"
-                        style={{ background: "#f5f6f7", border: "none", borderRadius: 16, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14, textAlign: "left" }}
+                        style={{ background: "#f0f1f4", border: "none", borderRadius: 24, padding: "14px 14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14, textAlign: "left" }}
                       >
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                         <div>
@@ -310,7 +310,7 @@ export default function Fab() {
                       <button
                         onClick={() => { if (!checkinDone) { window.dispatchEvent(new CustomEvent("padelop:open-checkin")); setLogPickerOpen(false); setFabExpanded(false); } }}
                         className="active:scale-95 transition-transform"
-                        style={{ background: checkinDone ? "#f5f6f7" : "#f0f4ff", border: "none", borderRadius: 16, padding: "14px 14px", cursor: checkinDone ? "default" : "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14, textAlign: "left", position: "relative", opacity: checkinDone ? 0.5 : 1 }}
+                        style={{ background: checkinDone ? "#f0f1f4" : "#f0f4ff", border: "none", borderRadius: 24, padding: "14px 14px", cursor: checkinDone ? "default" : "pointer", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 14, textAlign: "left", position: "relative", opacity: checkinDone ? 0.5 : 1 }}
                       >
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={checkinDone ? "#6b7480" : "#2653d4"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
                         <div>
