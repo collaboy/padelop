@@ -401,6 +401,7 @@ export default function Home8() {
   drillTagRef.current = drillTag;
   const settlingRef = useRef(false);
   const checkinNudgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevPostMatchOpenRef = useRef(false);
   const [cardSnap, setCardSnap] = useState<'none' | 'left' | 'right'>('none');
   const [liveX, setLiveX] = useState(0);
   const [swipeX, setSwipeX] = useState(0);
@@ -838,6 +839,18 @@ export default function Home8() {
       swipeDirRef.current = null;
     }
   }, [checkinNudgeOpen]);
+
+  useEffect(() => {
+    if (prevPostMatchOpenRef.current && !postMatchOpen) {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const ml = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null");
+      const done = ml?.date === todayStr;
+      const nudgeDismissed = localStorage.getItem("padelop:checkin-nudge-dismissed") === todayStr;
+      const hour = new Date().getHours();
+      if (!done && !nudgeDismissed && hour < 13) setCheckinNudgeOpen(true);
+    }
+    prevPostMatchOpenRef.current = postMatchOpen;
+  }, [postMatchOpen]);
 
   useEffect(() => {
     if (doIdx === 0) setDrumIdx(currentIdx);
@@ -1713,7 +1726,7 @@ export default function Home8() {
         )}
 
         {/* Morning check-in nudge */}
-        {checkinNudgeOpen && (
+        {checkinNudgeOpen && !postMatchOpen && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "24px", paddingBottom: "24px" }} onClick={() => { try { localStorage.setItem("padelop:checkin-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {} setCheckinNudgeOpen(false); }} onTouchStart={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
             <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>

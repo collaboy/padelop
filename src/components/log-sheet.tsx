@@ -1117,13 +1117,24 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
               </div>
             </div>
             <div>
+              <p className="t-label text-c-text-sub mb-3">Energy going in?</p>
+              <div className="flex gap-3">
+                {[{ v: "high", label: "High" }, { v: "mid", label: "Medium" }, { v: "low", label: "Low" }].map(({ v, label }) => {
+                  const sel = matchReview.energy === v;
+                  return <button key={v} onClick={() => setMatchReview(r => ({ ...r, energy: v }))}
+                    className="flex-1 py-3 rounded-2xl border-2 text-[13px] font-bold transition-all active:scale-95"
+                    style={{ borderColor: sel ? PURPLE : "var(--c-line)", background: sel ? "#f5f3ff" : "var(--c-bg-input)", color: sel ? PURPLE : "var(--c-text-sub)" }}>{label}</button>;
+                })}
+              </div>
+            </div>
+            <div>
               <p className="t-label text-c-text-sub mb-3">Who did you play against?</p>
               <input
                 type="text"
                 placeholder="e.g. Marco & Luis"
                 value={matchReview.opponentNames}
                 onChange={e => setMatchReview(r => ({ ...r, opponentNames: e.target.value }))}
-                className="w-full px-4 py-3 rounded-2xl border-2 text-[14px] text-c-text outline-none placeholder:text-[#b0b5ba]"
+                className="w-full px-4 py-3 rounded-2xl border-2 text-[16px] text-c-text outline-none placeholder:text-[#b0b5ba]"
                 style={{ borderColor: matchReview.opponentNames ? PURPLE : "var(--c-line)", background: matchReview.opponentNames ? "#f5f3ff" : "var(--c-bg-input)" }}
               />
               {matchResultImage ? (
@@ -1233,7 +1244,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                 onChange={e => setMatchReview(r => ({ ...r, notes: e.target.value }))}
                 placeholder="How did the game go? Describe the players, key moments, tactics…"
                 rows={3}
-                style={{ width: "100%", padding: "12px 14px", borderRadius: 14, border: "1.5px solid var(--c-line)", background: "var(--c-bg-input)", fontSize: 14, color: "var(--c-text)", outline: "none", fontFamily: "inherit", resize: "none", lineHeight: 1.5, boxSizing: "border-box" }}
+                style={{ width: "100%", padding: "12px 14px", borderRadius: 14, border: "1.5px solid var(--c-line)", background: "var(--c-bg-input)", fontSize: 16, color: "var(--c-text)", outline: "none", fontFamily: "inherit", resize: "none", lineHeight: 1.5, boxSizing: "border-box" }}
               />
             </div>
             <button onClick={() => {

@@ -152,6 +152,7 @@ html, body {
 input, textarea, [contenteditable] {
   -webkit-user-select: text;
   user-select: text;
+  font-size: max(16px, 1em); /* prevent iOS auto-zoom on focus */
 }
 
 /* ── Type scale ──────────────────────────────────────────────────────────

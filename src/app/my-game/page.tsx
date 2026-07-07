@@ -551,6 +551,7 @@ export default function ProfilePage() {
   const [schedModalIdx, setSchedModalIdx] = useState<number | null>(null);
   const [schedModalClosing, setSchedModalClosing] = useState(false);
   const [profileDetailOpen, setProfileDetailOpen] = useState(false);
+  const [insightSheetOpen, setInsightSheetOpen] = useState(false);
 
   // Panel state (inline action panel below profile card)
   const [panelExpanded, setPanelExpanded] = useState(false);
@@ -1844,13 +1845,191 @@ export default function ProfilePage() {
                       })()}
                     </div>
 
-                    {/* Breathe */}
-                    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <div style={{ textAlign: "center" }}>
-                        <p style={{ margin: "0 0 2px", fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 400, letterSpacing: "0.12em", color: "#e8ebed", lineHeight: 1 }}>remember to</p>
-                        <p style={{ margin: 0, fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 300, letterSpacing: "0.18em", color: "#dde1e5", lineHeight: 1 }}>breathe</p>
-                      </div>
-                    </div>
+                    {/* Match insight / breathe */}
+                    {(() => {
+                      const decided = reviews.filter(r => r.result === "win" || r.result === "loss");
+
+                      if (decided.length < 5) {
+                        return (
+                          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <div style={{ textAlign: "center" }}>
+                              <p style={{ margin: "0 0 2px", fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 400, letterSpacing: "0.12em", color: "#e8ebed", lineHeight: 1 }}>remember to</p>
+                              <p style={{ margin: 0, fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 300, letterSpacing: "0.18em", color: "#dde1e5", lineHeight: 1 }}>breathe</p>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      // Energy correlation — fall back to feeling for old reviews without energy set
+                      const toEnergyBucket = (r: ReviewEntry) => {
+                        if (r.energy === "high" || r.energy === "mid" || r.energy === "low") return r.energy;
+                        if (r.feeling === "great") return "high";
+                        if (r.feeling === "ok") return "mid";
+                        if (r.feeling === "bad") return "low";
+                        return null;
+                      };
+                      const energyGroups: Record<string, { wins: number; total: number }> = { high: { wins: 0, total: 0 }, mid: { wins: 0, total: 0 }, low: { wins: 0, total: 0 } };
+                      decided.forEach(r => {
+                        const bucket = toEnergyBucket(r);
+                        const g = bucket ? energyGroups[bucket] : null;
+                        if (g) { g.total++; if (r.result === "win") g.wins++; }
+                      });
+
+                      // Readiness score correlation (join to score history by date)
+                      const scoreByDate = new Map(history.map(s => [s.date, s.overall]));
+                      const readinessGroups: Record<string, { wins: number; total: number }> = {
+                        high: { wins: 0, total: 0 },
+                        mid:  { wins: 0, total: 0 },
+                        low:  { wins: 0, total: 0 },
+                      };
+                      decided.forEach(r => {
+                        const date = (r as ReviewEntry & { matchDate?: string }).matchDate ?? r.ts.slice(0, 10);
+                        const score = scoreByDate.get(date);
+                        if (score === undefined) return;
+                        const bucket = score >= 70 ? "high" : score >= 50 ? "mid" : "low";
+                        readinessGroups[bucket].total++;
+                        if (r.result === "win") readinessGroups[bucket].wins++;
+                      });
+
+                      // Pick the strongest insight: biggest win-rate delta between best and worst populated buckets
+                      type Bucket = { label: string; wins: number; total: number };
+                      const pickBest = (groups: Record<string, { wins: number; total: number }>, labels: Record<string, string>): { best: Bucket; worst: Bucket; delta: number } | null => {
+                        const populated = Object.entries(groups)
+                          .filter(([, g]) => g.total >= 2)
+                          .map(([k, g]) => ({ label: labels[k], wins: g.wins, total: g.total }))
+                          .sort((a, b) => (b.wins / b.total) - (a.wins / a.total));
+                        if (populated.length < 2) return null;
+                        const best = populated[0], worst = populated[populated.length - 1];
+                        const delta = (best.wins / best.total) - (worst.wins / worst.total);
+                        return delta >= 0.15 ? { best, worst, delta } : null;
+                      };
+
+                      const energyInsight = pickBest(energyGroups, { high: "high energy", mid: "medium energy", low: "low energy" });
+                      const readinessInsight = pickBest(readinessGroups, { high: "high readiness", mid: "medium readiness", low: "low readiness" });
+
+                      // Prefer whichever has the bigger delta
+                      const insight = (readinessInsight && (!energyInsight || readinessInsight.delta >= energyInsight.delta))
+                        ? readinessInsight : energyInsight;
+
+                      if (!insight) {
+                        return (
+                          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <div style={{ textAlign: "center" }}>
+                              <p style={{ margin: "0 0 2px", fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 400, letterSpacing: "0.12em", color: "#e8ebed", lineHeight: 1 }}>remember to</p>
+                              <p style={{ margin: 0, fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 300, letterSpacing: "0.18em", color: "#dde1e5", lineHeight: 1 }}>breathe</p>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      const { best } = insight;
+                      const allWins = best.wins === best.total;
+                      const sentence = allWins
+                        ? `You haven't lost on a ${best.label} day.`
+                        : `You win more on ${best.label} days.`;
+
+                      return (
+                        <div
+                          style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+                          onClick={() => setInsightSheetOpen(true)}
+                        >
+                          <div style={{ textAlign: "center", padding: "0 32px" }}>
+                            <p style={{ margin: "0 0 10px", fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 300, letterSpacing: "0.01em", color: "#9aa5b0", lineHeight: 1.4, textWrap: "balance" } as React.CSSProperties}>{sentence}</p>
+                            <div style={{ display: "flex", justifyContent: "center" }}>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c8cdd2" strokeWidth="2" strokeLinecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Insight detail sheet */}
+                    {insightSheetOpen && (() => {
+                      const decided = reviews.filter(r => r.result === "win" || r.result === "loss");
+                      const scoreByDate = new Map(history.map(s => [s.date, s.overall]));
+
+                      const toEnergyBucket2 = (r: ReviewEntry) => {
+                        if (r.energy === "high" || r.energy === "mid" || r.energy === "low") return r.energy;
+                        if (r.feeling === "great") return "high";
+                        if (r.feeling === "ok") return "mid";
+                        if (r.feeling === "bad") return "low";
+                        return null;
+                      };
+                      const energyGroups: Record<string, { wins: number; total: number }> = { high: { wins: 0, total: 0 }, mid: { wins: 0, total: 0 }, low: { wins: 0, total: 0 } };
+                      decided.forEach(r => { const b = toEnergyBucket2(r); const g = b ? energyGroups[b] : null; if (g) { g.total++; if (r.result === "win") g.wins++; } });
+
+                      const readinessGroups: Record<string, { wins: number; total: number }> = { high: { wins: 0, total: 0 }, mid: { wins: 0, total: 0 }, low: { wins: 0, total: 0 } };
+                      decided.forEach(r => {
+                        const date = (r as ReviewEntry & { matchDate?: string }).matchDate ?? r.ts.slice(0, 10);
+                        const score = scoreByDate.get(date);
+                        if (score === undefined) return;
+                        const bucket = score >= 70 ? "high" : score >= 50 ? "mid" : "low";
+                        readinessGroups[bucket].total++;
+                        if (r.result === "win") readinessGroups[bucket].wins++;
+                      });
+
+                      // Build coaching paragraph
+                      const h = energyGroups.high, m = energyGroups.mid, l = energyGroups.low;
+                      const populated = [
+                        { key: "high", label: "high energy", ...h },
+                        { key: "mid",  label: "medium energy", ...m },
+                        { key: "low",  label: "low energy", ...l },
+                      ].filter(g => g.total >= 2).sort((a, b) => (b.wins / b.total) - (a.wins / a.total));
+
+                      const best2 = populated[0];
+                      const worst2 = populated[populated.length - 1];
+
+                      let coachPara = "";
+                      if (best2 && worst2 && best2.key !== worst2.key) {
+                        const bestLabel = best2.key === "high" ? "high" : best2.key === "mid" ? "medium" : "low";
+                        const worstLabel = worst2.key === "high" ? "high" : worst2.key === "mid" ? "medium" : "low";
+                        if (best2.wins === best2.total) {
+                          coachPara = `You haven't lost when your energy was high going in — ${best2.wins} for ${best2.total}. On ${worstLabel} energy days, you've won ${worst2.wins} for ${worst2.total}. What you do the night before a match is showing up in your results.`;
+                        } else if (best2.key === "mid" && (worst2.wins / worst2.total) < (best2.wins / best2.total) - 0.2) {
+                          coachPara = `Your best results come on medium-energy days — ${best2.wins} for ${best2.total}. High-pressure, high-energy days haven't translated as well: ${energyGroups.high.wins} for ${energyGroups.high.total}. Controlled and settled seems to suit your game.`;
+                        } else {
+                          coachPara = `On ${bestLabel} energy days you've won ${best2.wins} for ${best2.total}. On ${worstLabel} energy days, ${worst2.wins} for ${worst2.total}. Sleep, hydration, and your pre-match routine are directly showing up in your results.`;
+                        }
+                      } else if (best2) {
+                        coachPara = `On ${best2.key === "high" ? "high" : best2.key === "mid" ? "medium" : "low"} energy days you've won ${best2.wins} for ${best2.total}. Keep logging and the picture will get clearer — the more you rate, the sharper this gets.`;
+                      }
+
+                      const Row = ({ label, wins, total }: { label: string; wins: number; total: number }) => {
+                        if (total === 0) return null;
+                        const pct = Math.round((wins / total) * 100);
+                        const color = pct >= 60 ? "#16a34a" : pct >= 40 ? "#f59e0b" : "#dc2626";
+                        return (
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+                            <span style={{ fontSize: 15, color: "#4a5050", minWidth: 110 }}>{label}</span>
+                            <div style={{ flex: 1, height: 5, borderRadius: 999, background: "#f0f0f0", overflow: "hidden" }}>
+                              <div style={{ height: "100%", width: `${pct}%`, borderRadius: 999, background: color }} />
+                            </div>
+                            <span style={{ fontSize: 13, fontWeight: 600, color: "#8a9096", minWidth: 52, textAlign: "right" }}>{wins} for {total}</span>
+                          </div>
+                        );
+                      };
+
+                      return (
+                        <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setInsightSheetOpen(false)}>
+                          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                            <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
+                            <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "20px 20px 48px", display: "flex", flexDirection: "column", gap: 20 }}>
+                              <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#b0b8c1" }}>Match pattern</p>
+                              {coachPara && (
+                                <p style={{ margin: 0, fontSize: 16, color: "#1a1c1c", lineHeight: 1.65, fontWeight: 400 }}>{coachPara}</p>
+                              )}
+                              <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingTop: 4 }}>
+                                <Row label="High energy" wins={energyGroups.high.wins} total={energyGroups.high.total} />
+                                <Row label="Medium energy" wins={energyGroups.mid.wins} total={energyGroups.mid.total} />
+                                <Row label="Low energy" wins={energyGroups.low.wins} total={energyGroups.low.total} />
+                              </div>
+                              <p style={{ margin: 0, fontSize: 12, color: "#b0b8c1", lineHeight: 1.5 }}>Based on {decided.length} rated match{decided.length !== 1 ? "es" : ""}. Patterns sharpen as you log more.</p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     {/* Matches panel */}
                     {matchesPanelOpen && (
