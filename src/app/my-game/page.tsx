@@ -1990,10 +1990,7 @@ export default function ProfilePage() {
                     {matchInsight ? (
                       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }} onClick={() => setInsightSheetOpen(true)}>
                         <div style={{ textAlign: "center", padding: "0 32px" }}>
-                          <p style={{ margin: "0 0 10px", fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 300, letterSpacing: "0.01em", color: "#9aa5b0", lineHeight: 1.4, textWrap: "balance" } as React.CSSProperties}>{matchInsight.sentence}</p>
-                          <div style={{ display: "flex", justifyContent: "center" }}>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c8cdd2" strokeWidth="2" strokeLinecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-                          </div>
+                          <p style={{ margin: 0, fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 300, letterSpacing: "0.01em", color: "#9aa5b0", lineHeight: 1.4, textWrap: "balance" } as React.CSSProperties}>{matchInsight.sentence}</p>
                         </div>
                       </div>
                     ) : (
