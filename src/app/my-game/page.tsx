@@ -1341,6 +1341,7 @@ export default function ProfilePage() {
                         <span style={{ fontSize: 20, fontWeight: 700, color: "#fff" }}>{Object.values(schedDone).flat().length}</span>
                       </div>
                       <span style={{ fontSize: 13, fontWeight: 500, color: "#1a1c1c" }}>Lifetime Points</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>
                     </div>
                     {/* Coach's note */}
                     {matchInsight ? (
