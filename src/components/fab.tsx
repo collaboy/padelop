@@ -157,23 +157,24 @@ export default function Fab() {
   return (
     <>
       {/* Spacer so page content clears the tab bar */}
-      <div style={{ height: "calc(56px + env(safe-area-inset-bottom))" }} aria-hidden="true" />
+      <div style={{ height: "calc(56px + env(safe-area-inset-bottom) + 16px)" }} aria-hidden="true" />
 
       {/* Bottom tab bar */}
       <div
         style={{
           position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
+          bottom: "calc(env(safe-area-inset-bottom) + 10px)",
+          left: 10,
+          right: 10,
           zIndex: 20,
-          background: "rgba(255,255,255,0.88)",
+          background: "rgba(255,255,255,0.72)",
           backdropFilter: "blur(20px) saturate(180%)",
           WebkitBackdropFilter: "blur(20px) saturate(180%)",
-          borderTop: "0.5px solid rgba(0,0,0,0.08)",
+          borderRadius: 20,
+          border: "0.5px solid rgba(0,0,0,0.07)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
           display: "flex",
           alignItems: "stretch",
-          paddingBottom: "env(safe-area-inset-bottom)",
           visibility: hiddenForModal ? "hidden" : undefined,
           pointerEvents: hiddenForModal ? "none" : undefined,
         }}
