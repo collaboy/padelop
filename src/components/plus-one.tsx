@@ -46,7 +46,7 @@ function PadlaSheet({ onClose }: { onClose: () => void }) {
           </div>
         </div>
         {nextMilestone !== null && (
-          <div style={{ margin: "0 0 20px", padding: "10px 16px", borderRadius: 999, background: "#dcfce7", display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ margin: "0 0 20px", padding: "10px 16px", borderRadius: 999, background: "#f0f1f4", display: "flex", alignItems: "center", gap: 8 }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1a7a3f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
             <span style={{ fontSize: 13, fontWeight: 600, color: "#1a7a3f", whiteSpace: "nowrap" }}>{toNext} points until your next milestone</span>
           </div>
@@ -59,7 +59,7 @@ function PadlaSheet({ onClose }: { onClose: () => void }) {
             {visible.map(([title, count]) => (
               <div key={title} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <span style={{ fontSize: 15, fontWeight: 500, color: "#1a1c1c" }}>{title}</span>
-                <span style={{ fontSize: 13, fontWeight: 700, color: "#1a7a3f", background: "#dcfce7", borderRadius: 999, padding: "2px 10px" }}>×{count}</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "#6b7480", background: "#f0f1f4", borderRadius: 999, padding: "2px 10px" }}>×{count}</span>
               </div>
             ))}
             {hasMore && (
