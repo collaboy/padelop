@@ -833,8 +833,6 @@ export default function ProfilePage() {
     });
     window.addEventListener("storage", loadAll);
     window.addEventListener("padelop:sync-done", loadAll);
-    const handleOpenCheckin = () => { setLogTab("checkin"); setLogSheetOpen(true); };
-    window.addEventListener("padelop:open-checkin", handleOpenCheckin);
     let lastSync = Date.now();
     const onVisible = () => {
       if (document.visibilityState === "visible" && Date.now() - lastSync > 5_000) {
@@ -850,7 +848,6 @@ export default function ProfilePage() {
     return () => {
       window.removeEventListener("storage", loadAll);
       window.removeEventListener("padelop:sync-done", loadAll);
-      window.removeEventListener("padelop:open-checkin", handleOpenCheckin);
       document.removeEventListener("visibilitychange", onVisible);
     };
   }, []);
