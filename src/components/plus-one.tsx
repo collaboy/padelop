@@ -46,11 +46,9 @@ function PadlaSheet({ onClose }: { onClose: () => void }) {
           </div>
         </div>
         {nextMilestone !== null && (
-          <div style={{ margin: "0 0 20px", padding: "12px 14px", borderRadius: 14, background: "#fef3c7", display: "flex", flexDirection: "column", gap: 2 }}>
-            <p style={{ margin: 0, fontSize: 12, color: "#92400e", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", textAlign: "center" }}>
-              <span style={{ fontWeight: 700 }}>Next milestone</span>
-              <span style={{ fontWeight: 400, opacity: 0.75 }}> &middot; {nextMilestone} Padla Points &middot; {toNext} to go</span>
-            </p>
+          <div style={{ margin: "0 0 20px", padding: "10px 16px", borderRadius: 999, background: "#fef3c7", display: "inline-flex", alignItems: "center", gap: 8, alignSelf: "flex-start" }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#92400e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#92400e", whiteSpace: "nowrap" }}>{toNext} points until your next milestone</span>
           </div>
         )}
         <p className="t-label" style={{ color: "#8a9096", margin: "0 0 14px" }}>Activity breakdown</p>
