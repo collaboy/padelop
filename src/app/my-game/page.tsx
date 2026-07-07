@@ -1342,10 +1342,9 @@ export default function ProfilePage() {
                       </div>
                     ) : (
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "4px 0 8px" }}>
-                        <div style={{ textAlign: "center" }}>
-                          <p style={{ margin: "0 0 2px", fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 400, letterSpacing: "0.12em", color: "#c8cdd2", lineHeight: 1 }}>remember to</p>
-                          <p style={{ margin: 0, fontSize: "clamp(28px, 7vw, 38px)", fontWeight: 300, letterSpacing: "0.18em", color: "#c8cdd2", lineHeight: 1 }}>breathe</p>
-                        </div>
+                        <p style={{ margin: 0, fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 300, letterSpacing: "0.01em", color: "#c8cdd2", lineHeight: 1.5, textAlign: "center" }}>
+                          {["Habits win matches.", "Small reps compound.", "Train your weaknesses.", "Rest is part of training.", "Show up consistently.", "Log a game. See the gaps.", "Your game is built daily."][new Date().getDay()]}
+                        </p>
                       </div>
                     )}
                     {/* Row 1: Next Match · Day Type · Goals */}
@@ -1725,7 +1724,7 @@ export default function ProfilePage() {
                               <defs><path id="formScoreArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
                               <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#formScoreArc" startOffset="50%" textAnchor="middle">MY FORM</textPath>
+                                <textPath href="#formScoreArc" startOffset="50%" textAnchor="middle">FORM</textPath>
                               </text>
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
                                 fontSize={score !== null ? "46" : "36"} fontWeight="800"
