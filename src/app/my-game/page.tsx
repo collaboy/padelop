@@ -1335,6 +1335,19 @@ export default function ProfilePage() {
                     const dim = (active: boolean) => ({ opacity: anyOpen && !active ? 0.3 : 1, transition: "opacity 0.2s" });
                     return (
                     <>
+                    {/* Coach's note */}
+                    {matchInsight ? (
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: "4px 0 8px" }} onClick={() => setInsightSheetOpen(true)}>
+                        <p style={{ margin: 0, fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 300, letterSpacing: "0.01em", color: "#9aa5b0", lineHeight: 1.5, textWrap: "balance", textAlign: "center" } as React.CSSProperties}>{matchInsight.sentence}</p>
+                      </div>
+                    ) : (
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "4px 0 8px" }}>
+                        <div style={{ textAlign: "center" }}>
+                          <p style={{ margin: "0 0 2px", fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 400, letterSpacing: "0.12em", color: "#c8cdd2", lineHeight: 1 }}>remember to</p>
+                          <p style={{ margin: 0, fontSize: "clamp(28px, 7vw, 38px)", fontWeight: 300, letterSpacing: "0.18em", color: "#c8cdd2", lineHeight: 1 }}>breathe</p>
+                        </div>
+                      </div>
+                    )}
                     {/* Row 1: Next Match · Day Type · Goals */}
                     <div style={{ display: "flex", gap: 10 }}>
                       {/* Next Match */}
@@ -1990,21 +2003,6 @@ export default function ProfilePage() {
                       })()}
                     </div>
 
-                    {/* Match insight / breathe */}
-                    {matchInsight ? (
-                      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }} onClick={() => setInsightSheetOpen(true)}>
-                        <div style={{ textAlign: "center", padding: "0 32px" }}>
-                          <p style={{ margin: 0, fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 300, letterSpacing: "0.01em", color: "#9aa5b0", lineHeight: 1.4, textWrap: "balance" } as React.CSSProperties}>{matchInsight.sentence}</p>
-                        </div>
-                      </div>
-                    ) : (
-                      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <div style={{ textAlign: "center" }}>
-                          <p style={{ margin: "0 0 2px", fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 400, letterSpacing: "0.12em", color: "#e8ebed", lineHeight: 1 }}>remember to</p>
-                          <p style={{ margin: 0, fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 300, letterSpacing: "0.18em", color: "#dde1e5", lineHeight: 1 }}>breathe</p>
-                        </div>
-                      </div>
-                    )}
 
                     {/* Insight detail sheet */}
                     {insightSheetOpen && matchInsight && (() => {
