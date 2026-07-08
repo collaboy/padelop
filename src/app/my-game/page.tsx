@@ -2057,7 +2057,7 @@ export default function ProfilePage() {
                           const circ = 2 * Math.PI * rr;
                           const offset = circ * (1 - winRate / 100);
                           return (
-                            <div style={{ background: "#f8f9fa", borderRadius: 16, padding: "14px 16px" }}>
+                            <div style={{ padding: "4px 0" }}>
                               <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#8a9096" }}>Match Record</p>
                               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                                 <div style={{ position: "relative", flexShrink: 0 }}>
