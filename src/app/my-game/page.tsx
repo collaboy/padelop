@@ -1337,11 +1337,11 @@ export default function ProfilePage() {
                     <>
                     {/* Coach's note */}
                     {matchInsight ? (
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: "24px 24px 32px" }} onClick={() => setInsightSheetOpen(true)}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: "36px 24px 44px" }} onClick={() => setInsightSheetOpen(true)}>
                         <p style={{ margin: 0, fontSize: "clamp(17px, 4.5vw, 21px)", fontWeight: 300, letterSpacing: "0.01em", color: "#7a8590", lineHeight: 1.5, textWrap: "balance", textAlign: "center" } as React.CSSProperties}>{matchInsight.sentence}</p>
                       </div>
                     ) : (
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 24px 32px" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "36px 24px 44px" }}>
                         <p style={{ margin: 0, fontSize: "clamp(17px, 4.5vw, 21px)", fontWeight: 300, letterSpacing: "0.01em", color: "#a0aab2", lineHeight: 1.5, textAlign: "center" }}>
                           {["Habits win matches.", "Small reps compound.", "Train your weaknesses.", "Rest is part of training.", "Show up consistently.", "Log a game. See the gaps.", "Your game is built daily."][new Date().getDay()]}
                         </p>
