@@ -254,11 +254,7 @@ export default function Fab() {
                     ))}
                   </div>
                 </div>
-                {/* Swipe hint dots */}
-                <div style={{ display: fabExpanded ? "none" : "flex", justifyContent: "center", gap: 5, marginTop: 4 }}>
-                  <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#1a1c1c", opacity: tileScrolled ? 0.05 : 0.12, transition: "opacity 0.2s" }} />
-                  <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#1a1c1c", opacity: tileScrolled ? 0.12 : 0.05, transition: "opacity 0.2s" }} />
-                </div>
+
                 {/* Log manually expanded */}
                 <div style={{ overflow: "hidden", maxHeight: fabExpanded ? 600 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8, paddingTop: 0, paddingBottom: 10 }}>
