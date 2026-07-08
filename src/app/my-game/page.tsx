@@ -1323,22 +1323,12 @@ export default function ProfilePage() {
                     return (
                     <>
                     {/* Hero Circle */}
-                    <div style={{ display: "flex", gap: 12, marginLeft: -20, marginRight: -20, overflow: "hidden" }}>
-                      <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", flexShrink: 0, marginLeft: "calc(-50.5vw - 12px)" }}>
-                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                          <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
-                        </svg>
-                      </div>
-                      <div onClick={() => openPadlaPanel()} style={{ flex: "0 0 67vw", aspectRatio: "1/1", flexShrink: 0, cursor: "pointer" }}>
+                    <div style={{ display: "flex", justifyContent: "center" }}>
+                      <div onClick={() => openPadlaPanel()} style={{ width: "62vw", aspectRatio: "1/1", cursor: "pointer" }}>
                         <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                           <circle cx="100" cy="100" r="99" fill="#2653d4" />
                           <text x="100" y="96" textAnchor="middle" dominantBaseline="middle" fontSize="32" fontWeight="800" style={{ fill: "#fff", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>MY GAME</text>
                           <text x="100" y="114" textAnchor="middle" dominantBaseline="middle" fontSize="13" fontWeight="500" style={{ fill: "rgba(255,255,255,0.55)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>{Object.values(schedDone).flat().length} PADLA POINTS</text>
-                        </svg>
-                      </div>
-                      <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", flexShrink: 0 }}>
-                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                          <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
                         </svg>
                       </div>
                     </div>
@@ -2060,7 +2050,7 @@ export default function ProfilePage() {
                           const wins = last7.filter(r => r.result === "win").length;
                           const winRate = Math.round((wins / last7.length) * 100);
                           const ringColor = winRate >= 60 ? "#16a34a" : winRate >= 40 ? "#f59e0b" : "#dc2626";
-                          const rr = 32, stroke = 7, size = 80;
+                          const rr = 64, stroke = 10, size = 160;
                           const circ = 2 * Math.PI * rr;
                           const offset = circ * (1 - winRate / 100);
                           return (
@@ -2075,8 +2065,8 @@ export default function ProfilePage() {
                                       style={{ transform: "rotate(-90deg)", transformOrigin: "50% 50%", transition: "stroke-dashoffset 0.8s ease" }} />
                                   </svg>
                                   <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                                    <span style={{ fontSize: 17, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{winRate}%</span>
-                                    <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#8a9096" }}>wins</span>
+                                    <span style={{ fontSize: 32, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{winRate}%</span>
+                                    <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#8a9096" }}>wins</span>
                                   </div>
                                 </div>
                                 <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
