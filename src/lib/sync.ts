@@ -70,7 +70,7 @@ export async function hydrateFromSupabase(): Promise<SyncResult | null> {
         ts:           m.date + "T12:00:00.000Z",
         result:       m.result ?? "",
         feeling:      m.feeling ?? "",
-        opponentNames: "",
+        opponentNames: [m.player_2, m.player_3, m.player_4].filter(Boolean).join(", "),
         energy:       m.energy ?? "",
         injury:       m.injury ?? "",
         wellDone:     m.well_done ?? [],

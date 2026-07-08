@@ -1366,7 +1366,9 @@ export default function ProfilePage() {
                         <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                           <circle cx="100" cy="100" r="99" fill="#2653d4" />
                           <text x="100" y="96" textAnchor="middle" dominantBaseline="middle" fontSize="32" fontWeight="800" style={{ fill: "#fff", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>MY GAME</text>
-                          <text x="100" y="120" textAnchor="middle" dominantBaseline="middle" fontSize="13" fontWeight="500" style={{ fill: "rgba(255,255,255,0.55)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>{Object.values(schedDone).flat().length} PADLA POINTS</text>
+                          <text x="100" y="120" textAnchor="middle" dominantBaseline="middle" fontSize="14" fontWeight="700" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                            <tspan fontWeight="800" fill="rgba(255,255,255,0.95)">{Object.values(schedDone).flat().length}</tspan>{" PADLA POINTS"}
+                          </text>
                         </svg>
                       </div>
                     </div>
@@ -1454,7 +1456,7 @@ export default function ProfilePage() {
                           <defs><path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                           <circle cx="100" cy="100" r="99" fill="#16a34a" />
                           <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                            <textPath href="#goalsTextArc" startOffset="50%" textAnchor="middle">TODAY&apos;S GOALS</textPath>
+                            <textPath href="#goalsTextArc" startOffset="50%" textAnchor="middle">SCHEDULE</textPath>
                           </text>
                           <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
                             fontSize={pct === 100 ? "44" : "36"} fontWeight="800"
@@ -1482,10 +1484,15 @@ export default function ProfilePage() {
                     {dayTypeInfoOpen && (
                       <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
                         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                        <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
-                          <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
+                        <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                          <div style={{ background: `${panelDayColor}14`, flexShrink: 0 }}>
+                            <div style={{ width: 40, height: 4, borderRadius: 999, background: `${panelDayColor}40`, margin: "12px auto 10px" }} />
+                            <div style={{ padding: "0 18px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                              <p style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: "-0.01em", color: panelDayColor }}>Day Types</p>
+                              <span style={{ fontSize: 13, fontWeight: 700, color: panelDayColor, background: `${panelDayColor}20`, borderRadius: 999, padding: "3px 12px" }}>{panelDayLabel}</span>
+                            </div>
+                          </div>
                           <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px" }}>
-                            <p style={{ margin: "0 0 14px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Day Types</p>
                             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                               {DAY_TYPE_INFO.map(dt => (
                                 <div key={dt.label} style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
@@ -1527,8 +1534,14 @@ export default function ProfilePage() {
                       return (
                         <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
                           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
-                          <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
+                          <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                          <div style={{ background: "#2653d414", flexShrink: 0 }}>
+                            <div style={{ width: 40, height: 4, borderRadius: 999, background: "#2653d440", margin: "12px auto 10px" }} />
+                            <div style={{ padding: "0 18px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                              <p style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: "-0.01em", color: "#2653d4" }}>Next Match</p>
+                              <span style={{ fontSize: 13, fontWeight: 700, color: "#2653d4", background: "#2653d420", borderRadius: 999, padding: "3px 12px" }}>{cdLabel}</span>
+                            </div>
+                          </div>
                           <div className="overflow-y-auto flex-1" style={{ minHeight: 0 }}>
                         <div style={{ overflow: "hidden" }}>
                           {/* hidden file input for screenshot upload */}
@@ -1548,54 +1561,47 @@ export default function ProfilePage() {
                             if (nmUploadRef.current) nmUploadRef.current.value = '';
                           }} />
 
-                          <div style={{ padding: "20px", position: "relative" }}>
-                            {/* Edit icon */}
-                            <button onClick={() => {
-                              if (nextMatchInfoMode === 'edit') { setNextMatchInfoMode(null); }
-                              else if (nextMatch) { setNmMatchForm({ date: nextMatch.date, time: nextMatch.time, club: nextMatch.club ?? '', court: nextMatch.court ?? '', p1: nextMatch.player_1, p2: nextMatch.player_2, p3: nextMatch.player_3, p4: nextMatch.player_4 }); setNextMatchInfoMode('edit'); }
-                            }} style={{ position: "absolute", top: 14, left: 14, background: "#f4f4f6", border: "none", cursor: "pointer", padding: 7, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a5050" }}>
-                              {nextMatchInfoMode === 'edit' ? (
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                          <div style={{ padding: "16px 16px 28px", display: "flex", flexDirection: "column", gap: 12 }}>
+                            {/* Match info card */}
+                            <div style={{ background: "#fff", borderRadius: 20, padding: "20px" }}>
+                              {nextMatch ? (
+                                <>
+                                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
+                                    <div>
+                                      <p style={{ margin: 0, fontSize: 28, fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1 }}>{matchDate?.toLocaleDateString("en-GB", { weekday: "long" })}</p>
+                                      <p style={{ margin: "3px 0 0", fontSize: 17, fontWeight: 500, color: "#6b7480" }}>{matchDate?.toLocaleDateString("en-GB", { day: "numeric", month: "long" })}</p>
+                                    </div>
+                                    <span style={{ fontSize: 36, fontWeight: 800, color: "#2653d4", letterSpacing: "-0.02em", lineHeight: 1 }}>{nextMatch.time}</span>
+                                  </div>
+                                  {(nextMatch.club || nextMatch.court) && (
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                                      {nextMatch.club && <span style={{ fontSize: 15, color: "#6b7480" }}>{nextMatch.club}</span>}
+                                      {nextMatch.court && (() => { const n = nextMatch.court.match(/\d+/)?.[0]; return n ? <span style={{ fontSize: 13, fontWeight: 700, color: "#2653d4", background: "#eef2ff", borderRadius: 6, padding: "2px 8px" }}>Court #{n}</span> : null; })()}
+                                    </div>
+                                  )}
+                                  {[nextMatch.player_1, nextMatch.player_2, nextMatch.player_3, nextMatch.player_4].filter(Boolean).length > 0 && (
+                                    <p style={{ margin: "0 0 14px", fontSize: 15, color: "#6b7480" }}>
+                                      {[nextMatch.player_1, nextMatch.player_2, nextMatch.player_3, nextMatch.player_4].filter(Boolean).join(" · ")}
+                                    </p>
+                                  )}
+                                  <button onClick={() => {
+                                    if (nextMatchInfoMode === 'edit') { setNextMatchInfoMode(null); }
+                                    else { setNmMatchForm({ date: nextMatch.date, time: nextMatch.time, club: nextMatch.club ?? '', court: nextMatch.court ?? '', p1: nextMatch.player_1, p2: nextMatch.player_2, p3: nextMatch.player_3, p4: nextMatch.player_4 }); setNextMatchInfoMode('edit'); }
+                                  }} style={{ background: "none", border: "none", padding: 0, fontSize: 14, fontWeight: 700, color: "#2653d4", cursor: "pointer" }}>
+                                    {nextMatchInfoMode === 'edit' ? "Cancel" : "Edit match"}
+                                  </button>
+                                </>
                               ) : (
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                <div style={{ textAlign: "center", padding: "8px 0" }}>
+                                  <p style={{ margin: "0 0 4px", fontSize: 17, fontWeight: 700, color: "#1a1c1c" }}>No match scheduled</p>
+                                  <p style={{ margin: 0, fontSize: 15, color: "#8a9096" }}>Add your next game below</p>
+                                </div>
                               )}
-                            </button>
-                            {/* Add icon */}
-                            <button onClick={() => {
-                              if (nextMatchInfoMode === 'add') { setNextMatchInfoMode(null); setNmMatchForm(EMPTY_FORM); }
-                              else { setNmMatchForm(EMPTY_FORM); setNmUploadError(null); setNextMatchInfoMode('add'); nmUploadRef.current?.click(); }
-                            }} style={{ position: "absolute", top: 14, right: 14, background: "#f4f4f6", border: "none", cursor: "pointer", padding: 7, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a5050" }}>
-                              {nextMatchInfoMode === 'add' ? (
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                              ) : (
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                              )}
-                            </button>
-
-                            {/* Hero */}
-                            <div style={{ textAlign: "center", marginBottom: 6, paddingTop: 4 }}>
-                              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4" }}>Next Match</span>
-                              <p style={{ margin: "6px 0 8px", fontSize: "clamp(28px, 7vw, 38px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{cdLabel}</p>
-                              {nextMatch && <span style={{ fontSize: 16, color: "#6b7480", fontWeight: 500 }}>{dateStr} · {nextMatch.time}</span>}
                             </div>
-
-                            {/* Detail rows */}
-                            {nextMatch && (
-                              <div style={{ display: "flex", flexDirection: "column", textAlign: "center", gap: 4, marginBottom: 4 }}>
-                                {nextMatch.club && <span style={{ fontSize: 15, fontWeight: 500, color: "#8a9096" }}>({nextMatch.club})</span>}
-                                {nextMatch.court && (() => { const n = nextMatch.court.match(/\d+/)?.[0]; return n ? <span style={{ fontSize: 17, fontWeight: 700, color: "#1a1c1c", lineHeight: 1.4, marginTop: 2 }}>#{n}</span> : null; })()}
-                                {[nextMatch.player_1, nextMatch.player_2, nextMatch.player_3, nextMatch.player_4].filter(Boolean).length > 0 && (
-                                  <span style={{ fontSize: 15, color: "#6b7480", marginTop: 4 }}>
-                                    {[nextMatch.player_1, nextMatch.player_2, nextMatch.player_3, nextMatch.player_4].filter(Boolean).map(p => p.slice(0, 2)).join(' · ')}
-                                  </span>
-                                )}
-                              </div>
-                            )}
 
                             {/* Edit form */}
                             {nextMatchInfoMode === 'edit' && (
-                              <div style={{ marginTop: 20 }}>
-                                <div style={{ height: 1, background: "#f0f0f0", marginBottom: 16 }} />
+                              <div style={{ background: "#fff", borderRadius: 20, padding: "16px" }}>
                                 <div className="flex flex-col gap-3">
                                   <button onClick={() => { setNmUploadError(null); nmUploadRef.current?.click(); }} disabled={nmUploadExtracting} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl active:opacity-70" style={{ background: "#f4f6ff", border: "1.5px solid #2653d418", opacity: nmUploadExtracting ? 0.5 : 1 }}>
                                     <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#2653d4" }}>
@@ -1637,43 +1643,53 @@ export default function ProfilePage() {
                               </div>
                             )}
 
-                            {/* Add form */}
-                            {nextMatchInfoMode === 'add' && (
-                              <div style={{ marginTop: 20 }}>
-                                <div style={{ height: 1, background: "#f0f0f0", marginBottom: 16 }} />
-                                <div className="flex flex-col gap-3">
-                                  <button onClick={() => { setNmUploadError(null); nmUploadRef.current?.click(); }} disabled={nmUploadExtracting} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl active:opacity-70" style={{ background: "#f4f6ff", border: "1.5px solid #2653d418", opacity: nmUploadExtracting ? 0.5 : 1 }}>
-                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#2653d4" }}>
-                                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                                    </div>
-                                    <span className="text-[14px] font-semibold text-[#1a1c1c] flex-1 text-left">{nmUploadExtracting ? "Reading screenshot…" : "Upload screenshot"}</span>
+                            {/* Add match */}
+                            {nextMatchInfoMode !== 'edit' && (
+                              <>
+                                {nextMatchInfoMode !== 'add' && (
+                                  <button onClick={() => { setNmMatchForm(EMPTY_FORM); setNmUploadError(null); setNextMatchInfoMode('add'); nmUploadRef.current?.click(); }}
+                                    style={{ alignSelf: "flex-start", background: "#2653d4", color: "#fff", border: "none", borderRadius: 20, padding: "8px 16px", fontSize: 15, fontWeight: 700, cursor: "pointer" }}>
+                                    + Add match
                                   </button>
-                                  {nmUploadError && <div className="px-3 py-2.5 rounded-xl text-[13px] text-[#c0392b]" style={{ background: "#fff0f0", border: "1.5px solid #ffd0d0" }}>{nmUploadError}</div>}
-                                  <div className="flex flex-col gap-1">
-                                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
-                                    <input type="date" value={nmMatchForm.date} onChange={e => setNmMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: nmMatchForm.date ? "#2653d4" : "#e2e2e2", background: nmMatchForm.date ? "#f4f6ff" : "#fff", minHeight: 44, cursor: "pointer" }} />
+                                )}
+                                {nextMatchInfoMode === 'add' && (
+                                  <div style={{ background: "#fff", borderRadius: 20, padding: "16px" }}>
+                                    <div className="flex flex-col gap-3">
+                                      <button onClick={() => { setNmUploadError(null); nmUploadRef.current?.click(); }} disabled={nmUploadExtracting} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl active:opacity-70" style={{ background: "#f4f6ff", border: "1.5px solid #2653d418", opacity: nmUploadExtracting ? 0.5 : 1 }}>
+                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#2653d4" }}>
+                                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                        </div>
+                                        <span className="text-[14px] font-semibold text-[#1a1c1c] flex-1 text-left">{nmUploadExtracting ? "Reading screenshot…" : "Upload screenshot"}</span>
+                                      </button>
+                                      {nmUploadError && <div className="px-3 py-2.5 rounded-xl text-[13px] text-[#c0392b]" style={{ background: "#fff0f0", border: "1.5px solid #ffd0d0" }}>{nmUploadError}</div>}
+                                      <div className="flex flex-col gap-1">
+                                        <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
+                                        <input type="date" value={nmMatchForm.date} onChange={e => setNmMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: nmMatchForm.date ? "#2653d4" : "#e2e2e2", background: nmMatchForm.date ? "#f4f6ff" : "#fff", minHeight: 44, cursor: "pointer" }} />
+                                      </div>
+                                      <div className="flex flex-col gap-1">
+                                        <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
+                                        <input type="time" value={nmMatchForm.time} onChange={e => setNmMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: nmMatchForm.time ? "#2653d4" : "#e2e2e2", background: nmMatchForm.time ? "#f4f6ff" : "#fff", minHeight: 44, cursor: "pointer" }} />
+                                      </div>
+                                      <div className="flex flex-col gap-1">
+                                        <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Club</label>
+                                        <input type="text" placeholder="e.g. Club Padel BCN" value={nmMatchForm.club} onChange={e => setNmMatchForm(f => ({ ...f, club: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: nmMatchForm.club ? "#2653d4" : "#e2e2e2", background: nmMatchForm.club ? "#f4f6ff" : "#fff" }} />
+                                      </div>
+                                      <div className="flex flex-col gap-1">
+                                        <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Court #</label>
+                                        <input type="text" placeholder="e.g. 3" value={nmMatchForm.court} onChange={e => setNmMatchForm(f => ({ ...f, court: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: nmMatchForm.court ? "#2653d4" : "#e2e2e2", background: nmMatchForm.court ? "#f4f6ff" : "#fff" }} />
+                                      </div>
+                                      <div className="flex flex-col gap-2">
+                                        <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Players</label>
+                                        {(['p1','p2','p3','p4'] as const).map((key, i) => (
+                                          <input key={key} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={nmMatchForm[key]} onChange={e => setNmMatchForm(f => ({ ...f, [key]: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: nmMatchForm[key] ? "#2653d4" : "#e2e2e2", background: nmMatchForm[key] ? "#f4f6ff" : "#fff" }} />
+                                        ))}
+                                      </div>
+                                      <button onClick={saveAdd} className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white" style={{ background: (!nmMatchForm.date || !nmMatchForm.time) ? "#c4c7c7" : "#2653d4" }}>Save match</button>
+                                      <button onClick={() => { setNextMatchInfoMode(null); setNmMatchForm(EMPTY_FORM); }} className="w-full py-3 rounded-2xl text-[14px] font-semibold" style={{ background: "#f4f6f8", color: "#6b7480", border: "none", cursor: "pointer" }}>Cancel</button>
+                                    </div>
                                   </div>
-                                  <div className="flex flex-col gap-1">
-                                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
-                                    <input type="time" value={nmMatchForm.time} onChange={e => setNmMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: nmMatchForm.time ? "#2653d4" : "#e2e2e2", background: nmMatchForm.time ? "#f4f6ff" : "#fff", minHeight: 44, cursor: "pointer" }} />
-                                  </div>
-                                  <div className="flex flex-col gap-1">
-                                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Club</label>
-                                    <input type="text" placeholder="e.g. Club Padel BCN" value={nmMatchForm.club} onChange={e => setNmMatchForm(f => ({ ...f, club: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: nmMatchForm.club ? "#2653d4" : "#e2e2e2", background: nmMatchForm.club ? "#f4f6ff" : "#fff" }} />
-                                  </div>
-                                  <div className="flex flex-col gap-1">
-                                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Court #</label>
-                                    <input type="text" placeholder="e.g. 3" value={nmMatchForm.court} onChange={e => setNmMatchForm(f => ({ ...f, court: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: nmMatchForm.court ? "#2653d4" : "#e2e2e2", background: nmMatchForm.court ? "#f4f6ff" : "#fff" }} />
-                                  </div>
-                                  <div className="flex flex-col gap-2">
-                                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Players</label>
-                                    {(['p1','p2','p3','p4'] as const).map((key, i) => (
-                                      <input key={key} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={nmMatchForm[key]} onChange={e => setNmMatchForm(f => ({ ...f, [key]: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: nmMatchForm[key] ? "#2653d4" : "#e2e2e2", background: nmMatchForm[key] ? "#f4f6ff" : "#fff" }} />
-                                    ))}
-                                  </div>
-                                  <button onClick={saveAdd} className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white" style={{ background: (!nmMatchForm.date || !nmMatchForm.time) ? "#c4c7c7" : "#2653d4" }}>Save match</button>
-                                </div>
-                              </div>
+                                )}
+                              </>
                             )}
                           </div>
                         </div>
@@ -1686,10 +1702,15 @@ export default function ProfilePage() {
                     {panelSchedOpen && (
                       <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)} onTouchStart={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
                         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                        <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
-                          <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
+                        <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                          <div style={{ background: "#16a34a14", flexShrink: 0 }}>
+                            <div style={{ width: 40, height: 4, borderRadius: 999, background: "#16a34a40", margin: "12px auto 10px" }} />
+                            <div style={{ padding: "0 18px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                              <p style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: "-0.01em", color: "#16a34a" }}>Schedule</p>
+                              <span style={{ fontSize: 13, fontWeight: 700, color: "#16a34a", background: "#16a34a20", borderRadius: 999, padding: "3px 12px" }}>{done}/{total}</span>
+                            </div>
+                          </div>
                           <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px" }}>
-                            <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Today&apos;s Schedule</p>
                             {schedule.map((item, i) => {
                               const isDone = (schedDone[todayKey] ?? []).includes(item.title);
                               return (
@@ -1781,11 +1802,11 @@ export default function ProfilePage() {
                         const hasData = ml > 0;
                         const color = "#0ea5e9";
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        const pct = hasData ? Math.min(ml / 2000, 1) : null;
+                        const pct = hasData ? Math.min(ml / 3000, 1) : null;
                         const centerText = hasData
                           ? (ml >= 1000 ? `${(ml / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${ml}ml`)
                           : "—";
-                        const subText = pct !== null ? `${Math.round(pct * 100)}% of 2L` : "not logged";
+                        const subText = pct !== null ? `${Math.round(pct * 100)}% of 3L` : "not logged";
                         return (
                           <div onClick={() => togglePanel('hydration')} {...touchPress(() => togglePanel('hydration'))}
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(hydrationPanelOpen) }}>
@@ -1827,10 +1848,15 @@ export default function ProfilePage() {
                       return (
                         <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
                           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
-                            <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
+                          <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                            <div style={{ background: `${stier.color}14`, flexShrink: 0 }}>
+                              <div style={{ width: 40, height: 4, borderRadius: 999, background: `${stier.color}40`, margin: "12px auto 10px" }} />
+                              <div style={{ padding: "0 18px 16px" }}>
+                                <p style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: "-0.01em", color: stier.color }}>Streak</p>
+                              </div>
+                            </div>
                             <div className="overflow-y-auto flex-1" style={{ minHeight: 0 }}>
-                              <div style={{ background: `linear-gradient(145deg, ${stier.grad[0]}, ${stier.grad[1]})`, padding: "20px 20px 16px", textAlign: "center" }}>
+                              <div style={{ background: `linear-gradient(145deg, ${stier.grad[0]}, ${stier.grad[1]})`, padding: "16px 20px 16px", textAlign: "center" }}>
                                 <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: stier.color }}>{stier.label}</span>
                                 <p style={{ margin: "6px 0 3px", fontSize: 44, fontWeight: 800, color: stier.color, lineHeight: 1 }}>{streak}</p>
                                 <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: stier.color, opacity: 0.7 }}>day streak</p>
@@ -1858,41 +1884,110 @@ export default function ProfilePage() {
                     {formScorePanelOpen && formScore && (() => {
                       const { score, components } = formScore;
                       const color = score >= 70 ? "#16a34a" : score >= 50 ? "#d97706" : "#ef4444";
-                      const rows: { label: string; value: number | null; weight: string }[] = [
-                        { label: "Body",        value: components.body,        weight: "30%" },
-                        { label: "Match form",  value: components.matchForm,   weight: "25%" },
-                        { label: "Consistency", value: components.consistency, weight: "20%" },
-                        { label: "Activity",    value: components.activity,    weight: "15%" },
-                        { label: "Hydration",   value: components.hydration,   weight: "10%" },
+                      const todayYMD2 = new Date().toISOString().slice(0, 10);
+
+                      // Body context
+                      const snapHistory: { date: string; recovery: number; wellbeing: number }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:score-history") || "[]"); } catch { return []; } })();
+                      const cutoff7s = new Date(); cutoff7s.setDate(cutoff7s.getDate() - 7);
+                      const recentCheckins = snapHistory.filter(s => s.date >= cutoff7s.toISOString().slice(0, 10) && s.date <= todayYMD2).length;
+
+                      // Match form context
+                      const matchRevs: { result: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]"); } catch { return []; } })();
+                      const last5 = matchRevs.slice(0, 5);
+                      const mWins = last5.filter(r => r.result === "win").length;
+                      const mLosses = last5.filter(r => r.result === "loss").length;
+                      const mDraws = last5.filter(r => r.result === "draw").length;
+
+                      // Consistency context
+                      const sdLocal: Record<string, string[]> = (() => { try { return JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}"); } catch { return {}; } })();
+                      let ciDays = 0, sdDays = 0;
+                      for (let i = 0; i < 7; i++) { const d = new Date(); d.setDate(d.getDate() - i); const ds = d.toISOString().slice(0, 10); if (snapHistory.some(s => s.date === ds)) ciDays++; if (sdLocal[ds]?.length > 0) sdDays++; }
+
+                      // Activity context
+                      const cutoff14s = new Date(); cutoff14s.setDate(cutoff14s.getDate() - 14);
+                      const c14 = cutoff14s.toISOString().slice(0, 10);
+                      const gdLocal: string[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:game-days") || "[]"); } catch { return []; } })();
+                      const mCount = gdLocal.filter(d => d >= c14 && d <= todayYMD2).length;
+                      const tLogs: { ts: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:training-logs") || "[]"); } catch { return []; } })();
+                      const sCount = tLogs.filter(t => { const d = new Date(t.ts).toISOString().slice(0, 10); return d >= c14 && d <= todayYMD2; }).length;
+
+                      // Hydration context
+                      const LMAP: Record<string, number> = { "<1L": 750, "1–1.5L": 1250, "1.5–2L": 1750, "2–2.5L": 2250, "2.5–3L": 2750, "3L+": 3000 };
+                      const hLogs2: { ts: string; litres: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch { return []; } })();
+                      const hq2 = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null"); } catch { return null; } })();
+                      const mlMap: Record<string, number> = {};
+                      hLogs2.forEach(h => { mlMap[new Date(h.ts).toISOString().slice(0, 10)] = LMAP[h.litres] ?? 0; });
+                      if (hq2?.date === todayYMD2 && typeof hq2.ml === "number" && hq2.ml > 0) mlMap[todayYMD2] = hq2.ml;
+                      const hDays: number[] = [];
+                      for (let i = 0; i < 7; i++) { const d = new Date(); d.setDate(d.getDate() - i); const ds = d.toISOString().slice(0, 10); if (mlMap[ds] != null) hDays.push(mlMap[ds]); }
+                      const avgL = hDays.length > 0 ? (hDays.reduce((a, b) => a + b, 0) / hDays.length / 1000).toFixed(1) : null;
+
+                      const rows: { label: string; value: number | null; weight: string; context: string; action: string | null }[] = [
+                        {
+                          label: "Body", value: components.body, weight: "30%",
+                          context: recentCheckins < 2 ? `${recentCheckins} morning log this week` : `Sleep, energy & recovery · ${recentCheckins} of 7 days logged`,
+                          action: recentCheckins < 2 ? "Do your morning check-in — need 2+ days" : null,
+                        },
+                        {
+                          label: "Match form", value: components.matchForm, weight: "25%",
+                          context: last5.length === 0 ? "No match reviews yet" : `Last ${last5.length} match${last5.length > 1 ? "es" : ""} · ${mWins}W ${mLosses}L${mDraws > 0 ? ` ${mDraws}D` : ""}`,
+                          action: last5.length === 0 ? "Log a match result to unlock" : null,
+                        },
+                        {
+                          label: "Consistency", value: components.consistency, weight: "20%",
+                          context: (ciDays === 0 && sdDays === 0) ? "Nothing logged this week" : `${ciDays}/7 days checked in · ${sdDays} schedule days done`,
+                          action: ciDays === 0 ? "Do your morning check-in" : null,
+                        },
+                        {
+                          label: "Activity", value: components.activity, weight: "15%",
+                          context: (mCount + sCount) === 0 ? "No matches or sessions in 14 days" : `${mCount} match${mCount !== 1 ? "es" : ""} · ${sCount} training session${sCount !== 1 ? "s" : ""} (14 days)`,
+                          action: (mCount + sCount) === 0 ? "Log training or a match" : null,
+                        },
+                        {
+                          label: "Hydration", value: components.hydration, weight: "10%",
+                          context: avgL === null ? "No hydration logged this week" : `7-day avg · ${avgL}L/day`,
+                          action: avgL === null ? "Log water intake in check-in" : null,
+                        },
                       ];
-                      const bar = (v: number | null) => {
-                        if (v === null) return <span style={{ fontSize: 15, color: "#b0b8c1" }}>no data</span>;
+
+                      const scoreBar = (v: number) => {
                         const c = v >= 70 ? "#16a34a" : v >= 50 ? "#d97706" : "#ef4444";
                         return (
-                          <div style={{ display: "flex", alignItems: "center", gap: 6, flex: 1 }}>
-                            <div style={{ flex: 1, height: 5, borderRadius: 99, background: "#f0f0f0" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
+                            <div style={{ flex: 1, height: 4, borderRadius: 99, background: "#ebebeb" }}>
                               <div style={{ width: `${v}%`, height: "100%", borderRadius: 99, background: c, transition: "width 0.4s" }} />
                             </div>
-                            <span style={{ fontSize: 15, fontWeight: 700, color: c, minWidth: 26, textAlign: "right" }}>{v}</span>
+                            <span style={{ fontSize: 14, fontWeight: 800, color: c, minWidth: 24, textAlign: "right" }}>{v}</span>
                           </div>
                         );
                       };
+
                       return (
                         <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
                           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
-                            <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
-                            <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 18px 40px" }}>
-                              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14 }}>
-                                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>My Form</span>
-                                <span style={{ fontSize: 32, fontWeight: 800, color, lineHeight: 1 }}>{score}</span>
+                          <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                            <div style={{ background: `${color}14`, flexShrink: 0 }}>
+                              <div style={{ width: 40, height: 4, borderRadius: 999, background: `${color}40`, margin: "12px auto 10px" }} />
+                              <div style={{ padding: "0 18px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                <p style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: "-0.01em", color }}>Form</p>
+                                <span style={{ fontSize: 13, fontWeight: 700, color, background: `${color}20`, borderRadius: 999, padding: "3px 12px" }}>{score} / 100</span>
                               </div>
+                            </div>
+                            <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 18px 40px" }}>
                               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                                 {rows.map(r => (
-                                  <div key={r.label} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                    <span style={{ fontSize: 16, color: "#6b7480", fontWeight: 500, minWidth: 80 }}>{r.label}</span>
-                                    {bar(r.value)}
-                                    <span style={{ fontSize: 11, color: "#c0c7d0", fontWeight: 500, minWidth: 28, textAlign: "right" }}>{r.weight}</span>
+                                  <div key={r.label} style={{ background: "#f8f9fa", borderRadius: 14, padding: "12px 14px" }}>
+                                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                      <span style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>{r.label}</span>
+                                      <span style={{ fontSize: 11, fontWeight: 600, color: "#c8cdd4" }}>{r.weight}</span>
+                                    </div>
+                                    <p style={{ margin: "3px 0 0", fontSize: 13, color: r.value === null ? "#c0c7d0" : "#6b7480", lineHeight: 1.4 }}>
+                                      {r.value === null ? (r.action ?? r.context) : r.context}
+                                    </p>
+                                    {r.value !== null && scoreBar(r.value)}
+                                    {r.value !== null && r.action && (
+                                      <p style={{ margin: "6px 0 0", fontSize: 12, fontWeight: 600, color: "#d97706" }}>{r.action}</p>
+                                    )}
                                   </div>
                                 ))}
                               </div>
@@ -1907,19 +2002,21 @@ export default function ProfilePage() {
                       const ml = hydrationMl;
                       const hLogs: HydrationEntry[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch { return []; } })();
                       const todayLog = hLogs.find(e => new Date(e.ts).toISOString().slice(0, 10) === new Date().toISOString().slice(0, 10)) ?? null;
-                      const target = 2000;
+                      const target = 3000;
                       const pct = ml > 0 ? Math.min(ml / target, 1) : null;
                       const displayMl = ml > 0 ? (ml >= 1000 ? `${(ml / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${ml}ml`) : null;
                       return (
                         <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
                           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
-                            <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
-                            <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 18px 40px" }}>
-                              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12 }}>
-                                <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Hydration today</span>
-                                <span style={{ fontSize: 28, fontWeight: 800, color: "#0ea5e9", lineHeight: 1 }}>{displayMl ?? "—"}</span>
+                          <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                            <div style={{ background: "#0ea5e914", flexShrink: 0 }}>
+                              <div style={{ width: 40, height: 4, borderRadius: 999, background: "#0ea5e940", margin: "12px auto 10px" }} />
+                              <div style={{ padding: "0 18px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                <p style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: "-0.01em", color: "#0ea5e9" }}>Hydration</p>
+                                <span style={{ fontSize: 13, fontWeight: 700, color: "#0ea5e9", background: "#0ea5e920", borderRadius: 999, padding: "3px 12px" }}>{displayMl ?? "—"}</span>
                               </div>
+                            </div>
+                            <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 18px 40px" }}>
                               {pct !== null && (
                                 <>
                                   <div style={{ height: 7, borderRadius: 99, background: "#f0f0f0", marginBottom: 6 }}>
@@ -2003,7 +2100,7 @@ export default function ProfilePage() {
                                 <textPath href="#insightsArc" startOffset="50%" textAnchor="middle">INSIGHTS</textPath>
                               </text>
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{count > 0 ? count : "—"}</text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>notes</text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>available</text>
                             </svg>
                           </div>
                         );
@@ -2058,10 +2155,15 @@ export default function ProfilePage() {
                       return (
                         <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setInsightSheetOpen(false)}>
                           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
-                            <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
+                          <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                            <div style={{ background: "#2653d414", flexShrink: 0 }}>
+                              <div style={{ width: 40, height: 4, borderRadius: 999, background: "#2653d440", margin: "12px auto 10px" }} />
+                              <div style={{ padding: "0 18px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                <p style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: "-0.01em", color: "#2653d4" }}>Match Pattern</p>
+                                <span style={{ fontSize: 13, fontWeight: 700, color: "#2653d4", background: "#2653d420", borderRadius: 999, padding: "3px 12px" }}>{decided.length} matches</span>
+                              </div>
+                            </div>
                             <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "20px 20px 48px", display: "flex", flexDirection: "column", gap: 20 }}>
-                              <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#b0b8c1" }}>Match pattern</p>
                               <p style={{ margin: 0, fontSize: 16, color: "#1a1c1c", lineHeight: 1.65, fontWeight: 400 }}>{matchInsight.para}</p>
                               <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingTop: 4 }}>
                                 {matchInsight.rows.map(r => <Row key={r.key} label={r.label} wins={r.wins} total={r.total} />)}
@@ -2077,11 +2179,15 @@ export default function ProfilePage() {
                     {matchesPanelOpen && (
                       <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
                         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                        <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "88dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
-                          <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
-                          <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "4px 16px 40px", display: "flex", flexDirection: "column", gap: 10 }}>
-                        <p className="t-label" style={{ color: "var(--c-label)", margin: "10px 0 0" }}>Matches</p>
-
+                        <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "88dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                          <div style={{ background: "#2653d414", flexShrink: 0 }}>
+                            <div style={{ width: 40, height: 4, borderRadius: 999, background: "#2653d440", margin: "12px auto 10px" }} />
+                            <div style={{ padding: "0 18px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                              <p style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: "-0.01em", color: "#2653d4" }}>Matches</p>
+                              <span style={{ fontSize: 13, fontWeight: 700, color: "#2653d4", background: "#2653d420", borderRadius: 999, padding: "3px 12px" }}>{reviews.length} {reviews.length === 1 ? "match" : "matches"}</span>
+                            </div>
+                          </div>
+                          <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px", display: "flex", flexDirection: "column", gap: 10 }}>
                         {/* Match record card */}
                         {reviews.length > 0 && (() => {
                           const last7 = reviews.slice(0, 7);
@@ -2093,7 +2199,6 @@ export default function ProfilePage() {
                           const offset = circ * (1 - winRate / 100);
                           return (
                             <div style={{ padding: "4px 0" }}>
-                              <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#8a9096" }}>Match Record</p>
                               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                                 <div style={{ position: "relative", flexShrink: 0 }}>
                                   <svg width={size} height={size}>
@@ -2292,7 +2397,6 @@ export default function ProfilePage() {
                             const insight = pool[idx];
                             return (
                               <>
-                                <p style={{ margin: "0 0 14px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Featured Insights</p>
                                 <button
                                   onClick={() => setFeaturedIdx(i => (i + 1) % pool.length)}
                                   style={{ width: "100%", background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" }}
@@ -2314,8 +2418,14 @@ export default function ProfilePage() {
                       return (
                         <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
                           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
-                            <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
+                          <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                            <div style={{ background: "#eef2ff", flexShrink: 0 }}>
+                              <div style={{ width: 40, height: 4, borderRadius: 999, background: "#c7d2fe", margin: "12px auto 10px" }} />
+                              <div style={{ padding: "0 18px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                <p style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: "-0.01em", color: "var(--c-blue)" }}>Insights</p>
+                                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--c-blue)", background: "#eef2ff", borderRadius: 999, padding: "3px 12px" }}>{pool.length} available</span>
+                              </div>
+                            </div>
                             <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px" }}>
                               {sheetContent}
                             </div>
@@ -2340,8 +2450,14 @@ export default function ProfilePage() {
                       return (
                         <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
                           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                          <div className="relative w-full bg-white flex flex-col" style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
-                            <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
+                          <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                            <div style={{ background: "#1a1c1c0d", flexShrink: 0 }}>
+                              <div style={{ width: 40, height: 4, borderRadius: 999, background: "#1a1c1c30", margin: "12px auto 10px" }} />
+                              <div style={{ padding: "0 18px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                <p style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: "-0.01em", color: "#1a1c1c" }}>Patterns</p>
+                                <span style={{ fontSize: 13, fontWeight: 700, color: "#6b7480", background: "#e8eaed", borderRadius: 999, padding: "3px 12px" }}>{reviews.length} matches</span>
+                              </div>
+                            </div>
                             <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px", display: "flex", flexDirection: "column", gap: 16 }}>
                               {wellTags.length === 0 && badTags.length === 0 ? (
                                 <p style={{ fontSize: 16, color: "#9aa0a6", margin: 0 }}>No tags yet — log match reviews to see your patterns.</p>

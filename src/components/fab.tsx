@@ -236,18 +236,19 @@ export default function Fab() {
                 )}
 
                 {/* Top row — Home, My Game, +, [Settings — swipe left to reveal] */}
-                <div ref={tileRowRef} style={{ display: "flex", gap: 10 }}>
-                  <div style={{ display: "flex", width: "100%", justifyContent: "space-evenly", alignItems: "center" }}>
+                <div ref={tileRowRef} onScroll={e => setTileScrolled((e.currentTarget.scrollLeft) > 30)} style={{ overflowX: "scroll", scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}>
+                  <div style={{ display: "flex", gap: 10 }}>
                     {([
-                      { label: "Home", action: () => { startNavLoad(); router.push("/home8"); }, icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
-                      { label: "My Game", action: () => { if (pathname.startsWith("/my-game")) { setLogPickerOpen(false); return; } startNavLoad(); router.push("/my-game"); }, icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><g transform="rotate(-45, 12, 12)"><circle cx="12" cy="8" r="6.5"/><path d="M10.5 14.2 L10.5 20 Q12 22 13.5 20 L13.5 14.2"/><line x1="10.5" y1="18" x2="13.5" y2="18"/><circle cx="12" cy="6.5" r="0.9" fill="#6b7480" stroke="none"/><circle cx="9.8" cy="9" r="0.9" fill="#6b7480" stroke="none"/><circle cx="14.2" cy="9" r="0.9" fill="#6b7480" stroke="none"/><circle cx="12" cy="11.5" r="0.9" fill="#6b7480" stroke="none"/></g></svg> },
-                      { label: "Log", action: () => setFabExpanded(v => !v), icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>, active: fabExpanded },
-                      { label: "Settings", action: () => { closeAll(); startNavLoad(); router.push("/settings"); }, icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
+                      { label: "Home", action: () => { startNavLoad(); router.push("/home8"); }, icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
+                      { label: "My Game", action: () => { if (pathname.startsWith("/my-game")) { setLogPickerOpen(false); return; } startNavLoad(); router.push("/my-game"); }, icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><g transform="rotate(-45, 12, 12)"><circle cx="12" cy="8" r="6.5"/><path d="M10.5 14.2 L10.5 20 Q12 22 13.5 20 L13.5 14.2"/><line x1="10.5" y1="18" x2="13.5" y2="18"/><circle cx="12" cy="6.5" r="0.9" fill="#6b7480" stroke="none"/><circle cx="9.8" cy="9" r="0.9" fill="#6b7480" stroke="none"/><circle cx="14.2" cy="9" r="0.9" fill="#6b7480" stroke="none"/><circle cx="12" cy="11.5" r="0.9" fill="#6b7480" stroke="none"/></g></svg> },
+                      { label: "Log", action: () => setFabExpanded(v => !v), icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>, active: fabExpanded },
+                      { label: "Settings", action: () => { closeAll(); startNavLoad(); router.push("/settings"); }, icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
                     ] as { label: string; action: () => void; icon: React.ReactNode; active?: boolean }[]).map(({ label, action, icon, active }) => (
                       <button key={label} onClick={action} className="active:scale-95 transition-transform"
-                        style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}>
-                        <div style={{ width: 56, height: 56, borderRadius: "50%", background: active ? "#e8e9ec" : "#ffffff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        style={{ flex: "0 0 calc((100vw - 52px) / 3.5)", background: "none", border: "none", padding: 0, cursor: "pointer" }}>
+                        <div style={{ width: "100%", aspectRatio: "1/1", borderRadius: "50%", background: active ? "#e8e9ec" : "#ffffff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 5 }}>
                           {icon}
+                          <span style={{ fontSize: 13, fontWeight: 500, color: "#9aa5b0", letterSpacing: "0.01em" }}>{label}</span>
                         </div>
                       </button>
                     ))}
@@ -264,9 +265,9 @@ export default function Fab() {
                         { label: "Gear", sub: "Racket, shoes…", bg: "#f5f0ff", color: "#8a9096", icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 1.99-.32l-.45-2.77 2.99-.85A6 6 0 0 0 18 5.32l2.99.85-.45 2.77a1 1 0 0 0 1.99.32l.58-3.57a2 2 0 0 0-1.33-2.23z"/><rect x="5" y="9" width="14" height="12" rx="1"/></svg>, action: () => { setSmartUploadResult({ category: "gear", label: "Add gear", confidence: "high", data: { type: "", brand: "", name: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
                         { label: "Food", sub: "Meal or snack", bg: "#f0fdf4", color: "#8a9096", icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>, action: () => { setSmartUploadResult({ category: "meal", label: "Add a meal", confidence: "high", data: { description: "", meal_type: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); } },
                       ]).map(({ label, sub, bg, color, icon, action }) => (
-                        <button key={label} onClick={action} className="active:scale-95 transition-transform" style={{ background: "#ffffff", border: "none", borderRadius: "50%", padding: "14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, textAlign: "center", aspectRatio: "1/1", width: "100%" }}>
+                        <button key={label} onClick={action} className="active:scale-95 transition-transform" style={{ background: "#ffffff", border: "none", borderRadius: "50%", padding: "14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, textAlign: "center", aspectRatio: "1/1", width: "100%" }}>
                           {icon}
-                          <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{label}</p>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{label}</p>
                         </button>
                       ))}
                     </div>
@@ -279,7 +280,7 @@ export default function Fab() {
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                         <div>
                           <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Note</p>
-                          <p style={{ fontSize: 12, fontWeight: 600, color: "#8a9096", margin: "1px 0 0", lineHeight: 1.2 }}>Thoughts, feelings, ideas</p>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: "#8a9096", margin: "2px 0 0" }}>Thoughts, feelings, ideas</p>
                         </div>
                       </button>
                       <button
@@ -289,10 +290,14 @@ export default function Fab() {
                       >
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
                         <div>
-                          <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Check-in</p>
-                          <p style={{ fontSize: 12, fontWeight: 600, color: "#8a9096", margin: "1px 0 0", lineHeight: 1.2 }}>{checkinDone ? "Done today" : "Morning log"}</p>
-                          {checkinDone && <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: 2, display: "block", margin: "2px auto 0" }}><polyline points="20 6 9 17 4 12"/></svg>}
+                          <p style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>{checkinDone ? "Check-in" : "Check-in"}</p>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: "#8a9096", margin: "2px 0 0" }}>{checkinDone ? "Done today" : "Morning log"}</p>
                         </div>
+                        {checkinDone && (
+                          <div style={{ position: "absolute", top: 10, right: 10 }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                          </div>
+                        )}
                       </button>
                     </div>
                   </div>

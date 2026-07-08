@@ -42,7 +42,7 @@ function getWeekGameDays(): string[] {
 const LITRE_MAP: Record<string, number> = {
   "<1L": 0.8, "1–1.5L": 1.25, "1.5–2L": 1.75, "2–2.5L": 2.25, "2.5–3L": 2.75, "3L+": 3.5,
 };
-const HYDRATION_TARGET = 3.5;
+const HYDRATION_TARGET = 3;
 
 export default function RecoveryClient() {
   const todayYMD = new Date().toISOString().slice(0, 10);

@@ -3,9 +3,9 @@
 import React, { useState, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { saveCheckIn, computeScores, loadScoringData } from "@/lib/scoring";
+import { saveCheckIn, computeScores, loadScoringData, saveScoreSnapshot } from "@/lib/scoring";
 import { downloadSnapshot, importData } from "@/lib/storage";
-import { saveMatchReview, saveCheckInToDb, saveHydrationToDb, seedHydrationToDb, saveNutritionToDb, saveTrainingToDb, saveScheduleDoneToDb } from "@/lib/db";
+import { saveMatchReview, saveCheckInToDb, saveHydrationToDb, seedHydrationToDb, saveNutritionToDb, saveTrainingToDb, saveScheduleDoneToDb, saveScoreSnapshotToDb } from "@/lib/db";
 import { startNavLoad, startPlusOne } from "@/lib/nav-events";
 
 function rangeToMl(range: string): number {
@@ -571,6 +571,11 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
           pain_areas:      painAreas,
           water_on_waking: next.water === "yes",
         });
+        // Snapshot scores immediately so Body component has data without needing a My Game visit
+        const _sd = loadScoringData();
+        const _ss = computeScores(_sd.checkIn, _sd.hydration, _sd.review, _sd.nutrition, _sd.gameDaysThisWeek, _sd.habits, _sd.training);
+        saveScoreSnapshot(_ss);
+        saveScoreSnapshotToDb(todayYMD, _ss);
 
         // Auto-mark "Wake up" as done only if they drank water on waking
         if (next.water === "yes") {

@@ -673,7 +673,7 @@ export type FormScore = {
     matchForm: number | null;   // 25% — last 5 match reviews (result + feeling + energy)
     consistency: number | null; // 20% — check-in days + schedule completion last 7 days
     activity: number | null;    // 15% — matches + training sessions last 14 days
-    hydration: number | null;   // 10% — today's ml vs 2L target (or recent litres logs)
+    hydration: number | null;   // 10% — 7-day avg ml vs 3L target
   };
 };
 
@@ -691,7 +691,7 @@ export function computeFormScore(): FormScore {
     const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 7);
     const cutoffStr = cutoff.toISOString().slice(0, 10);
     const recent = history.filter(s => s.date >= cutoffStr && s.date <= todayYMD);
-    if (recent.length >= 1) {
+    if (recent.length >= 2) {
       const avg = recent.reduce((sum, s) => sum + (s.recovery + s.wellbeing) / 2, 0) / recent.length;
       body = Math.round(c01((avg - 65) / 35) * 100);
     }
@@ -751,23 +751,34 @@ export function computeFormScore(): FormScore {
   } catch {}
 
   // Component 5: Hydration (10%)
-  // Same three-step fallback as home8: quick tracker → litres log → waterOnWaking seed.
+  // 7-day rolling average of ml logged, consistent with other components.
+  // Today's quick-tracker reading overrides the log entry for today if present.
   let hydration: number | null = null;
   try {
     const LITRE_ML: Record<string, number> = { "<1L": 750, "1–1.5L": 1250, "1.5–2L": 1750, "2–2.5L": 2250, "2.5–3L": 2750, "3L+": 3000 };
+    const logs = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]") as HydrationEntry[];
     const hq = JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null");
-    const hasQuick = hq?.date === todayYMD && typeof hq.ml === "number" && hq.ml > 0;
-    let ml = hasQuick ? (hq.ml as number) : 0;
-    if (!hasQuick) {
-      const logs = JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]") as HydrationEntry[];
-      const todayLog = logs.find(e => new Date(e.ts).toISOString().slice(0, 10) === todayYMD);
-      if (todayLog) ml = LITRE_ML[todayLog.litres] ?? 0;
+
+    const mlByDate: Record<string, number> = {};
+    for (const log of logs) {
+      const d = new Date(log.ts).toISOString().slice(0, 10);
+      mlByDate[d] = LITRE_ML[log.litres] ?? 0;
     }
-    if (ml === 0) {
-      const mLog = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null");
-      if (mLog?.date === todayYMD && mLog?.waterOnWaking === true) ml = 500;
+    // Today's quick tracker overrides the log for today
+    if (hq?.date === todayYMD && typeof hq.ml === "number" && hq.ml > 0) {
+      mlByDate[todayYMD] = hq.ml;
     }
-    if (ml > 0) hydration = Math.round(c01(ml / 2000) * 100);
+
+    const days: number[] = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const ds = d.toISOString().slice(0, 10);
+      if (mlByDate[ds] != null) days.push(mlByDate[ds]);
+    }
+    if (days.length >= 1) {
+      const avg = days.reduce((a, b) => a + b, 0) / days.length;
+      hydration = Math.round(c01(avg / 3000) * 100);
+    }
   } catch {}
 
   // Weighted average — null components redistribute their weight to present ones
