@@ -1289,22 +1289,8 @@ export default function ProfilePage() {
     <><style>{`@keyframes mg-sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style><div className="w-full" style={{ backgroundColor: "#ffffff", height: "100dvh", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }} onTouchStart={onSwipeStart} onTouchEnd={onSwipeEnd}>
 
       {/* ── Profile ──────────────────────────────────────────────────────── */}
-        <div style={{ padding: "16px 20px 120px", display: "flex", flexDirection: "column", gap: 20, flex: 1, minHeight: 0, overflowY: "auto" }}>
+        <div style={{ padding: "36px 20px 120px", display: "flex", flexDirection: "column", gap: 20, flex: 1, minHeight: 0, overflowY: "auto" }}>
           {/* Header */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <button
-                onClick={() => router.back()}
-                style={{ width: 36, height: 36, borderRadius: "50%", background: "#ffffff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-              </button>
-              <h1 style={{ fontSize: "clamp(20px, 5.5vw, 26px)", fontWeight: 800, color: "#1a1c1c", margin: 0, letterSpacing: "-0.02em" }}>My Game</h1>
-            </div>
-            <div onClick={() => openPadlaPanel()} style={{ width: 32, height: 32, borderRadius: "50%", background: "#94a3b8", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: "#fff", lineHeight: 1 }}>{Object.values(schedDone).flat().length}</span>
-            </div>
-          </div>
 
           {panelSmartError && (
             <div style={{ background: "#fff5f5", border: "1.5px solid #fecaca", borderRadius: 12, padding: "10px 14px" }}>
@@ -1336,123 +1322,26 @@ export default function ProfilePage() {
                     const dim = (active: boolean) => ({ opacity: anyOpen && !active ? 0.3 : 1, transition: "opacity 0.2s" });
                     return (
                     <>
-                    {/* Circle Carousel */}
-                    {(() => {
-                      const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                      const todayC = new Date().toISOString().slice(0, 10);
-                      const diffDaysC = nextMatch ? Math.round((new Date(nextMatch.date + "T12:00").getTime() - new Date(todayC + "T12:00").getTime()) / 86400000) : null;
-                      const countdownLabelC = diffDaysC === null ? "NO MATCH" : diffDaysC === 0 ? "TODAY" : diffDaysC === 1 ? "TOMORROW" : `IN ${diffDaysC} DAYS`;
-                      const timeLabelC = nextMatch?.time ?? "";
-                      const partsC = panelDayLabel.split(" ");
-                      const mainLabelC = partsC.length > 1 ? partsC.slice(0, -1).join(" ") : panelDayLabel;
-                      const dayWordC = partsC.length > 1 ? partsC[partsC.length - 1] : "";
-                      const fsScore = formScore?.score ?? null;
-                      const fsColor = fsScore === null ? "#9aa0a6" : fsScore >= 70 ? "#16a34a" : fsScore >= 50 ? "#d97706" : "#ef4444";
-                      const STIERSC = [{ min: 0, color: "#9aa0a6" }, { min: 5, color: "#2653d4" }, { min: 15, color: "#059669" }, { min: 30, color: "#d97706" }, { min: 60, color: "#7c3aed" }, { min: 100, color: "#0ea5e9" }];
-                      const stierC = [...STIERSC].reverse().find(t => streak >= t.min) ?? STIERSC[0];
-                      const mlC = hydrationMl; const hasHydC = mlC > 0; const hydColorC = "#0ea5e9";
-                      const hydTextC = hasHydC ? (mlC >= 1000 ? `${(mlC / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${mlC}ml`) : "—";
-                      const hydSubC = hasHydC ? `${Math.round(Math.min(mlC / 2000, 1) * 100)}% of 2L` : "not logged";
-                      const mWins = reviews.filter(r => r.result === "win").length;
-                      const mLosses = reviews.filter(r => r.result === "loss").length;
-                      const mTotal = mWins + mLosses;
-                      const matchTextC = reviews.length > 0 ? String(reviews.length) : "—";
-                      const matchSubC = mTotal > 0 ? `${Math.round((mWins / mTotal) * 100)}% wins` : "no matches";
-                      const last5C = [...reviews].sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 5);
-                      const iCount = [reviews.length >= 3 && mTotal > 0, last5C.length >= 3, reviews.flatMap(r => r.wellDone ?? []).length > 0, reviews.flatMap(r => r.improved ?? []).length > 0, streak > 0, partnerCount >= 2, trainingSessions.length > 0, thisWeekAvg !== null && lastWeekAvg !== null, tournamentCount > 0].filter(Boolean).length;
-                      const wC: Record<string, number> = {}; const bC: Record<string, number> = {};
-                      reviews.forEach(r => { (r.wellDone ?? []).forEach(t => { wC[t] = (wC[t] ?? 0) + 1; }); (r.improved ?? []).forEach(t => { bC[t] = (bC[t] ?? 0) + 1; }); });
-                      const totalTagsC = Object.keys(wC).length + Object.keys(bC).length;
-                      const todayDoneC = new Set(schedDone[todayKey] ?? []);
-                      const doneC = schedule.filter(s => todayDoneC.has(s.title)).length;
-                      const totalC = schedule.length;
-                      const tagsCircle = (pfx: string) => (
+                    {/* Hero Circle */}
+                    <div style={{ display: "flex", gap: 12, marginLeft: -20, marginRight: -20, overflow: "hidden" }}>
+                      <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", flexShrink: 0, marginLeft: "calc(-50.5vw - 12px)" }}>
                         <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                          <defs><path id={`${pfx}gbA`} d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                           <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
-                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "#e11d48", fontFamily: ff }}><textPath href={`#${pfx}gbA`} startOffset="50%" textAnchor="middle">PATTERNS</textPath></text>
-                          <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: "#e11d48", fontFamily: ff }}>{totalTagsC > 0 ? totalTagsC : "—"}</text>
-                          <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: "#e11d48", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>tags logged</text>
                         </svg>
-                      );
-                      return (
-                        <div ref={(el) => { (carouselRef as React.MutableRefObject<HTMLDivElement|null>).current = el; if (el) el.scrollLeft = Math.round(window.innerWidth * 0.67) + 12; }} style={{ display: "flex", overflowX: "scroll", scrollSnapType: "x mandatory", gap: 12, paddingLeft: "16vw", paddingRight: "16vw", marginLeft: -20, marginRight: -20, scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
-                          <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>{tagsCircle("crz-")}</div>
-                          <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="cr-nmA" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="#2653d4" />
-                              <text fontSize="19" fontWeight="700" letterSpacing="2.5" style={{ fill: "rgba(255,255,255,0.7)", fontFamily: ff }}><textPath href="#cr-nmA" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath></text>
-                              <text x="100" y={timeLabelC ? "93" : "108"} textAnchor="middle" dominantBaseline="middle" fontSize={countdownLabelC.length > 7 ? "18" : "22"} fontWeight="800" letterSpacing="0.06em" style={{ fill: "rgba(255,255,255,0.9)", fontFamily: ff }}>{countdownLabelC}</text>
-                              {timeLabelC && <text x="100" y="123" textAnchor="middle" dominantBaseline="middle" fontSize="32" fontWeight="800" style={{ fill: "#fff", fontFamily: ff }}>{timeLabelC}</text>}
-                            </svg>
-                          </div>
-                          <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="cr-dtA" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill={panelDayColor} />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: ff }}><textPath href="#cr-dtA" startOffset="50%" textAnchor="middle">TODAY</textPath></text>
-                              <text x="100" y={dayWordC ? "93" : "108"} textAnchor="middle" dominantBaseline="middle" fontSize="24" fontWeight="800" style={{ fill: "white", fontFamily: ff }}>{mainLabelC}</text>
-                              {dayWordC && <text x="100" y="123" textAnchor="middle" dominantBaseline="middle" fontSize="20" fontWeight="800" style={{ fill: "white", fontFamily: ff }}>{dayWordC}</text>}
-                            </svg>
-                          </div>
-                          <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="cr-goA" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="#16a34a" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: ff }}><textPath href="#cr-goA" startOffset="50%" textAnchor="middle">TODAY&apos;S GOALS</textPath></text>
-                              <text x="100" y="108" textAnchor="middle" dominantBaseline="middle" fontSize={totalC && doneC === totalC ? "44" : "36"} fontWeight="800" style={{ fill: "white", fontFamily: ff }}>{totalC && doneC === totalC ? "✓" : `${doneC}/${totalC}`}</text>
-                            </svg>
-                          </div>
-                          <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="cr-stA" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: stierC.color, fontFamily: ff }}><textPath href="#cr-stA" startOffset="50%" textAnchor="middle">STREAK</textPath></text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="46" fontWeight="800" style={{ fill: stierC.color, fontFamily: ff }}>{streak > 0 ? streak : "—"}</text>
-                              <text x="100" y="152" textAnchor="middle" fontSize="20" fontWeight="600" style={{ fill: stierC.color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>day streak</text>
-                            </svg>
-                          </div>
-                          <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="cr-fmA" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: fsColor, fontFamily: ff }}><textPath href="#cr-fmA" startOffset="50%" textAnchor="middle">FORM</textPath></text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize={fsScore !== null ? "46" : "36"} fontWeight="800" style={{ fill: fsColor, fontFamily: ff }}>{fsScore !== null ? fsScore : "—"}</text>
-                              <text x="100" y="152" textAnchor="middle" fontSize="19" fontWeight="600" style={{ fill: fsColor, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{fsScore === null ? "no data" : fsScore >= 70 ? "on track" : "building"}</text>
-                            </svg>
-                          </div>
-                          <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="cr-hyA" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: hydColorC, fontFamily: ff }}><textPath href="#cr-hyA" startOffset="50%" textAnchor="middle">HYDRATION</textPath></text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize={hydTextC.length > 4 ? "34" : hydTextC.length > 2 ? "42" : "46"} fontWeight="800" style={{ fill: hasHydC ? hydColorC : "#9aa0a6", fontFamily: ff }}>{hydTextC}</text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: hasHydC ? hydColorC : "#9aa0a6", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{hydSubC}</text>
-                            </svg>
-                          </div>
-                          <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="cr-maA" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "#2653d4", fontFamily: ff }}><textPath href="#cr-maA" startOffset="50%" textAnchor="middle">MATCHES</textPath></text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: "#2653d4", fontFamily: ff }}>{matchTextC}</text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: "#2653d4", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{matchSubC}</text>
-                            </svg>
-                          </div>
-                          <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="cr-inA" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "#f59e0b", fontFamily: ff }}><textPath href="#cr-inA" startOffset="50%" textAnchor="middle">INSIGHTS</textPath></text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: "#f59e0b", fontFamily: ff }}>{iCount > 0 ? iCount : "—"}</text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: "#f59e0b", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>notes</text>
-                            </svg>
-                          </div>
-                          <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>{tagsCircle("cr-")}</div>
-                        </div>
-                      );
-                    })()}
+                      </div>
+                      <div onClick={() => openPadlaPanel()} style={{ flex: "0 0 67vw", aspectRatio: "1/1", flexShrink: 0, cursor: "pointer" }}>
+                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
+                          <circle cx="100" cy="100" r="99" fill="#2653d4" />
+                          <text x="100" y="96" textAnchor="middle" dominantBaseline="middle" fontSize="32" fontWeight="800" style={{ fill: "#fff", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>MY GAME</text>
+                          <text x="100" y="114" textAnchor="middle" dominantBaseline="middle" fontSize="13" fontWeight="500" style={{ fill: "rgba(255,255,255,0.55)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>{Object.values(schedDone).flat().length} PADLA POINTS</text>
+                        </svg>
+                      </div>
+                      <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", flexShrink: 0 }}>
+                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
+                          <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
+                        </svg>
+                      </div>
+                    </div>
                     {/* Coach's note */}
                     {matchInsight ? (
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: "36px 24px 44px" }} onClick={() => setInsightSheetOpen(true)}>
