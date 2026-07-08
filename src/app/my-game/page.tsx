@@ -957,12 +957,6 @@ export default function ProfilePage() {
   const [racketSince, setRacketSince] = useState("");
   const [shoeImage, setShoeImage] = useState("");
   const [kitImage, setKitImage] = useState("");
-  useLayoutEffect(() => {
-    if (carouselRef.current) {
-      carouselRef.current.scrollLeft = window.innerWidth * 0.67 + 12;
-    }
-  }, []);
-
   const racketRowRef = useRef<HTMLDivElement>(null);
   const [racketSlotSize, setRacketSlotSize] = useState(80);
   useEffect(() => {
@@ -1382,7 +1376,7 @@ export default function ProfilePage() {
                         </svg>
                       );
                       return (
-                        <div ref={carouselRef} style={{ display: "flex", overflowX: "scroll", scrollSnapType: "x mandatory", gap: 12, paddingLeft: "16vw", paddingRight: "16vw", marginLeft: -20, marginRight: -20, scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
+                        <div ref={(el) => { (carouselRef as React.MutableRefObject<HTMLDivElement|null>).current = el; if (el) el.scrollLeft = Math.round(window.innerWidth * 0.67) + 12; }} style={{ display: "flex", overflowX: "scroll", scrollSnapType: "x mandatory", gap: 12, paddingLeft: "16vw", paddingRight: "16vw", marginLeft: -20, marginRight: -20, scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
                           <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>{tagsCircle("crz-")}</div>
                           <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
