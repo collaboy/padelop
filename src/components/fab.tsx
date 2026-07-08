@@ -224,7 +224,7 @@ export default function Fab() {
         <div className="fixed inset-0 z-[200] flex items-end" onClick={closeAll} onTouchStart={e => e.stopPropagation()} onTouchMove={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
           <style>{`@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" />
-          <div className="relative w-full bg-white rounded-t-[28px] shadow-2xl" style={{ animation: "sheetUp 0.3s cubic-bezier(0.22,1,0.36,1)", overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "85dvh", paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
+          <div className="relative w-full rounded-t-[28px] shadow-2xl" style={{ background: "#f0f1f4", animation: "sheetUp 0.3s cubic-bezier(0.22,1,0.36,1)", overflow: "hidden", display: "flex", flexDirection: "column", maxHeight: "85dvh", paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
 
             <div style={{ overflowY: "auto", minHeight: 0 }}>
               <div style={{ padding: "16px 16px 24px", display: "flex", flexDirection: "column", gap: fabExpanded ? 8 : 10 }}>
@@ -246,7 +246,7 @@ export default function Fab() {
                     ] as { label: string; action: () => void; icon: React.ReactNode; active?: boolean }[]).map(({ label, action, icon, active }) => (
                       <button key={label} onClick={action} className="active:scale-95 transition-transform"
                         style={{ flex: "0 0 calc((100vw - 52px) / 3.5)", background: "none", border: "none", padding: 0, cursor: "pointer" }}>
-                        <div style={{ width: "100%", aspectRatio: "1/1", borderRadius: "50%", background: active ? "#e0e2e6" : "#f0f1f4", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 5 }}>
+                        <div style={{ width: "100%", aspectRatio: "1/1", borderRadius: "50%", background: active ? "#e8e9ec" : "#ffffff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 5 }}>
                           {icon}
                           <span style={{ fontSize: 13, fontWeight: 500, color: "#9aa5b0", letterSpacing: "0.01em" }}>{label}</span>
                         </div>
