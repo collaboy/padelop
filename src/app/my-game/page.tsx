@@ -957,9 +957,9 @@ export default function ProfilePage() {
   const [racketSince, setRacketSince] = useState("");
   const [shoeImage, setShoeImage] = useState("");
   const [kitImage, setKitImage] = useState("");
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (carouselRef.current) {
-      carouselRef.current.scrollLeft = window.innerWidth * 0.76 + 12;
+      carouselRef.current.scrollLeft = window.innerWidth * 0.67 + 12;
     }
   }, []);
 
@@ -1382,9 +1382,9 @@ export default function ProfilePage() {
                         </svg>
                       );
                       return (
-                        <div ref={carouselRef} style={{ display: "flex", overflowX: "scroll", scrollSnapType: "x mandatory", gap: 12, paddingLeft: "12vw", paddingRight: "12vw", marginLeft: -20, marginRight: -20, scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
-                          <div style={{ flex: "0 0 76vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>{tagsCircle("crz-")}</div>
-                          <div style={{ flex: "0 0 76vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
+                        <div ref={carouselRef} style={{ display: "flex", overflowX: "scroll", scrollSnapType: "x mandatory", gap: 12, paddingLeft: "16vw", paddingRight: "16vw", marginLeft: -20, marginRight: -20, scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
+                          <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>{tagsCircle("crz-")}</div>
+                          <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="cr-nmA" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#2653d4" />
@@ -1393,7 +1393,7 @@ export default function ProfilePage() {
                               {timeLabelC && <text x="100" y="123" textAnchor="middle" dominantBaseline="middle" fontSize="32" fontWeight="800" style={{ fill: "#fff", fontFamily: ff }}>{timeLabelC}</text>}
                             </svg>
                           </div>
-                          <div style={{ flex: "0 0 76vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
+                          <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="cr-dtA" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill={panelDayColor} />
@@ -1402,7 +1402,7 @@ export default function ProfilePage() {
                               {dayWordC && <text x="100" y="123" textAnchor="middle" dominantBaseline="middle" fontSize="20" fontWeight="800" style={{ fill: "white", fontFamily: ff }}>{dayWordC}</text>}
                             </svg>
                           </div>
-                          <div style={{ flex: "0 0 76vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
+                          <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="cr-goA" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#16a34a" />
@@ -1410,7 +1410,7 @@ export default function ProfilePage() {
                               <text x="100" y="108" textAnchor="middle" dominantBaseline="middle" fontSize={totalC && doneC === totalC ? "44" : "36"} fontWeight="800" style={{ fill: "white", fontFamily: ff }}>{totalC && doneC === totalC ? "✓" : `${doneC}/${totalC}`}</text>
                             </svg>
                           </div>
-                          <div style={{ flex: "0 0 76vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
+                          <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="cr-stA" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
@@ -1419,7 +1419,7 @@ export default function ProfilePage() {
                               <text x="100" y="152" textAnchor="middle" fontSize="20" fontWeight="600" style={{ fill: stierC.color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>day streak</text>
                             </svg>
                           </div>
-                          <div style={{ flex: "0 0 76vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
+                          <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="cr-fmA" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
@@ -1428,7 +1428,7 @@ export default function ProfilePage() {
                               <text x="100" y="152" textAnchor="middle" fontSize="19" fontWeight="600" style={{ fill: fsColor, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{fsScore === null ? "no data" : fsScore >= 70 ? "on track" : "building"}</text>
                             </svg>
                           </div>
-                          <div style={{ flex: "0 0 76vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
+                          <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="cr-hyA" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
@@ -1437,7 +1437,7 @@ export default function ProfilePage() {
                               <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: hasHydC ? hydColorC : "#9aa0a6", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{hydSubC}</text>
                             </svg>
                           </div>
-                          <div style={{ flex: "0 0 76vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
+                          <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="cr-maA" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
@@ -1446,7 +1446,7 @@ export default function ProfilePage() {
                               <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: "#2653d4", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{matchSubC}</text>
                             </svg>
                           </div>
-                          <div style={{ flex: "0 0 76vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
+                          <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="cr-inA" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
@@ -1455,7 +1455,7 @@ export default function ProfilePage() {
                               <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: "#f59e0b", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>notes</text>
                             </svg>
                           </div>
-                          <div style={{ flex: "0 0 76vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>{tagsCircle("cr-")}</div>
+                          <div style={{ flex: "0 0 67vw", aspectRatio: "1/1", scrollSnapAlign: "center" }}>{tagsCircle("cr-")}</div>
                         </div>
                       );
                     })()}
