@@ -167,7 +167,7 @@ export default function Fab() {
       <button
         onClick={() => { setSmartUploadError(null); setFabExpanded(false); setLogPickerOpen(true); }}
         className="fixed z-[30] active:scale-90 transition-transform"
-        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.5rem", width: 54, height: 54, borderRadius: 27, background: "#e2e4e7", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", visibility: hiddenForModal ? "hidden" : undefined, pointerEvents: hiddenForModal ? "none" : undefined }}
+        style={{ bottom: "calc(1.5rem + env(safe-area-inset-bottom))", right: "1.5rem", width: 54, height: 54, borderRadius: 27, background: "#ffffff", boxShadow: "0 4px 16px rgba(0,0,0,0.16), 0 1px 4px rgba(0,0,0,0.08)", visibility: hiddenForModal ? "hidden" : undefined, pointerEvents: hiddenForModal ? "none" : undefined }}
         aria-label="Add"
       >
       </button>

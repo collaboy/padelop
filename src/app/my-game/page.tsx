@@ -465,6 +465,44 @@ function nowTimeStr() {
   return `${String(n.getHours()).padStart(2, "0")}:${String(n.getMinutes()).padStart(2, "0")}`;
 }
 
+// ── Touch press feedback ───────────────────────────────────────────────────
+let _ptx = 0, _pty = 0, _pc = false;
+function touchPress(action: () => void) {
+  return {
+    onTouchStart(e: React.TouchEvent) {
+      _ptx = e.touches[0].clientX; _pty = e.touches[0].clientY; _pc = false;
+      const el = e.currentTarget as HTMLElement;
+      el.style.transition = "transform 80ms ease-out,filter 80ms ease-out";
+      el.style.transform = "scale(0.96)";
+      el.style.filter = "brightness(0.95)";
+    },
+    onTouchMove(e: React.TouchEvent) {
+      if (!_pc && Math.hypot(e.touches[0].clientX - _ptx, e.touches[0].clientY - _pty) > 8) {
+        _pc = true;
+        const el = e.currentTarget as HTMLElement;
+        el.style.transition = "transform 200ms cubic-bezier(.25,.46,.45,.94),filter 200ms ease-out";
+        el.style.transform = "scale(1)";
+        el.style.filter = "brightness(1)";
+      }
+    },
+    onTouchEnd(e: React.TouchEvent) {
+      e.preventDefault();
+      const el = e.currentTarget as HTMLElement;
+      el.style.transition = "transform 200ms cubic-bezier(.25,.46,.45,.94),filter 200ms ease-out";
+      el.style.transform = "scale(1)";
+      el.style.filter = "brightness(1)";
+      if (!_pc) action();
+    },
+    onTouchCancel(e: React.TouchEvent) {
+      _pc = true;
+      const el = e.currentTarget as HTMLElement;
+      el.style.transition = "transform 200ms ease-out,filter 200ms ease-out";
+      el.style.transform = "scale(1)";
+      el.style.filter = "brightness(1)";
+    },
+  };
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
@@ -1324,17 +1362,17 @@ export default function ProfilePage() {
                     <>
                     {/* Hero Circle */}
                     <div style={{ display: "flex", justifyContent: "center" }}>
-                      <div onClick={() => openPadlaPanel()} style={{ width: "62vw", aspectRatio: "1/1", cursor: "pointer" }}>
+                      <div onClick={() => openPadlaPanel()} {...touchPress(() => openPadlaPanel())} style={{ width: "62vw", aspectRatio: "1/1", cursor: "pointer" }}>
                         <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                           <circle cx="100" cy="100" r="99" fill="#2653d4" />
                           <text x="100" y="96" textAnchor="middle" dominantBaseline="middle" fontSize="32" fontWeight="800" style={{ fill: "#fff", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>MY GAME</text>
-                          <text x="100" y="114" textAnchor="middle" dominantBaseline="middle" fontSize="13" fontWeight="500" style={{ fill: "rgba(255,255,255,0.55)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>{Object.values(schedDone).flat().length} PADLA POINTS</text>
+                          <text x="100" y="120" textAnchor="middle" dominantBaseline="middle" fontSize="13" fontWeight="500" style={{ fill: "rgba(255,255,255,0.55)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>{Object.values(schedDone).flat().length} PADLA POINTS</text>
                         </svg>
                       </div>
                     </div>
                     {/* Coach's note */}
                     {matchInsight ? (
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: "36px 24px 44px" }} onClick={() => setInsightSheetOpen(true)}>
+                      <div onClick={() => setInsightSheetOpen(true)} {...touchPress(() => setInsightSheetOpen(true))} style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: "36px 24px 44px" }}>
                         <p style={{ margin: 0, fontSize: "clamp(17px, 4.5vw, 21px)", fontWeight: 300, letterSpacing: "0.01em", color: "#7a8590", lineHeight: 1.5, textWrap: "balance", textAlign: "center" } as React.CSSProperties}>{matchInsight.sentence}</p>
                       </div>
                     ) : (
@@ -1356,7 +1394,7 @@ export default function ProfilePage() {
                         const timeLabel = nextMatch?.time ?? "";
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                         return (
-                          <div onClick={() => togglePanel('nextMatch')}
+                          <div onClick={() => togglePanel('nextMatch')} {...touchPress(() => togglePanel('nextMatch'))}
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(nextMatchPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="nextMatchTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
@@ -1381,7 +1419,7 @@ export default function ProfilePage() {
                       })()}
 
                       {/* Day Type */}
-                      <div onClick={() => togglePanel('dayType')}
+                      <div onClick={() => togglePanel('dayType')} {...touchPress(() => togglePanel('dayType'))}
                         style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(dayTypeInfoOpen) }}>
                         {(() => {
                           const parts = panelDayLabel.split(" ");
@@ -1410,7 +1448,7 @@ export default function ProfilePage() {
                       </div>
 
                       {/* Today's Goals */}
-                      <div onClick={() => togglePanel('sched')}
+                      <div onClick={() => togglePanel('sched')} {...touchPress(() => togglePanel('sched'))}
                         style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(panelSchedOpen) }}>
                         <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                           <defs><path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
@@ -1686,7 +1724,7 @@ export default function ProfilePage() {
                         ];
                         const stier = [...STIERS].reverse().find(t => streak >= t.min) ?? STIERS[0];
                         return (
-                          <div onClick={() => togglePanel('streak')}
+                          <div onClick={() => togglePanel('streak')} {...touchPress(() => togglePanel('streak'))}
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(streakPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
@@ -1715,7 +1753,7 @@ export default function ProfilePage() {
                         const color = score === null ? "#9aa0a6" : score >= 70 ? "#16a34a" : score >= 50 ? "#d97706" : "#ef4444";
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                         return (
-                          <div onClick={() => togglePanel('formScore')}
+                          <div onClick={() => togglePanel('formScore')} {...touchPress(() => togglePanel('formScore'))}
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(formScorePanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="formScoreArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
@@ -1749,7 +1787,7 @@ export default function ProfilePage() {
                           : "—";
                         const subText = pct !== null ? `${Math.round(pct * 100)}% of 2L` : "not logged";
                         return (
-                          <div onClick={() => togglePanel('hydration')}
+                          <div onClick={() => togglePanel('hydration')} {...touchPress(() => togglePanel('hydration'))}
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(hydrationPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="hydrationArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
@@ -1920,7 +1958,7 @@ export default function ProfilePage() {
                         const centerText = reviews.length > 0 ? String(reviews.length) : "—";
                         const sub = total > 0 ? `${Math.round((wins / total) * 100)}% wins` : "no matches";
                         return (
-                          <div onClick={() => togglePanel('matches')}
+                          <div onClick={() => togglePanel('matches')} {...touchPress(() => togglePanel('matches'))}
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(matchesPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="matchesArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
@@ -1956,7 +1994,7 @@ export default function ProfilePage() {
                           tournamentCount > 0,
                         ].filter(Boolean).length;
                         return (
-                          <div onClick={() => togglePanel('insights')}
+                          <div onClick={() => togglePanel('insights')} {...touchPress(() => togglePanel('insights'))}
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(insightsPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="insightsArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
@@ -1983,7 +2021,7 @@ export default function ProfilePage() {
                         });
                         const totalTags = Object.keys(wellCounts).length + Object.keys(badCounts).length;
                         return (
-                          <div onClick={() => togglePanel('goodBad')}
+                          <div onClick={() => togglePanel('goodBad')} {...touchPress(() => togglePanel('goodBad'))}
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(openPanel === 'goodBad') }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="goodBadArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
