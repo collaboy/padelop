@@ -50,7 +50,6 @@ export default function Fab() {
   const [insertUploadCategory, setInsertUploadCategory] = useState<string | null>(null);
   const [smartUploadResult, setSmartUploadResult] = useState<{ category: string; label: string; confidence: string; data: Record<string, string> } | null>(null);
   const [smartUploadError, setSmartUploadError] = useState<string | null>(null);
-  const [uploadCategoryPickerOpen, setUploadCategoryPickerOpen] = useState(false);
   const [mealTime, setMealTime] = useState("");
   const [mealText, setMealText] = useState("");
   const [mealsToday, setMealsToday] = useState<{ id: string; time: string; description: string }[]>([]);
@@ -425,36 +424,9 @@ export default function Fab() {
               <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-[#e0e0e0]" /></div>
               <div style={{ padding: "12px 20px 4px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <button
-                    onClick={() => setUploadCategoryPickerOpen(o => !o)}
-                    style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 8px", borderRadius: 6, background: meta.color + "18", border: "none", cursor: "pointer", marginBottom: 6 }}
-                  >
+                  <span style={{ display: "inline-flex", alignItems: "center", padding: "3px 8px", borderRadius: 6, background: meta.color + "18", marginBottom: 6 }}>
                     <span style={{ fontSize: 11, fontWeight: 700, color: meta.color, letterSpacing: "0.06em", textTransform: "uppercase" }}>{meta.title}</span>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={meta.color} strokeWidth="2.5" strokeLinecap="round" style={{ transition: "transform 0.15s", transform: uploadCategoryPickerOpen ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
-                  </button>
-                  {uploadCategoryPickerOpen && (() => {
-                    const emptyData: Record<string, Record<string, string>> = {
-                      match_schedule: { date: "", time: "", club: "", court: "", player_1: "", player_2: "", player_3: "", player_4: "" },
-                      meal:           { description: "", meal_type: "" },
-                      gear:           { type: "", brand: "", name: "" },
-                      match_result:   { result: "", score: "", opponent_names: "" },
-                    };
-                    const options = [
-                      { key: "match_schedule", title: "Match schedule", color: "#2653d4" },
-                      { key: "meal",           title: "Meal",           color: "#16a34a" },
-                      { key: "gear",           title: "Gear",           color: "#7c3aed" },
-                      { key: "match_result",   title: "Match result",   color: "#ea580c" },
-                    ];
-                    return (
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 8 }}>
-                        {options.map(opt => (
-                          <button key={opt.key} onClick={() => { setSmartUploadResult(r => r ? { ...r, category: opt.key, data: emptyData[opt.key] ?? {} } : r); setUploadCategoryPickerOpen(false); }} style={{ padding: "4px 10px", borderRadius: 6, border: `1.5px solid ${opt.key === category ? opt.color : "#e8eaed"}`, background: opt.key === category ? opt.color + "18" : "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700, color: opt.key === category ? opt.color : "#6b7480" }}>
-                            {opt.title}
-                          </button>
-                        ))}
-                      </div>
-                    );
-                  })()}
+                  </span>
                   <p style={{ fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1.3 }}>{label}</p>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0, marginTop: 2 }}>
