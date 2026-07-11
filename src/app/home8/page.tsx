@@ -402,6 +402,8 @@ export default function Home8() {
   const settlingRef = useRef(false);
   const checkinNudgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevPostMatchOpenRef = useRef(false);
+  const postMatchOpenRef = useRef(false);
+  postMatchOpenRef.current = postMatchOpen;
   const [cardSnap, setCardSnap] = useState<'none' | 'left' | 'right'>('none');
   const [liveX, setLiveX] = useState(0);
   const [swipeX, setSwipeX] = useState(0);
@@ -713,9 +715,8 @@ export default function Home8() {
     // Only show the morning nudge AFTER sync finishes — avoids false positives when sync hasn't loaded yet
     function handleSyncDone() {
       loadReadiness();
-      loadMatch();
-      // Check if loadMatch() will open the post-match popup — if so, defer check-in to the
-      // postMatchOpen useEffect sequence to avoid both flags being set simultaneously.
+      // Pre-check BEFORE loadMatch() because loadMatch sets padelop:post-match-dismissed
+      // atomically when it opens the popup — reading after would always see dismissed=true.
       const willShowPostMatch = (() => {
         try {
           const nm = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
@@ -734,12 +735,17 @@ export default function Home8() {
           return !alreadyReviewed && !dismissed;
         } catch { return false; }
       })();
+      loadMatch();
       const todayStr = new Date().toISOString().slice(0, 10);
       const ml = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null");
       const done = ml?.date === todayStr;
       const nudgeDismissed = localStorage.getItem("padelop:checkin-nudge-dismissed") === todayStr;
       const hour = new Date().getHours();
-      if (!done && !nudgeDismissed && hour < 13 && !willShowPostMatch) setCheckinNudgeOpen(true);
+      // Also check postMatchOpenRef in case mount's loadMatch already opened the popup
+      // (dismissed key would already be set, so willShowPostMatch would miss it)
+      if (!done && !nudgeDismissed && hour < 13 && !willShowPostMatch && !postMatchOpenRef.current) {
+        setCheckinNudgeOpen(true);
+      }
     }
     window.addEventListener("padelop:sync-done", handleSyncDone);
     setDrillTag(getTopNeedsWorkTag());
