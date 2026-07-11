@@ -714,12 +714,32 @@ export default function Home8() {
     function handleSyncDone() {
       loadReadiness();
       loadMatch();
+      // Check if loadMatch() will open the post-match popup — if so, defer check-in to the
+      // postMatchOpen useEffect sequence to avoid both flags being set simultaneously.
+      const willShowPostMatch = (() => {
+        try {
+          const nm = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
+          if (!nm?.date) return false;
+          const nowD = new Date();
+          const todayD = nowD.toISOString().slice(0, 10);
+          let ended = nm.date < todayD;
+          if (!ended && nm.date === todayD && nm.time) {
+            const [h, m] = (nm.time as string).split(":").map(Number);
+            ended = nowD.getHours() * 60 + nowD.getMinutes() >= h * 60 + m + 90;
+          }
+          if (!ended) return false;
+          const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+          const alreadyReviewed = reviews.some((r: { ts?: string }) => r.ts?.slice(0, 10) === nm.date);
+          const dismissed = localStorage.getItem("padelop:post-match-dismissed") === nm.date;
+          return !alreadyReviewed && !dismissed;
+        } catch { return false; }
+      })();
       const todayStr = new Date().toISOString().slice(0, 10);
       const ml = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null");
       const done = ml?.date === todayStr;
       const nudgeDismissed = localStorage.getItem("padelop:checkin-nudge-dismissed") === todayStr;
       const hour = new Date().getHours();
-      if (!done && !nudgeDismissed && hour < 13) setCheckinNudgeOpen(true);
+      if (!done && !nudgeDismissed && hour < 13 && !willShowPostMatch) setCheckinNudgeOpen(true);
     }
     window.addEventListener("padelop:sync-done", handleSyncDone);
     setDrillTag(getTopNeedsWorkTag());
