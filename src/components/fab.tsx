@@ -572,7 +572,7 @@ export default function Fab() {
                     {category === "match_schedule" ? "Save match" : category === "meal" ? "Log meal" : category === "match_result" ? "Save result" : "Save"}
                   </button>
                 )}
-                {category !== "gear" && (
+                {category !== "gear" && category !== "match_result" && (
                   <button onClick={handleEditManually} style={{ padding: "10px 20px", borderRadius: 999, background: "none", border: "1.5px solid #e8eaed", cursor: "pointer", fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 600, color: "#6b7480", width: "100%" }}>
                     {category === "unknown" ? "Enter manually" : "Edit manually"}
                   </button>
