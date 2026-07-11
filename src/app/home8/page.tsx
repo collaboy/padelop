@@ -709,9 +709,11 @@ export default function Home8() {
     function handleOpenLogSheet() { setLogSheetOpen(true); }
     function handleToggleLogSheet() { setLogSheetOpen(v => !v); }
     function handleOpenCheckin() { setLogWizard(false); setLogTab("checkin"); setLogSheetOpen(true); }
+    function handleOpenMatchReview() { setLogTab("matchreview"); setLogSheetOpen(true); }
     window.addEventListener("padelop:open-log-sheet", handleOpenLogSheet);
     window.addEventListener("padelop:toggle-log-sheet", handleToggleLogSheet);
     window.addEventListener("padelop:open-checkin", handleOpenCheckin);
+    window.addEventListener("padelop:open-matchreview", handleOpenMatchReview);
     // Only show the morning nudge AFTER sync finishes — avoids false positives when sync hasn't loaded yet
     function handleSyncDone() {
       loadReadiness();
@@ -750,7 +752,7 @@ export default function Home8() {
     window.addEventListener("padelop:sync-done", handleSyncDone);
     setDrillTag(getTopNeedsWorkTag());
     const id = setInterval(() => setNow(new Date()), 1_000);
-    return () => { clearInterval(id); window.removeEventListener("storage", handleStorage); window.removeEventListener("padelop:match-added", handleMatchAdded); window.removeEventListener("padelop:open-log-sheet", handleOpenLogSheet); window.removeEventListener("padelop:toggle-log-sheet", handleToggleLogSheet); window.removeEventListener("padelop:open-checkin", handleOpenCheckin); window.removeEventListener("padelop:sync-done", handleSyncDone); };
+    return () => { clearInterval(id); window.removeEventListener("storage", handleStorage); window.removeEventListener("padelop:match-added", handleMatchAdded); window.removeEventListener("padelop:open-log-sheet", handleOpenLogSheet); window.removeEventListener("padelop:toggle-log-sheet", handleToggleLogSheet); window.removeEventListener("padelop:open-checkin", handleOpenCheckin); window.removeEventListener("padelop:open-matchreview", handleOpenMatchReview); window.removeEventListener("padelop:sync-done", handleSyncDone); };
   }, []);
 
   // Reset hydration counter when date rolls over midnight

@@ -533,21 +533,52 @@ export default function Fab() {
                     <div><label style={labelSt}>Name / Model</label><input type="text" value={data.name ?? ""} onChange={e => updateData("name", e.target.value)} style={inputSt} placeholder="Model or description" /></div>
                   </div>
                 )}
-                {category === "match_result" && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                    <div>
-                      <label style={labelSt}>Result</label>
-                      <select value={data.result ?? ""} onChange={e => updateData("result", e.target.value)} style={inputSt}>
-                        <option value="">Select…</option>
-                        <option value="win">Win</option>
-                        <option value="loss">Loss</option>
-                        <option value="draw">Draw</option>
-                      </select>
+                {category === "match_result" && (() => {
+                  const reviews: { ts: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]"); } catch { return []; } })();
+                  const reviewedDates = new Set(reviews.map(r => r.ts?.slice(0, 10)).filter(Boolean));
+                  const upcoming: StoredMatch[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:upcoming-matches") || "[]"); } catch { return []; } })();
+                  const nextRaw: StoredMatch | null = (() => { try { return JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch { return null; } })();
+                  const seen = new Set<string>();
+                  const unratedCount = [...upcoming, ...(nextRaw ? [nextRaw] : [])].filter(m => {
+                    if (!m.date || !m.time || seen.has(m.date)) return false;
+                    seen.add(m.date);
+                    return new Date(`${m.date}T${m.time}:00`).getTime() < Date.now() && !reviewedDates.has(m.date);
+                  }).length;
+                  return (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                      {unratedCount > 0 && (
+                        <button
+                          onClick={() => { window.dispatchEvent(new Event("padelop:open-matchreview")); setLogPickerSub(null); setSmartUploadResult(null); }}
+                          style={{ width: "100%", padding: "14px 16px", borderRadius: 14, background: "#2653d4", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }}
+                        >
+                          <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M8 21h8M12 17v4"/><path d="M7 4H4a2 2 0 0 0-2 2v2c0 3.3 2.7 6 6 6"/><path d="M17 4h3a2 2 0 0 1 2 2v2c0 3.3-2.7 6-6 6"/><path d="M7 4h10v8a5 5 0 0 1-10 0V4z"/>
+                            </svg>
+                          </div>
+                          <div style={{ flex: 1, textAlign: "left" }}>
+                            <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#fff" }}>Rate My Match</p>
+                            <p style={{ margin: "2px 0 0", fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,0.75)" }}>
+                              {unratedCount === 1 ? "1 match needs a rating" : `${unratedCount} matches need a rating`}
+                            </p>
+                          </div>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" strokeWidth="2.5" strokeLinecap="round"><path d="M9 18l6-6-6-6"/></svg>
+                        </button>
+                      )}
+                      <div>
+                        <label style={labelSt}>Result</label>
+                        <select value={data.result ?? ""} onChange={e => updateData("result", e.target.value)} style={inputSt}>
+                          <option value="">Select…</option>
+                          <option value="win">Win</option>
+                          <option value="loss">Loss</option>
+                          <option value="draw">Draw</option>
+                        </select>
+                      </div>
+                      <div><label style={labelSt}>Score</label><input type="text" value={data.score ?? ""} onChange={e => updateData("score", e.target.value)} style={inputSt} placeholder="e.g. 6-3, 7-5" /></div>
+                      <div><label style={labelSt}>Opponents</label><input type="text" value={data.opponent_names ?? ""} onChange={e => updateData("opponent_names", e.target.value)} style={inputSt} placeholder="Opponent names" /></div>
                     </div>
-                    <div><label style={labelSt}>Score</label><input type="text" value={data.score ?? ""} onChange={e => updateData("score", e.target.value)} style={inputSt} placeholder="e.g. 6-3, 7-5" /></div>
-                    <div><label style={labelSt}>Opponents</label><input type="text" value={data.opponent_names ?? ""} onChange={e => updateData("opponent_names", e.target.value)} style={inputSt} placeholder="Opponent names" /></div>
-                  </div>
-                )}
+                  );
+                })()}
                 {category === "unknown" && (
                   <p style={{ fontSize: "clamp(14px, 3.6vw, 16px)", color: "#6b7480", lineHeight: 1.5, margin: 0 }}>
                     We couldn&apos;t identify a category for this image. Try uploading a match schedule screenshot, a meal photo, gear, or a match result scoreboard.
