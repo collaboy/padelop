@@ -460,6 +460,13 @@ export default function Fab() {
                   </div>
                 );
               })()}
+              {(category === "match_schedule" || category === "match_result") && (
+                <div style={{ padding: "12px 20px 2px" }}>
+                  <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                    {category === "match_schedule" ? "Schedule a match" : "Log result"}
+                  </p>
+                </div>
+              )}
               <div style={{ padding: "10px 20px 4px" }}>
                 <button
                   onClick={() => { setInsertUploadCategory(category); insertUploadRef.current?.click(); }}
