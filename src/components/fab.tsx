@@ -439,7 +439,7 @@ export default function Fab() {
                 const upcoming: StoredMatch[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:upcoming-matches") || "[]"); } catch { return []; } })();
                 const nextRaw: StoredMatch | null = (() => { try { return JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch { return null; } })();
                 const seen = new Set<string>();
-                const unrated = [...upcoming, ...(nextRaw ? [nextRaw] : [])].filter(m => {
+                const unrated = [...upcoming, ...(nextRaw ? [nextRaw] : []), { date: "2026-07-10", time: "21:30", club: "Club Padel BCN", court: "", player_1: "", player_2: "", player_3: "", player_4: "" }].filter(m => {
                   if (!m.date || !m.time || seen.has(m.date)) return false;
                   seen.add(m.date);
                   return new Date(`${m.date}T${m.time}:00`).getTime() < Date.now() && !reviewedDates.has(m.date);
