@@ -546,6 +546,7 @@ export default function ProfilePage() {
   const [matchExpandedIdx, setMatchExpandedIdx] = useState<number | null>(null);
   const [matchAddOpen, setMatchAddOpen] = useState(false);
   const [matchEditForms, setMatchEditForms] = useState<Record<number, MatchForm>>({});
+  const [matchHistoryOpen, setMatchHistoryOpen] = useState(false);
   const [matchAddForm, setMatchAddForm] = useState<MatchForm>(EMPTY_FORM);
   const [selectedReview, setSelectedReview] = useState<ReviewEntry | null>(null);
 
@@ -869,8 +870,10 @@ export default function ProfilePage() {
       setHydrationMl(readHydrationMl());
       setFormScore(computeFormScore());
     });
+    function handleOpenCheckin() { setLogTab("checkin"); setLogSheetOpen(true); }
     window.addEventListener("storage", loadAll);
     window.addEventListener("padelop:sync-done", loadAll);
+    window.addEventListener("padelop:open-checkin", handleOpenCheckin);
     let lastSync = Date.now();
     const onVisible = () => {
       if (document.visibilityState === "visible" && Date.now() - lastSync > 5_000) {
@@ -886,6 +889,7 @@ export default function ProfilePage() {
     return () => {
       window.removeEventListener("storage", loadAll);
       window.removeEventListener("padelop:sync-done", loadAll);
+      window.removeEventListener("padelop:open-checkin", handleOpenCheckin);
       document.removeEventListener("visibilitychange", onVisible);
     };
   }, []);
@@ -2286,38 +2290,48 @@ export default function ProfilePage() {
                           {matchAddOpen ? "Cancel" : "+ Add"}
                         </button>
                         {reviews.length > 0 && (
-                          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>
-                            <p style={{ margin: "4px 4px 0", fontSize: 12, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em" }}>HISTORY</p>
-                            {[...reviews].sort((a, b) => b.ts.localeCompare(a.ts)).map((r, i) => {
-                              const resultColor = r.result === "win" ? "#16a34a" : r.result === "loss" ? "#ef4444" : "#8a9096";
-                              const resultBg   = r.result === "win" ? "#f0fdf4" : r.result === "loss" ? "#fff5f5" : "#f4f6f8";
-                              const opponentNames = typeof (r as ReviewEntry & { opponentNames?: string }).opponentNames === "string" && (r as ReviewEntry & { opponentNames?: string }).opponentNames ? (r as ReviewEntry & { opponentNames?: string }).opponentNames : null;
-                              return (
-                                <button key={i} onClick={() => setSelectedReview(r)} style={{ width: "100%", background: "#f8f9fa", borderRadius: 16, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12, border: "none", cursor: "pointer", textAlign: "left" }}>
-                                  <div style={{ flexShrink: 0, width: 44, textAlign: "center", background: "#fff", borderRadius: 11, padding: "7px 4px" }}>
-                                    <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: "#8a9096" }}>{new Date(r.ts.slice(0, 10) + "T12:00").toLocaleDateString("en-GB", { month: "short" }).toUpperCase()}</p>
-                                    <p style={{ margin: "1px 0 0", fontSize: 20, fontWeight: 900, color: "#1a1c1c", lineHeight: 1 }}>{new Date(r.ts.slice(0, 10) + "T12:00").getDate()}</p>
-                                  </div>
-                                  <div style={{ flex: 1, minWidth: 0 }}>
-                                    {opponentNames ? (
-                                      <p style={{ margin: "0 0 2px", fontSize: 16, fontWeight: 700, color: "#1a1c1c", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>vs {opponentNames}</p>
-                                    ) : (
-                                      r.feeling && <p style={{ margin: "0 0 2px", fontSize: 15, color: "#8a9096" }}>{r.feeling}</p>
-                                    )}
-                                    {(r.wellDone?.length > 0 || r.improved?.length > 0) && (
-                                      <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
-                                        {r.wellDone?.slice(0, 2).map(t => <span key={t} style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 999, background: "#f0fdf4", color: "#16a34a" }}>{t}</span>)}
-                                        {r.improved?.slice(0, 2).map(t => <span key={t} style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 999, background: "#fff5f5", color: "#ef4444" }}>{t}</span>)}
+                          <div style={{ background: "#f8f9fa", borderRadius: 18, overflow: "hidden" }}>
+                            <button onClick={() => setMatchHistoryOpen(o => !o)} style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", textAlign: "left" }}>
+                              <span style={{ fontSize: 12, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em" }}>HISTORY</span>
+                              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                <span style={{ fontSize: 12, fontWeight: 600, color: "#b0b8c1" }}>{reviews.length} match{reviews.length !== 1 ? "es" : ""}</span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0b8c1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: matchHistoryOpen ? "rotate(180deg)" : "rotate(0deg)" }}><path d="M6 9l6 6 6-6"/></svg>
+                              </div>
+                            </button>
+                            {matchHistoryOpen && (
+                              <div style={{ display: "flex", flexDirection: "column", gap: 1, paddingBottom: 8 }}>
+                                {[...reviews].sort((a, b) => b.ts.localeCompare(a.ts)).map((r, i) => {
+                                  const resultColor = r.result === "win" ? "#16a34a" : r.result === "loss" ? "#ef4444" : "#8a9096";
+                                  const resultBg   = r.result === "win" ? "#f0fdf4" : r.result === "loss" ? "#fff5f5" : "#f4f6f8";
+                                  const opponentNames = typeof (r as ReviewEntry & { opponentNames?: string }).opponentNames === "string" && (r as ReviewEntry & { opponentNames?: string }).opponentNames ? (r as ReviewEntry & { opponentNames?: string }).opponentNames : null;
+                                  return (
+                                    <button key={i} onClick={() => { setOpenPanel(null); setSelectedReview(r); }} style={{ width: "calc(100% - 16px)", alignSelf: "center", background: "#fff", borderRadius: 12, padding: "12px 14px", display: "flex", alignItems: "center", gap: 12, border: "none", cursor: "pointer", textAlign: "left" }}>
+                                      <div style={{ flexShrink: 0, width: 40, textAlign: "center", background: "#f8f9fa", borderRadius: 10, padding: "6px 4px" }}>
+                                        <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: "#8a9096" }}>{new Date(r.ts.slice(0, 10) + "T12:00").toLocaleDateString("en-GB", { month: "short" }).toUpperCase()}</p>
+                                        <p style={{ margin: "1px 0 0", fontSize: 18, fontWeight: 900, color: "#1a1c1c", lineHeight: 1 }}>{new Date(r.ts.slice(0, 10) + "T12:00").getDate()}</p>
                                       </div>
-                                    )}
-                                  </div>
-                                  <div style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 6 }}>
-                                    {r.result && <span style={{ fontSize: 12, fontWeight: 800, padding: "4px 10px", borderRadius: 999, background: resultBg, color: resultColor }}>{r.result.charAt(0).toUpperCase() + r.result.slice(1)}</span>}
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                                  </div>
-                                </button>
-                              );
-                            })}
+                                      <div style={{ flex: 1, minWidth: 0 }}>
+                                        {opponentNames ? (
+                                          <p style={{ margin: "0 0 2px", fontSize: 15, fontWeight: 700, color: "#1a1c1c", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>vs {opponentNames}</p>
+                                        ) : (
+                                          r.feeling && <p style={{ margin: "0 0 2px", fontSize: 14, color: "#8a9096" }}>{r.feeling}</p>
+                                        )}
+                                        {(r.wellDone?.length > 0 || r.improved?.length > 0) && (
+                                          <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 3 }}>
+                                            {r.wellDone?.slice(0, 2).map(t => <span key={t} style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 999, background: "#f0fdf4", color: "#16a34a" }}>{t}</span>)}
+                                            {r.improved?.slice(0, 2).map(t => <span key={t} style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 999, background: "#fff5f5", color: "#ef4444" }}>{t}</span>)}
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 6 }}>
+                                        {r.result && <span style={{ fontSize: 11, fontWeight: 800, padding: "3px 9px", borderRadius: 999, background: resultBg, color: resultColor }}>{r.result.charAt(0).toUpperCase() + r.result.slice(1)}</span>}
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                                      </div>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
                           </div>
                         )}
                           </div>
