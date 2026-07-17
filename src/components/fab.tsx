@@ -414,7 +414,7 @@ export default function Fab() {
               </div>
               {(category === "match_schedule" || category === "match_result") && (() => {
                 const reviews: { ts: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]"); } catch { return []; } })();
-                const reviewedDates = new Set(reviews.map((r: { ts: string }) => r.ts?.slice(0, 10)).filter(Boolean));
+                const reviewedDates = new Set(reviews.map((r: { ts: string; matchDate?: string }) => r.matchDate ?? r.ts?.slice(0, 10)).filter(Boolean));
                 const upcoming: StoredMatch[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:upcoming-matches") || "[]"); } catch { return []; } })();
                 const nextRaw: StoredMatch | null = (() => { try { return JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch { return null; } })();
                 const seen = new Set<string>();
