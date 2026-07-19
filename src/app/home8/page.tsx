@@ -558,9 +558,10 @@ export default function Home8() {
         setReviews(raw ? (JSON.parse(raw) as ReviewEntry[]) : []);
       } catch { setReviews([]); }
       const todayStr = new Date().toISOString().slice(0, 10);
-      // Compute streak from score snapshot history
-      const history = loadScoreHistory();
-      const dateset = new Set(history.map(s => s.date));
+      // Compute streak from check-in history (reliable — synced from DB)
+      const ciHistory: { date: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:checkin-history") || "[]"); } catch { return []; } })();
+      const scoreHistory = loadScoreHistory();
+      const dateset = new Set([...ciHistory.map(c => c.date), ...scoreHistory.map(s => s.date)]);
       let s = 0;
       const cur = new Date();
       if (!dateset.has(cur.toISOString().slice(0, 10))) cur.setDate(cur.getDate() - 1);
