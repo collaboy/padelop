@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { saveUpcomingMatch, saveNutritionToDb, saveNoteToDb, saveMatchReview, saveGearToDb } from "@/lib/db";
 import { createClient } from "@/lib/supabase/client";
 import { startNavLoad } from "@/lib/nav-events";
+import { getDayType, getScheduleData, getTopNeedsWorkTag } from "@/lib/schedule-data";
 
 type StoredMatch = { date: string; time: string; club: string; court: string; player_1: string; player_2: string; player_3: string; player_4: string };
 
@@ -583,6 +584,13 @@ export default function Fab() {
         const decided = reviews.filter(r => r.result === "win" || r.result === "loss").length;
         const winRate = decided > 0 ? Math.round((wins / decided) * 100) : null;
 
+        const gameDays: string[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:game-days") || "[]"); } catch { return []; } })();
+        const upcomingMatches: { date: string; time: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:upcoming-matches") || "[]"); } catch { return []; } })();
+        const dayType = getDayType(gameDays, nextMatch, upcomingMatches);
+        const drillTag = (() => { try { return getTopNeedsWorkTag(); } catch { return null; } })();
+        const { schedule, currentIdx } = getScheduleData(dayType, nextMatch?.time ?? null, drillTag);
+        const currentActivity = schedule[currentIdx];
+
         return (
           <div className="fixed inset-0 z-[200] flex items-end" onClick={closeAll}>
             <style>{`@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
@@ -608,9 +616,9 @@ export default function Fab() {
                     <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{winRate !== null ? `${winRate}%` : "—"}</p>
                     <p style={{ margin: "4px 0 0", fontSize: 11, fontWeight: 600, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Win rate</p>
                   </div>
-                  <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 12px", textAlign: "center" }}>
-                    <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{reviews.length || "—"}</p>
-                    <p style={{ margin: "4px 0 0", fontSize: 11, fontWeight: 600, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Matches</p>
+                  <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 12px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                    <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: currentActivity?.color ?? "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>{currentActivity?.time ?? "—"}</p>
+                    <p style={{ margin: "4px 0 0", fontSize: 13, fontWeight: 700, color: "#1a1c1c", lineHeight: 1.2, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{currentActivity?.title ?? "—"}</p>
                   </div>
                 </div>
 
