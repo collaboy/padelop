@@ -138,14 +138,15 @@ export async function hydrateFromSupabase(): Promise<SyncResult | null> {
 
     // ── Check-in history (for trend enrichment) ───────────────────────────
     if (checkIns.length) {
-      const ciHistory = checkIns.map(c => ({
-        date:      c.date      as string,
-        sleep:     c.sleep     ?? 3,
-        energy:    c.energy    ?? 3,
-        hydration: c.hydration ?? 3,
-        stress:    c.stress    ?? 3,
-      }));
-      localStorage.setItem("padelop:checkin-history", JSON.stringify(ciHistory));
+      const localCiHistory: { date: string; sleep: number; energy: number; hydration: number; stress: number }[] = (() => {
+        try { return JSON.parse(localStorage.getItem("padelop:checkin-history") || "[]"); } catch { return []; }
+      })();
+      const ciMap = new Map(localCiHistory.map(c => [c.date, c]));
+      for (const c of checkIns) {
+        ciMap.set(c.date as string, { date: c.date as string, sleep: c.sleep ?? 3, energy: c.energy ?? 3, hydration: c.hydration ?? 3, stress: c.stress ?? 3 });
+      }
+      const mergedCiHistory = Array.from(ciMap.values()).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 180);
+      localStorage.setItem("padelop:checkin-history", JSON.stringify(mergedCiHistory));
     }
 
     // ── Hydration ────────────────────────────────────────────────────────

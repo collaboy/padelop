@@ -570,21 +570,19 @@ export default function Fab() {
       {/* My Game summary sheet */}
       {myGameSheetOpen && (() => {
         const ciHistory: { date: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:checkin-history") || "[]"); } catch { return []; } })();
-        const dateset = new Set(ciHistory.map(c => c.date));
+        const scoreHistory: { date: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:score-history") || "[]"); } catch { return []; } })();
+        const dateset = new Set([...ciHistory.map(c => c.date), ...scoreHistory.map(s => s.date)]);
         let streak = 0;
         const cur = new Date();
         if (!dateset.has(cur.toISOString().slice(0, 10))) cur.setDate(cur.getDate() - 1);
         while (dateset.has(cur.toISOString().slice(0, 10))) { streak++; cur.setDate(cur.getDate() - 1); }
 
         const nextMatch: StoredMatch | null = (() => { try { return JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch { return null; } })();
-        const reviews: { result?: string; matchDate?: string; ts: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]"); } catch { return []; } })();
+        const reviews: { result?: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]"); } catch { return []; } })();
         const lastFive = reviews.slice(0, 5);
         const wins = reviews.filter(r => r.result === "win").length;
         const decided = reviews.filter(r => r.result === "win" || r.result === "loss").length;
         const winRate = decided > 0 ? Math.round((wins / decided) * 100) : null;
-
-        const scoreHistory: { date: string; overall?: number; recovery?: number }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:score-history") || "[]"); } catch { return []; } })();
-        const latestScore = scoreHistory[0];
 
         return (
           <div className="fixed inset-0 z-[200] flex items-end" onClick={closeAll}>
@@ -612,10 +610,19 @@ export default function Fab() {
                     <p style={{ margin: "4px 0 0", fontSize: 11, fontWeight: 600, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Win rate</p>
                   </div>
                   <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 12px", textAlign: "center" }}>
-                    <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: latestScore?.recovery != null ? (latestScore.recovery >= 70 ? "#16a34a" : latestScore.recovery >= 45 ? "#d97706" : "#dc2626") : "#1a1c1c", lineHeight: 1 }}>{latestScore?.recovery != null ? latestScore.recovery : "—"}</p>
-                    <p style={{ margin: "4px 0 0", fontSize: 11, fontWeight: 600, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Readiness</p>
+                    <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{reviews.length || "—"}</p>
+                    <p style={{ margin: "4px 0 0", fontSize: 11, fontWeight: 600, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Matches</p>
                   </div>
                 </div>
+
+                {/* Next match */}
+                {nextMatch?.date && (
+                  <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 16px" }}>
+                    <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Next match</p>
+                    <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1a1c1c" }}>{new Date(nextMatch.date + "T12:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })} · {nextMatch.time}</p>
+                    {nextMatch.club ? <p style={{ margin: "2px 0 0", fontSize: 13, color: "#6b7480" }}>{nextMatch.club}</p> : null}
+                  </div>
+                )}
 
                 {/* Recent form */}
                 {lastFive.length > 0 && (
@@ -628,15 +635,6 @@ export default function Fab() {
                         </div>
                       ))}
                     </div>
-                  </div>
-                )}
-
-                {/* Next match */}
-                {nextMatch?.date && (
-                  <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 16px" }}>
-                    <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Next match</p>
-                    <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1a1c1c" }}>{new Date(nextMatch.date + "T12:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })} · {nextMatch.time}</p>
-                    {nextMatch.club ? <p style={{ margin: "2px 0 0", fontSize: 13, color: "#6b7480" }}>{nextMatch.club}</p> : null}
                   </div>
                 )}
               </div>
