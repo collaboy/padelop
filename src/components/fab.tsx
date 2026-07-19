@@ -622,62 +622,57 @@ export default function Fab() {
                   return (
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
                       <div style={{ background: "#ffffff", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 90 }}>
-                        <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#2653d4", textTransform: "uppercase", letterSpacing: "0.05em" }}>Padel pts</p>
-                        <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#2653d4", lineHeight: 1 }}>{lifetimePoints > 0 ? ptLabel : "—"}</p>
-                        <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#2653d4", opacity: 0.6 }}>lifetime</p>
+                        <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" }}>Padel pts</p>
+                        <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{lifetimePoints > 0 ? ptLabel : "—"}</p>
+                        <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#8a9096" }}>lifetime</p>
                       </div>
-                      {(() => { const sc = streak >= 30 ? "#f59e0b" : "#1a1c1c"; return (
                       <div style={{ background: "#ffffff", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 90 }}>
-                        <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: sc, textTransform: "uppercase", letterSpacing: "0.05em" }}>Streak</p>
-                        <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: sc, lineHeight: 1 }}>{streak > 0 ? streak : "—"}</p>
-                        <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: sc, opacity: 0.6 }}>days</p>
+                        <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" }}>Streak</p>
+                        <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{streak > 0 ? streak : "—"}</p>
+                        <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#8a9096" }}>days</p>
                       </div>
-                      ); })()}
-                      {(() => { const wc = winRate !== null ? (winRate >= 60 ? "#16a34a" : winRate >= 40 ? "#d97706" : "#ef4444") : "#8a9096"; return (
                       <div style={{ background: "#ffffff", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 90 }}>
-                        <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: wc, textTransform: "uppercase", letterSpacing: "0.05em" }}>Win rate</p>
-                        <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: wc, lineHeight: 1 }}>{winRate !== null ? `${winRate}%` : "—"}</p>
-                        <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: wc, opacity: 0.6 }}>{winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no data"}</p>
+                        <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" }}>Win rate</p>
+                        <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{winRate !== null ? `${winRate}%` : "—"}</p>
+                        <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#8a9096" }}>{winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no data"}</p>
                       </div>
-                      ); })()}
                     </div>
                   );
                 })()}
-
-                {/* Next match */}
-                {nextMatch?.date && (
-                  <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 16px" }}>
-                    <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Next match</p>
-                    <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1a1c1c" }}>{new Date(nextMatch.date + "T12:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })} · {nextMatch.time}</p>
-                    {nextMatch.club ? <p style={{ margin: "2px 0 0", fontSize: 13, color: "#6b7480" }}>{nextMatch.club}</p> : null}
-                  </div>
-                )}
 
                 {/* Hydration */}
                 {(() => {
                   const todayStr = new Date().toISOString().slice(0, 10);
                   const quick: { date: string; ml: number } | null = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null"); } catch { return null; } })();
                   const todayMl = quick?.date === todayStr ? quick.ml : 0;
+                  const goal = 2500;
+                  const pct = Math.min(todayMl / goal, 1);
                   const logs: { ts: string; litres: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch { return []; } })();
+                  const mlFromLitres = (l: string) => l === "<1L" ? 800 : l === "1–1.5L" ? 1250 : l === "1.5–2L" ? 1750 : l === "2–2.5L" ? 2250 : l === "2.5–3L" ? 2750 : 3000;
                   const last7 = Array.from({ length: 7 }, (_, i) => {
                     const d = new Date(); d.setDate(d.getDate() - (6 - i));
                     const dStr = d.toISOString().slice(0, 10);
                     const entry = logs.find(l => l.ts.slice(0, 10) === dStr);
-                    const ml = entry ? (entry.litres === "<1L" ? 800 : entry.litres === "1–1.5L" ? 1250 : entry.litres === "1.5–2L" ? 1750 : entry.litres === "2–2.5L" ? 2250 : entry.litres === "2.5–3L" ? 2750 : 3000) : (dStr === todayStr ? todayMl : 0);
+                    const ml = entry ? mlFromLitres(entry.litres) : (dStr === todayStr ? todayMl : 0);
                     return { dStr, ml, isToday: dStr === todayStr };
                   });
-                  const todayLabel = todayMl >= 3000 ? "3L+" : todayMl >= 2500 ? "2.5–3L" : todayMl >= 2000 ? "2–2.5L" : todayMl >= 1500 ? "1.5–2L" : todayMl >= 1000 ? "1–1.5L" : todayMl > 0 ? "<1L" : "—";
-                  const dotColor = (ml: number) => ml >= 2000 ? "#0000ff" : ml >= 1500 ? "#3b82f6" : ml >= 1000 ? "#f97316" : "#ef4444";
+                  const barColor = (ml: number) => ml >= 2000 ? "#0000ff" : ml >= 1500 ? "#3b82f6" : ml >= 1000 ? "#f97316" : ml > 0 ? "#ef4444" : "#f0f1f4";
+                  const todayLitres = todayMl >= 1000 ? `${(todayMl / 1000).toFixed(1)}L` : todayMl > 0 ? `${todayMl}ml` : "0L";
                   return (
                     <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 16px" }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                        <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Hydration</p>
-                        <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>{todayLabel} today</p>
+                      <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" }}>Hydration</p>
+                      {/* Daily gauge */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                        <div style={{ flex: 1, height: 10, borderRadius: 999, background: "#f0f1f4", overflow: "hidden" }}>
+                          <div style={{ width: `${pct * 100}%`, height: "100%", borderRadius: 999, background: pct >= 0.8 ? "#0000ff" : pct >= 0.6 ? "#3b82f6" : pct >= 0.4 ? "#f97316" : "#ef4444", transition: "width 0.4s ease" }} />
+                        </div>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c", minWidth: 36, textAlign: "right" }}>{todayLitres}</span>
                       </div>
-                      <div style={{ display: "flex", gap: 6, alignItems: "flex-end" }}>
+                      {/* Week bars */}
+                      <div style={{ display: "flex", gap: 6 }}>
                         {last7.map(({ dStr, ml, isToday }) => (
                           <div key={dStr} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                            <div style={{ width: "100%", height: 32, borderRadius: 6, background: ml > 0 ? dotColor(ml) : "#f0f1f4", opacity: isToday ? 1 : 0.6 }} />
+                            <div style={{ width: "100%", height: 28, borderRadius: 5, background: barColor(ml), opacity: isToday ? 1 : 0.65 }} />
                             <span style={{ fontSize: 10, color: "#8a9096" }}>{new Date(dStr + "T12:00:00").toLocaleDateString("en-GB", { weekday: "narrow" })}</span>
                           </div>
                         ))}
