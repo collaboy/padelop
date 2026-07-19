@@ -571,7 +571,7 @@ export default function Fab() {
       {/* My Game summary sheet */}
       {myGameSheetOpen && (() => {
         const ciHistory: { date: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:checkin-history") || "[]"); } catch { return []; } })();
-        const scoreHistory: { date: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:score-history") || "[]"); } catch { return []; } })();
+        const scoreHistory: { date: string; overall?: number }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:score-history") || "[]"); } catch { return []; } })();
         const dateset = new Set([...ciHistory.map(c => c.date), ...scoreHistory.map(s => s.date)]);
         let streak = 0;
         const cur = new Date();
@@ -606,21 +606,49 @@ export default function Fab() {
                   <button onClick={() => { closeAll(); startNavLoad(); router.push("/my-game"); }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#2653d4", padding: 0 }}>View full →</button>
                 </div>
 
-                {/* Stats row */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
-                  <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 12px", textAlign: "center" }}>
-                    <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{streak}</p>
-                    <p style={{ margin: "4px 0 0", fontSize: 11, fontWeight: 600, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Day streak</p>
-                  </div>
-                  <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 12px", textAlign: "center" }}>
-                    <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{winRate !== null ? `${winRate}%` : "—"}</p>
-                    <p style={{ margin: "4px 0 0", fontSize: 11, fontWeight: 600, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Win rate</p>
-                  </div>
-                  <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 12px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                    <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: currentActivity?.color ?? "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>{currentActivity?.time ?? "—"}</p>
-                    <p style={{ margin: "4px 0 0", fontSize: 13, fontWeight: 700, color: "#1a1c1c", lineHeight: 1.2, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{currentActivity?.title ?? "—"}</p>
-                  </div>
-                </div>
+                {/* Stats row — circle cards */}
+                {(() => {
+                  const lifetimePoints = scoreHistory.reduce((acc, s) => acc + (s.overall ?? 0), 0);
+                  const ptLabel = lifetimePoints >= 1000 ? `${(lifetimePoints / 1000).toFixed(1)}K` : String(lifetimePoints);
+                  const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                  const streakColor = streak >= 30 ? "#f59e0b" : streak >= 7 ? "#2653d4" : "#6b7480";
+                  const wrColor = winRate !== null ? (winRate >= 60 ? "#16a34a" : winRate >= 40 ? "#d97706" : "#ef4444") : "#8a9096";
+                  const ptColor = "#2653d4";
+                  return (
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                      {/* Points */}
+                      <svg viewBox="0 0 200 200" width="100%" style={{ display: "block" }}>
+                        <defs><path id="mgsPtsArc" d="M 20,80 A 80,80 0 0,1 180,80" /></defs>
+                        <circle cx="100" cy="100" r="99" fill="#ffffff" />
+                        <text fontSize="19" fontWeight="700" letterSpacing="0.04em" style={{ fill: ptColor, fontFamily: ff }}>
+                          <textPath href="#mgsPtsArc" startOffset="50%" textAnchor="middle">PADEL PTS</textPath>
+                        </text>
+                        <text x="100" y="105" textAnchor="middle" dominantBaseline="middle" fontSize={lifetimePoints >= 1000 ? "38" : "42"} fontWeight="800" style={{ fill: ptColor, fontFamily: ff }}>{lifetimePoints > 0 ? ptLabel : "—"}</text>
+                        <text x="100" y="152" textAnchor="middle" fontSize="18" fontWeight="600" style={{ fill: ptColor, fontFamily: ff, opacity: 0.6 } as React.CSSProperties}>lifetime</text>
+                      </svg>
+                      {/* Streak */}
+                      <svg viewBox="0 0 200 200" width="100%" style={{ display: "block" }}>
+                        <defs><path id="mgsStreakArc" d="M 20,80 A 80,80 0 0,1 180,80" /></defs>
+                        <circle cx="100" cy="100" r="99" fill="#ffffff" />
+                        <text fontSize="19" fontWeight="700" letterSpacing="0.04em" style={{ fill: streakColor, fontFamily: ff }}>
+                          <textPath href="#mgsStreakArc" startOffset="50%" textAnchor="middle">STREAK</textPath>
+                        </text>
+                        <text x="100" y="105" textAnchor="middle" dominantBaseline="middle" fontSize="46" fontWeight="800" style={{ fill: streakColor, fontFamily: ff }}>{streak > 0 ? streak : "—"}</text>
+                        <text x="100" y="152" textAnchor="middle" fontSize="18" fontWeight="600" style={{ fill: streakColor, fontFamily: ff, opacity: 0.6 } as React.CSSProperties}>days</text>
+                      </svg>
+                      {/* Win rate */}
+                      <svg viewBox="0 0 200 200" width="100%" style={{ display: "block" }}>
+                        <defs><path id="mgsWrArc" d="M 20,80 A 80,80 0 0,1 180,80" /></defs>
+                        <circle cx="100" cy="100" r="99" fill="#ffffff" />
+                        <text fontSize="19" fontWeight="700" letterSpacing="0.04em" style={{ fill: wrColor, fontFamily: ff }}>
+                          <textPath href="#mgsWrArc" startOffset="50%" textAnchor="middle">WIN RATE</textPath>
+                        </text>
+                        <text x="100" y="105" textAnchor="middle" dominantBaseline="middle" fontSize="40" fontWeight="800" style={{ fill: wrColor, fontFamily: ff }}>{winRate !== null ? `${winRate}%` : "—"}</text>
+                        <text x="100" y="152" textAnchor="middle" fontSize="18" fontWeight="600" style={{ fill: wrColor, fontFamily: ff, opacity: 0.6 } as React.CSSProperties}>{winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no data"}</text>
+                      </svg>
+                    </div>
+                  );
+                })()}
 
                 {/* Next match */}
                 {nextMatch?.date && (
