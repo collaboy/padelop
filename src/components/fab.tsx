@@ -621,18 +621,25 @@ export default function Fab() {
                   const ptLabel = lifetimePoints >= 1000 ? `${(lifetimePoints / 1000).toFixed(1)}K` : String(lifetimePoints);
                   return (
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
-                      <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 12px", textAlign: "center" }}>
+                      <div style={{ background: "#ffffff", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 90 }}>
+                        <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#2653d4", textTransform: "uppercase", letterSpacing: "0.05em" }}>Padel pts</p>
                         <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#2653d4", lineHeight: 1 }}>{lifetimePoints > 0 ? ptLabel : "—"}</p>
-                        <p style={{ margin: "4px 0 0", fontSize: 11, fontWeight: 600, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Padel pts</p>
+                        <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#2653d4", opacity: 0.6 }}>lifetime</p>
                       </div>
-                      <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 12px", textAlign: "center" }}>
-                        <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: streak >= 30 ? "#f59e0b" : "#1a1c1c", lineHeight: 1 }}>{streak > 0 ? streak : "—"}</p>
-                        <p style={{ margin: "4px 0 0", fontSize: 11, fontWeight: 600, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Day streak</p>
+                      {(() => { const sc = streak >= 30 ? "#f59e0b" : "#1a1c1c"; return (
+                      <div style={{ background: "#ffffff", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 90 }}>
+                        <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: sc, textTransform: "uppercase", letterSpacing: "0.05em" }}>Streak</p>
+                        <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: sc, lineHeight: 1 }}>{streak > 0 ? streak : "—"}</p>
+                        <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: sc, opacity: 0.6 }}>days</p>
                       </div>
-                      <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 12px", textAlign: "center" }}>
-                        <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: winRate !== null ? (winRate >= 60 ? "#16a34a" : winRate >= 40 ? "#d97706" : "#ef4444") : "#1a1c1c", lineHeight: 1 }}>{winRate !== null ? `${winRate}%` : "—"}</p>
-                        <p style={{ margin: "4px 0 0", fontSize: 11, fontWeight: 600, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Win rate</p>
+                      ); })()}
+                      {(() => { const wc = winRate !== null ? (winRate >= 60 ? "#16a34a" : winRate >= 40 ? "#d97706" : "#ef4444") : "#8a9096"; return (
+                      <div style={{ background: "#ffffff", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 90 }}>
+                        <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: wc, textTransform: "uppercase", letterSpacing: "0.05em" }}>Win rate</p>
+                        <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: wc, lineHeight: 1 }}>{winRate !== null ? `${winRate}%` : "—"}</p>
+                        <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: wc, opacity: 0.6 }}>{winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no data"}</p>
                       </div>
+                      ); })()}
                     </div>
                   );
                 })()}
