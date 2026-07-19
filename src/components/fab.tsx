@@ -618,9 +618,9 @@ export default function Fab() {
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
                       {/* Points */}
                       <svg viewBox="0 0 200 200" width="100%" style={{ display: "block" }}>
-                        <defs><path id="mgsPtsArc" d="M 20,80 A 80,80 0 0,1 180,80" /></defs>
+                        <defs><path id="mgsPtsArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                         <circle cx="100" cy="100" r="99" fill="#ffffff" />
-                        <text fontSize="19" fontWeight="700" letterSpacing="0.04em" style={{ fill: ptColor, fontFamily: ff }}>
+                        <text fontSize="20" fontWeight="700" letterSpacing="0.04em" style={{ fill: ptColor, fontFamily: ff }}>
                           <textPath href="#mgsPtsArc" startOffset="50%" textAnchor="middle">PADEL PTS</textPath>
                         </text>
                         <text x="100" y="105" textAnchor="middle" dominantBaseline="middle" fontSize={lifetimePoints >= 1000 ? "38" : "42"} fontWeight="800" style={{ fill: ptColor, fontFamily: ff }}>{lifetimePoints > 0 ? ptLabel : "—"}</text>
@@ -628,9 +628,9 @@ export default function Fab() {
                       </svg>
                       {/* Streak */}
                       <svg viewBox="0 0 200 200" width="100%" style={{ display: "block" }}>
-                        <defs><path id="mgsStreakArc" d="M 20,80 A 80,80 0 0,1 180,80" /></defs>
+                        <defs><path id="mgsStreakArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                         <circle cx="100" cy="100" r="99" fill="#ffffff" />
-                        <text fontSize="19" fontWeight="700" letterSpacing="0.04em" style={{ fill: streakColor, fontFamily: ff }}>
+                        <text fontSize="20" fontWeight="700" letterSpacing="0.04em" style={{ fill: streakColor, fontFamily: ff }}>
                           <textPath href="#mgsStreakArc" startOffset="50%" textAnchor="middle">STREAK</textPath>
                         </text>
                         <text x="100" y="105" textAnchor="middle" dominantBaseline="middle" fontSize="46" fontWeight="800" style={{ fill: streakColor, fontFamily: ff }}>{streak > 0 ? streak : "—"}</text>
@@ -638,9 +638,9 @@ export default function Fab() {
                       </svg>
                       {/* Win rate */}
                       <svg viewBox="0 0 200 200" width="100%" style={{ display: "block" }}>
-                        <defs><path id="mgsWrArc" d="M 20,80 A 80,80 0 0,1 180,80" /></defs>
+                        <defs><path id="mgsWrArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                         <circle cx="100" cy="100" r="99" fill="#ffffff" />
-                        <text fontSize="19" fontWeight="700" letterSpacing="0.04em" style={{ fill: wrColor, fontFamily: ff }}>
+                        <text fontSize="20" fontWeight="700" letterSpacing="0.04em" style={{ fill: wrColor, fontFamily: ff }}>
                           <textPath href="#mgsWrArc" startOffset="50%" textAnchor="middle">WIN RATE</textPath>
                         </text>
                         <text x="100" y="105" textAnchor="middle" dominantBaseline="middle" fontSize="40" fontWeight="800" style={{ fill: wrColor, fontFamily: ff }}>{winRate !== null ? `${winRate}%` : "—"}</text>
