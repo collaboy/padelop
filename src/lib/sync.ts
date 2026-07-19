@@ -269,16 +269,27 @@ export async function hydrateFromSupabase(): Promise<SyncResult | null> {
 
     // ── Score snapshots ──────────────────────────────────────────────────
     const snapData = scoreSnapsRes.data ?? [];
-    if (snapData.length) {
-      const history = snapData.map(s => ({
-        date:      s.date as string,
-        overall:   s.overall   ?? 0,
-        recovery:  s.recovery  ?? 0,
-        nutrition: s.nutrition ?? 0,
-        training:  s.training  ?? 0,
-        wellbeing: s.wellbeing ?? 0,
-      }));
-      localStorage.setItem("padelop:score-history", JSON.stringify(history));
+    const localSnaps: { date: string; overall: number; recovery: number; nutrition: number; training: number; wellbeing: number }[] = (() => {
+      try { return JSON.parse(localStorage.getItem("padelop:score-history") || "[]"); } catch { return []; }
+    })();
+    // Merge: start with local, overwrite with DB entries, keep local-only dates
+    const snapMap = new Map(localSnaps.map(s => [s.date, s]));
+    const dbSnapDates = new Set<string>();
+    for (const s of snapData) {
+      const date = s.date as string;
+      dbSnapDates.add(date);
+      snapMap.set(date, { date, overall: s.overall ?? 0, recovery: s.recovery ?? 0, nutrition: s.nutrition ?? 0, training: s.training ?? 0, wellbeing: s.wellbeing ?? 0 });
+    }
+    const mergedSnaps = Array.from(snapMap.values()).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 90);
+    localStorage.setItem("padelop:score-history", JSON.stringify(mergedSnaps));
+    // Push local-only dates to DB so other devices can see them
+    for (const s of localSnaps) {
+      if (!dbSnapDates.has(s.date)) {
+        supabase.from("score_snapshots").upsert(
+          { user_id: user.id, date: s.date, overall: s.overall, recovery: s.recovery, nutrition: s.nutrition, training: s.training, wellbeing: s.wellbeing },
+          { onConflict: "user_id,date" }
+        ).then();
+      }
     }
 
     // ── Game days (derived from match dates) ─────────────────────────────
