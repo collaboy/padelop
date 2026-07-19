@@ -558,14 +558,21 @@ export default function Home8() {
         setReviews(raw ? (JSON.parse(raw) as ReviewEntry[]) : []);
       } catch { setReviews([]); }
       const todayStr = new Date().toISOString().slice(0, 10);
-      // Compute streak from check-in history (reliable — synced from DB)
+      // Compute streak — union of check-in history + score snapshots, 1-day grace for sync gaps
       const ciHistory: { date: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:checkin-history") || "[]"); } catch { return []; } })();
       const scoreHistory = loadScoreHistory();
       const dateset = new Set([...ciHistory.map(c => c.date), ...scoreHistory.map(s => s.date)]);
       let s = 0;
       const cur = new Date();
       if (!dateset.has(cur.toISOString().slice(0, 10))) cur.setDate(cur.getDate() - 1);
-      while (dateset.has(cur.toISOString().slice(0, 10))) { s++; cur.setDate(cur.getDate() - 1); }
+      let graceUsed = false;
+      while (true) {
+        const d = cur.toISOString().slice(0, 10);
+        if (dateset.has(d)) { s++; graceUsed = false; }
+        else if (!graceUsed) { graceUsed = true; }
+        else break;
+        cur.setDate(cur.getDate() - 1);
+      }
       setStreak(s);
       try {
         const p = JSON.parse(localStorage.getItem("padelop:profile") || "null");

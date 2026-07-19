@@ -576,7 +576,14 @@ export default function Fab() {
         let streak = 0;
         const cur = new Date();
         if (!dateset.has(cur.toISOString().slice(0, 10))) cur.setDate(cur.getDate() - 1);
-        while (dateset.has(cur.toISOString().slice(0, 10))) { streak++; cur.setDate(cur.getDate() - 1); }
+        let graceUsed = false;
+        while (true) {
+          const d = cur.toISOString().slice(0, 10);
+          if (dateset.has(d)) { streak++; graceUsed = false; }
+          else if (!graceUsed) { graceUsed = true; }
+          else break;
+          cur.setDate(cur.getDate() - 1);
+        }
 
         const nextMatch: StoredMatch | null = (() => { try { return JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch { return null; } })();
         const reviews: { result?: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]"); } catch { return []; } })();
@@ -608,7 +615,9 @@ export default function Fab() {
 
                 {/* Stats row — circle cards */}
                 {(() => {
-                  const lifetimePoints = scoreHistory.reduce((acc, s) => acc + (s.overall ?? 0), 0);
+                  const scoreMap = new Map(scoreHistory.map(s => [s.date, s.overall ?? 65]));
+                  const allDates = new Set([...ciHistory.map(c => c.date), ...scoreHistory.map(s => s.date)]);
+                  const lifetimePoints = Array.from(allDates).reduce((acc, d) => acc + (scoreMap.get(d) ?? 65), 0);
                   const ptLabel = lifetimePoints >= 1000 ? `${(lifetimePoints / 1000).toFixed(1)}K` : String(lifetimePoints);
                   const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                   const streakColor = streak >= 30 ? "#f59e0b" : streak >= 7 ? "#2653d4" : "#6b7480";
