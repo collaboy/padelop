@@ -637,7 +637,7 @@ export default function Fab() {
                     return { dStr, ml, isToday: dStr === todayStr };
                   });
                   const todayLabel = todayMl >= 3000 ? "3L+" : todayMl >= 2500 ? "2.5–3L" : todayMl >= 2000 ? "2–2.5L" : todayMl >= 1500 ? "1.5–2L" : todayMl >= 1000 ? "1–1.5L" : todayMl > 0 ? "<1L" : "—";
-                  const dotColor = (ml: number) => ml >= 2000 ? "#16a34a" : ml >= 1000 ? "#d97706" : "#e5e7eb";
+                  const dotColor = (ml: number) => ml >= 2000 ? "#1e3a8a" : ml >= 1500 ? "#2653d4" : ml >= 1000 ? "#93c5fd" : "#dbeafe";
                   return (
                     <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 16px" }}>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
