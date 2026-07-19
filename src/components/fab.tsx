@@ -46,6 +46,7 @@ export default function Fab() {
   const [logPickerOpen, setLogPickerOpen] = useState(false);
   const [logPickerSub, setLogPickerSub] = useState<"nutrition" | "matchreview" | "upload-confirm" | null>(null);
   const [fabExpanded, setFabExpanded] = useState(false);
+  const [myGameSheetOpen, setMyGameSheetOpen] = useState(false);
   const [insertUploadLoading, setInsertUploadLoading] = useState(false);
   const [insertUploadCategory, setInsertUploadCategory] = useState<string | null>(null);
   const [smartUploadResult, setSmartUploadResult] = useState<{ category: string; label: string; confidence: string; data: Record<string, string> } | null>(null);
@@ -153,6 +154,7 @@ export default function Fab() {
     setFabExpanded(false);
     setSmartUploadError(null);
     setTileScrolled(false);
+    setMyGameSheetOpen(false);
   }
 
   const inputSt: React.CSSProperties = { width: "100%", padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", outline: "none", fontFamily: "inherit", background: "#f8f9fa", boxSizing: "border-box" };
@@ -240,7 +242,7 @@ export default function Fab() {
                     {([
                       { label: "Home", action: () => { startNavLoad(); router.push("/home8"); }, icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
                       { label: "Log", action: () => setFabExpanded(v => !v), icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>, active: fabExpanded },
-                      { label: "My Game", action: () => { if (pathname.startsWith("/my-game")) { setLogPickerOpen(false); return; } startNavLoad(); router.push("/my-game"); }, icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="7" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg> },
+                      { label: "My Game", action: () => { setLogPickerOpen(false); setFabExpanded(false); setMyGameSheetOpen(true); }, icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="7" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg> },
                       { label: "Settings", action: () => { closeAll(); startNavLoad(); router.push("/settings"); }, icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
                     ] as { label: string; action: () => void; icon: React.ReactNode; active?: boolean }[]).map(({ label, action, icon, active }) => (
                       <button key={label} onClick={action} className="active:scale-95 transition-transform"
@@ -558,6 +560,84 @@ export default function Fab() {
                   <button onClick={handleEditManually} style={{ padding: "10px 20px", borderRadius: 999, background: "none", border: "1.5px solid #e8eaed", cursor: "pointer", fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 600, color: "#6b7480", width: "100%" }}>
                     {category === "unknown" ? "Enter manually" : "Edit manually"}
                   </button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* My Game summary sheet */}
+      {myGameSheetOpen && (() => {
+        const ciHistory: { date: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:checkin-history") || "[]"); } catch { return []; } })();
+        const dateset = new Set(ciHistory.map(c => c.date));
+        let streak = 0;
+        const cur = new Date();
+        if (!dateset.has(cur.toISOString().slice(0, 10))) cur.setDate(cur.getDate() - 1);
+        while (dateset.has(cur.toISOString().slice(0, 10))) { streak++; cur.setDate(cur.getDate() - 1); }
+
+        const nextMatch: StoredMatch | null = (() => { try { return JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch { return null; } })();
+        const reviews: { result?: string; matchDate?: string; ts: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]"); } catch { return []; } })();
+        const lastFive = reviews.slice(0, 5);
+        const wins = reviews.filter(r => r.result === "win").length;
+        const decided = reviews.filter(r => r.result === "win" || r.result === "loss").length;
+        const winRate = decided > 0 ? Math.round((wins / decided) * 100) : null;
+
+        const scoreHistory: { date: string; overall?: number; recovery?: number }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:score-history") || "[]"); } catch { return []; } })();
+        const latestScore = scoreHistory[0];
+
+        return (
+          <div className="fixed inset-0 z-[200] flex items-end" onClick={closeAll}>
+            <style>{`@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
+            <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" />
+            <div className="relative w-full rounded-t-[28px] shadow-2xl" style={{ background: "#f0f1f4", animation: "sheetUp 0.3s cubic-bezier(0.22,1,0.36,1)", paddingBottom: "env(safe-area-inset-bottom)" }} onClick={e => e.stopPropagation()}>
+              <div style={{ display: "flex", justifyContent: "center", paddingTop: 12, paddingBottom: 4 }}>
+                <div style={{ width: 40, height: 4, borderRadius: 2, background: "#d0d3d8" }} />
+              </div>
+              <div style={{ padding: "12px 20px 24px", display: "flex", flexDirection: "column", gap: 12 }}>
+                {/* Header */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <p style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#1a1c1c" }}>My Game</p>
+                  <button onClick={() => { closeAll(); startNavLoad(); router.push("/my-game"); }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#2653d4", padding: 0 }}>View full →</button>
+                </div>
+
+                {/* Stats row */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+                  <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 12px", textAlign: "center" }}>
+                    <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{streak}</p>
+                    <p style={{ margin: "4px 0 0", fontSize: 11, fontWeight: 600, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Day streak</p>
+                  </div>
+                  <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 12px", textAlign: "center" }}>
+                    <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{winRate !== null ? `${winRate}%` : "—"}</p>
+                    <p style={{ margin: "4px 0 0", fontSize: 11, fontWeight: 600, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Win rate</p>
+                  </div>
+                  <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 12px", textAlign: "center" }}>
+                    <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: latestScore?.recovery != null ? (latestScore.recovery >= 70 ? "#16a34a" : latestScore.recovery >= 45 ? "#d97706" : "#dc2626") : "#1a1c1c", lineHeight: 1 }}>{latestScore?.recovery != null ? latestScore.recovery : "—"}</p>
+                    <p style={{ margin: "4px 0 0", fontSize: 11, fontWeight: 600, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Readiness</p>
+                  </div>
+                </div>
+
+                {/* Recent form */}
+                {lastFive.length > 0 && (
+                  <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 16px" }}>
+                    <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Recent form</p>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      {lastFive.map((r, i) => (
+                        <div key={i} style={{ width: 36, height: 36, borderRadius: "50%", background: r.result === "win" ? "#dcfce7" : r.result === "loss" ? "#fee2e2" : "#f0f1f4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <span style={{ fontSize: 13, fontWeight: 800, color: r.result === "win" ? "#16a34a" : r.result === "loss" ? "#dc2626" : "#8a9096" }}>{r.result === "win" ? "W" : r.result === "loss" ? "L" : "D"}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Next match */}
+                {nextMatch?.date && (
+                  <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 16px" }}>
+                    <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Next match</p>
+                    <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1a1c1c" }}>{new Date(nextMatch.date + "T12:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })} · {nextMatch.time}</p>
+                    {nextMatch.club ? <p style={{ margin: "2px 0 0", fontSize: 13, color: "#6b7480" }}>{nextMatch.club}</p> : null}
+                  </div>
                 )}
               </div>
             </div>
