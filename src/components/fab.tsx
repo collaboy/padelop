@@ -579,7 +579,6 @@ export default function Fab() {
 
         const nextMatch: StoredMatch | null = (() => { try { return JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch { return null; } })();
         const reviews: { result?: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]"); } catch { return []; } })();
-        const lastFive = reviews.slice(0, 5);
         const wins = reviews.filter(r => r.result === "win").length;
         const decided = reviews.filter(r => r.result === "win" || r.result === "loss").length;
         const winRate = decided > 0 ? Math.round((wins / decided) * 100) : null;
@@ -624,19 +623,38 @@ export default function Fab() {
                   </div>
                 )}
 
-                {/* Recent form */}
-                {lastFive.length > 0 && (
-                  <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 16px" }}>
-                    <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Recent form</p>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      {lastFive.map((r, i) => (
-                        <div key={i} style={{ width: 36, height: 36, borderRadius: "50%", background: r.result === "win" ? "#dcfce7" : r.result === "loss" ? "#fee2e2" : "#f0f1f4", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <span style={{ fontSize: 13, fontWeight: 800, color: r.result === "win" ? "#16a34a" : r.result === "loss" ? "#dc2626" : "#8a9096" }}>{r.result === "win" ? "W" : r.result === "loss" ? "L" : "D"}</span>
-                        </div>
-                      ))}
+                {/* Hydration */}
+                {(() => {
+                  const todayStr = new Date().toISOString().slice(0, 10);
+                  const quick: { date: string; ml: number } | null = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null"); } catch { return null; } })();
+                  const todayMl = quick?.date === todayStr ? quick.ml : 0;
+                  const logs: { ts: string; litres: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch { return []; } })();
+                  const last7 = Array.from({ length: 7 }, (_, i) => {
+                    const d = new Date(); d.setDate(d.getDate() - (6 - i));
+                    const dStr = d.toISOString().slice(0, 10);
+                    const entry = logs.find(l => l.ts.slice(0, 10) === dStr);
+                    const ml = entry ? (entry.litres === "<1L" ? 800 : entry.litres === "1–1.5L" ? 1250 : entry.litres === "1.5–2L" ? 1750 : entry.litres === "2–2.5L" ? 2250 : entry.litres === "2.5–3L" ? 2750 : 3000) : (dStr === todayStr ? todayMl : 0);
+                    return { dStr, ml, isToday: dStr === todayStr };
+                  });
+                  const todayLabel = todayMl >= 3000 ? "3L+" : todayMl >= 2500 ? "2.5–3L" : todayMl >= 2000 ? "2–2.5L" : todayMl >= 1500 ? "1.5–2L" : todayMl >= 1000 ? "1–1.5L" : todayMl > 0 ? "<1L" : "—";
+                  const dotColor = (ml: number) => ml >= 2000 ? "#16a34a" : ml >= 1000 ? "#d97706" : "#e5e7eb";
+                  return (
+                    <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 16px" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                        <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#8a9096", textTransform: "uppercase", letterSpacing: "0.05em" }}>Hydration</p>
+                        <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>{todayLabel} today</p>
+                      </div>
+                      <div style={{ display: "flex", gap: 6, alignItems: "flex-end" }}>
+                        {last7.map(({ dStr, ml, isToday }) => (
+                          <div key={dStr} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                            <div style={{ width: "100%", height: 32, borderRadius: 6, background: ml > 0 ? dotColor(ml) : "#f0f1f4", opacity: isToday ? 1 : 0.6 }} />
+                            <span style={{ fontSize: 10, color: "#8a9096" }}>{new Date(dStr + "T12:00:00").toLocaleDateString("en-GB", { weekday: "narrow" })}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
               </div>
             </div>
           </div>
