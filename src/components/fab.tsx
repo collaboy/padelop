@@ -647,35 +647,15 @@ export default function Fab() {
                   const todayMl = quick?.date === todayStr ? quick.ml : 0;
                   const goal = 2500;
                   const pct = Math.min(todayMl / goal, 1);
-                  const logs: { ts: string; litres: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch { return []; } })();
-                  const mlFromLitres = (l: string) => l === "<1L" ? 800 : l === "1–1.5L" ? 1250 : l === "1.5–2L" ? 1750 : l === "2–2.5L" ? 2250 : l === "2.5–3L" ? 2750 : 3000;
-                  const last7 = Array.from({ length: 7 }, (_, i) => {
-                    const d = new Date(); d.setDate(d.getDate() - (6 - i));
-                    const dStr = d.toISOString().slice(0, 10);
-                    const entry = logs.find(l => l.ts.slice(0, 10) === dStr);
-                    const ml = entry ? mlFromLitres(entry.litres) : (dStr === todayStr ? todayMl : 0);
-                    return { dStr, ml, isToday: dStr === todayStr };
-                  });
-                  const barColor = (ml: number) => ml >= 2000 ? "#0000ff" : ml >= 1500 ? "#3b82f6" : ml >= 1000 ? "#f97316" : ml > 0 ? "#ef4444" : "#f0f1f4";
                   const todayLitres = todayMl >= 1000 ? `${(todayMl / 1000).toFixed(1)}L` : todayMl > 0 ? `${todayMl}ml` : "0L";
                   return (
                     <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 16px" }}>
                       <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" }}>Hydration</p>
-                      {/* Daily gauge */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <div style={{ flex: 1, height: 10, borderRadius: 999, background: "#f0f1f4", overflow: "hidden" }}>
                           <div style={{ width: `${pct * 100}%`, height: "100%", borderRadius: 999, background: pct >= 0.8 ? "#0000ff" : pct >= 0.6 ? "#3b82f6" : pct >= 0.4 ? "#f97316" : "#ef4444", transition: "width 0.4s ease" }} />
                         </div>
                         <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c", minWidth: 36, textAlign: "right" }}>{todayLitres}</span>
-                      </div>
-                      {/* Week bars */}
-                      <div style={{ display: "flex", gap: 6 }}>
-                        {last7.map(({ dStr, ml, isToday }) => (
-                          <div key={dStr} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                            <div style={{ width: "100%", height: 28, borderRadius: 5, background: barColor(ml), opacity: isToday ? 1 : 0.65 }} />
-                            <span style={{ fontSize: 10, color: "#8a9096" }}>{new Date(dStr + "T12:00:00").toLocaleDateString("en-GB", { weekday: "narrow" })}</span>
-                          </div>
-                        ))}
                       </div>
                     </div>
                   );
