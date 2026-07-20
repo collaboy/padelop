@@ -595,7 +595,6 @@ export default function ProfilePage() {
   // Panel state (inline action panel below profile card)
   const [panelExpanded, setPanelExpanded] = useState(false);
   const [openPanel, setOpenPanel] = useState<string | null>(null);
-  const nextMatchPanelOpen  = openPanel === 'nextMatch';
   const dayTypeInfoOpen     = openPanel === 'dayType';
   const panelSchedOpen      = openPanel === 'sched';
   const streakPanelOpen     = openPanel === 'streak';
@@ -607,11 +606,6 @@ export default function ProfilePage() {
   const togglePanel = (name: string) => setOpenPanel(p => p === name ? null : name);
   const [formScore, setFormScore] = useState<FormScore | null>(null);
   const [hydrationMl, setHydrationMl] = useState(0);
-  const [nextMatchInfoMode, setNextMatchInfoMode] = useState<'edit'|'add'|null>(null);
-  const [nmMatchForm, setNmMatchForm] = useState<MatchForm>(EMPTY_FORM);
-  const nmUploadRef = useRef<HTMLInputElement>(null);
-  const [nmUploadError, setNmUploadError] = useState<string|null>(null);
-  const [nmUploadExtracting, setNmUploadExtracting] = useState(false);
   const [panelUploadLoading, setPanelUploadLoading] = useState(false);
   const [panelUploadCategory, setPanelUploadCategory] = useState<string | null>(null);
   const [panelSmartResult, setPanelSmartResult] = useState<{ category: string; label: string; confidence: string; data: Record<string, string> } | null>(null);
@@ -1364,18 +1358,6 @@ export default function ProfilePage() {
                     const dim = (active: boolean) => ({ opacity: anyOpen && !active ? 0.3 : 1, transition: "opacity 0.2s" });
                     return (
                     <>
-                    {/* Hero Circle */}
-                    <div style={{ display: "flex", justifyContent: "center" }}>
-                      <div onClick={() => openPadlaPanel()} {...touchPress(() => openPadlaPanel())} style={{ width: "62vw", aspectRatio: "1/1", cursor: "pointer" }}>
-                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                          <circle cx="100" cy="100" r="99" fill="#2653d4" />
-                          <text x="100" y="96" textAnchor="middle" dominantBaseline="middle" fontSize="32" fontWeight="800" style={{ fill: "#fff", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>MY GAME</text>
-                          <text x="100" y="120" textAnchor="middle" dominantBaseline="middle" fontSize="14" fontWeight="700" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                            <tspan fontWeight="800" fill="rgba(255,255,255,0.95)">{Object.values(schedDone).flat().length}</tspan>{" PADLA POINTS"}
-                          </text>
-                        </svg>
-                      </div>
-                    </div>
                     {/* Coach's note */}
                     {matchInsight ? (
                       <div onClick={() => setInsightSheetOpen(true)} {...touchPress(() => setInsightSheetOpen(true))} style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: "36px 24px 44px" }}>
@@ -1388,41 +1370,27 @@ export default function ProfilePage() {
                         </p>
                       </div>
                     )}
-                    {/* Row 1: Next Match · Day Type · Goals */}
+                    {/* Row 1: My Game · Day Type · Goals */}
                     <div style={{ display: "flex", gap: 10 }}>
-                      {/* Next Match */}
-                      {(() => {
-                        const today = new Date().toISOString().slice(0, 10);
-                        const diffDays = nextMatch
-                          ? Math.round((new Date(nextMatch.date + "T12:00").getTime() - new Date(today + "T12:00").getTime()) / 86400000)
-                          : null;
-                        const countdownLabel = diffDays === null ? "NO MATCH" : diffDays === 0 ? "TODAY" : diffDays === 1 ? "TOMORROW" : `IN ${diffDays} DAYS`;
-                        const timeLabel = nextMatch?.time ?? "";
-                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        return (
-                          <div onClick={() => togglePanel('nextMatch')} {...touchPress(() => togglePanel('nextMatch'))}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(nextMatchPanelOpen) }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="nextMatchTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="#2653d4" />
-                              <text fontSize="19" fontWeight="700" letterSpacing="2.5" style={{ fill: "rgba(255,255,255,0.7)", fontFamily: ff }}>
-                                <textPath href="#nextMatchTopArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
-                              </text>
-                              <text x="100" y={timeLabel ? "93" : "108"} textAnchor="middle" dominantBaseline="middle"
-                                fontSize={countdownLabel.length > 7 ? "18" : "22"} fontWeight="800" letterSpacing="0.06em"
-                                style={{ fill: "rgba(255,255,255,0.9)", fontFamily: ff }}>
-                                {countdownLabel}
-                              </text>
-                              {timeLabel && (
-                                <text x="100" y="123" textAnchor="middle" dominantBaseline="middle"
-                                  fontSize="32" fontWeight="800" letterSpacing="-0.02em" style={{ fill: "#fff", fontFamily: ff }}>
-                                  {timeLabel}
-                                </text>
-                              )}
-                            </svg>
-                          </div>
-                        );
-                      })()}
+                      {/* My Game */}
+                      <div onClick={() => openPadlaPanel()} {...touchPress(() => openPadlaPanel())}
+                        style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0 }}>
+                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
+                          <defs><path id="myGameTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                          <circle cx="100" cy="100" r="99" fill="#2653d4" />
+                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                            <textPath href="#myGameTopArc" startOffset="50%" textAnchor="middle">MY GAME</textPath>
+                          </text>
+                          <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
+                            fontSize="46" fontWeight="800" style={{ fill: "#fff", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                            {Object.values(schedDone).flat().length}
+                          </text>
+                          <text x="100" y="152" textAnchor="middle" fontSize="20" fontWeight="600"
+                            style={{ fill: "#fff", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", opacity: 0.65 } as React.CSSProperties}>
+                            padla points
+                          </text>
+                        </svg>
+                      </div>
 
                       {/* Day Type */}
                       <div onClick={() => togglePanel('dayType')} {...touchPress(() => togglePanel('dayType'))}
@@ -1509,199 +1477,6 @@ export default function ProfilePage() {
                         </div>
                       </div>
                     )}
-
-                    {/* Next Match panel — full width below row 1 */}
-                    {nextMatchPanelOpen && (() => {
-                      const today2 = new Date().toISOString().slice(0, 10);
-                      const matchDate = nextMatch ? new Date(nextMatch.date + "T12:00") : null;
-                      const todayDate = new Date(today2 + "T12:00");
-                      const diffDays = matchDate ? Math.round((matchDate.getTime() - todayDate.getTime()) / 86400000) : null;
-                      const cdLabel = diffDays === null ? "NO MATCH" : diffDays === 0 ? "TODAY" : diffDays === 1 ? "TOMORROW" : `IN ${diffDays} DAYS`;
-                      const dateStr = matchDate ? matchDate.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" }) : "";
-                      const saveEdit = () => {
-                        if (!nmMatchForm.date || !nmMatchForm.time) return;
-                        const data = matchFormToStored(nmMatchForm);
-                        const updated = upcomingMatches.map(m => m.date === nextMatch?.date && m.time === nextMatch?.time ? data : m);
-                        const merged = upcomingMatches.some(m => m.date === nextMatch?.date && m.time === nextMatch?.time) ? updated : [data, ...upcomingMatches];
-                        matchSaveList(merged);
-                        saveUpcomingMatch(data);
-                        setNextMatchInfoMode(null);
-                      };
-                      const saveAdd = () => {
-                        if (!nmMatchForm.date || !nmMatchForm.time) return;
-                        const data = matchFormToStored(nmMatchForm);
-                        matchSaveList([...upcomingMatches, data]);
-                        saveUpcomingMatch(data);
-                        setNmMatchForm(EMPTY_FORM);
-                        setNextMatchInfoMode(null);
-                      };
-                      return (
-                        <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
-                          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                          <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
-                          <div style={{ background: "#2653d414", flexShrink: 0 }}>
-                            <div style={{ width: 40, height: 4, borderRadius: 999, background: "#2653d440", margin: "12px auto 10px" }} />
-                            <div style={{ padding: "0 18px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                              <p style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: "-0.01em", color: "#2653d4" }}>Next Match</p>
-                              <span style={{ fontSize: 13, fontWeight: 700, color: "#2653d4", background: "#2653d420", borderRadius: 999, padding: "3px 12px" }}>{cdLabel}</span>
-                            </div>
-                          </div>
-                          <div className="overflow-y-auto flex-1" style={{ minHeight: 0 }}>
-                        <div style={{ overflow: "hidden" }}>
-                          {/* hidden file input for screenshot upload */}
-                          <input ref={nmUploadRef} type="file" accept="image/*" style={{ display: "none" }} onChange={async e => {
-                            const file = e.target.files?.[0];
-                            if (!file) return;
-                            setNmUploadError(null); setNmUploadExtracting(true);
-                            try {
-                              const reader = new FileReader();
-                              const base64 = await new Promise<string>((resolve, reject) => { reader.onload = () => resolve((reader.result as string).split(',')[1]); reader.onerror = reject; reader.readAsDataURL(file); });
-                              const res = await fetch('/api/extract-match', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: base64, mediaType: file.type }) });
-                              const data = await res.json();
-                              if (!res.ok || data.error) { setNmUploadError(data.message || 'Could not read the screenshot.'); }
-                              else { setNmMatchForm({ date: data.date ?? '', time: data.time ?? '', club: data.club ?? '', court: data.court ?? '', p1: data.player_1 ?? '', p2: data.player_2 ?? '', p3: data.player_3 ?? '', p4: data.player_4 ?? '' }); setNextMatchInfoMode('edit'); }
-                            } catch { setNmUploadError('Upload failed. Please try again.'); }
-                            setNmUploadExtracting(false);
-                            if (nmUploadRef.current) nmUploadRef.current.value = '';
-                          }} />
-
-                          <div style={{ padding: "16px 16px 28px", display: "flex", flexDirection: "column", gap: 12 }}>
-                            {/* Match info card */}
-                            <div style={{ background: "#fff", borderRadius: 20, padding: "20px" }}>
-                              {nextMatch ? (
-                                <>
-                                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
-                                    <div>
-                                      <p style={{ margin: 0, fontSize: 28, fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1 }}>{matchDate?.toLocaleDateString("en-GB", { weekday: "long" })}</p>
-                                      <p style={{ margin: "3px 0 0", fontSize: 17, fontWeight: 500, color: "#6b7480" }}>{matchDate?.toLocaleDateString("en-GB", { day: "numeric", month: "long" })}</p>
-                                    </div>
-                                    <span style={{ fontSize: 36, fontWeight: 800, color: "#2653d4", letterSpacing: "-0.02em", lineHeight: 1 }}>{nextMatch.time}</span>
-                                  </div>
-                                  {(nextMatch.club || nextMatch.court) && (
-                                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                                      {nextMatch.club && <span style={{ fontSize: 15, color: "#6b7480" }}>{nextMatch.club}</span>}
-                                      {nextMatch.court && (() => { const n = nextMatch.court.match(/\d+/)?.[0]; return n ? <span style={{ fontSize: 13, fontWeight: 700, color: "#2653d4", background: "#eef2ff", borderRadius: 6, padding: "2px 8px" }}>Court #{n}</span> : null; })()}
-                                    </div>
-                                  )}
-                                  {[nextMatch.player_1, nextMatch.player_2, nextMatch.player_3, nextMatch.player_4].filter(Boolean).length > 0 && (
-                                    <p style={{ margin: "0 0 14px", fontSize: 15, color: "#6b7480" }}>
-                                      {[nextMatch.player_1, nextMatch.player_2, nextMatch.player_3, nextMatch.player_4].filter(Boolean).join(" · ")}
-                                    </p>
-                                  )}
-                                  <button onClick={() => {
-                                    if (nextMatchInfoMode === 'edit') { setNextMatchInfoMode(null); }
-                                    else { setNmMatchForm({ date: nextMatch.date, time: nextMatch.time, club: nextMatch.club ?? '', court: nextMatch.court ?? '', p1: nextMatch.player_1, p2: nextMatch.player_2, p3: nextMatch.player_3, p4: nextMatch.player_4 }); setNextMatchInfoMode('edit'); }
-                                  }} style={{ background: "none", border: "none", padding: 0, fontSize: 14, fontWeight: 700, color: "#2653d4", cursor: "pointer" }}>
-                                    {nextMatchInfoMode === 'edit' ? "Cancel" : "Edit match"}
-                                  </button>
-                                </>
-                              ) : (
-                                <div style={{ textAlign: "center", padding: "8px 0" }}>
-                                  <p style={{ margin: "0 0 4px", fontSize: 17, fontWeight: 700, color: "#1a1c1c" }}>No match scheduled</p>
-                                  <p style={{ margin: 0, fontSize: 15, color: "#8a9096" }}>Add your next game below</p>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Edit form */}
-                            {nextMatchInfoMode === 'edit' && (
-                              <div style={{ background: "#fff", borderRadius: 20, padding: "16px" }}>
-                                <div className="flex flex-col gap-3">
-                                  <button onClick={() => { setNmUploadError(null); nmUploadRef.current?.click(); }} disabled={nmUploadExtracting} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl active:opacity-70" style={{ background: "#f4f6ff", border: "1.5px solid #2653d418", opacity: nmUploadExtracting ? 0.5 : 1 }}>
-                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#2653d4" }}>
-                                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                                    </div>
-                                    <span className="text-[14px] font-semibold text-[#1a1c1c] flex-1 text-left">{nmUploadExtracting ? "Reading screenshot…" : "Upload screenshot"}</span>
-                                  </button>
-                                  {nmUploadError && <div className="px-3 py-2.5 rounded-xl text-[13px] text-[#c0392b]" style={{ background: "#fff0f0", border: "1.5px solid #ffd0d0" }}>{nmUploadError}</div>}
-                                  <div className="flex flex-col gap-1">
-                                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
-                                    <input type="date" value={nmMatchForm.date} onChange={e => setNmMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: nmMatchForm.date ? "#2653d4" : "#e2e2e2", background: nmMatchForm.date ? "#f4f6ff" : "#fff", minHeight: 44, cursor: "pointer" }} />
-                                  </div>
-                                  <div className="flex flex-col gap-1">
-                                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
-                                    <input type="time" value={nmMatchForm.time} onChange={e => setNmMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: nmMatchForm.time ? "#2653d4" : "#e2e2e2", background: nmMatchForm.time ? "#f4f6ff" : "#fff", minHeight: 44, cursor: "pointer" }} />
-                                  </div>
-                                  <div className="flex flex-col gap-1">
-                                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Club</label>
-                                    <input type="text" placeholder="e.g. Club Padel BCN" value={nmMatchForm.club} onChange={e => setNmMatchForm(f => ({ ...f, club: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: nmMatchForm.club ? "#2653d4" : "#e2e2e2", background: nmMatchForm.club ? "#f4f6ff" : "#fff" }} />
-                                  </div>
-                                  <div className="flex flex-col gap-1">
-                                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Court #</label>
-                                    <input type="text" placeholder="e.g. 3" value={nmMatchForm.court} onChange={e => setNmMatchForm(f => ({ ...f, court: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: nmMatchForm.court ? "#2653d4" : "#e2e2e2", background: nmMatchForm.court ? "#f4f6ff" : "#fff" }} />
-                                  </div>
-                                  <div className="flex flex-col gap-2">
-                                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Players</label>
-                                    {(['p1','p2','p3','p4'] as const).map((key, i) => (
-                                      <input key={key} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={nmMatchForm[key]} onChange={e => setNmMatchForm(f => ({ ...f, [key]: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: nmMatchForm[key] ? "#2653d4" : "#e2e2e2", background: nmMatchForm[key] ? "#f4f6ff" : "#fff" }} />
-                                    ))}
-                                  </div>
-                                  <button onClick={saveEdit} className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white" style={{ background: (!nmMatchForm.date || !nmMatchForm.time) ? "#c4c7c7" : "#2653d4" }}>Save changes</button>
-                                  <button onClick={() => {
-                                    if (!nextMatch) return;
-                                    matchSaveList(upcomingMatches.filter(m => !(m.date === nextMatch.date && m.time === nextMatch.time)));
-                                    setOpenPanel(null);
-                                    setNextMatchInfoMode(null);
-                                  }} className="w-full py-3 rounded-2xl text-[14px] font-semibold" style={{ background: "#fef2f2", color: "#dc2626", border: "none", cursor: "pointer" }}>Delete match</button>
-                                </div>
-                              </div>
-                            )}
-
-                            {/* Add match */}
-                            {nextMatchInfoMode !== 'edit' && (
-                              <>
-                                {nextMatchInfoMode !== 'add' && (
-                                  <button onClick={() => { setNmMatchForm(EMPTY_FORM); setNmUploadError(null); setNextMatchInfoMode('add'); nmUploadRef.current?.click(); }}
-                                    style={{ alignSelf: "flex-start", background: "#2653d4", color: "#fff", border: "none", borderRadius: 20, padding: "8px 16px", fontSize: 15, fontWeight: 700, cursor: "pointer" }}>
-                                    + Add match
-                                  </button>
-                                )}
-                                {nextMatchInfoMode === 'add' && (
-                                  <div style={{ background: "#fff", borderRadius: 20, padding: "16px" }}>
-                                    <div className="flex flex-col gap-3">
-                                      <button onClick={() => { setNmUploadError(null); nmUploadRef.current?.click(); }} disabled={nmUploadExtracting} className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl active:opacity-70" style={{ background: "#f4f6ff", border: "1.5px solid #2653d418", opacity: nmUploadExtracting ? 0.5 : 1 }}>
-                                        <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#2653d4" }}>
-                                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                                        </div>
-                                        <span className="text-[14px] font-semibold text-[#1a1c1c] flex-1 text-left">{nmUploadExtracting ? "Reading screenshot…" : "Upload screenshot"}</span>
-                                      </button>
-                                      {nmUploadError && <div className="px-3 py-2.5 rounded-xl text-[13px] text-[#c0392b]" style={{ background: "#fff0f0", border: "1.5px solid #ffd0d0" }}>{nmUploadError}</div>}
-                                      <div className="flex flex-col gap-1">
-                                        <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
-                                        <input type="date" value={nmMatchForm.date} onChange={e => setNmMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: nmMatchForm.date ? "#2653d4" : "#e2e2e2", background: nmMatchForm.date ? "#f4f6ff" : "#fff", minHeight: 44, cursor: "pointer" }} />
-                                      </div>
-                                      <div className="flex flex-col gap-1">
-                                        <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
-                                        <input type="time" value={nmMatchForm.time} onChange={e => setNmMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: nmMatchForm.time ? "#2653d4" : "#e2e2e2", background: nmMatchForm.time ? "#f4f6ff" : "#fff", minHeight: 44, cursor: "pointer" }} />
-                                      </div>
-                                      <div className="flex flex-col gap-1">
-                                        <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Club</label>
-                                        <input type="text" placeholder="e.g. Club Padel BCN" value={nmMatchForm.club} onChange={e => setNmMatchForm(f => ({ ...f, club: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: nmMatchForm.club ? "#2653d4" : "#e2e2e2", background: nmMatchForm.club ? "#f4f6ff" : "#fff" }} />
-                                      </div>
-                                      <div className="flex flex-col gap-1">
-                                        <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Court #</label>
-                                        <input type="text" placeholder="e.g. 3" value={nmMatchForm.court} onChange={e => setNmMatchForm(f => ({ ...f, court: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: nmMatchForm.court ? "#2653d4" : "#e2e2e2", background: nmMatchForm.court ? "#f4f6ff" : "#fff" }} />
-                                      </div>
-                                      <div className="flex flex-col gap-2">
-                                        <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Players</label>
-                                        {(['p1','p2','p3','p4'] as const).map((key, i) => (
-                                          <input key={key} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={nmMatchForm[key]} onChange={e => setNmMatchForm(f => ({ ...f, [key]: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]" style={{ borderColor: nmMatchForm[key] ? "#2653d4" : "#e2e2e2", background: nmMatchForm[key] ? "#f4f6ff" : "#fff" }} />
-                                        ))}
-                                      </div>
-                                      <button onClick={saveAdd} className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white" style={{ background: (!nmMatchForm.date || !nmMatchForm.time) ? "#c4c7c7" : "#2653d4" }}>Save match</button>
-                                      <button onClick={() => { setNextMatchInfoMode(null); setNmMatchForm(EMPTY_FORM); }} className="w-full py-3 rounded-2xl text-[14px] font-semibold" style={{ background: "#f4f6f8", color: "#6b7480", border: "none", cursor: "pointer" }}>Cancel</button>
-                                    </div>
-                                  </div>
-                                )}
-                              </>
-                            )}
-                          </div>
-                        </div>
-                          </div>
-                          </div>
-                        </div>
-                      );
-                    })()}
 
                     {panelSchedOpen && (
                       <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)} onTouchStart={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
