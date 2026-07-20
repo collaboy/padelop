@@ -1358,18 +1358,29 @@ export default function ProfilePage() {
                     const dim = (active: boolean) => ({ opacity: anyOpen && !active ? 0.3 : 1, transition: "opacity 0.2s" });
                     return (
                     <>
+                    {/* Today's date + day type pill */}
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "20px 24px 0" }}>
+                      <p style={{ margin: 0, fontSize: "clamp(28px, 7vw, 38px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>
+                        {new Date().toLocaleDateString("en-GB", { weekday: "long" })}, {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long" })}
+                      </p>
+                      <div onClick={() => togglePanel('dayType')} {...touchPress(() => togglePanel('dayType'))} style={{ cursor: "pointer", ...dim(dayTypeInfoOpen) }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: panelDayColor, background: `${panelDayColor}18`, borderRadius: 999, padding: "5px 14px" }}>{panelDayLabel}</span>
+                      </div>
+                    </div>
+
                     {/* Coach's note */}
                     {matchInsight ? (
-                      <div onClick={() => setInsightSheetOpen(true)} {...touchPress(() => setInsightSheetOpen(true))} style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: "36px 24px 44px" }}>
+                      <div onClick={() => setInsightSheetOpen(true)} {...touchPress(() => setInsightSheetOpen(true))} style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: "20px 24px 44px" }}>
                         <p style={{ margin: 0, fontSize: "clamp(17px, 4.5vw, 21px)", fontWeight: 300, letterSpacing: "0.01em", color: "#7a8590", lineHeight: 1.5, textWrap: "balance", textAlign: "center" } as React.CSSProperties}>{matchInsight.sentence}</p>
                       </div>
                     ) : (
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "36px 24px 44px" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "20px 24px 44px" }}>
                         <p style={{ margin: 0, fontSize: "clamp(17px, 4.5vw, 21px)", fontWeight: 300, letterSpacing: "0.01em", color: "#a0aab2", lineHeight: 1.5, textAlign: "center" }}>
                           {["Habits win matches.", "Small reps compound.", "Train your weaknesses.", "Rest is part of training.", "Show up consistently.", "Log a game. See the gaps.", "Your game is built daily."][new Date().getDay()]}
                         </p>
                       </div>
                     )}
+
                     {/* Row 1: My Game · Day Type · Goals */}
                     <div style={{ display: "flex", gap: 10 }}>
                       {/* My Game */}
