@@ -1381,11 +1381,100 @@ export default function ProfilePage() {
                       </div>
                     )}
 
+                    {/* Summary stats row (ported from FAB menu's My Game sheet) */}
+                    {(() => {
+                      const lifetimePoints = Object.values(schedDone).flat().length;
+                      const ptLabel = lifetimePoints >= 1000 ? `${(lifetimePoints / 1000).toFixed(1)}K` : String(lifetimePoints);
+                      const wins = reviews.filter(r => r.result === "win").length;
+                      const decided = reviews.filter(r => r.result === "win" || r.result === "loss").length;
+                      const winRate = decided > 0 ? Math.round((wins / decided) * 100) : null;
+                      return (
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
+                          <div style={{ background: "#f0f1f4", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 90 }}>
+                            <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" }}>Padel pts</p>
+                            <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{lifetimePoints > 0 ? ptLabel : "—"}</p>
+                            <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#8a9096" }}>lifetime</p>
+                          </div>
+                          <div style={{ background: "#f0f1f4", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 90 }}>
+                            <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" }}>Streak</p>
+                            <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{streak > 0 ? streak : "—"}</p>
+                            <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#8a9096" }}>days</p>
+                          </div>
+                          <div style={{ background: "#f0f1f4", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 90 }}>
+                            <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" }}>Win rate</p>
+                            <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{winRate !== null ? `${winRate}%` : "—"}</p>
+                            <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#8a9096" }}>{winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no data"}</p>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
                     {/* Row 1: My Game · Day Type · Goals */}
-                    <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+                    <div style={{ display: "flex", gap: 10 }}>
+                      {/* My Game */}
+                      <div onClick={() => openPadlaPanel()} {...touchPress(() => openPadlaPanel())}
+                        style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0 }}>
+                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
+                          <defs><path id="myGameTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                          <circle cx="100" cy="100" r="99" fill="#2653d4" />
+                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                            <textPath href="#myGameTopArc" startOffset="50%" textAnchor="middle">MY GAME</textPath>
+                          </text>
+                          <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
+                            fontSize="46" fontWeight="800" style={{ fill: "#fff", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                            {Object.values(schedDone).flat().length}
+                          </text>
+                          <text x="100" y="152" textAnchor="middle" fontSize="20" fontWeight="600"
+                            style={{ fill: "#fff", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", opacity: 0.65 } as React.CSSProperties}>
+                            padla points
+                          </text>
+                        </svg>
+                      </div>
+
+                      {/* Next Match */}
+                      <div onClick={() => togglePanel('matches')} {...touchPress(() => togglePanel('matches'))}
+                        style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(matchesPanelOpen) }}>
+                        {(() => {
+                          const nmColor = "#7c3aed";
+                          const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                          if (!nextMatch) {
+                            return (
+                              <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
+                                <defs><path id="nextMatchTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                                <circle cx="100" cy="100" r="99" fill={nmColor} />
+                                <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: ff }}>
+                                  <textPath href="#nextMatchTopArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
+                                </text>
+                                <text x="100" y="108" textAnchor="middle" dominantBaseline="middle" fontSize="22" fontWeight="800" style={{ fill: "white", fontFamily: ff }}>
+                                  None
+                                </text>
+                              </svg>
+                            );
+                          }
+                          const today = new Date().toISOString().slice(0, 10);
+                          const diffDays = Math.round((new Date(nextMatch.date + "T12:00").getTime() - new Date(today + "T12:00").getTime()) / 86400000);
+                          const mainLabel = diffDays === 0 ? "Today" : diffDays === 1 ? "Tmrw" : `${diffDays}d`;
+                          return (
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
+                              <defs><path id="nextMatchTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill={nmColor} />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: ff }}>
+                                <textPath href="#nextMatchTopArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
+                              </text>
+                              <text x="100" y="93" textAnchor="middle" dominantBaseline="middle" fontSize="24" fontWeight="800" style={{ fill: "white", fontFamily: ff }}>
+                                {mainLabel}
+                              </text>
+                              <text x="100" y="123" textAnchor="middle" dominantBaseline="middle" fontSize="20" fontWeight="800" style={{ fill: "white", fontFamily: ff }}>
+                                {nextMatch.time}
+                              </text>
+                            </svg>
+                          );
+                        })()}
+                      </div>
+
                       {/* Today's Goals */}
                       <div onClick={() => togglePanel('sched')} {...touchPress(() => togglePanel('sched'))}
-                        style={{ flex: "0 0 calc((100% - 20px) / 3)", aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(panelSchedOpen) }}>
+                        style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(panelSchedOpen) }}>
                         <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                           <defs><path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                           <circle cx="100" cy="100" r="99" fill="#16a34a" />
@@ -1412,35 +1501,6 @@ export default function ProfilePage() {
                           })()}
                         </svg>
                       </div>
-
-                      {/* Form Score */}
-                      {(() => {
-                        const fs = formScore;
-                        const score = fs?.score ?? null;
-                        const color = score === null ? "#9aa0a6" : score >= 70 ? "#16a34a" : score >= 50 ? "#d97706" : "#ef4444";
-                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        return (
-                          <div onClick={() => togglePanel('formScore')} {...touchPress(() => togglePanel('formScore'))}
-                            style={{ flex: "0 0 calc((100% - 20px) / 3)", aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(formScorePanelOpen) }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="formScoreArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#formScoreArc" startOffset="50%" textAnchor="middle">FORM</textPath>
-                              </text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-                                fontSize={score !== null ? "46" : "36"} fontWeight="800"
-                                style={{ fill: color, fontFamily: ff }}>
-                                {score !== null ? score : "—"}
-                              </text>
-                              <text x="100" y="152" textAnchor="middle" fontSize="19" fontWeight="600"
-                                style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
-                                {score === null ? "no data" : score >= 70 ? "on track" : "building"}
-                              </text>
-                            </svg>
-                          </div>
-                        );
-                      })()}
 
                     </div>
 
@@ -1502,7 +1562,7 @@ export default function ProfilePage() {
                     )}
 
                     {/* Row 2: Streak · Form Score · Hydration */}
-                    <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
+                    <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
                       {/* Streak */}
                       {(() => {
                         const STIERS = [
@@ -1537,46 +1597,64 @@ export default function ProfilePage() {
                         );
                       })()}
 
-                      {/* My Game */}
-                      <div onClick={() => openPadlaPanel()} {...touchPress(() => openPadlaPanel())}
-                        style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0 }}>
-                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                          <defs><path id="myGameTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
-                          <circle cx="100" cy="100" r="99" fill="#2653d4" />
-                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                            <textPath href="#myGameTopArc" startOffset="50%" textAnchor="middle">MY GAME</textPath>
-                          </text>
-                          <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-                            fontSize="46" fontWeight="800" style={{ fill: "#fff", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                            {Object.values(schedDone).flat().length}
-                          </text>
-                          <text x="100" y="152" textAnchor="middle" fontSize="20" fontWeight="600"
-                            style={{ fill: "#fff", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", opacity: 0.65 } as React.CSSProperties}>
-                            padla points
-                          </text>
-                        </svg>
-                      </div>
-
-                      {/* Matches circle */}
+                      {/* Form Score */}
                       {(() => {
-                        const color = "#2653d4";
+                        const fs = formScore;
+                        const score = fs?.score ?? null;
+                        const color = score === null ? "#9aa0a6" : score >= 70 ? "#16a34a" : score >= 50 ? "#d97706" : "#ef4444";
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        const wins   = reviews.filter(r => r.result === "win").length;
-                        const losses = reviews.filter(r => r.result === "loss").length;
-                        const total  = wins + losses;
-                        const centerText = total > 0 ? `${Math.round((wins / total) * 100)}%` : "—";
-                        const sub = total > 0 ? "wins" : "no matches";
                         return (
-                          <div onClick={() => togglePanel('matches')} {...touchPress(() => togglePanel('matches'))}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(matchesPanelOpen) }}>
+                          <div onClick={() => togglePanel('formScore')} {...touchPress(() => togglePanel('formScore'))}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(formScorePanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="matchesArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <defs><path id="formScoreArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
                               <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#matchesArc" startOffset="50%" textAnchor="middle">MATCHES</textPath>
+                                <textPath href="#formScoreArc" startOffset="50%" textAnchor="middle">FORM</textPath>
                               </text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{centerText}</text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
+                                fontSize={score !== null ? "46" : "36"} fontWeight="800"
+                                style={{ fill: color, fontFamily: ff }}>
+                                {score !== null ? score : "—"}
+                              </text>
+                              <text x="100" y="152" textAnchor="middle" fontSize="19" fontWeight="600"
+                                style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
+                                {score === null ? "no data" : score >= 70 ? "on track" : "building"}
+                              </text>
+                            </svg>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Hydration */}
+                      {(() => {
+                        const ml = hydrationMl;
+                        const hasData = ml > 0;
+                        const color = "#0ea5e9";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        const pct = hasData ? Math.min(ml / 3000, 1) : null;
+                        const centerText = hasData
+                          ? (ml >= 1000 ? `${(ml / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${ml}ml`)
+                          : "—";
+                        const subText = pct !== null ? `${Math.round(pct * 100)}% of 3L` : "not logged";
+                        return (
+                          <div onClick={() => togglePanel('hydration')} {...touchPress(() => togglePanel('hydration'))}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(hydrationPanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
+                              <defs><path id="hydrationArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
+                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#hydrationArc" startOffset="50%" textAnchor="middle">HYDRATION</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
+                                fontSize={centerText.length > 4 ? "34" : centerText.length > 2 ? "42" : "46"} fontWeight="800"
+                                style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff }}>
+                                {centerText}
+                              </text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600"
+                                style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
+                                {subText}
+                              </text>
                             </svg>
                           </div>
                         );
@@ -1796,36 +1874,27 @@ export default function ProfilePage() {
                     })()}
 
                     {/* Row 3: Matches · Insights · Tags */}
-                    <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
-                      {/* Hydration */}
+                    <div style={{ display: "flex", gap: 10 }}>
+                      {/* Matches circle */}
                       {(() => {
-                        const ml = hydrationMl;
-                        const hasData = ml > 0;
-                        const color = "#0ea5e9";
+                        const color = "#2653d4";
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        const pct = hasData ? Math.min(ml / 3000, 1) : null;
-                        const centerText = hasData
-                          ? (ml >= 1000 ? `${(ml / 1000).toFixed(1).replace(/\.0$/, "")}L` : `${ml}ml`)
-                          : "—";
-                        const subText = pct !== null ? `${Math.round(pct * 100)}% of 3L` : "not logged";
+                        const wins   = reviews.filter(r => r.result === "win").length;
+                        const losses = reviews.filter(r => r.result === "loss").length;
+                        const total  = wins + losses;
+                        const centerText = reviews.length > 0 ? String(reviews.length) : "—";
+                        const sub = total > 0 ? `${Math.round((wins / total) * 100)}% wins` : "no matches";
                         return (
-                          <div onClick={() => togglePanel('hydration')} {...touchPress(() => togglePanel('hydration'))}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(hydrationPanelOpen) }}>
+                          <div onClick={() => togglePanel('matches')} {...touchPress(() => togglePanel('matches'))}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(matchesPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="hydrationArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <defs><path id="matchesArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
                               <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#hydrationArc" startOffset="50%" textAnchor="middle">HYDRATION</textPath>
+                                <textPath href="#matchesArc" startOffset="50%" textAnchor="middle">MATCHES</textPath>
                               </text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-                                fontSize={centerText.length > 4 ? "34" : centerText.length > 2 ? "42" : "46"} fontWeight="800"
-                                style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff }}>
-                                {centerText}
-                              </text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600"
-                                style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
-                                {subText}
-                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{centerText}</text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
                             </svg>
                           </div>
                         );
