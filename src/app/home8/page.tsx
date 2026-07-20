@@ -267,6 +267,7 @@ export default function Home8() {
   const [matchInfoTipsOpen, setMatchInfoTipsOpen] = useState(false);
   const [matchInfoMode, setMatchInfoMode] = useState<null | 'edit' | 'add'>(null);
   const [matchInfoAddTab, setMatchInfoAddTab] = useState<null | 'upload' | 'manual'>(null);
+  const [editingMatchKey, setEditingMatchKey] = useState<{ date: string; time: string } | null>(null);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; court?: string; players?: string[] } | null>(null);
   const [isAddMode, setIsAddMode] = useState(false);
   const [matchActionMode, setMatchActionMode] = useState<null | 'edit' | 'add'>(null);
@@ -1796,8 +1797,7 @@ export default function Home8() {
 
 
 
-        {/* Match info modal */}
-        {/* Match info modal — bottom sheet */}
+        {/* Match info modal — bottom sheet (mirrors the FAB menu's slide-up sheet) */}
         {matchInfoOpen && match && (() => {
           const matchDate = new Date(match.date + "T12:00");
           const todayDate = new Date(today + "T12:00");
@@ -1805,13 +1805,35 @@ export default function Home8() {
           const countdownLabel = diffDays === 0 ? "TODAY" : diffDays === 1 ? "TOMORROW" : `IN ${diffDays} DAYS`;
           const dateStr = matchDate.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long" });
           const playerStr = match.players && match.players.length > 0 ? match.players.map(p => p.slice(0, 2)).join(' · ') : null;
-          const closeSheet = () => { setMatchInfoOpen(false); setMatchInfoMode(null); setMatchInfoAddTab(null); setMatchInfoTipsOpen(false); };
+          const closeSheet = () => { setMatchInfoOpen(false); setMatchInfoMode(null); setMatchInfoAddTab(null); setMatchInfoTipsOpen(false); setEditingMatchKey(null); };
+          const reviewedDates = (() => {
+            try {
+              const reviews: { ts?: string; matchDate?: string }[] = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
+              return new Set(reviews.map(r => r.matchDate ?? r.ts?.slice(0, 10)).filter(Boolean) as string[]);
+            } catch { return new Set<string>(); }
+          })();
+          const seenDates = new Set<string>();
+          const unratedMatches = getMatchList().filter(m => {
+            if (!m.date || !m.time || seenDates.has(m.date)) return false;
+            seenDates.add(m.date);
+            return new Date(`${m.date}T${m.time}:00`).getTime() < Date.now() && !reviewedDates.has(m.date);
+          });
+          const unratedKeys = new Set(unratedMatches.map(m => `${m.date}_${m.time}`));
+          const otherMatches = getMatchList().filter(m => !(m.date === match.date && m.time === match.time) && !unratedKeys.has(`${m.date}_${m.time}`));
+          const openMatchReview = () => { closeSheet(); setLogTab("matchreview"); setLogSheetOpen(true); };
+          const openEditFor = (src: StoredMatch) => {
+            setMatchForm({ date: src.date ?? '', time: src.time ?? '', club: src.club ?? '', court: src.court ?? '', p1: src.player_1 ?? '', p2: src.player_2 ?? '', p3: src.player_3 ?? '', p4: src.player_4 ?? '' });
+            setEditingMatchKey({ date: src.date, time: src.time });
+            setMatchInfoMode('edit');
+            setMatchInfoAddTab(null);
+          };
           const saveEdit = () => {
             if (!matchForm.date || !matchForm.time) return;
             const data: StoredMatch = { date: matchForm.date, time: matchForm.time, club: matchForm.club, court: matchForm.court, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
+            const key = editingMatchKey ?? match;
             const current = getMatchList();
-            const replaced = current.map(m => m.date === match?.date && m.time === match?.time ? data : m);
-            const updated = current.some(m => m.date === match?.date && m.time === match?.time) ? replaced : [data, ...current];
+            const replaced = current.map(m => m.date === key?.date && m.time === key?.time ? data : m);
+            const updated = current.some(m => m.date === key?.date && m.time === key?.time) ? replaced : [data, ...current];
             const sorted = saveMatchList(updated);
             const next = sorted[0];
             if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, court: next.court || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
@@ -1831,14 +1853,18 @@ export default function Home8() {
             closeSheet();
           };
           return (
-            <div className="fixed inset-0 z-[200] flex items-start justify-center px-5" style={{ paddingTop: "10dvh", paddingBottom: "10dvh" }} onClick={closeSheet}>
-              <style>{`@keyframes miScaleIn{from{transform:scale(0.95);opacity:0}to{transform:scale(1);opacity:1}}`}</style>
+            <div className="fixed inset-0 z-[200] flex items-end" onClick={closeSheet}>
+              <style>{`@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
               <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
               <div
-                className="relative w-full bg-white rounded-[28px] flex flex-col overflow-hidden"
-                style={{ animation: "miScaleIn 0.2s cubic-bezier(0.22,1,0.36,1)", maxHeight: "80dvh" }}
+                className="relative w-full bg-white rounded-t-[28px] flex flex-col overflow-hidden shadow-2xl"
+                style={{ animation: "sheetUp 0.3s cubic-bezier(0.22,1,0.36,1)", maxHeight: "85dvh", paddingBottom: "env(safe-area-inset-bottom)" }}
                 onClick={e => e.stopPropagation()}
               >
+                <div style={{ display: "flex", justifyContent: "center", paddingTop: 12, paddingBottom: 4, flexShrink: 0 }}>
+                  <div style={{ width: 40, height: 4, borderRadius: 2, background: "#d0d3d8" }} />
+                </div>
+
                 {/* Shared hidden file input for both edit and add upload */}
                 <input ref={actionUploadRef} type="file" accept="image/*" className="hidden" onChange={async (e) => {
                   const file = e.target.files?.[0];
@@ -1860,6 +1886,26 @@ export default function Home8() {
                 <div className="overflow-y-auto flex-1 overscroll-contain" style={{ minHeight: 0 }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, padding: "16px 16px 32px" }}>
 
+                  {/* Needs rating — same list the FAB "Log" sheet surfaces */}
+                  {unratedMatches.length > 0 && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                      <p style={{ margin: "0 2px", fontSize: 11, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em", textTransform: "uppercase" }}>Needs rating</p>
+                      {unratedMatches.map((m, i) => (
+                        <button
+                          key={`${m.date}-${m.time}-${i}`}
+                          onClick={openMatchReview}
+                          style={{ width: "100%", padding: "11px 14px", borderRadius: 12, background: "#f0f4ff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, textAlign: "left" }}
+                        >
+                          <div style={{ flex: 1 }}>
+                            <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>{new Date(m.date + "T12:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}</p>
+                            <p style={{ margin: "1px 0 0", fontSize: 12, color: "#6b7480" }}>{m.time}{m.club ? ` · ${m.club}` : ""}</p>
+                          </div>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: "#2653d4", background: "#dce8ff", borderRadius: 999, padding: "3px 10px", whiteSpace: "nowrap" }}>Rate now</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
                   {/* MATCH INFO CARD */}
                   <div style={{ position: "relative", borderRadius: 24, overflow: "hidden" }}>
                     {/* All content on white */}
@@ -1867,8 +1913,8 @@ export default function Home8() {
                       {/* Edit icon — left */}
                       <button
                         onClick={() => {
-                          if (matchInfoMode === 'edit') { setMatchInfoMode(null); }
-                          else { const fresh = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); const src = fresh ?? match; setMatchForm({ date: src.date ?? '', time: src.time ?? '', club: src.club ?? src.location ?? '', court: src.court ?? '', p1: src.player_1 ?? src.players?.[0] ?? '', p2: src.player_2 ?? src.players?.[1] ?? '', p3: src.player_3 ?? src.players?.[2] ?? '', p4: src.player_4 ?? src.players?.[3] ?? '' }); setMatchInfoMode('edit'); setMatchInfoAddTab(null); }
+                          if (matchInfoMode === 'edit') { setMatchInfoMode(null); setEditingMatchKey(null); }
+                          else { const fresh = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); const src = fresh ?? match; setMatchForm({ date: src.date ?? '', time: src.time ?? '', club: src.club ?? src.location ?? '', court: src.court ?? '', p1: src.player_1 ?? src.players?.[0] ?? '', p2: src.player_2 ?? src.players?.[1] ?? '', p3: src.player_3 ?? src.players?.[2] ?? '', p4: src.player_4 ?? src.players?.[3] ?? '' }); setEditingMatchKey({ date: match.date, time: match.time }); setMatchInfoMode('edit'); setMatchInfoAddTab(null); }
                         }}
                         style={{ position: "absolute", top: 14, left: 14, background: "#f4f4f6", border: "none", cursor: "pointer", padding: 7, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a5050" }}
                       >
@@ -1943,8 +1989,9 @@ export default function Home8() {
                           </div>
                           <button onClick={saveEdit} className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white" style={{ background: (!matchForm.date || !matchForm.time) ? "#c4c7c7" : "#2653d4" }}>Save changes</button>
                           <button onClick={() => {
-                            deleteUpcomingMatchFromDb(match.date, match.time ?? "");
-                            const updated = getMatchList().filter(m => !(m.date === match.date && m.time === match.time));
+                            const key = editingMatchKey ?? match;
+                            deleteUpcomingMatchFromDb(key.date, key.time ?? "");
+                            const updated = getMatchList().filter(m => !(m.date === key.date && m.time === key.time));
                             const sorted = saveMatchList(updated);
                             const next = sorted[0];
                             if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, court: next.court || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
@@ -1966,7 +2013,11 @@ export default function Home8() {
                             <span className="text-[14px] font-semibold text-[#1a1c1c] flex-1 text-left">{uploadExtracting ? "Reading screenshot…" : "Upload screenshot"}</span>
                             {uploadExtracting && <svg className="animate-spin ml-auto flex-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>}
                           </button>
+                          {matchInfoAddTab !== 'manual' && (
+                            <button onClick={() => setMatchInfoAddTab('manual')} className="w-full py-3 rounded-2xl text-[14px] font-semibold" style={{ background: "#f4f4f6", color: "#1a1c1c", border: "none", cursor: "pointer" }}>Add manually</button>
+                          )}
                           {uploadError && <div className="px-3 py-2.5 rounded-xl text-[13px] text-[#c0392b]" style={{ background: "#fff0f0", border: "1.5px solid #ffd0d0" }}>{uploadError}</div>}
+                          {matchInfoAddTab === 'manual' && (<>
                           <div className="flex flex-col gap-3">
                             <div className="flex flex-col gap-1">
                               <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
@@ -1992,12 +2043,32 @@ export default function Home8() {
                             ))}
                           </div>
                           <button onClick={saveAdd} className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white" style={{ background: (!matchForm.date || !matchForm.time) ? "#c4c7c7" : "#2653d4" }}>Save match</button>
+                          </>)}
                         </div>
                       </div>
                     )}
                     </div>{/* end gradient section */}
                   </div>
 
+                  {/* Other stored games — same list the FAB "Log" sheet surfaces */}
+                  {otherMatches.length > 0 && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                      <p style={{ margin: "4px 2px 0", fontSize: 11, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em", textTransform: "uppercase" }}>Other upcoming games</p>
+                      {otherMatches.map((m, i) => (
+                        <button
+                          key={`${m.date}-${m.time}-${i}`}
+                          onClick={() => openEditFor(m)}
+                          style={{ width: "100%", padding: "12px 14px", borderRadius: 16, background: "#f4f4f6", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, textAlign: "left" }}
+                        >
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>{new Date(m.date + "T12:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}</p>
+                            <p style={{ margin: "1px 0 0", fontSize: 12, color: "#6b7480" }}>{m.time}{m.club ? ` · ${m.club}` : ""}{m.court ? ` · #${m.court}` : ""}</p>
+                          </div>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: "#2653d4", background: "#dce8ff", borderRadius: 999, padding: "3px 10px", whiteSpace: "nowrap" }}>Edit</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
                 </div>{/* end flex column */}
                 </div>{/* end scroll container */}

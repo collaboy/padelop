@@ -52,6 +52,7 @@ export default function Fab() {
   const [insertUploadCategory, setInsertUploadCategory] = useState<string | null>(null);
   const [smartUploadResult, setSmartUploadResult] = useState<{ category: string; label: string; confidence: string; data: Record<string, string> } | null>(null);
   const [smartUploadError, setSmartUploadError] = useState<string | null>(null);
+  const [scheduleManualOpen, setScheduleManualOpen] = useState(false);
   const [mealTime, setMealTime] = useState("");
   const [mealText, setMealText] = useState("");
   const [mealsToday, setMealsToday] = useState<{ id: string; time: string; description: string }[]>([]);
@@ -115,6 +116,7 @@ export default function Fab() {
     function handleOpen() { setSmartUploadError(null); setFabExpanded(false); setLogPickerOpen(true); }
     function handleAddMatch() {
       setSmartUploadResult({ category: "match_schedule", label: "Schedule a match", confidence: "high", data: { date: "", time: "", club: "", court: "", player_1: "", player_2: "", player_3: "", player_4: "" } });
+      setScheduleManualOpen(false);
       setLogPickerSub("upload-confirm");
     }
     window.addEventListener("padelop:open-fab", handleOpen);
@@ -156,6 +158,7 @@ export default function Fab() {
     setSmartUploadError(null);
     setTileScrolled(false);
     setMyGameSheetOpen(false);
+    setScheduleManualOpen(false);
   }
 
   const inputSt: React.CSSProperties = { width: "100%", padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", outline: "none", fontFamily: "inherit", background: "#f8f9fa", boxSizing: "border-box" };
@@ -209,6 +212,7 @@ export default function Fab() {
               setSmartUploadError(result.message || "Could not read the image.");
             } else {
               setSmartUploadResult(result);
+              setScheduleManualOpen(true);
               setLogPickerSub("upload-confirm");
               setLogPickerOpen(false);
             }
@@ -237,20 +241,26 @@ export default function Fab() {
                   </div>
                 )}
 
-                {/* Top row — Home, My Game, +, [Settings — swipe left to reveal] */}
+                {/* Top row — Home, Log, My Game, Check-in, [Settings — swipe left to reveal] */}
                 <div ref={tileRowRef} onScroll={e => setTileScrolled((e.currentTarget.scrollLeft) > 30)} style={{ overflowX: "scroll", scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}>
                   <div style={{ display: "flex", gap: 10 }}>
                     {([
                       { label: "Home", action: () => { startNavLoad(); router.push("/home8"); }, icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
                       { label: "Log", action: () => setFabExpanded(v => !v), icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2.2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>, active: fabExpanded },
                       { label: "My Game", action: () => { setLogPickerOpen(false); setFabExpanded(false); setMyGameSheetOpen(true); }, icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="7" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg> },
+                      { label: "Check-in", action: () => { if (!checkinDone) { window.dispatchEvent(new CustomEvent("padelop:open-checkin")); setLogPickerOpen(false); setFabExpanded(false); } }, icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>, done: checkinDone },
                       { label: "Settings", action: () => { closeAll(); startNavLoad(); router.push("/settings"); }, icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
-                    ] as { label: string; action: () => void; icon: React.ReactNode; active?: boolean }[]).map(({ label, action, icon, active }) => (
+                    ] as { label: string; action: () => void; icon: React.ReactNode; active?: boolean; done?: boolean }[]).map(({ label, action, icon, active, done }) => (
                       <button key={label} onClick={action} className="active:scale-95 transition-transform"
-                        style={{ flex: "0 0 calc((100vw - 52px) / 3.5)", background: "none", border: "none", padding: 0, cursor: "pointer" }}>
-                        <div style={{ width: "100%", aspectRatio: "1/1", borderRadius: "50%", background: active ? "#e8e9ec" : "#ffffff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 5 }}>
+                        style={{ flex: "0 0 calc((100vw - 52px) / 3.5)", background: "none", border: "none", padding: 0, cursor: done ? "default" : "pointer" }}>
+                        <div style={{ width: "100%", aspectRatio: "1/1", borderRadius: "50%", background: active ? "#e8e9ec" : "#ffffff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 5, position: "relative", opacity: done ? 0.5 : 1 }}>
                           {icon}
                           <span style={{ fontSize: 13, fontWeight: 500, color: "#9aa5b0", letterSpacing: "0.01em" }}>{label}</span>
+                          {done && (
+                            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </div>
+                          )}
                         </div>
                       </button>
                     ))}
@@ -261,25 +271,12 @@ export default function Fab() {
                 <div style={{ overflow: "hidden", maxHeight: fabExpanded ? 300 : 0, transition: "max-height 0.3s cubic-bezier(0.4,0,0.2,1)" }}>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, paddingBottom: 10 }}>
                     <button
-                      onClick={() => { setSmartUploadResult({ category: "match_schedule", label: "Schedule a match", confidence: "high", data: { date: "", time: "", club: "", court: "", player_1: "", player_2: "", player_3: "", player_4: "" } }); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); }}
+                      onClick={() => { setSmartUploadResult({ category: "match_schedule", label: "Schedule a match", confidence: "high", data: { date: "", time: "", club: "", court: "", player_1: "", player_2: "", player_3: "", player_4: "" } }); setScheduleManualOpen(false); setLogPickerSub("upload-confirm"); setLogPickerOpen(false); }}
                       className="active:scale-95 transition-transform"
                       style={{ background: "#ffffff", border: "none", borderRadius: "50%", padding: "14px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, textAlign: "center", aspectRatio: "1/1", width: "100%" }}
                     >
                       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
                       <p style={{ fontSize: 13, fontWeight: 600, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Match</p>
-                    </button>
-                    <button
-                      onClick={() => { if (!checkinDone) { window.dispatchEvent(new CustomEvent("padelop:open-checkin")); setLogPickerOpen(false); setFabExpanded(false); } }}
-                      className="active:scale-95 transition-transform"
-                      style={{ background: "#ffffff", border: "none", borderRadius: "50%", padding: "14px", cursor: checkinDone ? "default" : "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, textAlign: "center", aspectRatio: "1/1", width: "100%", position: "relative", opacity: checkinDone ? 0.5 : 1 }}
-                    >
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-                      <p style={{ fontSize: 13, fontWeight: 600, color: "#1a1c1c", margin: 0, lineHeight: 1.2 }}>Check-in</p>
-                      {checkinDone && (
-                        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                        </div>
-                      )}
                     </button>
                   </div>
                 </div>
@@ -464,11 +461,19 @@ export default function Fab() {
                     {insertUploadLoading ? "Reading…" : "Upload screenshot"}
                   </span>
                 </button>
+                {category === "match_schedule" && !scheduleManualOpen && (
+                  <button
+                    onClick={() => setScheduleManualOpen(true)}
+                    style={{ width: "100%", marginTop: 8, padding: "13px 16px", borderRadius: 14, background: "#f4f4f6", border: "none", cursor: "pointer", fontSize: 15, fontWeight: 600, color: "#1a1c1c" }}
+                  >
+                    Add manually
+                  </button>
+                )}
               </div>
 
               {/* Editable fields */}
               <div style={{ padding: "12px 20px 4px" }}>
-                {category === "match_schedule" && (
+                {category === "match_schedule" && scheduleManualOpen && (
                   <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                       <div>
@@ -552,12 +557,12 @@ export default function Fab() {
 
               {/* Actions */}
               <div style={{ padding: "16px 20px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
-                {category !== "unknown" && (
+                {category !== "unknown" && (category !== "match_schedule" || scheduleManualOpen) && (
                   <button onClick={handleConfirm} disabled={!canConfirm} style={{ padding: "13px 20px", borderRadius: 999, background: canConfirm ? meta.color : "#e8eaed", border: "none", cursor: canConfirm ? "pointer" : "default", fontSize: "clamp(14px, 3.6vw, 16px)", fontWeight: 700, color: canConfirm ? "#fff" : "#b0b8c1", width: "100%" }}>
                     {category === "match_schedule" ? "Save match" : category === "meal" ? "Log meal" : category === "match_result" ? "Save result" : "Save"}
                   </button>
                 )}
-                {category !== "gear" && category !== "match_result" && (
+                {category !== "gear" && category !== "match_result" && category !== "match_schedule" && (
                   <button onClick={handleEditManually} style={{ padding: "10px 20px", borderRadius: 999, background: "none", border: "1.5px solid #e8eaed", cursor: "pointer", fontSize: "clamp(13px, 3.4vw, 15px)", fontWeight: 600, color: "#6b7480", width: "100%" }}>
                     {category === "unknown" ? "Enter manually" : "Edit manually"}
                   </button>
@@ -635,27 +640,6 @@ export default function Fab() {
                         <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" }}>Win rate</p>
                         <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{winRate !== null ? `${winRate}%` : "—"}</p>
                         <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#8a9096" }}>{winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no data"}</p>
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                {/* Hydration */}
-                {(() => {
-                  const todayStr = new Date().toISOString().slice(0, 10);
-                  const quick: { date: string; ml: number } | null = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-quick") || "null"); } catch { return null; } })();
-                  const todayMl = quick?.date === todayStr ? quick.ml : 0;
-                  const goal = 2500;
-                  const pct = Math.min(todayMl / goal, 1);
-                  const todayLitres = todayMl >= 1000 ? `${(todayMl / 1000).toFixed(1)}L` : todayMl > 0 ? `${todayMl}ml` : "0L";
-                  return (
-                    <div style={{ background: "#ffffff", borderRadius: 16, padding: "14px 16px" }}>
-                      <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" }}>Hydration</p>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <div style={{ flex: 1, height: 10, borderRadius: 999, background: "#f0f1f4", overflow: "hidden" }}>
-                          <div style={{ width: `${pct * 100}%`, height: "100%", borderRadius: 999, background: pct >= 0.8 ? "#0000ff" : pct >= 0.6 ? "#3b82f6" : pct >= 0.4 ? "#f97316" : "#ef4444", transition: "width 0.4s ease" }} />
-                        </div>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1c1c", minWidth: 36, textAlign: "right" }}>{todayLitres}</span>
                       </div>
                     </div>
                   );
