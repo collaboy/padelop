@@ -1390,17 +1390,17 @@ export default function ProfilePage() {
                       const winRate = decided > 0 ? Math.round((wins / decided) * 100) : null;
                       return (
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
-                          <div style={{ background: "#f0f1f4", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 90 }}>
+                          <div style={{ background: "#f0f1f4", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", aspectRatio: "1/1" }}>
                             <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" }}>Padel pts</p>
                             <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{lifetimePoints > 0 ? ptLabel : "—"}</p>
                             <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#8a9096" }}>lifetime</p>
                           </div>
-                          <div style={{ background: "#f0f1f4", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 90 }}>
+                          <div style={{ background: "#f0f1f4", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", aspectRatio: "1/1" }}>
                             <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" }}>Streak</p>
                             <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{streak > 0 ? streak : "—"}</p>
                             <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#8a9096" }}>days</p>
                           </div>
-                          <div style={{ background: "#f0f1f4", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 90 }}>
+                          <div style={{ background: "#f0f1f4", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", aspectRatio: "1/1" }}>
                             <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" }}>Win rate</p>
                             <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{winRate !== null ? `${winRate}%` : "—"}</p>
                             <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#8a9096" }}>{winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no data"}</p>
