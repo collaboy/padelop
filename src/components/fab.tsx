@@ -239,29 +239,39 @@ export default function Fab() {
                   </div>
                 )}
 
-                {/* Top row — Home, My Game, Check-in, [Settings — swipe left to reveal] */}
+                {/* Top row — Home, My Game */}
                 <div ref={tileRowRef} onScroll={e => setTileScrolled((e.currentTarget.scrollLeft) > 30)} style={{ overflowX: "scroll", scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}>
                   <div style={{ display: "flex", gap: 10 }}>
                     {([
                       { label: "Home", action: () => { startNavLoad(); router.push("/home8"); }, icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
                       { label: "My Game", action: () => { setLogPickerOpen(false); setMyGameSheetOpen(true); }, icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="7" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg> },
-                      { label: "Check-in", action: () => { if (!checkinDone) { window.dispatchEvent(new CustomEvent("padelop:open-checkin")); setLogPickerOpen(false); } }, icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>, done: checkinDone },
-                      { label: "Settings", action: () => { closeAll(); startNavLoad(); router.push("/settings"); }, icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
-                    ] as { label: string; action: () => void; icon: React.ReactNode; done?: boolean }[]).map(({ label, action, icon, done }) => (
+                    ] as { label: string; action: () => void; icon: React.ReactNode }[]).map(({ label, action, icon }) => (
                       <button key={label} onClick={action} className="active:scale-95 transition-transform"
-                        style={{ flex: "0 0 calc((100vw - 52px) / 3.5)", background: "none", border: "none", padding: 0, cursor: done ? "default" : "pointer" }}>
-                        <div style={{ width: "100%", aspectRatio: "1/1", borderRadius: "50%", background: "#ffffff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 5, position: "relative", opacity: done ? 0.5 : 1 }}>
+                        style={{ flex: 1, background: "none", border: "none", padding: 0, cursor: "pointer" }}>
+                        <div style={{ width: "100%", aspectRatio: "1/1", borderRadius: "50%", background: "#ffffff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 5, position: "relative" }}>
                           {icon}
                           <span style={{ fontSize: 13, fontWeight: 500, color: "#9aa5b0", letterSpacing: "0.01em" }}>{label}</span>
-                          {done && (
-                            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            </div>
-                          )}
                         </div>
                       </button>
                     ))}
                   </div>
+                </div>
+
+                {/* Secondary links — Check-in, Settings */}
+                <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
+                  <button
+                    onClick={() => { if (!checkinDone) { window.dispatchEvent(new CustomEvent("padelop:open-checkin")); setLogPickerOpen(false); } }}
+                    style={{ background: "none", border: "none", padding: "8px 14px", cursor: checkinDone ? "default" : "pointer", fontSize: 14, fontWeight: 600, color: checkinDone ? "#c3c8ce" : "#9aa5b0" }}
+                  >
+                    {checkinDone ? "Checked in ✓" : "Check-in"}
+                  </button>
+                  <span style={{ color: "#d0d3d8", fontSize: 14, alignSelf: "center" }}>·</span>
+                  <button
+                    onClick={() => { closeAll(); startNavLoad(); router.push("/settings"); }}
+                    style={{ background: "none", border: "none", padding: "8px 14px", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#9aa5b0" }}
+                  >
+                    Settings
+                  </button>
                 </div>
               </div>
 
