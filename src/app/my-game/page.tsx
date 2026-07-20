@@ -1381,13 +1381,11 @@ export default function ProfilePage() {
                       </div>
                     )}
 
-                    <p style={{ margin: 0, fontSize: 18, fontWeight: 800, color: "#1a1c1c", textAlign: "center" }}>Today</p>
-
                     {/* Row 1: My Game · Day Type · Goals */}
                     <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
                       {/* Today's Goals */}
                       <div onClick={() => togglePanel('sched')} {...touchPress(() => togglePanel('sched'))}
-                        style={{ flex: "0 0 33%", aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(panelSchedOpen) }}>
+                        style={{ flex: "0 0 calc((100% - 20px) / 3)", aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(panelSchedOpen) }}>
                         <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                           <defs><path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                           <circle cx="100" cy="100" r="99" fill="#16a34a" />
@@ -1423,7 +1421,7 @@ export default function ProfilePage() {
                         const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                         return (
                           <div onClick={() => togglePanel('formScore')} {...touchPress(() => togglePanel('formScore'))}
-                            style={{ flex: "0 0 33%", aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(formScorePanelOpen) }}>
+                            style={{ flex: "0 0 calc((100% - 20px) / 3)", aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(formScorePanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="formScoreArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
@@ -1503,10 +1501,8 @@ export default function ProfilePage() {
                       </div>
                     )}
 
-                    <p style={{ margin: "24px 0 0", fontSize: 18, fontWeight: 800, color: "#1a1c1c", textAlign: "center" }}>Stats</p>
-
                     {/* Row 2: Streak · Form Score · Hydration */}
-                    <div style={{ display: "flex", gap: 10 }}>
+                    <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
                       {/* Streak */}
                       {(() => {
                         const STIERS = [
@@ -1799,10 +1795,8 @@ export default function ProfilePage() {
                       );
                     })()}
 
-                    <p style={{ margin: "24px 0 0", fontSize: 18, fontWeight: 800, color: "#1a1c1c", textAlign: "center" }}>Insights</p>
-
                     {/* Row 3: Matches · Insights · Tags */}
-                    <div style={{ display: "flex", gap: 10 }}>
+                    <div style={{ display: "flex", gap: 10, marginTop: 24 }}>
                       {/* Hydration */}
                       {(() => {
                         const ml = hydrationMl;
