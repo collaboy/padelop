@@ -1508,7 +1508,7 @@ export default function ProfilePage() {
                     {panelSchedOpen && (
                       <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)} onTouchStart={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
                         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-                        <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                        <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => { e.stopPropagation(); setSchedDayTypeExpanded(false); }}>
                           <div style={{ background: "#16a34a14", flexShrink: 0 }}>
                             <div style={{ width: 40, height: 4, borderRadius: 999, background: "#16a34a40", margin: "12px auto 10px" }} />
                             <div style={{ padding: "0 18px 4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -1516,7 +1516,7 @@ export default function ProfilePage() {
                               <span style={{ fontSize: 13, fontWeight: 700, color: "#16a34a", background: "#16a34a20", borderRadius: 999, padding: "3px 12px" }}>{done}/{total}</span>
                             </div>
                             <div style={{ padding: "0 18px 16px" }}>
-                              <div onClick={() => setSchedDayTypeExpanded(v => !v)} {...touchPress(() => setSchedDayTypeExpanded(v => !v))} style={{ display: "inline-block", cursor: "pointer" }}>
+                              <div onClick={e => { e.stopPropagation(); setSchedDayTypeExpanded(v => !v); }} {...touchPress(() => setSchedDayTypeExpanded(v => !v))} style={{ display: "inline-block", cursor: "pointer" }}>
                                 <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: panelDayColor, background: "#fff", borderRadius: 999, padding: "6px 16px" }}>{panelDayLabel}</span>
                               </div>
                               {schedDayTypeExpanded && (
