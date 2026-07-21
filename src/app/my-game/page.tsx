@@ -1364,7 +1364,7 @@ export default function ProfilePage() {
                         {new Date().toLocaleDateString("en-GB", { weekday: "long" })}, {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long" })}
                       </p>
                       <div onClick={() => togglePanel('dayType')} {...touchPress(() => togglePanel('dayType'))} style={{ cursor: "pointer", ...dim(dayTypeInfoOpen) }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: panelDayColor, background: `${panelDayColor}18`, borderRadius: 999, padding: "5px 14px" }}>{panelDayLabel}</span>
+                        <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: panelDayColor, background: `${panelDayColor}18`, borderRadius: 999, padding: "9px 22px" }}>{panelDayLabel}</span>
                       </div>
                     </div>
 
@@ -1405,6 +1405,50 @@ export default function ProfilePage() {
                             <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{winRate !== null ? `${winRate}%` : "—"}</p>
                             <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#8a9096" }}>{winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no data"}</p>
                           </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* PREVIEW ONLY — square-card version of the 3x3 grid below */}
+                    {(() => {
+                      const cardSt: React.CSSProperties = { background: "#f0f1f4", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", aspectRatio: "1/1" };
+                      const titleSt: React.CSSProperties = { margin: 0, fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" };
+                      const numSt: React.CSSProperties = { margin: 0, fontSize: 22, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 };
+                      const subSt: React.CSSProperties = { margin: 0, fontSize: 11, fontWeight: 600, color: "#8a9096" };
+
+                      const points = Object.values(schedDone).flat().length;
+                      const today = new Date().toISOString().slice(0, 10);
+                      const nmDiff = nextMatch ? Math.round((new Date(nextMatch.date + "T12:00").getTime() - new Date(today + "T12:00").getTime()) / 86400000) : null;
+                      const nmLabel = nmDiff === null ? "None" : nmDiff === 0 ? "Today" : nmDiff === 1 ? "Tmrw" : `${nmDiff}d`;
+                      const todayDoneSet = new Set(schedDone[todayKey] ?? []);
+                      const schedDoneCount = schedule.filter(s => todayDoneSet.has(s.title)).length;
+                      const wins = reviews.filter(r => r.result === "win").length;
+                      const losses = reviews.filter(r => r.result === "loss").length;
+                      const matchTotal = wins + losses;
+                      const wellCount = reviews.flatMap(r => r.wellDone ?? []).length;
+                      const badCount = reviews.flatMap(r => r.improved ?? []).length;
+
+                      const cards: { title: string; num: string; sub: string }[] = [
+                        { title: "Padla Pts", num: points > 0 ? String(points) : "—", sub: "lifetime" },
+                        { title: "Next Match", num: nmLabel, sub: nextMatch?.time ?? "" },
+                        { title: "Schedule", num: `${schedDoneCount}/${schedule.length}`, sub: "today" },
+                        { title: "Streak", num: streak > 0 ? String(streak) : "—", sub: "days" },
+                        { title: "Form", num: formScore?.score != null ? String(formScore.score) : "—", sub: "building" },
+                        { title: "Hydration", num: hydrationMl > 0 ? `${hydrationMl}ml` : "—", sub: "25% of 3L" },
+                        { title: "Matches", num: matchTotal > 0 ? `${Math.round((wins / matchTotal) * 100)}%` : "—", sub: "wins" },
+                        { title: "Insights", num: String(wellCount + badCount), sub: "available" },
+                        { title: "Patterns", num: String(wellCount + badCount), sub: "tags logged" },
+                      ];
+
+                      return (
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginTop: 10, marginBottom: 20 }}>
+                          {cards.map(c => (
+                            <div key={c.title} style={cardSt}>
+                              <p style={titleSt}>{c.title}</p>
+                              <p style={numSt}>{c.num}</p>
+                              <p style={subSt}>{c.sub}</p>
+                            </div>
+                          ))}
                         </div>
                       );
                     })()}
