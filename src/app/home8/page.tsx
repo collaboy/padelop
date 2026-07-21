@@ -1459,13 +1459,13 @@ export default function Home8() {
                 return (
                   <div
                     key="card3"
-                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", paddingTop: doIdx === 2 ? 48 : 120, gap: 14, zIndex: doIdx === 2 ? 2 : 1, height: "calc(100dvh - 120px)", overflow: "hidden", pointerEvents: doIdx === 2 ? "auto" : "none", touchAction: "none" }}
+                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", paddingTop: 48, gap: 14, zIndex: doIdx === 2 ? 2 : 1, height: "calc(100dvh - 120px)", overflow: "hidden", pointerEvents: doIdx === 2 ? "auto" : "none", touchAction: "none" }}
                     onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
                     onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
                   >
                     {doIdx === 2 && (
                       <>
-                        <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: dayColor, background: `${dayColor}18`, borderRadius: 999, padding: "12px 28px" }}>{dayLabel}</span>
+                        <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: dayColor, background: `${dayColor}18`, borderRadius: 999, padding: "12px 28px" }}>MY GAME</span>
                         <p style={{ margin: 0, fontSize: "clamp(15px, 4vw, 18px)", fontWeight: 300, color: "#7a8590", lineHeight: 1.5, textAlign: "center", textWrap: "balance" } as React.CSSProperties}>{message}</p>
                       </>
                     )}
@@ -1475,16 +1475,20 @@ export default function Home8() {
                         {circle("c3schedule", "#16a34a", "SCHEDULE", "rgba(255,255,255,0.75)", `${completed.size}/${schedule.length}`, "#fff", "today", "#fff", 0.65)}
                         {circle("c3form", "#7c3aed", "FORM", "rgba(255,255,255,0.75)", readiness, "#fff", "readiness", "#fff", 0.65)}
                       </div>
-                      <div style={{ width: "100%", display: "flex", gap: 10 }}>
-                        {circle("c3points", "#f0f1f4", "PADEL PTS", "#1a1c1c", points > 0 ? points : "—", "#1a1c1c", "today", "#8a9096", 1)}
-                        {circle("c3streak", "#f0f1f4", "STREAK", "#1a1c1c", streak > 0 ? streak : "—", "#1a1c1c", "days", "#8a9096", 1)}
-                        {circle("c3winrate", "#f0f1f4", "WIN RATE", "#1a1c1c", winRate !== null ? `${winRate}%` : "—", "#1a1c1c", winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no data", "#8a9096", 1)}
-                      </div>
-                      <div style={{ width: "100%", display: "flex", gap: 10 }}>
-                        {circle("c3hydration", "#f0f1f4", "HYDRATION", "#0ea5e9", logHydrationMl > 0 ? `${logHydrationMl}ml` : "—", "#0ea5e9", logHydrationMl > 0 ? `${Math.round(Math.min(logHydrationMl / 3000, 1) * 100)}% of 3L` : "not logged", "#0ea5e9", 0.65)}
-                        {circle("c3insights", "#f0f1f4", "INSIGHTS", "#f59e0b", wellCount + badCount > 0 ? wellCount + badCount : "—", "#f59e0b", "available", "#f59e0b", 0.65)}
-                        {circle("c3patterns", "#f0f1f4", "PATTERNS", "#e11d48", wellCount + badCount > 0 ? wellCount + badCount : "—", "#e11d48", "tags logged", "#e11d48", 0.65)}
-                      </div>
+                      {doIdx === 2 && (
+                        <>
+                          <div style={{ width: "100%", display: "flex", gap: 10 }}>
+                            {circle("c3points", "#f0f1f4", "PADEL PTS", "#1a1c1c", points > 0 ? points : "—", "#1a1c1c", "today", "#8a9096", 1)}
+                            {circle("c3streak", "#f0f1f4", "STREAK", "#1a1c1c", streak > 0 ? streak : "—", "#1a1c1c", "days", "#8a9096", 1)}
+                            {circle("c3winrate", "#f0f1f4", "WIN RATE", "#1a1c1c", winRate !== null ? `${winRate}%` : "—", "#1a1c1c", winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no data", "#8a9096", 1)}
+                          </div>
+                          <div style={{ width: "100%", display: "flex", gap: 10 }}>
+                            {circle("c3hydration", "#f0f1f4", "HYDRATION", "#0ea5e9", logHydrationMl > 0 ? `${logHydrationMl}ml` : "—", "#0ea5e9", logHydrationMl > 0 ? `${Math.round(Math.min(logHydrationMl / 3000, 1) * 100)}% of 3L` : "not logged", "#0ea5e9", 0.65)}
+                            {circle("c3insights", "#f0f1f4", "INSIGHTS", "#f59e0b", wellCount + badCount > 0 ? wellCount + badCount : "—", "#f59e0b", "available", "#f59e0b", 0.65)}
+                            {circle("c3patterns", "#f0f1f4", "PATTERNS", "#e11d48", wellCount + badCount > 0 ? wellCount + badCount : "—", "#e11d48", "tags logged", "#e11d48", 0.65)}
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 );
