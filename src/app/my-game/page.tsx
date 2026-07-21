@@ -1358,11 +1358,9 @@ export default function ProfilePage() {
                     const dim = (active: boolean) => ({ opacity: anyOpen && !active ? 0.3 : 1, transition: "opacity 0.2s" });
                     return (
                     <>
-                    {/* Day type pill */}
+                    {/* My Game pill */}
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "20px 24px 0" }}>
-                      <div onClick={() => togglePanel('dayType')} {...touchPress(() => togglePanel('dayType'))} style={{ cursor: "pointer", ...dim(dayTypeInfoOpen) }}>
-                        <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: panelDayColor, background: `${panelDayColor}18`, borderRadius: 999, padding: "12px 28px" }}>{panelDayLabel}</span>
-                      </div>
+                      <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: panelDayColor, background: `${panelDayColor}18`, borderRadius: 999, padding: "12px 28px" }}>My Game</span>
                     </div>
 
                     {/* Coach's note */}
@@ -1515,6 +1513,11 @@ export default function ProfilePage() {
                             <div style={{ padding: "0 18px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                               <p style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: "-0.01em", color: "#16a34a" }}>Schedule</p>
                               <span style={{ fontSize: 13, fontWeight: 700, color: "#16a34a", background: "#16a34a20", borderRadius: 999, padding: "3px 12px" }}>{done}/{total}</span>
+                            </div>
+                            <div style={{ display: "flex", justifyContent: "center", padding: "0 18px 16px" }}>
+                              <div onClick={() => togglePanel('dayType')} {...touchPress(() => togglePanel('dayType'))} style={{ cursor: "pointer", ...dim(dayTypeInfoOpen) }}>
+                                <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: panelDayColor, background: `${panelDayColor}18`, borderRadius: 999, padding: "12px 28px" }}>{panelDayLabel}</span>
+                              </div>
                             </div>
                           </div>
                           <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px" }}>

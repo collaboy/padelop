@@ -238,13 +238,13 @@ export default function Fab() {
 
                 {/* Top row — Home, My Game */}
                 <div ref={tileRowRef} onScroll={e => setTileScrolled((e.currentTarget.scrollLeft) > 30)} style={{ overflowX: "scroll", scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}>
-                  <div style={{ display: "flex", gap: 10 }}>
+                  <div style={{ display: "flex", justifyContent: "space-evenly" }}>
                     {([
                       { label: "Home", action: () => { startNavLoad(); router.push("/home8"); }, icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
                       { label: "My Game", action: () => { closeAll(); startNavLoad(); router.push("/my-game"); }, icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="7" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg> },
                     ] as { label: string; action: () => void; icon: React.ReactNode }[]).map(({ label, action, icon }) => (
                       <button key={label} onClick={action} className="active:scale-95 transition-transform"
-                        style={{ flex: 1, background: "none", border: "none", padding: 0, cursor: "pointer" }}>
+                        style={{ width: "33%", flexShrink: 0, background: "none", border: "none", padding: 0, cursor: "pointer" }}>
                         <div style={{ width: "100%", aspectRatio: "1/1", borderRadius: "50%", background: "#ffffff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 5, position: "relative" }}>
                           {icon}
                           <span style={{ fontSize: 13, fontWeight: 500, color: "#9aa5b0", letterSpacing: "0.01em" }}>{label}</span>
