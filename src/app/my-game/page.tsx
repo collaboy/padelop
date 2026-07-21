@@ -1378,34 +1378,6 @@ export default function ProfilePage() {
                       </div>
                     )}
 
-                    {/* Summary stats row (ported from FAB menu's My Game sheet) */}
-                    {(() => {
-                      const lifetimePoints = Object.values(schedDone).flat().length;
-                      const ptLabel = lifetimePoints >= 1000 ? `${(lifetimePoints / 1000).toFixed(1)}K` : String(lifetimePoints);
-                      const wins = reviews.filter(r => r.result === "win").length;
-                      const decided = reviews.filter(r => r.result === "win" || r.result === "loss").length;
-                      const winRate = decided > 0 ? Math.round((wins / decided) * 100) : null;
-                      return (
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 10 }}>
-                          <div onClick={() => openPadlaPanel()} {...touchPress(() => openPadlaPanel())} style={{ background: "#f0f1f4", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", aspectRatio: "1/1", cursor: "pointer" }}>
-                            <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" }}>Padel pts</p>
-                            <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{lifetimePoints > 0 ? ptLabel : "—"}</p>
-                            <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#8a9096" }}>lifetime</p>
-                          </div>
-                          <div onClick={() => togglePanel('streak')} {...touchPress(() => togglePanel('streak'))} style={{ background: "#f0f1f4", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", aspectRatio: "1/1", cursor: "pointer", ...dim(streakPanelOpen) }}>
-                            <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" }}>Streak</p>
-                            <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{streak > 0 ? streak : "—"}</p>
-                            <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#8a9096" }}>days</p>
-                          </div>
-                          <div onClick={() => togglePanel('matches')} {...touchPress(() => togglePanel('matches'))} style={{ background: "#f0f1f4", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", aspectRatio: "1/1", cursor: "pointer", ...dim(matchesPanelOpen) }}>
-                            <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" }}>Win rate</p>
-                            <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{winRate !== null ? `${winRate}%` : "—"}</p>
-                            <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#8a9096" }}>{winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no data"}</p>
-                          </div>
-                        </div>
-                      );
-                    })()}
-
                     {/* Row 1: My Game · Day Type · Goals */}
                     <div style={{ display: "flex", gap: 10 }}>
                       {/* Next Match */}
@@ -1565,6 +1537,60 @@ export default function ProfilePage() {
                         </div>
                       </div>
                     )}
+
+                    {/* Summary stats row (ported from FAB menu's My Game sheet), now circles like the rest of the grid */}
+                    {(() => {
+                      const lifetimePoints = Object.values(schedDone).flat().length;
+                      const wins = reviews.filter(r => r.result === "win").length;
+                      const decided = reviews.filter(r => r.result === "win" || r.result === "loss").length;
+                      const winRate = decided > 0 ? Math.round((wins / decided) * 100) : null;
+                      const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                      return (
+                        <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+                          {/* Padel pts */}
+                          <div onClick={() => openPadlaPanel()} {...touchPress(() => openPadlaPanel())}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0 }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
+                              <defs><path id="padelPtsArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
+                              <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: "#1a1c1c", fontFamily: ff }}>
+                                <textPath href="#padelPtsArc" startOffset="50%" textAnchor="middle">PADEL PTS</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="46" fontWeight="800" style={{ fill: "#1a1c1c", fontFamily: ff }}>{lifetimePoints > 0 ? lifetimePoints : "—"}</text>
+                              <text x="100" y="152" textAnchor="middle" fontSize="19" fontWeight="600" style={{ fill: "#8a9096", fontFamily: ff }}>lifetime</text>
+                            </svg>
+                          </div>
+
+                          {/* Streak */}
+                          <div onClick={() => togglePanel('streak')} {...touchPress(() => togglePanel('streak'))}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(streakPanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
+                              <defs><path id="streakStatArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
+                              <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: "#1a1c1c", fontFamily: ff }}>
+                                <textPath href="#streakStatArc" startOffset="50%" textAnchor="middle">STREAK</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="46" fontWeight="800" style={{ fill: "#1a1c1c", fontFamily: ff }}>{streak > 0 ? streak : "—"}</text>
+                              <text x="100" y="152" textAnchor="middle" fontSize="19" fontWeight="600" style={{ fill: "#8a9096", fontFamily: ff }}>days</text>
+                            </svg>
+                          </div>
+
+                          {/* Win rate */}
+                          <div onClick={() => togglePanel('matches')} {...touchPress(() => togglePanel('matches'))}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(matchesPanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
+                              <defs><path id="winRateArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
+                              <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: "#1a1c1c", fontFamily: ff }}>
+                                <textPath href="#winRateArc" startOffset="50%" textAnchor="middle">WIN RATE</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="42" fontWeight="800" style={{ fill: "#1a1c1c", fontFamily: ff }}>{winRate !== null ? `${winRate}%` : "—"}</text>
+                              <text x="100" y="152" textAnchor="middle" fontSize="19" fontWeight="600" style={{ fill: "#8a9096", fontFamily: ff }}>{winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no data"}</text>
+                            </svg>
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     {/* Row 2: Hydration · Insights · Patterns */}
                     <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
