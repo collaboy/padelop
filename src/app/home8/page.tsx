@@ -1414,7 +1414,9 @@ export default function Home8() {
                     onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
                     onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
                   >
-                    <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: dayColor, background: `${dayColor}18`, borderRadius: 999, padding: "12px 28px", marginBottom: 12 }}>{dayLabel}</span>
+                    <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4", textAlign: "center" }}>
+                      {dayLabel}
+                    </p>
                     <p style={{ margin: 0, fontSize: "clamp(30px, 7.5vw, 40px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>{title}</p>
                     <p style={{ margin: 0, fontSize: "clamp(15px, 3.8vw, 18px)", color: "#6b7480", lineHeight: 1.6, textAlign: "center" }}>{sub}</p>
                   </div>
