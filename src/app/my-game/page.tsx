@@ -604,6 +604,7 @@ export default function ProfilePage() {
   const gearPanelOpen       = openPanel === 'gear';
   const matchesPanelOpen    = openPanel === 'matches';
   const togglePanel = (name: string) => setOpenPanel(p => p === name ? null : name);
+  const [schedDayTypeExpanded, setSchedDayTypeExpanded] = useState(false);
   const [formScore, setFormScore] = useState<FormScore | null>(null);
   const [hydrationMl, setHydrationMl] = useState(0);
   const [panelUploadLoading, setPanelUploadLoading] = useState(false);
@@ -1510,14 +1511,24 @@ export default function ProfilePage() {
                         <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
                           <div style={{ background: "#16a34a14", flexShrink: 0 }}>
                             <div style={{ width: 40, height: 4, borderRadius: 999, background: "#16a34a40", margin: "12px auto 10px" }} />
-                            <div style={{ padding: "0 18px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            <div style={{ padding: "0 18px 4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                               <p style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: "-0.01em", color: "#16a34a" }}>Schedule</p>
                               <span style={{ fontSize: 13, fontWeight: 700, color: "#16a34a", background: "#16a34a20", borderRadius: 999, padding: "3px 12px" }}>{done}/{total}</span>
                             </div>
-                            <div style={{ display: "flex", justifyContent: "center", padding: "0 18px 16px" }}>
-                              <div onClick={() => togglePanel('dayType')} {...touchPress(() => togglePanel('dayType'))} style={{ cursor: "pointer", ...dim(dayTypeInfoOpen) }}>
-                                <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: panelDayColor, background: `${panelDayColor}18`, borderRadius: 999, padding: "12px 28px" }}>{panelDayLabel}</span>
+                            <div style={{ padding: "0 18px 16px" }}>
+                              <div onClick={() => setSchedDayTypeExpanded(v => !v)} {...touchPress(() => setSchedDayTypeExpanded(v => !v))} style={{ display: "inline-block", cursor: "pointer" }}>
+                                <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: panelDayColor, background: "#fff", borderRadius: 999, padding: "6px 16px" }}>{panelDayLabel}</span>
                               </div>
+                              {schedDayTypeExpanded && (
+                                <div style={{ marginTop: 12, background: "#fff", borderRadius: 12, padding: 10, display: "flex", flexDirection: "column", gap: 10 }}>
+                                  {DAY_TYPE_INFO.map(dt => (
+                                    <div key={dt.label} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                                      <span style={{ fontSize: 14, fontWeight: 700, color: dt.color, background: `${dt.color}18`, borderRadius: 5, padding: "2px 8px", alignSelf: "flex-start" }}>{dt.label}</span>
+                                      <span style={{ fontSize: 16, color: "#5a6270", lineHeight: 1.4 }}>{dt.desc}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           </div>
                           <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px" }}>
