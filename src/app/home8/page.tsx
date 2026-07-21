@@ -987,7 +987,7 @@ export default function Home8() {
   const modalItem = schedule[modalIdx] ?? doItem;
   const curMins = now.getHours() * 60 + now.getMinutes();
 
-  const goNext = () => setDoIdx(i => Math.min(i + 1, 1));
+  const goNext = () => setDoIdx(i => Math.min(i + 1, 2));
   const goPrev = () => setDoIdx(i => Math.max(i - 1, -1));
 
   return (
@@ -1095,11 +1095,13 @@ export default function Home8() {
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingLeft: 10, paddingRight: 10, position: "relative", zIndex: 2, overflow: "hidden" }}>
             <div style={{
               display: "flex", flexDirection: "column", gap: 10,
-              transform: doIdx >= 1
-                ? `translateY(calc(270px - 200vw - 100dvh))`
-                : doIdx === -1
-                  ? `translateY(calc(60px - 100vw + ${liveY}px))`
-                  : `translateY(calc(160px - 150vw - 55dvh + ${liveY}px))`,
+              transform: doIdx === 2
+                ? `translateY(calc(300px - 300vw - 100dvh))`
+                : doIdx === 1
+                  ? `translateY(calc(270px - 200vw - 100dvh))`
+                  : doIdx === -1
+                    ? `translateY(calc(60px - 100vw + ${liveY}px))`
+                    : `translateY(calc(160px - 150vw - 55dvh + ${liveY}px))`,
               transition: liveY !== 0 ? "none" : "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
             }}>
               {/* Structural spacer — keeps transform geometry intact */}
@@ -1410,15 +1412,62 @@ export default function Home8() {
                 return (
                   <div
                     key="card2"
-                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px", gap: 2, zIndex: doIdx === 1 ? 2 : 1, height: "calc(100vw - 40px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", opacity: doIdx >= 1 ? 1 : 0, transition: "opacity 0.3s" }}
+                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px", gap: 2, zIndex: doIdx === 1 ? 2 : 1, height: "calc(100vw - 40px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", opacity: doIdx === 1 ? 1 : 0, transition: "opacity 0.3s" }}
                     onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
-                    onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
+                    onTouchEnd={e => {
+                      const dy = e.changedTouches[0].clientY - handleDragStartY.current;
+                      if (dy > 20) goPrev();
+                      else if (dy < -20) goNext();
+                    }}
                   >
                     <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4", textAlign: "center" }}>
                       {dayLabel}
                     </p>
                     <p style={{ margin: 0, fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>{title}</p>
                     <p style={{ margin: 0, fontSize: "clamp(15px, 3.8vw, 18px)", color: "#6b7480", lineHeight: 1.6, textAlign: "center" }}>{sub}</p>
+                  </div>
+                );
+              })()}
+
+              {/* Card 3: square-card summary grid — reached by swiping up again from Card 2 */}
+              {(() => {
+                const cardSt: React.CSSProperties = { background: "#f0f1f4", borderRadius: 16, padding: "10px 6px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", aspectRatio: "1/1" };
+                const titleSt: React.CSSProperties = { margin: 0, fontSize: 10, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.04em" };
+                const numSt: React.CSSProperties = { margin: 0, fontSize: 19, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 };
+                const subSt: React.CSSProperties = { margin: 0, fontSize: 10, fontWeight: 600, color: "#8a9096" };
+                const points = completed.size;
+                const todayStr = now.toISOString().slice(0, 10);
+                const nmDiff = match ? Math.round((new Date(match.date + "T12:00").getTime() - new Date(todayStr + "T12:00").getTime()) / 86400000) : null;
+                const nmLabel = nmDiff === null ? "None" : nmDiff === 0 ? "Today" : nmDiff === 1 ? "Tmrw" : `${nmDiff}d`;
+                const wellCount = reviews.flatMap(r => r.wellDone ?? []).length;
+                const badCount = reviews.flatMap(r => r.improved ?? []).length;
+                const gridCards: { title: string; num: string; sub: string }[] = [
+                  { title: "Padla Pts", num: points > 0 ? String(points) : "—", sub: "today" },
+                  { title: "Next Match", num: nmLabel, sub: match?.time ?? "" },
+                  { title: "Schedule", num: `${completed.size}/${schedule.length}`, sub: "today" },
+                  { title: "Streak", num: streak > 0 ? String(streak) : "—", sub: "days" },
+                  { title: "Form", num: String(readiness), sub: "readiness" },
+                  { title: "Hydration", num: logHydrationMl > 0 ? `${logHydrationMl}ml` : "—", sub: "today" },
+                  { title: "Matches", num: winRate !== null ? `${winRate}%` : "—", sub: "wins" },
+                  { title: "Insights", num: String(wellCount + badCount), sub: "available" },
+                  { title: "Patterns", num: String(wellCount + badCount), sub: "tags logged" },
+                ];
+                return (
+                  <div
+                    key="card3"
+                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", justifyContent: "center", padding: 16, zIndex: doIdx === 2 ? 2 : 1, height: "calc(100vw - 40px)", overflow: "hidden", pointerEvents: doIdx === 2 ? "auto" : "none", touchAction: "none", opacity: doIdx === 2 ? 1 : 0, transition: "opacity 0.3s" }}
+                    onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
+                    onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
+                  >
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                      {gridCards.map(c => (
+                        <div key={c.title} style={cardSt}>
+                          <p style={titleSt}>{c.title}</p>
+                          <p style={numSt}>{c.num}</p>
+                          <p style={subSt}>{c.sub}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 );
               })()}
