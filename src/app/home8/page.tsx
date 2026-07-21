@@ -1417,7 +1417,7 @@ export default function Home8() {
                     <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4", textAlign: "center" }}>
                       {dayLabel}
                     </p>
-                    <p style={{ margin: 0, fontSize: "clamp(30px, 7.5vw, 40px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>{title}</p>
+                    <p style={{ margin: 0, fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>{title}</p>
                     <p style={{ margin: 0, fontSize: "clamp(15px, 3.8vw, 18px)", color: "#6b7480", lineHeight: 1.6, textAlign: "center" }}>{sub}</p>
                   </div>
                 );
