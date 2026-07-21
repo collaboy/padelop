@@ -1459,7 +1459,7 @@ export default function Home8() {
                 return (
                   <div
                     key="card3"
-                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", padding: "48px 0 0", gap: 14, zIndex: doIdx === 2 ? 2 : 1, height: "calc(100dvh - 120px)", overflow: "hidden", pointerEvents: doIdx === 2 ? "auto" : "none", touchAction: "none" }}
+                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", paddingTop: doIdx === 2 ? 48 : 120, gap: 14, zIndex: doIdx === 2 ? 2 : 1, height: "calc(100dvh - 120px)", overflow: "hidden", pointerEvents: doIdx === 2 ? "auto" : "none", touchAction: "none" }}
                     onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
                     onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
                   >
