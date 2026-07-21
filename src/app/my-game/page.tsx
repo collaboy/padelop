@@ -1361,7 +1361,7 @@ export default function ProfilePage() {
                     {/* Day type pill */}
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "20px 24px 0" }}>
                       <div onClick={() => togglePanel('dayType')} {...touchPress(() => togglePanel('dayType'))} style={{ cursor: "pointer", ...dim(dayTypeInfoOpen) }}>
-                        <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: panelDayColor, background: `${panelDayColor}18`, borderRadius: 999, padding: "9px 22px" }}>{panelDayLabel}</span>
+                        <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: panelDayColor, background: `${panelDayColor}18`, borderRadius: 999, padding: "12px 28px" }}>{panelDayLabel}</span>
                       </div>
                     </div>
 
@@ -1386,18 +1386,18 @@ export default function ProfilePage() {
                       const decided = reviews.filter(r => r.result === "win" || r.result === "loss").length;
                       const winRate = decided > 0 ? Math.round((wins / decided) * 100) : null;
                       return (
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
-                          <div style={{ background: "#f0f1f4", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", aspectRatio: "1/1" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 10 }}>
+                          <div onClick={() => openPadlaPanel()} {...touchPress(() => openPadlaPanel())} style={{ background: "#f0f1f4", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", aspectRatio: "1/1", cursor: "pointer" }}>
                             <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" }}>Padel pts</p>
                             <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{lifetimePoints > 0 ? ptLabel : "—"}</p>
                             <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#8a9096" }}>lifetime</p>
                           </div>
-                          <div style={{ background: "#f0f1f4", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", aspectRatio: "1/1" }}>
+                          <div onClick={() => togglePanel('streak')} {...touchPress(() => togglePanel('streak'))} style={{ background: "#f0f1f4", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", aspectRatio: "1/1", cursor: "pointer", ...dim(streakPanelOpen) }}>
                             <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" }}>Streak</p>
                             <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{streak > 0 ? streak : "—"}</p>
                             <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#8a9096" }}>days</p>
                           </div>
-                          <div style={{ background: "#f0f1f4", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", aspectRatio: "1/1" }}>
+                          <div onClick={() => togglePanel('matches')} {...touchPress(() => togglePanel('matches'))} style={{ background: "#f0f1f4", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", aspectRatio: "1/1", cursor: "pointer", ...dim(matchesPanelOpen) }}>
                             <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" }}>Win rate</p>
                             <p style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{winRate !== null ? `${winRate}%` : "—"}</p>
                             <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: "#8a9096" }}>{winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no data"}</p>
@@ -1408,31 +1408,11 @@ export default function ProfilePage() {
 
                     {/* Row 1: My Game · Day Type · Goals */}
                     <div style={{ display: "flex", gap: 10 }}>
-                      {/* My Game */}
-                      <div onClick={() => openPadlaPanel()} {...touchPress(() => openPadlaPanel())}
-                        style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0 }}>
-                        <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                          <defs><path id="myGameTopArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
-                          <circle cx="100" cy="100" r="99" fill="#2653d4" />
-                          <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                            <textPath href="#myGameTopArc" startOffset="50%" textAnchor="middle">MY GAME</textPath>
-                          </text>
-                          <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-                            fontSize="46" fontWeight="800" style={{ fill: "#fff", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                            {Object.values(schedDone).flat().length}
-                          </text>
-                          <text x="100" y="152" textAnchor="middle" fontSize="20" fontWeight="600"
-                            style={{ fill: "#fff", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", opacity: 0.65 } as React.CSSProperties}>
-                            padla points
-                          </text>
-                        </svg>
-                      </div>
-
                       {/* Next Match */}
                       <div onClick={() => togglePanel('matches')} {...touchPress(() => togglePanel('matches'))}
                         style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(matchesPanelOpen) }}>
                         {(() => {
-                          const nmColor = "#7c3aed";
+                          const nmColor = "#2653d4";
                           const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                           if (!nextMatch) {
                             return (
@@ -1499,6 +1479,34 @@ export default function ProfilePage() {
                         </svg>
                       </div>
 
+                      {/* Form Score */}
+                      {(() => {
+                        const fs = formScore;
+                        const score = fs?.score ?? null;
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        return (
+                          <div onClick={() => togglePanel('formScore')} {...touchPress(() => togglePanel('formScore'))}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(formScorePanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
+                              <defs><path id="formScoreArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="#7c3aed" />
+                              <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: ff }}>
+                                <textPath href="#formScoreArc" startOffset="50%" textAnchor="middle">FORM</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
+                                fontSize={score !== null ? "46" : "36"} fontWeight="800"
+                                style={{ fill: "#fff", fontFamily: ff }}>
+                                {score !== null ? score : "—"}
+                              </text>
+                              <text x="100" y="152" textAnchor="middle" fontSize="19" fontWeight="600"
+                                style={{ fill: "#fff", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
+                                {score === null ? "no data" : score >= 70 ? "on track" : "building"}
+                              </text>
+                            </svg>
+                          </div>
+                        );
+                      })()}
+
                     </div>
 
                     {dayTypeInfoOpen && (
@@ -1558,71 +1566,8 @@ export default function ProfilePage() {
                       </div>
                     )}
 
-                    {/* Row 2: Streak · Form Score · Hydration */}
-                    <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-                      {/* Streak */}
-                      {(() => {
-                        const STIERS = [
-                          { min: 0,   label: "Beginner",  color: "#9aa0a6", grad: ["#f4f4f6","#eaecee"] },
-                          { min: 5,   label: "Starter",   color: "#2653d4", grad: ["#eef2ff","#dbe4ff"] },
-                          { min: 15,  label: "Grinder",   color: "#059669", grad: ["#ecfdf5","#d1fae5"] },
-                          { min: 30,  label: "Dedicated", color: "#d97706", grad: ["#fffbeb","#fde68a"] },
-                          { min: 60,  label: "Elite",     color: "#7c3aed", grad: ["#faf5ff","#ede9fe"] },
-                          { min: 100, label: "Legend",    color: "#0ea5e9", grad: ["#f0f9ff","#bae6fd"] },
-                        ];
-                        const stier = [...STIERS].reverse().find(t => streak >= t.min) ?? STIERS[0];
-                        return (
-                          <div onClick={() => togglePanel('streak')} {...touchPress(() => togglePanel('streak'))}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(streakPanelOpen) }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="streakTopArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
-                              <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                                <textPath href="#streakTopArc" startOffset="50%" textAnchor="middle">STREAK</textPath>
-                              </text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-                                fontSize={streak >= 100 ? "34" : streak >= 10 ? "46" : "46"} fontWeight="800"
-                                style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                                {streak > 0 ? streak : "—"}
-                              </text>
-                              <text x="100" y="152" textAnchor="middle" fontSize="20" fontWeight="600"
-                                style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif", opacity: 0.65 } as React.CSSProperties}>
-                                day streak
-                              </text>
-                            </svg>
-                          </div>
-                        );
-                      })()}
-
-                      {/* Form Score */}
-                      {(() => {
-                        const fs = formScore;
-                        const score = fs?.score ?? null;
-                        const color = score === null ? "#9aa0a6" : score >= 70 ? "#16a34a" : score >= 50 ? "#d97706" : "#ef4444";
-                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        return (
-                          <div onClick={() => togglePanel('formScore')} {...touchPress(() => togglePanel('formScore'))}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(formScorePanelOpen) }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="formScoreArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
-                              <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#formScoreArc" startOffset="50%" textAnchor="middle">FORM</textPath>
-                              </text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
-                                fontSize={score !== null ? "46" : "36"} fontWeight="800"
-                                style={{ fill: color, fontFamily: ff }}>
-                                {score !== null ? score : "—"}
-                              </text>
-                              <text x="100" y="152" textAnchor="middle" fontSize="19" fontWeight="600"
-                                style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
-                                {score === null ? "no data" : score >= 70 ? "on track" : "building"}
-                              </text>
-                            </svg>
-                          </div>
-                        );
-                      })()}
-
+                    {/* Row 2: Hydration · Insights · Patterns */}
+                    <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
                       {/* Hydration */}
                       {(() => {
                         const ml = hydrationMl;
@@ -1652,6 +1597,69 @@ export default function ProfilePage() {
                                 style={{ fill: hasData ? color : "#9aa0a6", fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>
                                 {subText}
                               </text>
+                            </svg>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Insights circle */}
+                      {(() => {
+                        const color = "#f59e0b";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        const wins   = reviews.filter(r => r.result === "win").length;
+                        const losses = reviews.filter(r => r.result === "loss").length;
+                        const last5i = [...reviews].sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 5);
+                        const hasTopWellDone = reviews.flatMap(r => r.wellDone ?? []).length > 0;
+                        const hasTopImprove  = reviews.flatMap(r => r.improved ?? []).length > 0;
+                        const count  = [
+                          reviews.length >= 3 && wins + losses > 0,
+                          last5i.length >= 3,
+                          hasTopWellDone,
+                          hasTopImprove,
+                          streak > 0,
+                          partnerCount >= 2,
+                          trainingSessions.length > 0,
+                          thisWeekAvg !== null && lastWeekAvg !== null,
+                          tournamentCount > 0,
+                        ].filter(Boolean).length;
+                        return (
+                          <div onClick={() => togglePanel('insights')} {...touchPress(() => togglePanel('insights'))}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(insightsPanelOpen) }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
+                              <defs><path id="insightsArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
+                              <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#insightsArc" startOffset="50%" textAnchor="middle">INSIGHTS</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{count > 0 ? count : "—"}</text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>available</text>
+                            </svg>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Tags circle */}
+                      {(() => {
+                        const color = "#e11d48";
+                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                        const wellCounts: Record<string, number> = {};
+                        const badCounts: Record<string, number> = {};
+                        reviews.forEach(r => {
+                          (r.wellDone ?? []).forEach(t => { wellCounts[t] = (wellCounts[t] ?? 0) + 1; });
+                          (r.improved ?? []).forEach(t => { badCounts[t] = (badCounts[t] ?? 0) + 1; });
+                        });
+                        const totalTags = Object.keys(wellCounts).length + Object.keys(badCounts).length;
+                        return (
+                          <div onClick={() => togglePanel('goodBad')} {...touchPress(() => togglePanel('goodBad'))}
+                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(openPanel === 'goodBad') }}>
+                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
+                              <defs><path id="goodBadArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
+                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
+                              <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: color, fontFamily: ff }}>
+                                <textPath href="#goodBadArc" startOffset="50%" textAnchor="middle">PATTERNS</textPath>
+                              </text>
+                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{totalTags > 0 ? totalTags : "—"}</text>
+                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>tags logged</text>
                             </svg>
                           </div>
                         );
@@ -1869,97 +1877,6 @@ export default function ProfilePage() {
                         </div>
                       );
                     })()}
-
-                    {/* Row 3: Matches · Insights · Tags */}
-                    <div style={{ display: "flex", gap: 10 }}>
-                      {/* Matches circle */}
-                      {(() => {
-                        const color = "#2653d4";
-                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        const wins   = reviews.filter(r => r.result === "win").length;
-                        const losses = reviews.filter(r => r.result === "loss").length;
-                        const total  = wins + losses;
-                        const centerText = reviews.length > 0 ? String(reviews.length) : "—";
-                        const sub = total > 0 ? `${Math.round((wins / total) * 100)}% wins` : "no matches";
-                        return (
-                          <div onClick={() => togglePanel('matches')} {...touchPress(() => togglePanel('matches'))}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(matchesPanelOpen) }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="matchesArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
-                              <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#matchesArc" startOffset="50%" textAnchor="middle">MATCHES</textPath>
-                              </text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{centerText}</text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>{sub}</text>
-                            </svg>
-                          </div>
-                        );
-                      })()}
-
-                      {/* Insights circle */}
-                      {(() => {
-                        const color = "#f59e0b";
-                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        const wins   = reviews.filter(r => r.result === "win").length;
-                        const losses = reviews.filter(r => r.result === "loss").length;
-                        const last5i = [...reviews].sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 5);
-                        const hasTopWellDone = reviews.flatMap(r => r.wellDone ?? []).length > 0;
-                        const hasTopImprove  = reviews.flatMap(r => r.improved ?? []).length > 0;
-                        const count  = [
-                          reviews.length >= 3 && wins + losses > 0,
-                          last5i.length >= 3,
-                          hasTopWellDone,
-                          hasTopImprove,
-                          streak > 0,
-                          partnerCount >= 2,
-                          trainingSessions.length > 0,
-                          thisWeekAvg !== null && lastWeekAvg !== null,
-                          tournamentCount > 0,
-                        ].filter(Boolean).length;
-                        return (
-                          <div onClick={() => togglePanel('insights')} {...touchPress(() => togglePanel('insights'))}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(insightsPanelOpen) }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="insightsArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
-                              <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#insightsArc" startOffset="50%" textAnchor="middle">INSIGHTS</textPath>
-                              </text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{count > 0 ? count : "—"}</text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>available</text>
-                            </svg>
-                          </div>
-                        );
-                      })()}
-
-                      {/* Tags circle */}
-                      {(() => {
-                        const color = "#e11d48";
-                        const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
-                        const wellCounts: Record<string, number> = {};
-                        const badCounts: Record<string, number> = {};
-                        reviews.forEach(r => {
-                          (r.wellDone ?? []).forEach(t => { wellCounts[t] = (wellCounts[t] ?? 0) + 1; });
-                          (r.improved ?? []).forEach(t => { badCounts[t] = (badCounts[t] ?? 0) + 1; });
-                        });
-                        const totalTags = Object.keys(wellCounts).length + Object.keys(badCounts).length;
-                        return (
-                          <div onClick={() => togglePanel('goodBad')} {...touchPress(() => togglePanel('goodBad'))}
-                            style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(openPanel === 'goodBad') }}>
-                            <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="goodBadArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
-                              <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
-                              <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: color, fontFamily: ff }}>
-                                <textPath href="#goodBadArc" startOffset="50%" textAnchor="middle">PATTERNS</textPath>
-                              </text>
-                              <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{totalTags > 0 ? totalTags : "—"}</text>
-                              <text x="100" y="148" textAnchor="middle" fontSize="17" fontWeight="600" style={{ fill: color, fontFamily: ff, opacity: 0.65 } as React.CSSProperties}>tags logged</text>
-                            </svg>
-                          </div>
-                        );
-                      })()}
-                    </div>
 
 
                     {/* Insight detail sheet */}
