@@ -987,7 +987,7 @@ export default function Home8() {
   const modalItem = schedule[modalIdx] ?? doItem;
   const curMins = now.getHours() * 60 + now.getMinutes();
 
-  const goNext = () => setDoIdx(i => Math.min(i + 1, 1));
+  const goNext = () => setDoIdx(i => Math.min(i + 1, 2));
   const goPrev = () => setDoIdx(i => Math.max(i - 1, -1));
 
   return (
@@ -1095,11 +1095,13 @@ export default function Home8() {
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingLeft: 10, paddingRight: 10, position: "relative", zIndex: 2, overflow: "hidden" }}>
             <div style={{
               display: "flex", flexDirection: "column", gap: 10,
-              transform: doIdx === 1
-                ? `translateY(calc(270px - 200vw - 100dvh))`
-                : doIdx === -1
-                  ? `translateY(calc(60px - 100vw + ${liveY}px))`
-                  : `translateY(calc(160px - 150vw - 55dvh + ${liveY}px))`,
+              transform: doIdx === 2
+                ? `translateY(calc(160px - 300vw - 100dvh))`
+                : doIdx === 1
+                  ? `translateY(calc(270px - 200vw - 100dvh))`
+                  : doIdx === -1
+                    ? `translateY(calc(60px - 100vw + ${liveY}px))`
+                    : `translateY(calc(160px - 150vw - 55dvh + ${liveY}px))`,
               transition: liveY !== 0 ? "none" : "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
             }}>
               {/* Structural spacer — keeps transform geometry intact */}
@@ -1390,7 +1392,42 @@ export default function Home8() {
                 );
               })()}
 
-              {/* Card 2: encouragement + My Game snapshot grid */}
+              {/* Card 2: encouragement */}
+              {(() => {
+                const title =
+                  dayType === "match"     ? "Game on." :
+                  dayType === "pre-match" ? "Tomorrow is match day." :
+                  dayType === "recovery"  ? "Well played." :
+                  "Keep going.";
+                const sub =
+                  dayType === "match"
+                    ? "Trust your game and enjoy every point."
+                    : dayType === "pre-match"
+                    ? "Rest up, carb load, and get to bed early. The prep is done."
+                    : dayType === "recovery"
+                    ? "Rest is part of training. Let your body recover and come back stronger."
+                    : drillTag
+                    ? `Today focus on ${drillTag}. Small improvements compound into big gains.`
+                    : "Every session counts. Show up, put in the work, and trust the process.";
+                return (
+                  <div
+                    key="card2"
+                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px", gap: 2, zIndex: doIdx === 1 ? 2 : 1, height: "calc(100vw - 40px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", opacity: doIdx === 1 ? 1 : 0, transition: "opacity 0.3s" }}
+                    onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
+                    onTouchEnd={e => {
+                      const dy = e.changedTouches[0].clientY - handleDragStartY.current;
+                      if (dy > 20) goPrev();
+                      else if (dy < -20) goNext();
+                    }}
+                  >
+                    <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: dayColor, background: `${dayColor}18`, borderRadius: 999, padding: "12px 28px", marginBottom: 12 }}>{dayLabel}</span>
+                    <p style={{ margin: 0, fontSize: "clamp(30px, 7.5vw, 40px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>{title}</p>
+                    <p style={{ margin: 0, fontSize: "clamp(15px, 3.8vw, 18px)", color: "#6b7480", lineHeight: 1.6, textAlign: "center" }}>{sub}</p>
+                  </div>
+                );
+              })()}
+
+              {/* Card 3: My Game snapshot — reached by swiping up again from Card 2 */}
               {(() => {
                 const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
                 const points = completed.size;
@@ -1421,27 +1458,27 @@ export default function Home8() {
 
                 return (
                   <div
-                    key="card2"
-                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 16px", gap: 14, zIndex: doIdx === 1 ? 2 : 1, height: "calc(100dvh - 120px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", opacity: doIdx === 1 ? 1 : 0, transition: "opacity 0.3s" }}
+                    key="card3"
+                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", padding: "48px 0 0", gap: 14, zIndex: doIdx === 2 ? 2 : 1, height: "calc(100dvh - 120px)", overflow: "hidden", pointerEvents: doIdx === 2 ? "auto" : "none", touchAction: "none", opacity: doIdx === 2 ? 1 : 0, transition: "opacity 0.3s" }}
                     onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
                     onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
                   >
                     <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: dayColor, background: `${dayColor}18`, borderRadius: 999, padding: "12px 28px" }}>{dayLabel}</span>
                     <p style={{ margin: 0, fontSize: "clamp(15px, 4vw, 18px)", fontWeight: 300, color: "#7a8590", lineHeight: 1.5, textAlign: "center", textWrap: "balance" } as React.CSSProperties}>{message}</p>
                     <div style={{ width: "100%", display: "flex", gap: 10 }}>
-                      {circle("c2nextMatch", "#2653d4", "NEXT MATCH", "rgba(255,255,255,0.75)", nmLabel, "#fff", match?.time ?? "", "#fff", 0.65)}
-                      {circle("c2schedule", "#16a34a", "SCHEDULE", "rgba(255,255,255,0.75)", `${completed.size}/${schedule.length}`, "#fff", "today", "#fff", 0.65)}
-                      {circle("c2form", "#7c3aed", "FORM", "rgba(255,255,255,0.75)", readiness, "#fff", "readiness", "#fff", 0.65)}
+                      {circle("c3nextMatch", "#2653d4", "NEXT MATCH", "rgba(255,255,255,0.75)", nmLabel, "#fff", match?.time ?? "", "#fff", 0.65)}
+                      {circle("c3schedule", "#16a34a", "SCHEDULE", "rgba(255,255,255,0.75)", `${completed.size}/${schedule.length}`, "#fff", "today", "#fff", 0.65)}
+                      {circle("c3form", "#7c3aed", "FORM", "rgba(255,255,255,0.75)", readiness, "#fff", "readiness", "#fff", 0.65)}
                     </div>
                     <div style={{ width: "100%", display: "flex", gap: 10 }}>
-                      {circle("c2points", "#f0f1f4", "PADEL PTS", "#1a1c1c", points > 0 ? points : "—", "#1a1c1c", "today", "#8a9096", 1)}
-                      {circle("c2streak", "#f0f1f4", "STREAK", "#1a1c1c", streak > 0 ? streak : "—", "#1a1c1c", "days", "#8a9096", 1)}
-                      {circle("c2winrate", "#f0f1f4", "WIN RATE", "#1a1c1c", winRate !== null ? `${winRate}%` : "—", "#1a1c1c", winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no data", "#8a9096", 1)}
+                      {circle("c3points", "#f0f1f4", "PADEL PTS", "#1a1c1c", points > 0 ? points : "—", "#1a1c1c", "today", "#8a9096", 1)}
+                      {circle("c3streak", "#f0f1f4", "STREAK", "#1a1c1c", streak > 0 ? streak : "—", "#1a1c1c", "days", "#8a9096", 1)}
+                      {circle("c3winrate", "#f0f1f4", "WIN RATE", "#1a1c1c", winRate !== null ? `${winRate}%` : "—", "#1a1c1c", winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no data", "#8a9096", 1)}
                     </div>
                     <div style={{ width: "100%", display: "flex", gap: 10 }}>
-                      {circle("c2hydration", "#f0f1f4", "HYDRATION", "#0ea5e9", logHydrationMl > 0 ? `${logHydrationMl}ml` : "—", "#0ea5e9", logHydrationMl > 0 ? `${Math.round(Math.min(logHydrationMl / 3000, 1) * 100)}% of 3L` : "not logged", "#0ea5e9", 0.65)}
-                      {circle("c2insights", "#f0f1f4", "INSIGHTS", "#f59e0b", wellCount + badCount > 0 ? wellCount + badCount : "—", "#f59e0b", "available", "#f59e0b", 0.65)}
-                      {circle("c2patterns", "#f0f1f4", "PATTERNS", "#e11d48", wellCount + badCount > 0 ? wellCount + badCount : "—", "#e11d48", "tags logged", "#e11d48", 0.65)}
+                      {circle("c3hydration", "#f0f1f4", "HYDRATION", "#0ea5e9", logHydrationMl > 0 ? `${logHydrationMl}ml` : "—", "#0ea5e9", logHydrationMl > 0 ? `${Math.round(Math.min(logHydrationMl / 3000, 1) * 100)}% of 3L` : "not logged", "#0ea5e9", 0.65)}
+                      {circle("c3insights", "#f0f1f4", "INSIGHTS", "#f59e0b", wellCount + badCount > 0 ? wellCount + badCount : "—", "#f59e0b", "available", "#f59e0b", 0.65)}
+                      {circle("c3patterns", "#f0f1f4", "PATTERNS", "#e11d48", wellCount + badCount > 0 ? wellCount + badCount : "—", "#e11d48", "tags logged", "#e11d48", 0.65)}
                     </div>
                   </div>
                 );
