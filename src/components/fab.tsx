@@ -50,6 +50,7 @@ export default function Fab() {
   const [smartUploadResult, setSmartUploadResult] = useState<{ category: string; label: string; confidence: string; data: Record<string, string> } | null>(null);
   const [smartUploadError, setSmartUploadError] = useState<string | null>(null);
   const [scheduleManualOpen, setScheduleManualOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [mealTime, setMealTime] = useState("");
   const [mealText, setMealText] = useState("");
   const [mealsToday, setMealsToday] = useState<{ id: string; time: string; description: string }[]>([]);
@@ -154,6 +155,14 @@ export default function Fab() {
     setSmartUploadError(null);
     setTileScrolled(false);
     setScheduleManualOpen(false);
+    setMoreOpen(false);
+  }
+
+  function navTo(path: string) {
+    closeAll();
+    if (pathname === path) return;
+    startNavLoad();
+    router.push(path);
   }
 
   const inputSt: React.CSSProperties = { width: "100%", padding: "8px 12px", borderRadius: 10, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", outline: "none", fontFamily: "inherit", background: "#f8f9fa", boxSizing: "border-box" };
@@ -236,35 +245,36 @@ export default function Fab() {
                   </div>
                 )}
 
-                {/* Top row — Home, My Game */}
+                {/* Top row — Today, Check-in (if not done), My Game */}
                 <div ref={tileRowRef} onScroll={e => setTileScrolled((e.currentTarget.scrollLeft) > 30)} style={{ overflowX: "scroll", scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}>
-                  <div style={{ display: "flex", justifyContent: "space-evenly" }}>
+                  <div style={{ display: "flex", gap: 10 }}>
                     {([
-                      { label: "Home", action: () => { startNavLoad(); router.push("/home8"); }, icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
-                      { label: "My Game", action: () => { closeAll(); startNavLoad(); router.push("/my-game"); }, icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="7" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg> },
+                      { label: "Now", action: () => navTo("/home8"), icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><line x1="16" y1="2.5" x2="16" y2="6.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="3" y1="10" x2="21" y2="10"/><circle cx="12" cy="15.5" r="2" fill="#6b7480" stroke="none"/></svg> },
+                      { label: "Today's Schedule", action: () => navTo("/schedule"), icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="12" height="16" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><line x1="9" y1="10.5" x2="15" y2="10.5"/><line x1="9" y1="14.5" x2="15" y2="14.5"/></svg> },
+                      ...(!checkinDone ? [{
+                        label: "Check-in",
+                        action: () => { window.dispatchEvent(new CustomEvent("padelop:open-checkin")); setLogPickerOpen(false); },
+                        icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="8 12.5 10.5 15 16 9"/></svg>,
+                      }] : []),
+                      { label: "My Game", action: () => navTo("/my-game"), icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="7" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg> },
+                      { label: "Matches", action: () => navTo("/matches"), icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 5H4a2 2 0 0 0 0 4h1M17 5h3a2 2 0 0 1 0 4h-1"/><path d="M12 17v4"/><path d="M8 21h8"/></svg> },
+                      { label: "More", action: () => setMoreOpen(true), icon: <svg width="28" height="28" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6" fill="#6b7480"/><circle cx="12" cy="12" r="1.6" fill="#6b7480"/><circle cx="19" cy="12" r="1.6" fill="#6b7480"/></svg> },
                     ] as { label: string; action: () => void; icon: React.ReactNode }[]).map(({ label, action, icon }) => (
                       <button key={label} onClick={action} className="active:scale-95 transition-transform"
-                        style={{ width: "33%", flexShrink: 0, background: "none", border: "none", padding: 0, cursor: "pointer" }}>
-                        <div style={{ width: "100%", aspectRatio: "1/1", borderRadius: "50%", background: "#ffffff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 5, position: "relative" }}>
+                        style={{ flex: 1, background: "none", border: "none", padding: 0, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
+                        <div style={{ width: "100%", aspectRatio: "1/1", borderRadius: "50%", background: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "relative" }}>
                           {icon}
-                          <span style={{ fontSize: 13, fontWeight: 500, color: "#9aa5b0", letterSpacing: "0.01em" }}>{label}</span>
                         </div>
+                        <span style={{ fontSize: 13, fontWeight: 500, color: "#9aa5b0", letterSpacing: "0.01em", textAlign: "center" }}>{label}</span>
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {/* Secondary links — Check-in, Settings */}
-                <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
+                {/* Secondary link — Settings */}
+                <div style={{ display: "flex", justifyContent: "center" }}>
                   <button
-                    onClick={() => { if (!checkinDone) { window.dispatchEvent(new CustomEvent("padelop:open-checkin")); setLogPickerOpen(false); } }}
-                    style={{ background: "none", border: "none", padding: "8px 14px", cursor: checkinDone ? "default" : "pointer", fontSize: 14, fontWeight: 600, color: checkinDone ? "#c3c8ce" : "#9aa5b0" }}
-                  >
-                    {checkinDone ? "Checked in ✓" : "Check-in"}
-                  </button>
-                  <span style={{ color: "#d0d3d8", fontSize: 14, alignSelf: "center" }}>·</span>
-                  <button
-                    onClick={() => { closeAll(); startNavLoad(); router.push("/settings"); }}
+                    onClick={() => navTo("/settings")}
                     style={{ background: "none", border: "none", padding: "8px 14px", cursor: "pointer", fontSize: 14, fontWeight: 600, color: "#9aa5b0" }}
                   >
                     Settings
@@ -273,6 +283,31 @@ export default function Fab() {
               </div>
 
             </div>
+
+            {/* More sheet */}
+            {moreOpen && (
+              <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setMoreOpen(false)}>
+                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+                <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                  <div style={{ width: 40, height: 4, borderRadius: 999, background: "#d8dbe0", margin: "12px auto 6px" }} />
+                  <div style={{ padding: "6px 8px 24px", display: "flex", flexDirection: "column" }}>
+                    {([
+                      { label: "Insights", path: "/insights" },
+                      { label: "Shopping List", path: "/shopping-list" },
+                      { label: "Schedule", path: "/schedule" },
+                    ]).map(({ label, path }) => (
+                      <button
+                        key={label}
+                        onClick={() => navTo(path)}
+                        style={{ background: "none", border: "none", padding: "14px 18px", textAlign: "left", fontSize: 16, fontWeight: 600, color: "#1a1c1c", cursor: "pointer" }}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Food sub-modal */}
             {logPickerSub === "nutrition" && (

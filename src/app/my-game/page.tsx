@@ -1430,9 +1430,9 @@ export default function ProfilePage() {
                             <textPath href="#goalsTextArc" startOffset="50%" textAnchor="middle">SCHEDULE</textPath>
                           </text>
                           <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
-                            fontSize={pct === 100 ? "44" : "36"} fontWeight="800"
+                            fontSize={pct === 100 ? "44" : "28"} fontWeight="800"
                             style={{ fill: "white", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
-                            {pct === 100 ? "✓" : `${done}/${total}`}
+                            {pct === 100 ? "✓" : `${done} of ${total}`}
                           </text>
                           {(() => {
                             const r = 88, cX = 100, cY = 100, totalDeg = 110, startDeg = 90 + totalDeg / 2, N = schedule.length;
@@ -1568,7 +1568,7 @@ export default function ProfilePage() {
                               <defs><path id="padelPtsArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
                               <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: "#1a1c1c", fontFamily: ff }}>
-                                <textPath href="#padelPtsArc" startOffset="50%" textAnchor="middle">PADEL PTS</textPath>
+                                <textPath href="#padelPtsArc" startOffset="50%" textAnchor="middle">PADLA PTS</textPath>
                               </text>
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="46" fontWeight="800" style={{ fill: "#1a1c1c", fontFamily: ff }}>{lifetimePoints > 0 ? lifetimePoints : "—"}</text>
                               <text x="100" y="152" textAnchor="middle" fontSize="19" fontWeight="600" style={{ fill: "#8a9096", fontFamily: ff }}>lifetime</text>
