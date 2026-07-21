@@ -516,7 +516,7 @@ export default function ProfilePage() {
 
   // Matches
   const [logSheetOpen, setLogSheetOpen]       = useState(false);
-  const [logTab, setLogTab]                   = useState<"checkin" | null>(null);
+  const [logTab, setLogTab]                   = useState<"checkin" | "matchreview" | null>(null);
   const [checkinDone, setCheckinDone]         = useState<boolean | null>(null);
   const [nextMatch, setNextMatch]             = useState<StoredMatch | null>(null);
   const [reviews, setReviews]                 = useState<ReviewEntry[]>([]);
@@ -603,8 +603,10 @@ export default function ProfilePage() {
   const insightsPanelOpen   = openPanel === 'insights';
   const gearPanelOpen       = openPanel === 'gear';
   const matchesPanelOpen    = openPanel === 'matches';
+  const nextMatchPanelOpen  = openPanel === 'nextMatch';
   const togglePanel = (name: string) => setOpenPanel(p => p === name ? null : name);
   const [schedDayTypeExpanded, setSchedDayTypeExpanded] = useState(false);
+  const [matchRecordExpanded, setMatchRecordExpanded] = useState(false);
   const [formScore, setFormScore] = useState<FormScore | null>(null);
   const [hydrationMl, setHydrationMl] = useState(0);
   const [panelUploadLoading, setPanelUploadLoading] = useState(false);
@@ -1380,8 +1382,8 @@ export default function ProfilePage() {
                     {/* Row 1: My Game · Day Type · Goals */}
                     <div style={{ display: "flex", gap: 10 }}>
                       {/* Next Match */}
-                      <div onClick={() => togglePanel('matches')} {...touchPress(() => togglePanel('matches'))}
-                        style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(matchesPanelOpen) }}>
+                      <div onClick={() => togglePanel('nextMatch')} {...touchPress(() => togglePanel('nextMatch'))}
+                        style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(nextMatchPanelOpen) }}>
                         {(() => {
                           const nmColor = "#2653d4";
                           const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
@@ -1532,12 +1534,22 @@ export default function ProfilePage() {
                             </div>
                           </div>
                           <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px" }}>
-                            {schedule.map((item, i) => {
+                            {(() => {
+                              const toMins = (t: string) => t.split(":").reduce((a, b, i) => a + (i === 0 ? Number(b) * 60 : Number(b)), 0);
+                              const curMins = schedNow.getHours() * 60 + schedNow.getMinutes();
+                              return schedule.map((item, i) => {
                               const isDone = (schedDone[todayKey] ?? []).includes(item.title);
+                              const isCurrent = toMins(item.time) <= curMins && (i === schedule.length - 1 || toMins(schedule[i + 1].time) > curMins);
+                              const isPast = !isDone && !isCurrent && toMins(item.time) < curMins;
                               return (
                                 <div key={item.title}
                                   onClick={() => { if (SCHEDULE_DETAILS[item.title] || item.isDrill) { setPanelSchedModalIdx(i); setPanelExpandedMealIdx(null); setPanelCheckedMeals(new Set()); } }}
-                                  style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 0", cursor: SCHEDULE_DETAILS[item.title] || item.isDrill ? "pointer" : "default", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f6" : "none" }}>
+                                  style={{ position: "relative", display: "flex", alignItems: "center", gap: 10, padding: "10px 0", cursor: SCHEDULE_DETAILS[item.title] || item.isDrill ? "pointer" : "default", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f6" : "none", opacity: isPast ? 0.45 : 1 }}>
+                                  {isCurrent && (
+                                    <div style={{ position: "absolute", left: -16, top: 0, bottom: 0, width: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                      <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#16a34a" }} />
+                                    </div>
+                                  )}
                                   <button onClick={e => { e.stopPropagation(); panelToggleDone(item.title); }}
                                     style={{ width: 22, height: 22, borderRadius: 6, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s", cursor: "pointer" }}>
                                     {isDone && <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
@@ -1546,7 +1558,8 @@ export default function ProfilePage() {
                                   <span style={{ fontSize: 15, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
                                 </div>
                               );
-                            })}
+                              });
+                            })()}
                           </div>
                         </div>
                       </div>
@@ -1959,6 +1972,90 @@ export default function ProfilePage() {
                       );
                     })()}
 
+                    {/* Next Match panel */}
+                    {nextMatchPanelOpen && (
+                      <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+                        <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
+                          <div style={{ background: "#2653d414", flexShrink: 0 }}>
+                            <div style={{ width: 40, height: 4, borderRadius: 999, background: "#2653d440", margin: "12px auto 10px" }} />
+                            <div style={{ padding: "0 18px 16px" }}>
+                              <p style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: "-0.01em", color: "#2653d4" }}>Next Match</p>
+                            </div>
+                          </div>
+                          <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px", display: "flex", flexDirection: "column", gap: 10 }}>
+                            {(() => {
+                              const reviewedDates = new Set(
+                                reviews.map(r => (r as ReviewEntry & { matchDate?: string }).matchDate ?? r.ts?.slice(0, 10)).filter(Boolean)
+                              );
+                              const rawUpcoming: StoredMatch[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:upcoming-matches") || "[]"); } catch { return []; } })();
+                              const rawNext: StoredMatch | null = (() => { try { return JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch { return null; } })();
+                              const seen = new Set<string>();
+                              const needsRating = ([...rawUpcoming, rawNext] as (StoredMatch | null)[])
+                                .filter((m): m is StoredMatch => !!m)
+                                .filter(m => {
+                                  if (!m.date || !m.time || seen.has(m.date)) return false;
+                                  seen.add(m.date);
+                                  return new Date(`${m.date}T${m.time}:00`).getTime() < Date.now() && !reviewedDates.has(m.date);
+                                });
+                              return (
+                                <>
+                                  {needsRating.length > 0 && (
+                                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                      <p style={{ margin: "0 4px", fontSize: 12, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em" }}>NEEDS RATING</p>
+                                      {needsRating.map((m, i) => (
+                                        <button
+                                          key={i}
+                                          onClick={() => { setOpenPanel(null); setLogTab("matchreview"); setLogSheetOpen(true); }}
+                                          style={{ width: "100%", background: "#f0f4ff", border: "none", borderRadius: 16, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12, textAlign: "left" }}
+                                        >
+                                          <div style={{ flexShrink: 0, width: 44, textAlign: "center" }}>
+                                            <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: "#2653d4", lineHeight: 1 }}>{new Date(m.date + "T12:00").toLocaleDateString("en-GB", { month: "short" }).toUpperCase()}</p>
+                                            <p style={{ margin: "2px 0 0", fontSize: 20, fontWeight: 900, color: "#1a1c1c", lineHeight: 1 }}>{new Date(m.date + "T12:00").getDate()}</p>
+                                          </div>
+                                          <div style={{ flex: 1, minWidth: 0 }}>
+                                            <p style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#1a1c1c" }}>{m.time}{m.club ? ` · ${m.club}` : ""}</p>
+                                            <p style={{ margin: 0, fontSize: 13, color: "#2653d4", fontWeight: 600 }}>Tap to rate this match</p>
+                                          </div>
+                                        </button>
+                                      ))}
+                                    </div>
+                                  )}
+                                  {nextMatch ? (() => {
+                                    const players = [nextMatch.player_1, nextMatch.player_2, nextMatch.player_3, nextMatch.player_4].filter(Boolean);
+                                    const countdown = fmtCountdown(nextMatch.date, nextMatch.time);
+                                    const isToday2 = countdown === "Today";
+                                    return (
+                                      <div style={{ background: "#fff", borderRadius: 18, padding: 16, display: "flex", alignItems: "center", gap: 12 }}>
+                                        <div style={{ flexShrink: 0, width: 48, textAlign: "center", background: isToday2 ? "#eef2ff" : "#f8f9fa", borderRadius: 12, padding: "8px 4px" }}>
+                                          <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: isToday2 ? "#2653d4" : "#8a9096", lineHeight: 1 }}>{new Date(nextMatch.date + "T12:00").toLocaleDateString("en-GB", { month: "short" }).toUpperCase()}</p>
+                                          <p style={{ margin: "2px 0 0", fontSize: 22, fontWeight: 900, color: isToday2 ? "#2653d4" : "#1a1c1c", lineHeight: 1 }}>{new Date(nextMatch.date + "T12:00").getDate()}</p>
+                                          <p style={{ margin: "2px 0 0", fontSize: 10, fontWeight: 600, color: isToday2 ? "#2653d4" : "#8a9096", lineHeight: 1 }}>{new Date(nextMatch.date + "T12:00").toLocaleDateString("en-GB", { weekday: "short" }).toUpperCase()}</p>
+                                        </div>
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                                            <span style={{ fontSize: 16, fontWeight: 800, color: "#1a1c1c" }}>{nextMatch.time || "—"}</span>
+                                            {nextMatch.club && <span style={{ fontSize: 15, color: "#8a9096", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>· {nextMatch.club}{nextMatch.court ? ` #${nextMatch.court}` : ""}</span>}
+                                          </div>
+                                          {players.length > 0 && <p style={{ margin: 0, fontSize: 15, color: "#8a9096", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{players.join(", ")}</p>}
+                                          <span style={{ display: "inline-block", marginTop: 5, fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: isToday2 ? "#eef2ff" : "#f4f6f8", color: isToday2 ? "#2653d4" : "#8a9096" }}>{countdown}</span>
+                                        </div>
+                                      </div>
+                                    );
+                                  })() : (
+                                    <div style={{ background: "#fff", borderRadius: 20, padding: "24px 20px", textAlign: "center" }}>
+                                      <p style={{ margin: "0 0 6px", fontSize: 16, fontWeight: 800, color: "#1a1c1c" }}>No upcoming match</p>
+                                      <p style={{ margin: 0, fontSize: 15, color: "#8a9096" }}>Schedule your next game to see it here</p>
+                                    </div>
+                                  )}
+                                </>
+                              );
+                            })()}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Matches panel */}
                     {matchesPanelOpen && (
                       <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={() => setOpenPanel(null)}>
@@ -1982,21 +2079,27 @@ export default function ProfilePage() {
                           const circ = 2 * Math.PI * rr;
                           const offset = circ * (1 - winRate / 100);
                           return (
-                            <div style={{ padding: "4px 0" }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                                <div style={{ position: "relative", flexShrink: 0 }}>
-                                  <svg width={size} height={size}>
-                                    <circle cx={size/2} cy={size/2} r={rr} fill="none" stroke="#e2e8f0" strokeWidth={stroke} />
-                                    <circle cx={size/2} cy={size/2} r={rr} fill="none" stroke={ringColor} strokeWidth={stroke} strokeLinecap="round"
-                                      strokeDasharray={circ} strokeDashoffset={offset}
-                                      style={{ transform: "rotate(-90deg)", transformOrigin: "50% 50%", transition: "stroke-dashoffset 0.8s ease" }} />
-                                  </svg>
-                                  <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                                    <span style={{ fontSize: 32, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{winRate}%</span>
-                                    <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#8a9096" }}>wins</span>
-                                  </div>
+                            <div style={{ padding: "4px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+                              <div style={{ position: "relative", flexShrink: 0 }}>
+                                <svg width={size} height={size}>
+                                  <circle cx={size/2} cy={size/2} r={rr} fill="none" stroke="#e2e8f0" strokeWidth={stroke} />
+                                  <circle cx={size/2} cy={size/2} r={rr} fill="none" stroke={ringColor} strokeWidth={stroke} strokeLinecap="round"
+                                    strokeDasharray={circ} strokeDashoffset={offset}
+                                    style={{ transform: "rotate(-90deg)", transformOrigin: "50% 50%", transition: "stroke-dashoffset 0.8s ease" }} />
+                                </svg>
+                                <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                                  <span style={{ fontSize: 32, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{winRate}%</span>
+                                  <span style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#8a9096" }}>wins</span>
                                 </div>
-                                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+                              </div>
+                              <button
+                                onClick={() => setMatchRecordExpanded(v => !v)}
+                                style={{ margin: 0, width: "100%", fontSize: 16, fontWeight: 700, color: "#3a4550", background: "#f8f9fa", border: "none", borderRadius: 20, padding: "18px 16px", cursor: "pointer", textAlign: "center" }}
+                              >
+                                You&rsquo;ve won {wins} out of the last {last7.length} games...
+                              </button>
+                              {matchRecordExpanded && (
+                                <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 6 }}>
                                   {last7.map((rev, i) => (
                                     <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                                       <span style={{ fontSize: 11, fontWeight: 600, color: "#8a9096", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -2010,7 +2113,7 @@ export default function ProfilePage() {
                                     </div>
                                   ))}
                                 </div>
-                              </div>
+                              )}
                             </div>
                           );
                         })()}
