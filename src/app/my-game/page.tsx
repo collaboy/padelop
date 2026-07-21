@@ -1358,11 +1358,8 @@ export default function ProfilePage() {
                     const dim = (active: boolean) => ({ opacity: anyOpen && !active ? 0.3 : 1, transition: "opacity 0.2s" });
                     return (
                     <>
-                    {/* Today's date + day type pill */}
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, padding: "20px 24px 0" }}>
-                      <p style={{ margin: 0, fontSize: "clamp(28px, 7vw, 38px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>
-                        {new Date().toLocaleDateString("en-GB", { weekday: "long" })}, {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long" })}
-                      </p>
+                    {/* Day type pill */}
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "20px 24px 0" }}>
                       <div onClick={() => togglePanel('dayType')} {...touchPress(() => togglePanel('dayType'))} style={{ cursor: "pointer", ...dim(dayTypeInfoOpen) }}>
                         <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: panelDayColor, background: `${panelDayColor}18`, borderRadius: 999, padding: "9px 22px" }}>{panelDayLabel}</span>
                       </div>
@@ -1409,59 +1406,15 @@ export default function ProfilePage() {
                       );
                     })()}
 
-                    {/* PREVIEW ONLY — square-card version of the 3x3 grid below */}
-                    {(() => {
-                      const cardSt: React.CSSProperties = { background: "#f0f1f4", borderRadius: 16, padding: "12px 8px", textAlign: "center", display: "flex", flexDirection: "column", justifyContent: "space-between", aspectRatio: "1/1" };
-                      const titleSt: React.CSSProperties = { margin: 0, fontSize: 11, fontWeight: 700, color: "#1a1c1c", textTransform: "uppercase", letterSpacing: "0.05em" };
-                      const numSt: React.CSSProperties = { margin: 0, fontSize: 22, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 };
-                      const subSt: React.CSSProperties = { margin: 0, fontSize: 11, fontWeight: 600, color: "#8a9096" };
-
-                      const points = Object.values(schedDone).flat().length;
-                      const today = new Date().toISOString().slice(0, 10);
-                      const nmDiff = nextMatch ? Math.round((new Date(nextMatch.date + "T12:00").getTime() - new Date(today + "T12:00").getTime()) / 86400000) : null;
-                      const nmLabel = nmDiff === null ? "None" : nmDiff === 0 ? "Today" : nmDiff === 1 ? "Tmrw" : `${nmDiff}d`;
-                      const todayDoneSet = new Set(schedDone[todayKey] ?? []);
-                      const schedDoneCount = schedule.filter(s => todayDoneSet.has(s.title)).length;
-                      const wins = reviews.filter(r => r.result === "win").length;
-                      const losses = reviews.filter(r => r.result === "loss").length;
-                      const matchTotal = wins + losses;
-                      const wellCount = reviews.flatMap(r => r.wellDone ?? []).length;
-                      const badCount = reviews.flatMap(r => r.improved ?? []).length;
-
-                      const cards: { title: string; num: string; sub: string }[] = [
-                        { title: "Padla Pts", num: points > 0 ? String(points) : "—", sub: "lifetime" },
-                        { title: "Next Match", num: nmLabel, sub: nextMatch?.time ?? "" },
-                        { title: "Schedule", num: `${schedDoneCount}/${schedule.length}`, sub: "today" },
-                        { title: "Streak", num: streak > 0 ? String(streak) : "—", sub: "days" },
-                        { title: "Form", num: formScore?.score != null ? String(formScore.score) : "—", sub: "building" },
-                        { title: "Hydration", num: hydrationMl > 0 ? `${hydrationMl}ml` : "—", sub: "25% of 3L" },
-                        { title: "Matches", num: matchTotal > 0 ? `${Math.round((wins / matchTotal) * 100)}%` : "—", sub: "wins" },
-                        { title: "Insights", num: String(wellCount + badCount), sub: "available" },
-                        { title: "Patterns", num: String(wellCount + badCount), sub: "tags logged" },
-                      ];
-
-                      return (
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginTop: 10, marginBottom: 20 }}>
-                          {cards.map(c => (
-                            <div key={c.title} style={cardSt}>
-                              <p style={titleSt}>{c.title}</p>
-                              <p style={numSt}>{c.num}</p>
-                              <p style={subSt}>{c.sub}</p>
-                            </div>
-                          ))}
-                        </div>
-                      );
-                    })()}
-
                     {/* Row 1: My Game · Day Type · Goals */}
                     <div style={{ display: "flex", gap: 10 }}>
                       {/* My Game */}
                       <div onClick={() => openPadlaPanel()} {...touchPress(() => openPadlaPanel())}
                         style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0 }}>
                         <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                          <defs><path id="myGameTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                          <defs><path id="myGameTopArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
                           <circle cx="100" cy="100" r="99" fill="#2653d4" />
-                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                          <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
                             <textPath href="#myGameTopArc" startOffset="50%" textAnchor="middle">MY GAME</textPath>
                           </text>
                           <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
@@ -1484,9 +1437,9 @@ export default function ProfilePage() {
                           if (!nextMatch) {
                             return (
                               <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                                <defs><path id="nextMatchTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                                <defs><path id="nextMatchTopArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
                                 <circle cx="100" cy="100" r="99" fill={nmColor} />
-                                <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: ff }}>
+                                <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: ff }}>
                                   <textPath href="#nextMatchTopArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
                                 </text>
                                 <text x="100" y="108" textAnchor="middle" dominantBaseline="middle" fontSize="22" fontWeight="800" style={{ fill: "white", fontFamily: ff }}>
@@ -1500,9 +1453,9 @@ export default function ProfilePage() {
                           const mainLabel = diffDays === 0 ? "Today" : diffDays === 1 ? "Tmrw" : `${diffDays}d`;
                           return (
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="nextMatchTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <defs><path id="nextMatchTopArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
                               <circle cx="100" cy="100" r="99" fill={nmColor} />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: ff }}>
+                              <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: ff }}>
                                 <textPath href="#nextMatchTopArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
                               </text>
                               <text x="100" y="93" textAnchor="middle" dominantBaseline="middle" fontSize="24" fontWeight="800" style={{ fill: "white", fontFamily: ff }}>
@@ -1520,9 +1473,9 @@ export default function ProfilePage() {
                       <div onClick={() => togglePanel('sched')} {...touchPress(() => togglePanel('sched'))}
                         style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(panelSchedOpen) }}>
                         <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                          <defs><path id="goalsTextArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                          <defs><path id="goalsTextArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
                           <circle cx="100" cy="100" r="99" fill="#16a34a" />
-                          <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                          <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
                             <textPath href="#goalsTextArc" startOffset="50%" textAnchor="middle">SCHEDULE</textPath>
                           </text>
                           <text x="100" y="108" textAnchor="middle" dominantBaseline="middle"
@@ -1554,7 +1507,7 @@ export default function ProfilePage() {
                         <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
                           <div style={{ background: `${panelDayColor}14`, flexShrink: 0 }}>
                             <div style={{ width: 40, height: 4, borderRadius: 999, background: `${panelDayColor}40`, margin: "12px auto 10px" }} />
-                            <div style={{ padding: "0 18px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            <div style={{ padding: "0 18px 16px", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 8 }}>
                               <p style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: "-0.01em", color: panelDayColor }}>Day Types</p>
                               <span style={{ fontSize: 13, fontWeight: 700, color: panelDayColor, background: `${panelDayColor}20`, borderRadius: 999, padding: "3px 12px" }}>{panelDayLabel}</span>
                             </div>
@@ -1622,9 +1575,9 @@ export default function ProfilePage() {
                           <div onClick={() => togglePanel('streak')} {...touchPress(() => togglePanel('streak'))}
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(streakPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="streakTopArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <defs><path id="streakTopArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+                              <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: stier.color, fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
                                 <textPath href="#streakTopArc" startOffset="50%" textAnchor="middle">STREAK</textPath>
                               </text>
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
@@ -1651,9 +1604,9 @@ export default function ProfilePage() {
                           <div onClick={() => togglePanel('formScore')} {...touchPress(() => togglePanel('formScore'))}
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(formScorePanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="formScoreArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <defs><path id="formScoreArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                              <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: color, fontFamily: ff }}>
                                 <textPath href="#formScoreArc" startOffset="50%" textAnchor="middle">FORM</textPath>
                               </text>
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
@@ -1685,9 +1638,9 @@ export default function ProfilePage() {
                           <div onClick={() => togglePanel('hydration')} {...touchPress(() => togglePanel('hydration'))}
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(hydrationPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="hydrationArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <defs><path id="hydrationArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                              <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: color, fontFamily: ff }}>
                                 <textPath href="#hydrationArc" startOffset="50%" textAnchor="middle">HYDRATION</textPath>
                               </text>
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
@@ -1932,9 +1885,9 @@ export default function ProfilePage() {
                           <div onClick={() => togglePanel('matches')} {...touchPress(() => togglePanel('matches'))}
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(matchesPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="matchesArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <defs><path id="matchesArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                              <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: color, fontFamily: ff }}>
                                 <textPath href="#matchesArc" startOffset="50%" textAnchor="middle">MATCHES</textPath>
                               </text>
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{centerText}</text>
@@ -1968,9 +1921,9 @@ export default function ProfilePage() {
                           <div onClick={() => togglePanel('insights')} {...touchPress(() => togglePanel('insights'))}
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(insightsPanelOpen) }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="insightsArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <defs><path id="insightsArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                              <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: color, fontFamily: ff }}>
                                 <textPath href="#insightsArc" startOffset="50%" textAnchor="middle">INSIGHTS</textPath>
                               </text>
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{count > 0 ? count : "—"}</text>
@@ -1995,9 +1948,9 @@ export default function ProfilePage() {
                           <div onClick={() => togglePanel('goodBad')} {...touchPress(() => togglePanel('goodBad'))}
                             style={{ flex: 1, aspectRatio: "1/1", cursor: "pointer", padding: 0, ...dim(openPanel === 'goodBad') }}>
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
-                              <defs><path id="goodBadArc" d="M 30,76 A 76,76 0 0,1 170,76" /></defs>
+                              <defs><path id="goodBadArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#f0f1f4" />
-                              <text fontSize="22" fontWeight="700" letterSpacing="0.03em" style={{ fill: color, fontFamily: ff }}>
+                              <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: color, fontFamily: ff }}>
                                 <textPath href="#goodBadArc" startOffset="50%" textAnchor="middle">PATTERNS</textPath>
                               </text>
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="44" fontWeight="800" style={{ fill: color, fontFamily: ff }}>{totalTags > 0 ? totalTags : "—"}</text>
