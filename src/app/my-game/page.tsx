@@ -607,6 +607,8 @@ export default function ProfilePage() {
   const togglePanel = (name: string) => setOpenPanel(p => p === name ? null : name);
   const [schedDayTypeExpanded, setSchedDayTypeExpanded] = useState(false);
   const [matchRecordExpanded, setMatchRecordExpanded] = useState(false);
+  const [noteIdx, setNoteIdx] = useState(0);
+  const noteScrollRef = useRef<HTMLDivElement>(null);
   const [formScore, setFormScore] = useState<FormScore | null>(null);
   const [hydrationMl, setHydrationMl] = useState(0);
   const [panelUploadLoading, setPanelUploadLoading] = useState(false);
@@ -1363,11 +1365,6 @@ export default function ProfilePage() {
                     const dim = (active: boolean) => ({ opacity: anyOpen && !active ? 0.3 : 1, transition: "opacity 0.2s" });
                     return (
                     <>
-                    {/* My Game pill */}
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "20px 24px 24px" }}>
-                      <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: panelDayColor, background: `${panelDayColor}18`, borderRadius: 999, padding: "12px 28px" }}>My Game</span>
-                    </div>
-
                     {/* Row 1: My Game · Day Type · Goals */}
                     <div style={{ display: "flex", gap: 10 }}>
                       {/* Next Match */}
@@ -1709,18 +1706,51 @@ export default function ProfilePage() {
 
                     </div>
 
-                    {/* Coach's note */}
-                    {matchInsight ? (
-                      <div onClick={() => setInsightSheetOpen(true)} {...touchPress(() => setInsightSheetOpen(true))} style={{ flex: 1, minHeight: 160, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: "0 24px" }}>
-                        <p style={{ margin: 0, fontSize: "clamp(17px, 4.5vw, 21px)", fontWeight: 300, letterSpacing: "0.01em", color: "#7a8590", lineHeight: 1.5, textWrap: "balance", textAlign: "center" } as React.CSSProperties}>{matchInsight.sentence}</p>
-                      </div>
-                    ) : (
-                      <div style={{ flex: 1, minHeight: 160, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 24px" }}>
-                        <p style={{ margin: 0, fontSize: "clamp(17px, 4.5vw, 21px)", fontWeight: 300, letterSpacing: "0.01em", color: "#a0aab2", lineHeight: 1.5, textAlign: "center" }}>
-                          {["Habits win matches.", "Small reps compound.", "Train your weaknesses.", "Rest is part of training.", "Show up consistently.", "Log a game. See the gaps.", "Your game is built daily."][new Date().getDay()]}
-                        </p>
-                      </div>
-                    )}
+                    {/* Coach's note carousel */}
+                    {(() => {
+                      const quotes = ["Habits win matches.", "Small reps compound.", "Train your weaknesses.", "Rest is part of training.", "Show up consistently.", "Log a game. See the gaps.", "Your game is built daily."];
+                      const notes: { text: string; clickable?: boolean }[] = [
+                        ...(matchInsight ? [{ text: matchInsight.sentence, clickable: true }] : []),
+                        ...quotes.map(q => ({ text: q })),
+                      ];
+                      return (
+                        <div style={{ flex: 1, minHeight: 160, display: "flex", flexDirection: "column", justifyContent: "center", gap: 10 }}>
+                          <div
+                            ref={noteScrollRef}
+                            onScroll={e => {
+                              const el = e.currentTarget;
+                              const idx = Math.round(el.scrollLeft / el.clientWidth);
+                              if (idx !== noteIdx) setNoteIdx(idx);
+                            }}
+                            style={{ display: "flex", overflowX: "auto", scrollSnapType: "x mandatory", scrollbarWidth: "none" } as React.CSSProperties}
+                          >
+                            {notes.map((note, i) => (
+                              <div
+                                key={i}
+                                onClick={note.clickable ? () => setInsightSheetOpen(true) : undefined}
+                                {...(note.clickable ? touchPress(() => setInsightSheetOpen(true)) : {})}
+                                style={{ width: "100%", flexShrink: 0, scrollSnapAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", cursor: note.clickable ? "pointer" : "default", padding: "0 24px" }}
+                              >
+                                <p style={{ margin: 0, fontSize: "clamp(17px, 4.5vw, 21px)", fontWeight: 300, letterSpacing: "0.01em", color: note.clickable ? "#7a8590" : "#a0aab2", lineHeight: 1.5, textWrap: "balance", textAlign: "center" } as React.CSSProperties}>
+                                  {note.text}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                          {notes.length > 1 && (
+                            <div style={{ display: "flex", justifyContent: "center", gap: 6 }}>
+                              {notes.map((_, i) => (
+                                <button
+                                  key={i}
+                                  onClick={() => noteScrollRef.current?.scrollTo({ left: i * (noteScrollRef.current?.clientWidth ?? 0), behavior: "smooth" })}
+                                  style={{ width: i === noteIdx ? 16 : 6, height: 6, borderRadius: 999, border: "none", padding: 0, background: i === noteIdx ? "#9aa0a6" : "#e0e3e7", cursor: "pointer", transition: "width 0.2s, background 0.2s" }}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
 
                     {/* Panel for row 2 */}
                     {streakPanelOpen && (() => {
