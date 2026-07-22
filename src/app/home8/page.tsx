@@ -1394,21 +1394,11 @@ export default function Home8() {
                     <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                       <defs><path id={id} d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
                       <circle cx="100" cy="100" r="99" fill={fill} />
-                      {(() => {
-                        const words = title.split(" ");
-                        return (
-                          <text textAnchor="middle" fontSize="30" fontWeight="900" letterSpacing="0.03em" style={{ fill: titleColor, fontFamily: ff }}>
-                            {words.length === 2 ? (
-                              <>
-                                <tspan x="100" y="88">{words[0]}</tspan>
-                                <tspan x="100" y="116">{words[1]}</tspan>
-                              </>
-                            ) : (
-                              <tspan x="100" y="100" dominantBaseline="middle">{title}</tspan>
-                            )}
-                          </text>
-                        );
-                      })()}
+                      <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: titleColor, fontFamily: ff }}>
+                        <textPath href={`#${id}`} startOffset="50%" textAnchor="middle">{title}</textPath>
+                      </text>
+                      <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="46" fontWeight="800" style={{ fill: mainColor, fontFamily: ff }}>{main}</text>
+                      <text x="100" y="152" textAnchor="middle" fontSize="19" fontWeight="600" style={{ fill: subColor, fontFamily: ff, opacity: subOpacity } as React.CSSProperties}>{sub}</text>
                     </svg>
                   </div>
                 );
