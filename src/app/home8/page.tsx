@@ -1410,7 +1410,7 @@ export default function Home8() {
                     onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
                     onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
                   >
-                    <div style={{ width: "100%", height: "100%", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gridTemplateRows: "repeat(3, 1fr)", rowGap: 10, columnGap: 6 }}>
+                    <div style={{ width: "100%", height: "100%", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gridTemplateRows: "repeat(3, 1fr)", rowGap: 16, columnGap: 6 }}>
                       {circle("c2nextMatch", "#2653d4", "NEXT MATCH", "rgba(255,255,255,0.75)", nmLabel, "#fff", match?.time ?? "", "#fff", 0.65, () => setOpenPanel("nextMatch"))}
                       {circle("c2schedule", "#16a34a", "SCHEDULE", "rgba(255,255,255,0.75)", `${completed.size}/${schedule.length}`, "#fff", "today", "#fff", 0.65, () => setOpenPanel("schedule"))}
                       {circle("c2form", "#7c3aed", "FORM", "rgba(255,255,255,0.75)", readiness, "#fff", "readiness", "#fff", 0.65, () => setOpenPanel("form"))}
@@ -2530,7 +2530,7 @@ export default function Home8() {
             transition: "opacity 0.3s", cursor: "pointer",
           }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="3"/>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>

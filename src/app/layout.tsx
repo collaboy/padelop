@@ -5,7 +5,6 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import SwipeNav from "@/components/swipe-nav";
 import WeekPlanModal from "@/components/week-plan-modal";
-import Fab from "@/components/fab";
 import NavLoader from "@/components/nav-loader";
 import PlusOne from "@/components/plus-one";
 
@@ -46,7 +45,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {children}
             </main>
           </SwipeNav>
-<Fab />
           <NavLoader />
           <PlusOne />
           <WeekPlanModal />
