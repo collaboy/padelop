@@ -1389,6 +1389,7 @@ export default function Home8() {
                   main: React.ReactNode, mainColor: string,
                   sub: React.ReactNode, subColor: string, subOpacity: number,
                   onTap?: () => void,
+                  mainFontSize: number = 46,
                 ) => (
                   <div onClick={onTap} style={{ minWidth: 0, minHeight: 0, overflow: "hidden", cursor: onTap ? "pointer" : "default" }}>
                     <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
@@ -1397,7 +1398,7 @@ export default function Home8() {
                       <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: titleColor, fontFamily: ff }}>
                         <textPath href={`#${id}`} startOffset="50%" textAnchor="middle">{title}</textPath>
                       </text>
-                      <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="46" fontWeight="800" style={{ fill: mainColor, fontFamily: ff }}>{main}</text>
+                      <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize={mainFontSize} fontWeight="800" style={{ fill: mainColor, fontFamily: ff }}>{main}</text>
                       <text x="100" y="152" textAnchor="middle" fontSize="19" fontWeight="600" style={{ fill: subColor, fontFamily: ff, opacity: subOpacity } as React.CSSProperties}>{sub}</text>
                     </svg>
                   </div>
@@ -1411,13 +1412,13 @@ export default function Home8() {
                     onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
                   >
                     <div style={{ width: "100%", height: "calc(100% - 10px)", marginTop: 10, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gridTemplateRows: "repeat(3, 1fr)", rowGap: 16, columnGap: 6 }}>
-                      {circle("c2nextMatch", "#2653d4", "NEXT MATCH", "rgba(255,255,255,0.75)", nmLabel, "#fff", match?.time ?? "", "#fff", 0.65, () => setOpenPanel("nextMatch"))}
+                      {circle("c2nextMatch", "#2653d4", "NEXT MATCH", "rgba(255,255,255,0.75)", nmLabel, "#fff", match?.time ?? "", "#fff", 0.65, () => setOpenPanel("nextMatch"), 36)}
                       {circle("c2schedule", "#16a34a", "SCHEDULE", "rgba(255,255,255,0.75)", `${completed.size}/${schedule.length}`, "#fff", "today", "#fff", 0.65, () => setOpenPanel("schedule"))}
                       {circle("c2form", "#7c3aed", "FORM", "rgba(255,255,255,0.75)", readiness, "#fff", "readiness", "#fff", 0.65, () => setOpenPanel("form"))}
                       {circle("c2points", "#f0f1f4", "PADLA PTS", "#1a1c1c", points > 0 ? points : "—", "#1a1c1c", "today", "#8a9096", 1)}
                       {circle("c2streak", "#f0f1f4", "STREAK", "#1a1c1c", streak > 0 ? streak : "—", "#1a1c1c", "days", "#8a9096", 1, () => setOpenPanel("streak"))}
                       {circle("c2winrate", "#f0f1f4", "WIN RATE", "#1a1c1c", winRate !== null ? `${winRate}%` : "—", "#1a1c1c", winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no data", "#8a9096", 1, () => setOpenPanel("matches"))}
-                      {circle("c2hydration", "#f0f1f4", "HYDRATION", "#0ea5e9", logHydrationMl > 0 ? `${logHydrationMl}ml` : "—", "#0ea5e9", logHydrationMl > 0 ? `${Math.round(Math.min(logHydrationMl / 3000, 1) * 100)}% of 3L` : "not logged", "#0ea5e9", 0.65, () => setOpenPanel("hydration"))}
+                      {circle("c2hydration", "#f0f1f4", "HYDRATION", "#0ea5e9", logHydrationMl > 0 ? `${logHydrationMl}ml` : "—", "#0ea5e9", logHydrationMl > 0 ? `${Math.round(Math.min(logHydrationMl / 3000, 1) * 100)}% of 3L` : "not logged", "#0ea5e9", 0.65, () => setOpenPanel("hydration"), 36)}
                       {circle("c2insights", "#f0f1f4", "INSIGHTS", "#f59e0b", wellCount + badCount > 0 ? wellCount + badCount : "—", "#f59e0b", "available", "#f59e0b", 0.65, () => setOpenPanel("insights"))}
                       {circle("c2patterns", "#f0f1f4", "PATTERNS", "#e11d48", wellCount + badCount > 0 ? wellCount + badCount : "—", "#e11d48", "tags logged", "#e11d48", 0.65, () => setOpenPanel("patterns"))}
                     </div>
