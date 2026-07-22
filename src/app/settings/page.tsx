@@ -596,7 +596,7 @@ export default function SettingsPage() {
           <p className="t-label" style={{ color: "#7c3aed", margin: "0 4px 10px" }}>Admin</p>
           <div style={{ background: "#faf5ff", borderRadius: "var(--r-md)", overflow: "hidden", boxShadow: "var(--shadow-soft)", border: "1px solid #e9d5ff" }}>
             {[
-              { label: "Insights", sub: "Performance data & analytics", href: "/my-game", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> },
+              { label: "Insights", sub: "Performance data & analytics", href: "/home8", icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> },
             ].map(({ label, sub, href, icon }, i) => (
               <button
                 key={label}

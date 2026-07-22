@@ -2,11 +2,21 @@
 
 import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { startNavLoad, startPlusOne } from "@/lib/nav-events";
 import LogSheet from "@/components/log-sheet";
 import ReadinessSheet from "@/components/readiness-sheet";
 import PushPrompt from "@/components/push-prompt";
+
+const ScheduleSheet = dynamic(() => import("@/components/sheets/schedule-sheet"));
+const NextMatchSheet = dynamic(() => import("@/components/sheets/next-match-sheet"));
+const FormScoreSheet = dynamic(() => import("@/components/sheets/form-score-sheet"));
+const StreakSheet = dynamic(() => import("@/components/sheets/streak-sheet"));
+const MatchesSheet = dynamic(() => import("@/components/sheets/matches-sheet"));
+const HydrationSheet = dynamic(() => import("@/components/sheets/hydration-sheet"));
+const InsightsSheet = dynamic(() => import("@/components/sheets/insights-sheet"));
+const PatternsSheet = dynamic(() => import("@/components/sheets/patterns-sheet"));
 import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, computeMatchReadiness, loadMorningLog, improveTips, type MatchReadinessResult, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
 import { pad, addMins, toMins, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag, getDayType, ITEM_COLORS, type ScheduleItem, type DayType, getScheduleData, SCHEDULE_DETAILS } from "@/lib/schedule-data";
 import { saveUpcomingMatch, saveNutritionToDb, saveHydrationToDb, saveNoteToDb, saveMatchReview, saveGearToDb, saveScheduleDoneToDb, saveTrainingToDb, deleteUpcomingMatchFromDb } from "@/lib/db";
@@ -307,6 +317,7 @@ export default function Home8() {
     wellbeing: { status: "not_logged", reason: "" },
   });
   const [schedDetailOpen, setSchedDetailOpen] = useState<{ title: string; subtitle?: string; color: string; detail: string; isDrill?: boolean } | null>(null);
+  const [openPanel, setOpenPanel] = useState<null | "schedule" | "nextMatch" | "form" | "streak" | "matches" | "hydration" | "insights" | "patterns">(null);
   const [postMatchOpen, setPostMatchOpen] = useState(false);
   const [postMatchDate, setPostMatchDate] = useState<string | null>(null);
   const [checkinNudgeOpen, setCheckinNudgeOpen] = useState(false);
@@ -1377,8 +1388,9 @@ export default function Home8() {
                   id: string, fill: string, title: string, titleColor: string,
                   main: React.ReactNode, mainColor: string,
                   sub: React.ReactNode, subColor: string, subOpacity: number,
+                  onTap?: () => void,
                 ) => (
-                  <div style={{ minWidth: 0, minHeight: 0, overflow: "hidden" }}>
+                  <div onClick={onTap} style={{ minWidth: 0, minHeight: 0, overflow: "hidden", cursor: onTap ? "pointer" : "default" }}>
                     <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                       <defs><path id={id} d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
                       <circle cx="100" cy="100" r="99" fill={fill} />
@@ -1394,20 +1406,20 @@ export default function Home8() {
                 return (
                   <div
                     key="card2"
-                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 10, gap: 2, zIndex: doIdx === 1 ? 2 : 1, height: "calc(100vw - 40px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", opacity: doIdx === 1 ? 1 : 0, transition: "opacity 0.3s" }}
+                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 0, gap: 2, zIndex: doIdx === 1 ? 2 : 1, height: "calc(100vw - 40px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", opacity: doIdx === 1 ? 1 : 0, transition: "opacity 0.3s" }}
                     onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
                     onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
                   >
                     <div style={{ width: "100%", height: "100%", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gridTemplateRows: "repeat(3, 1fr)", rowGap: 10, columnGap: 6 }}>
-                      {circle("c2nextMatch", "#2653d4", "NEXT MATCH", "rgba(255,255,255,0.75)", nmLabel, "#fff", match?.time ?? "", "#fff", 0.65)}
-                      {circle("c2schedule", "#16a34a", "SCHEDULE", "rgba(255,255,255,0.75)", `${completed.size}/${schedule.length}`, "#fff", "today", "#fff", 0.65)}
-                      {circle("c2form", "#7c3aed", "FORM", "rgba(255,255,255,0.75)", readiness, "#fff", "readiness", "#fff", 0.65)}
+                      {circle("c2nextMatch", "#2653d4", "NEXT MATCH", "rgba(255,255,255,0.75)", nmLabel, "#fff", match?.time ?? "", "#fff", 0.65, () => setOpenPanel("nextMatch"))}
+                      {circle("c2schedule", "#16a34a", "SCHEDULE", "rgba(255,255,255,0.75)", `${completed.size}/${schedule.length}`, "#fff", "today", "#fff", 0.65, () => setOpenPanel("schedule"))}
+                      {circle("c2form", "#7c3aed", "FORM", "rgba(255,255,255,0.75)", readiness, "#fff", "readiness", "#fff", 0.65, () => setOpenPanel("form"))}
                       {circle("c2points", "#f0f1f4", "PADLA PTS", "#1a1c1c", points > 0 ? points : "—", "#1a1c1c", "today", "#8a9096", 1)}
-                      {circle("c2streak", "#f0f1f4", "STREAK", "#1a1c1c", streak > 0 ? streak : "—", "#1a1c1c", "days", "#8a9096", 1)}
-                      {circle("c2winrate", "#f0f1f4", "WIN RATE", "#1a1c1c", winRate !== null ? `${winRate}%` : "—", "#1a1c1c", winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no data", "#8a9096", 1)}
-                      {circle("c2hydration", "#f0f1f4", "HYDRATION", "#0ea5e9", logHydrationMl > 0 ? `${logHydrationMl}ml` : "—", "#0ea5e9", logHydrationMl > 0 ? `${Math.round(Math.min(logHydrationMl / 3000, 1) * 100)}% of 3L` : "not logged", "#0ea5e9", 0.65)}
-                      {circle("c2insights", "#f0f1f4", "INSIGHTS", "#f59e0b", wellCount + badCount > 0 ? wellCount + badCount : "—", "#f59e0b", "available", "#f59e0b", 0.65)}
-                      {circle("c2patterns", "#f0f1f4", "PATTERNS", "#e11d48", wellCount + badCount > 0 ? wellCount + badCount : "—", "#e11d48", "tags logged", "#e11d48", 0.65)}
+                      {circle("c2streak", "#f0f1f4", "STREAK", "#1a1c1c", streak > 0 ? streak : "—", "#1a1c1c", "days", "#8a9096", 1, () => setOpenPanel("streak"))}
+                      {circle("c2winrate", "#f0f1f4", "WIN RATE", "#1a1c1c", winRate !== null ? `${winRate}%` : "—", "#1a1c1c", winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no data", "#8a9096", 1, () => setOpenPanel("matches"))}
+                      {circle("c2hydration", "#f0f1f4", "HYDRATION", "#0ea5e9", logHydrationMl > 0 ? `${logHydrationMl}ml` : "—", "#0ea5e9", logHydrationMl > 0 ? `${Math.round(Math.min(logHydrationMl / 3000, 1) * 100)}% of 3L` : "not logged", "#0ea5e9", 0.65, () => setOpenPanel("hydration"))}
+                      {circle("c2insights", "#f0f1f4", "INSIGHTS", "#f59e0b", wellCount + badCount > 0 ? wellCount + badCount : "—", "#f59e0b", "available", "#f59e0b", 0.65, () => setOpenPanel("insights"))}
+                      {circle("c2patterns", "#f0f1f4", "PATTERNS", "#e11d48", wellCount + badCount > 0 ? wellCount + badCount : "—", "#e11d48", "tags logged", "#e11d48", 0.65, () => setOpenPanel("patterns"))}
                     </div>
                   </div>
                 );
@@ -2507,7 +2519,31 @@ export default function Home8() {
           </div>
         )}
 
+        {/* Settings shortcut — shown only on the bottom (grid) card */}
+        <button
+          onClick={() => { startNavLoad(); router.push("/settings"); }}
+          style={{
+            position: "fixed", left: "50%", bottom: 18, transform: "translateX(-50%)",
+            width: 36, height: 36, borderRadius: "50%", border: "none", background: "transparent",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            zIndex: doIdx === 1 ? 65 : -1, opacity: doIdx === 1 ? 1 : 0, pointerEvents: doIdx === 1 ? "auto" : "none",
+            transition: "opacity 0.3s", cursor: "pointer",
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7480" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
 
+        <ScheduleSheet open={openPanel === "schedule"} onClose={() => setOpenPanel(null)} />
+        <NextMatchSheet open={openPanel === "nextMatch"} onClose={() => setOpenPanel(null)} onRateMatch={() => { setLogTab("matchreview"); setLogSheetOpen(true); }} />
+        <FormScoreSheet open={openPanel === "form"} onClose={() => setOpenPanel(null)} />
+        <StreakSheet open={openPanel === "streak"} onClose={() => setOpenPanel(null)} />
+        <MatchesSheet open={openPanel === "matches"} onClose={() => setOpenPanel(null)} />
+        <HydrationSheet open={openPanel === "hydration"} onClose={() => setOpenPanel(null)} />
+        <InsightsSheet open={openPanel === "insights"} onClose={() => setOpenPanel(null)} />
+        <PatternsSheet open={openPanel === "patterns"} onClose={() => setOpenPanel(null)} />
       </main>
     </>
   );
