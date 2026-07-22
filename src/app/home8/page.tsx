@@ -1105,57 +1105,30 @@ export default function Home8() {
               {/* Structural spacer — keeps transform geometry intact */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", pointerEvents: "none" }} />
 
-              {/* Card 0: next match */}
+              {/* Card 0: encouragement (content swapped in, same wrapper/dimensions as before) */}
               {(() => {
-                const today = now.toISOString().slice(0, 10);
+                const title =
+                  dayType === "match"     ? "Game on." :
+                  dayType === "pre-match" ? "Tomorrow is match day." :
+                  dayType === "recovery"  ? "Well played." :
+                  "Keep going.";
+                const sub =
+                  dayType === "match"
+                    ? "Trust your game and enjoy every point."
+                    : dayType === "pre-match"
+                    ? "Rest up, carb load, and get to bed early. The prep is done."
+                    : dayType === "recovery"
+                    ? "Rest is part of training. Let your body recover and come back stronger."
+                    : drillTag
+                    ? `Today focus on ${drillTag}. Small improvements compound into big gains.`
+                    : "Every session counts. Show up, put in the work, and trust the process.";
                 return (
-                  <div style={{ width: "100%", flexShrink: 0, height: "calc(100dvh - 120px)", borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px", zIndex: doIdx === -1 ? 2 : 1, pointerEvents: doIdx === -1 ? "auto" : "none", opacity: doIdx === -1 ? 1 : 0, transition: "opacity 0.3s" }}>
-                    {match ? (() => {
-                      const matchDate = new Date(match.date + "T12:00");
-                      const todayDate = new Date(today + "T12:00");
-                      const diffDays = Math.round((matchDate.getTime() - todayDate.getTime()) / 86400000);
-                      const countdownLabel = diffDays === 0 ? "TODAY" : diffDays === 1 ? "TOMORROW" : `IN ${diffDays} DAYS`;
-                      return (
-                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-                          <div style={{ position: "relative", width: "calc((100vw - 40px) * 0.65)", height: "calc((100vw - 40px) * 0.65)", flexShrink: 0 }}>
-                            <button onClick={() => setMatchInfoOpen(true)} style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, boxShadow: "0 4px 20px #2653d455" }}>
-                              <span style={{ fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 800, color: "rgba(255,255,255,0.85)", letterSpacing: "0.08em", textTransform: "uppercase", lineHeight: 1 }}>{countdownLabel}</span>
-                              <span style={{ fontSize: "clamp(30px, 7.7vw, 37px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.02em" }}>{match.time}</span>
-                            </button>
-                            <svg viewBox="0 0 100 100" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
-                              <defs>
-                                <path id="matchArc" d="M 12 50 A 38 38 0 0 1 88 50" />
-                              </defs>
-                              <text fill="rgba(255,255,255,0.7)" fontSize="9.5" fontWeight="700" letterSpacing="2.5" fontFamily="inherit">
-                                <textPath href="#matchArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
-                              </text>
-                            </svg>
-                          </div>
-                        </div>
-                      );
-                    })() : (
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-                        <div style={{ position: "relative", width: "calc((100vw - 40px) * 0.65)", height: "calc((100vw - 40px) * 0.65)", flexShrink: 0 }}>
-                          <button
-                            onClick={() => window.dispatchEvent(new Event("padelop:add-match"))}
-                            style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 20px #2653d455" }}
-                          >
-                            <svg width="18%" height="18%" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="2.5" strokeLinecap="round">
-                              <line x1="12" y1="5" x2="12" y2="19"/>
-                              <line x1="5" y1="12" x2="19" y2="12"/>
-                            </svg>
-                          </button>
-                          <svg viewBox="0 0 100 100" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
-                            <defs>
-                              <path id="noMatchArc" d="M 12 50 A 38 38 0 0 1 88 50" />
-                            </defs>
-                            <text fill="rgba(255,255,255,0.7)" fontSize="9.5" fontWeight="700" letterSpacing="2.5" fontFamily="inherit">
-                              <textPath href="#noMatchArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
-                            </text>
-                          </svg>
-                        </div>
-                      </div>
-                    )}
+                  <div style={{ width: "100%", flexShrink: 0, height: "calc(100dvh - 120px)", borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px", gap: 2, zIndex: doIdx === -1 ? 2 : 1, pointerEvents: doIdx === -1 ? "auto" : "none", opacity: doIdx === -1 ? 1 : 0, transition: "opacity 0.3s" }}>
+                    <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4", textAlign: "center" }}>
+                      {dayLabel}
+                    </p>
+                    <p style={{ margin: 0, fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>{title}</p>
+                    <p style={{ margin: 0, fontSize: "clamp(15px, 3.8vw, 18px)", color: "#6b7480", lineHeight: 1.6, textAlign: "center" }}>{sub}</p>
                   </div>
                 );
               })()}
@@ -1390,35 +1363,50 @@ export default function Home8() {
                 );
               })()}
 
-              {/* Card 2: encouragement */}
+              {/* Card 2: My Game snapshot grid (content swapped in, same wrapper/dimensions as before) */}
               {(() => {
-                const title =
-                  dayType === "match"     ? "Game on." :
-                  dayType === "pre-match" ? "Tomorrow is match day." :
-                  dayType === "recovery"  ? "Well played." :
-                  "Keep going.";
-                const sub =
-                  dayType === "match"
-                    ? "Trust your game and enjoy every point."
-                    : dayType === "pre-match"
-                    ? "Rest up, carb load, and get to bed early. The prep is done."
-                    : dayType === "recovery"
-                    ? "Rest is part of training. Let your body recover and come back stronger."
-                    : drillTag
-                    ? `Today focus on ${drillTag}. Small improvements compound into big gains.`
-                    : "Every session counts. Show up, put in the work, and trust the process.";
+                const ff = "-apple-system, BlinkMacSystemFont, sans-serif";
+                const points = completed.size;
+                const todayStr = now.toISOString().slice(0, 10);
+                const nmDiff = match ? Math.round((new Date(match.date + "T12:00").getTime() - new Date(todayStr + "T12:00").getTime()) / 86400000) : null;
+                const nmLabel = nmDiff === null ? "None" : nmDiff === 0 ? "Today" : nmDiff === 1 ? "Tmrw" : `${nmDiff}d`;
+                const wellCount = reviews.flatMap(r => r.wellDone ?? []).length;
+                const badCount = reviews.flatMap(r => r.improved ?? []).length;
+
+                const circle = (
+                  id: string, fill: string, title: string, titleColor: string,
+                  main: React.ReactNode, mainColor: string,
+                  sub: React.ReactNode, subColor: string, subOpacity: number,
+                ) => (
+                  <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
+                    <defs><path id={id} d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
+                    <circle cx="100" cy="100" r="99" fill={fill} />
+                    <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: titleColor, fontFamily: ff }}>
+                      <textPath href={`#${id}`} startOffset="50%" textAnchor="middle">{title}</textPath>
+                    </text>
+                    <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize="46" fontWeight="800" style={{ fill: mainColor, fontFamily: ff }}>{main}</text>
+                    <text x="100" y="152" textAnchor="middle" fontSize="19" fontWeight="600" style={{ fill: subColor, fontFamily: ff, opacity: subOpacity } as React.CSSProperties}>{sub}</text>
+                  </svg>
+                );
+
                 return (
                   <div
                     key="card2"
-                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px", gap: 2, zIndex: doIdx === 1 ? 2 : 1, height: "calc(100vw - 40px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", opacity: doIdx === 1 ? 1 : 0, transition: "opacity 0.3s" }}
+                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 10, gap: 2, zIndex: doIdx === 1 ? 2 : 1, height: "calc(100vw - 40px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", opacity: doIdx === 1 ? 1 : 0, transition: "opacity 0.3s" }}
                     onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
                     onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
                   >
-                    <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4", textAlign: "center" }}>
-                      {dayLabel}
-                    </p>
-                    <p style={{ margin: 0, fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>{title}</p>
-                    <p style={{ margin: 0, fontSize: "clamp(15px, 3.8vw, 18px)", color: "#6b7480", lineHeight: 1.6, textAlign: "center" }}>{sub}</p>
+                    <div style={{ width: "100%", height: "100%", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gridTemplateRows: "repeat(3, 1fr)", gap: 6 }}>
+                      {circle("c2nextMatch", "#2653d4", "NEXT MATCH", "rgba(255,255,255,0.75)", nmLabel, "#fff", match?.time ?? "", "#fff", 0.65)}
+                      {circle("c2schedule", "#16a34a", "SCHEDULE", "rgba(255,255,255,0.75)", `${completed.size}/${schedule.length}`, "#fff", "today", "#fff", 0.65)}
+                      {circle("c2form", "#7c3aed", "FORM", "rgba(255,255,255,0.75)", readiness, "#fff", "readiness", "#fff", 0.65)}
+                      {circle("c2points", "#f0f1f4", "PADLA PTS", "#1a1c1c", points > 0 ? points : "—", "#1a1c1c", "today", "#8a9096", 1)}
+                      {circle("c2streak", "#f0f1f4", "STREAK", "#1a1c1c", streak > 0 ? streak : "—", "#1a1c1c", "days", "#8a9096", 1)}
+                      {circle("c2winrate", "#f0f1f4", "WIN RATE", "#1a1c1c", winRate !== null ? `${winRate}%` : "—", "#1a1c1c", winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no data", "#8a9096", 1)}
+                      {circle("c2hydration", "#f0f1f4", "HYDRATION", "#0ea5e9", logHydrationMl > 0 ? `${logHydrationMl}ml` : "—", "#0ea5e9", logHydrationMl > 0 ? `${Math.round(Math.min(logHydrationMl / 3000, 1) * 100)}% of 3L` : "not logged", "#0ea5e9", 0.65)}
+                      {circle("c2insights", "#f0f1f4", "INSIGHTS", "#f59e0b", wellCount + badCount > 0 ? wellCount + badCount : "—", "#f59e0b", "available", "#f59e0b", 0.65)}
+                      {circle("c2patterns", "#f0f1f4", "PATTERNS", "#e11d48", wellCount + badCount > 0 ? wellCount + badCount : "—", "#e11d48", "tags logged", "#e11d48", 0.65)}
+                    </div>
                   </div>
                 );
               })()}
