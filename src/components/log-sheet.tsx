@@ -242,6 +242,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
     function saveBedtime(bedtime: string, next: Record<string, string | number>) {
       try {
         savePartialCheckIn({ stress: Number(next.stress) || 3 });
+        saveCheckInToDb({ date: todayYMD, stress: Number(next.stress) || 3 });
 
         const ts = new Date().toISOString();
         const protein = String(next.protein ?? "");
@@ -566,6 +567,9 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
           date:            todayYMD,
           sleep:           ci.sleep,
           energy:          ci.energy,
+          soreness:        ci.soreness,
+          motivation:      ci.motivation,
+          stress:          ci.stress,
           sleep_hours:     String(next.sleepHours ?? ""),
           pain:            String(next.pain ?? "none"),
           pain_areas:      painAreas,

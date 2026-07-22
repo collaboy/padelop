@@ -66,6 +66,10 @@ export type Scores = {
   nutrition: number;
   training: number;
   wellbeing: number;
+  // Unfloored recovery/wellbeing (0-100, no 65 floor) — used by the Form Score's
+  // Body component, which needs real below-neutral gradient the floored values can't show.
+  recoveryRaw: number;
+  wellbeingRaw: number;
 };
 
 const LITRE_DELTA: Record<string, number> = {
@@ -73,6 +77,7 @@ const LITRE_DELTA: Record<string, number> = {
 };
 
 const clamp = (n: number) => Math.max(65, Math.min(100, Math.round(n)));
+const clamp0100 = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
 
 export function computeScores(
   checkIn: DailyCheckIn | null,
@@ -158,7 +163,10 @@ export function computeScores(
   // Overall: Recovery 30%, Nutrition 25%, Training 20%, Wellbeing 25%
   const overall = clamp(r * 0.30 + n * 0.25 + t * 0.20 + w * 0.25);
 
-  return { overall, recovery: r, nutrition: n, training: t, wellbeing: w };
+  return {
+    overall, recovery: r, nutrition: n, training: t, wellbeing: w,
+    recoveryRaw: clamp0100(rec), wellbeingRaw: clamp0100(wb),
+  };
 }
 
 export function saveHabits(habits: Omit<HabitsEntry, "date">): void {
@@ -642,7 +650,7 @@ export function computeAllTimeScores(): Scores {
     const revLogs = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]") as ReviewEntry[];
 
     const len = Math.max(hydLogs.length, nutLogs.length, revLogs.length);
-    if (len === 0) return { overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65 };
+    if (len === 0) return { overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65, recoveryRaw: 65, wellbeingRaw: 65 };
 
     const all: Scores[] = [];
     for (let i = 0; i < len; i++) {
@@ -656,9 +664,11 @@ export function computeAllTimeScores(): Scores {
       nutrition: avg(all.map(s => s.nutrition)),
       training:  avg(all.map(s => s.training)),
       wellbeing: avg(all.map(s => s.wellbeing)),
+      recoveryRaw:  avg(all.map(s => s.recoveryRaw)),
+      wellbeingRaw: avg(all.map(s => s.wellbeingRaw)),
     };
   } catch {
-    return { overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65 };
+    return { overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65, recoveryRaw: 65, wellbeingRaw: 65 };
   }
 }
 
@@ -684,16 +694,17 @@ export function computeFormScore(): FormScore {
   // Component 1: Body (30%)
   // 7-day average of recovery + wellbeing pillars from score-history.
   // These capture sleep, soreness, energy, stress, motivation.
-  // Scores are in [65,100], remapped to [0,100].
+  // Uses the unfloored 0-100 raw values (not the 65-floored display scores),
+  // so below-neutral days actually pull the score down instead of flooring at 65.
   let body: number | null = null;
   try {
     const history = JSON.parse(localStorage.getItem("padelop:score-history") || "[]") as ScoreSnapshot[];
     const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 7);
     const cutoffStr = cutoff.toISOString().slice(0, 10);
-    const recent = history.filter(s => s.date >= cutoffStr && s.date <= todayYMD);
+    const recent = history.filter(s => s.date >= cutoffStr && s.date <= todayYMD && s.recoveryRaw != null && s.wellbeingRaw != null);
     if (recent.length >= 2) {
-      const avg = recent.reduce((sum, s) => sum + (s.recovery + s.wellbeing) / 2, 0) / recent.length;
-      body = Math.round(c01((avg - 65) / 35) * 100);
+      const avg = recent.reduce((sum, s) => sum + (s.recoveryRaw + s.wellbeingRaw) / 2, 0) / recent.length;
+      body = Math.round(c01(avg / 100) * 100);
     }
   } catch {}
 

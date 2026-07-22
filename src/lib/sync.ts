@@ -270,7 +270,7 @@ export async function hydrateFromSupabase(): Promise<SyncResult | null> {
 
     // ── Score snapshots ──────────────────────────────────────────────────
     const snapData = scoreSnapsRes.data ?? [];
-    const localSnaps: { date: string; overall: number; recovery: number; nutrition: number; training: number; wellbeing: number }[] = (() => {
+    const localSnaps: { date: string; overall: number; recovery: number; nutrition: number; training: number; wellbeing: number; recoveryRaw?: number; wellbeingRaw?: number }[] = (() => {
       try { return JSON.parse(localStorage.getItem("padelop:score-history") || "[]"); } catch { return []; }
     })();
     // Merge: start with local, overwrite with DB entries, keep local-only dates
@@ -279,15 +279,21 @@ export async function hydrateFromSupabase(): Promise<SyncResult | null> {
     for (const s of snapData) {
       const date = s.date as string;
       dbSnapDates.add(date);
-      snapMap.set(date, { date, overall: s.overall ?? 0, recovery: s.recovery ?? 0, nutrition: s.nutrition ?? 0, training: s.training ?? 0, wellbeing: s.wellbeing ?? 0 });
+      snapMap.set(date, {
+        date, overall: s.overall ?? 0, recovery: s.recovery ?? 0, nutrition: s.nutrition ?? 0, training: s.training ?? 0, wellbeing: s.wellbeing ?? 0,
+        recoveryRaw: s.recovery_raw ?? undefined, wellbeingRaw: s.wellbeing_raw ?? undefined,
+      });
     }
     const mergedSnaps = Array.from(snapMap.values()).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 90);
     localStorage.setItem("padelop:score-history", JSON.stringify(mergedSnaps));
-    // Push local-only dates to DB so other devices can see them
+    // Push local-only dates to DB so other devices can see them.
+    // Skip entries from before the Body-score fix (no raw fields) — those are
+    // stale baseline pollution from unconditional snapshot saves and should be
+    // left to age out locally, not re-pushed to resurrect deleted DB rows.
     for (const s of localSnaps) {
-      if (!dbSnapDates.has(s.date)) {
+      if (!dbSnapDates.has(s.date) && s.recoveryRaw != null && s.wellbeingRaw != null) {
         supabase.from("score_snapshots").upsert(
-          { user_id: user.id, date: s.date, overall: s.overall, recovery: s.recovery, nutrition: s.nutrition, training: s.training, wellbeing: s.wellbeing },
+          { user_id: user.id, date: s.date, overall: s.overall, recovery: s.recovery, nutrition: s.nutrition, training: s.training, wellbeing: s.wellbeing, recovery_raw: s.recoveryRaw ?? null, wellbeing_raw: s.wellbeingRaw ?? null },
           { onConflict: "user_id,date" }
         ).then();
       }

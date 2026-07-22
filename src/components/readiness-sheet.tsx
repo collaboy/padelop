@@ -37,7 +37,7 @@ export default function ReadinessSheet({ open, onClose, onOpenLog: _onOpenLog, o
   function refresh() {
     const d = loadScoringData();
     const s = computeScores(d.checkIn, d.hydration, d.review, d.nutrition, d.gameDaysThisWeek, d.habits, d.training);
-    saveScoreSnapshot(s);
+    if (d.checkIn) saveScoreSnapshot(s);
     setMatchReadiness(computeMatchReadiness(d.checkIn, loadMorningLog(), false, d.review));
     setCheckIn(d.checkIn);
     setHydration(d.hydration);

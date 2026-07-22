@@ -196,8 +196,10 @@ export default function InsightsPage() {
         setMatchReadiness(computeMatchReadiness(d.checkIn, morningLog, !!data, d.review));
       });
     });
-    saveScoreSnapshot(s);
-    saveScoreSnapshotToDb(todayStr, s);
+    if (d.checkIn) {
+      saveScoreSnapshot(s);
+      saveScoreSnapshotToDb(todayStr, s);
+    }
     setHistory(loadScoreHistory());
     const habits: { date: string }[] = JSON.parse(localStorage.getItem("padelop:habits") || "[]");
     const dateset = new Set(habits.map(h => h.date));

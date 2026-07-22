@@ -527,7 +527,7 @@ export default function ProfilePage() {
 
   // Insights
   const [matchReadiness, setMatchReadiness] = useState<MatchReadinessResult | null>(null);
-  const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65 });
+  const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65, recoveryRaw: 65, wellbeingRaw: 65 });
   const [pillarStates, setPillarStates] = useState<PillarStates>({
     recovery:  { status: "not_logged", reason: "Morning check-in not done" },
     nutrition: { status: "not_logged", reason: "Night check-in not done yet" },
@@ -834,8 +834,10 @@ export default function ProfilePage() {
         setMatchReadiness(computeMatchReadiness(d.checkIn, morningLog, !!data, d.review));
       });
     });
-    saveScoreSnapshot(s);
-    saveScoreSnapshotToDb(new Date().toISOString().slice(0, 10), s);
+    if (d.checkIn) {
+      saveScoreSnapshot(s);
+      saveScoreSnapshotToDb(new Date().toISOString().slice(0, 10), s);
+    }
     const hist = loadScoreHistory();
     setHistory(hist);
     const habits: { date: string }[] = JSON.parse(localStorage.getItem("padelop:habits") || "[]");
@@ -1362,22 +1364,9 @@ export default function ProfilePage() {
                     return (
                     <>
                     {/* My Game pill */}
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "20px 24px 0" }}>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "20px 24px 24px" }}>
                       <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: panelDayColor, background: `${panelDayColor}18`, borderRadius: 999, padding: "12px 28px" }}>My Game</span>
                     </div>
-
-                    {/* Coach's note */}
-                    {matchInsight ? (
-                      <div onClick={() => setInsightSheetOpen(true)} {...touchPress(() => setInsightSheetOpen(true))} style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: "20px 24px 44px" }}>
-                        <p style={{ margin: 0, fontSize: "clamp(17px, 4.5vw, 21px)", fontWeight: 300, letterSpacing: "0.01em", color: "#7a8590", lineHeight: 1.5, textWrap: "balance", textAlign: "center" } as React.CSSProperties}>{matchInsight.sentence}</p>
-                      </div>
-                    ) : (
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "20px 24px 44px" }}>
-                        <p style={{ margin: 0, fontSize: "clamp(17px, 4.5vw, 21px)", fontWeight: 300, letterSpacing: "0.01em", color: "#a0aab2", lineHeight: 1.5, textAlign: "center" }}>
-                          {["Habits win matches.", "Small reps compound.", "Train your weaknesses.", "Rest is part of training.", "Show up consistently.", "Log a game. See the gaps.", "Your game is built daily."][new Date().getDay()]}
-                        </p>
-                      </div>
-                    )}
 
                     {/* Row 1: My Game · Day Type · Goals */}
                     <div style={{ display: "flex", gap: 10 }}>
@@ -1463,8 +1452,8 @@ export default function ProfilePage() {
                             <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                               <defs><path id="formScoreArc" d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
                               <circle cx="100" cy="100" r="99" fill="#7c3aed" />
-                              <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: ff }}>
-                                <textPath href="#formScoreArc" startOffset="50%" textAnchor="middle">FORM</textPath>
+                              <text fontSize="25" fontWeight="800" style={{ fill: "rgba(255,255,255,0.75)", fontFamily: ff }}>
+                                <textPath href="#formScoreArc" startOffset="50%" textAnchor="middle" textLength="160" lengthAdjust="spacingAndGlyphs">OVERALL FORM</textPath>
                               </text>
                               <text x="100" y="100" textAnchor="middle" dominantBaseline="middle"
                                 fontSize={score !== null ? "46" : "36"} fontWeight="800"
@@ -1719,6 +1708,19 @@ export default function ProfilePage() {
                       })()}
 
                     </div>
+
+                    {/* Coach's note */}
+                    {matchInsight ? (
+                      <div onClick={() => setInsightSheetOpen(true)} {...touchPress(() => setInsightSheetOpen(true))} style={{ flex: 1, minHeight: 160, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: "0 24px" }}>
+                        <p style={{ margin: 0, fontSize: "clamp(17px, 4.5vw, 21px)", fontWeight: 300, letterSpacing: "0.01em", color: "#7a8590", lineHeight: 1.5, textWrap: "balance", textAlign: "center" } as React.CSSProperties}>{matchInsight.sentence}</p>
+                      </div>
+                    ) : (
+                      <div style={{ flex: 1, minHeight: 160, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 24px" }}>
+                        <p style={{ margin: 0, fontSize: "clamp(17px, 4.5vw, 21px)", fontWeight: 300, letterSpacing: "0.01em", color: "#a0aab2", lineHeight: 1.5, textAlign: "center" }}>
+                          {["Habits win matches.", "Small reps compound.", "Train your weaknesses.", "Rest is part of training.", "Show up consistently.", "Log a game. See the gaps.", "Your game is built daily."][new Date().getDay()]}
+                        </p>
+                      </div>
+                    )}
 
                     {/* Panel for row 2 */}
                     {streakPanelOpen && (() => {

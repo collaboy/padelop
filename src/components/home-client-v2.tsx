@@ -430,7 +430,7 @@ export default function HomeClientV2() {
   const [heroMetric, setHeroMetric] = useState<string>("overall");
   const [heroCardExpanded, setHeroCardExpanded] = useState(false);
   const [improveScoreOpen, setImproveScoreOpen] = useState(false);
-  const [heroScores, setHeroScores] = useState<Scores>({ overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65 });
+  const [heroScores, setHeroScores] = useState<Scores>({ overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65, recoveryRaw: 65, wellbeingRaw: 65 });
   const cardTouchX = useRef(0);
   const notifTimeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
 

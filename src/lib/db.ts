@@ -161,13 +161,17 @@ export async function saveScheduleDoneToDb(date: string, tasks: string[]) {
   } catch {}
 }
 
-export async function saveScoreSnapshotToDb(date: string, scores: { overall: number; recovery: number; nutrition: number; training: number; wellbeing: number }) {
+export async function saveScoreSnapshotToDb(date: string, scores: { overall: number; recovery: number; nutrition: number; training: number; wellbeing: number; recoveryRaw?: number; wellbeingRaw?: number }) {
   try {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     await supabase.from("score_snapshots").upsert(
-      { user_id: user.id, date, ...scores },
+      {
+        user_id: user.id, date,
+        overall: scores.overall, recovery: scores.recovery, nutrition: scores.nutrition, training: scores.training, wellbeing: scores.wellbeing,
+        recovery_raw: scores.recoveryRaw ?? null, wellbeing_raw: scores.wellbeingRaw ?? null,
+      },
       { onConflict: "user_id,date" }
     );
   } catch {}
@@ -180,6 +184,8 @@ export async function saveCheckInToDb(data: {
   hydration?: number;
   energy?: number;
   stress?: number;
+  soreness?: number;
+  motivation?: number;
   sleep_hours?: string;
   pain?: string;
   pain_areas?: string[];
@@ -190,18 +196,27 @@ export async function saveCheckInToDb(data: {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
+    const { data: existing } = await supabase
+      .from("check_ins")
+      .select("sleep, nutrition, hydration, energy, stress, soreness, motivation, sleep_hours, pain, pain_areas, water_on_waking")
+      .eq("user_id", user.id)
+      .eq("date", data.date)
+      .maybeSingle();
+
     await supabase.from("check_ins").upsert({
       user_id:         user.id,
       date:            data.date,
-      sleep:           data.sleep ?? null,
-      nutrition:       data.nutrition ?? null,
-      hydration:       data.hydration ?? null,
-      energy:          data.energy ?? null,
-      stress:          data.stress ?? null,
-      sleep_hours:     data.sleep_hours ?? null,
-      pain:            data.pain ?? null,
-      pain_areas:      data.pain_areas ?? null,
-      water_on_waking: data.water_on_waking ?? null,
+      sleep:           data.sleep ?? existing?.sleep ?? null,
+      nutrition:       data.nutrition ?? existing?.nutrition ?? null,
+      hydration:       data.hydration ?? existing?.hydration ?? null,
+      energy:          data.energy ?? existing?.energy ?? null,
+      stress:          data.stress ?? existing?.stress ?? null,
+      soreness:        data.soreness ?? existing?.soreness ?? null,
+      motivation:      data.motivation ?? existing?.motivation ?? null,
+      sleep_hours:     data.sleep_hours ?? existing?.sleep_hours ?? null,
+      pain:            data.pain ?? existing?.pain ?? null,
+      pain_areas:      data.pain_areas ?? existing?.pain_areas ?? null,
+      water_on_waking: data.water_on_waking ?? existing?.water_on_waking ?? null,
     }, { onConflict: "user_id,date" });
   } catch {}
 }

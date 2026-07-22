@@ -58,7 +58,7 @@ function topTag(tags: string[]): string | null {
 
 export default function Insights4() {
   const [logSheetOpen, setLogSheetOpen] = useState(false);
-  const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65 });
+  const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65, recoveryRaw: 65, wellbeingRaw: 65 });
   const [pillarStates, setPillarStates] = useState<PillarStates>({
     recovery:  { status: "not_logged", reason: "Morning check-in not done" },
     nutrition: { status: "not_logged", reason: "Night check-in not done yet" },

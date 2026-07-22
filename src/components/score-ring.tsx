@@ -12,7 +12,7 @@ const METRIC_META: Record<string, { label: string; sublabel: string; color: stri
 };
 
 export default function ScoreRing({ metric = "overall" }: { metric?: string }) {
-  const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65 });
+  const [scores, setScores] = useState<Scores>({ overall: 65, recovery: 65, nutrition: 65, training: 65, wellbeing: 65, recoveryRaw: 65, wellbeingRaw: 65 });
 
   useEffect(() => {
     function load() {
