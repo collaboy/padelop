@@ -1410,7 +1410,7 @@ export default function Home8() {
                     onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
                     onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
                   >
-                    <div style={{ width: "100%", height: "100%", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gridTemplateRows: "repeat(3, 1fr)", rowGap: 16, columnGap: 6 }}>
+                    <div style={{ width: "100%", height: "calc(100% - 10px)", marginTop: 10, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gridTemplateRows: "repeat(3, 1fr)", rowGap: 16, columnGap: 6 }}>
                       {circle("c2nextMatch", "#2653d4", "NEXT MATCH", "rgba(255,255,255,0.75)", nmLabel, "#fff", match?.time ?? "", "#fff", 0.65, () => setOpenPanel("nextMatch"))}
                       {circle("c2schedule", "#16a34a", "SCHEDULE", "rgba(255,255,255,0.75)", `${completed.size}/${schedule.length}`, "#fff", "today", "#fff", 0.65, () => setOpenPanel("schedule"))}
                       {circle("c2form", "#7c3aed", "FORM", "rgba(255,255,255,0.75)", readiness, "#fff", "readiness", "#fff", 0.65, () => setOpenPanel("form"))}
