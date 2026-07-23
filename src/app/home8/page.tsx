@@ -18,107 +18,107 @@ import { saveUpcomingMatch, saveNutritionToDb, saveHydrationToDb, saveNoteToDb, 
 import { hydrateFromSupabase } from "@/lib/sync";
 import { downloadSnapshot } from "@/lib/storage";
 
-// ── Warmup audio captions (from 0618 (1).srt) ────────────────────────────
+// ── Warmup audio captions (from 0723.srt) ────────────────────────────
 const WARMUP_CUES: { from: number; text: string }[] = [
-  { from: 0,     text: "take a breath if you're listening to this" },
-  { from: 2.4,   text: "chances are your match is about 10 or 15 minutes away" },
-  { from: 5.7,   text: "and right now whether you realize it or not" },
-  { from: 8.4,   text: "your brain is already playing padel" },
-  { from: 10.4,  text: "it's thinking about opponents" },
-  { from: 12.1,  text: "it's remembering the last match" },
-  { from: 13.8,  text: "it's replaying mistakes" },
-  { from: 15.1,  text: "it's imagining great points that haven't happened yet" },
-  { from: 17.9,  text: "the funny thing is" },
-  { from: 18.8,  text: "that the actual match hasn't even started" },
-  { from: 21.3,  text: "you're still in the car and that's where we'll begin" },
-  { from: 24.0,  text: "because one of the most useful skills in padel" },
-  { from: 26.2,  text: "has nothing to do with technique" },
-  { from: 28.0,  text: "it's the ability to arrive mentally" },
-  { from: 29.9,  text: "where your feet already are" },
-  { from: 31.4,  text: "right now you're not playing a match" },
-  { from: 33.2,  text: "you're driving to one" },
-  { from: 34.5,  text: "so let the future stay in the future" },
-  { from: 36.3,  text: "for a few more minutes let's do a quick check" },
-  { from: 38.9,  text: "how's your hydration nothing fancy here" },
-  { from: 41.5,  text: "if you've brought water good" },
-  { from: 43.4,  text: "if you have electrolytes that you normally use fine" },
-  { from: 46.2,  text: "if not that's fine too" },
-  { from: 47.6,  text: "the goal isn't perfection" },
-  { from: 49.2,  text: "the goal is simply not showing up dehydrated" },
-  { from: 51.8,  text: "hydration isn't about gaining an advantage" },
-  { from: 54.1,  text: "it's about avoiding an unnecessary disadvantage simple" },
-  { from: 57.6,  text: "now let's talk about expectations" },
-  { from: 59.8,  text: "many players arrive at the court" },
-  { from: 61.4,  text: "carrying invisible luggage" },
-  { from: 63.2,  text: "maybe it's their ranking maybe it's their partner" },
-  { from: 65.8,  text: "maybe it's a previous loss" },
-  { from: 67.4,  text: "maybe it's the belief that they should win" },
-  { from: 69.4,  text: "but Padel doesn't care the court doesn't care" },
-  { from: 72.0,  text: "the glass doesn't care the ball certainly doesn't care" },
-  { from: 75.3,  text: "the match begins at 0 zero" },
-  { from: 77.1,  text: "every single time" },
-  { from: 78.5,  text: "and that's one of the most beautiful things about sport" },
-  { from: 81.3,  text: "nobody owes you anything everything starts fresh" },
-  { from: 83.8,  text: "now let's talk tactics not complicated tactics" },
-  { from: 86.7,  text: "just useful reminders first" },
-  { from: 89.1,  text: "respect the net at most club levels" },
-  { from: 91.0,  text: "the team controlling the net usually controls the match" },
-  { from: 93.7,  text: "that doesn't mean rushing the net recklessly" },
-  { from: 96.3,  text: "it means understanding its value" },
-  { from: 98.0,  text: "if you're at the back" },
-  { from: 99.0,  text: "and your opponents are comfortable at the net" },
-  { from: 101.4, text: "your mission isn't necessarily to hit a winner" },
-  { from: 104.0, text: "your mission is often much simpler" },
-  { from: 105.9, text: "create an opportunity to move forward" },
-  { from: 108.2, text: "maybe that's a lob maybe it's a deep ball" },
-  { from: 110.7, text: "maybe it's patience the point isn't the shot" },
-  { from: 113.4, text: "the point is improving your position" },
-  { from: 115.6, text: "second make your opponents earn points" },
-  { from: 118.2, text: "this sounds obvious" },
-  { from: 119.2, text: "but many matches are lost because players donate points" },
-  { from: 122.4, text: "unforced errors low percentage winners" },
-  { from: 124.8, text: "hero shots the kind of shot that looks amazing once" },
-  { from: 127.5, text: "and fails four times today" },
-  { from: 129.7, text: "see what happens if you make your opponents hit" },
-  { from: 132.0, text: "one more ball then one more" },
-  { from: 134.2, text: "then one more third" },
-  { from: 136.1, text: "watch the feet if you get a comfortable ball at the net" },
-  { from: 139.3, text: "remember that the feet" },
-  { from: 140.1, text: "are often a better target than the corners" },
-  { from: 142.5, text: "a difficult volley at someone's shoes" },
-  { from: 144.4, text: "can create more problems" },
-  { from: 145.9, text: "than a spectacular shot aimed at the fence" },
-  { from: 148.6, text: "simple beats flashy" },
-  { from: 149.8, text: "more often than most players realize" },
-  { from: 151.9, text: "now let's talk about the first few games" },
-  { from: 153.9, text: "the beginning of a match tells a story" },
-  { from: 156.0, text: "and many players try to write the ending in Chapter 1" },
-  { from: 158.8, text: "don't use the first few games to gather information" },
-  { from: 161.9, text: "who likes to lob who gets nervous under pressure" },
-  { from: 164.7, text: "who serves well who rushes" },
-  { from: 166.6, text: "who stays calm think like an observer" },
-  { from: 169.1, text: "the player who learns fastest often wins" },
-  { from: 171.5, text: "and finally a reminder" },
-  { from: 173.1, text: "you're going to miss shots today" },
-  { from: 174.8, text: "everybody does professionals do" },
-  { from: 177.2, text: "beginners do everyone in between does" },
-  { from: 180.0, text: "the difference isn't who misses" },
-  { from: 181.9, text: "the difference is who recovers" },
-  { from: 183.7, text: "can you let one bad point stay one bad point" },
-  { from: 186.2, text: "can you avoid turning one mistake into three" },
-  { from: 188.6, text: "can you reset" },
-  { from: 189.7, text: "because matches are rarely decided by a single error" },
-  { from: 192.6, text: "they're often decided" },
-  { from: 193.8, text: "by the emotional reaction that follows it" },
-  { from: 196.1, text: "so as you arrive at the club" },
-  { from: 197.9, text: "leave a little room for curiosity" },
-  { from: 200.0, text: "see what kind of match this becomes" },
-  { from: 202.0, text: "compete communicate" },
-  { from: 203.7, text: "move your feet stay present" },
-  { from: 205.7, text: "and when the first point begins" },
-  { from: 207.4, text: "remember you don't need to play perfect padel" },
-  { from: 210.4, text: "you just need to make the next good decision" },
-  { from: 212.5, text: "good luck see you on court" },
+  { from: 0.0,      text: "take a breath if you're listening to this" },
+  { from: 3.07,     text: "chances are your match is about 10 or 15 minutes away" },
+  { from: 7.1,      text: "and right now whether you realize it or not" },
+  { from: 10.43,    text: "your brain is already playing padel" },
+  { from: 12.97,    text: "it's thinking about opponents" },
+  { from: 15.1,     text: "it's remembering the last match" },
+  { from: 17.23,    text: "it's replaying mistakes" },
+  { from: 18.87,    text: "it's imagining great points that haven't happened yet" },
+  { from: 22.4,     text: "the funny thing is" },
+  { from: 23.47,    text: "that the actual match hasn't even started" },
+  { from: 26.57,    text: "you're still in the car and that's where we'll begin" },
+  { from: 30.03,    text: "because one of the most useful skills in padel" },
+  { from: 32.8,     text: "has nothing to do with technique" },
+  { from: 35.03,    text: "it's the ability to arrive mentally" },
+  { from: 37.3,     text: "where your feet already are" },
+  { from: 39.2,     text: "right now you're not playing a match" },
+  { from: 41.5,     text: "you're driving to one" },
+  { from: 43.07,    text: "so let the future stay in the future" },
+  { from: 45.37,    text: "for a few more minutes let's do a quick check" },
+  { from: 48.57,    text: "how's your hydration nothing fancy here" },
+  { from: 51.83,    text: "if you've brought water good" },
+  { from: 54.17,    text: "if you have electrolytes that you normally use fine" },
+  { from: 57.7,     text: "if not that's fine too" },
+  { from: 59.5,     text: "the goal isn't perfection" },
+  { from: 61.5,     text: "the goal is simply not showing up dehydrated" },
+  { from: 64.67,    text: "hydration isn't about gaining an advantage" },
+  { from: 67.73,    text: "it's about avoiding an unnecessary disadvantage simple" },
+  { from: 71.97,    text: "now let's talk about expectations" },
+  { from: 74.23,    text: "many players arrive at the court" },
+  { from: 75.77,    text: "carrying invisible luggage" },
+  { from: 77.57,    text: "maybe it's their ranking maybe it's their partner" },
+  { from: 80.23,    text: "maybe it's a previous loss" },
+  { from: 81.8,     text: "maybe it's the belief that they should win" },
+  { from: 83.77,    text: "but Padel doesn't care the court doesn't care" },
+  { from: 86.43,    text: "the glass doesn't care the ball certainly doesn't care" },
+  { from: 89.67,    text: "the match begins at 0 zero" },
+  { from: 91.5,     text: "every single time" },
+  { from: 92.87,    text: "and that's one of the most beautiful things about sport" },
+  { from: 95.7,     text: "nobody owes you anything everything starts fresh" },
+  { from: 98.23,    text: "now let's talk tactics not complicated tactics" },
+  { from: 101.1,    text: "just useful reminders first" },
+  { from: 103.47,   text: "respect the net at most club levels" },
+  { from: 105.4,    text: "the team controlling the net usually controls the match" },
+  { from: 108.1,    text: "that doesn't mean rushing the net recklessly" },
+  { from: 110.67,   text: "it means understanding its value" },
+  { from: 112.43,   text: "if you're at the back" },
+  { from: 113.43,   text: "and your opponents are comfortable at the net" },
+  { from: 115.8,    text: "your mission isn't necessarily to hit a winner" },
+  { from: 118.4,    text: "your mission is often much simpler" },
+  { from: 120.3,    text: "create an opportunity to move forward" },
+  { from: 122.57,   text: "maybe that's a lob maybe it's a deep ball" },
+  { from: 125.07,   text: "maybe it's patience the point isn't the shot" },
+  { from: 127.77,   text: "the point is improving your position" },
+  { from: 129.87,   text: "second make your opponents earn points" },
+  { from: 132.57,   text: "this sounds obvious" },
+  { from: 133.63,   text: "but many matches are lost because players donate points" },
+  { from: 136.8,    text: "unforced errors low percentage winners" },
+  { from: 139.2,    text: "hero shots the kind of shot that looks amazing once" },
+  { from: 141.9,    text: "and fails four times today" },
+  { from: 144.07,   text: "see what happens if you make your opponents hit" },
+  { from: 146.37,   text: "one more ball then one more" },
+  { from: 148.57,   text: "then one more third" },
+  { from: 150.47,   text: "watch the feet if you get a comfortable ball at the net" },
+  { from: 153.7,    text: "remember that the feet" },
+  { from: 154.5,    text: "are often a better target than the corners" },
+  { from: 156.8,    text: "a difficult volley at someone's shoes" },
+  { from: 158.77,   text: "can create more problems" },
+  { from: 160.3,    text: "than a spectacular shot aimed at the fence" },
+  { from: 163.03,   text: "simple beats flashy" },
+  { from: 164.2,    text: "more often than most players realize" },
+  { from: 166.3,    text: "now let's talk about the first few games" },
+  { from: 168.3,    text: "the beginning of a match tells a story" },
+  { from: 170.37,   text: "and many players try to write the ending in Chapter 1" },
+  { from: 173.2,    text: "don't use the first few games to gather information" },
+  { from: 176.3,    text: "who likes to lob who gets nervous under pressure" },
+  { from: 179.07,   text: "who serves well who rushes" },
+  { from: 180.97,   text: "who stays calm think like an observer" },
+  { from: 183.5,    text: "the player who learns fastest often wins" },
+  { from: 185.9,    text: "and finally a reminder" },
+  { from: 187.47,   text: "you're going to miss shots today" },
+  { from: 189.2,    text: "everybody does professionals do" },
+  { from: 191.6,    text: "beginners do everyone in between does" },
+  { from: 194.4,    text: "the difference isn't who misses" },
+  { from: 196.27,   text: "the difference is who recovers" },
+  { from: 198.07,   text: "can you let one bad point stay one bad point" },
+  { from: 200.57,   text: "can you avoid turning one mistake into three" },
+  { from: 202.97,   text: "can you reset" },
+  { from: 204.07,   text: "because matches are rarely decided by a single error" },
+  { from: 207.03,   text: "they're often decided" },
+  { from: 208.17,   text: "by the emotional reaction that follows it" },
+  { from: 210.47,   text: "so as you arrive at the club" },
+  { from: 212.3,    text: "leave a little room for curiosity" },
+  { from: 214.4,    text: "see what kind of match this becomes" },
+  { from: 216.4,    text: "compete communicate" },
+  { from: 218.07,   text: "move your feet stay present" },
+  { from: 220.1,    text: "and when the first point begins" },
+  { from: 221.83,   text: "remember you don't need to play perfect padel" },
+  { from: 224.8,    text: "you just need to make the next good decision" },
+  { from: 226.9,    text: "good luck see you on court" },
 ];
 
 // ── Tag cloud (mirrors matches4) ──────────────────────────────────────────
@@ -391,6 +391,21 @@ export default function Home8() {
   const warmupCurrentTimeRef = useRef(0);
   const warmupDurationRef = useRef(0);
   const isScrubbing = useRef(false);
+
+  useEffect(() => {
+    const resumeWarmupAudio = () => {
+      if (document.visibilityState === "visible") {
+        warmupAudioCtxRef.current?.resume();
+        if (warmupPlaying && warmupAudioRef.current?.paused) warmupAudioRef.current.play();
+      }
+    };
+    document.addEventListener("visibilitychange", resumeWarmupAudio);
+    window.addEventListener("pageshow", resumeWarmupAudio);
+    return () => {
+      document.removeEventListener("visibilitychange", resumeWarmupAudio);
+      window.removeEventListener("pageshow", resumeWarmupAudio);
+    };
+  }, [warmupPlaying]);
 
   const matchUploadRef = useRef<HTMLInputElement>(null);
   const actionUploadRef = useRef<HTMLInputElement>(null);
@@ -1257,6 +1272,7 @@ export default function Home8() {
                   if (!nextSlide) return null;
                   const doneAt = doneAtRef.current.get(s.title);
                   const justDone = doneAt && (Date.now() - doneAt < 2000);
+                  const showNiceWork = doneAt && (Date.now() - doneAt < 5000);
                   const completedTitle = s.title;
                   const nextTitle = nextSlide.title;
 
@@ -1267,7 +1283,7 @@ export default function Home8() {
                       {/* Timer layer */}
                       <div style={{ position: "absolute", inset: 0, zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0, padding: "0 12px" }}>
                         <p style={{ position: "relative", color: "#000", fontWeight: 800, fontSize: !nextTitle.includes(" & ") && nextTitle.length > 14 ? "clamp(18px, 5.8vw, 26px)" : "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, display: "inline-block", textAlign: "center", margin: 0 }}>
-                          <span style={{ position: "absolute", left: 0, right: 0, bottom: "100%", fontSize: 13, fontWeight: 700, color: "#000", letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1 }}>Next</span>
+                          <span style={{ position: "absolute", left: 0, right: 0, bottom: "100%", fontSize: 13, fontWeight: 700, color: showNiceWork ? "#16a34a" : "#000", letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1 }}>{showNiceWork ? "Nice work!" : "Next"}</span>
                           {nextTitle.includes(" & ")
                             ? <>{nextTitle.split(" & ")[0]}<br />{"& " + nextTitle.split(" & ").slice(1).join(" & ")}</>
                             : nextTitle}
@@ -1288,19 +1304,38 @@ export default function Home8() {
                   );
                 }
                 const isAudioAvailable = dayType === "match" && match && (() => { const [mH, mM] = match.time.split(":").map(Number); return now.getHours() * 60 + now.getMinutes() >= mH * 60 + mM - 60; })();
-                const handleWarmupToggle = (e: React.MouseEvent) => {
-                  e.stopPropagation();
+                const warmupSeek = (deltaSecs: number) => {
+                  const a = warmupAudioRef.current;
+                  if (!a) return;
+                  const t = Math.max(0, Math.min(warmupDurationRef.current, a.currentTime + deltaSecs));
+                  a.currentTime = t;
+                  setWarmupCurrentTime(t); warmupCurrentTimeRef.current = t;
+                };
+                const warmupToggleCore = () => {
                   if (!warmupAudioRef.current) {
                     const a = new Audio("/warmup.mp3");
                     warmupAudioRef.current = a;
-                    a.onended = () => { setWarmupPlaying(false); setWarmupCurrentTime(0); warmupCurrentTimeRef.current = 0; if (warmupRafRef.current) cancelAnimationFrame(warmupRafRef.current); };
-                    a.ontimeupdate = () => { setWarmupCurrentTime(a.currentTime); warmupCurrentTimeRef.current = a.currentTime; };
+                    a.onended = () => { setWarmupPlaying(false); setWarmupCurrentTime(0); warmupCurrentTimeRef.current = 0; if (warmupRafRef.current) cancelAnimationFrame(warmupRafRef.current); if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "none"; };
+                    a.ontimeupdate = () => {
+                      setWarmupCurrentTime(a.currentTime); warmupCurrentTimeRef.current = a.currentTime;
+                      if ("mediaSession" in navigator && "setPositionState" in navigator.mediaSession && a.duration) {
+                        navigator.mediaSession.setPositionState({ duration: a.duration, playbackRate: a.playbackRate, position: a.currentTime });
+                      }
+                    };
                     a.onloadedmetadata = () => { setWarmupDuration(a.duration); warmupDurationRef.current = a.duration; };
+                    if ("mediaSession" in navigator) {
+                      navigator.mediaSession.metadata = new MediaMetadata({ title: "Warmup", artist: "padla" });
+                      navigator.mediaSession.setActionHandler("play", warmupToggleCore);
+                      navigator.mediaSession.setActionHandler("pause", warmupToggleCore);
+                      navigator.mediaSession.setActionHandler("seekbackward", () => warmupSeek(-10));
+                      navigator.mediaSession.setActionHandler("seekforward", () => warmupSeek(10));
+                    }
                   }
                   if (warmupPlaying) {
                     warmupAudioRef.current.pause();
                     setWarmupPlaying(false);
                     if (warmupRafRef.current) cancelAnimationFrame(warmupRafRef.current);
+                    if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "paused";
                   } else {
                     if (!warmupAudioCtxRef.current) {
                       const ctx = new AudioContext();
@@ -1318,6 +1353,7 @@ export default function Home8() {
                     warmupAudioRef.current.play();
                     setWarmupPlaying(true);
                     setWarmupStarted(true);
+                    if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "playing";
                     const draw = () => {
                       const canvas = warmupVizRef.current;
                       const analyser = warmupAnalyserRef.current;
@@ -1355,6 +1391,7 @@ export default function Home8() {
                     draw();
                   }
                 };
+                const handleWarmupToggle = (e: React.MouseEvent) => { e.stopPropagation(); warmupToggleCore(); };
                 return (
                   <div key="active" className="animate-bounce-in" style={{ ...cardStyle, cursor: "pointer" }} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
                     {textureOverlay}
@@ -1388,24 +1425,14 @@ export default function Home8() {
                       <div onClick={e => e.stopPropagation()} style={{ position: "absolute", inset: 0, zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, opacity: warmupPlaying ? contentOpacity : 0, transition: "opacity 0.35s", pointerEvents: warmupPlaying ? "auto" : "none" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                           <button
-                            onClick={() => {
-                              if (!warmupAudioRef.current) return;
-                              const t = Math.max(0, warmupAudioRef.current.currentTime - 10);
-                              warmupAudioRef.current.currentTime = t;
-                              setWarmupCurrentTime(t); warmupCurrentTimeRef.current = t;
-                            }}
+                            onClick={() => warmupSeek(-10)}
                             style={{ background: "rgba(0,0,0,0.15)", border: "none", borderRadius: 20, cursor: "pointer", padding: "5px 12px", fontSize: 13, fontWeight: 800, color: "#000", letterSpacing: "-0.02em" }}
                           >−10</button>
                           <button onClick={handleWarmupToggle} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                             <svg width="37" height="37" viewBox="0 0 36 36" fill="none"><rect x="10" y="9" width="5" height="18" rx="2" fill="#000"/><rect x="21" y="9" width="5" height="18" rx="2" fill="#000"/></svg>
                           </button>
                           <button
-                            onClick={() => {
-                              if (!warmupAudioRef.current) return;
-                              const t = Math.min(warmupDurationRef.current, warmupAudioRef.current.currentTime + 10);
-                              warmupAudioRef.current.currentTime = t;
-                              setWarmupCurrentTime(t); warmupCurrentTimeRef.current = t;
-                            }}
+                            onClick={() => warmupSeek(10)}
                             style={{ background: "rgba(0,0,0,0.15)", border: "none", borderRadius: 20, cursor: "pointer", padding: "5px 12px", fontSize: 13, fontWeight: 800, color: "#000", letterSpacing: "-0.02em" }}
                           >+10</button>
                         </div>
