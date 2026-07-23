@@ -1603,9 +1603,7 @@ export default function Home8() {
                       </button>
                     </div>
                     <p style={{ fontSize: "clamp(13px, 3.4vw, 16px)", fontWeight: 600, color: "#3b9eff", margin: 0 }}>
-                      {logHydrationMl > 0
-                        ? `${Math.round(logHydrationMl / 250)} glass${Math.round(logHydrationMl / 250) === 1 ? "" : "es"}`
-                        : "0 glasses"}
+                      {Math.round(Math.min(logHydrationMl / 2500, 1) * 100)}% of 2.5L goal
                     </p>
 
                   </>
