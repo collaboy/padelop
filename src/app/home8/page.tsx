@@ -423,7 +423,7 @@ export default function Home8() {
   const swipeStartX = useRef(0);
   const [liveY, setLiveY] = useState(0);
   const [breathPhase, setBreathPhase] = useState(0);
-  const [breathDashOffset, setBreathDashOffset] = useState(560);
+  const [breathPhaseProgress, setBreathPhaseProgress] = useState(0);
   const breathStartRef = useRef(Date.now());
 
   useEffect(() => {
@@ -977,14 +977,14 @@ export default function Home8() {
   useEffect(() => {
     if (cardSnap !== 'right') {
       setBreathPhase(0);
-      setBreathDashOffset(560);
+      setBreathPhaseProgress(0);
       return;
     }
     breathStartRef.current = Date.now();
     const id = setInterval(() => {
       const elapsed = (Date.now() - breathStartRef.current) % 16000;
       setBreathPhase(Math.floor(elapsed / 4000));
-      setBreathDashOffset(560 - (elapsed / 16000) * 560);
+      setBreathPhaseProgress((elapsed % 4000) / 4000);
     }, 50);
     return () => clearInterval(id);
   }, [cardSnap]);
@@ -1073,9 +1073,24 @@ export default function Home8() {
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
                   <div style={{ position: "relative", width: "60%", aspectRatio: "1 / 1" }}>
                     <svg width="100%" height="100%" viewBox="0 0 160 160" style={{ display: "block", overflow: "visible" }}>
-                      <path d="M10 150 L10 10 L150 10 L150 150 L10 150" fill="none" stroke="#dce8f8" strokeWidth="5" strokeLinejoin="miter" />
-                      <path d="M10 150 L10 10 L150 10 L150 150 L10 150" fill="none" stroke="#3b9eff" strokeWidth="5" strokeLinejoin="miter"
-                        strokeDasharray="560" strokeDashoffset={breathDashOffset} />
+                      <circle cx="80" cy="80" r="70" fill="none" stroke="#dce8f8" strokeWidth="5" />
+                      {[
+                        "M 80,150 A 70,70 0 0,1 10,80",
+                        "M 10,80 A 70,70 0 0,1 80,10",
+                        "M 80,10 A 70,70 0 0,1 150,80",
+                        "M 150,80 A 70,70 0 0,1 80,150",
+                      ].map((d, i) => (
+                        <path
+                          key={i}
+                          d={d}
+                          fill="none"
+                          stroke={i < breathPhase ? "#1d4ed8" : "#3b9eff"}
+                          strokeWidth="5"
+                          strokeLinecap="round"
+                          strokeDasharray="110"
+                          strokeDashoffset={i < breathPhase ? 0 : i === breathPhase ? 110 - breathPhaseProgress * 110 : 110}
+                        />
+                      ))}
                     </svg>
                     <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none", gap: "0.8vw" }}>
                       <p style={{ fontSize: "clamp(16px, 5.25vw, 22px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>Breathe</p>
