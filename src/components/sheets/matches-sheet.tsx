@@ -3,6 +3,15 @@
 import React, { useState, useEffect } from "react";
 import type { ReviewEntry } from "@/lib/scoring";
 import { saveUpcomingMatch, deleteUpcomingMatchFromDb } from "@/lib/db";
+import { pad } from "@/lib/schedule-data";
+
+// Local (device) calendar date as YYYY-MM-DD — NOT toISOString(), which is UTC and
+// drifts a day off from the local date for several hours around local midnight
+// in timezones ahead of UTC.
+function localToday() {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
 
 type StoredMatch = {
   date: string; time: string; club: string; court?: string;
@@ -86,7 +95,7 @@ export default function MatchesContent() {
       } catch { setReviews([]); }
       try {
         const all: StoredMatch[] = JSON.parse(localStorage.getItem("padelop:upcoming-matches") || "[]");
-        const today2 = new Date().toISOString().slice(0, 10);
+        const today2 = localToday();
         const upcoming2 = all.filter(m => m.date >= today2).sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
         setUpcomingMatches(upcoming2);
         const forms: Record<number, MatchForm> = {};
@@ -104,7 +113,7 @@ export default function MatchesContent() {
   }, []);
 
   function matchSaveList(list: StoredMatch[]) {
-    const today2 = new Date().toISOString().slice(0, 10);
+    const today2 = localToday();
     const future = list.filter(m => m.date >= today2).sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
     localStorage.setItem("padelop:upcoming-matches", JSON.stringify(future));
     if (future.length > 0) localStorage.setItem("padelop:next-match", JSON.stringify(future[0]));

@@ -121,6 +121,13 @@ const WARMUP_CUES: { from: number; text: string }[] = [
   { from: 226.9,    text: "good luck see you on court" },
 ];
 
+// Local (device) calendar date as YYYY-MM-DD — NOT toISOString(), which is UTC and
+// drifts a day off from the local date for several hours around local midnight
+// in timezones ahead of UTC.
+function localISODate(d: Date) {
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 // ── Tag cloud (mirrors matches4) ──────────────────────────────────────────
 type ReviewEntry = { ts: string; feeling: string; result: string; opponent: string; energy: string; wellDone: string[]; improved: string[] };
 type TagEntry    = { text: string; count: number; type: "good" | "bad" };
@@ -650,8 +657,8 @@ export default function Home8() {
       } catch {}
     }
     function loadMatch() {
-      const todayD = new Date().toISOString().slice(0, 10);
-      const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+      const todayD = localISODate(new Date());
+      const yesterday = localISODate(new Date(Date.now() - 864e5));
       try {
         const listRaw = localStorage.getItem("padelop:upcoming-matches");
         const list: StoredMatch[] = listRaw ? JSON.parse(listRaw) : [];
@@ -758,7 +765,7 @@ export default function Home8() {
           const nm = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
           if (!nm?.date) return false;
           const nowD = new Date();
-          const todayD = nowD.toISOString().slice(0, 10);
+          const todayD = localISODate(nowD);
           let ended = nm.date < todayD;
           if (!ended && nm.date === todayD && nm.time) {
             const [h, m] = (nm.time as string).split(":").map(Number);
@@ -934,7 +941,7 @@ export default function Home8() {
   useEffect(() => {
     if (!match || postMatchOpen) return;
     const matchDay = match.date;
-    const todayDay = now.toISOString().slice(0, 10);
+    const todayDay = localISODate(now);
 
     // Check if match has ended: either on a previous day, or today past match time + 90 min
     let matchEnded = matchDay < todayDay;
