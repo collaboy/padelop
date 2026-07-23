@@ -115,7 +115,7 @@ export default function InsightsContent({ streak }: { streak: number }) {
   const pool = getInsightsPool(streak);
 
   if (pool.length === 0) {
-    return <p style={{ fontSize: 30, color: "#9aa0a6", margin: 0 }}>No insights yet — log some matches and check-ins to unlock.</p>;
+    return <p style={{ fontSize: 21, color: "#9aa0a6", margin: 0 }}>No insights yet — log some matches and check-ins to unlock.</p>;
   }
 
   const idx = featuredIdx % pool.length;
@@ -125,15 +125,15 @@ export default function InsightsContent({ streak }: { streak: number }) {
       onClick={() => setFeaturedIdx(i => (i + 1) % pool.length)}
       style={{ width: "100%", background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" }}
     >
-      <p style={{ margin: "0 0 6px", fontSize: 28, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-blue)" }}>{insight.label}</p>
-      <p style={{ margin: "0 0 14px", fontSize: 30, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{insight.body}</p>
+      <p style={{ margin: "0 0 6px", fontSize: 20, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-blue)" }}>{insight.label}</p>
+      <p style={{ margin: "0 0 14px", fontSize: 21, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{insight.body}</p>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", gap: 4 }}>
           {pool.map((_, i) => (
             <div key={i} style={{ width: i === idx ? 14 : 5, height: 5, borderRadius: 3, background: i === idx ? "var(--c-blue)" : "#e2e5ea", transition: "width 0.2s" }} />
           ))}
         </div>
-        <span style={{ fontSize: 26, color: "var(--c-hint)", fontWeight: 500 }}>Tap for next</span>
+        <span style={{ fontSize: 18, color: "var(--c-hint)", fontWeight: 500 }}>Tap for next</span>
       </div>
     </button>
   );

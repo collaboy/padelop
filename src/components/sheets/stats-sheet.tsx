@@ -20,9 +20,9 @@ function ExpandableRow({ color, title, value, sub, expanded, onToggle, children 
           <div style={{ width: 13, height: 13, borderRadius: "50%", background: color }} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontSize: 22, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", margin: "0 0 2px", color }}>{title}</p>
-          <p style={{ fontSize: "clamp(34px, 8.8vw, 40px)", fontWeight: 700, margin: 0, lineHeight: 1.25, color: "#1a1c1c" }}>{value}</p>
-          <p style={{ fontSize: "clamp(24px, 6.2vw, 28px)", margin: "2px 0 0", color: "#6b7480" }}>{sub}</p>
+          <p style={{ fontSize: 15, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", margin: "0 0 2px", color }}>{title}</p>
+          <p style={{ fontSize: "clamp(24px, 6.16vw, 28px)", fontWeight: 700, margin: 0, lineHeight: 1.25, color: "#1a1c1c" }}>{value}</p>
+          <p style={{ fontSize: "clamp(17px, 4.34vw, 20px)", margin: "2px 0 0", color: "#6b7480" }}>{sub}</p>
         </div>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: expanded ? "rotate(90deg)" : "rotate(0deg)" }}><path d="M9 18l6-6-6-6"/></svg>
       </div>
@@ -51,28 +51,28 @@ function PadlaPtsRow({ points, expanded, onToggle }: { points: number; expanded:
 
   return (
     <ExpandableRow color="#1a1c1c" title="Padla Pts" value={lifetimeScore > 0 ? lifetimeScore : "—"} sub={points > 0 ? `${points} completed today` : "lifetime points"} expanded={expanded} onToggle={onToggle}>
-      <p style={{ margin: "0 0 14px", fontSize: 24, color: "#9aa0a6", lineHeight: 1.4 }}>Every positive action earns a point.</p>
+      <p style={{ margin: "0 0 14px", fontSize: 17, color: "#9aa0a6", lineHeight: 1.4 }}>Every positive action earns a point.</p>
       {nextMilestone !== null && (
         <div style={{ margin: "0 0 14px", padding: "10px 16px", borderRadius: 999, background: "#dcfce7", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1a7a3f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H3.5a2.5 2.5 0 0 0 0 5H6"/><path d="M18 9h2.5a2.5 2.5 0 0 1 0 5H18"/><path d="M6 3h12v10a6 6 0 0 1-12 0V3z"/><path d="M9 21h6"/><path d="M12 17v4"/></svg>
-          <span style={{ fontSize: 26, fontWeight: 600, color: "#1a7a3f" }}>{toNext} points until your next milestone</span>
+          <span style={{ fontSize: 18, fontWeight: 600, color: "#1a7a3f" }}>{toNext} points until your next milestone</span>
         </div>
       )}
-      <p style={{ fontSize: 22, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 10px" }}>Activity breakdown</p>
+      <p style={{ fontSize: 15, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "#8a9096", margin: "0 0 10px" }}>Activity breakdown</p>
       {entries.length === 0 ? (
-        <p style={{ fontSize: 28, color: "#9aa0a6", margin: 0 }}>No activities yet. Start completing tasks on the home screen.</p>
+        <p style={{ fontSize: 20, color: "#9aa0a6", margin: 0 }}>No activities yet. Start completing tasks on the home screen.</p>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {visible.map(([title, count]) => (
             <div key={title} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <span style={{ fontSize: 28, fontWeight: 500, color: "#1a1c1c" }}>{title}</span>
-              <span style={{ fontSize: 26, fontWeight: 700, color: "#6b7480", background: "#f0f1f4", borderRadius: 999, padding: "2px 10px" }}>×{count}</span>
+              <span style={{ fontSize: 20, fontWeight: 500, color: "#1a1c1c" }}>{title}</span>
+              <span style={{ fontSize: 18, fontWeight: 700, color: "#6b7480", background: "#f0f1f4", borderRadius: 999, padding: "2px 10px" }}>×{count}</span>
             </div>
           ))}
           {hasMore && (
             <button
               onClick={e => { e.stopPropagation(); setShowAll(p => !p); }}
-              style={{ display: "flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: "4px 0", color: "#8a9096", fontSize: 26, fontWeight: 600 }}
+              style={{ display: "flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: "4px 0", color: "#8a9096", fontSize: 18, fontWeight: 600 }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ transition: "transform 0.2s", transform: showAll ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
               {showAll ? "Show less" : `Show all ${entries.length}`}
@@ -110,7 +110,7 @@ export default function StatsSheet({ open, onClose, points, streak, winRate, rea
         <div style={{ background: "#1a1c1c0d", flexShrink: 0 }} onClick={() => setExpandedKey(null)}>
           <div style={{ width: 40, height: 4, borderRadius: 999, background: "#1a1c1c30", margin: "12px auto 10px" }} />
           <div style={{ padding: "0 18px 16px" }}>
-            <p style={{ margin: 0, fontSize: 52, fontWeight: 800, letterSpacing: "-0.01em", color: "#1a1c1c" }}>Stats</p>
+            <p style={{ margin: 0, fontSize: 36, fontWeight: 800, letterSpacing: "-0.01em", color: "#1a1c1c" }}>Stats</p>
           </div>
         </div>
         <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px", display: "flex", flexDirection: "column", gap: 8 }} onClick={() => setExpandedKey(null)}>
