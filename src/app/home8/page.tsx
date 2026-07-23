@@ -1285,7 +1285,7 @@ export default function Home8() {
                   }
                 };
                 return (
-                  <div key="active" className="animate-bounce-in" style={cardStyle}>
+                  <div key="active" className="animate-bounce-in" style={{ ...cardStyle, cursor: "pointer" }} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
                     {textureOverlay}
                     {/* Visualizer — fills ball when playing */}
                     <canvas
@@ -1294,29 +1294,21 @@ export default function Home8() {
                     />
                     {/* INFO STATE: fades out when playing */}
                     <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: warmupPlaying ? 0 : isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.35s", pointerEvents: warmupPlaying ? "none" : "auto" }}>
-                      {!isSleepytime && <p className="text-[14px] tracking-wide leading-none" style={{ color: "#000", fontWeight: 600, background: "#fff", padding: 4, borderRadius: 4 }}>Do this now</p>}
                       {(() => {
                         const circleTitle = s.title === "Lunch" ? "Lunchtime" : s.title === "Dinner" ? "Dinnertime" : s.title;
                         return (
-                          <p style={{ color: "#000", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, background: "#fff", padding: "3px 6px", borderRadius: 4, display: "inline-block", textAlign: "center", margin: 0 }}>
+                          <p style={{ color: "#000", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, display: "inline-block", textAlign: "center", margin: 0 }}>
                             {circleTitle.includes(" & ")
                               ? <>{circleTitle.split(" & ")[0]}<br />{"& " + circleTitle.split(" & ").slice(1).join(" & ")}</>
                               : circleTitle}
                           </p>
                         );
                       })()}
-                      {isAudioAvailable
-                        ? (
-                          <button onClick={handleWarmupToggle} style={{ marginTop: 10, background: "#fff", border: "none", borderRadius: "50%", cursor: "pointer", width: 52, height: 52, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><polygon points="3,1 15,8 3,15" fill="#1a1c1c"/></svg>
-                          </button>
-                        ) : (
-                          <button onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }} className="mt-2 font-semibold px-4 py-1.5 rounded-full flex items-center gap-1.5" style={{ background: `${s.color}40`, color: "#fff", fontSize: "clamp(13px, 4vw, 18px)", border: "none", cursor: "pointer" }}>
-                            Show me
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><path d="M15 6l6 6-6 6"/></svg>
-                          </button>
-                        )
-                      }
+                      {isAudioAvailable && (
+                        <button onClick={handleWarmupToggle} style={{ marginTop: 10, background: "#fff", border: "none", borderRadius: "50%", cursor: "pointer", width: 52, height: 52, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><polygon points="3,1 15,8 3,15" fill="#1a1c1c"/></svg>
+                        </button>
+                      )}
                     </div>
 
                     {/* PLAYING STATE: fades in when playing */}
