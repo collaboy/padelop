@@ -17,6 +17,7 @@ const MatchesSheet = dynamic(() => import("@/components/sheets/matches-sheet"));
 const HydrationSheet = dynamic(() => import("@/components/sheets/hydration-sheet"));
 const InsightsSheet = dynamic(() => import("@/components/sheets/insights-sheet"));
 const PatternsSheet = dynamic(() => import("@/components/sheets/patterns-sheet"));
+const StatsSheet = dynamic(() => import("@/components/sheets/stats-sheet"));
 import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, computeMatchReadiness, loadMorningLog, improveTips, type MatchReadinessResult, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
 import { pad, addMins, toMins, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag, getDayType, ITEM_COLORS, type ScheduleItem, type DayType, getScheduleData, SCHEDULE_DETAILS } from "@/lib/schedule-data";
 import { saveUpcomingMatch, saveNutritionToDb, saveHydrationToDb, saveNoteToDb, saveMatchReview, saveGearToDb, saveScheduleDoneToDb, saveTrainingToDb, deleteUpcomingMatchFromDb } from "@/lib/db";
@@ -317,7 +318,7 @@ export default function Home8() {
     wellbeing: { status: "not_logged", reason: "" },
   });
   const [schedDetailOpen, setSchedDetailOpen] = useState<{ title: string; subtitle?: string; color: string; detail: string; isDrill?: boolean } | null>(null);
-  const [openPanel, setOpenPanel] = useState<null | "schedule" | "nextMatch" | "form" | "streak" | "matches" | "hydration" | "insights" | "patterns">(null);
+  const [openPanel, setOpenPanel] = useState<null | "schedule" | "nextMatch" | "form" | "streak" | "matches" | "hydration" | "insights" | "patterns" | "stats">(null);
   const [postMatchOpen, setPostMatchOpen] = useState(false);
   const [postMatchDate, setPostMatchDate] = useState<string | null>(null);
   const [checkinNudgeOpen, setCheckinNudgeOpen] = useState(false);
@@ -1403,16 +1404,16 @@ export default function Home8() {
                     onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
                     onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
                   >
-                    <div style={{ width: "100%", height: "calc(100% - 22px)", marginTop: 22, display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gridTemplateRows: "repeat(3, 1fr)", rowGap: 16, columnGap: 6 }}>
-                      {circle("c2nextMatch", "#2653d4", "NEXT MATCH", "rgba(255,255,255,0.75)", nmLabel, "#fff", match?.time ?? "", "#fff", 0.65, () => setOpenPanel("nextMatch"), 36)}
-                      {circle("c2schedule", "#16a34a", "SCHEDULE", "rgba(255,255,255,0.75)", `${completed.size}/${schedule.length}`, "#fff", "today", "#fff", 0.65, () => setOpenPanel("schedule"))}
-                      {circle("c2form", "#7c3aed", "FORM", "rgba(255,255,255,0.75)", readiness, "#fff", "readiness", "#fff", 0.65, () => setOpenPanel("form"))}
-                      {circle("c2points", "#f0f1f4", "PADLA PTS", "#1a1c1c", points > 0 ? points : "—", "#1a1c1c", "today", "#8a9096", 1)}
-                      {circle("c2streak", "#f0f1f4", "STREAK", "#1a1c1c", streak > 0 ? streak : "—", "#1a1c1c", "days", "#8a9096", 1, () => setOpenPanel("streak"))}
-                      {circle("c2winrate", "#f0f1f4", "WIN RATE", "#1a1c1c", winRate !== null ? `${winRate}%` : "—", "#1a1c1c", winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no data", "#8a9096", 1, () => setOpenPanel("matches"))}
-                      {circle("c2hydration", "#f0f1f4", "HYDRATION", "#0ea5e9", logHydrationMl > 0 ? `${logHydrationMl}ml` : "—", "#0ea5e9", logHydrationMl > 0 ? `${Math.round(Math.min(logHydrationMl / 3000, 1) * 100)}% of 3L` : "not logged", "#0ea5e9", 0.65, () => setOpenPanel("hydration"), 36)}
-                      {circle("c2insights", "#f0f1f4", "INSIGHTS", "#f59e0b", wellCount + badCount > 0 ? wellCount + badCount : "—", "#f59e0b", "available", "#f59e0b", 0.65, () => setOpenPanel("insights"))}
-                      {circle("c2patterns", "#f0f1f4", "PATTERNS", "#e11d48", wellCount + badCount > 0 ? wellCount + badCount : "—", "#e11d48", "tags logged", "#e11d48", 0.65, () => setOpenPanel("patterns"))}
+                    <div style={{ width: "100%", height: "calc(100% - 22px)", marginTop: 22, display: "flex", flexDirection: "column", gap: 16 }}>
+                      <div style={{ display: "flex", gap: 6, flex: 1 }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>{circle("c2nextMatch", "#2653d4", "NEXT MATCH", "rgba(255,255,255,0.75)", nmLabel, "#fff", match?.time ?? "", "#fff", 0.65, () => setOpenPanel("nextMatch"), 36)}</div>
+                        <div style={{ flex: 1, minWidth: 0 }}>{circle("c2schedule", "#16a34a", "SCHEDULE", "rgba(255,255,255,0.75)", `${completed.size}/${schedule.length}`, "#fff", "today", "#fff", 0.65, () => setOpenPanel("schedule"))}</div>
+                        <div style={{ flex: 1, minWidth: 0 }}>{circle("c2form", "#7c3aed", "FORM", "rgba(255,255,255,0.75)", readiness, "#fff", "readiness", "#fff", 0.65, () => setOpenPanel("form"))}</div>
+                      </div>
+                      <div style={{ display: "flex", gap: 6, flex: 1 }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>{circle("c2hydration", "#f0f1f4", "HYDRATION", "#0ea5e9", logHydrationMl > 0 ? `${logHydrationMl}ml` : "—", "#0ea5e9", logHydrationMl > 0 ? `${Math.round(Math.min(logHydrationMl / 3000, 1) * 100)}% of 3L` : "not logged", "#0ea5e9", 0.65, () => setOpenPanel("hydration"), 36)}</div>
+                        <div style={{ flex: 1, minWidth: 0 }}>{circle("c2stats", "#f0f1f4", "STATS", "#1a1c1c", streak > 0 ? streak : "—", "#1a1c1c", "pts, rate & more", "#8a9096", 1, () => setOpenPanel("stats"))}</div>
+                      </div>
                     </div>
                   </div>
                 );
@@ -2537,6 +2538,19 @@ export default function Home8() {
         <HydrationSheet open={openPanel === "hydration"} onClose={() => setOpenPanel(null)} />
         <InsightsSheet open={openPanel === "insights"} onClose={() => setOpenPanel(null)} />
         <PatternsSheet open={openPanel === "patterns"} onClose={() => setOpenPanel(null)} />
+        <StatsSheet
+          open={openPanel === "stats"}
+          onClose={() => setOpenPanel(null)}
+          points={completed.size}
+          streak={streak}
+          winRate={winRate}
+          insightsCount={reviews.flatMap(r => r.wellDone ?? []).length + reviews.flatMap(r => r.improved ?? []).length}
+          patternsCount={reviews.flatMap(r => r.wellDone ?? []).length + reviews.flatMap(r => r.improved ?? []).length}
+          onOpenStreak={() => setOpenPanel("streak")}
+          onOpenMatches={() => setOpenPanel("matches")}
+          onOpenInsights={() => setOpenPanel("insights")}
+          onOpenPatterns={() => setOpenPanel("patterns")}
+        />
       </main>
     </>
   );
