@@ -1535,7 +1535,13 @@ export default function Home8() {
                   : `${logHydrationMl}ml`;
                 return (
                   <>
-                    <svg viewBox="0 0 100 130" width="138" height="179" style={{ overflow: "visible" }}>
+                    <svg
+                      onClick={() => {
+                        const next = Math.min(MAX, logHydrationMl + 250);
+                        setLogHydrationMl(next);
+                        saveLogHydration(next);
+                      }}
+                      viewBox="0 0 100 130" width="138" height="179" style={{ overflow: "visible", cursor: logHydrationMl >= MAX ? "default" : "pointer" }}>
                       <defs>
                         <clipPath id="drop-clip-r">
                           <path d="M50 4 C72 22 94 58 94 84 A44 44 0 0 1 6 84 C6 58 28 22 50 4 Z"/>
@@ -1579,33 +1585,32 @@ export default function Home8() {
                       </text>
                     </svg>
 
-                    {/* + with subordinate − below-left */}
-                    <div style={{ position: "relative", width: 52, height: 52 }}>
-                      <button
-                        onClick={() => {
-                          const next = Math.min(MAX, logHydrationMl + 250);
-                          setLogHydrationMl(next);
-                          saveLogHydration(next);
-                        }}
-                        style={{ width: 52, height: 52, borderRadius: "50%", background: logHydrationMl >= MAX ? "#e8f0e8" : "#3b9eff", border: "none", cursor: logHydrationMl >= MAX ? "default" : "pointer", fontSize: "clamp(22px, 5.6vw, 27px)", fontWeight: 700, color: logHydrationMl >= MAX ? "#16a34a" : "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}
-                      >
-                        +
-                      </button>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 2 }}>
                       <button
                         onClick={() => {
                           const next = Math.max(0, logHydrationMl - 250);
                           setLogHydrationMl(next);
                           saveLogHydration(next);
                         }}
-                        style={{ position: "absolute", top: "50%", left: -26, transform: "translateY(-50%)", width: 20, height: 20, borderRadius: "50%", background: "#fff", border: "1.5px solid #dde2e8", boxShadow: "0 1px 4px rgba(0,0,0,0.10)", cursor: logHydrationMl <= 0 ? "default" : "pointer", fontSize: "clamp(13px, 3.4vw, 16px)", fontWeight: 700, color: logHydrationMl <= 0 ? "#c8cdd3" : "#6b7480", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1 }}
+                        style={{ width: 34, height: 34, borderRadius: "50%", background: "#fff", border: "1.5px solid #dde2e8", boxShadow: "0 1px 4px rgba(0,0,0,0.10)", cursor: logHydrationMl <= 0 ? "default" : "pointer", fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: logHydrationMl <= 0 ? "#c8cdd3" : "#6b7480", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
                       >
                         −
                       </button>
+                      <button
+                        onClick={() => {
+                          const next = Math.min(MAX, logHydrationMl + 250);
+                          setLogHydrationMl(next);
+                          saveLogHydration(next);
+                        }}
+                        style={{ width: 34, height: 34, borderRadius: "50%", background: logHydrationMl >= MAX ? "#e8f0e8" : "#3b9eff", border: "none", cursor: logHydrationMl >= MAX ? "default" : "pointer", fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: logHydrationMl >= MAX ? "#16a34a" : "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+                      >
+                        +
+                      </button>
                     </div>
-                    <p style={{ fontSize: "clamp(13px, 3.4vw, 16px)", fontWeight: 600, color: "#3b9eff", margin: 0 }}>
+
+                    <p style={{ fontSize: "clamp(13px, 3.4vw, 16px)", fontWeight: 600, color: "#3b9eff", margin: "2px 0 0", lineHeight: 1.1 }}>
                       {Math.round(Math.min(logHydrationMl / 2500, 1) * 100)}% of 2.5L goal
                     </p>
-
                   </>
                 );
               })()}
