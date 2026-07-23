@@ -14,7 +14,6 @@ const NextMatchSheet = dynamic(() => import("@/components/sheets/next-match-shee
 const FormScoreSheet = dynamic(() => import("@/components/sheets/form-score-sheet"));
 const StreakSheet = dynamic(() => import("@/components/sheets/streak-sheet"));
 const MatchesSheet = dynamic(() => import("@/components/sheets/matches-sheet"));
-const HydrationSheet = dynamic(() => import("@/components/sheets/hydration-sheet"));
 const InsightsSheet = dynamic(() => import("@/components/sheets/insights-sheet"));
 const PatternsSheet = dynamic(() => import("@/components/sheets/patterns-sheet"));
 const StatsSheet = dynamic(() => import("@/components/sheets/stats-sheet"));
@@ -318,7 +317,7 @@ export default function Home8() {
     wellbeing: { status: "not_logged", reason: "" },
   });
   const [schedDetailOpen, setSchedDetailOpen] = useState<{ title: string; subtitle?: string; color: string; detail: string; isDrill?: boolean } | null>(null);
-  const [openPanel, setOpenPanel] = useState<null | "schedule" | "nextMatch" | "form" | "streak" | "matches" | "hydration" | "insights" | "patterns" | "stats">(null);
+  const [openPanel, setOpenPanel] = useState<null | "schedule" | "nextMatch" | "form" | "streak" | "matches" | "insights" | "patterns" | "stats">(null);
   const [postMatchOpen, setPostMatchOpen] = useState(false);
   const [postMatchDate, setPostMatchDate] = useState<string | null>(null);
   const [checkinNudgeOpen, setCheckinNudgeOpen] = useState(false);
@@ -1117,7 +1116,62 @@ export default function Home8() {
               {/* Structural spacer — keeps transform geometry intact */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", pointerEvents: "none" }} />
 
-              {/* Card 0: encouragement (content swapped in, same wrapper/dimensions as before) */}
+              {/* Card 0: Next Match (reinstated at top; encouragement card kept below, unused, for later) */}
+              {(() => {
+                const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+                return (
+                  <div style={{ width: "100%", flexShrink: 0, height: "calc(100dvh - 120px)", borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 36px", zIndex: doIdx === -1 ? 2 : 1, pointerEvents: doIdx === -1 ? "auto" : "none", opacity: doIdx === -1 ? 1 : 0, transition: "opacity 0.3s" }}>
+                    {match ? (() => {
+                      const matchDate = new Date(match.date + "T12:00");
+                      const todayDate = new Date(today + "T12:00");
+                      const diffDays = Math.round((matchDate.getTime() - todayDate.getTime()) / 86400000);
+                      const countdownLabel = diffDays === 0 ? "TODAY" : diffDays === 1 ? "TOMORROW" : `IN ${diffDays} DAYS`;
+                      return (
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+                          <div style={{ position: "relative", width: "calc((100vw - 40px) * 0.65)", height: "calc((100vw - 40px) * 0.65)", flexShrink: 0 }}>
+                            <button onClick={() => setOpenPanel("nextMatch")} style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, boxShadow: "0 4px 20px #2653d455" }}>
+                              <span style={{ fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 800, color: "rgba(255,255,255,0.85)", letterSpacing: "0.08em", textTransform: "uppercase", lineHeight: 1 }}>{countdownLabel}</span>
+                              <span style={{ fontSize: "clamp(30px, 7.7vw, 37px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.02em" }}>{match.time}</span>
+                            </button>
+                            <svg viewBox="0 0 100 100" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
+                              <defs>
+                                <path id="matchArc" d="M 12 50 A 38 38 0 0 1 88 50" />
+                              </defs>
+                              <text fill="rgba(255,255,255,0.7)" fontSize="9.5" fontWeight="700" letterSpacing="2.5" fontFamily="inherit">
+                                <textPath href="#matchArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
+                              </text>
+                            </svg>
+                          </div>
+                        </div>
+                      );
+                    })() : (
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+                        <div style={{ position: "relative", width: "calc((100vw - 40px) * 0.65)", height: "calc((100vw - 40px) * 0.65)", flexShrink: 0 }}>
+                          <button
+                            onClick={() => window.dispatchEvent(new Event("padelop:add-match"))}
+                            style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 20px #2653d455" }}
+                          >
+                            <svg width="18%" height="18%" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="2.5" strokeLinecap="round">
+                              <line x1="12" y1="5" x2="12" y2="19"/>
+                              <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                          </button>
+                          <svg viewBox="0 0 100 100" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
+                            <defs>
+                              <path id="noMatchArc" d="M 12 50 A 38 38 0 0 1 88 50" />
+                            </defs>
+                            <text fill="rgba(255,255,255,0.7)" fontSize="9.5" fontWeight="700" letterSpacing="2.5" fontFamily="inherit">
+                              <textPath href="#noMatchArc" startOffset="50%" textAnchor="middle">NEXT MATCH</textPath>
+                            </text>
+                          </svg>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* Encouragement card — unused for now, kept here in case we want it again later.
               {(() => {
                 const title =
                   dayType === "match"     ? "Game on." :
@@ -1144,6 +1198,7 @@ export default function Home8() {
                   </div>
                 );
               })()}
+              */}
 
               {/* Card 1: do-this-now */}
               {(() => {
@@ -1404,16 +1459,8 @@ export default function Home8() {
                     onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
                     onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
                   >
-                    <div style={{ width: "100%", height: "calc(100% - 22px)", marginTop: 22, display: "flex", flexDirection: "column", gap: 16 }}>
-                      <div style={{ display: "flex", gap: 6, flex: 1 }}>
-                        <div style={{ flex: 1, minWidth: 0 }}>{circle("c2nextMatch", "#2653d4", "NEXT MATCH", "rgba(255,255,255,0.75)", nmLabel, "#fff", match?.time ?? "", "#fff", 0.65, () => setOpenPanel("nextMatch"), 36)}</div>
-                        <div style={{ flex: 1, minWidth: 0 }}>{circle("c2schedule", "#16a34a", "SCHEDULE", "rgba(255,255,255,0.75)", `${completed.size}/${schedule.length}`, "#fff", "today", "#fff", 0.65, () => setOpenPanel("schedule"))}</div>
-                        <div style={{ flex: 1, minWidth: 0 }}>{circle("c2form", "#7c3aed", "FORM", "rgba(255,255,255,0.75)", readiness, "#fff", "readiness", "#fff", 0.65, () => setOpenPanel("form"))}</div>
-                      </div>
-                      <div style={{ display: "flex", gap: 6, flex: 1 }}>
-                        <div style={{ flex: 1, minWidth: 0 }}>{circle("c2hydration", "#f0f1f4", "HYDRATION", "#0ea5e9", logHydrationMl > 0 ? `${logHydrationMl}ml` : "—", "#0ea5e9", logHydrationMl > 0 ? `${Math.round(Math.min(logHydrationMl / 3000, 1) * 100)}% of 3L` : "not logged", "#0ea5e9", 0.65, () => setOpenPanel("hydration"), 36)}</div>
-                        <div style={{ flex: 1, minWidth: 0 }}>{circle("c2stats", "#f0f1f4", "STATS", "#1a1c1c", streak > 0 ? streak : "—", "#1a1c1c", "pts, rate & more", "#8a9096", 1, () => setOpenPanel("stats"))}</div>
-                      </div>
+                    <div style={{ width: "100%", height: "calc(100% - 22px)", marginTop: 22, display: "flex", justifyContent: "center" }}>
+                      <div style={{ width: "calc((100vw - 40px) * 0.65)", height: "calc((100vw - 40px) * 0.65)", flexShrink: 0, minWidth: 0 }}>{circle("c2schedule", "#f0f1f4", "SCHEDULE", "#1a1c1c", `${completed.size}/${schedule.length}`, "#1a1c1c", "today", "#1a1c1c", 0.65, () => setOpenPanel("schedule"))}</div>
                     </div>
                   </div>
                 );
@@ -2513,29 +2560,44 @@ export default function Home8() {
           </div>
         )}
 
-        {/* Settings shortcut — shown only on the bottom (grid) card */}
-        <button
-          onClick={() => { startNavLoad(); router.push("/settings"); }}
+        {/* Stats link + Settings shortcut — shown only on the bottom (grid) card */}
+        <div
           style={{
             position: "fixed", left: "50%", bottom: 18, transform: "translateX(-50%)",
-            width: 36, height: 36, borderRadius: "50%", border: "none", background: "transparent",
-            display: "flex", alignItems: "center", justifyContent: "center",
+            display: "flex", alignItems: "center", gap: 18,
             zIndex: doIdx === 1 ? 65 : -1, opacity: doIdx === 1 ? 1 : 0, pointerEvents: doIdx === 1 ? "auto" : "none",
-            transition: "opacity 0.3s", cursor: "pointer",
+            transition: "opacity 0.3s",
           }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-          </svg>
-        </button>
+          <button
+            onClick={() => setOpenPanel("stats")}
+            style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+          </button>
+          <button
+            onClick={() => { startNavLoad(); router.push("/settings"); }}
+            style={{
+              width: 36, height: 36, borderRadius: "50%", border: "none", background: "transparent",
+              display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </button>
+        </div>
 
         <ScheduleSheet open={openPanel === "schedule"} onClose={() => setOpenPanel(null)} />
         <NextMatchSheet open={openPanel === "nextMatch"} onClose={() => setOpenPanel(null)} onRateMatch={() => { setLogTab("matchreview"); setLogSheetOpen(true); }} />
         <FormScoreSheet open={openPanel === "form"} onClose={() => setOpenPanel(null)} />
         <StreakSheet open={openPanel === "streak"} onClose={() => setOpenPanel(null)} />
         <MatchesSheet open={openPanel === "matches"} onClose={() => setOpenPanel(null)} />
-        <HydrationSheet open={openPanel === "hydration"} onClose={() => setOpenPanel(null)} />
         <InsightsSheet open={openPanel === "insights"} onClose={() => setOpenPanel(null)} />
         <PatternsSheet open={openPanel === "patterns"} onClose={() => setOpenPanel(null)} />
         <StatsSheet
@@ -2544,8 +2606,10 @@ export default function Home8() {
           points={completed.size}
           streak={streak}
           winRate={winRate}
+          readiness={readiness}
           insightsCount={reviews.flatMap(r => r.wellDone ?? []).length + reviews.flatMap(r => r.improved ?? []).length}
           patternsCount={reviews.flatMap(r => r.wellDone ?? []).length + reviews.flatMap(r => r.improved ?? []).length}
+          onOpenForm={() => setOpenPanel("form")}
           onOpenStreak={() => setOpenPanel("streak")}
           onOpenMatches={() => setOpenPanel("matches")}
           onOpenInsights={() => setOpenPanel("insights")}

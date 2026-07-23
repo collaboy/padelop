@@ -29,15 +29,17 @@ interface Props {
   points: number;
   streak: number;
   winRate: number | null;
+  readiness: number;
   insightsCount: number;
   patternsCount: number;
   onOpenStreak: () => void;
   onOpenMatches: () => void;
   onOpenInsights: () => void;
   onOpenPatterns: () => void;
+  onOpenForm: () => void;
 }
 
-export default function StatsSheet({ open, onClose, points, streak, winRate, insightsCount, patternsCount, onOpenStreak, onOpenMatches, onOpenInsights, onOpenPatterns }: Props) {
+export default function StatsSheet({ open, onClose, points, streak, winRate, readiness, insightsCount, patternsCount, onOpenStreak, onOpenMatches, onOpenInsights, onOpenPatterns, onOpenForm }: Props) {
   if (!open) return null;
 
   return (
@@ -53,6 +55,7 @@ export default function StatsSheet({ open, onClose, points, streak, winRate, ins
         </div>
         <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px", display: "flex", flexDirection: "column", gap: 8 }}>
           <Row color="#1a1c1c" title="Padla Pts" value={points > 0 ? points : "—"} sub="completed today" />
+          <Row color="#7c3aed" title="Form" value={readiness} sub="readiness" onTap={onOpenForm} />
           <Row color="#f59e0b" title="Streak" value={streak > 0 ? streak : "—"} sub={streak > 0 ? "days in a row" : "start today"} onTap={onOpenStreak} />
           <Row color="#dc2626" title="Win Rate" value={winRate !== null ? `${winRate}%` : "—"} sub={winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no matches logged"} onTap={onOpenMatches} />
           <Row color="#f59e0b" title="Insights" value={insightsCount > 0 ? insightsCount : "—"} sub="available" onTap={onOpenInsights} />
