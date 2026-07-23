@@ -1071,49 +1071,56 @@ export default function Home8() {
               {/* Main card */}
               <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "#fff", borderRadius: 24, marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-                  <div style={{ position: "relative", width: "60%", aspectRatio: "1 / 1" }}>
-                    <svg width="100%" height="100%" viewBox="0 0 160 160" style={{ display: "block", overflow: "visible" }}>
-                      <circle cx="80" cy="80" r="70" fill="none" stroke="#dce8f8" strokeWidth="5" />
-                      {[
-                        "M 80,150 A 70,70 0 0,1 10,80",
-                        "M 10,80 A 70,70 0 0,1 80,10",
-                        "M 80,10 A 70,70 0 0,1 150,80",
-                        "M 150,80 A 70,70 0 0,1 80,150",
-                      ].map((d, i) => (
-                        <path
-                          key={i}
-                          d={d}
-                          fill="none"
-                          stroke={i < breathPhase ? "#1d4ed8" : "#3b9eff"}
-                          strokeWidth="5"
-                          strokeLinecap="round"
-                          strokeDasharray="110"
-                          strokeDashoffset={i < breathPhase ? 0 : i === breathPhase ? 110 - breathPhaseProgress * 110 : 110}
-                        />
-                      ))}
-                    </svg>
-                    <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", pointerEvents: "none", gap: "0.8vw" }}>
-                      <p style={{ fontSize: "clamp(16px, 5.25vw, 22px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>Breathe</p>
-                      <p style={{ fontSize: "clamp(11px, 3.5vw, 16px)", fontWeight: 500, color: "#9aa5b0", margin: 0, textAlign: "center", lineHeight: 1.3 }}>(4x4 box breath)</p>
-                    </div>
-                  </div>
-                  <div style={{ height: "clamp(24px, 6vw, 32px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    {(() => {
-                      const phases = [
-                        { label: "In (nose)" },
-                        { label: "Hold" },
-                        { label: "Out (mouth)" },
-                        { label: "Hold" },
-                      ];
-                      const p = phases[breathPhase];
-                      return (
-                        <p key={breathPhase} style={{ fontSize: "clamp(13px, 4vw, 18px)", color: "#3b9eff", margin: 0, lineHeight: 1, fontWeight: 600 }}>
-                          {p.label}
-                        </p>
-                      );
-                    })()}
-                  </div>
-                  <p style={{ fontSize: "clamp(10px, 2.8vw, 13px)", color: "#c8cdd3", margin: 0, textAlign: "center", lineHeight: 1.4 }}>Skip if you have a respiratory condition</p>
+                  {(() => {
+                    let scale = 1;
+                    if (breathPhase === 0) scale = 1 + 0.18 * breathPhaseProgress; // Inhale: grows to +18%
+                    else if (breathPhase === 1) scale = 1.18; // Hold: stays at +18%
+                    else if (breathPhase === 2) scale = 1.18 - 0.18 * breathPhaseProgress; // Exhale: shrinks back to baseline
+                    else scale = 1; // Hold: stays at baseline
+                    return (
+                      <div style={{ position: "relative", width: "60%", aspectRatio: "1 / 1" }}>
+                        <svg width="100%" height="100%" viewBox="0 0 160 160" style={{ display: "block", overflow: "visible", transform: `scale(${scale})`, transformOrigin: "80px 80px" }}>
+                          <circle cx="80" cy="80" r="70" fill="none" stroke="#dce8f8" strokeWidth="5" />
+                          {[
+                            "M 80,150 A 70,70 0 0,1 10,80",
+                            "M 10,80 A 70,70 0 0,1 80,10",
+                            "M 80,10 A 70,70 0 0,1 150,80",
+                            "M 150,80 A 70,70 0 0,1 80,150",
+                          ].map((d, i) => (
+                            <path
+                              key={i}
+                              d={d}
+                              fill="none"
+                              stroke={i < breathPhase ? "#1d4ed8" : "#3b9eff"}
+                              strokeWidth="5"
+                              strokeLinecap="round"
+                              strokeDasharray="110"
+                              strokeDashoffset={i < breathPhase ? 0 : i === breathPhase ? 110 - breathPhaseProgress * 110 : 110}
+                            />
+                          ))}
+                        </svg>
+                        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+                          <p style={{ fontSize: "clamp(16px, 5.25vw, 22px)", fontWeight: 700, color: "#1a1c1c", margin: 0, lineHeight: 1 }}>Breathe</p>
+                        </div>
+                        <div style={{ position: "absolute", left: 0, right: 0, top: "58%", display: "flex", justifyContent: "center", pointerEvents: "none" }}>
+                          {(() => {
+                            const phases = [
+                              { label: "In" },
+                              { label: "Hold" },
+                              { label: "Out" },
+                              { label: "Hold" },
+                            ];
+                            const p = phases[breathPhase];
+                            return (
+                              <p key={breathPhase} style={{ fontSize: "clamp(12px, 3.8vw, 16px)", color: "#3b9eff", margin: 0, lineHeight: 1, fontWeight: 600 }}>
+                                {p.label}
+                              </p>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
               {/* Placeholder below */}
@@ -2599,6 +2606,18 @@ export default function Home8() {
             </div>
           </div>
         )}
+
+        {/* Breathing disclaimer — shown only on the breathing (left) card */}
+        <p
+          style={{
+            position: "fixed", left: "50%", bottom: 18, transform: "translateX(-50%)",
+            width: "80%", fontSize: "clamp(10px, 2.8vw, 13px)", color: "#c8cdd3", margin: 0, textAlign: "center", lineHeight: 1.4,
+            zIndex: cardSnap === 'right' ? 65 : -1, opacity: cardSnap === 'right' ? 1 : 0, pointerEvents: "none",
+            transition: "opacity 0.3s",
+          }}
+        >
+          Skip if you have a respiratory condition
+        </p>
 
         {/* Stats link + Settings shortcut — shown only on the bottom (grid) card */}
         <div
