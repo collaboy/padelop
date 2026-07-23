@@ -2684,8 +2684,6 @@ export default function Home8() {
           streak={streak}
           winRate={winRate}
           readiness={readiness}
-          insightsCount={reviews.flatMap(r => r.wellDone ?? []).length + reviews.flatMap(r => r.improved ?? []).length}
-          patternsCount={reviews.flatMap(r => r.wellDone ?? []).length + reviews.flatMap(r => r.improved ?? []).length}
         />
       </main>
     </>

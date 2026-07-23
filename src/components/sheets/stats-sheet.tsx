@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import FormScoreContent from "./form-score-sheet";
 import StreakContent from "./streak-sheet";
 import MatchesContent from "./matches-sheet";
-import InsightsContent from "./insights-sheet";
-import PatternsContent from "./patterns-sheet";
+import InsightsContent, { getInsightsPool } from "./insights-sheet";
+import PatternsContent, { getPatternsTagCount } from "./patterns-sheet";
 
 const MILESTONES = [10, 25, 50, 75, 100, 250, 500, 1000];
 
@@ -50,16 +50,8 @@ function PadlaPtsRow({ points, expanded, onToggle }: { points: number; expanded:
   const toNext = nextMilestone !== null ? nextMilestone - lifetimeScore : null;
 
   return (
-    <ExpandableRow color="#1a1c1c" title="Padla Pts" value={points > 0 ? points : "—"} sub="completed today" expanded={expanded} onToggle={onToggle}>
-      <div style={{ display: "flex", alignItems: "center", gap: 14, margin: "0 0 12px" }}>
-        <div style={{ flexShrink: 0, width: 52, height: 52, borderRadius: "50%", background: "#1a7a3f", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <span style={{ fontSize: 19, fontWeight: 800, letterSpacing: "-0.02em", color: "#fff", lineHeight: 1 }}>{lifetimeScore}</span>
-        </div>
-        <div>
-          <p style={{ margin: "0 0 2px", fontSize: 15, fontWeight: 800, color: "#1a7a3f", lineHeight: 1.2 }}>Lifetime Padla Points</p>
-          <p style={{ margin: 0, fontSize: 12, color: "#9aa0a6", lineHeight: 1.4 }}>Every positive action earns a point.</p>
-        </div>
-      </div>
+    <ExpandableRow color="#1a1c1c" title="Padla Pts" value={lifetimeScore > 0 ? lifetimeScore : "—"} sub={points > 0 ? `${points} completed today` : "lifetime points"} expanded={expanded} onToggle={onToggle}>
+      <p style={{ margin: "0 0 14px", fontSize: 12, color: "#9aa0a6", lineHeight: 1.4 }}>Every positive action earns a point.</p>
       {nextMilestone !== null && (
         <div style={{ margin: "0 0 14px", padding: "10px 16px", borderRadius: 999, background: "#dcfce7", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1a7a3f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H3.5a2.5 2.5 0 0 0 0 5H6"/><path d="M18 9h2.5a2.5 2.5 0 0 1 0 5H18"/><path d="M6 3h12v10a6 6 0 0 1-12 0V3z"/><path d="M9 21h6"/><path d="M12 17v4"/></svg>
@@ -99,15 +91,16 @@ interface Props {
   streak: number;
   winRate: number | null;
   readiness: number;
-  insightsCount: number;
-  patternsCount: number;
 }
 
-export default function StatsSheet({ open, onClose, points, streak, winRate, readiness, insightsCount, patternsCount }: Props) {
+export default function StatsSheet({ open, onClose, points, streak, winRate, readiness }: Props) {
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
   if (!open) return null;
 
   const toggle = (key: string) => setExpandedKey(k => k === key ? null : key);
+  const insightsCount = getInsightsPool(streak).length;
+  const patternsCount = getPatternsTagCount();
+  const matchesColor = winRate === null ? "#9aa0a6" : winRate >= 60 ? "#16a34a" : winRate >= 40 ? "#d97706" : "#dc2626";
 
   return (
     <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={onClose}>
@@ -122,19 +115,19 @@ export default function StatsSheet({ open, onClose, points, streak, winRate, rea
         </div>
         <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px", display: "flex", flexDirection: "column", gap: 8 }} onClick={() => setExpandedKey(null)}>
           <PadlaPtsRow points={points} expanded={expandedKey === "padla"} onToggle={() => toggle("padla")} />
-          <ExpandableRow color="#7c3aed" title="Form" value={readiness} sub="readiness" expanded={expandedKey === "form"} onToggle={() => toggle("form")}>
+          <ExpandableRow color="#7c3aed" title="Overall Form" value={`${readiness}%`} sub="readiness" expanded={expandedKey === "form"} onToggle={() => toggle("form")}>
             <FormScoreContent />
           </ExpandableRow>
-          <ExpandableRow color="#f59e0b" title="Streak" value={streak > 0 ? streak : "—"} sub={streak > 0 ? "days in a row" : "start today"} expanded={expandedKey === "streak"} onToggle={() => toggle("streak")}>
-            <StreakContent />
+          <ExpandableRow color="#d97706" title="Streak" value={streak > 0 ? streak : "—"} sub={streak > 0 ? "days in a row" : "start today"} expanded={expandedKey === "streak"} onToggle={() => toggle("streak")}>
+            <StreakContent streak={streak} />
           </ExpandableRow>
-          <ExpandableRow color="#dc2626" title="Win Rate" value={winRate !== null ? `${winRate}%` : "—"} sub={winRate !== null ? (winRate >= 60 ? "strong" : winRate >= 40 ? "building" : "keep going") : "no matches logged"} expanded={expandedKey === "matches"} onToggle={() => toggle("matches")}>
+          <ExpandableRow color={matchesColor} title="Matches" value={winRate !== null ? `${winRate}%` : "—"} sub={winRate !== null ? "win rate" : "no matches logged"} expanded={expandedKey === "matches"} onToggle={() => toggle("matches")}>
             <MatchesContent />
           </ExpandableRow>
-          <ExpandableRow color="#f59e0b" title="Insights" value={insightsCount > 0 ? insightsCount : "—"} sub="available" expanded={expandedKey === "insights"} onToggle={() => toggle("insights")}>
-            <InsightsContent />
+          <ExpandableRow color="#2563eb" title="Insights" value={insightsCount > 0 ? insightsCount : "—"} sub="available" expanded={expandedKey === "insights"} onToggle={() => toggle("insights")}>
+            <InsightsContent streak={streak} />
           </ExpandableRow>
-          <ExpandableRow color="#e11d48" title="Patterns" value={patternsCount > 0 ? patternsCount : "—"} sub="tags logged" expanded={expandedKey === "patterns"} onToggle={() => toggle("patterns")}>
+          <ExpandableRow color="#0d9488" title="Patterns" value={patternsCount > 0 ? patternsCount : "—"} sub="tags logged" expanded={expandedKey === "patterns"} onToggle={() => toggle("patterns")}>
             <PatternsContent />
           </ExpandableRow>
         </div>

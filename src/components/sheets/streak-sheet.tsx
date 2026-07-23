@@ -11,17 +11,7 @@ const STIERS = [
   { min: 100, label: "Legend",    color: "#0ea5e9", grad: ["#f0f9ff", "#bae6fd"] },
 ];
 
-export default function StreakContent() {
-  let habitDates = new Set<string>();
-  try {
-    const habits: { date: string }[] = JSON.parse(localStorage.getItem("padelop:habits") || "[]");
-    habitDates = new Set(habits.map(h => h.date));
-  } catch {}
-  const cur = new Date();
-  if (!habitDates.has(cur.toISOString().slice(0, 10))) cur.setDate(cur.getDate() - 1);
-  let streak = 0;
-  while (habitDates.has(cur.toISOString().slice(0, 10))) { streak++; cur.setDate(cur.getDate() - 1); }
-
+export default function StreakContent({ streak }: { streak: number }) {
   const stier = [...STIERS].reverse().find(t => streak >= t.min) ?? STIERS[0];
   const snext = STIERS[STIERS.indexOf(stier) + 1];
   const msg = streak === 0 ? "Log your first check-in to start your streak." : streak === 1 ? "Day one. Come back tomorrow to keep it going." : !snext ? "Legend status. You're in a league of your own." : `${snext.min - streak} day${snext.min - streak === 1 ? "" : "s"} to ${snext.label}.`;

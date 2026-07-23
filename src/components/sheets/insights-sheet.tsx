@@ -5,20 +5,8 @@ import { loadScoreHistory, type ReviewEntry, type ScoreSnapshot } from "@/lib/sc
 
 type TrainingEntry = { ts: string; sessionType: string[]; drillFocus: string[]; duration: string; intensity: string };
 
-export default function InsightsContent() {
-  const [featuredIdx, setFeaturedIdx] = useState(() => Math.floor(Math.random() * 8));
-
+export function getInsightsPool(streak: number): { label: string; body: string }[] {
   const reviews: ReviewEntry[] = (() => { try { const raw = localStorage.getItem("padelop:match-reviews"); return raw ? JSON.parse(raw) as ReviewEntry[] : []; } catch { return []; } })();
-
-  let habitDates = new Set<string>();
-  try {
-    const habits: { date: string }[] = JSON.parse(localStorage.getItem("padelop:habits") || "[]");
-    habitDates = new Set(habits.map(h => h.date));
-  } catch {}
-  const cur = new Date();
-  if (!habitDates.has(cur.toISOString().slice(0, 10))) cur.setDate(cur.getDate() - 1);
-  let streak = 0;
-  while (habitDates.has(cur.toISOString().slice(0, 10))) { streak++; cur.setDate(cur.getDate() - 1); }
 
   let partnerCount = 0;
   try {
@@ -118,6 +106,13 @@ export default function InsightsContent() {
       ? { label: "Tournaments", body: `You've entered ${tournamentCount} tournament${tournamentCount > 1 ? "s" : ""}. Competitive pressure is one of the best accelerators — the nerves, the intensity, the opponents. Keep entering.` }
       : null,
   ].filter((x): x is { label: string; body: string } => x !== null);
+
+  return pool;
+}
+
+export default function InsightsContent({ streak }: { streak: number }) {
+  const [featuredIdx, setFeaturedIdx] = useState(() => Math.floor(Math.random() * 8));
+  const pool = getInsightsPool(streak);
 
   if (pool.length === 0) {
     return <p style={{ fontSize: 15, color: "#9aa0a6", margin: 0 }}>No insights yet — log some matches and check-ins to unlock.</p>;
