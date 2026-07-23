@@ -175,7 +175,7 @@ export const ITEM_COLORS: Record<string, string> = {
   "Early dinner": "#16a34a",
   "Active recovery": "#0e7490",
   "Visualisation": "#64748b",
-  "Regroup & mental prep": "#7c3aed",
+  "Mental prep": "#7c3aed",
   "Wind down": "#64748b",
 };
 
@@ -219,7 +219,7 @@ function buildMatchSchedule(mH: number, mM: number, mt: string): Array<{ time: s
       { time: "07:30", title: "Breakfast", subtitle: "Oats, eggs, fruit" },
       { time: "09:00", title: "Mobility Exercise", subtitle: "Foam roll & light stretching" },
       { time: "12:30", title: "Lunch", subtitle: "Chicken, rice, veg" },
-      { time: addMins(mH, mM, -270), title: "Regroup & mental prep", subtitle: "Rest, visualise, stay off your feet" },
+      { time: addMins(mH, mM, -270), title: "Mental prep", subtitle: "Rest, visualise, stay off your feet" },
       { time: addMins(mH, mM, -150), title: "Pre-match meal", subtitle: "Chicken, rice, light salad" },
       { time: addMins(mH, mM, -60), title: "Warm up", subtitle: "Get loose — dynamic movement" },
       { time: mt, title: "Match", subtitle: "Game time" },
@@ -265,7 +265,7 @@ export function getScheduleData(dayType: DayType, matchTime: string | null, dril
       { time: "07:30", title: "Breakfast",           subtitle: "Oats, eggs — carb focus today" },
       { time: "09:30", title: "Light mobility",      subtitle: "Gentle — no hard session the day before" },
       { time: "12:30", title: "Lunch",               subtitle: "Pasta, rice or potatoes — carb-rich" },
-      { time: "15:00", title: "Regroup & mental prep", subtitle: "Visualise tomorrow — review your patterns" },
+      { time: "15:00", title: "Mental prep", subtitle: "Visualise tomorrow — review your patterns" },
       { time: "18:30", title: "Early dinner",        subtitle: "Finish eating by 7pm — sleep quality matters" },
       { time: "21:30", title: "Wind down",           subtitle: "Prioritise sleep — it's your biggest lever tonight" },
     ],
@@ -293,7 +293,7 @@ export function getScheduleData(dayType: DayType, matchTime: string | null, dril
       { time: "09:30", title: "Mobility Exercise", subtitle: "Hip flexors, thoracic spine, ankles" },
       { time: "11:00", title: drillTitle,          subtitle: drill.subtitle, isDrill: true },
       { time: "12:30", title: "Lunch",             subtitle: "Carbs + protein + greens" },
-      { time: "15:00", title: "Regroup & mental prep", subtitle: "Rest, visualise, stay off your feet" },
+      { time: "15:00", title: "Mental prep", subtitle: "Rest, visualise, stay off your feet" },
       { time: "16:00", title: "Active recovery",   subtitle: "Light walk or gentle movement" },
       { time: "19:00", title: "Dinner",            subtitle: "Focus on variety and micronutrients" },
       { time: "21:00", title: "Visualisation",     subtitle: "5 min mental rehearsal of key patterns" },
@@ -332,14 +332,14 @@ export function getScheduleData(dayType: DayType, matchTime: string | null, dril
 }
 
 export type MealOption     = { title: string; detail: string };
-export type DetailMeal     = { type: 'meal';     focus: string; options: [MealOption, MealOption, MealOption] };
+export type DetailMeal     = { type: 'meal';     focus: string; goal: string; options: [MealOption, MealOption, MealOption] };
 export type DetailExercise = { type: 'exercise'; focus: string; steps: { step: string; cue: string; reps: string }[] };
 export type DetailInfo     = { type: 'info';     focus: string; text: string };
 export type ScheduleDetail = DetailMeal | DetailExercise | DetailInfo;
 
 export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
   "Wake up": { type: 'info', focus: "Hydration · morning routine", text: "Starting your day with 500 ml of water re-hydrates you after 7–8 hours without fluids. Do this before coffee — caffeine is a mild diuretic and amplifies morning dehydration." },
-  "Breakfast": { type: 'meal', focus: "Protein · slow carbs · fruit", options: [
+  "Breakfast": { type: 'meal', focus: "Protein · slow carbs · fruit", goal: "Protein to curb hunger, slow carbs for steady energy, and fruit for a natural sugar hit to start the day.", options: [
     { title: "Scrambled eggs, oats & banana", detail: "3 eggs · 60g oats with water or milk · 1 banana. Slow carbs keep blood sugar stable through the morning." },
     { title: "Greek yogurt with granola & berries", detail: "200g full-fat Greek yogurt · 40g granola · handful of blueberries or strawberries. High protein, easy to digest." },
     { title: "Spinach omelette & wholegrain toast", detail: "3 eggs · large handful of spinach · 2 slices wholegrain toast. Good iron and B-vitamin hit to start the day." },
@@ -354,12 +354,12 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
     { step: "Shoulder rolls", cue: "Slow full circles forward and back. Wake up the rotator cuff without loading it.", reps: "10 each direction" },
     { step: "Hip circles", cue: "Hands on hips, slow big circles. Loosen the hip capsule before tomorrow.", reps: "10 each direction" },
   ]},
-  "Morning snack": { type: 'meal', focus: "Light energy · easy digestion", options: [
+  "Morning snack": { type: 'meal', focus: "Light energy · easy digestion", goal: "A quick hit of carbs and a little protein to bridge the gap to lunch without sitting heavy.", options: [
     { title: "Banana & nut butter", detail: "1 medium banana · 1 tbsp almond or peanut butter. Fast carbs + fat to bridge you to lunch without a spike." },
     { title: "Oat bar", detail: "1 oat-based bar, ideally under 10g sugar. Quick, portable, and won't sit heavy." },
     { title: "Greek yogurt", detail: "150g plain Greek yogurt. Light protein top-up — add honey if you need a bit more energy." },
   ]},
-  "Pre-match meal": { type: 'meal', focus: "Easy to digest · sustained energy", options: [
+  "Pre-match meal": { type: 'meal', focus: "Easy to digest · sustained energy", goal: "Lean protein and simple carbs that digest fast, giving sustained energy without weighing you down on court.", options: [
     { title: "Chicken, white rice & cucumber", detail: "150g grilled chicken · 150g cooked white rice · cucumber slices. White rice digests faster than brown — ideal 2–3 hrs pre-match." },
     { title: "Pasta, lean mince & tomato sauce", detail: "150g pasta · 100g lean beef or turkey mince · light tomato sauce. Keep it simple — avoid cream or heavy fat before playing." },
     { title: "Jacket potato, tuna & salad", detail: "1 medium jacket potato · 1 tin tuna in water · green salad. Easy on the gut, steady energy release." },
@@ -375,12 +375,12 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
     { step: "Seated hamstring stretch", cue: "Legs straight out in front, hinge from the hips and reach towards your feet.", reps: "45 sec" },
     { step: "Shoulder cross-body stretch", cue: "Pull one arm across your chest. Keep your shoulder pressed down away from your ear.", reps: "30 sec each side" },
   ]},
-  "Recovery meal": { type: 'meal', focus: "Protein + carbs · within 30 min", options: [
+  "Recovery meal": { type: 'meal', focus: "Protein + carbs · within 30 min", goal: "Protein to repair muscle and carbs to refill glycogen — eaten within 30 minutes for the fastest recovery.", options: [
     { title: "Salmon, sweet potato & spinach", detail: "150g salmon · 1 medium sweet potato · wilted spinach. The 30-minute window is real — muscle protein synthesis peaks when you eat soon after training." },
     { title: "Chicken stir-fry, noodles & broccoli", detail: "150g chicken breast · 100g egg noodles · broccoli · soy & ginger. Fast to cook, fast to digest." },
     { title: "Protein shake, toast & banana", detail: "30g whey protein in water · 2 slices wholegrain toast · 1 banana. The quickest route to the 3:1 carb-to-protein recovery ratio." },
   ]},
-  "Post-match lunch": { type: 'meal', focus: "Recovery · protein + carbs", options: [
+  "Post-match lunch": { type: 'meal', focus: "Recovery · protein + carbs", goal: "Protein to kickstart muscle repair and carbs to replenish the glycogen you burned during the match.", options: [
     { title: "Salmon, sweet potato & spinach", detail: "150g salmon · 1 medium sweet potato · spinach. Omega-3s reduce inflammation; sweet potato replenishes glycogen fast." },
     { title: "Chicken, rice & roasted veg", detail: "150g grilled chicken · 150g cooked rice · whatever veg you have. Simple, balanced, gets the job done." },
     { title: "Protein shake, toast & banana", detail: "30g whey in water · 2 slices toast · 1 banana. If you're short on time or appetite — hit the carb-protein window and eat properly later." },
@@ -392,24 +392,24 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
     { step: "Quad roll", cue: "Face down, forearms supporting you. Roll from hip to knee on the front of the thigh.", reps: "60 sec each leg" },
     { step: "Hip flexor lunge stretch", cue: "Low lunge, back knee down, slight backward lean. Feel the stretch in the front of the back hip.", reps: "60 sec each side" },
   ]},
-  "Lunch": { type: 'meal', focus: "Protein · carbs · greens", options: [
+  "Lunch": { type: 'meal', focus: "Protein · carbs · greens", goal: "Lean protein, complex carbs, and leafy greens — a balanced plate to keep energy steady through the afternoon.", options: [
     { title: "Chicken, quinoa & roasted veg", detail: "150g grilled chicken · 100g quinoa · mixed roasted veg. Quinoa is a complete protein — it covers all essential amino acids." },
     { title: "Tuna niçoise — eggs & green beans", detail: "1 tin tuna · 2 boiled eggs · green beans · olives · light vinaigrette. High protein, anti-inflammatory fats, easy to prep ahead." },
     { title: "Salmon, brown rice & broccoli", detail: "150g salmon fillet · 100g brown rice · steamed broccoli. Omega-3s support joint health and reduce post-session inflammation." },
   ]},
   "Cold shower": { type: 'info', focus: "Inflammation reduction · DOMS relief", text: "Two minutes of cold water constricts blood vessels, reduces inflammation, and blunts delayed onset muscle soreness. Start warm, finish cold for the last 90–120 seconds." },
-  "Dinner": { type: 'meal', focus: "Anti-inflammatory · micronutrient-rich", options: [
+  "Dinner": { type: 'meal', focus: "Anti-inflammatory · micronutrient-rich", goal: "Omega-3-rich protein, colourful vegetables, and micronutrients that support overnight recovery and ease inflammation.", options: [
     { title: "Salmon, sweet potato & spinach", detail: "150g salmon · 1 sweet potato · wilted spinach with garlic. Omega-3s, beta-carotene, and iron in one plate." },
     { title: "Sea bass, brown rice & kale", detail: "150g sea bass fillet · 100g brown rice · steamed kale. Light on the gut at night, rich in minerals for overnight recovery." },
     { title: "Chicken thighs, couscous & roasted veg", detail: "2 chicken thighs (skin off) · 100g couscous · roasted peppers and courgette. Thighs have more zinc and iron than breast." },
   ]},
-  "Early dinner": { type: 'meal', focus: "Carb focus · finish by 7pm", options: [
+  "Early dinner": { type: 'meal', focus: "Carb focus · finish by 7pm", goal: "Carb-heavy with moderate protein, finished by 7pm so glycogen stores are full before match day.", options: [
     { title: "Pasta & chicken in tomato sauce", detail: "150g pasta · 120g chicken · light tomato sauce. Finish by 7pm so glycogen loads fully before sleep." },
     { title: "Salmon, rice & steamed veg", detail: "150g salmon · 150g cooked rice · broccoli or green beans. Balanced macros, easy to digest before bed." },
     { title: "Jacket potato, eggs & salad", detail: "1 large jacket potato · 2–3 eggs · mixed salad. High-carb, moderate protein — good pre-match evening fuel." },
   ]},
   "Active recovery": { type: 'info', focus: "Aerobic flush · below 130 bpm", text: "Walk, swim, or cycle at a pace where you can hold a full conversation. Keep heart rate below 130 bpm. Light aerobic activity maintains cardiovascular fitness without accumulating fatigue." },
-  "Regroup & mental prep": { type: 'exercise', focus: "Mental rehearsal · focus", steps: [
+  "Mental prep": { type: 'exercise', focus: "Mental rehearsal · focus", steps: [
     { step: "Box breathing", cue: "4 in, 4 hold, 4 out, 4 hold. Settle the nervous system before the match window.", reps: "5 rounds" },
     { step: "Pattern review", cue: "Recall 2–3 patterns that work for you. Not everything — just what you'll lean on today.", reps: "3 minutes" },
     { step: "Visualise the first game", cue: "Picture your first serve, first volley, first exchange. Arrive mentally before you arrive physically.", reps: "2 minutes" },

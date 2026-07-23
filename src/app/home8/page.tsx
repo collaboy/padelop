@@ -306,6 +306,8 @@ export default function Home8() {
   const [morningDone, setMorningDone] = useState(false);
   const [expandedMealIdx, setExpandedMealIdx] = useState<number | null>(null);
   const [checkedMeals, setCheckedMeals] = useState<Set<number>>(new Set());
+  const [mealSuggestionsOpen, setMealSuggestionsOpen] = useState(false);
+  const [mealLogOpen, setMealLogOpen] = useState(false);
   const [streak, setStreak] = useState(0);
   const [profile, setProfile] = useState<{ name: string; level: string }>({ name: "", level: "Recreational" });
   const [matchCount, setMatchCount] = useState(0);
@@ -372,6 +374,8 @@ export default function Home8() {
   }, [gameDays, match, upcomingMatches]);
 
   const [logHydrationMl, setLogHydrationMl] = useState(0);
+  const [hydrationToastOn, setHydrationToastOn] = useState(false);
+  const hydrationToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const logGaugeRef    = useRef<HTMLDivElement>(null);
   const logDragStartX  = useRef(0);
   const logDragStartMl = useRef(0);
@@ -1262,28 +1266,18 @@ export default function Home8() {
                   const nextTitle = nextSlide.title;
 
                   return (
-                    <div key="done-card" style={{ ...cardStyle, background: "#e8ddd0", animation: "ball-drop 0.9s 0.1s both" }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
+                    <div key="done-card" style={{ ...cardStyle, background: "#E5E7EB", animation: "ball-drop 0.9s 0.1s both" }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
                       {textureOverlay}
 
                       {/* Timer layer */}
-                      <div style={{ position: "absolute", inset: 0, zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0 }}>
-                        {/* Curved top + bottom text */}
-                        {(() => { const ff = "-apple-system, BlinkMacSystemFont, sans-serif"; return (
-                        <svg viewBox="0 0 200 200" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
-                          <defs>
-                            <path id="doneTopArc" d="M 30,64 A 76,76 0 0,1 170,64" />
-                            <path id="doneBottomArc" d="M 7.6,100 A 92.4,92.4 0 0,0 192.4,100" />
-                          </defs>
-                          <text fontSize="14" fontWeight="700" letterSpacing="1" style={{ fill: "rgba(0,0,0,0.45)", fontFamily: ff }}>
-                            <textPath href="#doneTopArc" startOffset="50%" textAnchor="middle">NICE WORK</textPath>
-                          </text>
-                          <text fontSize="11" fontWeight="700" letterSpacing="0.5" style={{ fill: "rgba(0,0,0,0.45)", fontFamily: ff }}>
-                            <textPath href="#doneBottomArc" startOffset="50%" textAnchor="middle">{`${nextTitle} in ${fmtTime(secsUntilNext)}`}</textPath>
-                          </text>
-                        </svg>
-                        ); })()}
-                        <p style={{ margin: 0, fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#1a1c1c", letterSpacing: "-0.02em", textAlign: "center", lineHeight: 1.1 }}>{completedTitle}</p>
-                        <p style={{ margin: "4px 0 0", fontSize: "clamp(13px, 3.8vw, 16px)", fontWeight: 500, color: "rgba(0,0,0,0.45)", textAlign: "center", lineHeight: 1.1 }}>completed</p>
+                      <div style={{ position: "absolute", inset: 0, zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0, padding: "0 12px" }}>
+                        <p style={{ position: "relative", color: "#000", fontWeight: 800, fontSize: !nextTitle.includes(" & ") && nextTitle.length > 14 ? "clamp(18px, 5.8vw, 26px)" : "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, display: "inline-block", textAlign: "center", margin: 0 }}>
+                          <span style={{ position: "absolute", left: 0, right: 0, bottom: "100%", fontSize: 13, fontWeight: 700, color: "#000", letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1 }}>Next</span>
+                          {nextTitle.includes(" & ")
+                            ? <>{nextTitle.split(" & ")[0]}<br />{"& " + nextTitle.split(" & ").slice(1).join(" & ")}</>
+                            : nextTitle}
+                        </p>
+                        <p style={{ margin: "6px 0 0", fontSize: "clamp(13px, 3.8vw, 16px)", fontWeight: 500, color: "rgba(0,0,0,0.55)", textAlign: "center", lineHeight: 1.1 }}>in {fmtTime(secsUntilNext)}</p>
                       </div>
 
                       {/* Done flash — on top, cross-fades out into timer */}
@@ -1379,7 +1373,8 @@ export default function Home8() {
                       {(() => {
                         const circleTitle = s.title === "Lunch" ? "Lunchtime" : s.title === "Dinner" ? "Dinnertime" : s.title;
                         return (
-                          <p style={{ color: "#000", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, display: "inline-block", textAlign: "center", margin: 0 }}>
+                          <p style={{ position: "relative", color: "#000", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, display: "inline-block", textAlign: "center", margin: 0 }}>
+                            <span style={{ position: "absolute", left: 0, right: 0, bottom: "100%", fontSize: 13, fontWeight: 700, color: "#000", letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1 }}>Now</span>
                             {circleTitle.includes(" & ")
                               ? <>{circleTitle.split(" & ")[0]}<br />{"& " + circleTitle.split(" & ").slice(1).join(" & ")}</>
                               : circleTitle}
@@ -1533,13 +1528,23 @@ export default function Home8() {
                   : logHydrationMl >= 1000
                   ? `${+(logHydrationMl / 1000).toFixed(1)}L`
                   : `${logHydrationMl}ml`;
+                const pingHydrationToast = () => {
+                  setHydrationToastOn(true);
+                  if (hydrationToastTimer.current) clearTimeout(hydrationToastTimer.current);
+                  hydrationToastTimer.current = setTimeout(() => setHydrationToastOn(false), 2500);
+                };
                 return (
                   <>
+                    <div style={{ position: "relative" }}>
+                      <p style={{ position: "absolute", left: 0, right: 0, top: -28, textAlign: "center", fontSize: "clamp(13px, 3.4vw, 16px)", fontWeight: 600, color: "#3b9eff", margin: 0, lineHeight: 1.1, opacity: hydrationToastOn ? 1 : 0, transition: "opacity 0.4s", pointerEvents: "none" }}>
+                        {Math.round(Math.min(logHydrationMl / 2500, 1) * 100)}% of 2.5L goal
+                      </p>
                     <svg
                       onClick={() => {
                         const next = Math.min(MAX, logHydrationMl + 250);
                         setLogHydrationMl(next);
                         saveLogHydration(next);
+                        pingHydrationToast();
                       }}
                       viewBox="0 0 100 130" width="138" height="179" style={{ overflow: "visible", cursor: logHydrationMl >= MAX ? "default" : "pointer" }}>
                       <defs>
@@ -1584,6 +1589,7 @@ export default function Home8() {
                         {labelMl}
                       </text>
                     </svg>
+                    </div>
 
                     <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 2 }}>
                       <button
@@ -1591,6 +1597,7 @@ export default function Home8() {
                           const next = Math.max(0, logHydrationMl - 250);
                           setLogHydrationMl(next);
                           saveLogHydration(next);
+                          pingHydrationToast();
                         }}
                         style={{ width: 34, height: 34, borderRadius: "50%", background: "#fff", border: "1.5px solid #dde2e8", boxShadow: "0 1px 4px rgba(0,0,0,0.10)", cursor: logHydrationMl <= 0 ? "default" : "pointer", fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: logHydrationMl <= 0 ? "#c8cdd3" : "#6b7480", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
                       >
@@ -1601,16 +1608,13 @@ export default function Home8() {
                           const next = Math.min(MAX, logHydrationMl + 250);
                           setLogHydrationMl(next);
                           saveLogHydration(next);
+                          pingHydrationToast();
                         }}
                         style={{ width: 34, height: 34, borderRadius: "50%", background: logHydrationMl >= MAX ? "#e8f0e8" : "#3b9eff", border: "none", cursor: logHydrationMl >= MAX ? "default" : "pointer", fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: logHydrationMl >= MAX ? "#16a34a" : "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
                       >
                         +
                       </button>
                     </div>
-
-                    <p style={{ fontSize: "clamp(13px, 3.4vw, 16px)", fontWeight: 600, color: "#3b9eff", margin: "2px 0 0", lineHeight: 1.1 }}>
-                      {Math.round(Math.min(logHydrationMl / 2500, 1) * 100)}% of 2.5L goal
-                    </p>
                   </>
                 );
               })()}
@@ -1714,8 +1718,15 @@ export default function Home8() {
                       {isMeal && detail?.type === 'meal' && (
                         <div className="flex flex-col pt-4">
                           <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#8a9096" }}>{detail.focus}</p>
-                          <p style={{ fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 600, color: "#1a1c1c", margin: "0 0 8px" }}>What did you eat?</p>
-                          {detail.options.map((meal, i) => (
+                          <p style={{ fontSize: 15, color: "#4a5050", lineHeight: 1.6, margin: "0 0 16px" }}>{detail.goal}</p>
+                          <button
+                            onClick={() => setMealSuggestionsOpen(v => !v)}
+                            style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, borderRadius: 14, padding: "12px 14px", background: "#fff", boxShadow: "0 0 0 1px #f0f0f0", border: "none", cursor: "pointer", marginBottom: mealSuggestionsOpen ? 8 : 8 }}
+                          >
+                            <span style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>Suggestions</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: mealSuggestionsOpen ? "rotate(90deg)" : "rotate(0deg)" }}><path d="M9 18l6-6-6-6"/></svg>
+                          </button>
+                          {mealSuggestionsOpen && detail.options.map((meal, i) => (
                             <div key={i}>
                               <button
                                 onClick={() => setExpandedMealIdx(expandedMealIdx === i ? null : i)}
@@ -1738,8 +1749,14 @@ export default function Home8() {
                               {i < detail.options.length - 1 && <div style={{ height: 1, background: "#f0f0f0" }} />}
                             </div>
                           ))}
-                          <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 6 }}>
-                            <p style={{ margin: "0 0 2px", fontSize: 12, fontWeight: 600, color: "#8a9096", letterSpacing: "0.02em" }}>or, add manually</p>
+                          <button
+                            onClick={() => setMealLogOpen(v => !v)}
+                            style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, borderRadius: 14, padding: "12px 14px", background: "#fff", boxShadow: "0 0 0 1px #f0f0f0", border: "none", cursor: "pointer", marginBottom: mealLogOpen ? 8 : 0 }}
+                          >
+                            <span style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>Add manually</span>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: mealLogOpen ? "rotate(90deg)" : "rotate(0deg)" }}><path d="M9 18l6-6-6-6"/></svg>
+                          </button>
+                          {mealLogOpen && (
                             <textarea
                               value={mealText}
                               onChange={e => setMealText(e.target.value)}
@@ -1747,7 +1764,7 @@ export default function Home8() {
                               rows={3}
                               style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box", background: "#f8f9fa" }}
                             />
-                          </div>
+                          )}
                         </div>
                       )}
                       {(isInfo || isExercise || isDrill) && (

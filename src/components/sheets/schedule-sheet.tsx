@@ -44,6 +44,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
   const [modalClosing, setModalClosing] = useState(false);
   const [expandedMealIdx, setExpandedMealIdx] = useState<number | null>(null);
   const [checkedMeals, setCheckedMeals] = useState<Set<number>>(new Set());
+  const [mealSuggestionsOpen, setMealSuggestionsOpen] = useState(false);
   const [swipeX, setSwipeX] = useState(0);
   const swipeTrackRef = useRef<HTMLDivElement & { _startX?: number }>(null);
 
@@ -208,8 +209,15 @@ export default function ScheduleSheet({ open, onClose }: Props) {
               {modalIsMeal && modalDetail?.type === "meal" && (
                 <div className="flex flex-col pt-4">
                   <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#8a9096" }}>{modalDetail.focus}</p>
-                  <p style={{ fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 600, color: "#1a1c1c", margin: "0 0 8px" }}>What did you eat?</p>
-                  {modalDetail.options.map((meal, i) => (
+                  <p style={{ fontSize: 15, color: "#4a5050", lineHeight: 1.6, margin: "0 0 16px" }}>{modalDetail.goal}</p>
+                  <button
+                    onClick={() => setMealSuggestionsOpen(v => !v)}
+                    style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, borderRadius: 14, padding: "12px 14px", background: "#fff", boxShadow: "0 0 0 1px #f0f0f0", border: "none", cursor: "pointer", marginBottom: mealSuggestionsOpen ? 8 : 0 }}
+                  >
+                    <span style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>Suggestions</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: mealSuggestionsOpen ? "rotate(90deg)" : "rotate(0deg)" }}><path d="M9 18l6-6-6-6"/></svg>
+                  </button>
+                  {mealSuggestionsOpen && modalDetail.options.map((meal, i) => (
                     <div key={i}>
                       <button
                         onClick={() => setExpandedMealIdx(expandedMealIdx === i ? null : i)}
