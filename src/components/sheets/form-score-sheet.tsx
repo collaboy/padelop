@@ -73,7 +73,7 @@ export default function FormScoreContent() {
         <div style={{ flex: 1, height: 4, borderRadius: 99, background: "#ebebeb" }}>
           <div style={{ width: `${v}%`, height: "100%", borderRadius: 99, background: c, transition: "width 0.4s" }} />
         </div>
-        <span style={{ fontSize: 14, fontWeight: 800, color: c, minWidth: 24, textAlign: "right" }}>{v}</span>
+        <span style={{ fontSize: 28, fontWeight: 800, color: c, minWidth: 24, textAlign: "right" }}>{v}</span>
       </div>
     );
   };
@@ -83,15 +83,15 @@ export default function FormScoreContent() {
       {rows.map(r => (
         <div key={r.label} style={{ background: "#f8f9fa", borderRadius: 14, padding: "12px 14px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>{r.label}</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: "#c8cdd4" }}>{r.weight}</span>
+            <span style={{ fontSize: 30, fontWeight: 700, color: "#1a1c1c" }}>{r.label}</span>
+            <span style={{ fontSize: 22, fontWeight: 600, color: "#c8cdd4" }}>{r.weight}</span>
           </div>
-          <p style={{ margin: "3px 0 0", fontSize: 13, color: r.value === null ? "#c0c7d0" : "#6b7480", lineHeight: 1.4 }}>
+          <p style={{ margin: "3px 0 0", fontSize: 26, color: r.value === null ? "#c0c7d0" : "#6b7480", lineHeight: 1.4 }}>
             {r.value === null ? (r.action ?? r.context) : r.context}
           </p>
           {r.value !== null && scoreBar(r.value)}
           {r.value !== null && r.action && (
-            <p style={{ margin: "6px 0 0", fontSize: 12, fontWeight: 600, color: "#d97706" }}>{r.action}</p>
+            <p style={{ margin: "6px 0 0", fontSize: 24, fontWeight: 600, color: "#d97706" }}>{r.action}</p>
           )}
         </div>
       ))}

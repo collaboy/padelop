@@ -22,7 +22,7 @@ function fmtCountdown(date: string, time: string) {
 }
 
 function mfInputStyle(filled: boolean): React.CSSProperties {
-  return { width: "100%", padding: "10px 12px", borderRadius: 12, border: `1.5px solid ${filled ? "#2653d4" : "#e2e2e2"}`, background: filled ? "#f4f6ff" : "#fff", fontSize: 16, color: "#1a1c1c", outline: "none", fontFamily: "inherit", boxSizing: "border-box" };
+  return { width: "100%", padding: "10px 12px", borderRadius: 12, border: `1.5px solid ${filled ? "#2653d4" : "#e2e2e2"}`, background: filled ? "#f4f6ff" : "#fff", fontSize: 32, color: "#1a1c1c", outline: "none", fontFamily: "inherit", boxSizing: "border-box" };
 }
 
 function MatchFormWidget({ form, onChange, onSave, onDelete, saveLabel, saveColor }: {
@@ -35,33 +35,33 @@ function MatchFormWidget({ form, onChange, onSave, onDelete, saveLabel, saveColo
     <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingTop: 14 }}>
       <div style={{ display: "flex", gap: 8 }}>
         <div style={{ flex: 1 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: "#8a9096", marginBottom: 4 }}>DATE</p>
+          <p style={{ fontSize: 22, fontWeight: 700, color: "#8a9096", marginBottom: 4 }}>DATE</p>
           <input type="date" value={form.date} onChange={set("date")} style={mfInputStyle(!!form.date)} />
         </div>
         <div style={{ flex: 1 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, color: "#8a9096", marginBottom: 4 }}>TIME</p>
+          <p style={{ fontSize: 22, fontWeight: 700, color: "#8a9096", marginBottom: 4 }}>TIME</p>
           <input type="time" value={form.time} onChange={set("time")} style={mfInputStyle(!!form.time)} />
         </div>
       </div>
       <div>
-        <p style={{ fontSize: 11, fontWeight: 700, color: "#8a9096", marginBottom: 4 }}>CLUB</p>
+        <p style={{ fontSize: 22, fontWeight: 700, color: "#8a9096", marginBottom: 4 }}>CLUB</p>
         <input type="text" placeholder="e.g. Club Padel BCN" value={form.club} onChange={set("club")} style={mfInputStyle(!!form.club)} />
       </div>
       <div>
-        <p style={{ fontSize: 11, fontWeight: 700, color: "#8a9096", marginBottom: 4 }}>COURT</p>
+        <p style={{ fontSize: 22, fontWeight: 700, color: "#8a9096", marginBottom: 4 }}>COURT</p>
         <input type="text" placeholder="e.g. 3" value={form.court} onChange={set("court")} style={mfInputStyle(!!form.court)} />
       </div>
       <div>
-        <p style={{ fontSize: 11, fontWeight: 700, color: "#8a9096", marginBottom: 4 }}>PLAYERS</p>
+        <p style={{ fontSize: 22, fontWeight: 700, color: "#8a9096", marginBottom: 4 }}>PLAYERS</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {(["p1", "p2", "p3", "p4"] as const).map((k, i) => (
             <input key={k} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={form[k]} onChange={set(k)} style={mfInputStyle(!!form[k])} />
           ))}
         </div>
       </div>
-      <button onClick={onSave} disabled={!valid} style={{ marginTop: 4, padding: "13px", borderRadius: 16, border: "none", cursor: valid ? "pointer" : "default", fontSize: 15, fontWeight: 700, color: "#fff", background: valid ? saveColor : "#c4c7c7" }}>{saveLabel}</button>
+      <button onClick={onSave} disabled={!valid} style={{ marginTop: 4, padding: "13px", borderRadius: 16, border: "none", cursor: valid ? "pointer" : "default", fontSize: 30, fontWeight: 700, color: "#fff", background: valid ? saveColor : "#c4c7c7" }}>{saveLabel}</button>
       {onDelete && (
-        <button onClick={onDelete} style={{ padding: "10px", borderRadius: 16, border: "1.5px solid #fee2e2", background: "#fff5f5", fontSize: 14, fontWeight: 600, color: "#ef4444", cursor: "pointer" }}>Delete match</button>
+        <button onClick={onDelete} style={{ padding: "10px", borderRadius: 16, border: "1.5px solid #fee2e2", background: "#fff5f5", fontSize: 28, fontWeight: 600, color: "#ef4444", cursor: "pointer" }}>Delete match</button>
       )}
     </div>
   );
@@ -158,13 +158,13 @@ export default function MatchesContent() {
                     style={{ transform: "rotate(-90deg)", transformOrigin: "50% 50%", transition: "stroke-dashoffset 0.8s ease" }} />
                 </svg>
                 <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontSize: 28, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{winRate}%</span>
-                  <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#8a9096" }}>wins</span>
+                  <span style={{ fontSize: 56, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{winRate}%</span>
+                  <span style={{ fontSize: 24, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#8a9096" }}>wins</span>
                 </div>
               </div>
               <button
                 onClick={() => setMatchRecordExpanded(v => !v)}
-                style={{ margin: 0, width: "100%", fontSize: 15, fontWeight: 700, color: "#3a4550", background: "#f8f9fa", border: "none", borderRadius: 14, padding: "16px 14px", cursor: "pointer", textAlign: "center" }}
+                style={{ margin: 0, width: "100%", fontSize: 30, fontWeight: 700, color: "#3a4550", background: "#f8f9fa", border: "none", borderRadius: 14, padding: "16px 14px", cursor: "pointer", textAlign: "center" }}
               >
                 You&rsquo;ve won {wins} out of the last {last7.length} games...
               </button>
@@ -172,11 +172,11 @@ export default function MatchesContent() {
                 <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 6 }}>
                   {last7.map((rev, i) => (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: "#8a9096", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      <span style={{ fontSize: 22, fontWeight: 600, color: "#8a9096", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         {new Date(rev.ts).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}
                       </span>
                       <div style={{ height: 22, borderRadius: 8, display: "flex", alignItems: "center", padding: "0 8px", flexShrink: 0, background: rev.result === "win" ? "#dcfce7" : rev.result === "draw" ? "#fef9c3" : "#fee2e2" }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, textTransform: "capitalize", color: rev.result === "win" ? "#16a34a" : rev.result === "draw" ? "#a16207" : "#dc2626" }}>
+                        <span style={{ fontSize: 22, fontWeight: 700, textTransform: "capitalize", color: rev.result === "win" ? "#16a34a" : rev.result === "draw" ? "#a16207" : "#dc2626" }}>
                           {rev.result}
                         </span>
                       </div>
@@ -190,13 +190,13 @@ export default function MatchesContent() {
 
         {matchAddOpen && (
           <div style={{ background: "#f8f9fa", borderRadius: 14, padding: "14px 14px" }}>
-            <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "#1a1c1c" }}>New match</p>
+            <p style={{ margin: 0, fontSize: 30, fontWeight: 800, color: "#1a1c1c" }}>New match</p>
             <MatchFormWidget form={matchAddForm} onChange={setMatchAddForm} onSave={matchSaveAdd} saveLabel="Save match" saveColor="#16a34a" />
           </div>
         )}
         {upcomingMatches.length > 0 ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <p style={{ margin: "4px 4px 0", fontSize: 11, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em" }}>UPCOMING</p>
+            <p style={{ margin: "4px 4px 0", fontSize: 22, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em" }}>UPCOMING</p>
             {upcomingMatches.map((m, idx) => {
               const expanded = matchExpandedIdx === idx;
               const form = matchEditForms[idx] ?? EMPTY_FORM;
@@ -206,18 +206,18 @@ export default function MatchesContent() {
               return (
                 <div key={idx} style={{ background: "#f8f9fa", borderRadius: 14, overflow: "hidden" }}>
                   <button onClick={() => { setMatchExpandedIdx(expanded ? null : idx); setMatchAddOpen(false); }} style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "14px", display: "flex", alignItems: "center", gap: 12, textAlign: "left" }}>
-                    <div style={{ flexShrink: 0, width: 44, textAlign: "center", background: isToday2 ? "#eef2ff" : "#fff", borderRadius: 12, padding: "8px 4px" }}>
-                      <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: isToday2 ? "#2653d4" : "#8a9096", lineHeight: 1 }}>{new Date(m.date + "T12:00").toLocaleDateString("en-GB", { month: "short" }).toUpperCase()}</p>
-                      <p style={{ margin: "2px 0 0", fontSize: 20, fontWeight: 900, color: isToday2 ? "#2653d4" : "#1a1c1c", lineHeight: 1 }}>{new Date(m.date + "T12:00").getDate()}</p>
-                      <p style={{ margin: "2px 0 0", fontSize: 9, fontWeight: 600, color: isToday2 ? "#2653d4" : "#8a9096", lineHeight: 1 }}>{new Date(m.date + "T12:00").toLocaleDateString("en-GB", { weekday: "short" }).toUpperCase()}</p>
+                    <div style={{ flexShrink: 0, width: 84, textAlign: "center", background: isToday2 ? "#eef2ff" : "#fff", borderRadius: 12, padding: "8px 4px" }}>
+                      <p style={{ margin: 0, fontSize: 20, fontWeight: 700, color: isToday2 ? "#2653d4" : "#8a9096", lineHeight: 1 }}>{new Date(m.date + "T12:00").toLocaleDateString("en-GB", { month: "short" }).toUpperCase()}</p>
+                      <p style={{ margin: "2px 0 0", fontSize: 40, fontWeight: 900, color: isToday2 ? "#2653d4" : "#1a1c1c", lineHeight: 1 }}>{new Date(m.date + "T12:00").getDate()}</p>
+                      <p style={{ margin: "2px 0 0", fontSize: 18, fontWeight: 600, color: isToday2 ? "#2653d4" : "#8a9096", lineHeight: 1 }}>{new Date(m.date + "T12:00").toLocaleDateString("en-GB", { weekday: "short" }).toUpperCase()}</p>
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-                        <span style={{ fontSize: 15, fontWeight: 800, color: "#1a1c1c" }}>{m.time || "—"}</span>
-                        {m.club && <span style={{ fontSize: 14, color: "#8a9096", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>· {m.club}{m.court ? ` #${m.court}` : ""}</span>}
+                        <span style={{ fontSize: 30, fontWeight: 800, color: "#1a1c1c" }}>{m.time || "—"}</span>
+                        {m.club && <span style={{ fontSize: 28, color: "#8a9096", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>· {m.club}{m.court ? ` #${m.court}` : ""}</span>}
                       </div>
-                      {players.length > 0 && <p style={{ margin: 0, fontSize: 14, color: "#8a9096", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{players.join(", ")}</p>}
-                      <span style={{ display: "inline-block", marginTop: 5, fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: isToday2 ? "#eef2ff" : "#f4f6f8", color: isToday2 ? "#2653d4" : "#8a9096" }}>{countdown}</span>
+                      {players.length > 0 && <p style={{ margin: 0, fontSize: 28, color: "#8a9096", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{players.join(", ")}</p>}
+                      <span style={{ display: "inline-block", marginTop: 5, fontSize: 22, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: isToday2 ? "#eef2ff" : "#f4f6f8", color: isToday2 ? "#2653d4" : "#8a9096" }}>{countdown}</span>
                     </div>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: expanded ? "rotate(180deg)" : "rotate(0deg)" }}><path d="M6 9l6 6 6-6"/></svg>
                   </button>
@@ -232,22 +232,22 @@ export default function MatchesContent() {
           </div>
         ) : !matchAddOpen && (
           <div style={{ background: "#f8f9fa", borderRadius: 14, padding: "22px 18px", textAlign: "center" }}>
-            <p style={{ margin: "0 0 6px", fontSize: 15, fontWeight: 800, color: "#1a1c1c" }}>No upcoming matches</p>
-            <p style={{ margin: "0 0 14px", fontSize: 14, color: "#8a9096" }}>Schedule your next game</p>
+            <p style={{ margin: "0 0 6px", fontSize: 30, fontWeight: 800, color: "#1a1c1c" }}>No upcoming matches</p>
+            <p style={{ margin: "0 0 14px", fontSize: 28, color: "#8a9096" }}>Schedule your next game</p>
           </div>
         )}
         <button
           onClick={() => { setMatchAddOpen(o => !o); setMatchExpandedIdx(null); if (!matchAddOpen) setMatchAddForm(EMPTY_FORM); }}
-          style={{ alignSelf: "flex-start", background: matchAddOpen ? "#e8edf8" : "#2653d4", border: "none", borderRadius: 20, padding: "7px 16px", fontSize: 14, fontWeight: 700, color: matchAddOpen ? "#2653d4" : "#fff", cursor: "pointer" }}
+          style={{ alignSelf: "flex-start", background: matchAddOpen ? "#e8edf8" : "#2653d4", border: "none", borderRadius: 20, padding: "7px 16px", fontSize: 28, fontWeight: 700, color: matchAddOpen ? "#2653d4" : "#fff", cursor: "pointer" }}
         >
           {matchAddOpen ? "Cancel" : "+ Add"}
         </button>
         {reviews.length > 0 && (
           <div style={{ background: "#f8f9fa", borderRadius: 14, overflow: "hidden" }}>
             <button onClick={() => setMatchHistoryOpen(o => !o)} style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", textAlign: "left" }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em" }}>HISTORY</span>
+              <span style={{ fontSize: 22, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em" }}>HISTORY</span>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: "#b0b8c1" }}>{reviews.length} match{reviews.length !== 1 ? "es" : ""}</span>
+                <span style={{ fontSize: 24, fontWeight: 600, color: "#b0b8c1" }}>{reviews.length} match{reviews.length !== 1 ? "es" : ""}</span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0b8c1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: matchHistoryOpen ? "rotate(180deg)" : "rotate(0deg)" }}><path d="M6 9l6 6 6-6"/></svg>
               </div>
             </button>
@@ -259,25 +259,25 @@ export default function MatchesContent() {
                   const opponentNames = typeof (r as ReviewEntry & { opponentNames?: string }).opponentNames === "string" && (r as ReviewEntry & { opponentNames?: string }).opponentNames ? (r as ReviewEntry & { opponentNames?: string }).opponentNames : null;
                   return (
                     <button key={i} onClick={() => setSelectedReview(r)} style={{ width: "calc(100% - 16px)", alignSelf: "center", background: "#fff", borderRadius: 12, padding: "12px 14px", display: "flex", alignItems: "center", gap: 12, border: "none", cursor: "pointer", textAlign: "left" }}>
-                      <div style={{ flexShrink: 0, width: 40, textAlign: "center", background: "#f8f9fa", borderRadius: 10, padding: "6px 4px" }}>
-                        <p style={{ margin: 0, fontSize: 10, fontWeight: 700, color: "#8a9096" }}>{new Date(r.ts.slice(0, 10) + "T12:00").toLocaleDateString("en-GB", { month: "short" }).toUpperCase()}</p>
-                        <p style={{ margin: "1px 0 0", fontSize: 18, fontWeight: 900, color: "#1a1c1c", lineHeight: 1 }}>{new Date(r.ts.slice(0, 10) + "T12:00").getDate()}</p>
+                      <div style={{ flexShrink: 0, width: 76, textAlign: "center", background: "#f8f9fa", borderRadius: 10, padding: "6px 4px" }}>
+                        <p style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#8a9096" }}>{new Date(r.ts.slice(0, 10) + "T12:00").toLocaleDateString("en-GB", { month: "short" }).toUpperCase()}</p>
+                        <p style={{ margin: "1px 0 0", fontSize: 36, fontWeight: 900, color: "#1a1c1c", lineHeight: 1 }}>{new Date(r.ts.slice(0, 10) + "T12:00").getDate()}</p>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         {opponentNames ? (
-                          <p style={{ margin: "0 0 2px", fontSize: 15, fontWeight: 700, color: "#1a1c1c", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>vs {opponentNames}</p>
+                          <p style={{ margin: "0 0 2px", fontSize: 30, fontWeight: 700, color: "#1a1c1c", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>vs {opponentNames}</p>
                         ) : (
-                          r.feeling && <p style={{ margin: "0 0 2px", fontSize: 14, color: "#8a9096" }}>{r.feeling}</p>
+                          r.feeling && <p style={{ margin: "0 0 2px", fontSize: 28, color: "#8a9096" }}>{r.feeling}</p>
                         )}
                         {(r.wellDone?.length > 0 || r.improved?.length > 0) && (
                           <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 3 }}>
-                            {r.wellDone?.slice(0, 2).map(t => <span key={t} style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 999, background: "#f0fdf4", color: "#16a34a" }}>{t}</span>)}
-                            {r.improved?.slice(0, 2).map(t => <span key={t} style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 999, background: "#fff5f5", color: "#ef4444" }}>{t}</span>)}
+                            {r.wellDone?.slice(0, 2).map(t => <span key={t} style={{ fontSize: 20, fontWeight: 700, padding: "2px 7px", borderRadius: 999, background: "#f0fdf4", color: "#16a34a" }}>{t}</span>)}
+                            {r.improved?.slice(0, 2).map(t => <span key={t} style={{ fontSize: 20, fontWeight: 700, padding: "2px 7px", borderRadius: 999, background: "#fff5f5", color: "#ef4444" }}>{t}</span>)}
                           </div>
                         )}
                       </div>
                       <div style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 6 }}>
-                        {r.result && <span style={{ fontSize: 11, fontWeight: 800, padding: "3px 9px", borderRadius: 999, background: resultBg, color: resultColor }}>{r.result.charAt(0).toUpperCase() + r.result.slice(1)}</span>}
+                        {r.result && <span style={{ fontSize: 22, fontWeight: 800, padding: "3px 9px", borderRadius: 999, background: resultBg, color: resultColor }}>{r.result.charAt(0).toUpperCase() + r.result.slice(1)}</span>}
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                       </div>
                     </button>

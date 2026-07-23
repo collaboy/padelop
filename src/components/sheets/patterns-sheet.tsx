@@ -36,9 +36,9 @@ function TagBubble({ tag, count, maxCount, color, bg }: { tag: string; count: nu
           display: "flex", alignItems: "center", justifyContent: "center",
         }}
       >
-        <span style={{ fontSize: size >= 64 ? 20 : 16, fontWeight: 800, color, lineHeight: 1 }}>{count}</span>
+        <span style={{ fontSize: size >= 64 ? 40 : 32, fontWeight: 800, color, lineHeight: 1 }}>{count}</span>
       </div>
-      <span style={{ fontSize: 13, fontWeight: 600, color: "#4a5050", lineHeight: 1.25, textAlign: "center" }}>{tag}</span>
+      <span style={{ fontSize: 26, fontWeight: 600, color: "#4a5050", lineHeight: 1.25, textAlign: "center" }}>{tag}</span>
     </div>
   );
 }
@@ -47,7 +47,7 @@ export default function PatternsContent() {
   const { wellTags, badTags } = loadTagBreakdown();
 
   if (wellTags.length === 0 && badTags.length === 0) {
-    return <p style={{ fontSize: 15, color: "#9aa0a6", margin: 0 }}>No tags yet — log match reviews to see your patterns.</p>;
+    return <p style={{ fontSize: 30, color: "#9aa0a6", margin: 0 }}>No tags yet — log match reviews to see your patterns.</p>;
   }
 
   const wellMax = wellTags.length > 0 ? wellTags[0][1] : 0;
@@ -57,7 +57,7 @@ export default function PatternsContent() {
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {wellTags.length > 0 && (
         <div>
-          <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#16a34a" }}>What&apos;s Working</p>
+          <p style={{ margin: "0 0 12px", fontSize: 22, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#16a34a" }}>What&apos;s Working</p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
             {wellTags.map(([tag, count]) => (
               <TagBubble key={tag} tag={tag} count={count} maxCount={wellMax} color="#15803d" bg="#dcfce7" />
@@ -67,7 +67,7 @@ export default function PatternsContent() {
       )}
       {badTags.length > 0 && (
         <div>
-          <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#e11d48" }}>Needs Work</p>
+          <p style={{ margin: "0 0 12px", fontSize: 22, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#e11d48" }}>Needs Work</p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
             {badTags.map(([tag, count]) => (
               <TagBubble key={tag} tag={tag} count={count} maxCount={badMax} color="#be123c" bg="#ffe4e6" />
