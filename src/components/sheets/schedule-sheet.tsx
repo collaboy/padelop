@@ -132,9 +132,9 @@ export default function ScheduleSheet({ open, onClose }: Props) {
     <div className="flex flex-col gap-3 mt-3">
       {stepList.map((s, i) => (
         <div key={i} className="flex flex-col items-start p-3">
-          <p className="text-[17px] font-semibold text-[#1a1c1c] leading-snug" style={{ margin: 0 }}>{s.step}</p>
-          <p className="text-[14px] text-[#6b7480] mt-1 leading-snug" style={{ margin: 0 }}>{s.cue}</p>
-          <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold" style={{ background: "#2653d420", color: "#2653d4" }}>{s.reps}</span>
+          <p className="text-[24px] font-semibold text-[#1a1c1c] leading-snug" style={{ margin: 0 }}>{s.step}</p>
+          <p className="text-[20px] text-[#6b7480] mt-1 leading-snug" style={{ margin: 0 }}>{s.cue}</p>
+          <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[15px] font-bold" style={{ background: "#2653d420", color: "#2653d4" }}>{s.reps}</span>
         </div>
       ))}
     </div>
@@ -149,19 +149,19 @@ export default function ScheduleSheet({ open, onClose }: Props) {
           <div style={{ background: "#16a34a14", flexShrink: 0 }}>
             <div style={{ width: 40, height: 4, borderRadius: 999, background: "#16a34a40", margin: "12px auto 10px" }} />
             <div style={{ padding: "0 18px 4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <p style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: "-0.01em", color: "#16a34a" }}>Schedule</p>
-              <span style={{ fontSize: 13, fontWeight: 700, color: "#16a34a", background: "#16a34a20", borderRadius: 999, padding: "3px 12px" }}>{done}/{total}</span>
+              <p style={{ margin: 0, fontSize: 36, fontWeight: 800, letterSpacing: "-0.01em", color: "#16a34a" }}>Schedule</p>
+              <span style={{ fontSize: 18, fontWeight: 700, color: "#16a34a", background: "#16a34a20", borderRadius: 999, padding: "3px 12px" }}>{done}/{total}</span>
             </div>
             <div style={{ padding: "0 18px 16px" }}>
               <div onClick={e => { e.stopPropagation(); setDayTypeExpanded(v => !v); }} style={{ display: "inline-block", cursor: "pointer" }}>
-                <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: meta.color, background: "#fff", borderRadius: 999, padding: "6px 16px" }}>{meta.label}</span>
+                <span style={{ fontSize: 17, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: meta.color, background: "#fff", borderRadius: 999, padding: "6px 16px" }}>{meta.label}</span>
               </div>
               {dayTypeExpanded && (
                 <div style={{ marginTop: 12, background: "#fff", borderRadius: 12, padding: 10, display: "flex", flexDirection: "column", gap: 10 }}>
                   {DAY_TYPE_INFO.map(dt => (
                     <div key={dt.label} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                      <span style={{ fontSize: 14, fontWeight: 700, color: dt.color, background: `${dt.color}18`, borderRadius: 5, padding: "2px 8px", alignSelf: "flex-start" }}>{dt.label}</span>
-                      <span style={{ fontSize: 16, color: "#5a6270", lineHeight: 1.4 }}>{dt.desc}</span>
+                      <span style={{ fontSize: 20, fontWeight: 700, color: dt.color, background: `${dt.color}18`, borderRadius: 5, padding: "2px 8px", alignSelf: "flex-start" }}>{dt.label}</span>
+                      <span style={{ fontSize: 22, color: "#5a6270", lineHeight: 1.4 }}>{dt.desc}</span>
                     </div>
                   ))}
                 </div>
@@ -185,8 +185,8 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                       : <div style={{ width: 13, height: 13, borderRadius: "50%", background: item.color }} />}
                   </button>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ margin: 0, fontSize: "clamp(15px, 4vw, 17px)", fontWeight: 700, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none", lineHeight: 1.25 }}>{item.title}</p>
-                    <p style={{ margin: "2px 0 0", fontSize: 13, color: "#8a9096" }}>{isCurrent ? "Now · " : ""}{item.time}</p>
+                    <p style={{ margin: 0, fontSize: "clamp(21px, 5.6vw, 24px)", fontWeight: 700, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none", lineHeight: 1.25 }}>{item.title}</p>
+                    <p style={{ margin: "2px 0 0", fontSize: 18, color: "#8a9096" }}>{isCurrent ? "Now · " : ""}{item.time}</p>
                   </div>
                   {hasDetail && (
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
@@ -209,16 +209,16 @@ export default function ScheduleSheet({ open, onClose }: Props) {
           >
             <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
             <div className="overflow-y-auto flex-1 px-6 pb-4" style={{ minHeight: 0 }}>
-              <p style={{ margin: "20px 0 4px", fontSize: "clamp(22px, 6.5vw, 30px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.15 }}>{modalItem.title}</p>
+              <p style={{ margin: "20px 0 4px", fontSize: "clamp(31px, 9.1vw, 42px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.15 }}>{modalItem.title}</p>
               {modalIsMeal && modalDetail?.type === "meal" && (
                 <div className="flex flex-col pt-4">
-                  <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#8a9096" }}>{modalDetail.focus}</p>
-                  <p style={{ fontSize: 15, color: "#4a5050", lineHeight: 1.6, margin: "0 0 16px" }}>{modalDetail.goal}</p>
+                  <p className="text-[15px] font-bold uppercase tracking-widest pb-3" style={{ color: "#8a9096" }}>{modalDetail.focus}</p>
+                  <p style={{ fontSize: 21, color: "#4a5050", lineHeight: 1.6, margin: "0 0 16px" }}>{modalDetail.goal}</p>
                   <button
                     onClick={() => setMealSuggestionsOpen(v => !v)}
                     style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, borderRadius: 14, padding: "12px 14px", background: "#fff", boxShadow: "0 0 0 1px #f0f0f0", border: "none", cursor: "pointer", marginBottom: mealSuggestionsOpen ? 8 : 0 }}
                   >
-                    <span style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>Suggestions</span>
+                    <span style={{ fontSize: 21, fontWeight: 700, color: "#1a1c1c" }}>Suggestions</span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: mealSuggestionsOpen ? "rotate(90deg)" : "rotate(0deg)" }}><path d="M9 18l6-6-6-6"/></svg>
                   </button>
                   {mealSuggestionsOpen && modalDetail.options.map((meal, i) => (
@@ -234,12 +234,12 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                           >
                             {checkedMeals.has(i) && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>}
                           </button>
-                          <span style={{ fontSize: 15, fontWeight: 600, color: "#1a1c1c", lineHeight: 1.3, textAlign: "left" }}>{meal.title}</span>
+                          <span style={{ fontSize: 21, fontWeight: 600, color: "#1a1c1c", lineHeight: 1.3, textAlign: "left" }}>{meal.title}</span>
                         </div>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: expandedMealIdx === i ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
                       </button>
                       {expandedMealIdx === i && meal.detail && (
-                        <p style={{ margin: "0 0 8px", fontSize: 13, color: "#6b7480", lineHeight: 1.5 }}>{meal.detail}</p>
+                        <p style={{ margin: "0 0 8px", fontSize: 18, color: "#6b7480", lineHeight: 1.5 }}>{meal.detail}</p>
                       )}
                       {i < modalDetail.options.length - 1 && <div style={{ height: 1, background: "#f0f0f0" }} />}
                     </div>
@@ -248,7 +248,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                     onClick={() => setMealLogOpen(v => !v)}
                     style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, borderRadius: 14, padding: "12px 14px", background: "#fff", boxShadow: "0 0 0 1px #f0f0f0", border: "none", cursor: "pointer", marginTop: 8, marginBottom: mealLogOpen ? 8 : 0 }}
                   >
-                    <span style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>Add manually</span>
+                    <span style={{ fontSize: 21, fontWeight: 700, color: "#1a1c1c" }}>Add manually</span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: mealLogOpen ? "rotate(90deg)" : "rotate(0deg)" }}><path d="M9 18l6-6-6-6"/></svg>
                   </button>
                   {mealLogOpen && (
@@ -257,26 +257,26 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                       onChange={e => setMealText(e.target.value)}
                       placeholder="What did you eat?"
                       rows={3}
-                      style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box", background: "#f8f9fa" }}
+                      style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: "clamp(20px, 5.04vw, 22px)", color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box", background: "#f8f9fa" }}
                     />
                   )}
                 </div>
               )}
               {modalIsInfo && modalDetail?.type === "info" && (
                 <div className="pt-4">
-                  <p style={{ margin: "0 0 12px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{modalDetail.focus}</p>
-                  <p style={{ margin: 0, fontSize: 15, color: "#4a5050", lineHeight: 1.7 }}>{modalDetail.text}</p>
+                  <p style={{ margin: "0 0 12px", fontSize: 15, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{modalDetail.focus}</p>
+                  <p style={{ margin: 0, fontSize: 21, color: "#4a5050", lineHeight: 1.7 }}>{modalDetail.text}</p>
                 </div>
               )}
               {modalIsExercise && modalDetail?.type === "exercise" && (
                 <div className="pt-4">
-                  <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{modalDetail.focus}</p>
+                  <p style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{modalDetail.focus}</p>
                   {renderSteps(modalDetail.steps)}
                 </div>
               )}
               {modalIsDrill && (
                 <div className="pt-4">
-                  <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{drillDef.focus}</p>
+                  <p style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "#1a1c1c" }}>{drillDef.focus}</p>
                   {renderSteps(drillDef.steps)}
                 </div>
               )}
@@ -290,7 +290,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                   <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#00D455", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M5 13l4 4L19 7"/></svg>
                   </div>
-                  <span style={{ fontSize: 15, fontWeight: 600, color: "#00D455" }}>Done</span>
+                  <span style={{ fontSize: 21, fontWeight: 600, color: "#00D455" }}>Done</span>
                 </button>
               ) : (
                 <div
@@ -314,7 +314,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                 >
                   <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: swipeX, background: "#00D455", transition: swipeX === 0 ? "width 0.3s" : "none" }} />
                   <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-                    <span style={{ fontSize: 14, fontWeight: 600, color: "#8a9096", opacity: Math.max(0, 1 - swipeX / 80), transition: "opacity 0.1s" }}>Swipe to complete</span>
+                    <span style={{ fontSize: 20, fontWeight: 600, color: "#8a9096", opacity: Math.max(0, 1 - swipeX / 80), transition: "opacity 0.1s" }}>Swipe to complete</span>
                   </div>
                   <div style={{ position: "absolute", top: 4, left: 4 + swipeX, width: 48, height: 48, borderRadius: "50%", background: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", justifyContent: "center", transition: swipeX === 0 ? "left 0.3s" : "none", pointerEvents: "none" }}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/><path d="M13 6l6 6-6 6"/></svg>
