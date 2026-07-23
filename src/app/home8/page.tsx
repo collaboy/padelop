@@ -1443,7 +1443,7 @@ export default function Home8() {
                     <svg viewBox="0 0 200 200" width="100%" height="100%" style={{ display: "block" }}>
                       <defs><path id={id} d="M 33,79 A 73,73 0 0,1 167,79" /></defs>
                       <circle cx="100" cy="100" r="99" fill={fill} />
-                      <text fontSize="25" fontWeight="800" letterSpacing="0.05em" style={{ fill: titleColor, fontFamily: ff }}>
+                      <text fontSize="19" fontWeight="700" letterSpacing="0.05em" style={{ fill: titleColor, fontFamily: ff }}>
                         <textPath href={`#${id}`} startOffset="50%" textAnchor="middle">{title}</textPath>
                       </text>
                       <text x="100" y="100" textAnchor="middle" dominantBaseline="middle" fontSize={mainFontSize} fontWeight="800" style={{ fill: mainColor, fontFamily: ff }}>{main}</text>
@@ -1459,9 +1459,32 @@ export default function Home8() {
                     onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
                     onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
                   >
-                    <div style={{ width: "100%", height: "calc(100% - 22px)", marginTop: 22, display: "flex", justifyContent: "center" }}>
-                      <div style={{ width: "calc((100vw - 40px) * 0.65)", height: "calc((100vw - 40px) * 0.65)", flexShrink: 0, minWidth: 0 }}>{circle("c2schedule", "#f0f1f4", "SCHEDULE", "#1a1c1c", `${completed.size}/${schedule.length}`, "#1a1c1c", "today", "#1a1c1c", 0.65, () => setOpenPanel("schedule"))}</div>
-                    </div>
+                    {(() => {
+                      const title =
+                        dayType === "match"     ? "Game on." :
+                        dayType === "pre-match" ? "Tomorrow is match day." :
+                        dayType === "recovery"  ? "Well played." :
+                        "Keep going.";
+                      const sub =
+                        dayType === "match"
+                          ? "Trust your game and enjoy every point."
+                          : dayType === "pre-match"
+                          ? "Rest up, carb load, and get to bed early. The prep is done."
+                          : dayType === "recovery"
+                          ? "Rest is part of training. Let your body recover and come back stronger."
+                          : drillTag
+                          ? `Today focus on ${drillTag}. Small improvements compound into big gains.`
+                          : "Every session counts. Show up, put in the work, and trust the process.";
+                      return (
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, padding: "0 36px", width: "100%" }}>
+                          <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4", textAlign: "center" }}>
+                            {dayLabel}
+                          </p>
+                          <p style={{ margin: 0, fontSize: "clamp(30px, 7.5vw, 40px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>{title}</p>
+                          <p style={{ margin: 0, fontSize: "clamp(14px, 3.6vw, 17px)", color: "#6b7480", lineHeight: 1.6, textAlign: "center" }}>{sub}</p>
+                        </div>
+                      );
+                    })()}
                   </div>
                 );
               })()}
@@ -2569,6 +2592,15 @@ export default function Home8() {
             transition: "opacity 0.3s",
           }}
         >
+          <button
+            onClick={() => setOpenPanel("schedule")}
+            style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="4" y="4" width="16" height="16" rx="2"/>
+              <polyline points="8,12 10.5,14.5 16,9"/>
+            </svg>
+          </button>
           <button
             onClick={() => setOpenPanel("stats")}
             style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
