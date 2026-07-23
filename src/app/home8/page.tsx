@@ -1010,7 +1010,7 @@ export default function Home8() {
           ref={outerRef}
           style={{
             display: "flex", width: "300%", marginLeft: "-100%",
-            height: "100dvh", touchAction: doIdx >= 1 ? "pan-y" : "manipulation",
+            height: "100dvh", touchAction: "manipulation",
             transform: cardSnap === 'right' ? `translateX(calc(33.333% - 50px + ${liveX}px))` : cardSnap === 'left' ? `translateX(calc(-33.333% + 50px + ${liveX}px))` : `translateX(${liveX}px)`,
             transition: liveX !== 0 ? "none" : "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
           }}
@@ -1024,19 +1024,23 @@ export default function Home8() {
           onTouchMove={e => {
             const y = e.touches[0].clientY;
             lastTouchYRef.current = y;
-            if (doIdx >= 1) return;
             const dx = e.touches[0].clientX - touchStartXRef.current;
             const dy = e.touches[0].clientY - touchStartYRef.current;
             if (!swipeDirRef.current && (Math.abs(dx) > 8 || Math.abs(dy) > 8))
               swipeDirRef.current = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
+            if (doIdx >= 1) return;
             if (swipeDirRef.current === 'h' && doIdx === 0) setLiveX(dx);
             if (swipeDirRef.current === 'v' && cardSnap === 'none' && doIdx < 1 && !settlingRef.current) setLiveY(dy);
           }}
           onTouchEnd={e => {
             const endY = e.changedTouches[0].clientY;
             const dx = e.changedTouches[0].clientX - touchStartXRef.current;
-            if (doIdx >= 1) { swipeDirRef.current = null; return; }
             const dy = endY - touchStartYRef.current;
+            if (doIdx >= 1) {
+              if (swipeDirRef.current === 'v' && dy > 20) goPrev();
+              swipeDirRef.current = null;
+              return;
+            }
             if (swipeDirRef.current === 'h' && doIdx === 0) {
               setLiveX(0);
               if (cardSnap === 'none') {
@@ -1456,8 +1460,6 @@ export default function Home8() {
                   <div
                     key="card2"
                     style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 0, gap: 2, zIndex: doIdx === 1 ? 2 : 1, height: "calc(100vw - 40px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", opacity: doIdx === 1 ? 1 : 0, transition: "opacity 0.3s" }}
-                    onTouchStart={e => { handleDragStartY.current = e.touches[0].clientY; }}
-                    onTouchEnd={e => { if (e.changedTouches[0].clientY - handleDragStartY.current > 20) goPrev(); }}
                   >
                     {(() => {
                       const title =
@@ -1477,11 +1479,11 @@ export default function Home8() {
                           : "Every session counts. Show up, put in the work, and trust the process.";
                       return (
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, padding: "0 36px", width: "100%" }}>
-                          <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4", textAlign: "center" }}>
+                          <p style={{ margin: 0, fontSize: 14, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4", textAlign: "center" }}>
                             {dayLabel}
                           </p>
-                          <p style={{ margin: 0, fontSize: "clamp(30px, 7.5vw, 40px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>{title}</p>
-                          <p style={{ margin: 0, fontSize: "clamp(14px, 3.6vw, 17px)", color: "#6b7480", lineHeight: 1.6, textAlign: "center" }}>{sub}</p>
+                          <p style={{ margin: 0, fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>{title}</p>
+                          <p style={{ margin: 0, fontSize: "clamp(17px, 4.4vw, 20px)", color: "#6b7480", lineHeight: 1.6, textAlign: "center" }}>{sub}</p>
                         </div>
                       );
                     })()}
@@ -2620,7 +2622,11 @@ export default function Home8() {
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="3"/>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              <circle cx="12" cy="12" r="7.5"/>
+              <line x1="12" y1="2" x2="12" y2="5"/>
+              <line x1="12" y1="19" x2="12" y2="22"/>
+              <line x1="2" y1="12" x2="5" y2="12"/>
+              <line x1="19" y1="12" x2="22" y2="12"/>
             </svg>
           </button>
         </div>
