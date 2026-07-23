@@ -11,11 +11,6 @@ import PushPrompt from "@/components/push-prompt";
 
 const ScheduleSheet = dynamic(() => import("@/components/sheets/schedule-sheet"));
 const NextMatchSheet = dynamic(() => import("@/components/sheets/next-match-sheet"));
-const FormScoreSheet = dynamic(() => import("@/components/sheets/form-score-sheet"));
-const StreakSheet = dynamic(() => import("@/components/sheets/streak-sheet"));
-const MatchesSheet = dynamic(() => import("@/components/sheets/matches-sheet"));
-const InsightsSheet = dynamic(() => import("@/components/sheets/insights-sheet"));
-const PatternsSheet = dynamic(() => import("@/components/sheets/patterns-sheet"));
 const StatsSheet = dynamic(() => import("@/components/sheets/stats-sheet"));
 import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, computeMatchReadiness, loadMorningLog, improveTips, type MatchReadinessResult, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
 import { pad, addMins, toMins, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag, getDayType, ITEM_COLORS, type ScheduleItem, type DayType, getScheduleData, SCHEDULE_DETAILS } from "@/lib/schedule-data";
@@ -319,7 +314,7 @@ export default function Home8() {
     wellbeing: { status: "not_logged", reason: "" },
   });
   const [schedDetailOpen, setSchedDetailOpen] = useState<{ title: string; subtitle?: string; color: string; detail: string; isDrill?: boolean } | null>(null);
-  const [openPanel, setOpenPanel] = useState<null | "schedule" | "nextMatch" | "form" | "streak" | "matches" | "insights" | "patterns" | "stats">(null);
+  const [openPanel, setOpenPanel] = useState<null | "schedule" | "nextMatch" | "stats">(null);
   const [postMatchOpen, setPostMatchOpen] = useState(false);
   const [postMatchDate, setPostMatchDate] = useState<string | null>(null);
   const [checkinNudgeOpen, setCheckinNudgeOpen] = useState(false);
@@ -1707,7 +1702,7 @@ export default function Home8() {
               <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: modalClosing ? "sheet-fade-out 0.28s cubic-bezier(0.4,0,1,1) both" : undefined }} />
               <div
                 className="relative w-full bg-white flex flex-col"
-                style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: modalClosing ? "sheet-down 0.28s cubic-bezier(0.4,0,1,1) both" : "sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }}
+                style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "55dvh", animation: modalClosing ? "sheet-down 0.28s cubic-bezier(0.4,0,1,1) both" : "sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }}
                 onClick={e => e.stopPropagation()}
               >
                 {(isMeal || isExercise || isDrill || isInfo) && (
@@ -1968,7 +1963,7 @@ export default function Home8() {
               <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
               <div
                 className="relative w-full bg-white rounded-t-[28px] flex flex-col overflow-hidden shadow-2xl"
-                style={{ animation: "sheetUp 0.3s cubic-bezier(0.22,1,0.36,1)", maxHeight: "85dvh", paddingBottom: "env(safe-area-inset-bottom)" }}
+                style={{ animation: "sheetUp 0.3s cubic-bezier(0.22,1,0.36,1)", maxHeight: "85dvh", minHeight: "55dvh", paddingBottom: "env(safe-area-inset-bottom)" }}
                 onClick={e => e.stopPropagation()}
               >
                 <div style={{ display: "flex", justifyContent: "center", paddingTop: 12, paddingBottom: 4, flexShrink: 0 }}>
@@ -2675,23 +2670,13 @@ export default function Home8() {
             }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="3"/>
-              <circle cx="12" cy="12" r="7.5"/>
-              <line x1="12" y1="2" x2="12" y2="5"/>
-              <line x1="12" y1="19" x2="12" y2="22"/>
-              <line x1="2" y1="12" x2="5" y2="12"/>
-              <line x1="19" y1="12" x2="22" y2="12"/>
+              <path d="M 9.76,4.01 L 9.71,1.75 L 14.29,1.75 L 14.24,4.01 L 16.07,4.77 L 17.63,3.13 L 20.87,6.37 L 19.23,7.93 L 19.99,9.76 L 22.25,9.71 L 22.25,14.29 L 19.99,14.24 L 19.23,16.07 L 20.87,17.63 L 17.63,20.87 L 16.07,19.23 L 14.24,19.99 L 14.29,22.25 L 9.71,22.25 L 9.76,19.99 L 7.93,19.23 L 6.37,20.87 L 3.13,17.63 L 4.77,16.07 L 4.01,14.24 L 1.75,14.29 L 1.75,9.71 L 4.01,9.76 L 4.77,7.93 L 3.13,6.37 L 6.37,3.13 L 7.93,4.77 Z"/>
             </svg>
           </button>
         </div>
 
         <ScheduleSheet open={openPanel === "schedule"} onClose={() => setOpenPanel(null)} />
         <NextMatchSheet open={openPanel === "nextMatch"} onClose={() => setOpenPanel(null)} onRateMatch={() => { setLogTab("matchreview"); setLogSheetOpen(true); }} />
-        <FormScoreSheet open={openPanel === "form"} onClose={() => setOpenPanel(null)} />
-        <StreakSheet open={openPanel === "streak"} onClose={() => setOpenPanel(null)} />
-        <MatchesSheet open={openPanel === "matches"} onClose={() => setOpenPanel(null)} />
-        <InsightsSheet open={openPanel === "insights"} onClose={() => setOpenPanel(null)} />
-        <PatternsSheet open={openPanel === "patterns"} onClose={() => setOpenPanel(null)} />
         <StatsSheet
           open={openPanel === "stats"}
           onClose={() => setOpenPanel(null)}
@@ -2701,11 +2686,6 @@ export default function Home8() {
           readiness={readiness}
           insightsCount={reviews.flatMap(r => r.wellDone ?? []).length + reviews.flatMap(r => r.improved ?? []).length}
           patternsCount={reviews.flatMap(r => r.wellDone ?? []).length + reviews.flatMap(r => r.improved ?? []).length}
-          onOpenForm={() => setOpenPanel("form")}
-          onOpenStreak={() => setOpenPanel("streak")}
-          onOpenMatches={() => setOpenPanel("matches")}
-          onOpenInsights={() => setOpenPanel("insights")}
-          onOpenPatterns={() => setOpenPanel("patterns")}
         />
       </main>
     </>

@@ -1,32 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { computeFormScore, type FormScore } from "@/lib/scoring";
+import React from "react";
+import { computeFormScore } from "@/lib/scoring";
 
-interface Props {
-  open: boolean;
-  onClose: () => void;
-}
-
-export default function FormScoreSheet({ open, onClose }: Props) {
-  const [formScore, setFormScore] = useState<FormScore | null>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    function load() { setFormScore(computeFormScore()); }
-    load();
-    window.addEventListener("storage", load);
-    window.addEventListener("padelop:sync-done", load);
-    return () => {
-      window.removeEventListener("storage", load);
-      window.removeEventListener("padelop:sync-done", load);
-    };
-  }, [open]);
-
-  if (!open || !formScore) return null;
-
-  const { score, components } = formScore;
-  const color = score >= 70 ? "#16a34a" : score >= 50 ? "#d97706" : "#ef4444";
+export default function FormScoreContent() {
+  const { components } = computeFormScore();
   const todayYMD2 = new Date().toISOString().slice(0, 10);
 
   const snapHistory: { date: string; recovery: number; wellbeing: number }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:score-history") || "[]"); } catch { return []; } })();
@@ -101,37 +79,22 @@ export default function FormScoreSheet({ open, onClose }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-      <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
-        <style>{`@keyframes mg-sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
-        <div style={{ background: `${color}14`, flexShrink: 0 }}>
-          <div style={{ width: 40, height: 4, borderRadius: 999, background: `${color}40`, margin: "12px auto 10px" }} />
-          <div style={{ padding: "0 18px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <p style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: "-0.01em", color }}>Form</p>
-            <span style={{ fontSize: 13, fontWeight: 700, color, background: `${color}20`, borderRadius: 999, padding: "3px 12px" }}>{score} / 100</span>
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      {rows.map(r => (
+        <div key={r.label} style={{ background: "#f8f9fa", borderRadius: 14, padding: "12px 14px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>{r.label}</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "#c8cdd4" }}>{r.weight}</span>
           </div>
+          <p style={{ margin: "3px 0 0", fontSize: 13, color: r.value === null ? "#c0c7d0" : "#6b7480", lineHeight: 1.4 }}>
+            {r.value === null ? (r.action ?? r.context) : r.context}
+          </p>
+          {r.value !== null && scoreBar(r.value)}
+          {r.value !== null && r.action && (
+            <p style={{ margin: "6px 0 0", fontSize: 12, fontWeight: 600, color: "#d97706" }}>{r.action}</p>
+          )}
         </div>
-        <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 18px 40px" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {rows.map(r => (
-              <div key={r.label} style={{ background: "#f8f9fa", borderRadius: 14, padding: "12px 14px" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>{r.label}</span>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: "#c8cdd4" }}>{r.weight}</span>
-                </div>
-                <p style={{ margin: "3px 0 0", fontSize: 13, color: r.value === null ? "#c0c7d0" : "#6b7480", lineHeight: 1.4 }}>
-                  {r.value === null ? (r.action ?? r.context) : r.context}
-                </p>
-                {r.value !== null && scoreBar(r.value)}
-                {r.value !== null && r.action && (
-                  <p style={{ margin: "6px 0 0", fontSize: 12, fontWeight: 600, color: "#d97706" }}>{r.action}</p>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      ))}
     </div>
   );
 }

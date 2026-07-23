@@ -1,69 +1,44 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { loadScoreHistory, type ReviewEntry, type ScoreSnapshot } from "@/lib/scoring";
 
 type TrainingEntry = { ts: string; sessionType: string[]; drillFocus: string[]; duration: string; intensity: string };
 
-interface Props {
-  open: boolean;
-  onClose: () => void;
-}
-
-export default function InsightsSheet({ open, onClose }: Props) {
-  const [reviews, setReviews] = useState<ReviewEntry[]>([]);
-  const [streak, setStreak] = useState(0);
-  const [partnerCount, setPartnerCount] = useState(0);
-  const [tournamentCount, setTournamentCount] = useState(0);
-  const [trainingSessions, setTrainingSessions] = useState<TrainingEntry[]>([]);
-  const [history, setHistory] = useState<ScoreSnapshot[]>([]);
+export default function InsightsContent() {
   const [featuredIdx, setFeaturedIdx] = useState(() => Math.floor(Math.random() * 8));
 
-  useEffect(() => {
-    if (!open) return;
-    function load() {
-      try {
-        const raw = localStorage.getItem("padelop:match-reviews");
-        setReviews(raw ? JSON.parse(raw) as ReviewEntry[] : []);
-      } catch { setReviews([]); }
+  const reviews: ReviewEntry[] = (() => { try { const raw = localStorage.getItem("padelop:match-reviews"); return raw ? JSON.parse(raw) as ReviewEntry[] : []; } catch { return []; } })();
 
-      let habitDates = new Set<string>();
-      try {
-        const habits: { date: string }[] = JSON.parse(localStorage.getItem("padelop:habits") || "[]");
-        habitDates = new Set(habits.map(h => h.date));
-      } catch {}
-      const cur = new Date();
-      if (!habitDates.has(cur.toISOString().slice(0, 10))) cur.setDate(cur.getDate() - 1);
-      let streakCount = 0;
-      while (habitDates.has(cur.toISOString().slice(0, 10))) { streakCount++; cur.setDate(cur.getDate() - 1); }
-      setStreak(streakCount);
+  let habitDates = new Set<string>();
+  try {
+    const habits: { date: string }[] = JSON.parse(localStorage.getItem("padelop:habits") || "[]");
+    habitDates = new Set(habits.map(h => h.date));
+  } catch {}
+  const cur = new Date();
+  if (!habitDates.has(cur.toISOString().slice(0, 10))) cur.setDate(cur.getDate() - 1);
+  let streak = 0;
+  while (habitDates.has(cur.toISOString().slice(0, 10))) { streak++; cur.setDate(cur.getDate() - 1); }
 
-      try {
-        const allMatches: { player_2?: string }[] = JSON.parse(localStorage.getItem("padelop:upcoming-matches") || "[]");
-        const partners = new Set(allMatches.map(m => m.player_2).filter(Boolean));
-        setPartnerCount(partners.size);
-      } catch {}
-      try {
-        const t = JSON.parse(localStorage.getItem("padelop:tournaments") || "null");
-        setTournamentCount(typeof t?.count === "number" ? t.count : 0);
-      } catch {}
-      try {
-        const raw = localStorage.getItem("padelop:training-logs");
-        setTrainingSessions(raw ? (JSON.parse(raw) as TrainingEntry[]).sort((a, b) => b.ts.localeCompare(a.ts)) : []);
-      } catch { setTrainingSessions([]); }
+  let partnerCount = 0;
+  try {
+    const allMatches: { player_2?: string }[] = JSON.parse(localStorage.getItem("padelop:upcoming-matches") || "[]");
+    partnerCount = new Set(allMatches.map(m => m.player_2).filter(Boolean)).size;
+  } catch {}
 
-      setHistory(loadScoreHistory());
-    }
-    load();
-    window.addEventListener("storage", load);
-    window.addEventListener("padelop:sync-done", load);
-    return () => {
-      window.removeEventListener("storage", load);
-      window.removeEventListener("padelop:sync-done", load);
-    };
-  }, [open]);
+  let tournamentCount = 0;
+  try {
+    const t = JSON.parse(localStorage.getItem("padelop:tournaments") || "null");
+    tournamentCount = typeof t?.count === "number" ? t.count : 0;
+  } catch {}
 
-  if (!open) return null;
+  let trainingSessions: TrainingEntry[] = [];
+  try {
+    const raw = localStorage.getItem("padelop:training-logs");
+    trainingSessions = raw ? (JSON.parse(raw) as TrainingEntry[]).sort((a, b) => b.ts.localeCompare(a.ts)) : [];
+  } catch {}
+
+  const history: ScoreSnapshot[] = loadScoreHistory();
 
   const wins = reviews.filter(r => r.result === "win").length;
   const losses = reviews.filter(r => r.result === "loss").length;
@@ -144,46 +119,27 @@ export default function InsightsSheet({ open, onClose }: Props) {
       : null,
   ].filter((x): x is { label: string; body: string } => x !== null);
 
-  const sheetContent = pool.length === 0
-    ? <p style={{ fontSize: 15, color: "#9aa0a6", margin: 0 }}>No insights yet — log some matches and check-ins to unlock.</p>
-    : (() => {
-        const idx = featuredIdx % pool.length;
-        const insight = pool[idx];
-        return (
-          <button
-            onClick={() => setFeaturedIdx(i => (i + 1) % pool.length)}
-            style={{ width: "100%", background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" }}
-          >
-            <p style={{ margin: "0 0 6px", fontSize: 15, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-blue)" }}>{insight.label}</p>
-            <p style={{ margin: "0 0 16px", fontSize: 16, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{insight.body}</p>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div style={{ display: "flex", gap: 4 }}>
-                {pool.map((_, i) => (
-                  <div key={i} style={{ width: i === idx ? 14 : 5, height: 5, borderRadius: 3, background: i === idx ? "var(--c-blue)" : "#e2e5ea", transition: "width 0.2s" }} />
-                ))}
-              </div>
-              <span style={{ fontSize: 15, color: "var(--c-hint)", fontWeight: 500 }}>Tap for next</span>
-            </div>
-          </button>
-        );
-      })();
+  if (pool.length === 0) {
+    return <p style={{ fontSize: 15, color: "#9aa0a6", margin: 0 }}>No insights yet — log some matches and check-ins to unlock.</p>;
+  }
 
+  const idx = featuredIdx % pool.length;
+  const insight = pool[idx];
   return (
-    <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-      <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => e.stopPropagation()}>
-        <style>{`@keyframes mg-sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
-        <div style={{ background: "#eef2ff", flexShrink: 0 }}>
-          <div style={{ width: 40, height: 4, borderRadius: 999, background: "#c7d2fe", margin: "12px auto 10px" }} />
-          <div style={{ padding: "0 18px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <p style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: "-0.01em", color: "var(--c-blue)" }}>Insights</p>
-            <span style={{ fontSize: 13, fontWeight: 700, color: "var(--c-blue)", background: "#eef2ff", borderRadius: 999, padding: "3px 12px" }}>{pool.length} available</span>
-          </div>
+    <button
+      onClick={() => setFeaturedIdx(i => (i + 1) % pool.length)}
+      style={{ width: "100%", background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" }}
+    >
+      <p style={{ margin: "0 0 6px", fontSize: 14, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-blue)" }}>{insight.label}</p>
+      <p style={{ margin: "0 0 14px", fontSize: 15, fontWeight: 500, color: "#2c3235", lineHeight: 1.65 }}>{insight.body}</p>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", gap: 4 }}>
+          {pool.map((_, i) => (
+            <div key={i} style={{ width: i === idx ? 14 : 5, height: 5, borderRadius: 3, background: i === idx ? "var(--c-blue)" : "#e2e5ea", transition: "width 0.2s" }} />
+          ))}
         </div>
-        <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px" }}>
-          {sheetContent}
-        </div>
+        <span style={{ fontSize: 13, color: "var(--c-hint)", fontWeight: 500 }}>Tap for next</span>
       </div>
-    </div>
+    </button>
   );
 }

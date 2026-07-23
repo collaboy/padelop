@@ -45,6 +45,8 @@ export default function ScheduleSheet({ open, onClose }: Props) {
   const [expandedMealIdx, setExpandedMealIdx] = useState<number | null>(null);
   const [checkedMeals, setCheckedMeals] = useState<Set<number>>(new Set());
   const [mealSuggestionsOpen, setMealSuggestionsOpen] = useState(false);
+  const [mealLogOpen, setMealLogOpen] = useState(false);
+  const [mealText, setMealText] = useState("");
   const [swipeX, setSwipeX] = useState(0);
   const swipeTrackRef = useRef<HTMLDivElement & { _startX?: number }>(null);
 
@@ -143,7 +145,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
       <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={onClose}>
         <style>{`@keyframes mg-sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-        <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => { e.stopPropagation(); setDayTypeExpanded(false); }}>
+        <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "55dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => { e.stopPropagation(); setDayTypeExpanded(false); }}>
           <div style={{ background: "#16a34a14", flexShrink: 0 }}>
             <div style={{ width: 40, height: 4, borderRadius: 999, background: "#16a34a40", margin: "12px auto 10px" }} />
             <div style={{ padding: "0 18px 4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -166,7 +168,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
               )}
             </div>
           </div>
-          <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px" }}>
+          <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px", display: "flex", flexDirection: "column", gap: 8 }}>
             {schedule.map((item, i) => {
               const isDone = (schedDone[todayKey] ?? []).includes(item.title);
               const isCurrent = toMins(item.time) <= curMins && (i === schedule.length - 1 || toMins(schedule[i + 1].time) > curMins);
@@ -174,19 +176,21 @@ export default function ScheduleSheet({ open, onClose }: Props) {
               const hasDetail = !!(SCHEDULE_DETAILS[item.title] || item.isDrill);
               return (
                 <div key={item.title}
-                  onClick={() => { if (hasDetail) { setModalIdx(i); setExpandedMealIdx(null); setCheckedMeals(new Set()); } }}
-                  style={{ position: "relative", display: "flex", alignItems: "center", gap: 10, padding: "10px 0", cursor: hasDetail ? "pointer" : "default", borderBottom: i < schedule.length - 1 ? "1px solid #f4f4f6" : "none", opacity: isPast ? 0.45 : 1 }}>
-                  {isCurrent && (
-                    <div style={{ position: "absolute", left: -16, top: 0, bottom: 0, width: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#16a34a" }} />
-                    </div>
-                  )}
+                  onClick={() => { if (hasDetail) { setModalIdx(i); setExpandedMealIdx(null); setCheckedMeals(new Set()); setMealSuggestionsOpen(false); setMealLogOpen(false); setMealText(""); } }}
+                  style={{ display: "flex", alignItems: "center", gap: 12, borderRadius: 14, padding: isCurrent ? "24px 14px" : "12px 14px", background: "#fff", boxShadow: isCurrent ? `0 0 0 1.5px ${item.color}` : "0 0 0 1px #f0f0f0", cursor: hasDetail ? "pointer" : "default", opacity: isPast ? 0.45 : 1 }}>
                   <button onClick={e => { e.stopPropagation(); toggleDone(item.title); }}
-                    style={{ width: 22, height: 22, borderRadius: 6, border: `2px solid ${isDone ? item.color : "#d0d4da"}`, background: isDone ? item.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s", cursor: "pointer" }}>
-                    {isDone && <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                    style={{ width: 40, height: 40, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: `${item.color}1e`, border: "none", cursor: "pointer" }}>
+                    {isDone
+                      ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={item.color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                      : <div style={{ width: 13, height: 13, borderRadius: "50%", background: item.color }} />}
                   </button>
-                  <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none", flex: 1 }}>{item.title}</p>
-                  <span style={{ fontSize: 15, color: "#b0b8c1", fontWeight: 500, flexShrink: 0 }}>{item.time}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ margin: 0, fontSize: "clamp(15px, 4vw, 17px)", fontWeight: 700, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none", lineHeight: 1.25 }}>{item.title}</p>
+                    <p style={{ margin: "2px 0 0", fontSize: 13, color: "#8a9096" }}>{isCurrent ? "Now · " : ""}{item.time}</p>
+                  </div>
+                  {hasDetail && (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
+                  )}
                 </div>
               );
             })}
@@ -200,7 +204,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: modalClosing ? "mgsheet-fade-out 0.28s cubic-bezier(0.4,0,1,1) both" : undefined }} />
           <div
             className="relative w-full bg-white flex flex-col"
-            style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "50dvh", animation: modalClosing ? "mgsheet-down 0.28s cubic-bezier(0.4,0,1,1) both" : "mgsheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }}
+            style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "55dvh", animation: modalClosing ? "mgsheet-down 0.28s cubic-bezier(0.4,0,1,1) both" : "mgsheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }}
             onClick={e => e.stopPropagation()}
           >
             <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
@@ -240,6 +244,22 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                       {i < modalDetail.options.length - 1 && <div style={{ height: 1, background: "#f0f0f0" }} />}
                     </div>
                   ))}
+                  <button
+                    onClick={() => setMealLogOpen(v => !v)}
+                    style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, borderRadius: 14, padding: "12px 14px", background: "#fff", boxShadow: "0 0 0 1px #f0f0f0", border: "none", cursor: "pointer", marginTop: 8, marginBottom: mealLogOpen ? 8 : 0 }}
+                  >
+                    <span style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>Add manually</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: mealLogOpen ? "rotate(90deg)" : "rotate(0deg)" }}><path d="M9 18l6-6-6-6"/></svg>
+                  </button>
+                  {mealLogOpen && (
+                    <textarea
+                      value={mealText}
+                      onChange={e => setMealText(e.target.value)}
+                      placeholder="What did you eat?"
+                      rows={3}
+                      style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box", background: "#f8f9fa" }}
+                    />
+                  )}
                 </div>
               )}
               {modalIsInfo && modalDetail?.type === "info" && (
