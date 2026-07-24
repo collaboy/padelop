@@ -4,7 +4,7 @@ import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from "re
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { startNavLoad, startPlusOneFast } from "@/lib/nav-events";
+import { startNavLoad } from "@/lib/nav-events";
 import LogSheet from "@/components/log-sheet";
 import ReadinessSheet from "@/components/readiness-sheet";
 import PushPrompt from "@/components/push-prompt";
@@ -287,6 +287,7 @@ export default function Home8() {
   const lastDateRef = useRef(new Date().toISOString().slice(0, 10));
   const [celebrateTitle, setCelebrateTitle] = useState<string | null>(null);
   const [niceWorkTitle, setNiceWorkTitle] = useState<string | null>(null);
+  const [plusOneTitle, setPlusOneTitle] = useState<string | null>(null);
   const [doIdx, setDoIdx] = useState(0); // -1 = top holder, 0 = do-this-now, 1 = see schedule
   const [completed, setCompleted] = useState<Set<string>>(new Set());
   const [readiness, setReadiness] = useState(65);
@@ -359,9 +360,9 @@ export default function Home8() {
       if (recent) {
         const [title, ts] = recent;
         const elapsed = Date.now() - ts;
-        if (elapsed < 2000) {
+        if (elapsed < 1500) {
           setCelebrateTitle(title);
-          setTimeout(() => setCelebrateTitle(t => t === title ? null : t), 2000 - elapsed);
+          setTimeout(() => setCelebrateTitle(t => t === title ? null : t), 1500 - elapsed);
         }
         setNiceWorkTitle(title);
         setTimeout(() => setNiceWorkTitle(t => t === title ? null : t), 5000 - elapsed);
@@ -644,9 +645,9 @@ export default function Home8() {
           if (recent) {
             const [title, ts] = recent;
             const elapsed = Date.now() - ts;
-            if (elapsed < 2000) {
+            if (elapsed < 1500) {
               setCelebrateTitle(title);
-              setTimeout(() => setCelebrateTitle(t => t === title ? null : t), 2000 - elapsed);
+              setTimeout(() => setCelebrateTitle(t => t === title ? null : t), 1500 - elapsed);
             }
             setNiceWorkTitle(title);
             setTimeout(() => setNiceWorkTitle(t => t === title ? null : t), 5000 - elapsed);
@@ -1070,9 +1071,14 @@ export default function Home8() {
     const title = modalItem.title;
     setCelebrateTitle(title);
     setNiceWorkTitle(title);
-    startPlusOneFast();
-    setTimeout(() => setCelebrateTitle(t => t === title ? null : t), 2000);
+    setTimeout(() => setCelebrateTitle(t => t === title ? null : t), 1500);
     setTimeout(() => setNiceWorkTitle(t => t === title ? null : t), 5000);
+    // Wait until the green checkmark flash has fully faded to the gray "next" card, then
+    // float the +1 right over the "Nice work!" title instead of the global corner toast.
+    setTimeout(() => {
+      setPlusOneTitle(title);
+      setTimeout(() => setPlusOneTitle(t => t === title ? null : t), 1600);
+    }, 1500);
   }
 
   return (
@@ -1306,7 +1312,8 @@ export default function Home8() {
                 const isDone = completed.has(s.title);
                 const isReady = curMins >= toMins(s.time);
                 const nextSlide = schedule[currentIdx + 1];
-                const secsUntilNext = nextSlide ? toMins(nextSlide.time) * 60 - (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) : 0;
+                // TEMP: fake a 3h15m countdown for testing — was: nextSlide ? toMins(nextSlide.time) * 60 - (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) : 0
+                const secsUntilNext = 3 * 3600 + 15 * 60;
                 const fmtTime = (s: number) => { if (s <= 0) return "a moment"; const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60); if (h > 0) return `${h}h ${String(m).padStart(2,"0")}m`; return m > 0 ? `${m}m` : "a moment"; };
                 const cardStyle: React.CSSProperties = { position: "relative", width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", zIndex: 3, boxShadow: "none" };
                 if (!clientReady) return (
@@ -1345,8 +1352,11 @@ export default function Home8() {
                         <p style={{ position: "relative", color: "#000", fontWeight: 800, fontSize: !nextTitle.includes(" & ") && nextTitle.length > 14 ? "clamp(18px, 5.8vw, 26px)" : "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, display: "inline-block", textAlign: "center", margin: 0 }}>
                           <span style={{ position: "absolute", left: 0, right: 0, bottom: "100%", height: 16, marginBottom: 4, fontSize: 13, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1 }}>
                             <span style={{ position: "absolute", inset: 0, color: "#16a34a", opacity: showNiceWork ? 1 : 0, transition: "opacity 0.4s ease" }}>Nice work!</span>
-                            <span style={{ position: "absolute", inset: 0, color: "#000", opacity: showNiceWork ? 0 : 1, transition: "opacity 0.4s ease" }}>Next</span>
+                            <span style={{ position: "absolute", inset: 0, color: "#000", opacity: showNiceWork ? 0 : 1, transition: "opacity 0.4s ease" }}>Up next</span>
                           </span>
+                          {plusOneTitle === s.title && (
+                            <span style={{ position: "absolute", left: 0, right: 0, bottom: "calc(100% + 24px)", fontSize: 26, fontWeight: 800, color: "#16a34a", zIndex: 3, opacity: 0, animation: "p1-float-local 1.6s ease-out forwards" }}>+1</span>
+                          )}
                           {nextTitle.includes(" & ")
                             ? <>{nextTitle.split(" & ")[0]}<br />{"& " + nextTitle.split(" & ").slice(1).join(" & ")}</>
                             : nextTitle}
@@ -1355,7 +1365,7 @@ export default function Home8() {
                       </div>
 
                       {/* Done flash — on top, cross-fades out into timer */}
-                      <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", opacity: justDone ? undefined : 0, animation: justDone ? "done-flash-out 2s ease-in forwards" : undefined }}>
+                      <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", opacity: justDone ? undefined : 0, animation: justDone ? "done-flash-out 1.5s ease-in forwards" : undefined }}>
                         {textureOverlay}
                         <p style={{ position: "relative", color: "#000", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, display: "inline-block", textAlign: "center", margin: 0 }}>
                           <span style={{ position: "absolute", left: 0, right: 0, bottom: "100%", marginBottom: 10, display: "flex", justifyContent: "center" }}>
@@ -1364,7 +1374,6 @@ export default function Home8() {
                             </svg>
                           </span>
                           {completedTitle}
-                          <span style={{ position: "absolute", left: 0, right: 0, top: "100%", marginTop: 10, fontSize: "clamp(13px, 4vw, 17px)", fontWeight: 700, color: "#1a1c1c", letterSpacing: "0.04em" }}>Done</span>
                         </p>
                       </div>
                     </div>

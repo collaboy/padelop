@@ -237,7 +237,8 @@ body {
 .animate-done-breathe { animation: done-breathe 3s ease-in-out infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes draw-check { from { stroke-dashoffset: 30; } to { stroke-dashoffset: 0; } }
-@keyframes done-flash-out { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes done-flash-out { 0%, 77% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes p1-float-local { 0% { opacity: 0; transform: translateY(6px) scale(0.85); } 15% { opacity: 1; transform: translateY(-4px) scale(1.1); } 75% { opacity: 1; transform: translateY(-14px) scale(1.1); } 100% { opacity: 0; transform: translateY(-24px) scale(1); } }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
 /* Root: no animation (background stays put) */
