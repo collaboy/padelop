@@ -4,7 +4,7 @@ import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from "re
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { startNavLoad, startPlusOne } from "@/lib/nav-events";
+import { startNavLoad, startPlusOneFast } from "@/lib/nav-events";
 import LogSheet from "@/components/log-sheet";
 import ReadinessSheet from "@/components/readiness-sheet";
 import PushPrompt from "@/components/push-prompt";
@@ -285,7 +285,8 @@ export default function Home8() {
   const [upcomingCount, setUpcomingCount] = useState(0);
   const [now, setNow] = useState(new Date());
   const lastDateRef = useRef(new Date().toISOString().slice(0, 10));
-  const doneAtRef = useRef<Map<string, number>>(new Map());
+  const [celebrateTitle, setCelebrateTitle] = useState<string | null>(null);
+  const [niceWorkTitle, setNiceWorkTitle] = useState<string | null>(null);
   const [doIdx, setDoIdx] = useState(0); // -1 = top holder, 0 = do-this-now, 1 = see schedule
   const [completed, setCompleted] = useState<Set<string>>(new Set());
   const [readiness, setReadiness] = useState(65);
@@ -354,7 +355,17 @@ export default function Home8() {
     try {
       const dat: Record<string, Record<string, number>> = JSON.parse(localStorage.getItem("padelop:done-at") || "{}");
       const todayDat = dat[today] ?? {};
-      Object.entries(todayDat).forEach(([title, ts]) => doneAtRef.current.set(title, ts));
+      const recent = Object.entries(todayDat).find(([, ts]) => Date.now() - ts < 5000);
+      if (recent) {
+        const [title, ts] = recent;
+        const elapsed = Date.now() - ts;
+        if (elapsed < 2000) {
+          setCelebrateTitle(title);
+          setTimeout(() => setCelebrateTitle(t => t === title ? null : t), 2000 - elapsed);
+        }
+        setNiceWorkTitle(title);
+        setTimeout(() => setNiceWorkTitle(t => t === title ? null : t), 5000 - elapsed);
+      }
     } catch {}
     setClientReady(true);
   }, []);
@@ -629,7 +640,17 @@ export default function Home8() {
         try {
           const dat: Record<string, Record<string, number>> = JSON.parse(localStorage.getItem("padelop:done-at") || "{}");
           const todayDat = dat[todayStr] ?? {};
-          Object.entries(todayDat).forEach(([title, ts]) => doneAtRef.current.set(title, ts));
+          const recent = Object.entries(todayDat).find(([, ts]) => Date.now() - ts < 5000);
+          if (recent) {
+            const [title, ts] = recent;
+            const elapsed = Date.now() - ts;
+            if (elapsed < 2000) {
+              setCelebrateTitle(title);
+              setTimeout(() => setCelebrateTitle(t => t === title ? null : t), 2000 - elapsed);
+            }
+            setNiceWorkTitle(title);
+            setTimeout(() => setNiceWorkTitle(t => t === title ? null : t), 5000 - elapsed);
+          }
         } catch {}
         // Merge waterOnWaking
         try {
@@ -1020,12 +1041,7 @@ export default function Home8() {
     }
     setCompleted(prev => {
       const n = new Set(prev);
-      if (!wasComplete) {
-        n.add(item.title);
-        doneAtRef.current.set(item.title, Date.now());
-      } else {
-        n.delete(item.title);
-      }
+      if (!wasComplete) { n.add(item.title); } else { n.delete(item.title); }
       return n;
     });
     try {
@@ -1045,7 +1061,15 @@ export default function Home8() {
       } catch {}
       window.dispatchEvent(new Event("storage"));
     } catch {}
-    if (!wasComplete) startPlusOne();
+  }
+
+  function handleModalCompleteRevealed() {
+    const title = modalItem.title;
+    setCelebrateTitle(title);
+    setNiceWorkTitle(title);
+    startPlusOneFast();
+    setTimeout(() => setCelebrateTitle(t => t === title ? null : t), 2000);
+    setTimeout(() => setNiceWorkTitle(t => t === title ? null : t), 5000);
   }
 
   return (
@@ -1291,7 +1315,9 @@ export default function Home8() {
                 const isSleepytime = now.getHours() < 7 || curMins >= toMins(schedule[schedule.length - 1].time);
                 const contentOpacity = doIdx === 0 ? 1 : 0.2;
 
-                if (isSleepytime) return (
+                // Also cover the case where the last item of the day was just completed
+                // (no "next" item to show) — same end-of-day state as Sleepytime.
+                if (isSleepytime || (isDone && !nextSlide)) return (
                   <div key="active" className="animate-bounce-in" style={{ ...cardStyle }}>
                     <div style={{ position: "absolute", inset: 0, background: "rgba(10,12,30,0.65)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8 }}>
                       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#c9d6ff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -1302,36 +1328,41 @@ export default function Home8() {
                 );
 
                 if (isDone) {
-                  if (!nextSlide) return null;
-                  const doneAt = doneAtRef.current.get(s.title);
-                  const justDone = doneAt && (Date.now() - doneAt < 2000);
-                  const showNiceWork = doneAt && (Date.now() - doneAt < 5000);
+                  const justDone = celebrateTitle === s.title;
+                  const showNiceWork = niceWorkTitle === s.title;
                   const completedTitle = s.title;
                   const nextTitle = nextSlide.title;
 
                   return (
-                    <div key="done-card" style={{ ...cardStyle, background: "#E5E7EB", animation: "ball-drop 0.9s 0.1s both" }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
+                    <div key="done-card" style={{ ...cardStyle, background: "#E5E7EB" }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
                       {textureOverlay}
 
                       {/* Timer layer */}
                       <div style={{ position: "absolute", inset: 0, zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0, padding: "0 12px" }}>
                         <p style={{ position: "relative", color: "#000", fontWeight: 800, fontSize: !nextTitle.includes(" & ") && nextTitle.length > 14 ? "clamp(18px, 5.8vw, 26px)" : "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, display: "inline-block", textAlign: "center", margin: 0 }}>
-                          <span style={{ position: "absolute", left: 0, right: 0, bottom: "100%", fontSize: 13, fontWeight: 700, color: showNiceWork ? "#16a34a" : "#000", letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1 }}>{showNiceWork ? "Nice work!" : "Next"}</span>
+                          <span style={{ position: "absolute", left: 0, right: 0, bottom: "100%", height: 16, marginBottom: 4, fontSize: 13, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1 }}>
+                            <span style={{ position: "absolute", inset: 0, color: "#16a34a", opacity: showNiceWork ? 1 : 0, transition: "opacity 0.4s ease" }}>Nice work!</span>
+                            <span style={{ position: "absolute", inset: 0, color: "#000", opacity: showNiceWork ? 0 : 1, transition: "opacity 0.4s ease" }}>Next</span>
+                          </span>
                           {nextTitle.includes(" & ")
                             ? <>{nextTitle.split(" & ")[0]}<br />{"& " + nextTitle.split(" & ").slice(1).join(" & ")}</>
                             : nextTitle}
+                          <span style={{ position: "absolute", left: 0, right: 0, top: "100%", marginTop: 6, fontSize: "clamp(13px, 3.8vw, 16px)", fontWeight: 500, color: "rgba(0,0,0,0.55)", lineHeight: 1.1 }}>in {fmtTime(secsUntilNext)}</span>
                         </p>
-                        <p style={{ margin: "6px 0 0", fontSize: "clamp(13px, 3.8vw, 16px)", fontWeight: 500, color: "rgba(0,0,0,0.55)", textAlign: "center", lineHeight: 1.1 }}>in {fmtTime(secsUntilNext)}</p>
                       </div>
 
                       {/* Done flash — on top, cross-fades out into timer */}
-                      <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, opacity: justDone ? undefined : 0, animation: justDone ? "done-flash-out 2s ease-in forwards" : undefined }}>
+                      <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", opacity: justDone ? undefined : 0, animation: justDone ? "done-flash-out 2s ease-in forwards" : undefined }}>
                         {textureOverlay}
-                        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M5 13l4 4L19 7" style={{ strokeDasharray: 30, strokeDashoffset: 30, animation: justDone ? "draw-check 0.5s ease-out 0.1s forwards" : undefined }}/>
-                        </svg>
-                        <p style={{ fontSize: "clamp(22px, 7vw, 30px)", fontWeight: 800, color: "#1a1c1c", margin: 0, letterSpacing: "-0.02em", background: "#fff", padding: "3px 8px", borderRadius: 4 }}>{completedTitle}</p>
-                        <p style={{ fontSize: "clamp(13px, 4vw, 17px)", fontWeight: 700, color: "#1a1c1c", margin: 0, letterSpacing: "0.04em" }}>Done</p>
+                        <p style={{ position: "relative", color: "#000", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, display: "inline-block", textAlign: "center", margin: 0 }}>
+                          <span style={{ position: "absolute", left: 0, right: 0, bottom: "100%", marginBottom: 10, display: "flex", justifyContent: "center" }}>
+                            <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#1a1c1c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M5 13l4 4L19 7" style={{ strokeDasharray: 30, strokeDashoffset: 30, animation: justDone ? "draw-check 0.5s ease-out 0.5s forwards" : undefined }}/>
+                            </svg>
+                          </span>
+                          {completedTitle}
+                          <span style={{ position: "absolute", left: 0, right: 0, top: "100%", marginTop: 10, fontSize: "clamp(13px, 4vw, 17px)", fontWeight: 700, color: "#1a1c1c", letterSpacing: "0.04em" }}>Done</span>
+                        </p>
                       </div>
                     </div>
                   );
@@ -1436,7 +1467,7 @@ export default function Home8() {
                     {/* INFO STATE: fades out when playing */}
                     <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: warmupPlaying ? 0 : isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.35s", pointerEvents: warmupPlaying ? "none" : "auto" }}>
                       {(() => {
-                        const circleTitle = s.title === "Lunch" ? "Lunchtime" : s.title === "Dinner" ? "Dinnertime" : s.title;
+                        const circleTitle = s.title;
                         return (
                           <p style={{ position: "relative", color: "#000", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, display: "inline-block", textAlign: "center", margin: 0 }}>
                             <span style={{ position: "absolute", left: 0, right: 0, bottom: "100%", fontSize: 13, fontWeight: 700, color: "#000", letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1 }}>Now</span>
@@ -1686,6 +1717,7 @@ export default function Home8() {
             isComplete={completed.has(modalItem.title)}
             onComplete={handleModalComplete}
             onClosed={() => { setDoModalOpen(false); setSchedModalIdx(null); }}
+            onCompleteRevealed={handleModalCompleteRevealed}
             swipeLabelText="Swipe to complete (+1 pt)"
             zIndex={200}
           />

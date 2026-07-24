@@ -52,11 +52,12 @@ interface Props {
   isComplete: boolean;
   onComplete: () => void;
   onClosed: () => void;
+  onCompleteRevealed?: () => void;
   swipeLabelText?: string;
   zIndex?: number;
 }
 
-export default function ScheduleItemModal({ item, endTime, drillTag, isComplete, onComplete, onClosed, swipeLabelText = "Swipe to complete", zIndex = 200 }: Props) {
+export default function ScheduleItemModal({ item, endTime, drillTag, isComplete, onComplete, onClosed, onCompleteRevealed, swipeLabelText = "Swipe to complete", zIndex = 200 }: Props) {
   const v = SIZES;
   const [closing, setClosing] = useState(false);
   const [swipeX, setSwipeX] = useState(0);
@@ -79,13 +80,20 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
   function requestClose() {
     setClosing(true);
     setSwipeX(0);
-    setTimeout(onClosed, 320);
+    setTimeout(onClosed, 400);
   }
 
   function handleDoneClick() {
     const wasComplete = isComplete;
     onComplete();
-    if (!wasComplete) { setTimeout(requestClose, 350); } else { requestClose(); }
+    if (!wasComplete) {
+      // Start the reveal immediately so the checkmark celebration underneath
+      // draws in WHILE this modal fades out, instead of after it's gone.
+      onCompleteRevealed?.();
+      setTimeout(requestClose, 80);
+    } else {
+      requestClose();
+    }
   }
 
   const renderSteps = (stepList: { step: string; cue: string; reps: string }[]) => (
@@ -101,12 +109,12 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
   );
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center px-6" style={{ zIndex }} onClick={requestClose} onTouchStart={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
-      <style>{`@keyframes scheditem-pop-in{from{transform:scale(0.92);opacity:0}to{transform:scale(1);opacity:1}}@keyframes scheditem-pop-out{from{transform:scale(1);opacity:1}to{transform:scale(0.94);opacity:0}}@keyframes scheditem-fade-out{from{opacity:1}to{opacity:0}}`}</style>
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: closing ? "scheditem-fade-out 0.28s cubic-bezier(0.4,0,1,1) both" : undefined }} />
+    <div className="fixed inset-0 flex items-center justify-center px-6" style={{ zIndex }} onClick={() => requestClose()} onTouchStart={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
+      <style>{`@keyframes scheditem-pop-in{from{transform:scale(0.92);opacity:0}to{transform:scale(1);opacity:1}}@keyframes scheditem-fade-out{from{opacity:1}to{opacity:0}}`}</style>
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: closing ? "scheditem-fade-out 0.4s ease both" : undefined }} />
       <div
         className="relative w-full bg-white flex flex-col"
-        style={{ maxWidth: 420, borderRadius: 28, maxHeight: "80dvh", animation: closing ? "scheditem-pop-out 0.22s cubic-bezier(0.4,0,1,1) both" : "scheditem-pop-in 0.26s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 20px 60px rgba(0,0,0,0.25)", overflow: "hidden" }}
+        style={{ maxWidth: 420, borderRadius: 28, maxHeight: "80dvh", animation: closing ? "scheditem-fade-out 0.4s ease both" : "scheditem-pop-in 0.26s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 20px 60px rgba(0,0,0,0.25)", overflow: "hidden" }}
         onClick={e => e.stopPropagation()}
       >
         <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />

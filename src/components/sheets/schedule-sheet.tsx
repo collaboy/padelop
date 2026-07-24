@@ -95,7 +95,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
   useEffect(() => {
     if (!open || schedule.length === 0) return;
     const id = setTimeout(() => {
-      currentItemRef.current?.scrollIntoView({ block: "nearest" });
+      currentItemRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
     }, 300);
     return () => clearTimeout(id);
   }, [open, schedule]);
