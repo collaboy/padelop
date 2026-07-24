@@ -121,6 +121,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
 
   const toMins = (t: string) => t.split(":").reduce((a, b, i) => a + (i === 0 ? Number(b) * 60 : Number(b)), 0);
   const curMins = now.getHours() * 60 + now.getMinutes();
+  const isSleepytime = schedule.length > 0 && (now.getHours() < 7 || curMins >= toMins(schedule[schedule.length - 1].time));
 
   const modalItem = modalIdx !== null ? schedule[modalIdx] : null;
   const modalEndTime = modalIdx !== null ? schedule[modalIdx + 1]?.time : undefined;
@@ -154,7 +155,14 @@ export default function ScheduleSheet({ open, onClose }: Props) {
               )}
             </div>
           </div>
-          <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px", display: "flex", flexDirection: "column", gap: 8 }}>
+          <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px", display: "flex", flexDirection: "column", gap: 8, position: "relative" }}>
+            {isSleepytime && (
+              <div style={{ position: "absolute", inset: 0, zIndex: 10, background: "rgba(10,12,30,0.72)", backdropFilter: "blur(3px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10 }}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#c9d6ff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <p style={{ margin: 0, fontSize: "clamp(28px, 8vw, 38px)", fontWeight: 800, color: "#fff", letterSpacing: "-0.02em", textAlign: "center" }}>Rest up</p>
+                <p style={{ margin: 0, fontSize: "clamp(15px, 4vw, 18px)", fontWeight: 500, color: "rgba(200,210,255,0.75)", textAlign: "center" }}>See you at 7 AM</p>
+              </div>
+            )}
             {schedule.map((item, i) => {
               const isDone = (schedDone[todayKey] ?? []).includes(item.title);
               const isCurrent = toMins(item.time) <= curMins && (i === schedule.length - 1 || toMins(schedule[i + 1].time) > curMins);
