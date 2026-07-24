@@ -1018,9 +1018,9 @@ export default function Home8() {
   const dayColor = dayType === "match" ? "#2653d4" : dayType === "pre-match" ? "#d97706" : dayType === "recovery" ? "#7c3aed" : dayType === "maintenance" ? "#0e7490" : "#16a34a";
   const dayLabel = dayType === "match" ? "Match Day" : dayType === "pre-match" ? "Pre-Match Day" : dayType === "recovery" ? "Recovery Day" : dayType === "maintenance" ? "Maintenance Day" : dayType === "training" ? "Training Day" : "Today";
   const { schedule, currentIdx: realCurrentIdx } = getScheduleData(dayType, match?.time ?? null, drillTag);
-  // TEMP: force "Wind down" as the current item for testing — was: realCurrentIdx
-  const windDownIdx = schedule.findIndex(s => s.title === "Wind down");
-  const currentIdx = windDownIdx !== -1 ? windDownIdx : realCurrentIdx;
+  // TEMP: force "Dinner" as the current item for testing — was: realCurrentIdx
+  const dinnerIdx = schedule.findIndex(s => s.title === "Dinner");
+  const currentIdx = dinnerIdx !== -1 ? dinnerIdx : realCurrentIdx;
   const doItem = schedule[currentIdx];
   const modalIdx = schedModalIdx ?? currentIdx;
   const modalItem = schedule[modalIdx] ?? doItem;
