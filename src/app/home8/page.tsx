@@ -1822,12 +1822,12 @@ export default function Home8() {
             closeSheet();
           };
           return (
-            <div className="fixed inset-0 z-[200] flex items-end" onClick={closeSheet}>
-              <style>{`@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
+            <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" onClick={closeSheet}>
+              <style>{`@keyframes matchInfoPopIn{from{transform:scale(0.92);opacity:0}to{transform:scale(1);opacity:1}}`}</style>
               <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
               <div
-                className="relative w-full bg-white rounded-t-[28px] flex flex-col overflow-hidden shadow-2xl"
-                style={{ animation: "sheetUp 0.3s cubic-bezier(0.22,1,0.36,1)", maxHeight: "85dvh", minHeight: "55dvh", paddingBottom: "env(safe-area-inset-bottom)" }}
+                className="relative w-full bg-white rounded-[28px] flex flex-col overflow-hidden shadow-2xl"
+                style={{ animation: "matchInfoPopIn 0.26s cubic-bezier(0.22,1,0.36,1)", maxWidth: 420, maxHeight: "80dvh", minHeight: "55dvh", paddingBottom: "env(safe-area-inset-bottom)" }}
                 onClick={e => e.stopPropagation()}
               >
                 <div style={{ display: "flex", justifyContent: "center", paddingTop: 12, paddingBottom: 4, flexShrink: 0 }}>

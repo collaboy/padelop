@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   getScheduleData, getDayType, getTopNeedsWorkTag, pad,
   SCHEDULE_DETAILS,
@@ -49,6 +49,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
   const [schedDone, setSchedDone] = useState<Record<string, string[]>>({});
   const [dayTypeExpanded, setDayTypeExpanded] = useState(false);
   const [modalIdx, setModalIdx] = useState<number | null>(null);
+  const currentItemRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -90,6 +91,14 @@ export default function ScheduleSheet({ open, onClose }: Props) {
       window.removeEventListener("padelop:sync-done", load);
     };
   }, [open]);
+
+  useEffect(() => {
+    if (!open || schedule.length === 0) return;
+    const id = setTimeout(() => {
+      currentItemRef.current?.scrollIntoView({ block: "nearest" });
+    }, 300);
+    return () => clearTimeout(id);
+  }, [open, schedule]);
 
   if (!open) return null;
 
@@ -153,6 +162,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
               const hasDetail = !!(SCHEDULE_DETAILS[item.title] || item.isDrill);
               return (
                 <div key={item.title}
+                  ref={isCurrent ? currentItemRef : undefined}
                   onClick={() => { if (hasDetail) setModalIdx(i); }}
                   style={{ display: "flex", alignItems: "center", gap: 12, borderRadius: 14, padding: isCurrent ? "24px 14px" : "12px 14px", background: "#fff", boxShadow: isCurrent ? `0 0 0 1.5px ${item.color}` : "0 0 0 1px #f0f0f0", cursor: hasDetail ? "pointer" : "default", opacity: isPast ? 0.45 : 1 }}>
                   <button onClick={e => { e.stopPropagation(); toggleDone(item.title); }}
