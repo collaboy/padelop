@@ -9,7 +9,7 @@ import PatternsContent, { getPatternsTagCount } from "./patterns-sheet";
 
 const MILESTONES = [10, 25, 50, 75, 100, 250, 500, 1000];
 
-function ExpandableRow({ color, title, value, sub, expanded, onToggle, children }: { color: string; title: string; value: React.ReactNode; sub: string; expanded: boolean; onToggle: () => void; children: React.ReactNode }) {
+function ExpandableRow({ color, icon, title, value, sub, expanded, onToggle, children }: { color: string; icon?: React.ReactNode; title: string; value: React.ReactNode; sub: string; expanded: boolean; onToggle: () => void; children: React.ReactNode }) {
   return (
     <div style={{ borderRadius: 14, background: "#fff", boxShadow: "0 0 0 1px #f0f0f0", overflow: "hidden", flexShrink: 0 }} onClick={e => e.stopPropagation()}>
       <div
@@ -17,7 +17,7 @@ function ExpandableRow({ color, title, value, sub, expanded, onToggle, children 
         style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", cursor: "pointer" }}
       >
         <div style={{ width: 40, height: 40, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: `${color}1e` }}>
-          <div style={{ width: 13, height: 13, borderRadius: "50%", background: color }} />
+          {icon ?? <div style={{ width: 13, height: 13, borderRadius: "50%", background: color }} />}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <p style={{ fontSize: 15, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", margin: "0 0 2px", color }}>{title}</p>
@@ -50,8 +50,21 @@ function PadlaPtsRow({ points, expanded, onToggle }: { points: number; expanded:
   const toNext = nextMilestone !== null ? nextMilestone - lifetimeScore : null;
 
   return (
-    <ExpandableRow color="#1a1c1c" title="Padla Pts" value={lifetimeScore > 0 ? lifetimeScore : "—"} sub={points > 0 ? `${points} completed today` : "lifetime points"} expanded={expanded} onToggle={onToggle}>
-      <p style={{ margin: "0 0 14px", fontSize: 17, color: "#9aa0a6", lineHeight: 1.4 }}>Every positive action earns a point.</p>
+    <ExpandableRow
+      color="#1a7a3f"
+      icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="#1a7a3f" stroke="none"><path d="M12 2l2.9 6.26L21.5 9.27l-4.75 4.63L17.8 21 12 17.77 6.2 21l1.05-7.1L2.5 9.27l6.6-1.01L12 2z"/></svg>}
+      title="Padla Points"
+      value={lifetimeScore > 0 ? lifetimeScore : "—"}
+      sub={points > 0 ? `${points} completed today` : "lifetime points"}
+      expanded={expanded}
+      onToggle={onToggle}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 14, margin: "0 0 14px" }}>
+        <div style={{ flexShrink: 0, width: 60, height: 60, borderRadius: "50%", background: "#1a7a3f", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <span style={{ fontSize: 27, fontWeight: 800, letterSpacing: "-0.02em", color: "#fff", lineHeight: 1 }}>{lifetimeScore}</span>
+        </div>
+        <p style={{ margin: 0, fontSize: 17, color: "#9aa0a6", lineHeight: 1.4 }}>Every positive action earns a point.</p>
+      </div>
       {nextMilestone !== null && (
         <div style={{ margin: "0 0 14px", padding: "10px 16px", borderRadius: 999, background: "#dcfce7", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1a7a3f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H3.5a2.5 2.5 0 0 0 0 5H6"/><path d="M18 9h2.5a2.5 2.5 0 0 1 0 5H18"/><path d="M6 3h12v10a6 6 0 0 1-12 0V3z"/><path d="M9 21h6"/><path d="M12 17v4"/></svg>
@@ -115,19 +128,59 @@ export default function StatsSheet({ open, onClose, points, streak, winRate, rea
         </div>
         <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px", display: "flex", flexDirection: "column", gap: 8 }} onClick={() => setExpandedKey(null)}>
           <PadlaPtsRow points={points} expanded={expandedKey === "padla"} onToggle={() => toggle("padla")} />
-          <ExpandableRow color="#7c3aed" title="Overall Form" value={`${readiness}%`} sub="readiness" expanded={expandedKey === "form"} onToggle={() => toggle("form")}>
+          <ExpandableRow
+            color="#7c3aed"
+            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>}
+            title="Overall Form"
+            value={`${readiness}%`}
+            sub="readiness"
+            expanded={expandedKey === "form"}
+            onToggle={() => toggle("form")}
+          >
             <FormScoreContent />
           </ExpandableRow>
-          <ExpandableRow color="#d97706" title="Streak" value={streak > 0 ? streak : "—"} sub={streak > 0 ? "days in a row" : "start today"} expanded={expandedKey === "streak"} onToggle={() => toggle("streak")}>
+          <ExpandableRow
+            color="#d97706"
+            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="#d97706" stroke="none"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg>}
+            title="Streak"
+            value={streak > 0 ? streak : "—"}
+            sub={streak > 0 ? "days in a row" : "start today"}
+            expanded={expandedKey === "streak"}
+            onToggle={() => toggle("streak")}
+          >
             <StreakContent streak={streak} />
           </ExpandableRow>
-          <ExpandableRow color={matchesColor} title="Matches" value={winRate !== null ? `${winRate}%` : "—"} sub={winRate !== null ? "win rate" : "no matches logged"} expanded={expandedKey === "matches"} onToggle={() => toggle("matches")}>
+          <ExpandableRow
+            color={matchesColor}
+            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={matchesColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H3.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h2.5a2.5 2.5 0 0 0 0-5H18"/><path d="M6 3h12v10a6 6 0 0 1-12 0V3z"/><path d="M9 21h6"/><path d="M12 17v4"/></svg>}
+            title="Matches"
+            value={winRate !== null ? `${winRate}%` : "—"}
+            sub={winRate !== null ? "win rate" : "no matches logged"}
+            expanded={expandedKey === "matches"}
+            onToggle={() => toggle("matches")}
+          >
             <MatchesContent />
           </ExpandableRow>
-          <ExpandableRow color="#2563eb" title="Insights" value={insightsCount > 0 ? insightsCount : "—"} sub="available" expanded={expandedKey === "insights"} onToggle={() => toggle("insights")}>
+          <ExpandableRow
+            color="#2563eb"
+            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2z"/></svg>}
+            title="Insights"
+            value={insightsCount > 0 ? insightsCount : "—"}
+            sub="available"
+            expanded={expandedKey === "insights"}
+            onToggle={() => toggle("insights")}
+          >
             <InsightsContent streak={streak} />
           </ExpandableRow>
-          <ExpandableRow color="#0d9488" title="Patterns" value={patternsCount > 0 ? patternsCount : "—"} sub="tags logged" expanded={expandedKey === "patterns"} onToggle={() => toggle("patterns")}>
+          <ExpandableRow
+            color="#0d9488"
+            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41L11 3.83A2 2 0 0 0 9.59 3H4a1 1 0 0 0-1 1v5.59a2 2 0 0 0 .59 1.41l9.58 9.58a2 2 0 0 0 2.83 0l4.59-4.59a2 2 0 0 0 0-2.83z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>}
+            title="Patterns"
+            value={patternsCount > 0 ? patternsCount : "—"}
+            sub="tags logged"
+            expanded={expandedKey === "patterns"}
+            onToggle={() => toggle("patterns")}
+          >
             <PatternsContent />
           </ExpandableRow>
         </div>

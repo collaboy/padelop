@@ -2,11 +2,19 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import {
-  getScheduleData, getDayType, getTopNeedsWorkTag,
+  getScheduleData, getDayType, getTopNeedsWorkTag, pad,
   SCHEDULE_DETAILS, DRILL_LIBRARY, DEFAULT_DRILL,
   type DayType, type ScheduleItem,
 } from "@/lib/schedule-data";
 import { saveScheduleDoneToDb } from "@/lib/db";
+
+// Local (device) calendar date as YYYY-MM-DD — NOT toISOString(), which is UTC and
+// drifts a day off from the local date for several hours around local midnight
+// in timezones ahead of UTC.
+function localToday() {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
 
 type StoredMatch = { date: string; time: string };
 
@@ -52,6 +60,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
 
   useEffect(() => {
     if (!open) return;
+    setNow(new Date());
     const tick = setInterval(() => setNow(new Date()), 30_000);
     return () => clearInterval(tick);
   }, [open]);
@@ -59,7 +68,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
   useEffect(() => {
     if (!open) return;
     function load() {
-      const todayStr = new Date().toISOString().slice(0, 10);
+      const todayStr = localToday();
       let nm: StoredMatch | null = null;
       try { nm = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch {}
       let upcoming: StoredMatch[] = [];
@@ -86,7 +95,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
 
   if (!open) return null;
 
-  const todayKey = new Date().toISOString().slice(0, 10);
+  const todayKey = localToday();
   const done = (schedDone[todayKey] ?? []).length;
   const total = schedule.length;
   const meta = DAY_META[dayType];
