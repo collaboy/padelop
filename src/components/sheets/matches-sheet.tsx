@@ -167,7 +167,7 @@ export default function MatchesContent() {
                     style={{ transform: "rotate(-90deg)", transformOrigin: "50% 50%", transition: "stroke-dashoffset 0.8s ease" }} />
                 </svg>
                 <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontSize: 39, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{winRate}%</span>
+                  <span style={{ fontSize: 30, fontWeight: 800, color: "#1a1c1c", lineHeight: 1 }}>{winRate}%</span>
                   <span style={{ fontSize: 17, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#8a9096" }}>wins</span>
                 </div>
               </div>

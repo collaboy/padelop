@@ -78,6 +78,10 @@ const LITRE_DELTA: Record<string, number> = {
 
 const clamp = (n: number) => Math.max(65, Math.min(100, Math.round(n)));
 const clamp0100 = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
+// Local (device) calendar date as YYYY-MM-DD — NOT toISOString(), which is UTC and
+// drifts a day off from the local date for several hours around local midnight
+// in timezones ahead of UTC.
+const localDateStr = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
 export function computeScores(
   checkIn: DailyCheckIn | null,
@@ -682,7 +686,7 @@ export type FormScore = {
     body: number | null;        // 30% — 7-day recovery+wellbeing average
     matchForm: number | null;   // 25% — last 5 match reviews (result + feeling + energy)
     consistency: number | null; // 20% — check-in days + schedule completion last 7 days
-    activity: number | null;    // 15% — matches + training sessions last 14 days
+    activity: number | null;    // 15% — % of last 14 days with a match or exercise item done
     hydration: number | null;   // 10% — 7-day avg ml vs 3L target
   };
 };
@@ -744,21 +748,26 @@ export function computeFormScore(): FormScore {
   } catch {}
 
   // Component 4: Activity (15%)
-  // Matches played (game-days) + training sessions logged, last 14 days.
-  // 4 activities in 14 days = 100%.
+  // Fraction of the last 14 days with a match or a completed body/mental exercise
+  // item (Mobility Exercise, Light mobility, Warm up, Cool down, Stretch, Mental prep,
+  // Visualisation, Short walk, Active recovery, Rest). Drills are deliberately excluded —
+  // they require a court and a hitting partner, which logging in this app doesn't provide,
+  // so counting them would credit activity that mostly isn't actually happening.
+  const ACTIVITY_TITLES = new Set([
+    "Mobility Exercise", "Light mobility", "Warm up", "Cool down", "Stretch",
+    "Mental prep", "Visualisation", "Short walk", "Active recovery", "Rest",
+  ]);
   let activity: number | null = null;
   try {
-    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 14);
-    const cutoffStr = cutoff.toISOString().slice(0, 10);
-    const gameDays = JSON.parse(localStorage.getItem("padelop:game-days") || "[]") as string[];
-    const matches = gameDays.filter(d => d >= cutoffStr && d <= todayYMD).length;
-    const tLogs = JSON.parse(localStorage.getItem("padelop:training-logs") || "[]") as { ts: string }[];
-    const sessions = tLogs.filter(t => {
-      const d = new Date(t.ts).toISOString().slice(0, 10);
-      return d >= cutoffStr && d <= todayYMD;
-    }).length;
-    const total = matches + sessions;
-    if (total > 0) activity = Math.round(c01(total / 4) * 100);
+    const gameDays = new Set(JSON.parse(localStorage.getItem("padelop:game-days") || "[]") as string[]);
+    const sd = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}") as Record<string, string[]>;
+    let activeDays = 0;
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const ds = localDateStr(d);
+      if (gameDays.has(ds) || (sd[ds] ?? []).some(t => ACTIVITY_TITLES.has(t))) activeDays++;
+    }
+    if (activeDays > 0) activity = Math.round(c01(activeDays / 14) * 100);
   } catch {}
 
   // Component 5: Hydration (10%)

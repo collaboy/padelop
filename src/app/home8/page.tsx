@@ -10,10 +10,10 @@ import ReadinessSheet from "@/components/readiness-sheet";
 import PushPrompt from "@/components/push-prompt";
 
 const ScheduleSheet = dynamic(() => import("@/components/sheets/schedule-sheet"));
-const NextMatchSheet = dynamic(() => import("@/components/sheets/next-match-sheet"));
 const StatsSheet = dynamic(() => import("@/components/sheets/stats-sheet"));
-import { computeScores, loadScoringData, computePillarStates, loadScoreHistory, computeMatchReadiness, loadMorningLog, improveTips, type MatchReadinessResult, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
-import { pad, addMins, toMins, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag, getDayType, ITEM_COLORS, type ScheduleItem, type DayType, getScheduleData, SCHEDULE_DETAILS } from "@/lib/schedule-data";
+import ScheduleItemModal from "@/components/sheets/schedule-item-modal";
+import { computeFormScore, loadScoringData, computePillarStates, loadScoreHistory, computeMatchReadiness, loadMorningLog, improveTips, type MatchReadinessResult, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
+import { pad, addMins, toMins, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag, getDayType, ITEM_COLORS, type ScheduleItem, type DayType, getScheduleData } from "@/lib/schedule-data";
 import { saveUpcomingMatch, saveNutritionToDb, saveHydrationToDb, saveNoteToDb, saveMatchReview, saveGearToDb, saveScheduleDoneToDb, saveTrainingToDb, deleteUpcomingMatchFromDb } from "@/lib/db";
 import { hydrateFromSupabase } from "@/lib/sync";
 import { downloadSnapshot } from "@/lib/storage";
@@ -261,7 +261,6 @@ function getMatchTips(
 export default function Home8() {
   const router = useRouter();
   const [doModalOpen, setDoModalOpen] = useState(false);
-  const [modalClosing, setModalClosing] = useState(false);
   const [schedModalIdx, setSchedModalIdx] = useState<number | null>(null);
   const [modalDetailOpen, setModalDetailOpen] = useState(false);
   const [logSheetOpen, setLogSheetOpen] = useState(false);
@@ -306,10 +305,6 @@ export default function Home8() {
   const [preMatchChecked, setPreMatchChecked] = useState<string[]>([]);
   const [preMatchDuration, setPreMatchDuration] = useState("");
   const [morningDone, setMorningDone] = useState(false);
-  const [expandedMealIdx, setExpandedMealIdx] = useState<number | null>(null);
-  const [checkedMeals, setCheckedMeals] = useState<Set<number>>(new Set());
-  const [mealSuggestionsOpen, setMealSuggestionsOpen] = useState(false);
-  const [mealLogOpen, setMealLogOpen] = useState(false);
   const [streak, setStreak] = useState(0);
   const [profile, setProfile] = useState<{ name: string; level: string }>({ name: "", level: "Recreational" });
   const [matchCount, setMatchCount] = useState(0);
@@ -321,7 +316,7 @@ export default function Home8() {
     wellbeing: { status: "not_logged", reason: "" },
   });
   const [schedDetailOpen, setSchedDetailOpen] = useState<{ title: string; subtitle?: string; color: string; detail: string; isDrill?: boolean } | null>(null);
-  const [openPanel, setOpenPanel] = useState<null | "schedule" | "nextMatch" | "stats">(null);
+  const [openPanel, setOpenPanel] = useState<null | "schedule" | "stats">(null);
   const [postMatchOpen, setPostMatchOpen] = useState(false);
   const [postMatchDate, setPostMatchDate] = useState<string | null>(null);
   const [checkinNudgeOpen, setCheckinNudgeOpen] = useState(false);
@@ -330,7 +325,6 @@ export default function Home8() {
   const [upcomingMatches, setUpcomingMatches] = useState<{ date: string; time: string }[]>([]);
   const [dayType, setDayType] = useState<DayType>("baseline");
   const [drillTag, setDrillTag] = useState<string | null>(null);
-  const [drillSteps, setDrillSteps] = useState<{ step: string; cue: string; reps: string }[] | null>(null);
   const [clientReady, setClientReady] = useState(false);
 
   // Seed cache-backed state synchronously on client before first paint (avoids SSR mismatch + flash)
@@ -439,9 +433,6 @@ export default function Home8() {
   postMatchOpenRef.current = postMatchOpen;
   const [cardSnap, setCardSnap] = useState<'none' | 'left' | 'right'>('none');
   const [liveX, setLiveX] = useState(0);
-  const [swipeX, setSwipeX] = useState(0);
-  const swipeTrackRef = useRef<HTMLDivElement>(null);
-  const swipeStartX = useRef(0);
   const [liveY, setLiveY] = useState(0);
   const [breathPhase, setBreathPhase] = useState(0);
   const [breathPhaseProgress, setBreathPhaseProgress] = useState(0);
@@ -547,7 +538,7 @@ export default function Home8() {
     function loadReadiness() {
       const d = loadScoringData();
       const morningLog = loadMorningLog();
-      setReadiness(computeScores(d.checkIn, d.hydration, d.review, d.nutrition, d.gameDaysThisWeek, d.habits, d.training).overall);
+      setReadiness(computeFormScore().score);
       setMatchReadiness(computeMatchReadiness(d.checkIn, morningLog, false, d.review));
       setCheckInData(d.checkIn);
       setHydrationData(d.hydration);
@@ -929,14 +920,6 @@ export default function Home8() {
   }, [doIdx]);
 
 
-  useEffect(() => {
-    const item = schedule[schedModalIdx ?? currentIdx];
-    if (!doModalOpen || !item?.isDrill) { setDrillSteps(null); return; }
-    const def = DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL;
-    setDrillSteps(def.steps);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [doModalOpen, schedModalIdx]);
-
   // Detect when a match has ended (same day or previous day) and prompt review
   useEffect(() => {
     if (!match || postMatchOpen) return;
@@ -1017,10 +1000,53 @@ export default function Home8() {
   const doItem = schedule[currentIdx];
   const modalIdx = schedModalIdx ?? currentIdx;
   const modalItem = schedule[modalIdx] ?? doItem;
+  const modalEndTime = schedule[modalIdx + 1]?.time;
   const curMins = now.getHours() * 60 + now.getMinutes();
 
   const goNext = () => setDoIdx(i => Math.min(i + 1, 1));
   const goPrev = () => setDoIdx(i => Math.max(i - 1, -1));
+
+  function handleModalComplete() {
+    const item = modalItem;
+    const wasComplete = completed.has(item.title);
+    if (!wasComplete && item.isDrill) {
+      try {
+        const entry = { ts: new Date().toISOString(), sessionType: ["Drills"], drillFocus: drillTag ? [drillTag] : [], duration: "6", intensity: "moderate" };
+        const prev2 = JSON.parse(localStorage.getItem("padelop:training-logs") || "[]");
+        localStorage.setItem("padelop:training-logs", JSON.stringify([entry, ...prev2].slice(0, 50)));
+        window.dispatchEvent(new Event("storage"));
+      } catch {}
+      saveTrainingToDb({ date: new Date().toISOString().slice(0, 10), drill_focus: drillTag ?? undefined, duration_mins: 6 });
+    }
+    setCompleted(prev => {
+      const n = new Set(prev);
+      if (!wasComplete) {
+        n.add(item.title);
+        doneAtRef.current.set(item.title, Date.now());
+      } else {
+        n.delete(item.title);
+      }
+      return n;
+    });
+    try {
+      const todayKey = new Date().toISOString().slice(0, 10);
+      const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
+      const titles = sd[todayKey] ?? [];
+      sd[todayKey] = wasComplete
+        ? titles.filter(t => t !== item.title)
+        : [...titles.filter(t => t !== item.title), item.title];
+      localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
+      saveScheduleDoneToDb(todayKey, sd[todayKey]);
+      try {
+        const dat: Record<string, Record<string, number>> = JSON.parse(localStorage.getItem("padelop:done-at") || "{}");
+        if (!dat[todayKey]) dat[todayKey] = {};
+        if (wasComplete) { delete dat[todayKey][item.title]; } else { dat[todayKey][item.title] = Date.now(); }
+        localStorage.setItem("padelop:done-at", JSON.stringify(dat));
+      } catch {}
+      window.dispatchEvent(new Event("storage"));
+    } catch {}
+    if (!wasComplete) startPlusOne();
+  }
 
   return (
     <>
@@ -1176,7 +1202,7 @@ export default function Home8() {
                       return (
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
                           <div style={{ position: "relative", width: "calc((100vw - 40px) * 0.65)", height: "calc((100vw - 40px) * 0.65)", flexShrink: 0 }}>
-                            <button onClick={() => setOpenPanel("nextMatch")} style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, boxShadow: "0 4px 20px #2653d455" }}>
+                            <button onClick={() => setMatchInfoOpen(true)} style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, boxShadow: "0 4px 20px #2653d455" }}>
                               <span style={{ fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 800, color: "rgba(255,255,255,0.85)", letterSpacing: "0.08em", textTransform: "uppercase", lineHeight: 1 }}>{countdownLabel}</span>
                               <span style={{ fontSize: "clamp(30px, 7.7vw, 37px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.02em" }}>{match.time}</span>
                             </button>
@@ -1195,7 +1221,7 @@ export default function Home8() {
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
                         <div style={{ position: "relative", width: "calc((100vw - 40px) * 0.65)", height: "calc((100vw - 40px) * 0.65)", flexShrink: 0 }}>
                           <button
-                            onClick={() => window.dispatchEvent(new Event("padelop:add-match"))}
+                            onClick={() => { setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('pick'); setMatchModalOpen(true); }}
                             style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 20px #2653d455" }}
                           >
                             <svg width="18%" height="18%" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="2.5" strokeLinecap="round">
@@ -1400,7 +1426,7 @@ export default function Home8() {
                 };
                 const handleWarmupToggle = (e: React.MouseEvent) => { e.stopPropagation(); warmupToggleCore(); };
                 return (
-                  <div key="active" className="animate-bounce-in" style={{ ...cardStyle, cursor: "pointer" }} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
+                  <div key="active" className="animate-tap-pulse" style={{ ...cardStyle, cursor: "pointer" }} onClick={() => { setDoModalOpen(true); setModalDetailOpen(false); }}>
                     {textureOverlay}
                     {/* Visualizer — fills ball when playing */}
                     <canvas
@@ -1652,214 +1678,18 @@ export default function Home8() {
         </div>
 
         {/* Complete modal */}
-        {doModalOpen && modalItem && (() => {
-          const isComplete = completed.has(modalItem.title);
-          const detail = SCHEDULE_DETAILS[modalItem.title];
-          const isMeal = detail?.type === 'meal';
-          const isExercise = detail?.type === 'exercise';
-          const isInfo = detail?.type === 'info';
-          const isDrill = modalItem.isDrill && !!drillSteps;
-
-          const closeModal = () => {
-            setModalClosing(true);
-            setSwipeX(0);
-            setTimeout(() => {
-              setDoModalOpen(false);
-              setSchedModalIdx(null);
-              setModalClosing(false);
-            }, 320);
-          };
-
-          const handleDone = () => {
-            // Update data immediately
-            const isDrill = !isComplete && modalItem.isDrill;
-            if (isDrill) {
-              try {
-                const entry = { ts: new Date().toISOString(), sessionType: ["Drills"], drillFocus: drillTag ? [drillTag] : [], duration: "6", intensity: "moderate" };
-                const prev2 = JSON.parse(localStorage.getItem("padelop:training-logs") || "[]");
-                localStorage.setItem("padelop:training-logs", JSON.stringify([entry, ...prev2].slice(0, 50)));
-                window.dispatchEvent(new Event("storage"));
-              } catch {}
-              saveTrainingToDb({ date: new Date().toISOString().slice(0, 10), drill_focus: drillTag ?? undefined, duration_mins: 6 });
-            }
-            setCompleted(prev => {
-              const n = new Set(prev);
-              if (!isComplete) {
-                n.add(modalItem.title);
-                doneAtRef.current.set(modalItem.title, Date.now());
-              } else {
-                n.delete(modalItem.title);
-              }
-              return n;
-            });
-            try {
-              const todayKey = new Date().toISOString().slice(0, 10);
-              const sd: Record<string, string[]> = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}");
-              const titles = sd[todayKey] ?? [];
-              sd[todayKey] = isComplete
-                ? titles.filter(t => t !== modalItem.title)
-                : [...titles.filter(t => t !== modalItem.title), modalItem.title];
-              localStorage.setItem("padelop:schedule-done", JSON.stringify(sd));
-              saveScheduleDoneToDb(todayKey, sd[todayKey]);
-              try {
-                const dat: Record<string, Record<string, number>> = JSON.parse(localStorage.getItem("padelop:done-at") || "{}");
-                if (!dat[todayKey]) dat[todayKey] = {};
-                if (isComplete) { delete dat[todayKey][modalItem.title]; } else { dat[todayKey][modalItem.title] = Date.now(); }
-                localStorage.setItem("padelop:done-at", JSON.stringify(dat));
-              } catch {}
-              window.dispatchEvent(new Event("storage"));
-            } catch {}
-            // A: if marking complete, pause so circle shows green, then B: fade modal out
-            if (!isComplete) {
-              startPlusOne();
-              setTimeout(closeModal, 350);
-            } else {
-              closeModal();
-            }
-          };
-
-          const renderSteps = (stepList: { step: string; cue: string; reps: string }[]) => (
-            <div className="flex flex-col gap-3 mt-3">
-              {stepList.map((s, i) => (
-                <div key={i} className="flex flex-col items-start p-3">
-                  <p className="text-[17px] font-semibold text-[#1a1c1c] leading-snug">{s.step}</p>
-                  <p className="text-[14px] text-[#6b7480] mt-1 leading-snug">{s.cue}</p>
-                  <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold" style={{ background: "#2653d420", color: "#2653d4" }}>{s.reps}</span>
-                </div>
-              ))}
-            </div>
-          );
-
-          return (
-            <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={closeModal} onTouchStart={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
-              <style>{`@keyframes sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes sheet-down{from{transform:translateY(0)}to{transform:translateY(100%)}}@keyframes sheet-fade-out{from{opacity:1}to{opacity:0}}`}</style>
-              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: modalClosing ? "sheet-fade-out 0.28s cubic-bezier(0.4,0,1,1) both" : undefined }} />
-              <div
-                className="relative w-full bg-white flex flex-col"
-                style={{ borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "55dvh", animation: modalClosing ? "sheet-down 0.28s cubic-bezier(0.4,0,1,1) both" : "sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }}
-                onClick={e => e.stopPropagation()}
-              >
-                {(isMeal || isExercise || isDrill || isInfo) && (
-                  <>
-                    <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
-                    <div className="overflow-y-auto flex-1 px-6 pb-4" style={{ minHeight: 0 }}>
-                      <p className="font-bold" style={{ color: "#1a1c1c", fontSize: "clamp(22px, 6.5vw, 30px)", lineHeight: 1.15, margin: "20px 0 4px" }}>{modalItem.title}</p>
-                      {isMeal && detail?.type === 'meal' && (
-                        <div className="flex flex-col pt-4">
-                          <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#8a9096" }}>{detail.focus}</p>
-                          <p style={{ fontSize: 15, color: "#4a5050", lineHeight: 1.6, margin: "0 0 16px" }}>{detail.goal}</p>
-                          <button
-                            onClick={() => setMealSuggestionsOpen(v => !v)}
-                            style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, borderRadius: 14, padding: "12px 14px", background: "#fff", boxShadow: "0 0 0 1px #f0f0f0", border: "none", cursor: "pointer", marginBottom: mealSuggestionsOpen ? 8 : 8 }}
-                          >
-                            <span style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>Suggestions</span>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: mealSuggestionsOpen ? "rotate(90deg)" : "rotate(0deg)" }}><path d="M9 18l6-6-6-6"/></svg>
-                          </button>
-                          {mealSuggestionsOpen && detail.options.map((meal, i) => (
-                            <div key={i}>
-                              <button
-                                onClick={() => setExpandedMealIdx(expandedMealIdx === i ? null : i)}
-                                style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "10px 0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}
-                              >
-                                <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
-                                  <div
-                                    onClick={e => { e.stopPropagation(); setCheckedMeals(prev => { const next = new Set(prev); next.has(i) ? next.delete(i) : next.add(i); return next; }); }}
-                                    style={{ flexShrink: 0, width: 20, height: 20, borderRadius: 5, border: `2px solid ${checkedMeals.has(i) ? "#16a34a" : "#c4c7c7"}`, background: checkedMeals.has(i) ? "#16a34a" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}
-                                  >
-                                    {checkedMeals.has(i) && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>}
-                                  </div>
-                                  <span style={{ fontSize: 15, fontWeight: 600, color: "#1a1c1c", lineHeight: 1.3, textAlign: "left" }}>{meal.title}</span>
-                                </div>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c4c7c7" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: expandedMealIdx === i ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
-                              </button>
-                              {expandedMealIdx === i && meal.detail && (
-                                <p style={{ margin: "0 0 8px", fontSize: 13, color: "#6b7480", lineHeight: 1.5 }}>{meal.detail}</p>
-                              )}
-                              {i < detail.options.length - 1 && <div style={{ height: 1, background: "#f0f0f0" }} />}
-                            </div>
-                          ))}
-                          <button
-                            onClick={() => setMealLogOpen(v => !v)}
-                            style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, borderRadius: 14, padding: "12px 14px", background: "#fff", boxShadow: "0 0 0 1px #f0f0f0", border: "none", cursor: "pointer", marginBottom: mealLogOpen ? 8 : 0 }}
-                          >
-                            <span style={{ fontSize: 15, fontWeight: 700, color: "#1a1c1c" }}>Add manually</span>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: mealLogOpen ? "rotate(90deg)" : "rotate(0deg)" }}><path d="M9 18l6-6-6-6"/></svg>
-                          </button>
-                          {mealLogOpen && (
-                            <textarea
-                              value={mealText}
-                              onChange={e => setMealText(e.target.value)}
-                              placeholder="What did you eat?"
-                              rows={3}
-                              style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1.5px solid #e8eaed", fontSize: "clamp(14px, 3.6vw, 16px)", color: "#1a1c1c", resize: "none", outline: "none", fontFamily: "inherit", lineHeight: 1.5, boxSizing: "border-box", background: "#f8f9fa" }}
-                            />
-                          )}
-                        </div>
-                      )}
-                      {(isInfo || isExercise || isDrill) && (
-                        <div className="pt-4">
-                          {isInfo && detail?.type === 'info' && (
-                            <>
-                              <p className="text-[11px] font-bold uppercase tracking-widest pb-3" style={{ color: "#1a1c1c" }}>{detail.focus}</p>
-                              <p className="text-[17px] text-[#4a5050] leading-snug">{detail.text}</p>
-                            </>
-                          )}
-                          {isExercise && detail?.type === 'exercise' && renderSteps(detail.steps)}
-                          {isDrill && drillSteps && (
-                            <>
-                              <p className="text-[11px] font-bold uppercase tracking-widest pb-1 text-left" style={{ color: "#1a1c1c" }}>{(DRILL_LIBRARY[drillTag ?? ""] ?? DEFAULT_DRILL).focus}</p>
-                              {renderSteps(drillSteps)}
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    <div style={{ padding: "12px 24px 40px", flexShrink: 0 }}>
-                      {isComplete ? (
-                        <button
-                          onClick={handleDone}
-                          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", height: 56, borderRadius: 28, border: "2px solid #00D455", background: "transparent", cursor: "pointer" }}
-                        >
-                          <div style={{ width: 26, height: 26, borderRadius: "50%", background: "#00D455", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M5 13l4 4L19 7"/></svg>
-                          </div>
-                          <span style={{ fontSize: 15, fontWeight: 600, color: "#00D455" }}>Done</span>
-                        </button>
-                      ) : (
-                        <div
-                          ref={swipeTrackRef}
-                          style={{ position: "relative", height: 56, borderRadius: 28, background: "#f0f1f3", overflow: "hidden", touchAction: "none" }}
-                          onTouchStart={e => { swipeStartX.current = e.touches[0].clientX - swipeX; }}
-                          onTouchMove={e => {
-                            const track = swipeTrackRef.current;
-                            if (!track) return;
-                            const maxX = track.offsetWidth - 56;
-                            setSwipeX(Math.max(0, Math.min(maxX, e.touches[0].clientX - swipeStartX.current)));
-                          }}
-                          onTouchEnd={() => {
-                            const track = swipeTrackRef.current;
-                            if (!track) return;
-                            const maxX = track.offsetWidth - 56;
-                            if (swipeX >= maxX * 0.82) { handleDone(); }
-                            setSwipeX(0);
-                          }}
-                        >
-                          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: swipeX, background: "#00D455", transition: swipeX === 0 ? "width 0.3s" : "none" }} />
-                          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", paddingLeft: 36, pointerEvents: "none" }}>
-                            <span style={{ fontSize: 14, fontWeight: 600, color: "#8a9096", opacity: Math.max(0, 1 - swipeX / 80), transition: "opacity 0.1s" }}>Save and complete (+1 pt)</span>
-                          </div>
-                          <div style={{ position: "absolute", top: 4, left: 4 + swipeX, width: 48, height: 48, borderRadius: "50%", background: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", justifyContent: "center", transition: swipeX === 0 ? "left 0.3s" : "none", pointerEvents: "none" }}>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/><path d="M13 6l6 6-6 6"/></svg>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          );
-        })()}
+        {doModalOpen && modalItem && (
+          <ScheduleItemModal
+            item={modalItem}
+            endTime={modalEndTime}
+            drillTag={drillTag}
+            isComplete={completed.has(modalItem.title)}
+            onComplete={handleModalComplete}
+            onClosed={() => { setDoModalOpen(false); setSchedModalIdx(null); }}
+            swipeLabelText="Swipe to complete (+1 pt)"
+            zIndex={200}
+          />
+        )}
 
 
         {/* First-visit tooltip */}
@@ -2710,7 +2540,6 @@ export default function Home8() {
         </div>
 
         <ScheduleSheet open={openPanel === "schedule"} onClose={() => setOpenPanel(null)} />
-        <NextMatchSheet open={openPanel === "nextMatch"} onClose={() => setOpenPanel(null)} onRateMatch={() => { setLogTab("matchreview"); setLogSheetOpen(true); }} />
         <StatsSheet
           open={openPanel === "stats"}
           onClose={() => setOpenPanel(null)}

@@ -21,12 +21,18 @@ export default function FormScoreContent() {
   let ciDays = 0, sdDays = 0;
   for (let i = 0; i < 7; i++) { const d = new Date(); d.setDate(d.getDate() - i); const ds = d.toISOString().slice(0, 10); if (snapHistory.some(s => s.date === ds)) ciDays++; if (sdLocal[ds]?.length > 0) sdDays++; }
 
-  const cutoff14s = new Date(); cutoff14s.setDate(cutoff14s.getDate() - 14);
-  const c14 = cutoff14s.toISOString().slice(0, 10);
+  const ACTIVITY_TITLES = new Set([
+    "Mobility Exercise", "Light mobility", "Warm up", "Cool down", "Stretch",
+    "Mental prep", "Visualisation", "Short walk", "Active recovery", "Rest",
+  ]);
   const gdLocal: string[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:game-days") || "[]"); } catch { return []; } })();
-  const mCount = gdLocal.filter(d => d >= c14 && d <= todayYMD2).length;
-  const tLogs: { ts: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:training-logs") || "[]"); } catch { return []; } })();
-  const sCount = tLogs.filter(t => { const d = new Date(t.ts).toISOString().slice(0, 10); return d >= c14 && d <= todayYMD2; }).length;
+  const gameDaySet = new Set(gdLocal);
+  let activeDays = 0;
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const ds = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    if (gameDaySet.has(ds) || (sdLocal[ds] ?? []).some(t => ACTIVITY_TITLES.has(t))) activeDays++;
+  }
 
   const LMAP: Record<string, number> = { "<1L": 750, "1–1.5L": 1250, "1.5–2L": 1750, "2–2.5L": 2250, "2.5–3L": 2750, "3L+": 3000 };
   const hLogs2: { ts: string; litres: string }[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:hydration-logs") || "[]"); } catch { return []; } })();
@@ -56,8 +62,8 @@ export default function FormScoreContent() {
     },
     {
       label: "Activity", value: components.activity, weight: "15%",
-      context: (mCount + sCount) === 0 ? "No matches or sessions in 14 days" : `${mCount} match${mCount !== 1 ? "es" : ""} · ${sCount} training session${sCount !== 1 ? "s" : ""} (14 days)`,
-      action: (mCount + sCount) === 0 ? "Log training or a match" : null,
+      context: activeDays === 0 ? "No matches or exercises in 14 days" : `${activeDays}/14 days with a match or exercise`,
+      action: activeDays === 0 ? "Complete a warm up, stretch or walk" : null,
     },
     {
       label: "Hydration", value: components.hydration, weight: "10%",
@@ -80,6 +86,9 @@ export default function FormScoreContent() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <p style={{ margin: "0 0 4px", fontSize: 18, color: "#6b7480", lineHeight: 1.5 }}>
+        Overall Form is a weighted average of five things below — how your body&apos;s feeling, recent match results, how consistently you&apos;re logging, how active you&apos;ve been, and hydration. Each is scored 0–100 from your last 1–2 weeks, then blended by its weight, so a bad day won&apos;t tank it but a bad stretch will show.
+      </p>
       {rows.map(r => (
         <div key={r.label} style={{ background: "#f8f9fa", borderRadius: 14, padding: "12px 14px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>

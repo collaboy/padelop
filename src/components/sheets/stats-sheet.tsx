@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import FormScoreContent from "./form-score-sheet";
 import StreakContent from "./streak-sheet";
 import MatchesContent from "./matches-sheet";
@@ -9,9 +9,9 @@ import PatternsContent, { getPatternsTagCount } from "./patterns-sheet";
 
 const MILESTONES = [10, 25, 50, 75, 100, 250, 500, 1000];
 
-function ExpandableRow({ color, icon, title, value, sub, expanded, onToggle, children }: { color: string; icon?: React.ReactNode; title: string; value: React.ReactNode; sub: string; expanded: boolean; onToggle: () => void; children: React.ReactNode }) {
+function ExpandableRow({ color, icon, title, value, sub, expanded, dim, onToggle, children }: { color: string; icon?: React.ReactNode; title: string; value: React.ReactNode; sub: string; expanded: boolean; dim?: boolean; onToggle: () => void; children: React.ReactNode }) {
   return (
-    <div style={{ borderRadius: 14, background: "#fff", boxShadow: "0 0 0 1px #f0f0f0", overflow: "hidden", flexShrink: 0 }} onClick={e => e.stopPropagation()}>
+    <div style={{ borderRadius: 14, background: "#fff", boxShadow: "0 0 0 1px #f0f0f0", overflow: "hidden", flexShrink: 0, opacity: dim ? 0.4 : 1, transition: "opacity 0.25s" }} onClick={e => e.stopPropagation()}>
       <div
         onClick={onToggle}
         style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", cursor: "pointer" }}
@@ -35,7 +35,7 @@ function ExpandableRow({ color, icon, title, value, sub, expanded, onToggle, chi
   );
 }
 
-function PadlaPtsRow({ points, expanded, onToggle }: { points: number; expanded: boolean; onToggle: () => void }) {
+function PadlaPtsRow({ points, expanded, dim, onToggle }: { points: number; expanded: boolean; dim?: boolean; onToggle: () => void }) {
   const [showAll, setShowAll] = useState(false);
 
   const sd: Record<string, string[]> = (() => { try { return JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}"); } catch { return {}; } })();
@@ -57,6 +57,7 @@ function PadlaPtsRow({ points, expanded, onToggle }: { points: number; expanded:
       value={lifetimeScore > 0 ? lifetimeScore : "—"}
       sub={points > 0 ? `${points} completed today` : "lifetime points"}
       expanded={expanded}
+      dim={dim}
       onToggle={onToggle}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 14, margin: "0 0 14px" }}>
@@ -108,6 +109,9 @@ interface Props {
 
 export default function StatsSheet({ open, onClose, points, streak, winRate, readiness }: Props) {
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
+  useEffect(() => {
+    if (!open) setExpandedKey(null);
+  }, [open]);
   if (!open) return null;
 
   const toggle = (key: string) => setExpandedKey(k => k === key ? null : key);
@@ -127,7 +131,7 @@ export default function StatsSheet({ open, onClose, points, streak, winRate, rea
           </div>
         </div>
         <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px", display: "flex", flexDirection: "column", gap: 8 }} onClick={() => setExpandedKey(null)}>
-          <PadlaPtsRow points={points} expanded={expandedKey === "padla"} onToggle={() => toggle("padla")} />
+          <PadlaPtsRow points={points} expanded={expandedKey === "padla"} dim={expandedKey !== null && expandedKey !== "padla"} onToggle={() => toggle("padla")} />
           <ExpandableRow
             color="#7c3aed"
             icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>}
@@ -135,6 +139,7 @@ export default function StatsSheet({ open, onClose, points, streak, winRate, rea
             value={`${readiness}%`}
             sub="readiness"
             expanded={expandedKey === "form"}
+            dim={expandedKey !== null && expandedKey !== "form"}
             onToggle={() => toggle("form")}
           >
             <FormScoreContent />
@@ -146,6 +151,7 @@ export default function StatsSheet({ open, onClose, points, streak, winRate, rea
             value={streak > 0 ? streak : "—"}
             sub={streak > 0 ? "days in a row" : "start today"}
             expanded={expandedKey === "streak"}
+            dim={expandedKey !== null && expandedKey !== "streak"}
             onToggle={() => toggle("streak")}
           >
             <StreakContent streak={streak} />
@@ -157,6 +163,7 @@ export default function StatsSheet({ open, onClose, points, streak, winRate, rea
             value={winRate !== null ? `${winRate}%` : "—"}
             sub={winRate !== null ? "win rate" : "no matches logged"}
             expanded={expandedKey === "matches"}
+            dim={expandedKey !== null && expandedKey !== "matches"}
             onToggle={() => toggle("matches")}
           >
             <MatchesContent />
@@ -168,6 +175,7 @@ export default function StatsSheet({ open, onClose, points, streak, winRate, rea
             value={insightsCount > 0 ? insightsCount : "—"}
             sub="available"
             expanded={expandedKey === "insights"}
+            dim={expandedKey !== null && expandedKey !== "insights"}
             onToggle={() => toggle("insights")}
           >
             <InsightsContent streak={streak} />
@@ -179,6 +187,7 @@ export default function StatsSheet({ open, onClose, points, streak, winRate, rea
             value={patternsCount > 0 ? patternsCount : "—"}
             sub="tags logged"
             expanded={expandedKey === "patterns"}
+            dim={expandedKey !== null && expandedKey !== "patterns"}
             onToggle={() => toggle("patterns")}
           >
             <PatternsContent />
