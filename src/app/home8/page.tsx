@@ -384,6 +384,7 @@ export default function Home8() {
   const [logHydrationMl, setLogHydrationMl] = useState(0);
   const [hydrationToastOn, setHydrationToastOn] = useState(false);
   const hydrationToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hydrationTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const logGaugeRef    = useRef<HTMLDivElement>(null);
   const logDragStartX  = useRef(0);
   const logDragStartMl = useRef(0);
@@ -1018,10 +1019,7 @@ export default function Home8() {
   const today = new Date().toISOString().slice(0, 10);
   const dayColor = dayType === "match" ? "#2653d4" : dayType === "pre-match" ? "#d97706" : dayType === "recovery" ? "#7c3aed" : dayType === "maintenance" ? "#0e7490" : "#16a34a";
   const dayLabel = dayType === "match" ? "Match Day" : dayType === "pre-match" ? "Pre-Match Day" : dayType === "recovery" ? "Recovery Day" : dayType === "maintenance" ? "Maintenance Day" : dayType === "training" ? "Training Day" : "Today";
-  const { schedule, currentIdx: realCurrentIdx } = getScheduleData(dayType, match?.time ?? null, drillTag);
-  // TEMP: force "Dinner" as the current item for testing — was: realCurrentIdx
-  const dinnerIdx = schedule.findIndex(s => s.title === "Dinner");
-  const currentIdx = dinnerIdx !== -1 ? dinnerIdx : realCurrentIdx;
+  const { schedule, currentIdx } = getScheduleData(dayType, match?.time ?? null, drillTag);
   const doItem = schedule[currentIdx];
   const modalIdx = schedModalIdx ?? currentIdx;
   const modalItem = schedule[modalIdx] ?? doItem;
@@ -1312,8 +1310,7 @@ export default function Home8() {
                 const isDone = completed.has(s.title);
                 const isReady = curMins >= toMins(s.time);
                 const nextSlide = schedule[currentIdx + 1];
-                // TEMP: fake a 3h15m countdown for testing — was: nextSlide ? toMins(nextSlide.time) * 60 - (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) : 0
-                const secsUntilNext = 3 * 3600 + 15 * 60;
+                const secsUntilNext = nextSlide ? toMins(nextSlide.time) * 60 - (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) : 0;
                 const fmtTime = (s: number) => { if (s <= 0) return "a moment"; const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60); if (h > 0) return `${h}h ${String(m).padStart(2,"0")}m`; return m > 0 ? `${m}m` : "a moment"; };
                 const cardStyle: React.CSSProperties = { position: "relative", width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", zIndex: 3, boxShadow: "none" };
                 if (!clientReady) return (
@@ -1322,7 +1319,7 @@ export default function Home8() {
                   </div>
                 );
                 const textureOverlay = <div style={{ position: "absolute", inset: 0, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E")`, backgroundSize: "200px 200px", pointerEvents: "none", mixBlendMode: "overlay" as React.CSSProperties["mixBlendMode"] }} />;
-                const isSleepytime = false; // TEMP: disabled for testing — was: now.getHours() < 7 || curMins >= toMins(schedule[schedule.length - 1].time);
+                const isSleepytime = now.getHours() < 7 || curMins >= toMins(schedule[schedule.length - 1].time);
                 const contentOpacity = doIdx === 0 ? 1 : 0.2;
 
                 // Also cover the case where the last item of the day was just completed
@@ -1577,27 +1574,25 @@ export default function Home8() {
                     style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 0, gap: 2, zIndex: doIdx === 1 ? 2 : 1, height: "calc(100vw - 40px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", opacity: doIdx === 1 ? 1 : 0, transition: "opacity 0.3s" }}
                   >
                     {(() => {
-                      const title =
-                        dayType === "match"     ? "Game on." :
-                        dayType === "pre-match" ? "Tomorrow is match day." :
-                        dayType === "recovery"  ? "Well played." :
-                        "Keep going.";
                       const sub =
                         dayType === "match"
                           ? "Trust your game and enjoy every point."
                           : dayType === "pre-match"
                           ? "Rest up, carb load, and get to bed early. The prep is done."
                           : dayType === "recovery"
-                          ? "Rest is part of training. Let your body recover and come back stronger."
+                          ? "Rest is part of training. Your body adapts when you give it time to recover."
                           : drillTag
                           ? `Today focus on ${drillTag}. Small improvements compound into big gains.`
                           : "Every session counts. Show up, put in the work, and trust the process.";
                       return (
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, padding: "0 36px", width: "100%" }}>
-                          <p style={{ margin: 0, fontSize: 14, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4", textAlign: "center" }}>
-                            {dayLabel}
+                          <p style={{ margin: 0, fontSize: 13, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#9aa0a6", textAlign: "center" }}>
+                            Today
                           </p>
-                          <p style={{ margin: 0, fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>{title}</p>
+                          <p style={{ margin: 0, fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>{dayLabel}</p>
+                          <p style={{ margin: "16px 0 0", fontSize: 13, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4", textAlign: "center" }}>
+                            Coach
+                          </p>
                           <p style={{ margin: 0, fontSize: "clamp(17px, 4.4vw, 20px)", color: "#6b7480", lineHeight: 1.6, textAlign: "center" }}>{sub}</p>
                         </div>
                       );
@@ -1639,12 +1634,26 @@ export default function Home8() {
                       </p>
                     <svg
                       onClick={() => {
-                        const next = Math.min(MAX, logHydrationMl + 250);
-                        setLogHydrationMl(next);
-                        saveLogHydration(next);
-                        pingHydrationToast();
+                        if (hydrationTapTimer.current) {
+                          // Second tap within the window — treat as a double-tap: remove an increment.
+                          clearTimeout(hydrationTapTimer.current);
+                          hydrationTapTimer.current = null;
+                          const next = Math.max(0, logHydrationMl - 250);
+                          setLogHydrationMl(next);
+                          saveLogHydration(next);
+                          pingHydrationToast();
+                        } else {
+                          // Wait briefly to see if a second tap follows before committing the add.
+                          hydrationTapTimer.current = setTimeout(() => {
+                            hydrationTapTimer.current = null;
+                            const next = Math.min(MAX, logHydrationMl + 250);
+                            setLogHydrationMl(next);
+                            saveLogHydration(next);
+                            pingHydrationToast();
+                          }, 280);
+                        }
                       }}
-                      viewBox="0 0 100 130" width="138" height="179" style={{ overflow: "visible", cursor: logHydrationMl >= MAX ? "default" : "pointer" }}>
+                      viewBox="0 0 100 130" width="138" height="179" style={{ overflow: "visible", cursor: "pointer" }}>
                       <defs>
                         <clipPath id="drop-clip-r">
                           <path d="M50 4 C72 22 94 58 94 84 A44 44 0 0 1 6 84 C6 58 28 22 50 4 Z"/>
@@ -1687,31 +1696,6 @@ export default function Home8() {
                         {labelMl}
                       </text>
                     </svg>
-                    </div>
-
-                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 2 }}>
-                      <button
-                        onClick={() => {
-                          const next = Math.max(0, logHydrationMl - 250);
-                          setLogHydrationMl(next);
-                          saveLogHydration(next);
-                          pingHydrationToast();
-                        }}
-                        style={{ width: 34, height: 34, borderRadius: "50%", background: "#fff", border: "1.5px solid #dde2e8", boxShadow: "0 1px 4px rgba(0,0,0,0.10)", cursor: logHydrationMl <= 0 ? "default" : "pointer", fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: logHydrationMl <= 0 ? "#c8cdd3" : "#6b7480", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
-                      >
-                        −
-                      </button>
-                      <button
-                        onClick={() => {
-                          const next = Math.min(MAX, logHydrationMl + 250);
-                          setLogHydrationMl(next);
-                          saveLogHydration(next);
-                          pingHydrationToast();
-                        }}
-                        style={{ width: 34, height: 34, borderRadius: "50%", background: logHydrationMl >= MAX ? "#e8f0e8" : "#3b9eff", border: "none", cursor: logHydrationMl >= MAX ? "default" : "pointer", fontSize: "clamp(15px, 3.9vw, 18px)", fontWeight: 700, color: logHydrationMl >= MAX ? "#16a34a" : "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
-                      >
-                        +
-                      </button>
                     </div>
                   </>
                 );
@@ -2547,7 +2531,7 @@ export default function Home8() {
           style={{
             position: "fixed", left: "50%", bottom: 18, transform: "translateX(-50%)",
             display: "flex", alignItems: "center", gap: 18,
-            zIndex: doIdx === 1 ? 65 : -1, opacity: doIdx === 1 ? 1 : 0, pointerEvents: doIdx === 1 ? "auto" : "none",
+            zIndex: doIdx === 1 ? 65 : -1, opacity: doIdx === 1 ? 0.7 : 0, pointerEvents: doIdx === 1 ? "auto" : "none",
             transition: "opacity 0.3s",
           }}
         >

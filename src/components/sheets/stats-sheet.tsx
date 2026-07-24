@@ -35,6 +35,12 @@ function ExpandableRow({ color, icon, title, value, sub, expanded, dim, onToggle
   );
 }
 
+function SectionHeader({ title, first }: { title: string; first?: boolean }) {
+  return (
+    <p style={{ margin: first ? "0 4px 0" : "12px 4px 0", fontSize: 15, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "#9aa0a6" }}>{title}</p>
+  );
+}
+
 function PadlaPtsRow({ points, expanded, dim, onToggle }: { points: number; expanded: boolean; dim?: boolean; onToggle: () => void }) {
   const [showAll, setShowAll] = useState(false);
 
@@ -131,7 +137,7 @@ export default function StatsSheet({ open, onClose, points, streak, winRate, rea
           </div>
         </div>
         <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px", display: "flex", flexDirection: "column", gap: 8 }} onClick={() => setExpandedKey(null)}>
-          <PadlaPtsRow points={points} expanded={expandedKey === "padla"} dim={expandedKey !== null && expandedKey !== "padla"} onToggle={() => toggle("padla")} />
+          <SectionHeader title="Performance" first />
           <ExpandableRow
             color="#7c3aed"
             icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>}
@@ -143,18 +149,6 @@ export default function StatsSheet({ open, onClose, points, streak, winRate, rea
             onToggle={() => toggle("form")}
           >
             <FormScoreContent />
-          </ExpandableRow>
-          <ExpandableRow
-            color="#d97706"
-            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="#d97706" stroke="none"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg>}
-            title="Streak"
-            value={streak > 0 ? streak : "—"}
-            sub={streak > 0 ? "days in a row" : "start today"}
-            expanded={expandedKey === "streak"}
-            dim={expandedKey !== null && expandedKey !== "streak"}
-            onToggle={() => toggle("streak")}
-          >
-            <StreakContent streak={streak} />
           </ExpandableRow>
           <ExpandableRow
             color={matchesColor}
@@ -169,18 +163,6 @@ export default function StatsSheet({ open, onClose, points, streak, winRate, rea
             <MatchesContent />
           </ExpandableRow>
           <ExpandableRow
-            color="#2563eb"
-            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2z"/></svg>}
-            title="Insights"
-            value={insightsCount > 0 ? insightsCount : "—"}
-            sub="available"
-            expanded={expandedKey === "insights"}
-            dim={expandedKey !== null && expandedKey !== "insights"}
-            onToggle={() => toggle("insights")}
-          >
-            <InsightsContent streak={streak} />
-          </ExpandableRow>
-          <ExpandableRow
             color="#0d9488"
             icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d9488" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41L11 3.83A2 2 0 0 0 9.59 3H4a1 1 0 0 0-1 1v5.59a2 2 0 0 0 .59 1.41l9.58 9.58a2 2 0 0 0 2.83 0l4.59-4.59a2 2 0 0 0 0-2.83z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>}
             title="Patterns"
@@ -191,6 +173,35 @@ export default function StatsSheet({ open, onClose, points, streak, winRate, rea
             onToggle={() => toggle("patterns")}
           >
             <PatternsContent />
+          </ExpandableRow>
+
+          <SectionHeader title="Consistency" />
+          <PadlaPtsRow points={points} expanded={expandedKey === "padla"} dim={expandedKey !== null && expandedKey !== "padla"} onToggle={() => toggle("padla")} />
+          <ExpandableRow
+            color="#d97706"
+            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="#d97706" stroke="none"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg>}
+            title="Streak"
+            value={streak > 0 ? streak : "—"}
+            sub={streak > 0 ? "days in a row" : "start today"}
+            expanded={expandedKey === "streak"}
+            dim={expandedKey !== null && expandedKey !== "streak"}
+            onToggle={() => toggle("streak")}
+          >
+            <StreakContent streak={streak} />
+          </ExpandableRow>
+
+          <SectionHeader title="Learning" />
+          <ExpandableRow
+            color="#2563eb"
+            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2z"/></svg>}
+            title="Insights"
+            value={insightsCount > 0 ? insightsCount : "—"}
+            sub="available"
+            expanded={expandedKey === "insights"}
+            dim={expandedKey !== null && expandedKey !== "insights"}
+            onToggle={() => toggle("insights")}
+          >
+            <InsightsContent streak={streak} />
           </ExpandableRow>
         </div>
       </div>
