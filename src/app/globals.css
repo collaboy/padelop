@@ -208,10 +208,6 @@ body {
 
 @keyframes breathe { 0%, 100% { box-shadow: 0 0 5px 0px var(--glow, #16a34a); } 50% { box-shadow: 0 0 20px 5px var(--glow, #16a34a); } }
 .animate-breathe { animation: breathe 2.5s ease-in-out infinite; }
-@keyframes breathe-strong { 0%, 100% { box-shadow: 0 0 4px 2px color-mix(in srgb, var(--glow, #2653d4) 40%, transparent); } 50% { box-shadow: 0 0 10px 5px color-mix(in srgb, var(--glow, #2653d4) 25%, transparent); } }
-.breathe-strong { animation: breathe-strong 1.6s ease-in-out infinite; }
-@keyframes text-glow { 0%, 100% { text-shadow: 0 0 4px rgba(255,255,255,0.2); } 50% { text-shadow: 0 0 14px rgba(255,255,255,0.85), 0 0 4px rgba(255,255,255,0.4); } }
-.animate-text-glow { animation: text-glow 2s ease-in-out infinite; }
 @keyframes ball-drop {
   0%   { transform: translateY(-80vh); animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45); }
   65%  { transform: translateY(0); animation-timing-function: ease-out; }
@@ -222,8 +218,6 @@ body {
 }
 .animate-bounce-in { animation: ball-drop 0.9s both; animation-delay: 0.1s; }
 .animate-tap-pulse { animation: ball-drop 0.9s ease 0.1s 1 normal both, circle-breathe 3.6s ease-in-out 1.2s infinite; }
-@keyframes time-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-.animate-time-blink { animation: time-blink 1.2s ease-in-out infinite; }
 
 @keyframes nav-slide-out-left  { to   { transform: translateX(-28%); opacity: 0; } }
 @keyframes nav-slide-out-right { to   { transform: translateX(28%);  opacity: 0; } }
@@ -232,14 +226,10 @@ body {
 @keyframes water-wave { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 .animate-water-wave { animation: water-wave 2.4s linear infinite; }
 @keyframes circle-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.022); } }
-.animate-circle-breathe { animation: circle-breathe 4s ease-in-out infinite; }
-@keyframes done-breathe { 0%, 100% { border-color: rgba(0,212,85,0.3); } 50% { border-color: rgba(0,212,85,0.9); } }
-.animate-done-breathe { animation: done-breathe 3s ease-in-out infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes draw-check { from { stroke-dashoffset: 30; } to { stroke-dashoffset: 0; } }
 @keyframes done-flash-out { 0%, 77% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes p1-float-local { 0% { opacity: 0; transform: translateY(6px) scale(0.85); } 15% { opacity: 1; transform: translateY(-4px) scale(1.1); } 75% { opacity: 1; transform: translateY(-14px) scale(1.1); } 100% { opacity: 0; transform: translateY(-24px) scale(1); } }
-@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
 /* Root: no animation (background stays put) */
 ::view-transition-old(root),
