@@ -26,13 +26,19 @@ async function subscribeToPush(reg: ServiceWorkerRegistration) {
   await saveSubscription(sub);
 }
 
+// iOS PWAs can report Notification.permission as "default" again on a later
+// launch even after the user already granted it, so we also persist our own
+// record of a successful grant and trust that over the live API check.
+const GRANTED_KEY = "padelop:push-granted";
+
 export default function PushPrompt() {
   const [showing, setShowing] = useState(false);
 
   useEffect(() => {
     if (typeof Notification === "undefined" || !("serviceWorker" in navigator) || !("PushManager" in window)) return;
 
-    if (Notification.permission === "granted") {
+    if (localStorage.getItem(GRANTED_KEY) === "1" || Notification.permission === "granted") {
+      localStorage.setItem(GRANTED_KEY, "1");
       navigator.serviceWorker.register("/sw.js").then(subscribeToPush).catch(() => {});
       return;
     }
@@ -47,6 +53,7 @@ export default function PushPrompt() {
     setShowing(false);
     const result = await Notification.requestPermission();
     if (result === "granted") {
+      localStorage.setItem(GRANTED_KEY, "1");
       const reg = await navigator.serviceWorker.register("/sw.js");
       await subscribeToPush(reg).catch(() => {});
     }

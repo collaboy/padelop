@@ -51,6 +51,7 @@ async function unsubscribeAndRemove() {
       await sub.unsubscribe();
     }
   }
+  localStorage.removeItem("padelop:push-granted");
 }
 
 type NotifStatus = "unsupported" | "denied" | "enabled" | "off";
