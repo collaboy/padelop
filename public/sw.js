@@ -1,4 +1,4 @@
-// v4
+// v5
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 
@@ -10,14 +10,14 @@ self.addEventListener('push', e => {
       icon: '/icon-192.png',
       badge: '/icon-192.png',
       tag: d.tag ?? 'padelop',
-      data: { url: d.url ?? '/home8' },
+      data: { url: d.url ?? '/home' },
     })
   );
 });
 
 self.addEventListener('notificationclick', e => {
   e.notification.close();
-  const url = e.notification.data?.url ?? '/home8';
+  const url = e.notification.data?.url ?? '/home';
   e.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
       const existing = list.find(c => c.url.startsWith(self.location.origin));

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 async function saveSubscription(sub: PushSubscription) {
   const json = sub.toJSON();
@@ -27,8 +28,11 @@ async function subscribeToPush(reg: ServiceWorkerRegistration) {
 }
 
 // iOS PWAs can report Notification.permission as "default" again on a later
-// launch even after the user already granted it, so we also persist our own
-// record of a successful grant and trust that over the live API check.
+// launch even after the user already granted it, and localStorage itself
+// isn't fully reliable on iOS home-screen web apps either. So the database
+// row (created by a successful subscribe) is the real source of truth —
+// we only fall back to the local flag/live API check while that query is
+// in flight, to avoid a flash of the prompt on every load.
 const GRANTED_KEY = "padelop:push-granted";
 
 export default function PushPrompt() {
@@ -37,16 +41,35 @@ export default function PushPrompt() {
   useEffect(() => {
     if (typeof Notification === "undefined" || !("serviceWorker" in navigator) || !("PushManager" in window)) return;
 
-    if (localStorage.getItem(GRANTED_KEY) === "1" || Notification.permission === "granted") {
-      localStorage.setItem(GRANTED_KEY, "1");
-      navigator.serviceWorker.register("/sw.js").then(subscribeToPush).catch(() => {});
-      return;
+    let cancelled = false;
+
+    async function alreadySubscribedOnServer() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return false;
+        const { data } = await supabase.from("push_subscriptions").select("id").eq("user_id", user.id).limit(1);
+        return !!data?.length;
+      } catch {
+        return false;
+      }
     }
 
-    if (Notification.permission === "default") {
-      const t = setTimeout(() => setShowing(true), 4000);
-      return () => clearTimeout(t);
+    async function run() {
+      if (localStorage.getItem(GRANTED_KEY) === "1" || Notification.permission === "granted" || await alreadySubscribedOnServer()) {
+        if (cancelled) return;
+        localStorage.setItem(GRANTED_KEY, "1");
+        navigator.serviceWorker.register("/sw.js").then(subscribeToPush).catch(() => {});
+        return;
+      }
+
+      if (Notification.permission === "default" && !cancelled) {
+        setTimeout(() => { if (!cancelled) setShowing(true); }, 4000);
+      }
     }
+    run();
+
+    return () => { cancelled = true; };
   }, []);
 
   async function allow() {
