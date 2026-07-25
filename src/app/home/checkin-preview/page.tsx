@@ -12,7 +12,7 @@ export default function CheckinPreview() {
       </div>
       <LogSheet
         open={true}
-        onClose={() => router.push("/home8")}
+        onClose={() => router.push("/home")}
         defaultSub="checkin"
         previewMode={true}
       />

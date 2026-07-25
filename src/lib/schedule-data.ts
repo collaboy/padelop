@@ -1,4 +1,4 @@
-// Shared schedule data and logic — used by home8 and /schedule
+// Shared schedule data and logic — used by /home
 
 export const pad = (n: number) => String(n).padStart(2, "0");
 export const addMins = (h: number, m: number, delta: number) => {

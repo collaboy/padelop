@@ -37,7 +37,7 @@ export default function AuthPage() {
       .eq("id", data.user.id)
       .single();
 
-    window.location.href = profile?.display_name ? "/home8" : "/onboarding";
+    window.location.href = profile?.display_name ? "/home" : "/onboarding";
   }
 
   if (checkEmail) {

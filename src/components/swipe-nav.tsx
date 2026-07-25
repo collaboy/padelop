@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useRef } from "react";
 import { startNavLoad } from "@/lib/nav-events";
 
-const NAV_ORDER = ["/home8", "/matches"];
+const NAV_ORDER = ["/home", "/matches"];
 
 type VTDocument = Document & {
   startViewTransition: (cb: () => void) => { finished: Promise<void> };

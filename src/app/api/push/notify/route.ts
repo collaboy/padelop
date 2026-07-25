@@ -72,7 +72,7 @@ export async function GET(request: Request) {
           JSON.stringify({
             title: item.title,
             body: item.body,
-            url: "/home8",
+            url: "/home",
             tag: item.title.toLowerCase().replace(/\s+/g, "-"),
           })
         );
