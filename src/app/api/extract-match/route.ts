@@ -1,5 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const maxDuration = 30;
 
@@ -11,6 +13,14 @@ export async function POST(req: NextRequest) {
       { error: "no_api_key", message: "ANTHROPIC_API_KEY is not configured. Add it to .env.local and restart the server." },
       { status: 503 }
     );
+  }
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  if (!checkRateLimit(`extract-match:${user.id}`, 20, 60 * 60 * 1000)) {
+    return NextResponse.json({ error: "rate_limited", message: "Too many requests — please try again in a bit." }, { status: 429 });
   }
 
   let body: { image: string; mediaType: string };

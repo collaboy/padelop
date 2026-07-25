@@ -1,5 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const maxDuration = 15;
 
@@ -12,6 +14,14 @@ const DAY_CONTEXT: Record<string, string> = {
 export async function POST(req: NextRequest) {
   if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json({ error: "no_api_key" }, { status: 503 });
+  }
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  if (!checkRateLimit(`nutrition-analysis:${user.id}`, 15, 60 * 60 * 1000)) {
+    return NextResponse.json({ error: "rate_limited", message: "Too many requests — please try again in a bit." }, { status: 429 });
   }
 
   let body: { meals: Array<{ time: string; description: string }>; dayType: string };
