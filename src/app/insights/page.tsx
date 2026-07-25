@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { startNavLoad } from "@/lib/nav-events";
-import { saveGearToDb, uploadGearImageToStorage, saveScoreSnapshotToDb, saveNutritionInsightToDb } from "@/lib/db";
+import { saveScoreSnapshotToDb, saveNutritionInsightToDb } from "@/lib/db";
 import { hydrateFromSupabase } from "@/lib/sync";
 import { analyzeMeals, compareMealsToSchedule, foodGrade, loadFoodHistory, type MealEntry } from "@/lib/food-scoring";
 import {
@@ -140,35 +140,10 @@ export default function InsightsPage() {
   const [foodHistory, setFoodHistory] = useState<Array<{ date: string; score: number }>>([]);
   const [todayMeals, setTodayMeals] = useState<MealEntry[]>([]);
   const [nextMatch, setNextMatch] = useState<StoredMatch | null>(null);
-  const [gearEditOpen, setGearEditOpen] = useState(false);
-  const [racketName, setRacketName] = useState("");
-  const [racketType, setRacketType] = useState("");
-  const [racketImage, setRacketImage] = useState("");
-  const [racketSince, setRacketSince] = useState("");
-  const [shoeImage, setShoeImage] = useState("");
-  const [kitImage, setKitImage] = useState("");
-  const racketRowRef = useRef<HTMLDivElement>(null);
-  const [racketSlotSize, setRacketSlotSize] = useState(80);
-
-  useEffect(() => {
-    const el = racketRowRef.current;
-    if (!el) return;
-    const measure = () => setRacketSlotSize(el.offsetHeight - 24);
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    measure();
-    return () => ro.disconnect();
-  }, []);
 
   function loadAll() {
     const todayStr = new Date().toISOString().slice(0, 10);
     try { const raw = localStorage.getItem("padelop:profile"); if (raw) setProfile(JSON.parse(raw)); } catch {}
-    try {
-      const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}");
-      setRacketName(g.racketName ?? ""); setRacketType(g.racketType ?? "");
-      setRacketImage(g.racketImage ?? ""); setRacketSince(g.racketSince ?? "");
-      setShoeImage(g.shoeImage ?? ""); setKitImage(g.kitImage ?? "");
-    } catch {}
     try {
       const raw = localStorage.getItem("padelop:next-match");
       const m = raw ? JSON.parse(raw) as StoredMatch : null;
@@ -246,48 +221,6 @@ export default function InsightsPage() {
         }
       }).catch(() => {});
   }, [todayMeals, nextMatch]);
-
-  const handleRacketImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = reader.result as string; setRacketImage(img);
-      uploadGearImageToStorage("racket", img).then(url => {
-        const src = url ?? img; setRacketImage(src);
-        try { const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); localStorage.setItem("padelop:gear", JSON.stringify({ ...g, racketImage: src })); } catch {}
-        if (url) saveGearToDb({ type: "racket", photo_url: url });
-      });
-    };
-    reader.readAsDataURL(file); e.target.value = "";
-  };
-
-  const handleShoeImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = reader.result as string; setShoeImage(img);
-      uploadGearImageToStorage("shoe", img).then(url => {
-        const src = url ?? img; setShoeImage(src);
-        try { const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); localStorage.setItem("padelop:gear", JSON.stringify({ ...g, shoeImage: src })); } catch {}
-        if (url) saveGearToDb({ type: "shoe", photo_url: url });
-      });
-    };
-    reader.readAsDataURL(file); e.target.value = "";
-  };
-
-  const handleKitImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = reader.result as string; setKitImage(img);
-      uploadGearImageToStorage("kit", img).then(url => {
-        const src = url ?? img; setKitImage(src);
-        try { const g = JSON.parse(localStorage.getItem("padelop:gear") || "{}"); localStorage.setItem("padelop:gear", JSON.stringify({ ...g, kitImage: src })); } catch {}
-        if (url) saveGearToDb({ type: "kit", photo_url: url });
-      });
-    };
-    reader.readAsDataURL(file); e.target.value = "";
-  };
 
   // Derived values
   const deduped = Object.values(
@@ -388,84 +321,6 @@ export default function InsightsPage() {
           ))}
         </div>
       </div>
-
-      {/* My Gear */}
-      <section style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <div style={{ background: "#fff", borderRadius: "var(--r-lg)", overflow: "hidden", boxShadow: "var(--shadow-card)", border: "1px solid var(--c-line)" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px 0" }}>
-            <p className="t-label" style={{ color: "var(--c-label)", margin: 0 }}>My Gear</p>
-            <button onClick={() => setGearEditOpen(o => !o)} className="t-caption" style={{ background: "none", border: "none", cursor: "pointer", fontWeight: 500, color: "var(--c-forest)" }}>{gearEditOpen ? "Done" : "Edit"}</button>
-          </div>
-          <div ref={racketRowRef} style={{ display: "flex", alignItems: "stretch", padding: 12, gap: 14 }}>
-            <label htmlFor="racket-img-upload" style={{ cursor: "pointer", flexShrink: 0, width: racketSlotSize, height: racketSlotSize, display: "block" }}>
-              <div style={{ width: "100%", height: "100%", borderRadius: 10, overflow: "hidden", background: "#f4f4f6", border: racketImage ? "none" : "1.5px dashed #dde0e4", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {racketImage
-                  // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={racketImage} alt="Racket" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c4c7cc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
-                }
-              </div>
-            </label>
-            <input id="racket-img-upload" type="file" accept="image/*" className="hidden" onChange={handleRacketImage} />
-            <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center", padding: "8px 0" }}>
-              <span className="t-label" style={{ color: "var(--c-label)", display: "block", marginBottom: 8 }}>Current Racket</span>
-              <p className="t-title" style={{ color: "var(--c-text)", margin: 0, lineHeight: 1.2 }}>{racketName || "—"}</p>
-              <p className="t-body" style={{ color: "var(--c-text-dim)", margin: "4px 0 0" }}>{racketType || "Add a description"}</p>
-              <p className="t-caption" style={{ color: racketSince ? "var(--c-hint)" : "var(--c-disabled)", margin: "6px 0 0" }}>
-                {racketSince ? `Using since ${new Date(racketSince + "-01").toLocaleDateString("en-GB", { month: "short", year: "numeric" })}` : "Using since —"}
-              </p>
-            </div>
-          </div>
-          {gearEditOpen && (
-            <div style={{ borderTop: "1px solid #f0f0f0", padding: "20px", display: "flex", flexDirection: "column", gap: 12 }}>
-              <div>
-                <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 0 6px" }}>Racket name</p>
-                <input type="text" value={racketName} onChange={e => setRacketName(e.target.value)} placeholder="e.g. Bullpadel Vertex" className="t-body" style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--r-sm)", border: "2px solid #e2e2e2", fontWeight: 500, color: "var(--c-text)", outline: "none", background: "var(--c-bg-input)" }} />
-              </div>
-              <div>
-                <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 0 6px" }}>Type / description</p>
-                <input type="text" value={racketType} onChange={e => setRacketType(e.target.value)} placeholder="e.g. Control, Power, Hybrid" className="t-body" style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--r-sm)", border: "2px solid #e2e2e2", fontWeight: 500, color: "var(--c-text)", outline: "none", background: "var(--c-bg-input)" }} />
-              </div>
-              <div>
-                <p className="t-label" style={{ color: "var(--c-hint)", margin: "0 0 6px" }}>Using since</p>
-                <input type="month" value={racketSince} onChange={e => setRacketSince(e.target.value)} className="t-body" style={{ width: "100%", padding: "10px 14px", borderRadius: "var(--r-sm)", border: "2px solid #e2e2e2", fontWeight: 500, color: "var(--c-text)", outline: "none", background: "var(--c-bg-input)" }} />
-              </div>
-              <button
-                onClick={() => { localStorage.setItem("padelop:gear", JSON.stringify({ racketName, racketType, racketImage, racketSince, shoeImage, kitImage })); saveGearToDb({ type: "racket", name: racketName ?? undefined, racket_type: racketType ?? undefined, racket_since: racketSince ?? undefined, photo_url: racketImage?.startsWith("http") ? racketImage : undefined }); setGearEditOpen(false); }}
-                className="t-ui" style={{ padding: 12, borderRadius: "var(--r-sm)", background: "var(--c-blue)", border: "none", cursor: "pointer", color: "#fff" }}
-              >Save</button>
-            </div>
-          )}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1px", background: "var(--c-line)", borderTop: "1px solid var(--c-line)" }}>
-            <div style={{ background: "#fff", padding: 16, display: "flex", flexDirection: "column" }}>
-              <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 12px" }}>My Shoes</p>
-              <label htmlFor="shoe-img-upload" style={{ cursor: "pointer", display: "block", flex: 1 }}>
-                <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: shoeImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  {shoeImage
-                    // eslint-disable-next-line @next/next/no-img-element
-                    ? <img src={shoeImage} alt="Shoes" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 17h20v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-1z" /><path d="M2 17c0-3.5 2.5-6 6-6h2l3-2h3c2.2 0 4 1.5 4.5 3.5L21 17" /></svg>
-                  }
-                </div>
-              </label>
-              <input id="shoe-img-upload" type="file" accept="image/*" className="hidden" onChange={handleShoeImage} />
-            </div>
-            <div style={{ background: "#fff", padding: 16, display: "flex", flexDirection: "column" }}>
-              <p className="t-label" style={{ color: "var(--c-label)", margin: "0 0 12px" }}>My Kit</p>
-              <label htmlFor="kit-img-upload" style={{ cursor: "pointer", display: "block", flex: 1 }}>
-                <div style={{ aspectRatio: "1 / 1", borderRadius: "var(--r-sm)", overflow: "hidden", background: "var(--c-bg)", border: kitImage ? "none" : "1.5px dashed var(--c-line)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  {kitImage
-                    // eslint-disable-next-line @next/next/no-img-element
-                    ? <img src={kitImage} alt="Kit" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    : <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--c-disabled)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z" /></svg>
-                  }
-                </div>
-              </label>
-              <input id="kit-img-upload" type="file" accept="image/*" className="hidden" onChange={handleKitImage} />
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Streak */}
       {(() => {

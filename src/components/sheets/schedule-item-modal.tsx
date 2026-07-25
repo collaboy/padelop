@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import {
   SCHEDULE_DETAILS, DRILL_LIBRARY, DEFAULT_DRILL,
   type ScheduleItem,
@@ -67,8 +67,17 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
   const [mealSuggestionsOpen, setMealSuggestionsOpen] = useState(false);
   const [mealLogOpen, setMealLogOpen] = useState(false);
   const [mealText, setMealText] = useState("");
+  const [pinnedTop, setPinnedTop] = useState<number | null>(null);
   const swipeTrackRef = useRef<HTMLDivElement>(null);
   const swipeStartXRef = useRef(0);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Pin the card's top position after its first (collapsed-height) paint, so
+  // expanding "Info" only grows the card downward instead of the surrounding
+  // flex centering shifting the whole card upward as it gets taller.
+  useLayoutEffect(() => {
+    if (cardRef.current) setPinnedTop(cardRef.current.getBoundingClientRect().top);
+  }, []);
 
   const detail = SCHEDULE_DETAILS[item.title];
   const isMeal = detail?.type === "meal";
@@ -110,24 +119,26 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
 
   return (
     <div className="fixed inset-0 flex items-center justify-center px-6" style={{ zIndex }} onClick={() => requestClose()} onTouchStart={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
-      <style>{`@keyframes scheditem-pop-in{from{transform:scale(0.92);opacity:0}to{transform:scale(1);opacity:1}}@keyframes scheditem-fade-out{from{opacity:1}to{opacity:0}}`}</style>
+      <style>{`@keyframes scheditem-pop-in{from{transform:translateX(-50%) scale(0.92);opacity:0}to{transform:translateX(-50%) scale(1);opacity:1}}@keyframes scheditem-fade-out{from{opacity:1}to{opacity:0}}`}</style>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: closing ? "scheditem-fade-out 0.4s ease both" : undefined }} />
       <div
+        ref={cardRef}
         className="relative w-full bg-white flex flex-col"
-        style={{ maxWidth: 420, borderRadius: 28, maxHeight: "80dvh", animation: closing ? "scheditem-fade-out 0.4s ease both" : "scheditem-pop-in 0.26s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 20px 60px rgba(0,0,0,0.25)", overflow: "hidden" }}
+        style={{
+          maxWidth: 420, borderRadius: 28,
+          maxHeight: pinnedTop !== null ? `calc(100dvh - ${pinnedTop}px - 24px)` : "80dvh",
+          ...(pinnedTop !== null ? { position: "fixed", top: pinnedTop, left: "50%", width: "calc(100% - 48px)", transform: "translateX(-50%)" } : {}),
+          animation: closing ? "scheditem-fade-out 0.4s ease both" : "scheditem-pop-in 0.26s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 20px 60px rgba(0,0,0,0.25)", overflow: "hidden",
+        }}
         onClick={e => e.stopPropagation()}
       >
         <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
         <div className="overflow-y-auto flex-1 px-6 pb-6" style={{ minHeight: 0 }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 7, background: `${item.color}18`, borderRadius: 999, padding: "6px 14px", margin: "20px 0 12px" }}>
-            <span style={{ width: 8, height: 8, borderRadius: "50%", background: item.color, flexShrink: 0 }} />
-            <span style={{ fontSize: v.timeLabel, fontWeight: 700, color: item.color }}>{item.time}{endTime ? ` – ${endTime}` : ""}</span>
-          </div>
-          <p style={{ margin: "0 0 6px", fontSize: v.title, fontWeight: 800, color: "#1a1c1c", lineHeight: 1.25 }}>{item.title}</p>
+          <p style={{ margin: "20px 0 6px", fontSize: v.title, fontWeight: 800, color: "#1a1c1c", lineHeight: 1.25 }}>{item.title}</p>
           {item.subtitle && (
             // Keep a non-breaking space after em dashes so "—" never ends up
             // orphaned alone at the end of a wrapped line at this larger size.
-            <p style={{ margin: "0 0 20px", fontSize: v.subtitle, fontWeight: 500, color: "#8a9096", lineHeight: 1.25 }}>{item.subtitle.replace(/ — /g, " — ")}</p>
+            <p style={{ margin: "0 0 20px", fontSize: v.subtitle, fontWeight: 500, color: "#000", lineHeight: 1.25 }}>{item.subtitle.replace(/ — /g, " — ")}</p>
           )}
 
           {isComplete ? (

@@ -1352,7 +1352,7 @@ export default function Home8() {
                             <span style={{ position: "absolute", inset: 0, color: "#000", opacity: showNiceWork ? 0 : 1, transition: "opacity 0.4s ease" }}>Up next</span>
                           </span>
                           {plusOneTitle === s.title && (
-                            <span style={{ position: "absolute", left: 0, right: 0, bottom: "calc(100% + 24px)", fontSize: 26, fontWeight: 800, color: "#16a34a", zIndex: 3, opacity: 0, animation: "p1-float-local 1.6s ease-out forwards" }}>+1</span>
+                            <span style={{ position: "absolute", left: 0, right: 0, bottom: "calc(100% + 24px)", fontSize: 26, fontWeight: 800, color: "#000", zIndex: 3, opacity: 0, animation: "p1-float-local 1.6s ease-out forwards" }}>+1</span>
                           )}
                           {nextTitle.includes(" & ")
                             ? <>{nextTitle.split(" & ")[0]}<br />{"& " + nextTitle.split(" & ").slice(1).join(" & ")}</>
@@ -1473,24 +1473,26 @@ export default function Home8() {
                       ref={warmupVizRef}
                       style={{ position: "absolute", inset: 0, width: "100%", height: "100%", display: "block", opacity: warmupPlaying ? 1 : 0, transition: "opacity 0.5s" }}
                     />
-                    {/* INFO STATE: fades out when playing */}
-                    <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: warmupPlaying ? 0 : isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.35s", pointerEvents: warmupPlaying ? "none" : "auto" }}>
+                    {/* INFO STATE: fades out when playing — title is absolutely centered so the button below it never shifts it off-center */}
+                    <div style={{ position: "absolute", top: "50%", left: 0, right: 0, transform: "translateY(-50%)", zIndex: 1, opacity: warmupPlaying ? 0 : isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.35s", pointerEvents: warmupPlaying ? "none" : "auto" }}>
                       {(() => {
                         const circleTitle = s.title;
                         return (
-                          <p style={{ position: "relative", color: "#000", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, display: "inline-block", textAlign: "center", margin: 0 }}>
+                          <p style={{ position: "relative", color: "#000", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, display: "inline-block", textAlign: "center", margin: 0, width: "100%" }}>
                             <span style={{ position: "absolute", left: 0, right: 0, bottom: "100%", fontSize: 13, fontWeight: 700, color: "#000", letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1 }}>Now</span>
                             {circleTitle.includes(" & ")
                               ? <>{circleTitle.split(" & ")[0]}<br />{"& " + circleTitle.split(" & ").slice(1).join(" & ")}</>
                               : circleTitle}
+                            {isAudioAvailable && (
+                              <span style={{ position: "absolute", left: 0, right: 0, top: "100%", display: "flex", justifyContent: "center" }}>
+                                <button onClick={handleWarmupToggle} style={{ background: "#fff", border: "none", borderRadius: "50%", cursor: "pointer", width: 52, height: 52, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "auto" }}>
+                                  <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><polygon points="3,1 15,8 3,15" fill="#1a1c1c"/></svg>
+                                </button>
+                              </span>
+                            )}
                           </p>
                         );
                       })()}
-                      {isAudioAvailable && (
-                        <button onClick={handleWarmupToggle} style={{ marginTop: 10, background: "#fff", border: "none", borderRadius: "50%", cursor: "pointer", width: 52, height: 52, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><polygon points="3,1 15,8 3,15" fill="#1a1c1c"/></svg>
-                        </button>
-                      )}
                     </div>
 
                     {/* PLAYING STATE: fades in when playing */}
@@ -1585,15 +1587,12 @@ export default function Home8() {
                           ? `Today focus on ${drillTag}. Small improvements compound into big gains.`
                           : "Every session counts. Show up, put in the work, and trust the process.";
                       return (
-                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, padding: "0 36px", width: "100%" }}>
-                          <p style={{ margin: 0, fontSize: 13, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#9aa0a6", textAlign: "center" }}>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0, padding: "0 36px", width: "100%" }}>
+                          <p style={{ margin: 0, fontSize: 13, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4", textAlign: "center" }}>
                             Today
                           </p>
-                          <p style={{ margin: 0, fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.1, textAlign: "center" }}>{dayLabel}</p>
-                          <p style={{ margin: "16px 0 0", fontSize: 13, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4", textAlign: "center" }}>
-                            Coach
-                          </p>
-                          <p style={{ margin: 0, fontSize: "clamp(17px, 4.4vw, 20px)", color: "#6b7480", lineHeight: 1.6, textAlign: "center" }}>{sub}</p>
+                          <p style={{ margin: 0, fontSize: "clamp(36px, 9vw, 48px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1, textAlign: "center" }}>{dayLabel}</p>
+                          <p style={{ margin: "16px 0 0", fontSize: "clamp(17px, 4.4vw, 20px)", color: "#6b7480", lineHeight: 1.4, textAlign: "center" }}>{sub}</p>
                         </div>
                       );
                     })()}
