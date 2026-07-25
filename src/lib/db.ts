@@ -22,7 +22,7 @@ export async function saveTrainingToDb(entry: {
       duration_mins: entry.duration_mins ?? null,
       notes:        entry.notes ?? null,
     });
-  } catch {}
+  } catch (err) { console.error("saveTrainingToDb failed:", err); }
 }
 
 export async function saveProfileToDb(profile: {
@@ -52,7 +52,7 @@ export async function saveProfileToDb(profile: {
     if (profile.tournament_count !== undefined) fields.tournament_count = profile.tournament_count;
     if (profile.playing_since    !== undefined) fields.playing_since    = profile.playing_since;
     await supabase.from("profiles").upsert(fields);
-  } catch {}
+  } catch (err) { console.error("saveProfileToDb failed:", err); }
 }
 
 export async function saveUpcomingMatch(match: {
@@ -81,7 +81,7 @@ export async function saveUpcomingMatch(match: {
       player_3: match.player_3 ?? null,
       player_4: match.player_4 ?? null,
     }, { onConflict: "user_id,date,time" });
-  } catch {}
+  } catch (err) { console.error("saveUpcomingMatch failed:", err); }
 }
 
 export async function deleteUpcomingMatchFromDb(date: string, time: string) {
@@ -93,7 +93,7 @@ export async function deleteUpcomingMatchFromDb(date: string, time: string) {
       .eq("user_id", user.id)
       .eq("date", date)
       .eq("time", time);
-  } catch {}
+  } catch (err) { console.error("deleteUpcomingMatchFromDb failed:", err); }
 }
 
 export async function saveMatchReview(entry: {
@@ -146,7 +146,7 @@ export async function saveMatchReview(entry: {
         ...resultFields,
       });
     }
-  } catch {}
+  } catch (err) { console.error("saveMatchReview failed:", err); }
 }
 
 export async function saveScheduleDoneToDb(date: string, tasks: string[]) {
@@ -158,7 +158,7 @@ export async function saveScheduleDoneToDb(date: string, tasks: string[]) {
       { user_id: user.id, date, tasks },
       { onConflict: "user_id,date" }
     );
-  } catch {}
+  } catch (err) { console.error("saveScheduleDoneToDb failed:", err); }
 }
 
 export async function saveScoreSnapshotToDb(date: string, scores: { overall: number; recovery: number; nutrition: number; training: number; wellbeing: number; recoveryRaw?: number; wellbeingRaw?: number }) {
@@ -174,7 +174,7 @@ export async function saveScoreSnapshotToDb(date: string, scores: { overall: num
       },
       { onConflict: "user_id,date" }
     );
-  } catch {}
+  } catch (err) { console.error("saveScoreSnapshotToDb failed:", err); }
 }
 
 export async function saveCheckInToDb(data: {
@@ -218,7 +218,7 @@ export async function saveCheckInToDb(data: {
       pain_areas:      data.pain_areas ?? existing?.pain_areas ?? null,
       water_on_waking: data.water_on_waking ?? existing?.water_on_waking ?? null,
     }, { onConflict: "user_id,date" });
-  } catch {}
+  } catch (err) { console.error("saveCheckInToDb failed:", err); }
 }
 
 export async function saveNutritionToDb(entry: {
@@ -237,7 +237,7 @@ export async function saveNutritionToDb(entry: {
       meal_type:   entry.meal_type ?? null,
       description: entry.description ?? null,
     });
-  } catch {}
+  } catch (err) { console.error("saveNutritionToDb failed:", err); }
 }
 
 export async function saveGearToDb(item: {
@@ -258,7 +258,7 @@ export async function saveGearToDb(item: {
     if (item.racket_type !== undefined) fields.racket_type  = item.racket_type ?? null;
     if (item.racket_since !== undefined) fields.racket_since = item.racket_since ?? null;
     await supabase.from("gear").upsert(fields, { onConflict: "user_id,type" });
-  } catch {}
+  } catch (err) { console.error("saveGearToDb failed:", err); }
 }
 
 export async function saveNutritionInsightToDb(date: string, score: number, insight: string) {
@@ -273,7 +273,7 @@ export async function saveNutritionInsightToDb(date: string, score: number, insi
       nutrition_ai_score:    score,
       nutrition_ai_insight:  insight,
     }, { onConflict: "user_id,date" });
-  } catch {}
+  } catch (err) { console.error("saveNutritionInsightToDb failed:", err); }
 }
 
 export async function saveNoteToDb(entry: { date: string; body: string }) {
@@ -287,7 +287,7 @@ export async function saveNoteToDb(entry: { date: string; body: string }) {
       date:    entry.date,
       body:    entry.body,
     });
-  } catch {}
+  } catch (err) { console.error("saveNoteToDb failed:", err); }
 }
 
 export async function uploadGearImageToStorage(gearType: string, dataUrl: string): Promise<string | null> {
@@ -304,7 +304,8 @@ export async function uploadGearImageToStorage(gearType: string, dataUrl: string
     if (error) return null;
     const { data } = supabase.storage.from("gear-images").getPublicUrl(path);
     return data.publicUrl;
-  } catch {
+  } catch (err) {
+    console.error("uploadGearImageToStorage failed:", err);
     return null;
   }
 }
@@ -320,7 +321,7 @@ export async function saveHydrationToDb(date: string, ml: number) {
       date,
       ml,
     }, { onConflict: "user_id,date" });
-  } catch {}
+  } catch (err) { console.error("saveHydrationToDb failed:", err); }
 }
 
 // Inserts a baseline ml value only if no row exists for that date — never overwrites a real measurement
@@ -331,7 +332,7 @@ export async function deleteGearImageFromStorage(gearType: string): Promise<void
     if (!user) return;
     await supabase.storage.from("gear-images").remove([`${user.id}/${gearType}.jpg`]);
     await supabase.from("gear").update({ photo_url: null }).eq("user_id", user.id).eq("type", gearType);
-  } catch {}
+  } catch (err) { console.error("deleteGearImageFromStorage failed:", err); }
 }
 
 export async function seedHydrationToDb(date: string, ml: number) {
@@ -345,5 +346,5 @@ export async function seedHydrationToDb(date: string, ml: number) {
       date,
       ml,
     }, { onConflict: "user_id,date", ignoreDuplicates: true });
-  } catch {}
+  } catch (err) { console.error("seedHydrationToDb failed:", err); }
 }

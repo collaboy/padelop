@@ -264,7 +264,7 @@ export async function hydrateFromSupabase(): Promise<SyncResult | null> {
         supabase.from("schedule_done").upsert(
           { user_id: user.id, date, tasks: localSchedDone[date] },
           { onConflict: "user_id,date" }
-        ).then();
+        ).then(({ error }) => { if (error) console.error("hydrateFromSupabase: push schedule_done failed:", error); });
       }
     }
 
@@ -295,7 +295,7 @@ export async function hydrateFromSupabase(): Promise<SyncResult | null> {
         supabase.from("score_snapshots").upsert(
           { user_id: user.id, date: s.date, overall: s.overall, recovery: s.recovery, nutrition: s.nutrition, training: s.training, wellbeing: s.wellbeing, recovery_raw: s.recoveryRaw ?? null, wellbeing_raw: s.wellbeingRaw ?? null },
           { onConflict: "user_id,date" }
-        ).then();
+        ).then(({ error }) => { if (error) console.error("hydrateFromSupabase: push score_snapshots failed:", error); });
       }
     }
 
@@ -308,7 +308,8 @@ export async function hydrateFromSupabase(): Promise<SyncResult | null> {
     window.dispatchEvent(new Event("storage"));
     window.dispatchEvent(new Event("padelop:sync-done"));
     return { gameDays: matchDates, upcoming, nextMatch: upcoming[0] ?? null };
-  } catch {
+  } catch (err) {
+    console.error("hydrateFromSupabase failed:", err);
     window.dispatchEvent(new Event("padelop:sync-done"));
     return null;
   }
