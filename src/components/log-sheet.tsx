@@ -665,7 +665,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
             </button>
             {/* Progress */}
             <div className="flex flex-col items-center gap-1">
-              <span className="text-[12px] font-bold" style={{ color: accent }}>{morningStep + 1} of {totalSteps}</span>
+              <span className="text-[14px] font-bold" style={{ color: accent }}>{morningStep + 1} of {totalSteps}</span>
               <div className="flex items-center gap-1">
                 {Array.from({ length: totalSteps }).map((_, i) => (
                   <div key={i} style={{ width: i === morningStep ? 16 : 4, height: 4, borderRadius: "var(--r-pill)", background: i <= morningStep ? accent : "var(--c-line)", transition: "all 0.25s" }}/>
@@ -688,15 +688,15 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                     return (
                       <button key={v} onClick={() => pick(step.key, v)}
                         className="flex-1 rounded-2xl text-[20px] font-bold transition-all active:scale-95"
-                        style={{ height: 48, background: sel ? accent : "var(--c-bg)", color: sel ? "#fff" : "var(--c-text-sub)" }}>
+                        style={{ height: 52, background: sel ? accent : "var(--c-bg)", color: sel ? "#fff" : "var(--c-text-sub)" }}>
                         {v}
                       </button>
                     );
                   })}
                 </div>
-                <div className="flex justify-between mt-2">
-                  <span className="text-[11px] text-c-label">{step.lo}</span>
-                  <span className="text-[11px] text-c-label">{step.hi}</span>
+                <div className="flex justify-between mt-3">
+                  <span className="text-[14px] font-semibold text-c-label">{step.lo}</span>
+                  <span className="text-[14px] font-semibold text-c-label">{step.hi}</span>
                 </div>
               </div>
             )}
@@ -710,21 +710,21 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                         className="flex-1 flex flex-col items-center gap-2 py-3 rounded-2xl border-2 transition-all active:scale-95"
                         style={{ borderColor: sel ? accent : "var(--c-line)", background: sel ? "#eff6ff" : "var(--c-bg-input)" }}>
                         <Face v={v} sel={sel} color={accent}/>
-                        <span className="text-[13px] font-bold" style={{ color: sel ? accent : "var(--c-text-sub)" }}>{label}</span>
+                        <span className="text-[15px] font-bold" style={{ color: sel ? accent : "var(--c-text-sub)" }}>{label}</span>
                       </button>
                     );
                   })}
                 </div>
                 {step.key === "nutritionQuality" && (
-                  <div className="flex flex-col gap-1.5 mt-3">
+                  <div className="flex flex-col gap-2 mt-3">
                     {[
                       ["Poorly", "Skipped meals, processed food, low protein"],
                       ["OK",     "Ate enough but not optimal — some snacks or gaps"],
                       ["Well",   "Balanced meals, good protein, fruit or veg"],
                     ].map(([label, def]) => (
                       <div key={label} className="flex gap-2 items-baseline">
-                        <span style={{ fontSize: 12, fontWeight: 700, color: "var(--c-text-sub)", minWidth: 40 }}>{label}</span>
-                        <span style={{ fontSize: 12, color: "var(--c-hint)", lineHeight: 1.4 }}>{def}</span>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: "var(--c-text-sub)", minWidth: 44 }}>{label}</span>
+                        <span style={{ fontSize: 14, color: "var(--c-hint)", lineHeight: 1.4 }}>{def}</span>
                       </div>
                     ))}
                   </div>
@@ -737,8 +737,8 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                   const sel = morningData[step.key] === v;
                   return (
                     <button key={v} onClick={() => pick(step.key, v)}
-                      className="flex-1 rounded-2xl text-[16px] font-bold transition-all active:scale-95"
-                      style={{ height: 48, background: sel ? accent : "var(--c-bg)", color: sel ? "#fff" : "var(--c-text-sub)" }}>
+                      className="flex-1 rounded-2xl text-[17px] font-bold transition-all active:scale-95"
+                      style={{ height: 52, background: sel ? accent : "var(--c-bg)", color: sel ? "#fff" : "var(--c-text-sub)" }}>
                       {label}
                     </button>
                   );
@@ -751,8 +751,8 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                   const sel = morningData[step.key] === o;
                   return (
                     <button key={o} onClick={() => pick(step.key, o)}
-                      className="rounded-2xl text-[16px] font-bold transition-all active:scale-95 px-5"
-                      style={{ height: 48, background: sel ? accent : "var(--c-bg)", color: sel ? "#fff" : "var(--c-text-sub)" }}>
+                      className="rounded-2xl text-[17px] font-bold transition-all active:scale-95 px-5"
+                      style={{ height: 52, background: sel ? accent : "var(--c-bg)", color: sel ? "#fff" : "var(--c-text-sub)" }}>
                       {o}
                     </button>
                   );
@@ -766,16 +766,16 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                     const sel = painAreas.includes(area);
                     return (
                       <button key={area} onClick={() => setPainAreas(a => sel ? a.filter(x => x !== area) : [...a, area])}
-                        className="flex items-center justify-center gap-1.5 rounded-2xl text-[14px] font-bold transition-all active:scale-95"
-                        style={{ height: 44, background: sel ? accent : "var(--c-bg)", color: sel ? "#fff" : "var(--c-text-sub)" }}>
-                        {sel && <span style={{ fontSize: 11 }}>✓</span>}
+                        className="flex items-center justify-center gap-1.5 rounded-2xl text-[16px] font-bold transition-all active:scale-95"
+                        style={{ height: 48, background: sel ? accent : "var(--c-bg)", color: sel ? "#fff" : "var(--c-text-sub)" }}>
+                        {sel && <span style={{ fontSize: 13 }}>✓</span>}
                         {area}
                       </button>
                     );
                   })}
                 </div>
                 <button onClick={advance}
-                  className="w-full rounded-2xl text-white text-[16px] font-bold transition-all active:scale-95"
+                  className="w-full rounded-2xl text-white text-[17px] font-bold transition-all active:scale-95"
                   style={{ height: 52, background: accent }}>
                   Next →
                 </button>
@@ -788,8 +788,8 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                     const sel = nightHabits.includes(habit);
                     return (
                       <button key={habit} onClick={() => setNightHabits(h => sel ? h.filter(x => x !== habit) : [...h, habit])}
-                        className="flex items-center gap-2 px-4 rounded-2xl text-[14px] font-bold transition-all active:scale-95"
-                        style={{ height: 48, background: sel ? accent : "var(--c-bg)", color: sel ? "#fff" : "var(--c-text-sub)" }}>
+                        className="flex items-center gap-2 px-4 rounded-2xl text-[16px] font-bold transition-all active:scale-95"
+                        style={{ height: 52, background: sel ? accent : "var(--c-bg)", color: sel ? "#fff" : "var(--c-text-sub)" }}>
                         {sel && <span>✓</span>}
                         {habit}
                       </button>
@@ -797,7 +797,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                   })}
                 </div>
                 <button onClick={advance}
-                  className="w-full rounded-2xl text-white text-[16px] font-bold transition-all active:scale-95"
+                  className="w-full rounded-2xl text-white text-[17px] font-bold transition-all active:scale-95"
                   style={{ height: 52, background: accent }}>
                   Next →
                 </button>
@@ -824,7 +824,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                 </div>
                 <p style={{ fontSize: "clamp(22px, 6vw, 28px)", fontWeight: 800, color: "#1a1c1c" }}>Check-in complete</p>
                 <button onClick={() => saveCombined(morningData)}
-                  className="w-full rounded-2xl text-white text-[16px] font-bold transition-all active:scale-95"
+                  className="w-full rounded-2xl text-white text-[17px] font-bold transition-all active:scale-95"
                   style={{ height: 56, background: BLUE }}>
                   Save check-in (+1 pt)
                 </button>
