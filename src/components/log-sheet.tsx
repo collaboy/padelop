@@ -83,6 +83,16 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
         const today = new Date().toISOString().slice(0, 10);
         setNightQuickMl(hq?.date === today ? (hq.ml ?? 0) : 0);
       } catch { setNightQuickMl(0); }
+      // Pre-fill opponent names from the scheduled match — player_3/player_4
+      // are already treated as "opponents" elsewhere (the "History vs this
+      // opponent" stat on the home page assumes the same convention).
+      let prefillOpponents = "";
+      try {
+        const m = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
+        prefillOpponents = [m?.player_3, m?.player_4].filter(Boolean).join(", ");
+      } catch {}
+      setMatchReview({ feeling: "", result: "", opponent: "", opponentNames: prefillOpponents, energy: "", injury: "", wellDone: [], improved: [], mentalBefore: "", mentalDuring: "", mentalAfter: "", warmup: "", notes: "" });
+      setMatchResultImage(null);
     } else {
       setSub(null);
       setLogMethod(null);
