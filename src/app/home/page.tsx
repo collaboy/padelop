@@ -2564,6 +2564,17 @@ export default function Home8() {
               <path d="M 9.76,4.01 L 9.71,1.75 L 14.29,1.75 L 14.24,4.01 L 16.07,4.77 L 17.63,3.13 L 20.87,6.37 L 19.23,7.93 L 19.99,9.76 L 22.25,9.71 L 22.25,14.29 L 19.99,14.24 L 19.23,16.07 L 20.87,17.63 L 17.63,20.87 L 16.07,19.23 L 14.24,19.99 L 14.29,22.25 L 9.71,22.25 L 9.76,19.99 L 7.93,19.23 L 6.37,20.87 L 3.13,17.63 L 4.77,16.07 L 4.01,14.24 L 1.75,14.29 L 1.75,9.71 L 4.01,9.76 L 4.77,7.93 L 3.13,6.37 L 6.37,3.13 L 7.93,4.77 Z"/>
             </svg>
           </button>
+          {/* TEMP: quick access to the check-in wizard preview for design review */}
+          <button
+            onClick={() => { startNavLoad(); router.push("/home/checkin-preview"); }}
+            style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="5" y="3" width="14" height="18" rx="2"/>
+              <path d="M9 3h6v2H9z"/>
+              <polyline points="9,12 11,14 15,9.5"/>
+            </svg>
+          </button>
         </div>
 
         <ScheduleSheet open={openPanel === "schedule"} onClose={() => setOpenPanel(null)} />
