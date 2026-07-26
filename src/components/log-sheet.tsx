@@ -157,7 +157,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
             {([
               { key: "sleep",    label: "Sleep quality",   lo: "Poor",       hi: "Excellent" },
               { key: "energy",   label: "Energy level",    lo: "Exhausted",  hi: "Energised" },
-              { key: "soreness", label: "Muscle soreness", lo: "Very sore",  hi: "No soreness" },
+              { key: "soreness", label: "Muscle soreness", lo: "No soreness", hi: "Very sore" },
               { key: "hydration",label: "Hydration",       lo: "Dehydrated", hi: "Well hydrated" },
             ] as { key: keyof typeof recoveryCI; label: string; lo: string; hi: string }[]).map(({ key, label, lo, hi }) => (
               <div key={key}>
@@ -184,7 +184,9 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
               </div>
             ))}
             <button onClick={() => {
-                savePartialCheckIn(recoveryCI);
+                // UI shows 1=no soreness...5=very sore; stored/scored value keeps the
+                // existing 5=no-soreness-is-good convention scoring.ts expects.
+                savePartialCheckIn({ ...recoveryCI, soreness: 6 - recoveryCI.soreness });
                 saveCheckInToDb({ date: new Date().toISOString().slice(0, 10), sleep: recoveryCI.sleep, energy: recoveryCI.energy, hydration: recoveryCI.hydration });
                 afterSave();
               }}
@@ -504,7 +506,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
       { key: "nutritionQuality", section: "night",   type: "face",  question: "How well did you eat yesterday?",      opts: [["bad","Poorly"],["ok","OK"],["great","Well"]] },
       ...(hasYesterdayWater ? [] : [{ key: "hydrationLitres", section: "night" as const, type: "opts" as const, question: "How much did you drink yesterday?", opts: ["<1L","1–1.5L","1.5–2L","2–2.5L","2.5–3L","3L+"] }]),
       ...(hasYesterdayHabits ? [] : [{ key: "habits", section: "night" as const, type: "habits" as const, question: "Which habits did you complete?" }]),
-      { key: "soreness",         section: "morning", type: "scale", question: "How does your body feel right now?",   lo: "Very sore",    hi: "No soreness" },
+      { key: "soreness",         section: "morning", type: "scale", question: "How does your body feel right now?",   lo: "No soreness",    hi: "Very sore" },
       { key: "pain",             section: "morning", type: "opts3", question: "Any pain or injury today?",            opts: [["none","None"],["minor","Minor"],["yes","Yes"]] },
       ...((morningData.pain === "minor" || morningData.pain === "yes") ? [{ key: "painArea", section: "morning" as const, type: "painArea" as const, question: "Where?" }] : []),
       { key: "energy",           section: "morning", type: "scale", question: "Current energy level?",                lo: "Exhausted",    hi: "Energised"   },
@@ -553,13 +555,14 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
     function saveCombined(next: Record<string, string | number>) {
       if (previewMode) { onClose(); return; }
       try {
-        // UI shows 1=no stress...5=very stressed; stored/scored value keeps the
-        // existing 5=low-stress-is-good convention scoring.ts expects, so invert here.
+        // UI shows 1=no stress/soreness...5=very stressed/sore; stored/scored value
+        // keeps the existing "5=good" convention scoring.ts expects, so invert here.
         const rawStress = Number(next.stress);
+        const rawSoreness = Number(next.soreness);
         const ci = {
           sleep:      Number(next.sleep)      || 3,
           energy:     Number(next.energy)     || 3,
-          soreness:   Number(next.soreness)   || 3,
+          soreness:   rawSoreness ? 6 - rawSoreness : 3,
           motivation: Number(next.motivation) || 3,
           stress:     rawStress ? 6 - rawStress : 3,
         };
