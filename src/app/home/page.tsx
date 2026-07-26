@@ -2575,6 +2575,15 @@ export default function Home8() {
               <polyline points="9,12 11,14 15,9.5"/>
             </svg>
           </button>
+          {/* TEMP: quick access to the match review wizard preview for design review */}
+          <button
+            onClick={() => { startNavLoad(); router.push("/home/matchreview-preview"); }}
+            style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="12 2 15 8.5 22 9.5 17 14.5 18.2 21.5 12 18 5.8 21.5 7 14.5 2 9.5 9 8.5 12 2"/>
+            </svg>
+          </button>
         </div>
 
         <ScheduleSheet open={openPanel === "schedule"} onClose={() => setOpenPanel(null)} />

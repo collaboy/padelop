@@ -1267,6 +1267,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
               />
             </div>
             <button onClick={() => {
+                if (previewMode) { onClose(); return; }
                 try {
                   const matchDateSaved = (() => { try { const m = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); return m?.date ?? null; } catch { return null; } })();
                   const entry = { ...matchReview, resultImage: matchResultImage ?? undefined, ts: new Date().toISOString(), matchDate: matchDateSaved };
