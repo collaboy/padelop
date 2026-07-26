@@ -200,7 +200,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
 
   if (sub === "wellbeing") {
     const NIGHT_STEPS = [
-      { key: "stress",           type: "scale", question: "Stress level today?",          lo: "Very stressed", hi: "No stress" },
+      { key: "stress",           type: "scale", question: "Stress level today?",          lo: "No stress", hi: "Very stressed" },
       { key: "nutritionQuality", type: "face",  question: "How well did you eat?",         opts: [["bad","Poorly"],["ok","OK"],["great","Well"]] as [string,string][] },
       { key: "hydrationLitres",  type: "opts",  question: "How much did you drink today?", opts: ["<1L","1–1.5L","1.5–2L","2–2.5L","2.5–3L","3L+"] },
       { key: "urineColour",      type: "urine", question: "Urine colour?",
@@ -241,8 +241,12 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
 
     function saveBedtime(bedtime: string, next: Record<string, string | number>) {
       try {
-        savePartialCheckIn({ stress: Number(next.stress) || 3 });
-        saveCheckInToDb({ date: todayYMD, stress: Number(next.stress) || 3 });
+        // UI shows 1=no stress...5=very stressed; stored/scored value keeps the
+        // existing 5=low-stress-is-good convention scoring.ts expects, so invert here.
+        const rawStress = Number(next.stress);
+        const stress = rawStress ? 6 - rawStress : 3;
+        savePartialCheckIn({ stress });
+        saveCheckInToDb({ date: todayYMD, stress });
 
         const ts = new Date().toISOString();
         const protein = String(next.protein ?? "");
@@ -496,7 +500,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
       { key: "bedtime",          section: "night",   type: "opts",  question: "When did you go to bed last night?",  opts: ["9pm","10pm","10:30pm","11pm","After 11"] },
       { key: "sleep",            section: "night",   type: "scale", question: "How did you sleep last night?",        lo: "Poorly",       hi: "Excellent"  },
       { key: "sleepHours",       section: "night",   type: "opts",  question: "How many hours of sleep?",             opts: ["≤5h","6h","7h","8h","9h+"]            },
-      { key: "stress",           section: "night",   type: "scale", question: "Stress level yesterday?",              lo: "Very stressed", hi: "No stress"  },
+      { key: "stress",           section: "night",   type: "scale", question: "Stress level yesterday?",              lo: "No stress", hi: "Very stressed"  },
       { key: "nutritionQuality", section: "night",   type: "face",  question: "How well did you eat yesterday?",      opts: [["bad","Poorly"],["ok","OK"],["great","Well"]] },
       ...(hasYesterdayWater ? [] : [{ key: "hydrationLitres", section: "night" as const, type: "opts" as const, question: "How much did you drink yesterday?", opts: ["<1L","1–1.5L","1.5–2L","2–2.5L","2.5–3L","3L+"] }]),
       ...(hasYesterdayHabits ? [] : [{ key: "habits", section: "night" as const, type: "habits" as const, question: "Which habits did you complete?" }]),
@@ -549,12 +553,15 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
     function saveCombined(next: Record<string, string | number>) {
       if (previewMode) { onClose(); return; }
       try {
+        // UI shows 1=no stress...5=very stressed; stored/scored value keeps the
+        // existing 5=low-stress-is-good convention scoring.ts expects, so invert here.
+        const rawStress = Number(next.stress);
         const ci = {
           sleep:      Number(next.sleep)      || 3,
           energy:     Number(next.energy)     || 3,
           soreness:   Number(next.soreness)   || 3,
           motivation: Number(next.motivation) || 3,
-          stress:     Number(next.stress)     || 3,
+          stress:     rawStress ? 6 - rawStress : 3,
         };
         savePartialCheckIn({
           ...ci,
