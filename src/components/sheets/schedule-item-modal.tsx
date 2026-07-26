@@ -141,56 +141,16 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
             <p style={{ margin: "0 0 20px", fontSize: v.subtitle, fontWeight: 500, color: "#000", lineHeight: 1.25 }}>{item.subtitle.replace(/ — /g, " — ")}</p>
           )}
 
-          {isComplete ? (
-            <button
-              onClick={handleDoneClick}
-              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", height: 68, borderRadius: 34, border: `2px solid ${item.color}`, background: "transparent", cursor: "pointer" }}
-            >
-              <div style={{ width: 26, height: 26, borderRadius: "50%", background: item.color, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M5 13l4 4L19 7"/></svg>
-              </div>
-              <span style={{ fontSize: v.doneLabel, fontWeight: 600, color: item.color }}>Completed</span>
-            </button>
-          ) : (
-            <div
-              ref={swipeTrackRef}
-              style={{ position: "relative", height: 68, borderRadius: 34, background: "#f0f1f3", overflow: "hidden", touchAction: "none" }}
-              onTouchStart={e => { swipeStartXRef.current = e.touches[0].clientX - swipeX; }}
-              onTouchMove={e => {
-                const track = swipeTrackRef.current;
-                if (!track) return;
-                const maxX = track.offsetWidth - 60;
-                setSwipeX(Math.max(0, Math.min(maxX, e.touches[0].clientX - swipeStartXRef.current)));
-              }}
-              onTouchEnd={() => {
-                const track = swipeTrackRef.current;
-                if (!track) return;
-                const maxX = track.offsetWidth - 60;
-                if (swipeX >= maxX * 0.82) { handleDoneClick(); }
-                setSwipeX(0);
-              }}
-            >
-              <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: swipeX, background: item.color, transition: swipeX === 0 ? "width 0.3s" : "none" }} />
-              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-                <span style={{ fontSize: v.swipeLabel, fontWeight: 600, color: "#8a9096", opacity: Math.max(0, 1 - swipeX / 80), transition: "opacity 0.1s" }}>{swipeLabelText}</span>
-              </div>
-              <div style={{ position: "absolute", top: 4, left: 4 + swipeX, width: 60, height: 60, borderRadius: "50%", background: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", justifyContent: "center", transition: swipeX === 0 ? "left 0.3s" : "none", pointerEvents: "none" }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/><path d="M13 6l6 6-6 6"/></svg>
-              </div>
-            </div>
-          )}
-
-          <div style={{ height: 1, background: "#f0f0f0", margin: "20px 0 0" }} />
           <button
             onClick={() => setDetailsOpen(x => !x)}
-            style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 0", background: "none", border: "none", cursor: "pointer" }}
+            style={{ display: "flex", alignItems: "center", gap: 4, padding: "0 0 20px", margin: 0, background: "none", border: "none", cursor: "pointer" }}
           >
-            <span style={{ fontSize: v.detailsLabel, fontWeight: 700, color: "#1a1c1c" }}>Info</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: detailsOpen ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#8a9096" }}>{detailsOpen ? "Hide details" : "Show details"}</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: detailsOpen ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
           </button>
 
           {detailsOpen && (
-            <div style={{ paddingBottom: 8 }}>
+            <div style={{ paddingBottom: 20 }}>
               {isMeal && detail?.type === "meal" && (
                 <div className="flex flex-col">
                   <p className="font-bold uppercase tracking-widest pb-3" style={{ fontSize: v.focusLabel, color: "#8a9096" }}>{detail.focus}</p>
@@ -285,6 +245,45 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
                   {renderSteps(drillDef.steps)}
                 </div>
               )}
+            </div>
+          )}
+
+          {isComplete ? (
+            <button
+              onClick={handleDoneClick}
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "100%", height: 68, borderRadius: 34, border: `2px solid ${item.color}`, background: "transparent", cursor: "pointer" }}
+            >
+              <div style={{ width: 26, height: 26, borderRadius: "50%", background: item.color, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M5 13l4 4L19 7"/></svg>
+              </div>
+              <span style={{ fontSize: v.doneLabel, fontWeight: 600, color: item.color }}>Completed</span>
+            </button>
+          ) : (
+            <div
+              ref={swipeTrackRef}
+              style={{ position: "relative", height: 68, borderRadius: 34, background: "#f0f1f3", overflow: "hidden", touchAction: "none" }}
+              onTouchStart={e => { swipeStartXRef.current = e.touches[0].clientX - swipeX; }}
+              onTouchMove={e => {
+                const track = swipeTrackRef.current;
+                if (!track) return;
+                const maxX = track.offsetWidth - 60;
+                setSwipeX(Math.max(0, Math.min(maxX, e.touches[0].clientX - swipeStartXRef.current)));
+              }}
+              onTouchEnd={() => {
+                const track = swipeTrackRef.current;
+                if (!track) return;
+                const maxX = track.offsetWidth - 60;
+                if (swipeX >= maxX * 0.82) { handleDoneClick(); }
+                setSwipeX(0);
+              }}
+            >
+              <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: swipeX, background: item.color, transition: swipeX === 0 ? "width 0.3s" : "none" }} />
+              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+                <span style={{ fontSize: v.swipeLabel, fontWeight: 600, color: "#8a9096", opacity: Math.max(0, 1 - swipeX / 80), transition: "opacity 0.1s" }}>{swipeLabelText}</span>
+              </div>
+              <div style={{ position: "absolute", top: 4, left: 4 + swipeX, width: 60, height: 60, borderRadius: "50%", background: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", justifyContent: "center", transition: swipeX === 0 ? "left 0.3s" : "none", pointerEvents: "none" }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/><path d="M13 6l6 6-6 6"/></svg>
+              </div>
             </div>
           )}
         </div>
