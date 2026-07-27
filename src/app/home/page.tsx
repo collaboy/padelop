@@ -1907,44 +1907,39 @@ export default function Home8() {
                   <div style={{ position: "relative", borderRadius: 24, overflow: "hidden" }}>
                     {/* All content on white */}
                     <div style={{ background: "#fff", padding: "28px 20px 28px", position: "relative" }}>
-                      {/* Edit icon — left */}
-                      <button
-                        onClick={() => {
-                          if (matchInfoMode === 'edit') { setMatchInfoMode(null); setEditingMatchKey(null); }
-                          else { const list = getMatchList(); const src = (list.find(m => m.date === match.date && m.time === match.time) ?? match) as StoredMatch & { location?: string; players?: string[] }; setMatchForm({ date: src.date ?? '', time: src.time ?? '', club: src.club ?? src.location ?? '', court: src.court ?? '', p1: src.player_1 ?? src.players?.[0] ?? '', p2: src.player_2 ?? src.players?.[1] ?? '', p3: src.player_3 ?? src.players?.[2] ?? '', p4: src.player_4 ?? src.players?.[3] ?? '' }); setEditingMatchKey({ date: src.date, time: src.time }); setMatchInfoMode('edit'); setMatchInfoAddTab(null); }
-                        }}
-                        style={{ position: "absolute", top: 14, left: 14, background: "#f4f4f6", border: "none", cursor: "pointer", padding: 7, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a5050" }}
-                      >
-                        {matchInfoMode === 'edit' ? (
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                        ) : (
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                        )}
-                      </button>
-                      {/* Plus / add match — right */}
+                      {/* Plus / add match — top right, discreet */}
                       <button
                         onClick={() => {
                           if (matchInfoMode === 'add') { setMatchInfoMode(null); setMatchInfoAddTab(null); }
                           else { setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setUploadError(null); setMatchInfoMode('add'); setMatchInfoAddTab('upload'); actionUploadRef.current?.click(); }
                         }}
-                        style={{ position: "absolute", top: 14, right: 14, background: "#f4f4f6", border: "none", cursor: "pointer", padding: 7, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a5050" }}
+                        style={{ position: "absolute", top: 12, right: 12, background: "none", border: "none", cursor: "pointer", padding: 5, display: "flex", alignItems: "center", justifyContent: "center", color: "#b0b5ba" }}
                       >
                         {matchInfoMode === 'add' ? (
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                         ) : (
-                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                         )}
                       </button>
-                      {/* Hero text */}
-                      <div style={{ textAlign: "center", marginBottom: 6 }} onClick={closeSheet}>
-                        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4" }}>Next Match</span>
-                        <p style={{ margin: "6px 0 8px", fontSize: "clamp(32px, 8vw, 42px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{countdownLabel}</p>
-                        <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500, lineHeight: 1 }}>{dateStr} · {match.time}</span>
-                      </div>
-                      {/* Detail rows */}
-                      <div style={{ display: "flex", flexDirection: "column", textAlign: "center", gap: 4 }}>
-                        {match.club && <span style={{ fontSize: 13, fontWeight: 500, color: "#8a9096", lineHeight: 1 }}>({match.club})</span>}
-                        {match.court && (() => { const n = match.court.match(/\d+/)?.[0]; return n ? <span style={{ fontSize: 17, fontWeight: 700, color: "#1a1c1c", lineHeight: 1.4, marginTop: 2 }}>#{n}</span> : null; })()}
+                      {/* Match info — tap anywhere to edit */}
+                      <div
+                        style={{ cursor: "pointer" }}
+                        onClick={() => {
+                          if (matchInfoMode === 'edit') { setMatchInfoMode(null); setEditingMatchKey(null); }
+                          else { const list = getMatchList(); const src = (list.find(m => m.date === match.date && m.time === match.time) ?? match) as StoredMatch & { location?: string; players?: string[] }; setMatchForm({ date: src.date ?? '', time: src.time ?? '', club: src.club ?? src.location ?? '', court: src.court ?? '', p1: src.player_1 ?? src.players?.[0] ?? '', p2: src.player_2 ?? src.players?.[1] ?? '', p3: src.player_3 ?? src.players?.[2] ?? '', p4: src.player_4 ?? src.players?.[3] ?? '' }); setEditingMatchKey({ date: src.date, time: src.time }); setMatchInfoMode('edit'); setMatchInfoAddTab(null); }
+                        }}
+                      >
+                        {/* Hero text */}
+                        <div style={{ textAlign: "center", marginBottom: 6 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#2653d4" }}>Next Match</span>
+                          <p style={{ margin: "6px 0 8px", fontSize: "clamp(32px, 8vw, 42px)", fontWeight: 800, color: "#1a1c1c", lineHeight: 1.05, letterSpacing: "-0.01em" }}>{countdownLabel}</p>
+                          <span style={{ fontSize: 14, color: "#6b7480", fontWeight: 500, lineHeight: 1 }}>{dateStr} · {match.time}</span>
+                        </div>
+                        {/* Detail rows */}
+                        <div style={{ display: "flex", flexDirection: "column", textAlign: "center", gap: 4 }}>
+                          {match.club && <span style={{ fontSize: 13, fontWeight: 500, color: "#8a9096", lineHeight: 1 }}>({match.club})</span>}
+                          {match.court && (() => { const n = match.court.match(/\d+/)?.[0]; return n ? <span style={{ fontSize: 17, fontWeight: 700, color: "#1a1c1c", lineHeight: 1.4, marginTop: 2 }}>#{n}</span> : null; })()}
+                        </div>
                       </div>
 
                     {/* Inline edit form — expands below info rows */}
