@@ -1816,6 +1816,7 @@ export default function Home8() {
           });
           const unratedKeys = new Set(unratedMatches.map(m => `${m.date}_${m.time}`));
           const otherMatches = getMatchList().filter(m => !(m.date === match.date && m.time === match.time) && !unratedKeys.has(`${m.date}_${m.time}`));
+          const hasExtraContent = unratedMatches.length > 0 || otherMatches.length > 0 || matchInfoMode !== null;
           const openMatchReview = () => { closeSheet(); setLogTab("matchreview"); setLogSheetOpen(true); };
           const openEditFor = (src: StoredMatch) => {
             setMatchForm({ date: src.date ?? '', time: src.time ?? '', club: src.club ?? '', court: src.court ?? '', p1: src.player_1 ?? '', p2: src.player_2 ?? '', p3: src.player_3 ?? '', p4: src.player_4 ?? '' });
@@ -1854,7 +1855,7 @@ export default function Home8() {
               <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
               <div
                 className="relative w-full bg-white rounded-[28px] flex flex-col overflow-hidden shadow-2xl"
-                style={{ animation: "matchInfoPopIn 0.26s cubic-bezier(0.22,1,0.36,1)", maxWidth: 420, maxHeight: "80dvh", minHeight: "55dvh", paddingBottom: "env(safe-area-inset-bottom)" }}
+                style={{ animation: "matchInfoPopIn 0.26s cubic-bezier(0.22,1,0.36,1)", maxWidth: 420, maxHeight: "80dvh", minHeight: hasExtraContent ? "55dvh" : undefined, paddingBottom: "env(safe-area-inset-bottom)" }}
                 onClick={e => e.stopPropagation()}
               >
                 <div style={{ display: "flex", justifyContent: "center", paddingTop: 12, paddingBottom: 4, flexShrink: 0 }}>
