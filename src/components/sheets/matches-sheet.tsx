@@ -254,7 +254,7 @@ export default function MatchesContent() {
           {matchAddOpen ? "Cancel" : "+ Add"}
         </button>
         {reviews.length > 0 && (
-          <div style={{ background: "#f8f9fa", borderRadius: 14, overflow: "hidden" }}>
+          <div style={{ background: "#fff", borderRadius: 14, overflow: "hidden", boxShadow: "0 0 0 1px #ececec" }}>
             <button onClick={() => setMatchHistoryOpen(o => !o)} style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", textAlign: "left" }}>
               <span style={{ fontSize: 15, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em" }}>HISTORY</span>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -265,32 +265,18 @@ export default function MatchesContent() {
             {matchHistoryOpen && (
               <div style={{ display: "flex", flexDirection: "column", gap: 1, paddingBottom: 8 }}>
                 {[...reviews].sort((a, b) => b.ts.localeCompare(a.ts)).map((r, i) => {
-                  const resultColor = r.result === "win" ? "#16a34a" : r.result === "loss" ? "#ef4444" : "#8a9096";
-                  const resultBg = r.result === "win" ? "#f0fdf4" : r.result === "loss" ? "#fff5f5" : "#f4f6f8";
                   const opponentNames = typeof (r as ReviewEntry & { opponentNames?: string }).opponentNames === "string" && (r as ReviewEntry & { opponentNames?: string }).opponentNames ? (r as ReviewEntry & { opponentNames?: string }).opponentNames : null;
                   return (
-                    <button key={i} onClick={() => setSelectedReview(r)} style={{ width: "calc(100% - 16px)", alignSelf: "center", background: "#fff", borderRadius: 12, padding: "12px 14px", display: "flex", alignItems: "center", gap: 12, border: "none", cursor: "pointer", textAlign: "left" }}>
-                      <div style={{ flexShrink: 0, width: 56, textAlign: "center", background: "#f8f9fa", borderRadius: 10, padding: "6px 4px" }}>
+                    <button key={i} onClick={() => setSelectedReview(r)} style={{ width: "calc(100% - 16px)", alignSelf: "center", background: "#f8f9fa", borderRadius: 12, padding: "12px 14px", display: "flex", alignItems: "center", gap: 12, border: "none", cursor: "pointer", textAlign: "left" }}>
+                      <div style={{ flexShrink: 0, width: 56, textAlign: "center", background: "#fff", borderRadius: 10, padding: "6px 4px" }}>
                         <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#8a9096" }}>{new Date(r.ts.slice(0, 10) + "T12:00").toLocaleDateString("en-GB", { month: "short" }).toUpperCase()}</p>
                         <p style={{ margin: "1px 0 0", fontSize: 25, fontWeight: 900, color: "#1a1c1c", lineHeight: 1 }}>{new Date(r.ts.slice(0, 10) + "T12:00").getDate()}</p>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        {opponentNames ? (
-                          <p style={{ margin: "0 0 2px", fontSize: 21, fontWeight: 700, color: "#1a1c1c", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>vs {opponentNames}</p>
-                        ) : (
-                          r.feeling && <p style={{ margin: "0 0 2px", fontSize: 20, color: "#8a9096" }}>{r.feeling}</p>
-                        )}
-                        {(r.wellDone?.length > 0 || r.improved?.length > 0) && (
-                          <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 3 }}>
-                            {r.wellDone?.slice(0, 2).map(t => <span key={t} style={{ fontSize: 14, fontWeight: 700, padding: "2px 7px", borderRadius: 999, background: "#f0fdf4", color: "#16a34a" }}>{t}</span>)}
-                            {r.improved?.slice(0, 2).map(t => <span key={t} style={{ fontSize: 14, fontWeight: 700, padding: "2px 7px", borderRadius: 999, background: "#fff5f5", color: "#ef4444" }}>{t}</span>)}
-                          </div>
-                        )}
+                        <p style={{ margin: "0 0 2px", fontSize: 21, fontWeight: 700, color: "#1a1c1c", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{opponentNames ? `vs ${opponentNames}` : "Match"}</p>
+                        {r.result && <p style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#1a1c1c" }}>{r.result.charAt(0).toUpperCase() + r.result.slice(1)}</p>}
                       </div>
-                      <div style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 6 }}>
-                        {r.result && <span style={{ fontSize: 15, fontWeight: 800, padding: "3px 9px", borderRadius: 999, background: resultBg, color: resultColor }}>{r.result.charAt(0).toUpperCase() + r.result.slice(1)}</span>}
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                      </div>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
                     </button>
                   );
                 })}
@@ -299,7 +285,7 @@ export default function MatchesContent() {
           </div>
         )}
         {reviews.some(r => r.notes) && (
-          <div style={{ background: "#f8f9fa", borderRadius: 14, overflow: "hidden" }}>
+          <div style={{ background: "#fff", borderRadius: 14, overflow: "hidden", boxShadow: "0 0 0 1px #ececec" }}>
             <button onClick={() => setMatchNotesOpen(o => !o)} style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", textAlign: "left" }}>
               <span style={{ fontSize: 15, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em" }}>MATCH NOTES</span>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -328,10 +314,12 @@ export default function MatchesContent() {
                   }
                   return filtered.map((r, i) => {
                     const opponentNames = typeof (r as ReviewEntry & { opponentNames?: string }).opponentNames === "string" && (r as ReviewEntry & { opponentNames?: string }).opponentNames ? (r as ReviewEntry & { opponentNames?: string }).opponentNames : null;
+                    const partnerName = typeof (r as ReviewEntry & { partnerName?: string }).partnerName === "string" && (r as ReviewEntry & { partnerName?: string }).partnerName ? (r as ReviewEntry & { partnerName?: string }).partnerName : null;
+                    const matchup = opponentNames ? `You${partnerName ? ` & ${partnerName}` : ""} vs ${opponentNames}` : partnerName ? `You & ${partnerName}` : null;
                     const dateStr = new Date(r.ts.slice(0, 10) + "T12:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
                     return (
-                      <button key={i} onClick={() => setSelectedReview(r)} style={{ background: "#fff", borderRadius: 12, padding: "12px 14px", border: "none", cursor: "pointer", textAlign: "left", display: "flex", flexDirection: "column", gap: 4 }}>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: "#8a9096" }}>{dateStr}{opponentNames ? ` · vs ${opponentNames}` : ""}</span>
+                      <button key={i} onClick={() => setSelectedReview(r)} style={{ background: "#f8f9fa", borderRadius: 12, padding: "12px 14px", border: "none", cursor: "pointer", textAlign: "left", display: "flex", flexDirection: "column", gap: 4 }}>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: "#8a9096" }}>{dateStr}{matchup ? ` · ${matchup}` : ""}</span>
                         <span style={{ fontSize: 16, color: "#1a1c1c", lineHeight: 1.5 }}>{r.notes}</span>
                       </button>
                     );
@@ -371,12 +359,12 @@ export default function MatchesContent() {
               <div className="px-6 pb-5 flex-shrink-0">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-[#9aa5b0]">{dateStr}</p>
-                    {opponentNames && <p className="text-[22px] font-bold text-[#1a1c1c] mt-0.5 leading-tight">vs {opponentNames}</p>}
-                    {!opponentNames && <p className="text-[22px] font-bold text-[#1a1c1c] mt-0.5 leading-tight">Match</p>}
+                    <p className="text-[15px] font-bold uppercase tracking-[0.1em] text-[#9aa5b0]">{dateStr}</p>
+                    {opponentNames && <p className="text-[24px] font-bold text-[#1a1c1c] mt-0.5 leading-tight">vs {opponentNames}</p>}
+                    {!opponentNames && <p className="text-[24px] font-bold text-[#1a1c1c] mt-0.5 leading-tight">Match</p>}
                   </div>
                   {r.result && (
-                    <span className="flex-shrink-0 text-[14px] font-black px-4 py-2 rounded-full" style={{ background: resultBg, color: resultColor }}>
+                    <span className="flex-shrink-0 text-[17px] font-black px-4 py-2 rounded-full" style={{ background: resultBg, color: resultColor }}>
                       {r.result.charAt(0).toUpperCase() + r.result.slice(1)}
                     </span>
                   )}
@@ -385,28 +373,28 @@ export default function MatchesContent() {
               <div className="overflow-y-auto flex-1 px-6 pb-8 flex flex-col gap-5" style={{ overscrollBehavior: "contain" }}>
                 {r.notes && (
                   <div className="p-4 rounded-2xl" style={{ background: "#fff" }}>
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Notes</p>
-                    <p className="text-[15px] text-[#1a1c1c] leading-relaxed">{r.notes}</p>
+                    <p className="text-[15px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Notes</p>
+                    <p className="text-[17px] text-[#1a1c1c] leading-relaxed">{r.notes}</p>
                   </div>
                 )}
                 {(r.wellDone?.length > 0 || r.improved?.length > 0) && (
                   <div className="flex flex-col gap-3">
                     {r.wellDone?.length > 0 && (
                       <div>
-                        <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Went well</p>
+                        <p className="text-[15px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Went well</p>
                         <div className="flex flex-wrap gap-2">
                           {r.wellDone.map(t => (
-                            <span key={t} className="text-[13px] font-bold px-3 py-1.5 rounded-full" style={{ background: "#f0fdf4", color: "#16a34a" }}>{t}</span>
+                            <span key={t} className="text-[16px] font-bold px-3 py-1.5 rounded-full" style={{ background: "#f0fdf4", color: "#16a34a" }}>{t}</span>
                           ))}
                         </div>
                       </div>
                     )}
                     {r.improved?.length > 0 && (
                       <div>
-                        <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Work on</p>
+                        <p className="text-[15px] font-bold uppercase tracking-widest text-[#9aa5b0] mb-2">Work on</p>
                         <div className="flex flex-wrap gap-2">
                           {r.improved.map(t => (
-                            <span key={t} className="text-[13px] font-bold px-3 py-1.5 rounded-full" style={{ background: "#fff5f5", color: "#ef4444" }}>{t}</span>
+                            <span key={t} className="text-[16px] font-bold px-3 py-1.5 rounded-full" style={{ background: "#fff5f5", color: "#ef4444" }}>{t}</span>
                           ))}
                         </div>
                       </div>
@@ -415,14 +403,14 @@ export default function MatchesContent() {
                 )}
                 {(r.feeling || r.energy || r.mentalBefore || r.mentalDuring || r.mentalAfter) && (
                   <div className="flex flex-col gap-2">
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-[#9aa5b0]">On the day</p>
+                    <p className="text-[15px] font-bold uppercase tracking-widest text-[#9aa5b0]">On the day</p>
                     <div className="flex flex-wrap gap-2">
-                      {r.feeling && <span className="text-[13px] font-semibold px-3 py-1.5 rounded-full bg-[#f4f6f8] text-[#4a5050]">{FEELING_LABEL[r.feeling] ?? r.feeling}</span>}
-                      {r.energy && <span className="text-[13px] font-semibold px-3 py-1.5 rounded-full bg-[#f4f6f8] text-[#4a5050]">{ENERGY_LABEL[r.energy] ?? r.energy}</span>}
-                      {r.mentalBefore && <span className="text-[13px] font-semibold px-3 py-1.5 rounded-full bg-[#f4f6f8] text-[#4a5050]">Before: {MENTAL_LABEL[r.mentalBefore] ?? r.mentalBefore}</span>}
-                      {r.mentalDuring && <span className="text-[13px] font-semibold px-3 py-1.5 rounded-full bg-[#f4f6f8] text-[#4a5050]">During: {MENTAL_LABEL[r.mentalDuring] ?? r.mentalDuring}</span>}
-                      {r.mentalAfter && <span className="text-[13px] font-semibold px-3 py-1.5 rounded-full bg-[#f4f6f8] text-[#4a5050]">After: {MENTAL_LABEL[r.mentalAfter] ?? r.mentalAfter}</span>}
-                      {r.injury && r.injury !== "no" && <span className="text-[13px] font-semibold px-3 py-1.5 rounded-full" style={{ background: "#fff7ed", color: "#c2410c" }}>Injury: {r.injury}</span>}
+                      {r.feeling && <span className="text-[16px] font-semibold px-3 py-1.5 rounded-full bg-[#f4f6f8] text-[#4a5050]">{FEELING_LABEL[r.feeling] ?? r.feeling}</span>}
+                      {r.energy && <span className="text-[16px] font-semibold px-3 py-1.5 rounded-full bg-[#f4f6f8] text-[#4a5050]">{ENERGY_LABEL[r.energy] ?? r.energy}</span>}
+                      {r.mentalBefore && <span className="text-[16px] font-semibold px-3 py-1.5 rounded-full bg-[#f4f6f8] text-[#4a5050]">Before: {MENTAL_LABEL[r.mentalBefore] ?? r.mentalBefore}</span>}
+                      {r.mentalDuring && <span className="text-[16px] font-semibold px-3 py-1.5 rounded-full bg-[#f4f6f8] text-[#4a5050]">During: {MENTAL_LABEL[r.mentalDuring] ?? r.mentalDuring}</span>}
+                      {r.mentalAfter && <span className="text-[16px] font-semibold px-3 py-1.5 rounded-full bg-[#f4f6f8] text-[#4a5050]">After: {MENTAL_LABEL[r.mentalAfter] ?? r.mentalAfter}</span>}
+                      {r.injury && r.injury !== "no" && <span className="text-[16px] font-semibold px-3 py-1.5 rounded-full" style={{ background: "#fff7ed", color: "#c2410c" }}>Injury: {r.injury}</span>}
                     </div>
                   </div>
                 )}
