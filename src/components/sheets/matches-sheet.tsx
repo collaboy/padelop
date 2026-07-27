@@ -273,7 +273,7 @@ export default function MatchesContent() {
                         <p style={{ margin: "1px 0 0", fontSize: 25, fontWeight: 900, color: "#1a1c1c", lineHeight: 1 }}>{new Date(r.ts.slice(0, 10) + "T12:00").getDate()}</p>
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ margin: "0 0 2px", fontSize: 21, fontWeight: 700, color: "#1a1c1c", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{opponentNames ? `vs ${opponentNames}` : "Match"}</p>
+                        {opponentNames && <p style={{ margin: "0 0 2px", fontSize: 21, fontWeight: 700, color: "#1a1c1c", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>vs {opponentNames}</p>}
                         {r.result && <p style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#1a1c1c" }}>{r.result.charAt(0).toUpperCase() + r.result.slice(1)}</p>}
                       </div>
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
