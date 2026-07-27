@@ -83,6 +83,7 @@ export default function MatchesContent() {
   const [matchAddOpen, setMatchAddOpen] = useState(false);
   const [matchEditForms, setMatchEditForms] = useState<Record<number, MatchForm>>({});
   const [matchHistoryOpen, setMatchHistoryOpen] = useState(false);
+  const [historySearch, setHistorySearch] = useState("");
   const [matchAddForm, setMatchAddForm] = useState<MatchForm>(EMPTY_FORM);
   const [matchRecordExpanded, setMatchRecordExpanded] = useState(false);
   const [selectedReview, setSelectedReview] = useState<ReviewEntry | null>(null);
@@ -262,7 +263,30 @@ export default function MatchesContent() {
             </button>
             {matchHistoryOpen && (
               <div style={{ display: "flex", flexDirection: "column", gap: 1, paddingBottom: 8 }}>
-                {[...reviews].sort((a, b) => b.ts.localeCompare(a.ts)).map((r, i) => {
+                {reviews.length > 1 && (
+                  <div style={{ position: "relative", margin: "0 8px 8px" }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#b0b8c1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input
+                      type="text"
+                      value={historySearch}
+                      onChange={e => setHistorySearch(e.target.value)}
+                      placeholder="Search notes, opponents, tags…"
+                      style={{ width: "100%", padding: "10px 12px 10px 34px", borderRadius: 10, border: "1.5px solid #e2e2e2", background: "#fff", fontSize: 15, color: "#1a1c1c", outline: "none", boxSizing: "border-box" }}
+                    />
+                  </div>
+                )}
+                {(() => {
+                  const q = historySearch.trim().toLowerCase();
+                  const sorted = [...reviews].sort((a, b) => b.ts.localeCompare(a.ts));
+                  const filtered = !q ? sorted : sorted.filter(r => {
+                    const opponentNames = (r as ReviewEntry & { opponentNames?: string }).opponentNames ?? "";
+                    const haystack = [r.notes, opponentNames, r.feeling, ...(r.wellDone ?? []), ...(r.improved ?? [])].filter(Boolean).join(" ").toLowerCase();
+                    return haystack.includes(q);
+                  });
+                  if (q && filtered.length === 0) {
+                    return <p style={{ margin: "8px 8px 4px", fontSize: 15, color: "#b0b8c1", textAlign: "center" }}>No matches found</p>;
+                  }
+                  return filtered.map((r, i) => {
                   const resultColor = r.result === "win" ? "#16a34a" : r.result === "loss" ? "#ef4444" : "#8a9096";
                   const resultBg = r.result === "win" ? "#f0fdf4" : r.result === "loss" ? "#fff5f5" : "#f4f6f8";
                   const opponentNames = typeof (r as ReviewEntry & { opponentNames?: string }).opponentNames === "string" && (r as ReviewEntry & { opponentNames?: string }).opponentNames ? (r as ReviewEntry & { opponentNames?: string }).opponentNames : null;
@@ -291,7 +315,8 @@ export default function MatchesContent() {
                       </div>
                     </button>
                   );
-                })}
+                  });
+                })()}
               </div>
             )}
           </div>
