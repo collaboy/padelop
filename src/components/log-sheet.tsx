@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { saveCheckIn, computeScores, loadScoringData, saveScoreSnapshot } from "@/lib/scoring";
 import { downloadSnapshot, importData } from "@/lib/storage";
 import { saveMatchReview, saveCheckInToDb, saveHydrationToDb, seedHydrationToDb, saveNutritionToDb, saveTrainingToDb, saveScheduleDoneToDb, saveScoreSnapshotToDb } from "@/lib/db";
@@ -16,15 +15,6 @@ function rangeToMl(range: string): number {
   if (range === "2.5–3L") return 2750;
   return 3000;
 }
-
-const NAV_ITEMS = [
-  { href: "/home4",     label: "Home",      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg> },
-  { href: "/today4",    label: "Today",     icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg> },
-  { href: "/home-v1",   label: "Readiness", icon: null },
-  { href: "/track4",    label: "Track",     icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> },
-  { href: "/matches4",  label: "Matches",   icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
-  { href: "/insights4", label: "Insights",  icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> },
-];
 
 type Sub = "recovery" | "wellbeing" | "checkin" | "hydration" | "nutrition" | "training" | "matchlist" | "matchreview" | null;
 
@@ -62,7 +52,6 @@ function Face({ v, sel, color }: { v: string; sel: boolean; color: string }) {
 }
 
 export default function LogSheet({ open, onClose, defaultSub, startWizard, previewMode }: Props) {
-  const pathname = usePathname();
   const router = useRouter();
   const uploadRef = useRef<HTMLInputElement>(null);
   const importRef = useRef<HTMLInputElement>(null);
@@ -1381,9 +1370,6 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
 
   // ── Main picker ──────────────────────────────────────────────────────────
 
-  const scoringData = loadScoringData();
-  const overallScore = Math.round(computeScores(scoringData.checkIn, scoringData.hydration, scoringData.review, scoringData.nutrition, scoringData.gameDaysThisWeek, scoringData.habits, scoringData.training).overall);
-
   const todayStr = todayYMD;
   let recoveryDone = false;
   try { const ci = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null"); recoveryDone = ci?.date === todayStr && ci.sleep !== undefined; } catch {}
@@ -1429,22 +1415,6 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
         style={{ animation: "slideUp 0.3s cubic-bezier(0.22,1,0.36,1)", minHeight: startWizard ? "65vh" : "55vh", maxHeight: "90dvh", paddingBottom: "env(safe-area-inset-bottom)" }}
         onClick={e => e.stopPropagation()}>
         <div className="w-10 h-1 rounded-full bg-c-line mx-auto mt-4 mb-2 flex-shrink-0"/>
-        {/* Nav row */}
-        <div className="flex justify-around items-center px-2 pb-3 pt-1 flex-shrink-0" style={{ borderBottom: "1px solid #f0f0f0" }}>
-          {NAV_ITEMS.map(item => {
-            const active = pathname === item.href;
-            return (
-              <Link key={item.href} href={item.href} onClick={handleClose}
-                className="flex flex-col items-center gap-1 px-2 py-1"
-                style={{ color: active ? "var(--c-blue)" : "var(--c-label)" }}>
-                {item.icon ?? (
-                  <span style={{ fontSize: 20, fontWeight: 700, lineHeight: "20px", letterSpacing: "-0.02em", display: "block", width: 20, textAlign: "center" }}>{overallScore}</span>
-                )}
-                <span className="text-[10px] font-semibold">{item.label}</span>
-              </Link>
-            );
-          })}
-        </div>
         <div className="overflow-y-auto flex-1 overscroll-contain">
           {/* Method picker */}
           {!logMethod && (
