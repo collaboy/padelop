@@ -1911,7 +1911,7 @@ export default function Home8() {
                       <button
                         onClick={() => {
                           if (matchInfoMode === 'edit') { setMatchInfoMode(null); setEditingMatchKey(null); }
-                          else { const fresh = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); const src = fresh ?? match; setMatchForm({ date: src.date ?? '', time: src.time ?? '', club: src.club ?? src.location ?? '', court: src.court ?? '', p1: src.player_1 ?? src.players?.[0] ?? '', p2: src.player_2 ?? src.players?.[1] ?? '', p3: src.player_3 ?? src.players?.[2] ?? '', p4: src.player_4 ?? src.players?.[3] ?? '' }); setEditingMatchKey({ date: match.date, time: match.time }); setMatchInfoMode('edit'); setMatchInfoAddTab(null); }
+                          else { const list = getMatchList(); const src = (list.find(m => m.date === match.date && m.time === match.time) ?? match) as StoredMatch & { location?: string; players?: string[] }; setMatchForm({ date: src.date ?? '', time: src.time ?? '', club: src.club ?? src.location ?? '', court: src.court ?? '', p1: src.player_1 ?? src.players?.[0] ?? '', p2: src.player_2 ?? src.players?.[1] ?? '', p3: src.player_3 ?? src.players?.[2] ?? '', p4: src.player_4 ?? src.players?.[3] ?? '' }); setEditingMatchKey({ date: src.date, time: src.time }); setMatchInfoMode('edit'); setMatchInfoAddTab(null); }
                         }}
                         style={{ position: "absolute", top: 14, left: 14, background: "#f4f4f6", border: "none", cursor: "pointer", padding: 7, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#4a5050" }}
                       >
