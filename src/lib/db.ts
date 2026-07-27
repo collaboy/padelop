@@ -102,6 +102,7 @@ export async function saveMatchReview(entry: {
   matchTime?: string;
   result?: string;
   feeling?: string;
+  partnerName?: string;
   opponentNames?: string;
   energy?: string;
   injury?: string;
@@ -118,6 +119,13 @@ export async function saveMatchReview(entry: {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
+    // The "opponents" field is freeform text but player_3/player_4 are two
+    // separate slots (padel is 2v2) — split on common separators.
+    const [opp1, opp2] = (entry.opponentNames ?? "")
+      .split(/,|&|\band\b/i)
+      .map(s => s.trim())
+      .filter(Boolean);
+
     const resultFields = {
       result:        entry.result ?? null,
       feeling:       entry.feeling ?? null,
@@ -130,6 +138,9 @@ export async function saveMatchReview(entry: {
       well_done:     entry.wellDone ?? [],
       improved:      entry.improved ?? [],
       notes:         entry.notes ?? null,
+      player_2:      entry.partnerName || null,
+      player_3:      opp1 ?? null,
+      player_4:      opp2 ?? null,
     };
 
     if (entry.matchDate && entry.matchTime) {

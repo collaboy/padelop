@@ -1281,8 +1281,8 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
             <button onClick={() => {
                 if (previewMode) { onClose(); return; }
                 try {
-                  const matchDateSaved = (() => { try { const m = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); return m?.date ?? null; } catch { return null; } })();
-                  const entry = { ...matchReview, resultImage: matchResultImage ?? undefined, ts: new Date().toISOString(), matchDate: matchDateSaved };
+                  const { matchDateSaved, matchTimeSaved } = (() => { try { const m = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); return { matchDateSaved: m?.date ?? null, matchTimeSaved: m?.time ?? null }; } catch { return { matchDateSaved: null, matchTimeSaved: null }; } })();
+                  const entry = { ...matchReview, resultImage: matchResultImage ?? undefined, ts: new Date().toISOString(), matchDate: matchDateSaved, matchTime: matchTimeSaved };
                   const prev = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
                   localStorage.setItem("padelop:match-reviews", JSON.stringify([entry, ...prev].slice(0, 50)));
                   saveMatchReview(entry);
