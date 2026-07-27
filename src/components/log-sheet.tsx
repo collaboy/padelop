@@ -1115,9 +1115,9 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                   return (
                     <button key={v} onClick={() => setMatchReview(r => ({ ...r, feeling: v }))}
                       className="flex-1 flex flex-col items-center gap-1.5 py-3 rounded-2xl border-2 transition-all active:scale-95"
-                      style={{ borderColor: sel ? PURPLE : "var(--c-line)", background: sel ? "#f5f3ff" : "var(--c-bg-input)" }}>
-                      <Face v={v} sel={sel} color={PURPLE}/>
-                      <span className="text-[10px] font-bold tracking-wide" style={{ color: sel ? PURPLE : "var(--c-text-sub)" }}>{label}</span>
+                      style={{ borderColor: sel ? BLUE : "var(--c-line)", background: sel ? "#f4f6ff" : "var(--c-bg-input)" }}>
+                      <Face v={v} sel={sel} color={BLUE}/>
+                      <span className="text-[10px] font-bold tracking-wide" style={{ color: sel ? BLUE : "var(--c-text-sub)" }}>{label}</span>
                     </button>
                   );
                 })}
@@ -1141,7 +1141,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                   const sel = matchReview.energy === v;
                   return <button key={v} onClick={() => setMatchReview(r => ({ ...r, energy: v }))}
                     className="flex-1 py-3 rounded-2xl border-2 text-[13px] font-bold transition-all active:scale-95"
-                    style={{ borderColor: sel ? PURPLE : "var(--c-line)", background: sel ? "#f5f3ff" : "var(--c-bg-input)", color: sel ? PURPLE : "var(--c-text-sub)" }}>{label}</button>;
+                    style={{ borderColor: sel ? BLUE : "var(--c-line)", background: sel ? "#f4f6ff" : "var(--c-bg-input)", color: sel ? BLUE : "var(--c-text-sub)" }}>{label}</button>;
                 })}
               </div>
             </div>
@@ -1153,7 +1153,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                 value={matchReview.opponentNames}
                 onChange={e => setMatchReview(r => ({ ...r, opponentNames: e.target.value }))}
                 className="w-full px-4 py-3 rounded-2xl border-2 text-[16px] text-c-text outline-none placeholder:text-[#b0b5ba]"
-                style={{ borderColor: matchReview.opponentNames ? PURPLE : "var(--c-line)", background: matchReview.opponentNames ? "#f5f3ff" : "var(--c-bg-input)" }}
+                style={{ borderColor: matchReview.opponentNames ? BLUE : "var(--c-line)", background: matchReview.opponentNames ? "#f4f6ff" : "var(--c-bg-input)" }}
               />
               {matchResultImage ? (
                 <div className="mt-3 relative">
@@ -1191,7 +1191,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                   const sel = matchReview.opponent === v;
                   return <button key={v} onClick={() => setMatchReview(r => ({ ...r, opponent: v }))}
                     className="flex-1 py-3 rounded-2xl border-2 text-[13px] font-bold transition-all active:scale-95"
-                    style={{ borderColor: sel ? PURPLE : "var(--c-line)", background: sel ? "#f5f3ff" : "var(--c-bg-input)", color: sel ? PURPLE : "var(--c-text-sub)" }}>{label}</button>;
+                    style={{ borderColor: sel ? BLUE : "var(--c-line)", background: sel ? "#f4f6ff" : "var(--c-bg-input)", color: sel ? BLUE : "var(--c-text-sub)" }}>{label}</button>;
                 })}
               </div>
             </div>
@@ -1211,9 +1211,9 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                         return (
                           <button key={v} onClick={() => setMatchReview(r => ({ ...r, [key]: v }))}
                             className="flex-1 flex flex-col items-center gap-1 py-2 rounded-2xl border-2 transition-all active:scale-95"
-                            style={{ borderColor: sel ? PURPLE : "var(--c-line)", background: sel ? "#f5f3ff" : "var(--c-bg-input)" }}>
-                            <Face v={v} sel={sel} color={PURPLE}/>
-                            <span className="text-[9px] font-bold leading-tight text-center" style={{ color: sel ? PURPLE : "var(--c-text-sub)" }}>{text}</span>
+                            style={{ borderColor: sel ? BLUE : "var(--c-line)", background: sel ? "#f4f6ff" : "var(--c-bg-input)" }}>
+                            <Face v={v} sel={sel} color={BLUE}/>
+                            <span className="text-[9px] font-bold leading-tight text-center" style={{ color: sel ? BLUE : "var(--c-text-sub)" }}>{text}</span>
                           </button>
                         );
                       })}
@@ -1229,7 +1229,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                   const sel = matchReview.warmup === v;
                   return <button key={v} onClick={() => setMatchReview(r => ({ ...r, warmup: v }))}
                     className="flex-1 py-3 rounded-2xl border-2 text-[13px] font-bold transition-all active:scale-95"
-                    style={{ borderColor: sel ? PURPLE : "var(--c-line)", background: sel ? "#f5f3ff" : "var(--c-bg-input)", color: sel ? PURPLE : "var(--c-text-sub)" }}>{label}</button>;
+                    style={{ borderColor: sel ? BLUE : "var(--c-line)", background: sel ? "#f4f6ff" : "var(--c-bg-input)", color: sel ? BLUE : "var(--c-text-sub)" }}>{label}</button>;
                 })}
               </div>
             </div>
@@ -1278,7 +1278,7 @@ export default function LogSheet({ open, onClose, defaultSub, startWizard, previ
                 afterSave();
               }}
               className="w-full py-3.5 rounded-2xl t-ui text-white active:scale-[0.98] transition-transform"
-              style={{ background: PURPLE }}>
+              style={{ background: BLUE }}>
               Save Review
             </button>
             <div style={{ paddingBottom: "env(safe-area-inset-bottom)" }}/>
