@@ -800,7 +800,7 @@ export default function Home8() {
       const hour = new Date().getHours();
       // Also check postMatchOpenRef in case mount's loadMatch already opened the popup
       // (dismissed key would already be set, so willShowPostMatch would miss it)
-      if (!done && !nudgeDismissed && hour < 13 && !willShowPostMatch && !postMatchOpenRef.current) {
+      if (!done && !nudgeDismissed && hour >= 5 && hour < 13 && !willShowPostMatch && !postMatchOpenRef.current) {
         setCheckinNudgeOpen(true);
       }
     }
@@ -932,7 +932,7 @@ export default function Home8() {
       const done = ml?.date === todayStr;
       const nudgeDismissed = localStorage.getItem("padelop:checkin-nudge-dismissed") === todayStr;
       const hour = new Date().getHours();
-      if (!done && !nudgeDismissed && hour < 13) setCheckinNudgeOpen(true);
+      if (!done && !nudgeDismissed && hour >= 5 && hour < 13) setCheckinNudgeOpen(true);
     }
     prevPostMatchOpenRef.current = postMatchOpen;
   }, [postMatchOpen]);
