@@ -72,6 +72,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
   const [monthOffset, setMonthOffset] = useState(0);
   const [dayTypeFilter, setDayTypeFilter] = useState<DayType | "all">("all");
   const [dayDetail, setDayDetail] = useState<{ date: string; type: DayType } | null>(null);
+  const [notesExpanded, setNotesExpanded] = useState(false);
   const monthTouchStartXRef = useRef(0);
   const currentItemRef = useRef<HTMLDivElement>(null);
 
@@ -86,9 +87,11 @@ export default function ScheduleSheet({ open, onClose }: Props) {
     if (open) return;
     setDayTypeExpanded(false);
     setModalIdx(null);
+    setViewMode("week");
     setMonthOffset(0);
     setDayTypeFilter("all");
     setDayDetail(null);
+    setNotesExpanded(false);
   }, [open]);
 
   useEffect(() => {
@@ -262,7 +265,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                       return (
                         <button
                           key={i}
-                          onClick={() => { if (isPastOrToday) setDayDetail({ date: dateStr, type: dt }); }}
+                          onClick={() => { if (isPastOrToday) { setDayDetail({ date: dateStr, type: dt }); setNotesExpanded(false); } }}
                           style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "6px 0", background: "none", border: "none", cursor: isPastOrToday ? "pointer" : "default" }}
                         >
                           <div style={{
@@ -345,7 +348,26 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                           {matchReview.result.charAt(0).toUpperCase() + matchReview.result.slice(1)}
                         </span>
                       )}
-                      {matchReview.notes && <p style={{ margin: 0, fontSize: 17, color: "#1a1c1c", lineHeight: 1.5 }}>{matchReview.notes}</p>}
+                      {matchReview.notes && (() => {
+                        const PREVIEW_LEN = 120;
+                        const isLong = matchReview.notes.length > PREVIEW_LEN;
+                        const preview = isLong ? matchReview.notes.slice(0, PREVIEW_LEN).trimEnd() : matchReview.notes;
+                        return (
+                          <>
+                            <p style={{ margin: 0, fontSize: 17, color: "#1a1c1c", lineHeight: 1.5 }}>
+                              {notesExpanded || !isLong ? matchReview.notes : `${preview}…`}
+                            </p>
+                            {isLong && (
+                              <button
+                                onClick={() => setNotesExpanded(v => !v)}
+                                style={{ alignSelf: "flex-start", background: "none", border: "none", padding: 0, cursor: "pointer", fontSize: 15, fontWeight: 700, color: "#2653d4" }}
+                              >
+                                {notesExpanded ? "Show less" : "More"}
+                              </button>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 )}
