@@ -65,8 +65,9 @@ export default function NotesSummaryContent() {
       <button
         onClick={handleCreate}
         disabled={loading}
-        style={{ background: "#2653d4", border: "none", borderRadius: 999, padding: "10px 16px", fontSize: 16, fontWeight: 700, color: "#fff", cursor: loading ? "default" : "pointer", opacity: loading ? 0.7 : 1, alignSelf: "stretch", textAlign: "center" }}
+        style={{ background: "#2653d4", border: "none", borderRadius: 999, padding: "10px 16px", fontSize: 16, fontWeight: 700, color: "#fff", cursor: loading ? "default" : "pointer", opacity: loading ? 0.7 : 1, alignSelf: "stretch", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
       >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="#fff" stroke="none"><path d="M12 2l1.6 5.4L19 9l-5.4 1.6L12 16l-1.6-5.4L5 9l5.4-1.6L12 2z"/><path d="M19 14l.8 2.7L22.5 17.5l-2.7.8L19 21l-.8-2.7-2.7-.8 2.7-.8L19 14z"/></svg>
         {loading ? "Summarizing…" : "Generate report from my notes"}
       </button>
       {error && <p style={{ margin: 0, fontSize: 17, color: "#ef4444" }}>{error}</p>}
