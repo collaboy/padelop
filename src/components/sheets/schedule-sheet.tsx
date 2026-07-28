@@ -76,6 +76,10 @@ export default function ScheduleSheet({ open, onClose }: Props) {
   const monthTouchStartXRef = useRef(0);
   const currentItemRef = useRef<HTMLDivElement>(null);
 
+  const toMins = (t: string) => t.split(":").reduce((a, b, i) => a + (i === 0 ? Number(b) * 60 : Number(b)), 0);
+  const curMins = now.getHours() * 60 + now.getMinutes();
+  const isSleepytime = schedule.length > 0 && (now.getHours() < 7 || curMins >= toMins(schedule[schedule.length - 1].time));
+
   useEffect(() => {
     if (!open) return;
     setNow(new Date());
@@ -126,12 +130,12 @@ export default function ScheduleSheet({ open, onClose }: Props) {
   }, [open]);
 
   useEffect(() => {
-    if (!open || schedule.length === 0) return;
+    if (!open || schedule.length === 0 || isSleepytime) return;
     const id = setTimeout(() => {
       currentItemRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
     }, 300);
     return () => clearTimeout(id);
-  }, [open, schedule]);
+  }, [open, schedule, isSleepytime]);
 
   if (!open) return null;
 
@@ -149,10 +153,6 @@ export default function ScheduleSheet({ open, onClose }: Props) {
     } catch {}
     saveScheduleDoneToDb(todayKey, next);
   }
-
-  const toMins = (t: string) => t.split(":").reduce((a, b, i) => a + (i === 0 ? Number(b) * 60 : Number(b)), 0);
-  const curMins = now.getHours() * 60 + now.getMinutes();
-  const isSleepytime = schedule.length > 0 && (now.getHours() < 7 || curMins >= toMins(schedule[schedule.length - 1].time));
 
   const modalItem = modalIdx !== null ? schedule[modalIdx] : null;
   const modalEndTime = modalIdx !== null ? schedule[modalIdx + 1]?.time : undefined;
@@ -190,7 +190,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
               )}
             </div>
           </div>
-          <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px", display: "flex", flexDirection: "column", gap: 8, position: "relative" }}>
+          <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px", display: "flex", flexDirection: "column", gap: 8, position: "relative", overflowY: viewMode === "week" && isSleepytime ? "hidden" : "auto", touchAction: viewMode === "week" && isSleepytime ? "none" : "auto" }}>
             {viewMode === "week" ? (
               <>
                 {isSleepytime && (
