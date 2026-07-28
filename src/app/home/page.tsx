@@ -12,6 +12,7 @@ const PushPrompt = dynamic(() => import("@/components/push-prompt"));
 const ScheduleSheet = dynamic(() => import("@/components/sheets/schedule-sheet"));
 const StatsSheet = dynamic(() => import("@/components/sheets/stats-sheet"));
 import ScheduleItemModal from "@/components/sheets/schedule-item-modal";
+import { AddMatchModal } from "@/components/sheets/match-form";
 import { computeFormScore, loadScoringData, computePillarStates, loadScoreHistory, computeMatchReadiness, loadMorningLog, improveTips, type MatchReadinessResult, type PillarStates, type DailyCheckIn, type HydrationEntry, type NutritionEntry, type TrainingEntry } from "@/lib/scoring";
 import { pad, addMins, toMins, DRILL_LIBRARY, DEFAULT_DRILL, getTopNeedsWorkTag, getDayType, ITEM_COLORS, type ScheduleItem, type DayType, getScheduleData } from "@/lib/schedule-data";
 import { saveUpcomingMatch, saveNutritionToDb, saveHydrationToDb, saveNoteToDb, saveMatchReview, saveGearToDb, saveScheduleDoneToDb, saveTrainingToDb, deleteUpcomingMatchFromDb } from "@/lib/db";
@@ -279,7 +280,6 @@ export default function Home8() {
   const [logTab, setLogTab] = useState<"checkin" | "wellbeing" | "matchreview" | "hydration" | "nutrition" | "training" | null>(null);
   const [logWizard, setLogWizard] = useState(false);
   const [matchModalOpen, setMatchModalOpen] = useState(false);
-  const [matchModalTab, setMatchModalTab] = useState<'pick' | 'confirm' | 'manual'>('pick');
   const [matchForm, setMatchForm] = useState({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' });
   const [uploadExtracting, setUploadExtracting] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -291,7 +291,6 @@ export default function Home8() {
   const [matchInfoAddTab, setMatchInfoAddTab] = useState<null | 'upload' | 'manual'>(null);
   const [editingMatchKey, setEditingMatchKey] = useState<{ date: string; time: string } | null>(null);
   const [match, setMatch] = useState<{ date: string; time: string; club?: string; court?: string; players?: string[] } | null>(null);
-  const [isAddMode, setIsAddMode] = useState(false);
   const [matchActionMode, setMatchActionMode] = useState<null | 'edit' | 'add'>(null);
   const [upcomingCount, setUpcomingCount] = useState(0);
   const [now, setNow] = useState(new Date());
@@ -432,7 +431,6 @@ export default function Home8() {
     };
   }, [warmupPlaying]);
 
-  const matchUploadRef = useRef<HTMLInputElement>(null);
   const actionUploadRef = useRef<HTMLInputElement>(null);
   const [drumIdx, setDrumIdx] = useState(0);
   const drumDragRef = useRef<{ startY: number; startIdx: number } | null>(null);
@@ -1263,7 +1261,7 @@ export default function Home8() {
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
                         <div style={{ position: "relative", width: "calc((100vw - 40px) * 0.65)", height: "calc((100vw - 40px) * 0.65)", flexShrink: 0 }}>
                           <button
-                            onClick={() => { setIsAddMode(true); setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' }); setMatchModalTab('pick'); setMatchModalOpen(true); }}
+                            onClick={() => setMatchModalOpen(true)}
                             style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 20px #2653d455" }}
                           >
                             <svg width="18%" height="18%" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="2.5" strokeLinecap="round">
@@ -2086,7 +2084,6 @@ export default function Home8() {
               {/* Edit match */}
               <button onClick={() => {
                 if (matchActionMode === 'edit') { setMatchActionMode(null); return; }
-                setIsAddMode(false);
                 const fresh = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); const src = fresh ?? match;
                 setMatchForm({ date: src?.date ?? '', time: src?.time ?? '', club: src?.club ?? src?.location ?? '', court: src?.court ?? '', p1: src?.player_1 ?? src?.players?.[0] ?? '', p2: src?.player_2 ?? src?.players?.[1] ?? '', p3: src?.player_3 ?? src?.players?.[2] ?? '', p4: src?.player_4 ?? src?.players?.[3] ?? '' });
                 setMatchActionMode('edit');
@@ -2144,7 +2141,6 @@ export default function Home8() {
               {/* Add a match */}
               <button onClick={() => {
                 if (matchActionMode === 'add') { setMatchActionMode(null); return; }
-                setIsAddMode(true);
                 setMatchForm({ date: '', time: '', club: '', court: '', p1: '', p2: '', p3: '', p4: '' });
                 setMatchActionMode('add');
               }} className="w-full flex items-center gap-4 px-5 py-4 active:bg-[#f4f6ff] transition-colors" style={{ borderBottom: "1px solid #f0f0f0" }}>
@@ -2239,262 +2235,12 @@ export default function Home8() {
           </div>
         )}
 
-        {/* Add / Edit Match modal */}
-        {matchModalOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-5" style={{ paddingTop: "24px", paddingBottom: "24px" }} onClick={() => { setMatchModalOpen(false); setMatchModalTab('pick'); setLiveX(0); setLiveY(0); setUploadError(null); setUploadExtracting(false); }} onTouchStart={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-            <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
-              {/* Header */}
-              <div className="px-6 pt-5 pb-4 flex items-center justify-between border-b border-[#f0f0f0]">
-                <div>
-                  <p className="text-[18px] font-bold text-[#1a1c1c]">{isAddMode ? "Add Match" : "Edit Match"}</p>
-                  <p className="text-[13px] text-[#6b7480] mt-0.5">Upload a screenshot or enter manually</p>
-                </div>
-                <button onClick={() => { setMatchModalOpen(false); setMatchModalTab('pick'); setLiveX(0); setLiveY(0); setUploadError(null); setUploadExtracting(false); }} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "#f4f4f6" }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4a5050" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-              </div>
-
-              {matchModalTab === 'pick' && (
-                <div className="px-6 py-6 flex flex-col gap-3">
-                  {uploadExtracting && (
-                    <div className="flex items-center justify-center gap-3 py-4">
-                      <svg className="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2.5" strokeLinecap="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                      <span className="text-[14px] font-medium text-[#2653d4]">Reading screenshot…</span>
-                    </div>
-                  )}
-                  {uploadError && (
-                    <div className="px-4 py-3 rounded-2xl text-[13px] text-[#c0392b]" style={{ background: "#fff0f0", border: "1.5px solid #ffd0d0" }}>{uploadError}</div>
-                  )}
-                  <button
-                    disabled={uploadExtracting}
-                    onClick={() => {
-                      setUploadError(null);
-                      setLiveX(0);
-                      setCardSnap('none');
-                      const onFocus = () => { setLiveX(0); setCardSnap('none'); window.removeEventListener('focus', onFocus); };
-                      window.addEventListener('focus', onFocus);
-                      matchUploadRef.current?.click();
-                    }}
-                    className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl active:opacity-70 transition-opacity"
-                    style={{ background: "#f4f6ff", border: "1.5px solid #2653d418", opacity: uploadExtracting ? 0.5 : 1 }}
-                  >
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#2653d4" }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
-                      </svg>
-                    </div>
-                    <div className="text-left">
-                      <p className="text-[15px] font-semibold text-[#1a1c1c]">Upload screenshot</p>
-                      <p className="text-[12px] text-[#6b7480] mt-0.5">From your camera roll or files</p>
-                    </div>
-                  </button>
-                  <input ref={matchUploadRef} type="file" accept="image/*" className="hidden" onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    setUploadError(null);
-                    setUploadExtracting(true);
-                    try {
-                      const reader = new FileReader();
-                      const base64 = await new Promise<string>((resolve, reject) => {
-                        reader.onload = () => {
-                          const result = reader.result as string;
-                          resolve(result.split(',')[1]);
-                        };
-                        reader.onerror = reject;
-                        reader.readAsDataURL(file);
-                      });
-                      const res = await fetch('/api/extract-match', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ image: base64, mediaType: file.type }),
-                      });
-                      const data = await res.json();
-                      if (!res.ok || data.error) {
-                        setUploadError(data.message || 'Could not read the screenshot. Please enter manually.');
-                        setUploadExtracting(false);
-                        return;
-                      }
-                      setMatchForm({
-                        date: data.date ?? '',
-                        time: data.time ?? '',
-                        club: data.club ?? '',
-                        court: data.court ?? '',
-                        p1: data.player_1 ?? '',
-                        p2: data.player_2 ?? '',
-                        p3: data.player_3 ?? '',
-                        p4: data.player_4 ?? '',
-                      });
-                      setMatchModalTab('confirm');
-                    } catch {
-                      setUploadError('Upload failed. Please try again or enter manually.');
-                    }
-                    setUploadExtracting(false);
-                    if (matchUploadRef.current) matchUploadRef.current.value = '';
-                  }} />
-
-                  <button
-                    disabled={uploadExtracting}
-                    onClick={() => { setMatchForm({ date: match?.date ?? '', time: match?.time ?? '', club: match?.club ?? '', court: match?.court ?? '', p1: match?.players?.[0] ?? '', p2: match?.players?.[1] ?? '', p3: match?.players?.[2] ?? '', p4: match?.players?.[3] ?? '' }); setMatchModalTab('manual'); }}
-                    className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl active:opacity-70 transition-opacity"
-                    style={{ background: "#f9f9f9", border: "1.5px solid #f0f0f0", opacity: uploadExtracting ? 0.5 : 1 }}
-                  >
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#1a1c1c" }}>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="13" y2="18"/>
-                      </svg>
-                    </div>
-                    <div className="text-left">
-                      <p className="text-[15px] font-semibold text-[#1a1c1c]">Enter manually</p>
-                      <p className="text-[12px] text-[#6b7480] mt-0.5">Date, time, club and players</p>
-                    </div>
-                  </button>
-                </div>
-              )}
-
-              {matchModalTab === 'confirm' && (
-                <div className="px-6 py-5 flex flex-col gap-4">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#f0fdf4" }}>
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                    </div>
-                    <p className="text-[13px] font-semibold text-[#16a34a]">We read your screenshot — does this look right?</p>
-                  </div>
-                  <div style={{ background: "#f9f9f9", borderRadius: 16, overflow: "hidden", border: "1px solid #f0f0f0" }}>
-                    {[
-                      { label: "Date", value: matchForm.date ? new Date(matchForm.date + "T00:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" }) : "—" },
-                      { label: "Time", value: matchForm.time || "—" },
-                      { label: "Club", value: matchForm.club || "—" },
-                      { label: "Players", value: [matchForm.p1, matchForm.p2, matchForm.p3, matchForm.p4].filter(Boolean).join(", ") || "—" },
-                    ].map((row, i, arr) => (
-                      <div key={row.label} className="flex items-center px-4 py-3" style={{ borderBottom: i < arr.length - 1 ? "1px solid #f0f0f0" : "none" }}>
-                        <span className="text-[11px] font-bold uppercase tracking-widest text-[#8a9096] w-16 flex-shrink-0">{row.label}</span>
-                        <span className="text-[14px] font-medium text-[#1a1c1c]">{row.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    onClick={() => {
-                      if (!matchForm.date || !matchForm.time) return;
-                      const data: StoredMatch = { date: matchForm.date, time: matchForm.time, club: matchForm.club, court: matchForm.court, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
-                      const current = getMatchList();
-                      let updated: StoredMatch[];
-                      if (isAddMode) { updated = [...current, data]; } else {
-                        const replaced = current.map(m => m.date === match?.date && m.time === match?.time ? data : m);
-                        updated = current.some(m => m.date === match?.date && m.time === match?.time) ? replaced : [data, ...current];
-                      }
-                      const sorted = saveMatchList(updated);
-                      const next = sorted[0];
-                      if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
-                      saveUpcomingMatch({ date: data.date, time: data.time, club: data.club, court: data.court, player_1: data.player_1, player_2: data.player_2, player_3: data.player_3, player_4: data.player_4 });
-                      setMatchModalOpen(false); setMatchModalTab('pick'); setLiveX(0); setLiveY(0); setCardSnap('none'); setDoIdx(-1);
-                      window.dispatchEvent(new Event("storage"));
-                    }}
-                    className="w-full py-3.5 rounded-2xl text-[15px] font-bold text-white active:scale-[0.98] transition-transform"
-                    style={{ background: (!matchForm.date || !matchForm.time) ? "#c4c7c7" : "#2653d4" }}
-                  >
-                    Yes, save match
-                  </button>
-                  <button
-                    onClick={() => setMatchModalTab('manual')}
-                    className="w-full py-3 rounded-2xl text-[15px] font-semibold active:opacity-70 transition-opacity"
-                    style={{ background: "#f4f4f6", color: "#4a5050" }}
-                  >
-                    Edit details
-                  </button>
-                </div>
-              )}
-
-              {matchModalTab === 'manual' && (
-                <div className="px-6 py-5 flex flex-col gap-4 max-h-[70vh] overflow-y-auto">
-                  <div className="flex flex-col gap-3">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Date</label>
-                      <input type="date" value={matchForm.date} onChange={e => setMatchForm(f => ({ ...f, date: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: matchForm.date ? "#2653d4" : "#e2e2e2", background: matchForm.date ? "#f4f6ff" : "#f9f9f9", color: matchForm.date ? "#1a1c1c" : "#b0b5ba", minHeight: 44, cursor: "pointer" }} />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Time</label>
-                      <input type="time" value={matchForm.time} onChange={e => setMatchForm(f => ({ ...f, time: e.target.value }))} className="w-full px-3 py-2.5 rounded-xl border text-[15px] font-medium outline-none" style={{ borderColor: matchForm.time ? "#2653d4" : "#e2e2e2", background: matchForm.time ? "#f4f6ff" : "#f9f9f9", color: matchForm.time ? "#1a1c1c" : "#b0b5ba", minHeight: 44, cursor: "pointer" }} />
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Club</label>
-                    <input type="text" placeholder="e.g. Club Padel BCN" value={matchForm.club} onChange={e => setMatchForm(f => ({ ...f, club: e.target.value }))}
-                      className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]"
-                      style={{ borderColor: matchForm.club ? "#2653d4" : "#e2e2e2", background: matchForm.club ? "#f4f6ff" : "#f9f9f9" }} />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[11px] font-bold uppercase tracking-widest text-[#6b7480]">Players</label>
-                    {(['p1','p2','p3','p4'] as const).map((key, i) => (
-                      <input key={key} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={matchForm[key]} onChange={e => setMatchForm(f => ({ ...f, [key]: e.target.value }))}
-                        className="w-full px-3 py-2.5 rounded-xl border text-[16px] text-[#1a1c1c] outline-none placeholder:text-[#b0b5ba]"
-                        style={{ borderColor: matchForm[key] ? "#2653d4" : "#e2e2e2", background: matchForm[key] ? "#f4f6ff" : "#f9f9f9" }} />
-                    ))}
-                    {(() => {
-                      const opponentInputs = [matchForm.p3, matchForm.p4].filter(Boolean).map(s => s.toLowerCase().trim());
-                      if (!opponentInputs.length) return null;
-                      const matched = pastReviews.filter(r =>
-                        opponentInputs.some(name =>
-                          r.opponentNames.toLowerCase().split(/[\s,&]+/).some(n => n.length > 2 && name.includes(n))
-                        )
-                      );
-                      if (!matched.length) return null;
-                      const wins   = matched.filter(r => r.result === "win").length;
-                      const losses = matched.filter(r => r.result === "loss").length;
-                      const topStrength = matched.flatMap(r => r.wellDone).slice(0, 3).filter((v, i, a) => a.indexOf(v) === i);
-                      const topWeakness = matched.flatMap(r => r.improved).slice(0, 3).filter((v, i, a) => a.indexOf(v) === i);
-                      return (
-                        <div style={{ background: "#f4f6ff", borderRadius: 14, padding: "12px 14px", marginTop: 4, display: "flex", flexDirection: "column", gap: 6 }}>
-                          <p style={{ fontSize: "clamp(11px, 2.8vw, 14px)", fontWeight: 700, color: "#2653d4", letterSpacing: "0.06em", textTransform: "uppercase", margin: 0 }}>
-                            History vs this opponent — {wins}W {losses}L
-                          </p>
-                          {topStrength.length > 0 && (
-                            <p style={{ fontSize: "clamp(12px, 3.1vw, 15px)", color: "#496640", margin: 0 }}>
-                              Worked well: {topStrength.join(", ")}
-                            </p>
-                          )}
-                          {topWeakness.length > 0 && (
-                            <p style={{ fontSize: "clamp(12px, 3.1vw, 15px)", color: "#d97706", margin: 0 }}>
-                              Focus on: {topWeakness.join(", ")}
-                            </p>
-                          )}
-                        </div>
-                      );
-                    })()}
-                  </div>
-                  <button
-                    onClick={() => {
-                      if (!matchForm.date || !matchForm.time) return;
-                      const data: StoredMatch = { date: matchForm.date, time: matchForm.time, club: matchForm.club, court: matchForm.court, player_1: matchForm.p1, player_2: matchForm.p2, player_3: matchForm.p3, player_4: matchForm.p4 };
-                      const current = getMatchList();
-                      let updated: StoredMatch[];
-                      if (isAddMode) {
-                        updated = [...current, data];
-                      } else {
-                        // Replace the current next match (matched by date+time)
-                        const replaced = current.map(m => m.date === match?.date && m.time === match?.time ? data : m);
-                        updated = current.some(m => m.date === match?.date && m.time === match?.time) ? replaced : [data, ...current];
-                      }
-                      const sorted = saveMatchList(updated);
-                      const next = sorted[0];
-                      if (next) setMatch({ date: next.date, time: next.time, club: next.club || undefined, players: [next.player_1, next.player_2, next.player_3, next.player_4].filter(Boolean) });
-                      saveUpcomingMatch({ date: data.date, time: data.time, club: data.club, court: data.court, player_1: data.player_1, player_2: data.player_2, player_3: data.player_3, player_4: data.player_4 });
-                      setMatchModalOpen(false);
-                      setMatchModalTab('pick');
-                      setLiveX(0);
-                      setLiveY(0);
-                      setCardSnap('none');
-                      setDoIdx(-1);
-                    }}
-                    className="w-full py-3.5 rounded-2xl text-white text-[15px] font-bold active:scale-[0.98] transition-transform"
-                    style={{ background: matchForm.date && matchForm.time ? "#2653d4" : "#d0d3d6" }}
-                  >Save Match</button>
-                  <button onClick={() => setMatchModalTab('pick')} className="w-full py-2 text-[13px] font-semibold text-[#6b7480]">← Back</button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        {/* Add Match modal (shared component) */}
+        <AddMatchModal
+          open={matchModalOpen}
+          onClose={() => { setMatchModalOpen(false); setLiveX(0); setLiveY(0); }}
+          onSaved={() => { setMatchModalOpen(false); setLiveX(0); setLiveY(0); setCardSnap('none'); setDoIdx(-1); }}
+        />
 
         {/* Schedule detail modal */}
         {schedDetailOpen && (

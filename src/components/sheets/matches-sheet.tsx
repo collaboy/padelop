@@ -6,7 +6,7 @@ import { saveUpcomingMatch, deleteUpcomingMatchFromDb } from "@/lib/db";
 import { pad } from "@/lib/schedule-data";
 import {
   MatchFormFields as MatchFormWidget, matchFormToStored, persistUpcomingMatches,
-  EMPTY_MATCH_FORM as EMPTY_FORM,
+  EMPTY_MATCH_FORM as EMPTY_FORM, AddMatchModal,
   type MatchForm, type StoredMatchFull as StoredMatch,
 } from "./match-form";
 
@@ -37,7 +37,6 @@ export default function MatchesContent() {
   const [matchHistoryOpen, setMatchHistoryOpen] = useState(false);
   const [matchNotesOpen, setMatchNotesOpen] = useState(false);
   const [notesSearch, setNotesSearch] = useState("");
-  const [matchAddForm, setMatchAddForm] = useState<MatchForm>(EMPTY_FORM);
   const [matchRecordExpanded, setMatchRecordExpanded] = useState(false);
   const [selectedReview, setSelectedReview] = useState<ReviewEntry | null>(null);
 
@@ -81,15 +80,6 @@ export default function MatchesContent() {
     if (m) deleteUpcomingMatchFromDb(m.date, m.time ?? "");
     setMatchExpandedIdx(null);
   }
-  function matchSaveAdd() {
-    const f = matchAddForm;
-    if (!f.date || !f.time) return;
-    matchSaveList([...upcomingMatches, matchFormToStored(f)]);
-    saveUpcomingMatch({ date: f.date, time: f.time, club: f.club, court: f.court, player_1: f.p1, player_2: f.p2, player_3: f.p3, player_4: f.p4 });
-    setMatchAddForm(EMPTY_FORM);
-    setMatchAddOpen(false);
-  }
-
   return (
     <>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -141,12 +131,6 @@ export default function MatchesContent() {
           );
         })()}
 
-        {matchAddOpen && (
-          <div style={{ background: "#f8f9fa", borderRadius: 14, padding: "14px 14px" }}>
-            <p style={{ margin: 0, fontSize: 21, fontWeight: 800, color: "#1a1c1c" }}>New match</p>
-            <MatchFormWidget form={matchAddForm} onChange={setMatchAddForm} onSave={matchSaveAdd} saveLabel="Save match" saveColor="#16a34a" />
-          </div>
-        )}
         {upcomingMatches.length > 0 ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <p style={{ margin: "4px 4px 0", fontSize: 15, fontWeight: 700, color: "#8a9096", letterSpacing: "0.06em" }}>UPCOMING</p>
@@ -183,18 +167,19 @@ export default function MatchesContent() {
               );
             })}
           </div>
-        ) : !matchAddOpen && (
+        ) : (
           <div style={{ background: "#f8f9fa", borderRadius: 14, padding: "22px 18px", textAlign: "center" }}>
             <p style={{ margin: "0 0 6px", fontSize: 21, fontWeight: 800, color: "#1a1c1c" }}>No upcoming matches</p>
             <p style={{ margin: "0 0 14px", fontSize: 20, color: "#8a9096" }}>Schedule your next game</p>
           </div>
         )}
         <button
-          onClick={() => { setMatchAddOpen(o => !o); setMatchExpandedIdx(null); if (!matchAddOpen) setMatchAddForm(EMPTY_FORM); }}
-          style={{ alignSelf: "flex-start", background: matchAddOpen ? "#e8edf8" : "#2653d4", border: "none", borderRadius: 20, padding: "7px 16px", fontSize: 20, fontWeight: 700, color: matchAddOpen ? "#2653d4" : "#fff", cursor: "pointer" }}
+          onClick={() => { setMatchAddOpen(true); setMatchExpandedIdx(null); }}
+          style={{ alignSelf: "flex-start", background: "#2653d4", border: "none", borderRadius: 20, padding: "7px 16px", fontSize: 20, fontWeight: 700, color: "#fff", cursor: "pointer" }}
         >
-          {matchAddOpen ? "Cancel" : "+ Add"}
+          + Add
         </button>
+        <AddMatchModal open={matchAddOpen} onClose={() => setMatchAddOpen(false)} onSaved={() => setMatchAddOpen(false)} />
         {reviews.length > 0 && (
           <div style={{ background: "#fff", borderRadius: 14, overflow: "hidden", boxShadow: "0 0 0 1px #ececec" }}>
             <button onClick={() => setMatchHistoryOpen(o => !o)} style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "14px", display: "flex", alignItems: "center", justifyContent: "space-between", textAlign: "left" }}>
