@@ -1090,15 +1090,9 @@ export default function Home8() {
     }, 1500);
   }
 
-  // The safe-area strip behind the status bar/notch is its own element (not
-  // main's overall background) so only that strip changes color to match the
-  // ball while it's active — the rest of the page stays white as before.
-  const safeAreaBg = doIdx === 0 ? "#00D455" : "#fff";
-
   return (
     <>
-      <div style={{ position: "fixed", top: 0, left: 0, right: 0, height: "env(safe-area-inset-top)", background: safeAreaBg, transition: "background-color 0.3s", zIndex: 61 }} />
-      <main style={{ ...S, position: "fixed", inset: 0, paddingTop: "env(safe-area-inset-top)", paddingLeft: 10, paddingRight: 10, paddingBottom: 0, overflow: "hidden", background: "#fff", zIndex: 60, clipPath: "inset(0)", WebkitClipPath: "inset(0)" }}>
+      <main style={{ ...S, position: "fixed", inset: 0, paddingLeft: 10, paddingRight: 10, paddingBottom: 0, overflow: "hidden", background: "#fff", zIndex: 60, clipPath: "inset(0)", WebkitClipPath: "inset(0)" }}>
 
         {/* Horizontal strip: [readiness | carousel | log] */}
         <div
