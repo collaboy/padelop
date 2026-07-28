@@ -41,7 +41,7 @@ const SIZES = {
   textareaFont: "clamp(20px, 5.04vw, 22px)",
   infoText: 21,
   stepTitle: 24, stepCue: 20, stepReps: 15,
-  swipeLabel: 20, doneLabel: 21,
+  swipeLabel: 16, doneLabel: 21,
   detailsLabel: 21,
 };
 
@@ -278,8 +278,8 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
               }}
             >
               <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: swipeX, background: item.color, transition: swipeX === 0 ? "width 0.3s" : "none" }} />
-              <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-                <span style={{ fontSize: v.swipeLabel, fontWeight: 600, color: "#8a9096", opacity: Math.max(0, 1 - swipeX / 80), transition: "opacity 0.1s" }}>{swipeLabelText}</span>
+              <div style={{ position: "absolute", top: 0, bottom: 0, left: 76, right: 16, display: "flex", alignItems: "center", justifyContent: "flex-start", pointerEvents: "none" }}>
+                <span style={{ fontSize: v.swipeLabel, fontWeight: 600, color: "#8a9096", opacity: Math.max(0, 1 - swipeX / 80), transition: "opacity 0.1s", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{swipeLabelText}</span>
               </div>
               <div style={{ position: "absolute", top: 4, left: 4 + swipeX, width: 60, height: 60, borderRadius: "50%", background: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", justifyContent: "center", transition: swipeX === 0 ? "left 0.3s" : "none", pointerEvents: "none" }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round"><line x1="5" y1="12" x2="19" y2="12"/><path d="M13 6l6 6-6 6"/></svg>
