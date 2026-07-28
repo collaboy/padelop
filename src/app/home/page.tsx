@@ -128,6 +128,17 @@ function localISODate(d: Date) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
+// Rubber-band drag resistance: 1:1 tracking up to `threshold`, then
+// progressively damped beyond it (never hard-capped) so the vertical swipe
+// on the home carousel stays connected to the finger but can't travel far
+// enough to reveal blank space past the adjacent card.
+function rubberBand(d: number, threshold = 60, damp = 0.35) {
+  const sign = d < 0 ? -1 : 1;
+  const abs = Math.abs(d);
+  if (abs <= threshold) return d;
+  return sign * (threshold + (abs - threshold) * damp);
+}
+
 // ── Tag cloud (mirrors matches4) ──────────────────────────────────────────
 type ReviewEntry = { ts: string; feeling: string; result: string; opponent: string; energy: string; wellDone: string[]; improved: string[] };
 type TagEntry    = { text: string; count: number; type: "good" | "bad" };
@@ -1108,7 +1119,7 @@ export default function Home8() {
               swipeDirRef.current = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
             if (doIdx >= 1) return;
             if (swipeDirRef.current === 'h' && doIdx === 0) setLiveX(dx);
-            if (swipeDirRef.current === 'v' && cardSnap === 'none' && doIdx < 1 && !settlingRef.current) setLiveY(dy);
+            if (swipeDirRef.current === 'v' && cardSnap === 'none' && doIdx < 1 && !settlingRef.current) setLiveY(rubberBand(dy));
           }}
           onTouchEnd={e => {
             const endY = e.changedTouches[0].clientY;
