@@ -51,7 +51,7 @@ export default function PrivacyPage() {
           <ul style={ul}>
             <li><strong>Supabase</strong> — database and authentication (<a href="https://supabase.com/privacy" style={link}>supabase.com/privacy</a>)</li>
             <li><strong>Vercel</strong> — hosting (<a href="https://vercel.com/legal/privacy-policy" style={link}>vercel.com/legal/privacy-policy</a>)</li>
-            <li><strong>Anthropic Claude API</strong> — used to analyse uploaded images (e.g. food photos, match bookings). Images are sent to Anthropic's API and are not stored by us after processing.</li>
+            <li><strong>Anthropic Claude API</strong> — used to analyse uploaded images (e.g. food photos, match bookings) and, if you choose to generate one, to summarise your own written match notes. This content is sent to Anthropic's API and is not stored by us after processing.</li>
           </ul>
         </Section>
 

@@ -1,0 +1,56 @@
+import Anthropic from "@anthropic-ai/sdk";
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+export const maxDuration = 20;
+
+export async function POST(req: NextRequest) {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json({ error: "no_api_key" }, { status: 503 });
+  }
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
+  if (!checkRateLimit(`notes-summary:${user.id}`, 5, 60 * 60 * 1000)) {
+    return NextResponse.json({ error: "rate_limited", message: "Too many requests — please try again in a bit." }, { status: 429 });
+  }
+
+  let body: { notes: Array<{ date: string; text: string }> };
+  try { body = await req.json(); } catch {
+    return NextResponse.json({ error: "invalid_request" }, { status: 400 });
+  }
+
+  const { notes } = body;
+  if (!notes?.length) {
+    return NextResponse.json({ error: "no_notes" }, { status: 400 });
+  }
+
+  const noteList = notes.map(n => `${n.date}: ${n.text}`).join("\n\n");
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+  let summary: string;
+  try {
+    const res = await client.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 400,
+      messages: [{
+        role: "user",
+        content: `You are a padel performance coach. Below are a player's own match notes, in chronological order.
+
+${noteList}
+
+Write a short summary (3-5 sentences) of the patterns you notice: recurring strengths, recurring weaknesses, opponents or situations that come up more than once, and any trend over time. Be specific and reference concrete details from the notes. Do not invent anything not supported by the notes. Respond with plain text only, no markdown, no headers.`,
+      }],
+    });
+    summary = res.content[0].type === "text" ? res.content[0].text.trim() : "";
+  } catch (err) {
+    console.error("notes-summary:", err);
+    return NextResponse.json({ error: "api_error" }, { status: 502 });
+  }
+
+  if (!summary) return NextResponse.json({ error: "empty_summary" }, { status: 422 });
+  return NextResponse.json({ summary });
+}

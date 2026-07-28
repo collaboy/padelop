@@ -6,6 +6,7 @@ import StreakContent from "./streak-sheet";
 import MatchesContent from "./matches-sheet";
 import InsightsContent, { getInsightsPool } from "./insights-sheet";
 import PatternsContent, { getPatternsTagCount } from "./patterns-sheet";
+import NotesSummaryContent, { getNotesSummaryCount } from "./notes-summary-sheet";
 
 const MILESTONES = [10, 25, 50, 75, 100, 250, 500, 1000];
 
@@ -123,6 +124,7 @@ export default function StatsSheet({ open, onClose, points, streak, winRate, rea
   const toggle = (key: string) => setExpandedKey(k => k === key ? null : key);
   const insightsCount = getInsightsPool(streak).length;
   const patternsCount = getPatternsTagCount();
+  const notesSummaryCount = getNotesSummaryCount();
   const matchesColor = winRate === null ? "#9aa0a6" : winRate >= 60 ? "#16a34a" : winRate >= 40 ? "#d97706" : "#dc2626";
 
   return (
@@ -173,6 +175,18 @@ export default function StatsSheet({ open, onClose, points, streak, winRate, rea
             onToggle={() => toggle("patterns")}
           >
             <PatternsContent />
+          </ExpandableRow>
+          <ExpandableRow
+            color="#7c3aed"
+            icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>}
+            title="Notes Summary"
+            value={notesSummaryCount > 0 ? notesSummaryCount : "—"}
+            sub={notesSummaryCount > 0 ? "summaries created" : "no summaries yet"}
+            expanded={expandedKey === "notesSummary"}
+            dim={expandedKey !== null && expandedKey !== "notesSummary"}
+            onToggle={() => toggle("notesSummary")}
+          >
+            <NotesSummaryContent />
           </ExpandableRow>
 
           <SectionHeader title="Consistency" />
