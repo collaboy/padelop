@@ -314,7 +314,11 @@ export default function ScheduleSheet({ open, onClose }: Props) {
 
       {dayDetail && (() => {
         const meta = DAY_META[dayDetail.type];
-        const tasks = schedDone[dayDetail.date] ?? [];
+        const doneTitles = schedDone[dayDetail.date] ?? [];
+        const { schedule: fullDaySchedule } = getScheduleData(dayDetail.type === "baseline" ? "training" : dayDetail.type, null, null);
+        const allTitles = fullDaySchedule.map(item => item.title);
+        const completed = allTitles.filter(t => doneTitles.includes(t));
+        const missed = allTitles.filter(t => !doneTitles.includes(t));
         const dateLabel = new Date(dayDetail.date + "T12:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
         return (
           <div className="fixed inset-0 z-[400] flex items-end justify-center" onClick={() => setDayDetail(null)}>
@@ -326,18 +330,34 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                 <p style={{ margin: "0 0 8px", fontSize: 22, fontWeight: 800, color: "#1a1c1c" }}>{dateLabel}</p>
                 <span style={{ fontSize: 15, fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: meta.color, background: `${meta.color}18`, borderRadius: 999, padding: "4px 12px" }}>{meta.label}</span>
               </div>
-              <div className="overflow-y-auto" style={{ padding: "0 20px 24px" }}>
-                {tasks.length === 0 ? (
-                  <p style={{ margin: 0, fontSize: 16, color: "#9aa0a6" }}>Nothing completed this day.</p>
+              <div className="overflow-y-auto" style={{ padding: "0 20px 24px", display: "flex", flexDirection: "column", gap: 20 }}>
+                {completed.length === 0 && missed.length === 0 ? (
+                  <p style={{ margin: 0, fontSize: 16, color: "#9aa0a6" }}>No schedule data for this day.</p>
                 ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    {tasks.map(title => (
-                      <div key={title} style={{ display: "flex", alignItems: "center", gap: 10, background: "#f8f9fa", borderRadius: 12, padding: "10px 14px" }}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M5 13l4 4L19 7"/></svg>
-                        <span style={{ fontSize: 17, fontWeight: 600, color: "#1a1c1c" }}>{title}</span>
+                  <>
+                    {completed.length > 0 && (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#9aa0a6" }}>Completed</p>
+                        {completed.map(title => (
+                          <div key={title} style={{ display: "flex", alignItems: "center", gap: 10, background: "#f8f9fa", borderRadius: 12, padding: "10px 14px" }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M5 13l4 4L19 7"/></svg>
+                            <span style={{ fontSize: 17, fontWeight: 600, color: "#1a1c1c" }}>{title}</span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    )}
+                    {missed.length > 0 && (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#9aa0a6" }}>Not completed</p>
+                        {missed.map(title => (
+                          <div key={title} style={{ display: "flex", alignItems: "center", gap: 10, background: "#f8f9fa", borderRadius: 12, padding: "10px 14px", opacity: 0.6 }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M18 6 6 18M6 6l12 12"/></svg>
+                            <span style={{ fontSize: 17, fontWeight: 600, color: "#6b7480" }}>{title}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>

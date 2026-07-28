@@ -2522,15 +2522,15 @@ export default function Home8() {
         {/* Stats link + Settings shortcut — shown only on the bottom (grid) card */}
         <div
           style={{
-            position: "fixed", left: "50%", bottom: 18, transform: "translateX(-50%)",
-            display: "flex", alignItems: "center", gap: 18,
+            position: "fixed", left: "50%", bottom: 30, transform: "translateX(-50%)",
+            display: "flex", alignItems: "center", gap: 20,
             zIndex: doIdx === 1 ? 65 : -1, opacity: doIdx === 1 ? 0.7 : 0, pointerEvents: doIdx === 1 ? "auto" : "none",
             transition: "opacity 0.3s",
           }}
         >
           <button
             onClick={() => setOpenPanel("schedule")}
-            style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+            style={{ width: 48, height: 48, borderRadius: "50%", border: "none", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <rect x="4" y="4" width="16" height="16" rx="2"/>
@@ -2539,7 +2539,7 @@ export default function Home8() {
           </button>
           <button
             onClick={() => setOpenPanel("stats")}
-            style={{ width: 36, height: 36, borderRadius: "50%", border: "none", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+            style={{ width: 48, height: 48, borderRadius: "50%", border: "none", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="20" x2="18" y2="10"/>
@@ -2550,7 +2550,7 @@ export default function Home8() {
           <button
             onClick={() => { startNavLoad(); router.push("/settings"); }}
             style={{
-              width: 36, height: 36, borderRadius: "50%", border: "none", background: "transparent",
+              width: 48, height: 48, borderRadius: "50%", border: "none", background: "transparent",
               display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
             }}
           >
