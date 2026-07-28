@@ -34,12 +34,12 @@ function dayTypeForDate(dateStr: string, gameDays: string[], upcoming: StoredMat
   return (daysSince - 2) % 2 === 0 ? "maintenance" : "training";
 }
 
-const DAY_TYPE_INFO: { label: string; color: string; desc: string }[] = [
-  { label: "Match Day",       color: "#2653d4", desc: "Game day. Trust your prep and enjoy every point." },
-  { label: "Pre-Match Day",   color: "#d97706", desc: "Match tomorrow. Carb up, rest, and sleep early." },
-  { label: "Recovery Day",    color: "#7c3aed", desc: "Day after a match. Light movement, protein, hydration." },
-  { label: "Training Day",    color: "#16a34a", desc: "Build the habit. Small consistent actions compound." },
-  { label: "Maintenance Day", color: "#0e7490", desc: "Between cycles. Stay loose and let the body absorb the work." },
+const DAY_TYPE_INFO: { label: string; color: string; desc: string; type: DayType }[] = [
+  { label: "Match Day",       color: "#2653d4", desc: "Game day. Trust your prep and enjoy every point.", type: "match" },
+  { label: "Pre-Match Day",   color: "#d97706", desc: "Match tomorrow. Carb up, rest, and sleep early.", type: "pre-match" },
+  { label: "Recovery Day",    color: "#7c3aed", desc: "Day after a match. Light movement, protein, hydration.", type: "recovery" },
+  { label: "Training Day",    color: "#16a34a", desc: "Build the habit. Small consistent actions compound.", type: "training" },
+  { label: "Maintenance Day", color: "#0e7490", desc: "Between cycles. Stay loose and let the body absorb the work.", type: "maintenance" },
 ];
 
 const DAY_META: Record<DayType, { label: string; color: string }> = {
@@ -67,6 +67,9 @@ export default function ScheduleSheet({ open, onClose }: Props) {
   const [dayTypeExpanded, setDayTypeExpanded] = useState(false);
   const [modalIdx, setModalIdx] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"week" | "month">("week");
+  const [monthOffset, setMonthOffset] = useState(0);
+  const [dayTypeFilter, setDayTypeFilter] = useState<DayType | "all">("all");
+  const monthTouchStartXRef = useRef(0);
   const currentItemRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -80,6 +83,8 @@ export default function ScheduleSheet({ open, onClose }: Props) {
     if (open) return;
     setDayTypeExpanded(false);
     setModalIdx(null);
+    setMonthOffset(0);
+    setDayTypeFilter("all");
   }, [open]);
 
   useEffect(() => {
@@ -215,15 +220,24 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                 })}
               </>
             ) : (() => {
-              const year = now.getFullYear();
-              const month = now.getMonth();
-              const monthLabel = now.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+              const cursor = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
+              const year = cursor.getFullYear();
+              const month = cursor.getMonth();
+              const monthLabel = cursor.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
               const firstOfMonth = new Date(year, month, 1);
               const daysInMonth = new Date(year, month + 1, 0).getDate();
               const leadingBlanks = (firstOfMonth.getDay() + 6) % 7; // Monday-start offset
               const cells: (number | null)[] = [...Array(leadingBlanks).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
               return (
-                <div style={{ background: "#fff", borderRadius: 16, padding: 16, boxShadow: "0 0 0 1px #f0f0f0" }}>
+                <div
+                  style={{ background: "#fff", borderRadius: 16, padding: 16, boxShadow: "0 0 0 1px #f0f0f0" }}
+                  onTouchStart={e => { monthTouchStartXRef.current = e.touches[0].clientX; }}
+                  onTouchEnd={e => {
+                    const dx = e.changedTouches[0].clientX - monthTouchStartXRef.current;
+                    if (dx < -50) setMonthOffset(o => o + 1);
+                    else if (dx > 50) setMonthOffset(o => o - 1);
+                  }}
+                >
                   <p style={{ margin: "0 0 14px", fontSize: 18, fontWeight: 700, color: "#1a1c1c", textAlign: "center" }}>{monthLabel}</p>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, marginBottom: 6 }}>
                     {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
@@ -236,7 +250,8 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                       const dateStr = `${year}-${pad(month + 1)}-${pad(dayNum)}`;
                       const isToday = dateStr === todayKey;
                       const dt = dayTypeForDate(dateStr, gameDays, upcomingMatches);
-                      const color = DAY_META[dt].color;
+                      const isMatched = dayTypeFilter === "all" || dayTypeFilter === dt;
+                      const color = isMatched ? DAY_META[dt].color : "transparent";
                       const isCompleted = (schedDone[dateStr] ?? []).length > 0;
                       return (
                         <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "6px 0" }}>
@@ -245,24 +260,30 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                             background: color,
                             boxShadow: isToday ? "0 0 0 2px #fff, 0 0 0 3.5px #1a1c1c" : "none",
                           }}>
-                            <span style={{ fontSize: 15, fontWeight: 700, color: "#fff" }}>{dayNum}</span>
+                            <span style={{ fontSize: 15, fontWeight: isMatched ? 700 : 500, color: isMatched ? "#fff" : "#c0c4c8" }}>{dayNum}</span>
                           </div>
                           <div style={{ width: 4, height: 4, borderRadius: "50%", background: isCompleted ? "#1a1c1c" : "transparent" }} />
                         </div>
                       );
                     })}
                   </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 16px", marginTop: 16, paddingTop: 14, borderTop: "1px solid #f0f0f0" }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16, paddingTop: 14, borderTop: "1px solid #f0f0f0" }}>
+                    <button
+                      onClick={() => setDayTypeFilter("all")}
+                      style={{ display: "flex", alignItems: "center", gap: 6, background: dayTypeFilter === "all" ? "#f0f1f3" : "none", border: "none", borderRadius: 999, padding: "4px 10px 4px 4px", cursor: "pointer" }}
+                    >
+                      <span style={{ fontSize: 14, fontWeight: dayTypeFilter === "all" ? 700 : 500, color: dayTypeFilter === "all" ? "#1a1c1c" : "#6b7480" }}>All</span>
+                    </button>
                     {DAY_TYPE_INFO.map(dt => (
-                      <div key={dt.label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <button
+                        key={dt.label}
+                        onClick={() => setDayTypeFilter(f => f === dt.type ? "all" : dt.type)}
+                        style={{ display: "flex", alignItems: "center", gap: 6, background: dayTypeFilter === dt.type ? "#f0f1f3" : "none", border: "none", borderRadius: 999, padding: "4px 10px 4px 4px", cursor: "pointer" }}
+                      >
                         <div style={{ width: 12, height: 12, borderRadius: "50%", background: dt.color }} />
-                        <span style={{ fontSize: 14, color: "#6b7480" }}>{dt.label}</span>
-                      </div>
+                        <span style={{ fontSize: 14, fontWeight: dayTypeFilter === dt.type ? 700 : 500, color: dayTypeFilter === dt.type ? "#1a1c1c" : "#6b7480" }}>{dt.label}</span>
+                      </button>
                     ))}
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#1a1c1c" }} />
-                      <span style={{ fontSize: 14, color: "#6b7480" }}>Completed</span>
-                    </div>
                   </div>
                 </div>
               );
