@@ -1092,7 +1092,7 @@ export default function Home8() {
 
   return (
     <>
-      <main style={{ ...S, position: "fixed", inset: 0, paddingLeft: 10, paddingRight: 10, paddingBottom: 0, overflow: "hidden", background: "#fff", zIndex: 60, clipPath: "inset(0)", WebkitClipPath: "inset(0)" }}>
+      <main style={{ ...S, position: "fixed", inset: 0, paddingTop: "env(safe-area-inset-top)", paddingLeft: 10, paddingRight: 10, paddingBottom: 0, overflow: "hidden", background: "#fff", zIndex: 60, clipPath: "inset(0)", WebkitClipPath: "inset(0)" }}>
 
         {/* Horizontal strip: [readiness | carousel | log] */}
         <div
