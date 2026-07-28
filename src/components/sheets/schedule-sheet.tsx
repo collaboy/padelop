@@ -6,7 +6,7 @@ import {
   SCHEDULE_DETAILS,
   type DayType, type ScheduleItem,
 } from "@/lib/schedule-data";
-import { saveScheduleDoneToDb } from "@/lib/db";
+import { saveScheduleDoneToDb, saveUpcomingMatch } from "@/lib/db";
 import ScheduleItemModal from "./schedule-item-modal";
 import type { ReviewEntry } from "@/lib/scoring";
 
@@ -19,6 +19,12 @@ function localToday() {
 }
 
 type StoredMatch = { date: string; time: string };
+type NewMatchForm = { date: string; time: string; club: string; court: string; p1: string; p2: string; p3: string; p4: string };
+const EMPTY_MATCH_FORM: NewMatchForm = { date: "", time: "", club: "", court: "", p1: "", p2: "", p3: "", p4: "" };
+
+function newMatchInputStyle(filled: boolean): React.CSSProperties {
+  return { width: "100%", padding: "10px 12px", borderRadius: 12, border: `1.5px solid ${filled ? "#2653d4" : "#e2e2e2"}`, background: filled ? "#f4f6ff" : "#fff", fontSize: 17, color: "#1a1c1c", outline: "none", fontFamily: "inherit", boxSizing: "border-box" };
+}
 
 // Same rotation logic as getDayType() in schedule-data.ts, generalized to any
 // date (that function is hardcoded to "today") so the month view can classify
@@ -74,6 +80,8 @@ export default function ScheduleSheet({ open, onClose }: Props) {
   const [typeDropdownOpen, setTypeDropdownOpen] = useState(false);
   const [dayDetail, setDayDetail] = useState<{ date: string; type: DayType } | null>(null);
   const [notesExpanded, setNotesExpanded] = useState(false);
+  const [matchAddOpen, setMatchAddOpen] = useState(false);
+  const [matchAddForm, setMatchAddForm] = useState<NewMatchForm>(EMPTY_MATCH_FORM);
   const monthTouchStartXRef = useRef(0);
   const currentItemRef = useRef<HTMLDivElement>(null);
 
@@ -98,6 +106,8 @@ export default function ScheduleSheet({ open, onClose }: Props) {
     setTypeDropdownOpen(false);
     setDayDetail(null);
     setNotesExpanded(false);
+    setMatchAddOpen(false);
+    setMatchAddForm(EMPTY_MATCH_FORM);
   }, [open]);
 
   useEffect(() => {
@@ -154,6 +164,23 @@ export default function ScheduleSheet({ open, onClose }: Props) {
       window.dispatchEvent(new Event("storage"));
     } catch {}
     saveScheduleDoneToDb(todayKey, next);
+  }
+
+  function saveNewMatch() {
+    const f = matchAddForm;
+    if (!f.date || !f.time) return;
+    type FullStoredMatch = { date: string; time: string; club: string; court: string; player_1: string; player_2: string; player_3: string; player_4: string };
+    let all: FullStoredMatch[] = [];
+    try { all = JSON.parse(localStorage.getItem("padelop:upcoming-matches") || "[]"); } catch {}
+    const entry: FullStoredMatch = { date: f.date, time: f.time, club: f.club, court: f.court, player_1: f.p1, player_2: f.p2, player_3: f.p3, player_4: f.p4 };
+    const todayStr = localToday();
+    const updated = [...all, entry].filter(m => m.date >= todayStr).sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+    localStorage.setItem("padelop:upcoming-matches", JSON.stringify(updated));
+    localStorage.setItem("padelop:next-match", JSON.stringify(updated[0]));
+    window.dispatchEvent(new Event("storage"));
+    saveUpcomingMatch({ date: f.date, time: f.time, club: f.club, court: f.court, player_1: f.p1, player_2: f.p2, player_3: f.p3, player_4: f.p4 });
+    setMatchAddForm(EMPTY_MATCH_FORM);
+    setMatchAddOpen(false);
   }
 
   const modalItem = modalIdx !== null ? schedule[modalIdx] : null;
@@ -289,6 +316,12 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={dayTypeFilter !== "all" ? "#fff" : "#6b7480"} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                     </button>
+                    <button
+                      onClick={() => { setMatchAddOpen(true); setMatchAddForm(EMPTY_MATCH_FORM); }}
+                      style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, background: "#2653d4", border: "none", borderRadius: "50%", cursor: "pointer" }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </button>
                     {typeDropdownOpen && (
                       <>
                         <div style={{ position: "fixed", inset: 0, zIndex: 19 }} onClick={() => setTypeDropdownOpen(false)} />
@@ -419,6 +452,54 @@ export default function ScheduleSheet({ open, onClose }: Props) {
           </div>
         );
       })()}
+
+      {matchAddOpen && (
+        <div className="fixed inset-0 z-[400] flex items-end justify-center" onClick={() => setMatchAddOpen(false)}>
+          <style>{`@keyframes matchAddUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+          <div className="relative w-full" style={{ background: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: "matchAddUp 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden", display: "flex", flexDirection: "column" }} onClick={e => e.stopPropagation()}>
+            <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 10px", flexShrink: 0 }} />
+            <div style={{ padding: "0 20px 8px", flexShrink: 0 }}>
+              <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#1a1c1c" }}>Add match</p>
+            </div>
+            <div className="overflow-y-auto" style={{ padding: "0 20px 24px", display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ display: "flex", gap: 8 }}>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: "#8a9096", marginBottom: 4 }}>DATE</p>
+                  <input type="date" value={matchAddForm.date} onChange={e => setMatchAddForm(f => ({ ...f, date: e.target.value }))} style={newMatchInputStyle(!!matchAddForm.date)} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: "#8a9096", marginBottom: 4 }}>TIME</p>
+                  <input type="time" value={matchAddForm.time} onChange={e => setMatchAddForm(f => ({ ...f, time: e.target.value }))} style={newMatchInputStyle(!!matchAddForm.time)} />
+                </div>
+              </div>
+              <div>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "#8a9096", marginBottom: 4 }}>CLUB</p>
+                <input type="text" placeholder="e.g. Club Padel BCN" value={matchAddForm.club} onChange={e => setMatchAddForm(f => ({ ...f, club: e.target.value }))} style={newMatchInputStyle(!!matchAddForm.club)} />
+              </div>
+              <div>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "#8a9096", marginBottom: 4 }}>COURT</p>
+                <input type="text" placeholder="e.g. 3" value={matchAddForm.court} onChange={e => setMatchAddForm(f => ({ ...f, court: e.target.value }))} style={newMatchInputStyle(!!matchAddForm.court)} />
+              </div>
+              <div>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "#8a9096", marginBottom: 4 }}>PLAYERS</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {(["p1", "p2", "p3", "p4"] as const).map((k, i) => (
+                    <input key={k} type="text" placeholder={`Player ${i + 1}${i === 0 ? " (you)" : ""}`} value={matchAddForm[k]} onChange={e => setMatchAddForm(f => ({ ...f, [k]: e.target.value }))} style={newMatchInputStyle(!!matchAddForm[k])} />
+                  ))}
+                </div>
+              </div>
+              <button
+                onClick={saveNewMatch}
+                disabled={!matchAddForm.date || !matchAddForm.time}
+                style={{ marginTop: 4, padding: "13px", borderRadius: 16, border: "none", cursor: matchAddForm.date && matchAddForm.time ? "pointer" : "default", fontSize: 18, fontWeight: 700, color: "#fff", background: matchAddForm.date && matchAddForm.time ? "#2653d4" : "#c4c7c7" }}
+              >
+                Save match
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
