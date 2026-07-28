@@ -67,7 +67,7 @@ export default function NotesSummaryContent() {
         disabled={loading}
         style={{ background: "#2653d4", border: "none", borderRadius: 999, padding: "12px 20px", fontSize: 20, fontWeight: 700, color: "#fff", cursor: loading ? "default" : "pointer", opacity: loading ? 0.7 : 1, alignSelf: "flex-start" }}
       >
-        {loading ? "Summarizing…" : "Create summary from my notes"}
+        {loading ? "Summarizing…" : "Create report from my notes"}
       </button>
       {error && <p style={{ margin: 0, fontSize: 17, color: "#ef4444" }}>{error}</p>}
       {summaries.length > 0 && (
