@@ -201,6 +201,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
           isComplete={modalIsComplete}
           onComplete={() => toggleDone(modalItem.title)}
           onClosed={() => setModalIdx(null)}
+          swipeLabelText="Swipe to complete (+1 pt)"
           zIndex={300}
         />
       )}
