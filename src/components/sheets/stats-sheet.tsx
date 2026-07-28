@@ -12,7 +12,7 @@ const MILESTONES = [10, 25, 50, 75, 100, 250, 500, 1000];
 
 function ExpandableRow({ color, icon, title, value, sub, expanded, dim, onToggle, children }: { color: string; icon?: React.ReactNode; title: string; value: React.ReactNode; sub: string; expanded: boolean; dim?: boolean; onToggle: () => void; children: React.ReactNode }) {
   return (
-    <div style={{ borderRadius: 14, background: "#fff", boxShadow: "0 0 0 1px #f0f0f0", overflow: "hidden", flexShrink: 0, opacity: dim ? 0.4 : 1, transition: "opacity 0.25s" }} onClick={e => e.stopPropagation()}>
+    <div style={{ borderRadius: 14, background: "#fff", boxShadow: "0 0 0 1px #f0f0f0", overflow: "hidden", flexShrink: 0, opacity: dim ? 0.22 : 1, transition: "opacity 0.25s" }} onClick={e => e.stopPropagation()}>
       <div
         onClick={onToggle}
         style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", cursor: "pointer" }}
