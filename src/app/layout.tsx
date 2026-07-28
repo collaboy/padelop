@@ -45,13 +45,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-startup-image" href="/splash/splash-1320x2868.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
       </head>
       <body className="flex flex-col min-h-full bg-[var(--bg)]" suppressHydrationWarning>
-        {/* Instant, JS-free loading indicator — paints on first frame, before the
-            page's own client bundle downloads/hydrates, so there's never a blank
-            white flash. Any real page content (opaque bg, higher z-index) covers it. */}
-        <div style={{ position: "fixed", inset: 0, zIndex: -1, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <style>{`@keyframes root-spin { to { transform: rotate(360deg); } }`}</style>
-          <div style={{ width: 36, height: 36, borderRadius: "50%", border: "3px solid rgba(0,160,60,0.2)", borderTopColor: "#00A83C", animation: "root-spin 0.8s linear infinite" }} />
-        </div>
         <div className="hidden min-[481px]:flex fixed inset-0 z-[9999] bg-white items-center justify-center flex-col gap-4 text-center px-8">
           <div style={{ fontSize: 48 }}>📱</div>
           <p style={{ fontSize: 22, fontWeight: 700, color: "#1a1c1c" }}>Open on your phone</p>
