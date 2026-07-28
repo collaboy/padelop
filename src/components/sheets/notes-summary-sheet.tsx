@@ -27,6 +27,7 @@ export default function NotesSummaryContent() {
   const [summaries, setSummaries] = useState<Summary[]>(loadSummaries());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   const notes = loadNotes();
 
   async function handleCreate() {
@@ -46,6 +47,7 @@ export default function NotesSummaryContent() {
       const next = [{ ts: new Date().toISOString(), text: data.summary as string }, ...summaries];
       setSummaries(next);
       localStorage.setItem(SUMMARIES_KEY, JSON.stringify(next));
+      setExpandedIdx(0);
     } catch {
       setError("Couldn't create a summary — check your connection and try again.");
     } finally {
@@ -70,14 +72,25 @@ export default function NotesSummaryContent() {
       {summaries.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <p style={{ margin: 0, fontSize: 15, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9aa0a6" }}>Past summaries</p>
-          {summaries.map((s, i) => (
-            <div key={i} style={{ background: "#f8f9fa", borderRadius: 14, padding: "14px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
-              <span style={{ fontSize: 14, fontWeight: 700, color: "#9aa0a6" }}>
-                {new Date(s.ts).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
-              </span>
-              <p style={{ margin: 0, fontSize: 18, color: "#1a1c1c", lineHeight: 1.5 }}>{s.text}</p>
-            </div>
-          ))}
+          {summaries.map((s, i) => {
+            const isOpen = expandedIdx === i;
+            return (
+              <div key={i} style={{ background: "#f8f9fa", borderRadius: 14, overflow: "hidden" }}>
+                <button
+                  onClick={() => setExpandedIdx(v => v === i ? null : i)}
+                  style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", textAlign: "left" }}
+                >
+                  <span style={{ fontSize: 14, fontWeight: 700, color: "#9aa0a6" }}>
+                    {new Date(s.ts).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+                  </span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0b8c1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                {isOpen && (
+                  <p style={{ margin: 0, padding: "0 16px 16px", fontSize: 18, color: "#1a1c1c", lineHeight: 1.5 }}>{s.text}</p>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
