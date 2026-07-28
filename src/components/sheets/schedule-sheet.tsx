@@ -8,6 +8,7 @@ import {
 } from "@/lib/schedule-data";
 import { saveScheduleDoneToDb } from "@/lib/db";
 import ScheduleItemModal from "./schedule-item-modal";
+import type { ReviewEntry } from "@/lib/scoring";
 
 // Local (device) calendar date as YYYY-MM-DD — NOT toISOString(), which is UTC and
 // drifts a day off from the local date for several hours around local midnight
@@ -64,6 +65,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
   const [schedDone, setSchedDone] = useState<Record<string, string[]>>({});
   const [gameDays, setGameDays] = useState<string[]>([]);
   const [upcomingMatches, setUpcomingMatches] = useState<StoredMatch[]>([]);
+  const [reviews, setReviews] = useState<ReviewEntry[]>([]);
   const [dayTypeExpanded, setDayTypeExpanded] = useState(false);
   const [modalIdx, setModalIdx] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"week" | "month">("week");
@@ -101,6 +103,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
       let gd: string[] = [];
       try { gd = JSON.parse(localStorage.getItem("padelop:game-days") || "[]"); } catch {}
       setGameDays(gd);
+      try { setReviews(JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]")); } catch {}
       const dt = getDayType(gd, nm, upcoming);
       setDayType(dt);
       const matchTime = nm?.date === todayStr ? nm.time : null;
@@ -320,6 +323,8 @@ export default function ScheduleSheet({ open, onClose }: Props) {
         const completed = allTitles.filter(t => doneTitles.includes(t));
         const missed = allTitles.filter(t => !doneTitles.includes(t));
         const dateLabel = new Date(dayDetail.date + "T12:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+        const matchReview = dayDetail.type === "match" ? reviews.find(r => r.ts.slice(0, 10) === dayDetail.date) : undefined;
+        const resultColor = matchReview?.result === "win" ? "#16a34a" : matchReview?.result === "loss" ? "#ef4444" : "#8a9096";
         return (
           <div className="fixed inset-0 z-[400] flex items-end justify-center" onClick={() => setDayDetail(null)}>
             <style>{`@keyframes dayDetailUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
@@ -331,6 +336,19 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                 <span style={{ fontSize: 15, fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: meta.color, background: `${meta.color}18`, borderRadius: 999, padding: "4px 12px" }}>{meta.label}</span>
               </div>
               <div className="overflow-y-auto" style={{ padding: "0 20px 24px", display: "flex", flexDirection: "column", gap: 20 }}>
+                {matchReview && (matchReview.notes || matchReview.result) && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#9aa0a6" }}>Match notes</p>
+                    <div style={{ background: "#f8f9fa", borderRadius: 12, padding: "12px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
+                      {matchReview.result && (
+                        <span style={{ alignSelf: "flex-start", fontSize: 14, fontWeight: 800, color: resultColor, background: `${resultColor}18`, borderRadius: 999, padding: "3px 10px" }}>
+                          {matchReview.result.charAt(0).toUpperCase() + matchReview.result.slice(1)}
+                        </span>
+                      )}
+                      {matchReview.notes && <p style={{ margin: 0, fontSize: 17, color: "#1a1c1c", lineHeight: 1.5 }}>{matchReview.notes}</p>}
+                    </div>
+                  </div>
+                )}
                 {completed.length === 0 && missed.length === 0 ? (
                   <p style={{ margin: 0, fontSize: 16, color: "#9aa0a6" }}>No schedule data for this day.</p>
                 ) : (
