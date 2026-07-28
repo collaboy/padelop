@@ -161,7 +161,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
             <div style={{ padding: "0 18px 4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <p style={{ margin: 0, fontSize: 36, fontWeight: 800, letterSpacing: "-0.01em", color: "#16a34a" }}>Schedule</p>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }} onClick={e => e.stopPropagation()}>
-                <button onClick={() => setViewMode("week")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: 17, fontWeight: 700, color: viewMode === "week" ? "#16a34a" : "#9aa0a6" }}>Week</button>
+                <button onClick={() => setViewMode("week")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: 17, fontWeight: 700, color: viewMode === "week" ? "#16a34a" : "#9aa0a6" }}>Today</button>
                 <span style={{ fontSize: 17, color: "#c8ccd0" }}>|</span>
                 <button onClick={() => setViewMode("month")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: 17, fontWeight: 700, color: viewMode === "month" ? "#16a34a" : "#9aa0a6" }}>Month</button>
               </div>
