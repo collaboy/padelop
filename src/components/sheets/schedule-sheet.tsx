@@ -270,7 +270,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16, paddingTop: 14, borderTop: "1px solid #f0f0f0" }}>
                     <button
                       onClick={() => setDayTypeFilter("all")}
-                      style={{ display: "flex", alignItems: "center", gap: 6, background: dayTypeFilter === "all" ? "#f0f1f3" : "none", border: "none", borderRadius: 999, padding: "4px 10px 4px 4px", cursor: "pointer" }}
+                      style={{ display: "flex", alignItems: "center", gap: 6, background: dayTypeFilter === "all" ? "#f0f1f3" : "none", border: "none", borderRadius: 999, padding: "4px 12px", cursor: "pointer" }}
                     >
                       <span style={{ fontSize: 14, fontWeight: dayTypeFilter === "all" ? 700 : 500, color: dayTypeFilter === "all" ? "#1a1c1c" : "#6b7480" }}>All</span>
                     </button>
