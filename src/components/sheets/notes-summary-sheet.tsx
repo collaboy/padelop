@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import type { ReviewEntry } from "@/lib/scoring";
 
-type Summary = { ts: string; text: string };
+type SummarySection = { title: string; text: string };
+type Summary = { ts: string; sections?: SummarySection[]; text?: string };
 
 const SUMMARIES_KEY = "padelop:notes-summaries";
 
@@ -44,7 +45,7 @@ export default function NotesSummaryContent() {
         setError(data.message ?? "Couldn't create a summary — try again in a bit.");
         return;
       }
-      const next = [{ ts: new Date().toISOString(), text: data.summary as string }, ...summaries];
+      const next = [{ ts: new Date().toISOString(), sections: data.sections as SummarySection[] }, ...summaries];
       setSummaries(next);
       localStorage.setItem(SUMMARIES_KEY, JSON.stringify(next));
       setExpandedIdx(0);
@@ -86,7 +87,16 @@ export default function NotesSummaryContent() {
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0b8c1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}><path d="M6 9l6 6 6-6"/></svg>
                 </button>
                 {isOpen && (
-                  <p style={{ margin: 0, padding: "0 16px 16px", fontSize: 18, color: "#1a1c1c", lineHeight: 1.5 }}>{s.text}</p>
+                  <div style={{ padding: "0 16px 18px", display: "flex", flexDirection: "column", gap: 16 }}>
+                    {s.sections?.length ? s.sections.map((sec, si) => (
+                      <div key={si} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                        <p style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "#2653d4", letterSpacing: "0.02em" }}>{sec.title}</p>
+                        <p style={{ margin: 0, fontSize: 18, color: "#1a1c1c", lineHeight: 1.55 }}>{sec.text}</p>
+                      </div>
+                    )) : (
+                      <p style={{ margin: 0, fontSize: 18, color: "#1a1c1c", lineHeight: 1.5 }}>{s.text}</p>
+                    )}
+                  </div>
                 )}
               </div>
             );

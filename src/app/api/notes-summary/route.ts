@@ -31,26 +31,31 @@ export async function POST(req: NextRequest) {
   const noteList = notes.map(n => `${n.date}: ${n.text}`).join("\n\n");
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-  let summary: string;
+  let sections: { title: string; text: string }[] = [];
   try {
     const res = await client.messages.create({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 400,
+      max_tokens: 700,
       messages: [{
         role: "user",
         content: `You are a padel performance coach. Below are a player's own match notes, in chronological order.
 
 ${noteList}
 
-Write a short summary (3-5 sentences) of the patterns you notice: recurring strengths, recurring weaknesses, opponents or situations that come up more than once, and any trend over time. Be specific and reference concrete details from the notes. Do not invent anything not supported by the notes. Respond with plain text only, no markdown, no headers.`,
+Organize what you notice into 3-5 distinct themes (e.g. recurring strengths, recurring weaknesses, specific opponents or situations that come up more than once, trends over time, mental/tactical patterns — pick whichever themes actually fit what's in the notes, don't force ones that don't apply). For each theme, write a short, punchy title (2-4 words) and a body of 2-3 sentences. Be specific and reference concrete details (names, shots, situations) from the notes. Do not invent anything not supported by the notes.
+
+Respond with ONLY valid JSON, no markdown fences: {"sections": [{"title": "string", "text": "string"}, ...]}`,
       }],
     });
-    summary = res.content[0].type === "text" ? res.content[0].text.trim() : "";
+    const raw = res.content[0].type === "text" ? res.content[0].text.trim() : "";
+    const cleaned = raw.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "").trim();
+    const parsed = JSON.parse(cleaned);
+    sections = Array.isArray(parsed.sections) ? parsed.sections : [];
   } catch (err) {
     console.error("notes-summary:", err);
     return NextResponse.json({ error: "api_error" }, { status: 502 });
   }
 
-  if (!summary) return NextResponse.json({ error: "empty_summary" }, { status: 422 });
-  return NextResponse.json({ summary });
+  if (!sections.length) return NextResponse.json({ error: "empty_summary" }, { status: 422 });
+  return NextResponse.json({ sections });
 }
