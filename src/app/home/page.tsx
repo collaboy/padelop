@@ -1108,7 +1108,7 @@ export default function Home8() {
               swipeDirRef.current = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
             if (doIdx >= 1) return;
             if (swipeDirRef.current === 'h' && doIdx === 0) setLiveX(dx);
-            if (swipeDirRef.current === 'v' && cardSnap === 'none' && doIdx < 1 && !settlingRef.current) setLiveY(dy);
+            if (swipeDirRef.current === 'v' && cardSnap === 'none' && doIdx < 1 && !settlingRef.current) setLiveY(Math.max(-80, Math.min(80, dy)));
           }}
           onTouchEnd={e => {
             const endY = e.changedTouches[0].clientY;
