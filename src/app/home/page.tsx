@@ -1081,7 +1081,7 @@ export default function Home8() {
 
   return (
     <>
-      <main style={{ ...S, position: "fixed", inset: 0, paddingTop: "env(safe-area-inset-top)", paddingLeft: 10, paddingRight: 10, paddingBottom: 0, overflow: "hidden", background: "#fff", zIndex: 60 }}>
+      <main style={{ ...S, position: "fixed", inset: 0, paddingTop: "env(safe-area-inset-top)", paddingLeft: 10, paddingRight: 10, paddingBottom: 0, overflow: "hidden", background: "#fff", zIndex: 60, clipPath: "inset(0)", WebkitClipPath: "inset(0)" }}>
 
         {/* Horizontal strip: [readiness | carousel | log] */}
         <div
@@ -1207,7 +1207,7 @@ export default function Home8() {
           </div>
 
           {/* Carousel center — all schedule cards, doIdx in transform */}
-          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingLeft: 10, paddingRight: 10, position: "relative", zIndex: 2, overflow: "hidden" }}>
+          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingLeft: 10, paddingRight: 10, position: "relative", zIndex: 2, overflow: "hidden", clipPath: "inset(0)", WebkitClipPath: "inset(0)", isolation: "isolate", transform: "translateZ(0)" }}>
             <div style={{
               display: "flex", flexDirection: "column", gap: 10,
               transform: doIdx === 1
