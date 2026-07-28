@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
   let sections: { title: string; text: string }[] = [];
+  let title = "";
   try {
     const res = await client.messages.create({
       model: "claude-haiku-4-5-20251001",
@@ -44,18 +45,21 @@ ${noteList}
 
 Organize what you notice into 3-5 distinct themes (e.g. recurring strengths, recurring weaknesses, specific opponents or situations that come up more than once, trends over time, mental/tactical patterns — pick whichever themes actually fit what's in the notes, don't force ones that don't apply). For each theme, write a short, punchy title (2-4 words) and a body of 2-3 sentences. Be specific and reference concrete details (names, shots, situations) from the notes. Do not invent anything not supported by the notes.
 
-Respond with ONLY valid JSON, no markdown fences: {"sections": [{"title": "string", "text": "string"}, ...]}`,
+Also write one overall title (3-6 words) for this whole report, capturing the single most notable takeaway across all the themes.
+
+Respond with ONLY valid JSON, no markdown fences: {"title": "string", "sections": [{"title": "string", "text": "string"}, ...]}`,
       }],
     });
     const raw = res.content[0].type === "text" ? res.content[0].text.trim() : "";
     const cleaned = raw.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "").trim();
     const parsed = JSON.parse(cleaned);
     sections = Array.isArray(parsed.sections) ? parsed.sections : [];
+    title = typeof parsed.title === "string" ? parsed.title : "";
   } catch (err) {
     console.error("notes-summary:", err);
     return NextResponse.json({ error: "api_error" }, { status: 502 });
   }
 
   if (!sections.length) return NextResponse.json({ error: "empty_summary" }, { status: 422 });
-  return NextResponse.json({ sections });
+  return NextResponse.json({ title, sections });
 }

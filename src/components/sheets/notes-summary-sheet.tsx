@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import type { ReviewEntry } from "@/lib/scoring";
 
 type SummarySection = { title: string; text: string };
-type Summary = { ts: string; sections?: SummarySection[]; text?: string };
+type Summary = { ts: string; title?: string; sections?: SummarySection[]; text?: string };
 
 const SUMMARIES_KEY = "padelop:notes-summaries";
 
@@ -45,7 +45,7 @@ export default function NotesSummaryContent() {
         setError(data.message ?? "Couldn't create a summary — try again in a bit.");
         return;
       }
-      const next = [{ ts: new Date().toISOString(), sections: data.sections as SummarySection[] }, ...summaries];
+      const next = [{ ts: new Date().toISOString(), title: data.title as string, sections: data.sections as SummarySection[] }, ...summaries];
       setSummaries(next);
       localStorage.setItem(SUMMARIES_KEY, JSON.stringify(next));
       setExpandedIdx(0);
@@ -80,10 +80,13 @@ export default function NotesSummaryContent() {
               <div key={i} style={{ background: "#f8f9fa", borderRadius: 14, overflow: "hidden" }}>
                 <button
                   onClick={() => setExpandedIdx(v => v === i ? null : i)}
-                  style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", textAlign: "left" }}
+                  style={{ width: "100%", background: "none", border: "none", cursor: "pointer", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", textAlign: "left", gap: 12 }}
                 >
-                  <span style={{ fontSize: 14, fontWeight: 700, color: "#9aa0a6" }}>
-                    {new Date(s.ts).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+                  <span style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
+                    {s.title && <span style={{ fontSize: 16, fontWeight: 700, color: "#1a1c1c" }}>{s.title}</span>}
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#9aa0a6" }}>
+                      {new Date(s.ts).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+                    </span>
                   </span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b0b8c1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}><path d="M6 9l6 6 6-6"/></svg>
                 </button>
