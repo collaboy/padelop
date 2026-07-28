@@ -1314,9 +1314,7 @@ export default function Home8() {
                 const fmtTime = (s: number) => { if (s <= 0) return "a moment"; const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60); if (h > 0) return `${h}h ${String(m).padStart(2,"0")}m`; return m > 0 ? `${m}m` : "a moment"; };
                 const cardStyle: React.CSSProperties = { position: "relative", width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", zIndex: 3, boxShadow: "none" };
                 if (!clientReady) return (
-                  <div key="active" style={{ ...cardStyle, background: "#fff" }}>
-                    <div style={{ width: 36, height: 36, borderRadius: "50%", border: "3px solid rgba(0,160,60,0.2)", borderTopColor: "#00A83C", animation: "spin 0.8s linear infinite" }} />
-                  </div>
+                  <div key="active" style={{ ...cardStyle, background: "#fff" }} />
                 );
                 const textureOverlay = <div style={{ position: "absolute", inset: 0, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.22'/%3E%3C/svg%3E")`, backgroundSize: "200px 200px", pointerEvents: "none", mixBlendMode: "overlay" as React.CSSProperties["mixBlendMode"] }} />;
                 const isSleepytime = now.getHours() < 7 || curMins >= toMins(schedule[schedule.length - 1].time);
