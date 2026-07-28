@@ -19,6 +19,21 @@ function localToday() {
 
 type StoredMatch = { date: string; time: string };
 
+// Same rotation logic as getDayType() in schedule-data.ts, generalized to any
+// date (that function is hardcoded to "today") so the month view can classify
+// every day in the grid, not just the current one.
+function dayTypeForDate(dateStr: string, gameDays: string[], upcoming: StoredMatch[]): DayType {
+  const next = (() => { const d = new Date(dateStr + "T12:00"); d.setDate(d.getDate() + 1); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; })();
+  if (gameDays.includes(dateStr) || upcoming.some(m => m.date === dateStr)) return "match";
+  if (gameDays.includes(next) || upcoming.some(m => m.date === next)) return "pre-match";
+  const matchDates = [...new Set(gameDays)].filter(d => d <= dateStr).sort().reverse();
+  if (matchDates.length === 0) return "baseline";
+  const lastMatchDate = matchDates[0];
+  const daysSince = Math.round((new Date(dateStr + "T12:00").getTime() - new Date(lastMatchDate + "T12:00").getTime()) / 86400000);
+  if (daysSince <= 1) return "recovery";
+  return (daysSince - 2) % 2 === 0 ? "maintenance" : "training";
+}
+
 const DAY_TYPE_INFO: { label: string; color: string; desc: string }[] = [
   { label: "Match Day",       color: "#2653d4", desc: "Game day. Trust your prep and enjoy every point." },
   { label: "Pre-Match Day",   color: "#d97706", desc: "Match tomorrow. Carb up, rest, and sleep early." },
@@ -48,6 +63,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
   const [drillTag, setDrillTag] = useState<string | null>(null);
   const [schedDone, setSchedDone] = useState<Record<string, string[]>>({});
   const [gameDays, setGameDays] = useState<string[]>([]);
+  const [upcomingMatches, setUpcomingMatches] = useState<StoredMatch[]>([]);
   const [dayTypeExpanded, setDayTypeExpanded] = useState(false);
   const [modalIdx, setModalIdx] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"week" | "month">("week");
@@ -74,6 +90,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
       try { nm = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch {}
       let upcoming: StoredMatch[] = [];
       try { upcoming = JSON.parse(localStorage.getItem("padelop:upcoming-matches") || "[]"); } catch {}
+      setUpcomingMatches(upcoming);
       let gd: string[] = [];
       try { gd = JSON.parse(localStorage.getItem("padelop:game-days") || "[]"); } catch {}
       setGameDays(gd);
@@ -133,7 +150,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
       <div className="fixed inset-0 z-[200] flex items-end justify-center" onClick={onClose}>
         <style>{`@keyframes mg-sheet-up{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-        <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", minHeight: "55dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => { e.stopPropagation(); setDayTypeExpanded(false); }}>
+        <div className="relative w-full flex flex-col" style={{ background: "#f8f9fa", borderTopLeftRadius: 28, borderTopRightRadius: 28, height: "85dvh", animation: "mg-sheet-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden" }} onClick={e => { e.stopPropagation(); setDayTypeExpanded(false); }}>
           <div style={{ background: "#16a34a14", flexShrink: 0 }}>
             <div style={{ width: 40, height: 4, borderRadius: 999, background: "#16a34a40", margin: "12px auto 10px" }} />
             <div style={{ padding: "0 18px 4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -218,31 +235,32 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                       if (dayNum === null) return <div key={i} />;
                       const dateStr = `${year}-${pad(month + 1)}-${pad(dayNum)}`;
                       const isToday = dateStr === todayKey;
-                      const isGameDay = gameDays.includes(dateStr);
+                      const dt = dayTypeForDate(dateStr, gameDays, upcomingMatches);
+                      const color = DAY_META[dt].color;
                       const isCompleted = (schedDone[dateStr] ?? []).length > 0;
-                      const isPastDay = dateStr < todayKey;
                       return (
                         <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "6px 0" }}>
                           <div style={{
                             width: 30, height: 30, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
-                            background: isGameDay ? "#2653d4" : "transparent",
-                            boxShadow: isToday && !isGameDay ? "0 0 0 1.5px #16a34a" : "none",
-                            opacity: isPastDay && !isGameDay ? 0.45 : 1,
+                            background: color,
+                            boxShadow: isToday ? "0 0 0 2px #fff, 0 0 0 3.5px #1a1c1c" : "none",
                           }}>
-                            <span style={{ fontSize: 15, fontWeight: isToday || isGameDay ? 800 : 500, color: isGameDay ? "#fff" : "#1a1c1c" }}>{dayNum}</span>
+                            <span style={{ fontSize: 15, fontWeight: 700, color: "#fff" }}>{dayNum}</span>
                           </div>
-                          <div style={{ width: 4, height: 4, borderRadius: "50%", background: isCompleted ? "#16a34a" : "transparent" }} />
+                          <div style={{ width: 4, height: 4, borderRadius: "50%", background: isCompleted ? "#1a1c1c" : "transparent" }} />
                         </div>
                       );
                     })}
                   </div>
-                  <div style={{ display: "flex", gap: 16, marginTop: 16, paddingTop: 14, borderTop: "1px solid #f0f0f0" }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 16px", marginTop: 16, paddingTop: 14, borderTop: "1px solid #f0f0f0" }}>
+                    {DAY_TYPE_INFO.map(dt => (
+                      <div key={dt.label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <div style={{ width: 12, height: 12, borderRadius: "50%", background: dt.color }} />
+                        <span style={{ fontSize: 14, color: "#6b7480" }}>{dt.label}</span>
+                      </div>
+                    ))}
                     <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#2653d4" }} />
-                      <span style={{ fontSize: 14, color: "#6b7480" }}>Match day</span>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a" }} />
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#1a1c1c" }} />
                       <span style={{ fontSize: 14, color: "#6b7480" }}>Completed</span>
                     </div>
                   </div>
