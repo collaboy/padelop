@@ -9,7 +9,7 @@ import {
 import { saveScheduleDoneToDb } from "@/lib/db";
 import ScheduleItemModal from "./schedule-item-modal";
 import type { ReviewEntry } from "@/lib/scoring";
-import { MatchFormFields, EMPTY_MATCH_FORM, addUpcomingMatch } from "./match-form";
+import { AddMatchModal } from "./match-form";
 
 // Local (device) calendar date as YYYY-MM-DD — NOT toISOString(), which is UTC and
 // drifts a day off from the local date for several hours around local midnight
@@ -76,7 +76,6 @@ export default function ScheduleSheet({ open, onClose }: Props) {
   const [dayDetail, setDayDetail] = useState<{ date: string; type: DayType } | null>(null);
   const [notesExpanded, setNotesExpanded] = useState(false);
   const [matchAddOpen, setMatchAddOpen] = useState(false);
-  const [matchAddForm, setMatchAddForm] = useState(EMPTY_MATCH_FORM);
   const monthTouchStartXRef = useRef(0);
   const currentItemRef = useRef<HTMLDivElement>(null);
 
@@ -102,7 +101,6 @@ export default function ScheduleSheet({ open, onClose }: Props) {
     setDayDetail(null);
     setNotesExpanded(false);
     setMatchAddOpen(false);
-    setMatchAddForm(EMPTY_MATCH_FORM);
   }, [open]);
 
   useEffect(() => {
@@ -295,7 +293,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={dayTypeFilter !== "all" ? "#fff" : "#6b7480"} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                     </button>
                     <button
-                      onClick={() => { setMatchAddOpen(true); setMatchAddForm(EMPTY_MATCH_FORM); }}
+                      onClick={() => setMatchAddOpen(true)}
                       style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, background: "#2653d4", border: "none", borderRadius: "50%", cursor: "pointer" }}
                     >
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -431,27 +429,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
         );
       })()}
 
-      {matchAddOpen && (
-        <div className="fixed inset-0 z-[400] flex items-end justify-center" onClick={() => setMatchAddOpen(false)}>
-          <style>{`@keyframes matchAddUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-          <div className="relative w-full" style={{ background: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "85dvh", animation: "matchAddUp 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden", display: "flex", flexDirection: "column" }} onClick={e => e.stopPropagation()}>
-            <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 10px", flexShrink: 0 }} />
-            <div style={{ padding: "0 20px 8px", flexShrink: 0 }}>
-              <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#1a1c1c" }}>Add match</p>
-            </div>
-            <div className="overflow-y-auto" style={{ padding: "0 20px 24px", flex: 1, minHeight: 0 }}>
-              <MatchFormFields
-                form={matchAddForm}
-                onChange={setMatchAddForm}
-                onSave={() => { addUpcomingMatch(matchAddForm); setMatchAddForm(EMPTY_MATCH_FORM); setMatchAddOpen(false); }}
-                saveLabel="Save match"
-                saveColor="#2653d4"
-              />
-            </div>
-          </div>
-        </div>
-      )}
+      <AddMatchModal open={matchAddOpen} onClose={() => setMatchAddOpen(false)} onSaved={() => setMatchAddOpen(false)} />
     </>
   );
 }
