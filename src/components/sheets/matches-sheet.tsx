@@ -168,17 +168,25 @@ export default function MatchesContent() {
             })}
           </div>
         ) : (
-          <div style={{ background: "#f8f9fa", borderRadius: 14, padding: "22px 18px", textAlign: "center" }}>
+          <div style={{ background: "#f8f9fa", borderRadius: 14, padding: "22px 18px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
             <p style={{ margin: "0 0 6px", fontSize: 21, fontWeight: 800, color: "#1a1c1c" }}>No upcoming matches</p>
             <p style={{ margin: "0 0 14px", fontSize: 20, color: "#8a9096" }}>Schedule your next game</p>
+            <button
+              onClick={() => { setMatchAddOpen(true); setMatchExpandedIdx(null); }}
+              style={{ width: 40, height: 40, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
           </div>
         )}
-        <button
-          onClick={() => { setMatchAddOpen(true); setMatchExpandedIdx(null); }}
-          style={{ alignSelf: "center", width: 40, height: 40, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </button>
+        {upcomingMatches.length > 0 && (
+          <button
+            onClick={() => { setMatchAddOpen(true); setMatchExpandedIdx(null); }}
+            style={{ alignSelf: "center", width: 40, height: 40, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        )}
         <AddMatchModal open={matchAddOpen} onClose={() => setMatchAddOpen(false)} onSaved={() => setMatchAddOpen(false)} />
         {reviews.length > 0 && (
           <div style={{ background: "#fff", borderRadius: 14, overflow: "hidden", boxShadow: "0 0 0 1px #ececec" }}>
