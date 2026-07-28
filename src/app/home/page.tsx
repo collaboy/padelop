@@ -5,9 +5,9 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { startNavLoad } from "@/lib/nav-events";
-import LogSheet from "@/components/log-sheet";
-import ReadinessSheet from "@/components/readiness-sheet";
-import PushPrompt from "@/components/push-prompt";
+const LogSheet = dynamic(() => import("@/components/log-sheet"));
+const ReadinessSheet = dynamic(() => import("@/components/readiness-sheet"));
+const PushPrompt = dynamic(() => import("@/components/push-prompt"));
 
 const ScheduleSheet = dynamic(() => import("@/components/sheets/schedule-sheet"));
 const StatsSheet = dynamic(() => import("@/components/sheets/stats-sheet"));
