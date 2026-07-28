@@ -364,7 +364,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                 <p style={{ margin: "0 0 8px", fontSize: 22, fontWeight: 800, color: "#1a1c1c" }}>{dateLabel}</p>
                 <span style={{ fontSize: 15, fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: meta.color, background: `${meta.color}18`, borderRadius: 999, padding: "4px 12px" }}>{meta.label}</span>
               </div>
-              <div className="overflow-y-auto" style={{ padding: "0 20px 24px", display: "flex", flexDirection: "column", gap: 20 }}>
+              <div className="overflow-y-auto" style={{ padding: "0 20px 24px", display: "flex", flexDirection: "column", gap: 20, flex: 1, minHeight: 0 }}>
                 {matchReview && (matchReview.notes || matchReview.result) && (
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     <p style={{ margin: 0, fontSize: 13, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", color: "#9aa0a6" }}>Match notes</p>
@@ -440,7 +440,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
             <div style={{ padding: "0 20px 8px", flexShrink: 0 }}>
               <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#1a1c1c" }}>Add match</p>
             </div>
-            <div className="overflow-y-auto" style={{ padding: "0 20px 24px" }}>
+            <div className="overflow-y-auto" style={{ padding: "0 20px 24px", flex: 1, minHeight: 0 }}>
               <MatchFormFields
                 form={matchAddForm}
                 onChange={setMatchAddForm}
