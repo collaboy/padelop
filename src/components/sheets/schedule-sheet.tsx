@@ -47,8 +47,10 @@ export default function ScheduleSheet({ open, onClose }: Props) {
   const [schedule, setSchedule] = useState<ScheduleItem[]>([]);
   const [drillTag, setDrillTag] = useState<string | null>(null);
   const [schedDone, setSchedDone] = useState<Record<string, string[]>>({});
+  const [gameDays, setGameDays] = useState<string[]>([]);
   const [dayTypeExpanded, setDayTypeExpanded] = useState(false);
   const [modalIdx, setModalIdx] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<"week" | "month">("week");
   const currentItemRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -72,9 +74,10 @@ export default function ScheduleSheet({ open, onClose }: Props) {
       try { nm = JSON.parse(localStorage.getItem("padelop:next-match") || "null"); } catch {}
       let upcoming: StoredMatch[] = [];
       try { upcoming = JSON.parse(localStorage.getItem("padelop:upcoming-matches") || "[]"); } catch {}
-      let gameDays: string[] = [];
-      try { gameDays = JSON.parse(localStorage.getItem("padelop:game-days") || "[]"); } catch {}
-      const dt = getDayType(gameDays, nm, upcoming);
+      let gd: string[] = [];
+      try { gd = JSON.parse(localStorage.getItem("padelop:game-days") || "[]"); } catch {}
+      setGameDays(gd);
+      const dt = getDayType(gd, nm, upcoming);
       setDayType(dt);
       const matchTime = nm?.date === todayStr ? nm.time : null;
       const tag = getTopNeedsWorkTag();
@@ -103,8 +106,6 @@ export default function ScheduleSheet({ open, onClose }: Props) {
   if (!open) return null;
 
   const todayKey = localToday();
-  const done = (schedDone[todayKey] ?? []).length;
-  const total = schedule.length;
   const meta = DAY_META[dayType];
 
   function toggleDone(title: string) {
@@ -137,7 +138,11 @@ export default function ScheduleSheet({ open, onClose }: Props) {
             <div style={{ width: 40, height: 4, borderRadius: 999, background: "#16a34a40", margin: "12px auto 10px" }} />
             <div style={{ padding: "0 18px 4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <p style={{ margin: 0, fontSize: 36, fontWeight: 800, letterSpacing: "-0.01em", color: "#16a34a" }}>Schedule</p>
-              <span style={{ fontSize: 18, fontWeight: 700, color: "#16a34a", background: "#16a34a20", borderRadius: 999, padding: "3px 12px" }}>{done}/{total}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }} onClick={e => e.stopPropagation()}>
+                <button onClick={() => setViewMode("week")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: 17, fontWeight: 700, color: viewMode === "week" ? "#16a34a" : "#9aa0a6" }}>Week</button>
+                <span style={{ fontSize: 17, color: "#c8ccd0" }}>|</span>
+                <button onClick={() => setViewMode("month")} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: 17, fontWeight: 700, color: viewMode === "month" ? "#16a34a" : "#9aa0a6" }}>Month</button>
+              </div>
             </div>
             <div style={{ padding: "0 18px 16px" }}>
               <div onClick={e => { e.stopPropagation(); setDayTypeExpanded(v => !v); }} style={{ display: "inline-block", cursor: "pointer" }}>
@@ -156,39 +161,94 @@ export default function ScheduleSheet({ open, onClose }: Props) {
             </div>
           </div>
           <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "16px 16px 40px", display: "flex", flexDirection: "column", gap: 8, position: "relative" }}>
-            {isSleepytime && (
-              <div style={{ position: "absolute", inset: 0, zIndex: 10, background: "rgba(10,12,30,0.72)", backdropFilter: "blur(3px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10 }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#c9d6ff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                <p style={{ margin: 0, fontSize: "clamp(28px, 8vw, 38px)", fontWeight: 800, color: "#fff", letterSpacing: "-0.02em", textAlign: "center" }}>Rest up</p>
-                <p style={{ margin: 0, fontSize: "clamp(15px, 4vw, 18px)", fontWeight: 500, color: "rgba(200,210,255,0.75)", textAlign: "center" }}>See you at 7 AM</p>
-              </div>
-            )}
-            {schedule.map((item, i) => {
-              const isDone = (schedDone[todayKey] ?? []).includes(item.title);
-              const isCurrent = toMins(item.time) <= curMins && (i === schedule.length - 1 || toMins(schedule[i + 1].time) > curMins);
-              const isPast = !isDone && !isCurrent && toMins(item.time) < curMins;
-              const hasDetail = !!(SCHEDULE_DETAILS[item.title] || item.isDrill);
-              return (
-                <div key={item.title}
-                  ref={isCurrent ? currentItemRef : undefined}
-                  onClick={() => { if (hasDetail) setModalIdx(i); }}
-                  style={{ display: "flex", alignItems: "center", gap: 12, borderRadius: 14, padding: isCurrent ? "24px 14px" : "12px 14px", background: "#fff", boxShadow: isCurrent ? `0 0 0 1.5px ${item.color}` : "0 0 0 1px #f0f0f0", cursor: hasDetail ? "pointer" : "default", opacity: isPast ? 0.45 : 1 }}>
-                  <button onClick={e => { e.stopPropagation(); toggleDone(item.title); }}
-                    style={{ width: 40, height: 40, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: `${item.color}1e`, border: "none", cursor: "pointer" }}>
-                    {isDone
-                      ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={item.color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
-                      : <div style={{ width: 13, height: 13, borderRadius: "50%", background: item.color }} />}
-                  </button>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ margin: 0, fontSize: "clamp(21px, 5.6vw, 24px)", fontWeight: 700, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none", lineHeight: 1.25 }}>{item.title}</p>
-                    <p style={{ margin: "2px 0 0", fontSize: 18, color: "#8a9096" }}>{isCurrent ? "Now · " : ""}{item.time}</p>
+            {viewMode === "week" ? (
+              <>
+                {isSleepytime && (
+                  <div style={{ position: "absolute", inset: 0, zIndex: 10, background: "rgba(10,12,30,0.72)", backdropFilter: "blur(3px)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10 }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#c9d6ff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <p style={{ margin: 0, fontSize: "clamp(28px, 8vw, 38px)", fontWeight: 800, color: "#fff", letterSpacing: "-0.02em", textAlign: "center" }}>Rest up</p>
+                    <p style={{ margin: 0, fontSize: "clamp(15px, 4vw, 18px)", fontWeight: 500, color: "rgba(200,210,255,0.75)", textAlign: "center" }}>See you at 7 AM</p>
                   </div>
-                  {hasDetail && (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
-                  )}
+                )}
+                {schedule.map((item, i) => {
+                  const isDone = (schedDone[todayKey] ?? []).includes(item.title);
+                  const isCurrent = toMins(item.time) <= curMins && (i === schedule.length - 1 || toMins(schedule[i + 1].time) > curMins);
+                  const isPast = !isDone && !isCurrent && toMins(item.time) < curMins;
+                  const hasDetail = !!(SCHEDULE_DETAILS[item.title] || item.isDrill);
+                  return (
+                    <div key={item.title}
+                      ref={isCurrent ? currentItemRef : undefined}
+                      onClick={() => { if (hasDetail) setModalIdx(i); }}
+                      style={{ display: "flex", alignItems: "center", gap: 12, borderRadius: 14, padding: isCurrent ? "24px 14px" : "12px 14px", background: "#fff", boxShadow: isCurrent ? `0 0 0 1.5px ${item.color}` : "0 0 0 1px #f0f0f0", cursor: hasDetail ? "pointer" : "default", opacity: isPast ? 0.45 : 1 }}>
+                      <button onClick={e => { e.stopPropagation(); toggleDone(item.title); }}
+                        style={{ width: 40, height: 40, borderRadius: "50%", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: `${item.color}1e`, border: "none", cursor: "pointer" }}>
+                        {isDone
+                          ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={item.color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+                          : <div style={{ width: 13, height: 13, borderRadius: "50%", background: item.color }} />}
+                      </button>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ margin: 0, fontSize: "clamp(21px, 5.6vw, 24px)", fontWeight: 700, color: isDone ? "#9aa0a6" : "#1a1c1c", textDecoration: isDone ? "line-through" : "none", lineHeight: 1.25 }}>{item.title}</p>
+                        <p style={{ margin: "2px 0 0", fontSize: 18, color: "#8a9096" }}>{isCurrent ? "Now · " : ""}{item.time}</p>
+                      </div>
+                      {hasDetail && (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c0c4c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
+                      )}
+                    </div>
+                  );
+                })}
+              </>
+            ) : (() => {
+              const year = now.getFullYear();
+              const month = now.getMonth();
+              const monthLabel = now.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+              const firstOfMonth = new Date(year, month, 1);
+              const daysInMonth = new Date(year, month + 1, 0).getDate();
+              const leadingBlanks = (firstOfMonth.getDay() + 6) % 7; // Monday-start offset
+              const cells: (number | null)[] = [...Array(leadingBlanks).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
+              return (
+                <div style={{ background: "#fff", borderRadius: 16, padding: 16, boxShadow: "0 0 0 1px #f0f0f0" }}>
+                  <p style={{ margin: "0 0 14px", fontSize: 18, fontWeight: 700, color: "#1a1c1c", textAlign: "center" }}>{monthLabel}</p>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, marginBottom: 6 }}>
+                    {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+                      <span key={i} style={{ fontSize: 13, fontWeight: 700, color: "#9aa0a6", textAlign: "center" }}>{d}</span>
+                    ))}
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 }}>
+                    {cells.map((dayNum, i) => {
+                      if (dayNum === null) return <div key={i} />;
+                      const dateStr = `${year}-${pad(month + 1)}-${pad(dayNum)}`;
+                      const isToday = dateStr === todayKey;
+                      const isGameDay = gameDays.includes(dateStr);
+                      const isCompleted = (schedDone[dateStr] ?? []).length > 0;
+                      const isPastDay = dateStr < todayKey;
+                      return (
+                        <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "6px 0" }}>
+                          <div style={{
+                            width: 30, height: 30, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+                            background: isGameDay ? "#2653d4" : "transparent",
+                            boxShadow: isToday && !isGameDay ? "0 0 0 1.5px #16a34a" : "none",
+                            opacity: isPastDay && !isGameDay ? 0.45 : 1,
+                          }}>
+                            <span style={{ fontSize: 15, fontWeight: isToday || isGameDay ? 800 : 500, color: isGameDay ? "#fff" : "#1a1c1c" }}>{dayNum}</span>
+                          </div>
+                          <div style={{ width: 4, height: 4, borderRadius: "50%", background: isCompleted ? "#16a34a" : "transparent" }} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div style={{ display: "flex", gap: 16, marginTop: 16, paddingTop: 14, borderTop: "1px solid #f0f0f0" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#2653d4" }} />
+                      <span style={{ fontSize: 14, color: "#6b7480" }}>Match day</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a" }} />
+                      <span style={{ fontSize: 14, color: "#6b7480" }}>Completed</span>
+                    </div>
+                  </div>
                 </div>
               );
-            })}
+            })()}
           </div>
         </div>
       </div>
