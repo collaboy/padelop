@@ -285,13 +285,9 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 16, paddingTop: 14, borderTop: "1px solid #f0f0f0", position: "relative" }}>
                     <button
                       onClick={() => setTypeDropdownOpen(v => !v)}
-                      style={{ display: "flex", alignItems: "center", gap: 6, background: "#f0f1f3", border: "none", borderRadius: 999, padding: "4px 10px 4px 12px", cursor: "pointer" }}
+                      style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, background: dayTypeFilter !== "all" ? DAY_META[dayTypeFilter].color : "#f0f1f3", border: "none", borderRadius: "50%", cursor: "pointer" }}
                     >
-                      {dayTypeFilter !== "all" && <div style={{ width: 10, height: 10, borderRadius: "50%", background: DAY_META[dayTypeFilter].color }} />}
-                      <span style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1c" }}>
-                        {dayTypeFilter === "all" ? "All" : DAY_META[dayTypeFilter].label}
-                      </span>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: typeDropdownOpen ? "rotate(180deg)" : "rotate(0deg)" }}><path d="M6 9l6 6 6-6"/></svg>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={dayTypeFilter !== "all" ? "#fff" : "#6b7480"} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
                     </button>
                     {typeDropdownOpen && (
                       <>
