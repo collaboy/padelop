@@ -69,6 +69,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
   const [viewMode, setViewMode] = useState<"week" | "month">("week");
   const [monthOffset, setMonthOffset] = useState(0);
   const [dayTypeFilter, setDayTypeFilter] = useState<DayType | "all">("all");
+  const [dayDetail, setDayDetail] = useState<{ date: string; type: DayType } | null>(null);
   const monthTouchStartXRef = useRef(0);
   const currentItemRef = useRef<HTMLDivElement>(null);
 
@@ -85,6 +86,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
     setModalIdx(null);
     setMonthOffset(0);
     setDayTypeFilter("all");
+    setDayDetail(null);
   }, [open]);
 
   useEffect(() => {
@@ -249,12 +251,17 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                       if (dayNum === null) return <div key={i} />;
                       const dateStr = `${year}-${pad(month + 1)}-${pad(dayNum)}`;
                       const isToday = dateStr === todayKey;
+                      const isPastOrToday = dateStr <= todayKey;
                       const dt = dayTypeForDate(dateStr, gameDays, upcomingMatches);
                       const isMatched = dayTypeFilter === "all" || dayTypeFilter === dt;
                       const color = isMatched ? DAY_META[dt].color : "transparent";
                       const isCompleted = (schedDone[dateStr] ?? []).length > 0;
                       return (
-                        <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "6px 0" }}>
+                        <button
+                          key={i}
+                          onClick={() => { if (isPastOrToday) setDayDetail({ date: dateStr, type: dt }); }}
+                          style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "6px 0", background: "none", border: "none", cursor: isPastOrToday ? "pointer" : "default" }}
+                        >
                           <div style={{
                             width: 30, height: 30, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
                             background: color,
@@ -262,8 +269,8 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                           }}>
                             <span style={{ fontSize: 15, fontWeight: isMatched ? 700 : 500, color: isMatched ? "#fff" : "#c0c4c8" }}>{dayNum}</span>
                           </div>
-                          <div style={{ width: 4, height: 4, borderRadius: "50%", background: isCompleted ? "#1a1c1c" : "transparent" }} />
-                        </div>
+                          <div style={{ width: 4, height: 4, borderRadius: "50%", background: isCompleted ? "#c0c4c8" : "transparent" }} />
+                        </button>
                       );
                     })}
                   </div>
@@ -304,6 +311,39 @@ export default function ScheduleSheet({ open, onClose }: Props) {
           zIndex={300}
         />
       )}
+
+      {dayDetail && (() => {
+        const meta = DAY_META[dayDetail.type];
+        const tasks = schedDone[dayDetail.date] ?? [];
+        const dateLabel = new Date(dayDetail.date + "T12:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+        return (
+          <div className="fixed inset-0 z-[400] flex items-end justify-center" onClick={() => setDayDetail(null)}>
+            <style>{`@keyframes dayDetailUp{from{transform:translateY(100%)}to{transform:translateY(0)}}`}</style>
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+            <div className="relative w-full" style={{ background: "#fff", borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "70dvh", animation: "dayDetailUp 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.15)", overflow: "hidden", display: "flex", flexDirection: "column" }} onClick={e => e.stopPropagation()}>
+              <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 10px", flexShrink: 0 }} />
+              <div style={{ padding: "0 20px 16px", flexShrink: 0 }}>
+                <p style={{ margin: "0 0 8px", fontSize: 22, fontWeight: 800, color: "#1a1c1c" }}>{dateLabel}</p>
+                <span style={{ fontSize: 15, fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: meta.color, background: `${meta.color}18`, borderRadius: 999, padding: "4px 12px" }}>{meta.label}</span>
+              </div>
+              <div className="overflow-y-auto" style={{ padding: "0 20px 24px" }}>
+                {tasks.length === 0 ? (
+                  <p style={{ margin: 0, fontSize: 16, color: "#9aa0a6" }}>Nothing completed this day.</p>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {tasks.map(title => (
+                      <div key={title} style={{ display: "flex", alignItems: "center", gap: 10, background: "#f8f9fa", borderRadius: 12, padding: "10px 14px" }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M5 13l4 4L19 7"/></svg>
+                        <span style={{ fontSize: 17, fontWeight: 600, color: "#1a1c1c" }}>{title}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </>
   );
 }
