@@ -71,6 +71,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
   const [viewMode, setViewMode] = useState<"week" | "month">("week");
   const [monthOffset, setMonthOffset] = useState(0);
   const [dayTypeFilter, setDayTypeFilter] = useState<DayType | "all">("all");
+  const [typeDropdownOpen, setTypeDropdownOpen] = useState(false);
   const [dayDetail, setDayDetail] = useState<{ date: string; type: DayType } | null>(null);
   const [notesExpanded, setNotesExpanded] = useState(false);
   const monthTouchStartXRef = useRef(0);
@@ -94,6 +95,7 @@ export default function ScheduleSheet({ open, onClose }: Props) {
     setViewMode("week");
     setMonthOffset(0);
     setDayTypeFilter("all");
+    setTypeDropdownOpen(false);
     setDayDetail(null);
     setNotesExpanded(false);
   }, [open]);
@@ -280,23 +282,37 @@ export default function ScheduleSheet({ open, onClose }: Props) {
                       );
                     })}
                   </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16, paddingTop: 14, borderTop: "1px solid #f0f0f0" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 16, paddingTop: 14, borderTop: "1px solid #f0f0f0", position: "relative" }}>
                     <button
                       onClick={() => setDayTypeFilter("all")}
                       style={{ display: "flex", alignItems: "center", gap: 6, background: dayTypeFilter === "all" ? "#f0f1f3" : "none", border: "none", borderRadius: 999, padding: "4px 12px", cursor: "pointer" }}
                     >
                       <span style={{ fontSize: 14, fontWeight: dayTypeFilter === "all" ? 700 : 500, color: dayTypeFilter === "all" ? "#1a1c1c" : "#6b7480" }}>All</span>
                     </button>
-                    {DAY_TYPE_INFO.map(dt => (
-                      <button
-                        key={dt.label}
-                        onClick={() => setDayTypeFilter(f => f === dt.type ? "all" : dt.type)}
-                        style={{ display: "flex", alignItems: "center", gap: 6, background: dayTypeFilter === dt.type ? "#f0f1f3" : "none", border: "none", borderRadius: 999, padding: "4px 10px 4px 4px", cursor: "pointer" }}
-                      >
-                        <div style={{ width: 12, height: 12, borderRadius: "50%", background: dt.color }} />
-                        <span style={{ fontSize: 14, fontWeight: dayTypeFilter === dt.type ? 700 : 500, color: dayTypeFilter === dt.type ? "#1a1c1c" : "#6b7480" }}>{dt.label}</span>
-                      </button>
-                    ))}
+                    <button
+                      onClick={() => setTypeDropdownOpen(v => !v)}
+                      style={{ display: "flex", alignItems: "center", gap: 6, background: dayTypeFilter !== "all" ? "#f0f1f3" : "none", border: "none", borderRadius: 999, padding: "4px 10px 4px 12px", cursor: "pointer" }}
+                    >
+                      {dayTypeFilter !== "all" && <div style={{ width: 10, height: 10, borderRadius: "50%", background: DAY_META[dayTypeFilter].color }} />}
+                      <span style={{ fontSize: 14, fontWeight: dayTypeFilter !== "all" ? 700 : 500, color: dayTypeFilter !== "all" ? "#1a1c1c" : "#6b7480" }}>
+                        {dayTypeFilter === "all" ? "Day type" : DAY_META[dayTypeFilter].label}
+                      </span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.2s", transform: typeDropdownOpen ? "rotate(180deg)" : "rotate(0deg)" }}><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                    {typeDropdownOpen && (
+                      <div style={{ position: "absolute", bottom: "calc(100% + 4px)", left: 0, background: "#fff", borderRadius: 14, boxShadow: "0 4px 20px rgba(0,0,0,0.15)", padding: 6, display: "flex", flexDirection: "column", gap: 2, zIndex: 20, minWidth: 180 }}>
+                        {DAY_TYPE_INFO.map(dt => (
+                          <button
+                            key={dt.label}
+                            onClick={() => { setDayTypeFilter(f => f === dt.type ? "all" : dt.type); setTypeDropdownOpen(false); }}
+                            style={{ display: "flex", alignItems: "center", gap: 8, background: dayTypeFilter === dt.type ? "#f0f1f3" : "none", border: "none", borderRadius: 10, padding: "8px 10px", cursor: "pointer", textAlign: "left" }}
+                          >
+                            <div style={{ width: 12, height: 12, borderRadius: "50%", background: dt.color, flexShrink: 0 }} />
+                            <span style={{ fontSize: 15, fontWeight: dayTypeFilter === dt.type ? 700 : 500, color: "#1a1c1c" }}>{dt.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               );
