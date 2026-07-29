@@ -131,7 +131,7 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
               {(["right", "left"] as const).map(h => (
                 <button
                   key={h}
-                  onClick={() => setHand(h)}
+                  onClick={() => { setHand(h); setStep(s => s + 1); }}
                   style={{ flex: 1, padding: "28px 16px", borderRadius: "var(--r-md)", border: `2px solid ${hand === h ? "var(--c-blue)" : "var(--c-line)"}`, background: hand === h ? "var(--c-blue-tint)" : "#fff", cursor: "pointer", fontSize: 17, fontWeight: 700, color: hand === h ? "var(--c-blue)" : "var(--c-text)", transition: "all 0.15s" }}
                 >
                   {h === "right" ? "Right" : "Left"}
@@ -224,8 +224,9 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
         )}
       </div>
 
-      {/* Continue */}
-      {step < steps.length - 1 && (
+      {/* Continue — hidden on step 1 (Dominant hand), which only has two
+          options and auto-advances on tap instead */}
+      {step < steps.length - 1 && step !== 1 && (
         <button
           onClick={() => setStep(s => s + 1)}
           disabled={!canContinue || saving}
