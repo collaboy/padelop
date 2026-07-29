@@ -19,7 +19,8 @@ create table profiles (
   created_at timestamptz default now(),
   "position" text,
   tournament_count integer default 0,
-  playing_since text
+  playing_since text,
+  onboarding_completed boolean not null default false
 );
 alter table profiles enable row level security;
 create policy "own profile" on profiles for all using ((select auth.uid()) = id);

@@ -40,9 +40,10 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
 
     const { error } = await supabase.from("profiles")
       .update({
-        display_name: name.trim(),
-        play_level:   level,
-        overall_goal: goal,
+        display_name:         name.trim(),
+        play_level:           level,
+        overall_goal:         goal,
+        onboarding_completed: true,
       })
       .eq("id", user.id);
 

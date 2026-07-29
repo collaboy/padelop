@@ -464,8 +464,8 @@ export default function Home8() {
     // Redirect incomplete profiles to onboarding
     import("@/lib/supabase/client").then(({ createClient }) => {
       const supabase = createClient();
-      supabase.from("profiles").select("display_name").single().then(({ data }) => {
-        if (data && !data.display_name) router.push("/onboarding");
+      supabase.from("profiles").select("onboarding_completed").single().then(({ data }) => {
+        if (data && !data.onboarding_completed) router.push("/onboarding");
       });
     });
     hydrateFromSupabase().then(result => {
