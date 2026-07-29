@@ -125,7 +125,7 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
         ref={cardRef}
         className="relative w-full bg-white flex flex-col"
         style={{
-          maxWidth: 420, borderRadius: 28,
+          maxWidth: 420, minHeight: 400, borderRadius: 28,
           maxHeight: pinnedTop !== null ? `calc(100dvh - ${pinnedTop}px - 24px)` : "80dvh",
           ...(pinnedTop !== null ? { position: "fixed", top: pinnedTop, left: "50%", width: "calc(100% - 48px)", transform: "translateX(-50%)" } : {}),
           animation: closing ? "scheditem-fade-out 0.4s ease both" : "scheditem-pop-in 0.26s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 20px 60px rgba(0,0,0,0.25)", overflow: "hidden",
@@ -133,17 +133,20 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
         onClick={e => e.stopPropagation()}
       >
         <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
-        <div className="overflow-y-auto flex-1 px-6 pb-6" style={{ minHeight: 0 }}>
-          <p style={{ margin: "20px 0 6px", fontSize: v.title, fontWeight: 800, color: "#1a1c1c", lineHeight: 1.25 }}>{item.title}</p>
-          <p style={{ margin: "0 0 20px", fontSize: v.subtitle, fontWeight: 500, color: "#000", lineHeight: 1.25 }}>
-            {item.subtitle &&
-              // Keep a non-breaking space after em dashes so "—" never ends up
-              // orphaned alone at the end of a wrapped line at this larger size.
-              item.subtitle.replace(/ — /g, " —\xa0")}
-            <span onClick={() => setDetailsOpen(x => !x)} style={{ cursor: "pointer", color: "#2653d4", fontWeight: 700, fontSize: "0.85em" }}>
-              {detailsOpen ? "less" : "...more"}
-            </span>
-          </p>
+        <div style={{ padding: "20px 24px 0", flexShrink: 0 }}>
+          <p style={{ margin: 0, fontSize: v.title, fontWeight: 800, color: "#1a1c1c", lineHeight: 1.25 }}>{item.title}</p>
+        </div>
+        <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "0 24px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <div>
+            <p style={{ margin: "6px 0 0", fontSize: v.subtitle, fontWeight: 500, color: "#000", lineHeight: 1.25 }}>
+              {item.subtitle &&
+                // Keep a non-breaking space after em dashes so "—" never ends up
+                // orphaned alone at the end of a wrapped line at this larger size.
+                item.subtitle.replace(/ — /g, " —\xa0")}
+              <span onClick={() => setDetailsOpen(x => !x)} style={{ cursor: "pointer", color: "#2653d4", fontWeight: 700, fontSize: "0.85em" }}>
+                {detailsOpen ? "less" : "...more"}
+              </span>
+            </p>
 
           {detailsOpen && (
             <div style={{ paddingBottom: 20 }}>
@@ -243,7 +246,10 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
               )}
             </div>
           )}
+          </div>
+        </div>
 
+        <div style={{ padding: "16px 24px 24px", flexShrink: 0 }}>
           {isComplete ? (
             <button
               onClick={handleDoneClick}
