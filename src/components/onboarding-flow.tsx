@@ -83,12 +83,12 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
         </p>
       )}
       {/* Progress — a single track with a green ball travelling along it */}
-      <div style={{ position: "relative", height: 18, marginBottom: 48 }}>
-        <div style={{ position: "absolute", top: "50%", left: 0, right: 0, height: 4, borderRadius: 99, background: "var(--c-line)", transform: "translateY(-50%)" }} />
+      <div style={{ position: "relative", height: 24, marginBottom: 48 }}>
+        <div style={{ position: "absolute", top: "50%", left: 0, right: 0, height: 6, borderRadius: 99, background: "var(--c-line)", transform: "translateY(-50%)" }} />
         <div
           style={{
             position: "absolute", top: "50%", left: `${(step / (steps.length - 1)) * 100}%`,
-            width: 18, height: 18, borderRadius: "50%", background: "#00D455",
+            width: 24, height: 24, borderRadius: "50%", background: "#00D455",
             transform: "translate(-50%, -50%)", transition: "left 0.3s cubic-bezier(0.22,1,0.36,1)",
             boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
           }}
