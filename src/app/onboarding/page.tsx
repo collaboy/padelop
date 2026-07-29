@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { subscribeToPush } from "@/lib/push";
 
 const LEVELS = [
   { value: "beginner",      label: "Beginner",      sub: "Still learning the basics" },
@@ -18,6 +19,8 @@ const GOALS = [
   "Play more often",
 ];
 
+const POSITIONS = ["Left wall", "Right wall", "Both"];
+
 export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -25,10 +28,12 @@ export default function OnboardingPage() {
   const [hand, setHand] = useState<"right" | "left" | null>(null);
   const [level, setLevel] = useState<string | null>(null);
   const [goal, setGoal] = useState<string | null>(null);
+  const [position, setPosition] = useState<string | null>(null);
+  const [playingSince, setPlayingSince] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  const steps = ["Name", "Hand", "Level", "Goal"];
+  const steps = ["Name", "Hand", "Level", "Goal", "Position", "Playing Since", "Notifications"];
 
   async function finish() {
     setSaving(true);
@@ -43,6 +48,8 @@ export default function OnboardingPage() {
         dominant_hand: hand,
         play_level:    level,
         overall_goal:  goal,
+        position,
+        playing_since: playingSince.trim() || null,
       })
       .eq("id", user.id);
 
@@ -55,11 +62,26 @@ export default function OnboardingPage() {
     router.push("/home");
   }
 
+  async function enableNotifications() {
+    if (typeof Notification === "undefined" || !("PushManager" in window)) {
+      alert("To enable notifications on iPhone, add padla to your Home Screen first:\n\nSafari → Share button → Add to Home Screen\n\nThen open the app from the home screen icon and try again.");
+      finish();
+      return;
+    }
+    try {
+      const result = await Notification.requestPermission();
+      if (result === "granted") await subscribeToPush();
+    } catch {}
+    finish();
+  }
+
   const canContinue =
     (step === 0 && name.trim().length > 0) ||
     (step === 1 && hand !== null) ||
     (step === 2 && level !== null) ||
-    (step === 3 && goal !== null);
+    (step === 3 && goal !== null) ||
+    (step === 4 && position !== null) ||
+    (step === 5);
 
   return (
     <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", background: "var(--c-bg)", padding: "60px 24px 40px" }}>
@@ -144,16 +166,81 @@ export default function OnboardingPage() {
             </div>
           </>
         )}
+
+        {/* Step 4: Position */}
+        {step === 4 && (
+          <>
+            <p className="t-heading" style={{ margin: "0 0 8px" }}>Where do you play?</p>
+            <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 32px" }}>Your usual court position.</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {POSITIONS.map(p => (
+                <button
+                  key={p}
+                  onClick={() => setPosition(p)}
+                  style={{ padding: "20px 18px", borderRadius: "var(--r-md)", border: `2px solid ${position === p ? "var(--c-blue)" : "var(--c-line)"}`, background: position === p ? "var(--c-blue-tint)" : "#fff", cursor: "pointer", textAlign: "left", fontSize: 16, fontWeight: 700, color: position === p ? "var(--c-blue)" : "var(--c-text)", transition: "all 0.15s" }}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Step 5: Playing since */}
+        {step === 5 && (
+          <>
+            <p className="t-heading" style={{ margin: "0 0 8px" }}>Playing since?</p>
+            <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 32px" }}>Optional — the year you started.</p>
+            <input
+              type="text"
+              inputMode="numeric"
+              placeholder="e.g. 2019"
+              value={playingSince}
+              onChange={e => setPlayingSince(e.target.value)}
+              style={{ padding: "16px 18px", borderRadius: "var(--r-sm)", border: "1.5px solid var(--c-line)", fontSize: 18, background: "#fff", outline: "none", color: "var(--c-text)" }}
+            />
+          </>
+        )}
+
+        {/* Step 6: Notifications */}
+        {step === 6 && (
+          <>
+            <p className="t-heading" style={{ margin: "0 0 8px" }}>Stay on track</p>
+            <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 32px" }}>Get a nudge for your morning warm-up and a reminder to wind down at night. You can change this anytime in Settings.</p>
+          </>
+        )}
       </div>
 
-      {/* Continue / Finish */}
-      <button
-        onClick={step < 3 ? () => setStep(s => s + 1) : finish}
-        disabled={!canContinue || saving}
-        style={{ width: "100%", padding: "18px", borderRadius: "var(--r-sm)", background: canContinue ? "var(--c-blue)" : "var(--c-disabled)", color: "#fff", border: "none", fontSize: 17, fontWeight: 700, cursor: canContinue ? "pointer" : "not-allowed", marginTop: 32, transition: "background 0.2s" }}
-      >
-        {saving ? "Saving..." : step < 3 ? "Continue" : "Let's go"}
-      </button>
+      {/* Continue */}
+      {step < steps.length - 1 && (
+        <button
+          onClick={() => setStep(s => s + 1)}
+          disabled={!canContinue || saving}
+          style={{ width: "100%", padding: "18px", borderRadius: "var(--r-sm)", background: canContinue ? "var(--c-blue)" : "var(--c-disabled)", color: "#fff", border: "none", fontSize: 17, fontWeight: 700, cursor: canContinue ? "pointer" : "not-allowed", marginTop: 32, transition: "background 0.2s" }}
+        >
+          Continue
+        </button>
+      )}
+
+      {/* Notifications step: enable or skip, both finish onboarding */}
+      {step === steps.length - 1 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 32 }}>
+          <button
+            onClick={enableNotifications}
+            disabled={saving}
+            style={{ width: "100%", padding: "18px", borderRadius: "var(--r-sm)", background: "var(--c-blue)", color: "#fff", border: "none", fontSize: 17, fontWeight: 700, cursor: saving ? "default" : "pointer", transition: "background 0.2s" }}
+          >
+            {saving ? "Saving..." : "Enable Notifications"}
+          </button>
+          <button
+            onClick={finish}
+            disabled={saving}
+            style={{ width: "100%", padding: "16px", borderRadius: "var(--r-sm)", background: "none", color: "var(--c-text-sub)", border: "none", fontSize: 15, fontWeight: 600, cursor: saving ? "default" : "pointer" }}
+          >
+            Maybe later
+          </button>
+        </div>
+      )}
 
       {saveError && (
         <p style={{ fontSize: 13, color: "var(--c-red)", textAlign: "center", marginTop: 8 }}>{saveError}</p>

@@ -6,6 +6,7 @@ import { startNavLoad } from "@/lib/nav-events";
 import { createClient } from "@/lib/supabase/client";
 import { saveProfileToDb } from "@/lib/db";
 import { resizeImage } from "@/lib/image";
+import { subscribeToPush } from "@/lib/push";
 import AvatarCropModal from "@/components/avatar-crop-modal";
 
 const PROFILE_KEY = "padelop:profile";
@@ -18,24 +19,6 @@ const HANDS     = ["Right","Left"];
 function initials(name: string) {
   if (!name) return "?";
   return name.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
-}
-
-async function subscribeAndSave() {
-  const reg = await navigator.serviceWorker.register("/sw.js");
-  await navigator.serviceWorker.ready;
-  let sub = await reg.pushManager.getSubscription();
-  if (!sub) {
-    sub = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-    });
-  }
-  const json = sub.toJSON();
-  await fetch("/api/push/subscribe", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ endpoint: sub.endpoint, p256dh: json.keys?.p256dh ?? "", auth: json.keys?.auth ?? "" }),
-  });
 }
 
 async function unsubscribeAndRemove() {
@@ -209,7 +192,7 @@ export default function SettingsPage() {
     try {
       const result = await Notification.requestPermission();
       if (result === "granted") {
-        await subscribeAndSave();
+        await subscribeToPush();
         setNotifStatus("enabled");
       } else {
         setNotifStatus("denied");
