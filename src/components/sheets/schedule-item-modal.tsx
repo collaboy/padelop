@@ -123,24 +123,22 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
         <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
         <div style={{ padding: "20px 24px 0", flexShrink: 0 }}>
           <p style={{ margin: 0, fontSize: v.title, fontWeight: 800, color: "#1a1c1c", lineHeight: 1.25 }}>{item.title}</p>
+          {item.subtitle && (
+            // Keep a non-breaking space after em dashes so "—" never ends up
+            // orphaned alone at the end of a wrapped line at this larger size.
+            <p style={{ margin: "6px 0 0", fontSize: v.subtitle, fontWeight: 500, color: "#000", lineHeight: 1.25 }}>{item.subtitle.replace(/ — /g, " —\xa0")}</p>
+          )}
+          <button
+            onClick={() => setDetailsOpen(x => !x)}
+            style={{ display: "flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: 0, margin: "10px 0 20px" }}
+          >
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#8a9096" }}>Details</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: detailsOpen ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
         </div>
-        <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "0 24px", display: "flex", flexDirection: "column", justifyContent: "flex-start" }}>
-          <div>
-            {item.subtitle && (
-              // Keep a non-breaking space after em dashes so "—" never ends up
-              // orphaned alone at the end of a wrapped line at this larger size.
-              <p style={{ margin: "6px 0 0", fontSize: v.subtitle, fontWeight: 500, color: "#000", lineHeight: 1.25 }}>{item.subtitle.replace(/ — /g, " —\xa0")}</p>
-            )}
-            <button
-              onClick={() => setDetailsOpen(x => !x)}
-              style={{ display: "flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: 0, marginTop: 10 }}
-            >
-              <span style={{ fontSize: 13, fontWeight: 600, color: "#8a9096" }}>Details</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: detailsOpen ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-
+        <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "0 24px" }}>
           {detailsOpen && (
-            <div style={{ paddingTop: 14, paddingBottom: 20 }}>
+            <div style={{ paddingBottom: 20 }}>
               {isMeal && detail?.type === "meal" && (
                 <div className="flex flex-col">
                   <p className="font-bold uppercase tracking-widest pb-3" style={{ fontSize: v.focusLabel, color: "#8a9096" }}>{detail.focus}</p>
@@ -237,7 +235,6 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
               )}
             </div>
           )}
-          </div>
         </div>
 
         <div style={{ padding: "16px 24px 24px", flexShrink: 0 }}>
