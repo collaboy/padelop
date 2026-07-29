@@ -10,7 +10,7 @@ import { GOALS } from "@/lib/profile-options";
 const LEVELS = [
   { value: "2.0", label: "Beginner",     sub: "Still learning the basics" },
   { value: "3.0", label: "Intermediate", sub: "Comfortable playing regularly" },
-  { value: "4.5", label: "Competitive",  sub: "Tournament or league player" },
+  { value: "4.5", label: "Advanced",     sub: "Tournament or league player" },
 ];
 
 export default function OnboardingFlow({ previewMode = false }: { previewMode?: boolean }) {
