@@ -149,7 +149,7 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
         {step === 3 && (
           <>
             <p className="t-heading" style={{ margin: "0 0 8px" }}>Stay on track</p>
-            <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 32px" }}>Get a nudge for your morning warm-up and a reminder to wind down at night. You can change this anytime in Settings.</p>
+            <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 32px" }}>Get gentle reminders for your morning routine and evening recovery. You can change this anytime in Settings.</p>
           </>
         )}
 
