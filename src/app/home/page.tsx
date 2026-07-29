@@ -2315,6 +2315,20 @@ export default function Home8() {
               <path d="M 9.76,4.01 L 9.71,1.75 L 14.29,1.75 L 14.24,4.01 L 16.07,4.77 L 17.63,3.13 L 20.87,6.37 L 19.23,7.93 L 19.99,9.76 L 22.25,9.71 L 22.25,14.29 L 19.99,14.24 L 19.23,16.07 L 20.87,17.63 L 17.63,20.87 L 16.07,19.23 L 14.24,19.99 L 14.29,22.25 L 9.71,22.25 L 9.76,19.99 L 7.93,19.23 L 6.37,20.87 L 3.13,17.63 L 4.77,16.07 L 4.01,14.24 L 1.75,14.29 L 1.75,9.71 L 4.01,9.76 L 4.77,7.93 L 3.13,6.37 L 6.37,3.13 L 7.93,4.77 Z"/>
             </svg>
           </button>
+          <button
+            onClick={() => { startNavLoad(); router.push("/home/onboarding-preview"); }}
+            style={{
+              width: 48, height: 48, borderRadius: "50%", border: "none", background: "transparent",
+              display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
+            }}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9aa0a6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="9" cy="8" r="4"/>
+              <path d="M2 21v-1.5C2 16.5 5 14 9 14s7 2.5 7 5.5V21"/>
+              <line x1="19" y1="8" x2="19" y2="14"/>
+              <line x1="16" y1="11" x2="22" y2="11"/>
+            </svg>
+          </button>
         </div>
 
         <ScheduleSheet open={openPanel === "schedule"} onClose={() => setOpenPanel(null)} />
