@@ -154,6 +154,9 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
         {/* Step 3: Notifications */}
         {step === 3 && (
           <>
+            <div style={{ width: 56, height: 56, borderRadius: "50%", background: "var(--c-blue-tint)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--c-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </div>
             <p className="t-heading" style={{ margin: "0 0 8px" }}>Stay on track</p>
             <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 32px" }}>Get gentle reminders for your morning routine and evening recovery. You can change this anytime in Settings.</p>
           </>
