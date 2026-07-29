@@ -140,13 +140,9 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
               // Keep a non-breaking space after em dashes so "—" never ends up
               // orphaned alone at the end of a wrapped line at this larger size.
               item.subtitle.replace(/ — /g, " —\xa0")}
-            <button
-              onClick={() => setDetailsOpen(x => !x)}
-              style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: 0, marginLeft: 8, verticalAlign: "middle" }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="#8a9096" stroke="none"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
-              <span style={{ fontSize: 13, fontWeight: 600, color: "#8a9096" }}>{detailsOpen ? "Less" : "More"}</span>
-            </button>
+            <span onClick={() => setDetailsOpen(x => !x)} style={{ cursor: "pointer" }}>
+              {detailsOpen ? " less" : "... more"}
+            </span>
           </p>
 
           {detailsOpen && (
