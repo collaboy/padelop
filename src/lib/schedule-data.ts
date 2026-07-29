@@ -113,13 +113,27 @@ export const DEFAULT_DRILL: DrillDef = {
   ],
 };
 
+// Falls back to this when there's no match-review history yet to derive a
+// tag from — keeps the onboarding "goal" answer meaningful from day one.
+const GOAL_TO_DRILL_TAG: Record<string, string> = {
+  "Improve consistency": "Defense",
+  "Better net game":     "Volleys",
+  "Stronger serve":      "Serve",
+  "Improve movement":    "Movement",
+  "Win more matches":    "Positioning",
+};
+
 export function getTopNeedsWorkTag(): string | null {
   try {
     const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
     const counts: Record<string, number> = {};
     for (const r of reviews) for (const tag of (r.improved ?? [])) counts[tag] = (counts[tag] ?? 0) + 1;
     const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-    return sorted[0]?.[0] ?? null;
+    if (sorted[0]?.[0]) return sorted[0][0];
+  } catch {}
+  try {
+    const profile = JSON.parse(localStorage.getItem("padelop:profile") || "{}");
+    return GOAL_TO_DRILL_TAG[profile.goal] ?? null;
   } catch { return null; }
 }
 

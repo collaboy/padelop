@@ -4,10 +4,12 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { subscribeToPush } from "@/lib/push";
 
+// Values match Settings' 1.0–5.0 level scale (same "profiles.play_level"
+// column) so the two pickers never disagree on a user's level.
 const LEVELS = [
-  { value: "beginner",      label: "Beginner",      sub: "Still learning the basics" },
-  { value: "intermediate",  label: "Intermediate",  sub: "Comfortable playing regularly" },
-  { value: "competitive",   label: "Competitive",   sub: "Tournament or league player" },
+  { value: "2.0", label: "Beginner",     sub: "Still learning the basics" },
+  { value: "3.0", label: "Intermediate", sub: "Comfortable playing regularly" },
+  { value: "4.5", label: "Competitive",  sub: "Tournament or league player" },
 ];
 
 const GOALS = [
