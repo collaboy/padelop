@@ -140,8 +140,9 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
               // Keep a non-breaking space after em dashes so "—" never ends up
               // orphaned alone at the end of a wrapped line at this larger size.
               item.subtitle.replace(/ — /g, " —\xa0")}
-            <span onClick={() => setDetailsOpen(x => !x)} style={{ cursor: "pointer" }}>
-              {detailsOpen ? " less" : "... more"}
+            {" "}
+            <span onClick={() => setDetailsOpen(x => !x)} style={{ cursor: "pointer", color: "#2653d4", fontWeight: 700 }}>
+              {detailsOpen ? "less" : "more"}
             </span>
           </p>
 
