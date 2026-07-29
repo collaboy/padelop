@@ -136,7 +136,7 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
         <div style={{ padding: "20px 24px 0", flexShrink: 0 }}>
           <p style={{ margin: 0, fontSize: v.title, fontWeight: 800, color: "#1a1c1c", lineHeight: 1.25 }}>{item.title}</p>
         </div>
-        <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "0 24px", display: "flex", flexDirection: "column", justifyContent: detailsOpen ? "flex-start" : "center" }}>
+        <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "0 24px", display: "flex", flexDirection: "column", justifyContent: "flex-start" }}>
           <div>
             {item.subtitle && (
               // Keep a non-breaking space after em dashes so "—" never ends up
