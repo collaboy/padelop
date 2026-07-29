@@ -85,7 +85,7 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
       {/* Progress */}
       <div style={{ display: "flex", gap: 6, marginBottom: 48 }}>
         {steps.map((_, i) => (
-          <div key={i} style={{ flex: 1, height: 3, borderRadius: 99, background: i <= step ? "var(--c-blue)" : "var(--c-line)", transition: "background 0.3s" }} />
+          <div key={i} style={{ flex: 1, height: 7, borderRadius: 99, background: i <= step ? "var(--c-blue)" : "var(--c-line)", transition: "background 0.3s" }} />
         ))}
       </div>
 
