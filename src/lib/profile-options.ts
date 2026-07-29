@@ -9,6 +9,9 @@ export const GOALS = [
   "Improve volleys",
   "Build better habits",
   "Improve my serve",
+  "Improve my bandeja",
+  "Improve my smash",
+  "Improve my vibora",
 ];
 
 export const POSITIONS = ["Left wall", "Right wall", "Both"];

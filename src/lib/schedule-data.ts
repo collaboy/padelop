@@ -38,6 +38,16 @@ export const DRILL_LIBRARY: Record<string, DrillDef> = {
       { step: "Mental overhead", cue: "Visualise 3 smashes — read the lob early, feet set before contact, clean follow-through.", reps: "3 mental reps" },
     ],
   },
+  "Vibora": {
+    // Draft content — review/adjust the coaching cues before treating this as final.
+    subtitle: "Wrist snap & spin timing — no racket needed",
+    focus: "Wrist snap · topspin timing",
+    steps: [
+      { step: "Wrist snap shadow", cue: "No racket: whip your hand forward and down like cracking a small whip, snapping the wrist at the bottom. This pronation-driven action is what generates a vibora's heavy spin.", reps: "15 reps each side" },
+      { step: "Trophy-to-contact rehearsal", cue: "Load into the trophy position, then drive forward and down through an imaginary ball with extra wrist acceleration versus a flatter smash. Start slow, then add speed.", reps: "10 reps" },
+      { step: "Spin visualisation", cue: "Picture the ball skidding low and wide after the bounce — the signature vibora effect. Visualise reading the lob, adjusting your angle, and snapping through with heavy topspin.", reps: "5 mental reps" },
+    ],
+  },
   "Volleys": {
     subtitle: "Compact hand speed — desk or wall",
     focus: "Hand speed · compact technique",
@@ -122,6 +132,9 @@ const GOAL_TO_DRILL_TAG: Record<string, string> = {
   "Move better":         "Movement",
   "Improve volleys":     "Volleys",
   "Improve my serve":    "Serve",
+  "Improve my bandeja":  "Bandeja",
+  "Improve my smash":    "Smash",
+  "Improve my vibora":   "Vibora",
 };
 
 export function getTopNeedsWorkTag(): string | null {
