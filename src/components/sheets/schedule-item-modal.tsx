@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   SCHEDULE_DETAILS, DRILL_LIBRARY, DEFAULT_DRILL,
   type ScheduleItem,
@@ -67,17 +67,8 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
   const [mealSuggestionsOpen, setMealSuggestionsOpen] = useState(false);
   const [mealLogOpen, setMealLogOpen] = useState(false);
   const [mealText, setMealText] = useState("");
-  const [pinnedTop, setPinnedTop] = useState<number | null>(null);
   const swipeTrackRef = useRef<HTMLDivElement>(null);
   const swipeStartXRef = useRef(0);
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  // Pin the card's top position after its first (collapsed-height) paint, so
-  // expanding "Info" only grows the card downward instead of the surrounding
-  // flex centering shifting the whole card upward as it gets taller.
-  useLayoutEffect(() => {
-    if (cardRef.current) setPinnedTop(cardRef.current.getBoundingClientRect().top);
-  }, []);
 
   const detail = SCHEDULE_DETAILS[item.title];
   const isMeal = detail?.type === "meal";
@@ -118,17 +109,14 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
   );
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center px-6" style={{ zIndex }} onClick={() => requestClose()} onTouchStart={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
-      <style>{`@keyframes scheditem-pop-in{from{transform:translateX(-50%) scale(0.92);opacity:0}to{transform:translateX(-50%) scale(1);opacity:1}}@keyframes scheditem-fade-out{from{opacity:1}to{opacity:0}}`}</style>
+    <div className="fixed inset-0 flex items-end justify-center" style={{ zIndex }} onClick={() => requestClose()} onTouchStart={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
+      <style>{`@keyframes scheditem-slide-up{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes scheditem-slide-down{from{transform:translateY(0)}to{transform:translateY(100%)}}@keyframes scheditem-fade-out{from{opacity:1}to{opacity:0}}`}</style>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" style={{ animation: closing ? "scheditem-fade-out 0.4s ease both" : undefined }} />
       <div
-        ref={cardRef}
         className="relative w-full bg-white flex flex-col"
         style={{
-          maxWidth: 420, aspectRatio: detailsOpen ? undefined : "1 / 1", borderRadius: 28,
-          maxHeight: pinnedTop !== null ? `calc(100dvh - ${pinnedTop}px - 24px)` : "80dvh",
-          ...(pinnedTop !== null ? { position: "fixed", top: pinnedTop, left: "50%", width: "calc(100% - 48px)", transform: "translateX(-50%)" } : {}),
-          animation: closing ? "scheditem-fade-out 0.4s ease both" : "scheditem-pop-in 0.26s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 20px 60px rgba(0,0,0,0.25)", overflow: "hidden",
+          minHeight: "75dvh", maxHeight: "92dvh", borderTopLeftRadius: 28, borderTopRightRadius: 28,
+          animation: closing ? "scheditem-slide-down 0.3s ease both" : "scheditem-slide-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.25)", overflow: "hidden",
         }}
         onClick={e => e.stopPropagation()}
       >
