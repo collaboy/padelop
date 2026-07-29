@@ -89,8 +89,9 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
           style={{
             position: "absolute", top: "50%", left: `${(step / (steps.length - 1)) * 100}%`,
             width: 24, height: 24, borderRadius: "50%", background: "#00D455",
-            transform: "translate(-50%, -50%)", transition: "left 0.3s cubic-bezier(0.22,1,0.36,1)",
+            transform: "translate(-50%, -50%)", transition: "left 0.3s cubic-bezier(0.22,1,0.36,1), opacity 0.3s",
             boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+            opacity: step === steps.length - 1 ? 0.25 : 1,
           }}
         />
       </div>
