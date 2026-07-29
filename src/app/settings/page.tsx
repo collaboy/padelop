@@ -7,13 +7,13 @@ import { createClient } from "@/lib/supabase/client";
 import { saveProfileToDb } from "@/lib/db";
 import { resizeImage } from "@/lib/image";
 import { subscribeToPush } from "@/lib/push";
+import { GOALS, POSITIONS } from "@/lib/profile-options";
 import AvatarCropModal from "@/components/avatar-crop-modal";
 
 const PROFILE_KEY = "padelop:profile";
-type Profile = { name: string; level: string; position: string; hand: string; avatar: string; playingSince: string };
-const EMPTY_PROFILE: Profile = { name: "", level: "", position: "", hand: "", avatar: "", playingSince: "" };
+type Profile = { name: string; level: string; position: string; hand: string; avatar: string; playingSince: string; goal: string };
+const EMPTY_PROFILE: Profile = { name: "", level: "", position: "", hand: "", avatar: "", playingSince: "", goal: "" };
 const LEVELS    = ["1.0","1.5","2.0","2.5","3.0","3.5","4.0","4.5","5.0"];
-const POSITIONS = ["Left wall","Right wall","Both"];
 const HANDS     = ["Right","Left"];
 
 function initials(name: string) {
@@ -102,6 +102,7 @@ export default function SettingsPage() {
       play_level:    profile.level        || undefined,
       position:      profile.position     || undefined,
       playing_since: profile.playingSince || undefined,
+      overall_goal:  profile.goal         || undefined,
     });
     setProfileSaved(true);
   };
@@ -291,6 +292,14 @@ export default function SettingsPage() {
                       <button key={h} onClick={() => setField("hand", h)} style={{ padding: "7px 10px", borderRadius: 10, border: "1.5px solid", fontSize: 13, fontWeight: 600, cursor: "pointer", borderColor: profile.hand === h ? "#2653d4" : "var(--c-line)", background: profile.hand === h ? "#eef2ff" : "transparent", color: profile.hand === h ? "#2653d4" : "var(--c-hint)", textAlign: "left" }}>{h}</button>
                     ))}
                   </div>
+                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-hint)" }}>Main goal</label>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  {GOALS.map(g => (
+                    <button key={g} onClick={() => setField("goal", g)} style={{ padding: "6px 12px", borderRadius: 20, border: "1.5px solid", fontSize: 13, fontWeight: 600, cursor: "pointer", borderColor: profile.goal === g ? "#2653d4" : "var(--c-line)", background: profile.goal === g ? "#eef2ff" : "transparent", color: profile.goal === g ? "#2653d4" : "var(--c-hint)" }}>{g}</button>
+                  ))}
                 </div>
               </div>
               <button onClick={saveProfile} disabled={!canSaveProfile} style={{ padding: 11, borderRadius: 14, background: canSaveProfile ? "#2653d4" : "#c4c7c7", color: "#fff", border: "none", fontSize: 15, fontWeight: 700, cursor: canSaveProfile ? "pointer" : "default", marginTop: 4 }}>{profileSaved ? "Saved ✓" : "Save"}</button>

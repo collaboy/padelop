@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { subscribeToPush } from "@/lib/push";
+import { GOALS, POSITIONS } from "@/lib/profile-options";
 
 // Values match Settings' 1.0–5.0 level scale (same "profiles.play_level"
 // column) so the two pickers never disagree on a user's level.
@@ -11,17 +12,6 @@ const LEVELS = [
   { value: "3.0", label: "Intermediate", sub: "Comfortable playing regularly" },
   { value: "4.5", label: "Competitive",  sub: "Tournament or league player" },
 ];
-
-const GOALS = [
-  "Improve consistency",
-  "Better net game",
-  "Stronger serve",
-  "Improve movement",
-  "Win more matches",
-  "Play more often",
-];
-
-const POSITIONS = ["Left wall", "Right wall", "Both"];
 
 export default function OnboardingFlow({ previewMode = false }: { previewMode?: boolean }) {
   const router = useRouter();
