@@ -93,7 +93,7 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
         {/* Step 0: Name */}
         {step === 0 && (
           <>
-            <p className="t-heading" style={{ margin: "0 0 8px" }}>What's your name?</p>
+            <p className="t-heading" style={{ margin: "0 0 8px" }}>First things first… What should we call you?</p>
             <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 32px" }}>We'll use this across the app.</p>
             <input
               autoFocus
