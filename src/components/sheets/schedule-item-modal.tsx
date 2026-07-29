@@ -135,20 +135,19 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
         <div style={{ width: 40, height: 4, borderRadius: 999, background: "#e2e2e2", margin: "12px auto 0", flexShrink: 0 }} />
         <div className="overflow-y-auto flex-1 px-6 pb-6" style={{ minHeight: 0 }}>
           <p style={{ margin: "20px 0 6px", fontSize: v.title, fontWeight: 800, color: "#1a1c1c", lineHeight: 1.25 }}>{item.title}</p>
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, margin: "0 0 20px" }}>
-            {item.subtitle ? (
+          <p style={{ margin: "0 0 20px", fontSize: v.subtitle, fontWeight: 500, color: "#000", lineHeight: 1.25 }}>
+            {item.subtitle &&
               // Keep a non-breaking space after em dashes so "—" never ends up
               // orphaned alone at the end of a wrapped line at this larger size.
-              <p style={{ margin: 0, fontSize: v.subtitle, fontWeight: 500, color: "#000", lineHeight: 1.25 }}>{item.subtitle.replace(/ — /g, " — ")}</p>
-            ) : <span />}
+              item.subtitle.replace(/ — /g, " —\xa0")}
             <button
               onClick={() => setDetailsOpen(x => !x)}
-              style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: 4, marginTop: 2 }}
+              style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: 0, marginLeft: 8, verticalAlign: "middle" }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="#8a9096" stroke="none"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
               <span style={{ fontSize: 13, fontWeight: 600, color: "#8a9096" }}>{detailsOpen ? "Less" : "More"}</span>
             </button>
-          </div>
+          </p>
 
           {detailsOpen && (
             <div style={{ paddingBottom: 20 }}>
