@@ -33,7 +33,7 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  const steps = ["Name", "Hand", "Level", "Goal", "Position", "Playing Since", "Notifications"];
+  const steps = ["Name", "Hand", "Level", "Goal", "Position", "Playing Since", "Notifications", "Welcome"];
 
   async function finish() {
     if (previewMode) {
@@ -68,19 +68,19 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
 
   async function enableNotifications() {
     if (previewMode) {
-      finish();
+      setStep(s => s + 1);
       return;
     }
     if (typeof Notification === "undefined" || !("PushManager" in window)) {
       alert("To enable notifications on iPhone, add padla to your Home Screen first:\n\nSafari → Share button → Add to Home Screen\n\nThen open the app from the home screen icon and try again.");
-      finish();
+      setStep(s => s + 1);
       return;
     }
     try {
       const result = await Notification.requestPermission();
       if (result === "granted") await subscribeToPush();
     } catch {}
-    finish();
+    setStep(s => s + 1);
   }
 
   const canContinue =
@@ -222,6 +222,15 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
             <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 32px" }}>Get a nudge for your morning warm-up and a reminder to wind down at night. You can change this anytime in Settings.</p>
           </>
         )}
+
+        {/* Step 7: Welcome */}
+        {step === 7 && (
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+            <div style={{ width: 84, height: 84, borderRadius: "50%", background: "#00D455", marginBottom: 28, flexShrink: 0 }} />
+            <p className="t-heading" style={{ margin: "0 0 8px" }}>Welcome to padla</p>
+            <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: 0 }}>The green ball will tell you what to do next.</p>
+          </div>
+        )}
       </div>
 
       {/* Continue — only shown on the two free-text steps (Name, Playing
@@ -237,24 +246,33 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
         </button>
       )}
 
-      {/* Notifications step: enable or skip, both finish onboarding */}
-      {step === steps.length - 1 && (
+      {/* Notifications step: enable or skip, both advance to the Welcome step */}
+      {step === 6 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 32 }}>
           <button
             onClick={enableNotifications}
-            disabled={saving}
-            style={{ width: "100%", padding: "18px", borderRadius: "var(--r-sm)", background: "var(--c-blue)", color: "#fff", border: "none", fontSize: 17, fontWeight: 700, cursor: saving ? "default" : "pointer", transition: "background 0.2s" }}
+            style={{ width: "100%", padding: "18px", borderRadius: "var(--r-sm)", background: "var(--c-blue)", color: "#fff", border: "none", fontSize: 17, fontWeight: 700, cursor: "pointer", transition: "background 0.2s" }}
           >
-            {saving ? "Saving..." : "Enable Notifications"}
+            Enable Notifications
           </button>
           <button
-            onClick={finish}
-            disabled={saving}
-            style={{ width: "100%", padding: "16px", borderRadius: "var(--r-sm)", background: "none", color: "var(--c-text-sub)", border: "none", fontSize: 15, fontWeight: 600, cursor: saving ? "default" : "pointer" }}
+            onClick={() => setStep(s => s + 1)}
+            style={{ width: "100%", padding: "16px", borderRadius: "var(--r-sm)", background: "none", color: "var(--c-text-sub)", border: "none", fontSize: 15, fontWeight: 600, cursor: "pointer" }}
           >
             Maybe later
           </button>
         </div>
+      )}
+
+      {/* Welcome step: the actual finish — saves profile and enters the app */}
+      {step === steps.length - 1 && (
+        <button
+          onClick={finish}
+          disabled={saving}
+          style={{ width: "100%", padding: "18px", borderRadius: "var(--r-sm)", background: "var(--c-blue)", color: "#fff", border: "none", fontSize: 17, fontWeight: 700, cursor: saving ? "default" : "pointer", marginTop: 32, transition: "background 0.2s" }}
+        >
+          {saving ? "Saving..." : "Let's go"}
+        </button>
       )}
 
       {saveError && (
