@@ -115,7 +115,7 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
       <div
         className="relative w-full bg-white flex flex-col"
         style={{
-          minHeight: "75dvh", maxHeight: "92dvh", borderTopLeftRadius: 28, borderTopRightRadius: 28,
+          height: "85dvh", borderTopLeftRadius: 28, borderTopRightRadius: 28,
           animation: closing ? "scheditem-slide-down 0.3s ease both" : "scheditem-slide-up 0.28s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 -8px 40px rgba(0,0,0,0.25)", overflow: "hidden",
         }}
         onClick={e => e.stopPropagation()}
