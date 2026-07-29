@@ -142,7 +142,7 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
               item.subtitle.replace(/ — /g, " —\xa0")}
             {" "}
             <span onClick={() => setDetailsOpen(x => !x)} style={{ cursor: "pointer", color: "#2653d4", fontWeight: 700 }}>
-              {detailsOpen ? "less" : "more"}
+              {detailsOpen ? "less" : "...more"}
             </span>
           </p>
 
