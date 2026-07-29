@@ -116,11 +116,12 @@ export const DEFAULT_DRILL: DrillDef = {
 // Falls back to this when there's no match-review history yet to derive a
 // tag from — keeps the onboarding "goal" answer meaningful from day one.
 const GOAL_TO_DRILL_TAG: Record<string, string> = {
-  "Improve consistency": "Defense",
-  "Better net game":     "Volleys",
-  "Stronger serve":      "Serve",
-  "Improve movement":    "Movement",
   "Win more matches":    "Positioning",
+  "Feel more confident": "Mental strength",
+  "Be more consistent":  "Defense",
+  "Move better":         "Movement",
+  "Improve volleys":     "Volleys",
+  "Improve my serve":    "Serve",
 };
 
 export function getTopNeedsWorkTag(): string | null {

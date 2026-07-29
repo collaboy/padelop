@@ -2,12 +2,13 @@
 // values written to profiles.overall_goal / profiles.position) never drift
 // out of sync between the two places they're editable.
 export const GOALS = [
-  "Improve consistency",
-  "Better net game",
-  "Stronger serve",
-  "Improve movement",
   "Win more matches",
-  "Play more often",
+  "Feel more confident",
+  "Be more consistent",
+  "Move better",
+  "Improve volleys",
+  "Build better habits",
+  "Improve my serve",
 ];
 
 export const POSITIONS = ["Left wall", "Right wall", "Both"];
