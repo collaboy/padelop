@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { subscribeToPush } from "@/lib/push";
-import { GOALS, POSITIONS } from "@/lib/profile-options";
+import { GOALS } from "@/lib/profile-options";
 
 // Values match Settings' 1.0–5.0 level scale (same "profiles.play_level"
 // column) so the two pickers never disagree on a user's level.
@@ -17,15 +17,15 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
-  const [hand, setHand] = useState<"right" | "left" | null>(null);
   const [level, setLevel] = useState<string | null>(null);
   const [goal, setGoal] = useState<string | null>(null);
-  const [position, setPosition] = useState<string | null>(null);
-  const [playingSince, setPlayingSince] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  const steps = ["Name", "Hand", "Level", "Goal", "Position", "Playing Since", "Notifications", "Welcome"];
+  // Dominant hand, court position, and playing-since were dropped from
+  // onboarding — nothing in the app uses them to personalize anything yet,
+  // and they're all still editable in Settings whenever that changes.
+  const steps = ["Name", "Level", "Goal", "Notifications", "Welcome"];
 
   async function finish() {
     if (previewMode) {
@@ -40,12 +40,9 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
 
     const { error } = await supabase.from("profiles")
       .update({
-        display_name:  name.trim(),
-        dominant_hand: hand,
-        play_level:    level,
-        overall_goal:  goal,
-        position,
-        playing_since: playingSince.trim() || null,
+        display_name: name.trim(),
+        play_level:   level,
+        overall_goal: goal,
       })
       .eq("id", user.id);
 
@@ -75,13 +72,7 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
     setStep(s => s + 1);
   }
 
-  const canContinue =
-    (step === 0 && name.trim().length > 0) ||
-    (step === 1 && hand !== null) ||
-    (step === 2 && level !== null) ||
-    (step === 3 && goal !== null) ||
-    (step === 4 && position !== null) ||
-    (step === 5);
+  const canContinue = step === 0 && name.trim().length > 0;
 
   return (
     <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", background: "var(--c-bg)", padding: "60px 24px 40px" }}>
@@ -114,27 +105,8 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
           </>
         )}
 
-        {/* Step 1: Dominant hand */}
+        {/* Step 1: Play level */}
         {step === 1 && (
-          <>
-            <p className="t-heading" style={{ margin: "0 0 8px" }}>Dominant hand?</p>
-            <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 32px" }}>Affects drill instructions.</p>
-            <div style={{ display: "flex", gap: 12 }}>
-              {(["right", "left"] as const).map(h => (
-                <button
-                  key={h}
-                  onClick={() => { setHand(h); setStep(s => s + 1); }}
-                  style={{ flex: 1, padding: "28px 16px", borderRadius: "var(--r-md)", border: `2px solid ${hand === h ? "var(--c-blue)" : "var(--c-line)"}`, background: hand === h ? "var(--c-blue-tint)" : "#fff", cursor: "pointer", fontSize: 17, fontWeight: 700, color: hand === h ? "var(--c-blue)" : "var(--c-text)", transition: "all 0.15s" }}
-                >
-                  {h === "right" ? "Right" : "Left"}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* Step 2: Play level */}
-        {step === 2 && (
           <>
             <p className="t-heading" style={{ margin: "0 0 8px" }}>Your play level?</p>
             <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 32px" }}>Helps tailor your experience.</p>
@@ -153,8 +125,8 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
           </>
         )}
 
-        {/* Step 3: Goal */}
-        {step === 3 && (
+        {/* Step 2: Goal */}
+        {step === 2 && (
           <>
             <p className="t-heading" style={{ margin: "0 0 8px" }}>Main goal?</p>
             <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 32px" }}>This shapes your training focus.</p>
@@ -172,51 +144,16 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
           </>
         )}
 
-        {/* Step 4: Position */}
-        {step === 4 && (
-          <>
-            <p className="t-heading" style={{ margin: "0 0 8px" }}>Where do you play?</p>
-            <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 32px" }}>Your usual court position.</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {POSITIONS.map(p => (
-                <button
-                  key={p}
-                  onClick={() => { setPosition(p); setStep(s => s + 1); }}
-                  style={{ padding: "20px 18px", borderRadius: "var(--r-md)", border: `2px solid ${position === p ? "var(--c-blue)" : "var(--c-line)"}`, background: position === p ? "var(--c-blue-tint)" : "#fff", cursor: "pointer", textAlign: "left", fontSize: 16, fontWeight: 700, color: position === p ? "var(--c-blue)" : "var(--c-text)", transition: "all 0.15s" }}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-
-        {/* Step 5: Playing since */}
-        {step === 5 && (
-          <>
-            <p className="t-heading" style={{ margin: "0 0 8px" }}>Playing since?</p>
-            <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 32px" }}>Optional — the year you started.</p>
-            <input
-              type="text"
-              inputMode="numeric"
-              placeholder="e.g. 2019"
-              value={playingSince}
-              onChange={e => setPlayingSince(e.target.value)}
-              style={{ padding: "16px 18px", borderRadius: "var(--r-sm)", border: "1.5px solid var(--c-line)", fontSize: 18, background: "#fff", outline: "none", color: "var(--c-text)" }}
-            />
-          </>
-        )}
-
-        {/* Step 6: Notifications */}
-        {step === 6 && (
+        {/* Step 3: Notifications */}
+        {step === 3 && (
           <>
             <p className="t-heading" style={{ margin: "0 0 8px" }}>Stay on track</p>
             <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 32px" }}>Get a nudge for your morning warm-up and a reminder to wind down at night. You can change this anytime in Settings.</p>
           </>
         )}
 
-        {/* Step 7: Welcome */}
-        {step === 7 && (
+        {/* Step 4: Welcome */}
+        {step === 4 && (
           <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
             <div style={{ width: 84, height: 84, borderRadius: "50%", background: "#00D455", marginBottom: 28, flexShrink: 0 }} />
             <p className="t-heading" style={{ margin: "0 0 8px" }}>Welcome to padla</p>
@@ -225,10 +162,10 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
         )}
       </div>
 
-      {/* Continue — only shown on the two free-text steps (Name, Playing
-          Since). Every single-choice step auto-advances on tap instead,
-          since picking an option is already the complete answer. */}
-      {(step === 0 || step === 5) && (
+      {/* Continue — only shown on the one free-text step (Name). Every
+          single-choice step auto-advances on tap instead, since picking an
+          option is already the complete answer. */}
+      {step === 0 && (
         <button
           onClick={() => setStep(s => s + 1)}
           disabled={!canContinue || saving}
@@ -239,7 +176,7 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
       )}
 
       {/* Notifications step: enable or skip, both advance to the Welcome step */}
-      {step === 6 && (
+      {step === 3 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 32 }}>
           <button
             onClick={enableNotifications}
