@@ -125,7 +125,7 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
         ref={cardRef}
         className="relative w-full bg-white flex flex-col"
         style={{
-          maxWidth: 420, minHeight: 400, borderRadius: 28,
+          maxWidth: 420, aspectRatio: "1 / 1", borderRadius: 28,
           maxHeight: pinnedTop !== null ? `calc(100dvh - ${pinnedTop}px - 24px)` : "80dvh",
           ...(pinnedTop !== null ? { position: "fixed", top: pinnedTop, left: "50%", width: "calc(100% - 48px)", transform: "translateX(-50%)" } : {}),
           animation: closing ? "scheditem-fade-out 0.4s ease both" : "scheditem-pop-in 0.26s cubic-bezier(0.22,1,0.36,1)", boxShadow: "0 20px 60px rgba(0,0,0,0.25)", overflow: "hidden",
