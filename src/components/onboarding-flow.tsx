@@ -150,7 +150,7 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
               {LEVELS.map(l => (
                 <button
                   key={l.value}
-                  onClick={() => setLevel(l.value)}
+                  onClick={() => { setLevel(l.value); setStep(s => s + 1); }}
                   style={{ padding: "20px 18px", borderRadius: "var(--r-md)", border: `2px solid ${level === l.value ? "var(--c-blue)" : "var(--c-line)"}`, background: level === l.value ? "var(--c-blue-tint)" : "#fff", cursor: "pointer", textAlign: "left", transition: "all 0.15s" }}
                 >
                   <p style={{ margin: "0 0 2px", fontSize: 16, fontWeight: 700, color: level === l.value ? "var(--c-blue)" : "var(--c-text)" }}>{l.label}</p>
@@ -170,7 +170,7 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
               {GOALS.map(g => (
                 <button
                   key={g}
-                  onClick={() => setGoal(g)}
+                  onClick={() => { setGoal(g); setStep(s => s + 1); }}
                   style={{ padding: "12px 18px", borderRadius: "var(--r-pill)", border: `2px solid ${goal === g ? "var(--c-blue)" : "var(--c-line)"}`, background: goal === g ? "var(--c-blue-tint)" : "#fff", cursor: "pointer", fontSize: 15, fontWeight: 600, color: goal === g ? "var(--c-blue)" : "var(--c-text)", transition: "all 0.15s" }}
                 >
                   {g}
@@ -189,7 +189,7 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
               {POSITIONS.map(p => (
                 <button
                   key={p}
-                  onClick={() => setPosition(p)}
+                  onClick={() => { setPosition(p); setStep(s => s + 1); }}
                   style={{ padding: "20px 18px", borderRadius: "var(--r-md)", border: `2px solid ${position === p ? "var(--c-blue)" : "var(--c-line)"}`, background: position === p ? "var(--c-blue-tint)" : "#fff", cursor: "pointer", textAlign: "left", fontSize: 16, fontWeight: 700, color: position === p ? "var(--c-blue)" : "var(--c-text)", transition: "all 0.15s" }}
                 >
                   {p}
@@ -224,9 +224,10 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
         )}
       </div>
 
-      {/* Continue — hidden on step 1 (Dominant hand), which only has two
-          options and auto-advances on tap instead */}
-      {step < steps.length - 1 && step !== 1 && (
+      {/* Continue — only shown on the two free-text steps (Name, Playing
+          Since). Every single-choice step auto-advances on tap instead,
+          since picking an option is already the complete answer. */}
+      {(step === 0 || step === 5) && (
         <button
           onClick={() => setStep(s => s + 1)}
           disabled={!canContinue || saving}
