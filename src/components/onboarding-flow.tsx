@@ -82,11 +82,17 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
           Preview mode — no data is saved
         </p>
       )}
-      {/* Progress */}
-      <div style={{ display: "flex", gap: 6, marginBottom: 48 }}>
-        {steps.map((_, i) => (
-          <div key={i} style={{ flex: 1, height: 7, borderRadius: 99, background: i <= step ? "var(--c-blue)" : "var(--c-line)", transition: "background 0.3s" }} />
-        ))}
+      {/* Progress — a single track with a green ball travelling along it */}
+      <div style={{ position: "relative", height: 18, marginBottom: 48 }}>
+        <div style={{ position: "absolute", top: "50%", left: 0, right: 0, height: 4, borderRadius: 99, background: "var(--c-line)", transform: "translateY(-50%)" }} />
+        <div
+          style={{
+            position: "absolute", top: "50%", left: `${(step / (steps.length - 1)) * 100}%`,
+            width: 18, height: 18, borderRadius: "50%", background: "#00D455",
+            transform: "translate(-50%, -50%)", transition: "left 0.3s cubic-bezier(0.22,1,0.36,1)",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+          }}
+        />
       </div>
 
       <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
