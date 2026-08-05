@@ -9,7 +9,7 @@ import { GOALS } from "@/lib/profile-options";
 // column) so the two pickers never disagree on a user's level.
 const LEVELS = [
   { value: "2.0", label: "Beginner",     sub: "Still learning the basics" },
-  { value: "3.0", label: "Intermediate", sub: "Comfortable playing regularly" },
+  { value: "3.0", label: "Intermediate", sub: "You play regularly and know the basics" },
   { value: "4.5", label: "Advanced",     sub: "Tournament or league player" },
 ];
 
