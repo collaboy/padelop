@@ -130,10 +130,10 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
           )}
           <button
             onClick={() => setDetailsOpen(x => !x)}
-            style={{ display: "flex", alignItems: "center", gap: 4, background: "none", border: "none", cursor: "pointer", padding: 0, margin: "10px 0 20px" }}
+            style={{ display: "inline-flex", alignItems: "center", gap: 4, background: "#00D45520", border: "none", borderRadius: 999, cursor: "pointer", padding: "6px 12px", margin: "10px 0 20px" }}
           >
-            <span style={{ fontSize: 13, fontWeight: 600, color: "#8a9096" }}>Details</span>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8a9096" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: detailsOpen ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#1a7a3f" }}>{detailsOpen ? "Hide" : "Show me"}</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1a7a3f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, transition: "transform 0.2s", transform: detailsOpen ? "rotate(180deg)" : "rotate(0deg)" }}><polyline points="6 9 12 15 18 9"/></svg>
           </button>
         </div>
         <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "0 24px" }}>
