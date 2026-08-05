@@ -10,6 +10,7 @@ export const GOALS = [
   "Improve volleys",
   "Improve my serve",
   "Improve my bandeja",
+  "Improve my smash",
   "Improve my vibora",
   "Improve my Spanish",
 ];

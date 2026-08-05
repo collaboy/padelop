@@ -133,6 +133,7 @@ const GOAL_TO_DRILL_TAG: Record<string, string> = {
   "Improve volleys":     "Volleys",
   "Improve my serve":    "Serve",
   "Improve my bandeja":  "Bandeja",
+  "Improve my smash":    "Smash",
   "Improve my vibora":   "Vibora",
 };
 
