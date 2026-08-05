@@ -168,9 +168,9 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
         {/* Step 4: Welcome */}
         {step === 4 && (
           <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
-            <div style={{ width: 84, height: 84, borderRadius: "50%", background: "#00D455", marginBottom: 28, flexShrink: 0 }} />
-            <p className="t-heading" style={{ margin: "0 0 8px" }}>Welcome to padla</p>
-            <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: 0 }}>The green ball now knows your level and your goals. From here on, it will guide you one step at a time every day.</p>
+            <div className="animate-tap-pulse" style={{ width: 84, height: 84, borderRadius: "50%", background: "#00D455", marginBottom: 28, flexShrink: 0 }} />
+            <p className="t-heading" style={{ margin: "0 0 8px" }}>Welcome to REZI</p>
+            <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: 0 }}>Open the app to find out what you should be doing right in this moment.</p>
           </div>
         )}
       </div>
