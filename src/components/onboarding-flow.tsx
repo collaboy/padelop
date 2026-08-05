@@ -156,12 +156,12 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
         {step === 3 && (
           <>
             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "nowrap", margin: "0 0 8px" }}>
-              <p className="t-heading" style={{ margin: 0, lineHeight: 1 }}>Stay on track</p>
+              <p className="t-heading" style={{ margin: 0, lineHeight: 1 }}>Stay in sync</p>
               <div style={{ width: 30, height: 30, borderRadius: "50%", background: "var(--c-blue-tint)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--c-blue)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
               </div>
             </div>
-            <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 32px" }}>Get gentle reminders for your morning routine and evening recovery. You can change this anytime in Settings.</p>
+            <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 32px" }}>Allow notifications so padla can reach you when its guidance will be most useful — not just on the schedule.</p>
           </>
         )}
 
