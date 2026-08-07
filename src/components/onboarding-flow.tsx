@@ -170,7 +170,7 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
           <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
             <style>{`@keyframes onboarding-ball-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.14); } }`}</style>
             <div style={{ width: 84, height: 84, borderRadius: "50%", background: "#00D455", marginBottom: 28, flexShrink: 0, animation: "onboarding-ball-breathe 2.4s ease-in-out infinite" }} />
-            <p className="t-heading" style={{ margin: "0 0 8px" }}>Welcome to padla</p>
+            <p className="t-heading" style={{ margin: "0 0 8px" }}>Welcome to Padla</p>
             <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: 0 }}>Open the app to find out what you should be doing right in this moment.</p>
           </div>
         )}
