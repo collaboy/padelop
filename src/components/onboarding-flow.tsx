@@ -171,7 +171,7 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
             <style>{`@keyframes onboarding-ball-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.07); } }`}</style>
             <div style={{ width: 84, height: 84, borderRadius: "50%", background: "#00D455", marginBottom: 28, flexShrink: 0, animation: "onboarding-ball-breathe 2.8s ease-in-out infinite" }} />
             <p className="t-heading" style={{ margin: "0 0 8px" }}>Welcome to Padla</p>
-            <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: 0 }}>Open the app to find out what you should be doing right in this moment.</p>
+            <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: 0 }}>Open the app to find out what you should be doing right now to become a better padel player.</p>
           </div>
         )}
       </div>
