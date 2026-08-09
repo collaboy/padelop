@@ -380,7 +380,7 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
   "Light mobility": { type: 'exercise', focus: "Activation · gentle prep", steps: [
     { step: "Leg swings", cue: "Hold a wall, swing each leg forward and back. Easy and controlled.", reps: "10 each leg" },
     { step: "Shoulder rolls", cue: "Slow full circles forward and back. Wake up the shoulder without loading it.", reps: "10 each direction" },
-    { step: "Hip circles", cue: "Hands on hips, slow big circles. Loosen the hips before tomorrow.", reps: "10 each direction" },
+    { step: "Hip circles", cue: "Hands on hips, slow big circles. Loosen the hips and get moving.", reps: "10 each direction" },
   ]},
   "Morning snack": { type: 'meal', focus: "Light energy · easy digestion", goal: "A quick hit of carbs and a little protein to bridge the gap to lunch without sitting heavy.", options: [
     { title: "Banana & nut butter", detail: "1 medium banana · 1 tbsp almond or peanut butter. Fast carbs + fat to bridge you to lunch without a spike." },
