@@ -321,7 +321,7 @@ export function getScheduleData(dayType: DayType, matchTime: string | null, dril
       { time: "09:30", title: "Mobility Exercise", subtitle: "Hips, upper back, ankles" },
       { time: "11:00", title: drillTitle,          subtitle: drill.subtitle, isDrill: true },
       { time: "12:30", title: "Lunch",             subtitle: "Carbs + protein + greens" },
-      { time: "15:00", title: "Mental prep", subtitle: "Rest, visualise, stay off your feet" },
+      { time: "15:00", title: "Mental prep", subtitle: "Reset your focus — box breathing" },
       { time: "16:00", title: "Active recovery",   subtitle: "Light walk or gentle movement" },
       { time: "19:00", title: "Dinner",            subtitle: "Focus on variety and micronutrients" },
       { time: "21:00", title: "Visualisation",     subtitle: "5 min mental rehearsal of key patterns" },
@@ -438,9 +438,9 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
   ]},
   "Active recovery": { type: 'info', focus: "Aerobic flush · below 130 bpm", text: "Walk, swim, or cycle at a pace where you can hold a full conversation. Keep heart rate below 130 bpm. Light aerobic activity maintains cardiovascular fitness without accumulating fatigue." },
   "Mental prep": { type: 'exercise', focus: "Mental rehearsal · focus", steps: [
-    { step: "Box breathing", cue: "4 in, 4 hold, 4 out, 4 hold. Settle the nervous system before the match window.", reps: "5 rounds" },
+    { step: "Box breathing", cue: "4 in, 4 hold, 4 out, 4 hold. Settle the nervous system and sharpen your focus.", reps: "5 rounds" },
     { step: "Pattern review", cue: "Recall 2–3 patterns that work for you. Not everything — just what you'll lean on today.", reps: "3 minutes" },
-    { step: "Visualise the first game", cue: "Picture your first serve, first volley, first exchange. Arrive mentally before you arrive physically.", reps: "2 minutes" },
+    { step: "Visualise your execution", cue: "Picture a serve, a volley, a pattern — executed exactly how you want it. Arrive mentally before you arrive physically.", reps: "2 minutes" },
   ]},
   "Visualisation": { type: 'exercise', focus: "Mental rehearsal · pattern reinforcement", steps: [
     { step: "Replay a key moment", cue: "Pick one point from your last match that you lost. Replay it slowly in your mind — what would you change?", reps: "2 min" },
