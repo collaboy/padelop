@@ -16,7 +16,7 @@ export const DRILL_LIBRARY: Record<string, DrillDef> = {
     focus: "Toss rhythm · arm swing",
     steps: [
       { step: "Toss arm drill", cue: "Raise your toss arm slowly, release an imaginary ball at eye level, watch it rise. Consistency here eliminates most serve errors.", reps: "20 reps" },
-      { step: "Shadow swing", cue: "Full serve motion in slow motion — trophy position, shoulder turn, pronation at contact. No racket needed.", reps: "15 each side" },
+      { step: "Shadow swing", cue: "Full serve motion in slow motion — trophy position, shoulder turn, and a wrist snap at contact. No racket needed.", reps: "15 each side" },
       { step: "Mental serves", cue: "Eyes closed. Visualise 5 perfect serves — placement, spin, bounce. Feel the rhythm.", reps: "5 mental reps" },
     ],
   },
@@ -24,7 +24,7 @@ export const DRILL_LIBRARY: Record<string, DrillDef> = {
     subtitle: "Shoulder prep & overhead shadow — anywhere",
     focus: "Shoulder prep · overhead control",
     steps: [
-      { step: "Shoulder circles", cue: "Slow full arm circles forward and back. Activates the rotator cuff — the key joint in every overhead.", reps: "10 each direction" },
+      { step: "Shoulder circles", cue: "Slow full arm circles forward and back. Wakes up the shoulder — the key joint in every overhead.", reps: "10 each direction" },
       { step: "Closed-face shadow", cue: "Elbow up, wrist firm, simulate the controlled downward snap of a bandeja. No backswing.", reps: "15 each side" },
       { step: "Placement visualisation", cue: "Picture a high lob, your footwork, contact point, and the ball landing in the back corner.", reps: "5 mental reps" },
     ],
@@ -43,7 +43,7 @@ export const DRILL_LIBRARY: Record<string, DrillDef> = {
     subtitle: "Wrist snap & spin timing — no racket needed",
     focus: "Wrist snap · topspin timing",
     steps: [
-      { step: "Wrist snap shadow", cue: "No racket: whip your hand forward and down like cracking a small whip, snapping the wrist at the bottom. This pronation-driven action is what generates a vibora's heavy spin.", reps: "15 reps each side" },
+      { step: "Wrist snap shadow", cue: "No racket: whip your hand forward and down like cracking a small whip, snapping the wrist at the bottom. This wrist-driven action is what generates a vibora's heavy spin.", reps: "15 reps each side" },
       { step: "Trophy-to-contact rehearsal", cue: "Load into the trophy position, then drive forward and down through an imaginary ball with extra wrist acceleration versus a flatter smash. Start slow, then add speed.", reps: "10 reps" },
       { step: "Spin visualisation", cue: "Picture the ball skidding low and wide after the bounce — the signature vibora effect. Visualise reading the lob, adjusting your angle, and snapping through with heavy topspin.", reps: "5 mental reps" },
     ],
@@ -98,7 +98,7 @@ export const DRILL_LIBRARY: Record<string, DrillDef> = {
     focus: "Padel footwork · quick feet",
     steps: [
       { step: "Lateral shuffle + split", cue: "Side-to-side shuffle, 3 steps each way, ending with a soft split step. Core padel movement loop.", reps: "5 × 20 seconds" },
-      { step: "Forward lunge", cue: "Step into a deep lunge, back knee near the floor, recover. Works the hip flexors critical for fast first steps.", reps: "3 × 10 each leg" },
+      { step: "Forward lunge", cue: "Step into a deep lunge, back knee near the floor, recover. Works the hips — critical for fast first steps.", reps: "3 × 10 each leg" },
       { step: "Quick feet burst", cue: "Rapid small steps on the spot for 10 seconds, then freeze in a split-step landing.", reps: "8 rounds" },
     ],
   },
@@ -301,7 +301,7 @@ export function getScheduleData(dayType: DayType, matchTime: string | null, dril
       { time: "07:30", title: "Wake up",     subtitle: "500ml water — rehydrate after yesterday" },
       { time: "08:00", title: "Breakfast",   subtitle: "Eggs, fruit, Greek yogurt" },
       { time: "09:30", title: "Short walk",  subtitle: "20 min easy — flush out lactic acid" },
-      { time: "10:30", title: "Stretch",     subtitle: "Quads, hip flexors, calves, shoulders" },
+      { time: "10:30", title: "Stretch",     subtitle: "Quads, hips, calves, shoulders" },
       { time: "13:00", title: "Lunch",       subtitle: "Chicken, salmon or legumes + veg" },
       { time: "15:30", title: "Cold shower", subtitle: "2 min cold — reduces inflammation" },
       { time: "19:00", title: "Dinner",      subtitle: "Anti-inflammatory focus — fish, greens" },
@@ -318,7 +318,7 @@ export function getScheduleData(dayType: DayType, matchTime: string | null, dril
     training: [
       { time: "07:00", title: "Wake up",          subtitle: "500ml water before coffee" },
       { time: "07:30", title: "Breakfast",         subtitle: "High protein — eggs, yogurt, fruit" },
-      { time: "09:30", title: "Mobility Exercise", subtitle: "Hip flexors, thoracic spine, ankles" },
+      { time: "09:30", title: "Mobility Exercise", subtitle: "Hips, upper back, ankles" },
       { time: "11:00", title: drillTitle,          subtitle: drill.subtitle, isDrill: true },
       { time: "12:30", title: "Lunch",             subtitle: "Carbs + protein + greens" },
       { time: "15:00", title: "Mental prep", subtitle: "Rest, visualise, stay off your feet" },
@@ -330,7 +330,7 @@ export function getScheduleData(dayType: DayType, matchTime: string | null, dril
     baseline: [
       { time: "07:00", title: "Wake up",          subtitle: "500ml water before anything else" },
       { time: "07:30", title: "Breakfast",         subtitle: "High protein — eggs, yogurt, fruit" },
-      { time: "09:30", title: "Mobility Exercise", subtitle: "Hip flexors, thoracic spine, ankles" },
+      { time: "09:30", title: "Mobility Exercise", subtitle: "Hips, upper back, ankles" },
       { time: "12:30", title: "Lunch",             subtitle: "Carbs + protein + greens" },
       { time: "15:00", title: "Active recovery",   subtitle: "Light walk or gentle movement" },
       { time: "19:00", title: "Dinner",            subtitle: "Focus on variety and micronutrients" },
@@ -372,15 +372,15 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
     { title: "Greek yogurt with granola & berries", detail: "200g full-fat Greek yogurt · 40g granola · handful of blueberries or strawberries. High protein, easy to digest." },
     { title: "Spinach omelette & wholegrain toast", detail: "3 eggs · large handful of spinach · 2 slices wholegrain toast. Good iron and B-vitamin hit to start the day." },
   ]},
-  "Mobility Exercise": { type: 'exercise', focus: "Hip flexors · thoracic spine · ankles", steps: [
-    { step: "Hip flexor lunge hold", cue: "Step into a deep lunge, front knee at 90°. Push hips gently forward and hold.", reps: "60 sec each side" },
-    { step: "Thoracic rotation", cue: "Sit back on heels, hands behind head. Rotate your upper back slowly left and right.", reps: "10 reps each direction" },
+  "Mobility Exercise": { type: 'exercise', focus: "Hips · upper back · ankles", steps: [
+    { step: "Hip lunge hold", cue: "Step into a deep lunge, front knee at 90°. Push hips gently forward and hold.", reps: "60 sec each side" },
+    { step: "Upper back rotation", cue: "Sit back on heels, hands behind head. Rotate your upper back slowly left and right.", reps: "10 reps each direction" },
     { step: "Ankle circles", cue: "Stand on one foot and draw slow controlled circles with your raised ankle.", reps: "10 each direction, each ankle" },
   ]},
   "Light mobility": { type: 'exercise', focus: "Activation · gentle prep", steps: [
     { step: "Leg swings", cue: "Hold a wall, swing each leg forward and back. Easy and controlled.", reps: "10 each leg" },
-    { step: "Shoulder rolls", cue: "Slow full circles forward and back. Wake up the rotator cuff without loading it.", reps: "10 each direction" },
-    { step: "Hip circles", cue: "Hands on hips, slow big circles. Loosen the hip capsule before tomorrow.", reps: "10 each direction" },
+    { step: "Shoulder rolls", cue: "Slow full circles forward and back. Wake up the shoulder without loading it.", reps: "10 each direction" },
+    { step: "Hip circles", cue: "Hands on hips, slow big circles. Loosen the hips before tomorrow.", reps: "10 each direction" },
   ]},
   "Morning snack": { type: 'meal', focus: "Light energy · easy digestion", goal: "A quick hit of carbs and a little protein to bridge the gap to lunch without sitting heavy.", options: [
     { title: "Banana & nut butter", detail: "1 medium banana · 1 tbsp almond or peanut butter. Fast carbs + fat to bridge you to lunch without a spike." },
@@ -392,7 +392,7 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
     { title: "Pasta, lean mince & tomato sauce", detail: "150g pasta · 100g lean beef or turkey mince · light tomato sauce. Keep it simple — avoid cream or heavy fat before playing." },
     { title: "Jacket potato, tuna & salad", detail: "1 medium jacket potato · 1 tin tuna in water · green salad. Easy on the gut, steady energy release." },
   ]},
-  "Warm up": { type: 'exercise', focus: "Neuromuscular activation · movement prep", steps: [
+  "Warm up": { type: 'exercise', focus: "Activation · movement prep", steps: [
     { step: "Leg swings", cue: "Hold a wall for balance. Swing each leg forward and back, then laterally. Stay controlled.", reps: "15 reps each direction, each leg" },
     { step: "Lateral shuffle", cue: "Stay low, weight on balls of feet. Shuffle 5 metres left and right. Explode off each plant.", reps: "3 sets of 10 metres" },
     { step: "Shadow swings", cue: "20 forehand + 20 backhand shadow swings, building from 60% to 80% intensity. Focus on footwork and contact point.", reps: "20 each side" },
@@ -415,10 +415,10 @@ export const SCHEDULE_DETAILS: Record<string, ScheduleDetail> = {
   ]},
   "Rest": { type: 'info', focus: "Active recovery · circulation", text: "Rest is part of training. Keep movement minimal — a short walk is fine, nothing more. Your nervous system needs this window to consolidate adaptation from the sessions around it." },
   "Short walk": { type: 'info', focus: "Active recovery · circulation", text: "Walk at a pace where you can hold a full conversation. Low-intensity movement flushes metabolic waste from fatigued muscles without adding stress. 20 minutes is enough." },
-  "Stretch": { type: 'exercise', focus: "Quads · IT band · hip flexors · calves", steps: [
-    { step: "IT band roll", cue: "Side-lying, roll slowly from hip to knee on the outer thigh. Pause and breathe on tight spots.", reps: "60–90 sec each leg" },
+  "Stretch": { type: 'exercise', focus: "Quads · outer thigh · hips · calves", steps: [
+    { step: "Outer thigh roll", cue: "Side-lying, roll slowly from hip to knee on the outer thigh. Pause and breathe on tight spots.", reps: "60–90 sec each leg" },
     { step: "Quad roll", cue: "Face down, forearms supporting you. Roll from hip to knee on the front of the thigh.", reps: "60 sec each leg" },
-    { step: "Hip flexor lunge stretch", cue: "Low lunge, back knee down, slight backward lean. Feel the stretch in the front of the back hip.", reps: "60 sec each side" },
+    { step: "Hip lunge stretch", cue: "Low lunge, back knee down, slight backward lean. Feel the stretch in the front of the back hip.", reps: "60 sec each side" },
   ]},
   "Lunch": { type: 'meal', focus: "Protein · carbs · greens", goal: "Lean protein, complex carbs, and leafy greens — a balanced plate to keep energy steady through the afternoon.", options: [
     { title: "Chicken, quinoa & roasted veg", detail: "150g grilled chicken · 100g quinoa · mixed roasted veg. Quinoa is a complete protein — it covers all essential amino acids." },
