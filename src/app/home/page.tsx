@@ -129,6 +129,30 @@ function localISODate(d: Date) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
+// Splits a ball title into two lines when it's long, so it wraps neatly
+// instead of stretching tight across the circle. "&" titles split on the
+// ampersand; other long multi-word titles split at the space closest to
+// the midpoint. Returns null when the title is short enough to stay on one line.
+function splitBallTitle(title: string): [string, string] | null {
+  if (title.includes(" & ")) {
+    const idx = title.indexOf(" & ");
+    return [title.slice(0, idx), "& " + title.slice(idx + 3)];
+  }
+  if (title.length > 14) {
+    const words = title.split(" ");
+    if (words.length > 1) {
+      let bestIdx = 0, bestDiff = Infinity, acc = 0;
+      for (let i = 0; i < words.length - 1; i++) {
+        acc += words[i].length + 1;
+        const diff = Math.abs(acc - title.length / 2);
+        if (diff < bestDiff) { bestDiff = diff; bestIdx = i; }
+      }
+      return [words.slice(0, bestIdx + 1).join(" "), words.slice(bestIdx + 1).join(" ")];
+    }
+  }
+  return null;
+}
+
 // Rubber-band drag resistance: 1:1 tracking up to `threshold`, then
 // progressively damped beyond it (never hard-capped) so the vertical swipe
 // on the home carousel stays connected to the finger but can't travel far
@@ -1353,7 +1377,10 @@ export default function Home8() {
 
                       {/* Timer layer */}
                       <div style={{ position: "absolute", inset: 0, zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 0, padding: "0 12px" }}>
-                        <p style={{ position: "relative", color: "#000", fontWeight: 800, fontSize: !nextTitle.includes(" & ") && nextTitle.length > 14 ? "clamp(18px, 5.8vw, 26px)" : "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, display: "inline-block", textAlign: "center", margin: 0 }}>
+                        {(() => {
+                          const nextTitleLines = splitBallTitle(nextTitle);
+                          return (
+                        <p style={{ position: "relative", color: "#000", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: nextTitleLines ? 1.05 : 1.2, display: "inline-block", textAlign: "center", margin: 0 }}>
                           <span style={{ position: "absolute", left: 0, right: 0, bottom: "100%", height: 16, marginBottom: 4, fontSize: 13, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1 }}>
                             <span style={{ position: "absolute", inset: 0, color: "#16a34a", opacity: showNiceWork ? 1 : 0, transition: "opacity 0.4s ease" }}>Nice work!</span>
                             <span style={{ position: "absolute", inset: 0, color: "#000", opacity: showNiceWork ? 0 : 1, transition: "opacity 0.4s ease" }}>Up next</span>
@@ -1361,11 +1388,13 @@ export default function Home8() {
                           {plusOneTitle === s.title && (
                             <span style={{ position: "absolute", left: 0, right: 0, bottom: "calc(100% + 24px)", fontSize: 26, fontWeight: 800, color: "#000", zIndex: 3, opacity: 0, animation: "p1-float-local 1.6s ease-out forwards" }}>+1</span>
                           )}
-                          {nextTitle.includes(" & ")
-                            ? <>{nextTitle.split(" & ")[0]}<br />{"& " + nextTitle.split(" & ").slice(1).join(" & ")}</>
+                          {nextTitleLines
+                            ? <>{nextTitleLines[0]}<br />{nextTitleLines[1]}</>
                             : nextTitle}
                           <span style={{ position: "absolute", left: 0, right: 0, top: "100%", marginTop: 6, fontSize: "clamp(13px, 3.8vw, 16px)", fontWeight: 500, color: "rgba(0,0,0,0.55)", lineHeight: 1.1 }}>in {fmtTime(secsUntilNext)}</span>
                         </p>
+                          );
+                        })()}
                       </div>
 
                       {/* Done flash — on top, cross-fades out into timer */}
@@ -1484,11 +1513,12 @@ export default function Home8() {
                     <div style={{ position: "absolute", top: "50%", left: 0, right: 0, transform: "translateY(-50%)", zIndex: 1, opacity: warmupPlaying ? 0 : isSleepytime ? 0.2 : contentOpacity, transition: "opacity 0.35s", pointerEvents: warmupPlaying ? "none" : "auto" }}>
                       {(() => {
                         const circleTitle = s.title;
+                        const circleTitleLines = splitBallTitle(circleTitle);
                         return (
-                          <p style={{ position: "relative", color: "#000", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: 1.2, display: "inline-block", textAlign: "center", margin: 0, width: "100%" }}>
+                          <p style={{ position: "relative", color: "#000", fontWeight: 800, fontSize: "clamp(24px, 7.5vw, 34px)", lineHeight: circleTitleLines ? 1.05 : 1.2, display: "inline-block", textAlign: "center", margin: 0, width: "100%" }}>
                             <span style={{ position: "absolute", left: 0, right: 0, bottom: "100%", fontSize: 13, fontWeight: 700, color: "#000", letterSpacing: "0.06em", textTransform: "uppercase", lineHeight: 1 }}>Now</span>
-                            {circleTitle.includes(" & ")
-                              ? <>{circleTitle.split(" & ")[0]}<br />{"& " + circleTitle.split(" & ").slice(1).join(" & ")}</>
+                            {circleTitleLines
+                              ? <>{circleTitleLines[0]}<br />{circleTitleLines[1]}</>
                               : circleTitle}
                             {isAudioAvailable && (
                               <span style={{ position: "absolute", left: 0, right: 0, top: "100%", display: "flex", justifyContent: "center" }}>
