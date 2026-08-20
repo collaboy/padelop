@@ -26,10 +26,7 @@ export async function proxy(request: NextRequest) {
 
   const isPublic = pathname.startsWith("/auth") || pathname.startsWith("/onboarding");
 
-  // TEMP: auth gate disabled for tester access, revert by ~20:xx — remove this block to restore.
-  const AUTH_GATE_DISABLED_TEMP = true;
-
-  if (!user && !isPublic && !AUTH_GATE_DISABLED_TEMP) {
+  if (!user && !isPublic) {
     return NextResponse.redirect(new URL("/auth", request.url));
   }
 
