@@ -1,4 +1,4 @@
--- Padelop schema — regenerated from the live database (project xojuzcmavezcowkqhfis) on 2026-07-06.
+-- Padelop schema — regenerated from the live database (project xojuzcmavezcowkqhfis) on 2026-09-07.
 -- This file documents the live schema; changes are applied via Supabase migrations, not by running this file.
 
 -- Default privileges for tables created by postgres in public:
@@ -116,6 +116,8 @@ create table check_ins (
   pain text,
   pain_areas text[],
   water_on_waking boolean,
+  soreness smallint check (soreness >= 1 and soreness <= 5),
+  motivation smallint check (motivation >= 1 and motivation <= 5),
   unique (user_id, date)
 );
 alter table check_ins enable row level security;
@@ -233,6 +235,8 @@ create table score_snapshots (
   training smallint,
   wellbeing smallint,
   created_at timestamptz default now(),
+  recovery_raw smallint check (recovery_raw >= 0 and recovery_raw <= 100),
+  wellbeing_raw smallint check (wellbeing_raw >= 0 and wellbeing_raw <= 100),
   unique (user_id, date)
 );
 alter table score_snapshots enable row level security;
