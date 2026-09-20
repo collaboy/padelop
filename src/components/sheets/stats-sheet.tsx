@@ -111,7 +111,7 @@ interface Props {
   points: number;
   streak: number;
   winRate: number | null;
-  readiness: number;
+  readiness: number | null;
 }
 
 export default function StatsSheet({ open, onClose, points, streak, winRate, readiness }: Props) {
@@ -144,8 +144,8 @@ export default function StatsSheet({ open, onClose, points, streak, winRate, rea
             color="#7c3aed"
             icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>}
             title="Overall Form"
-            value={`${readiness}%`}
-            sub="readiness"
+            value={readiness !== null ? `${readiness}%` : "—"}
+            sub={readiness !== null ? "readiness" : "no recent data"}
             expanded={expandedKey === "form"}
             dim={expandedKey !== null && expandedKey !== "form"}
             onToggle={() => toggle("form")}

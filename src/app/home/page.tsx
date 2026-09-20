@@ -324,7 +324,7 @@ export default function Home8() {
   const [plusOneTitle, setPlusOneTitle] = useState<string | null>(null);
   const [doIdx, setDoIdx] = useState(0); // -1 = top holder, 0 = do-this-now, 1 = see schedule
   const [completed, setCompleted] = useState<Set<string>>(new Set());
-  const [readiness, setReadiness] = useState(65);
+  const [readiness, setReadiness] = useState<number | null>(null);
   const [readinessDone, setReadinessDone] = useState(0);
   const [readinessItems, setReadinessItems] = useState([false, false, false, false]);
   const [matchReadiness, setMatchReadiness] = useState<MatchReadinessResult | null>(null);

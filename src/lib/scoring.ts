@@ -681,7 +681,9 @@ export function computeAllTimeScores(): Scores {
 // Components that have no data return null and their weight is redistributed.
 
 export type FormScore = {
-  score: number;
+  // null when every component below is null — no recent data at all, distinct
+  // from a genuinely low score computed from real (if unflattering) data.
+  score: number | null;
   components: {
     body: number | null;        // 30% — 7-day recovery+wellbeing average
     matchForm: number | null;   // 25% — last 5 match reviews (result + feeling + energy)
@@ -713,11 +715,14 @@ export function computeFormScore(): FormScore {
   } catch {}
 
   // Component 2: Match Form (25%)
-  // Last 5 match reviews. Result weighted 60%, feeling 20%, energy 20%.
+  // Last 5 match reviews within the last 14 days. Result weighted 60%, feeling 20%, energy 20%.
+  // Windowed like the other components so a stale review from months of inactivity
+  // doesn't end up as 100% of the score once everything else has gone null.
   let matchForm: number | null = null;
   try {
     const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]") as ReviewEntry[];
-    const last5 = reviews.slice(0, 5);
+    const cutoff = Date.now() - 14 * 86400_000;
+    const last5 = reviews.filter(r => new Date(r.ts).getTime() >= cutoff).slice(0, 5);
     if (last5.length >= 1) {
       const perReview = last5.map(r => {
         const result  = r.result === "win" ? 1 : r.result === "draw" ? 0.5 : 0;
@@ -810,6 +815,9 @@ export function computeFormScore(): FormScore {
   for (const [k, v] of Object.entries(components)) {
     if (v !== null) { const w = WEIGHTS[k]; weightedSum += v * w; totalWeight += w; }
   }
-  const score = totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 0;
+  // No recent data at all (e.g. returning after a long break) — null, not 0:
+  // 0 would visually read as "worst possible score" when the truth is "nothing
+  // was measured," which is a different fact the UI should show differently.
+  const score = totalWeight > 0 ? Math.round(weightedSum / totalWeight) : null;
   return { score, components };
 }

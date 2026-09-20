@@ -6,11 +6,23 @@ export type SyncResult = {
   nextMatch: { date: string; time: string; club?: string; court?: string; player_1?: string; player_2?: string; player_3?: string; player_4?: string } | null;
 };
 
+const CACHE_OWNER_KEY = "padelop:cache-owner";
+
 export async function hydrateFromSupabase(): Promise<SyncResult | null> {
   try {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { window.dispatchEvent(new Event("padelop:sync-done")); return null; }
+
+    // If the cached data in localStorage belongs to a different (or unknown)
+    // account — e.g. sign-out didn't get a chance to clear it — wipe it before
+    // merging in this user's data, so a stale account's data can never bleed
+    // into a different account on the same device.
+    const cachedOwner = localStorage.getItem(CACHE_OWNER_KEY);
+    if (cachedOwner !== user.id) {
+      Object.keys(localStorage).filter(k => k.startsWith("padelop:")).forEach(k => localStorage.removeItem(k));
+      localStorage.setItem(CACHE_OWNER_KEY, user.id);
+    }
 
     const today = new Date().toISOString().slice(0, 10);
 
@@ -39,7 +51,7 @@ export async function hydrateFromSupabase(): Promise<SyncResult | null> {
         position:     dbProfile.position       ?? existing.position     ?? "",
         avatar:       dbProfile.avatar_url     ?? existing.avatar       ?? "",
         playingSince: dbProfile.playing_since  ?? existing.playingSince ?? "",
-        ...(dbProfile.overall_goal ? { goal: dbProfile.overall_goal } : {}),
+        ...(dbProfile.overall_goal?.length ? { goals: dbProfile.overall_goal } : {}),
         ...(dbProfile.club         ? { club: dbProfile.club }         : {}),
       }));
       if (dbProfile.tournament_count != null) {
@@ -313,5 +325,39 @@ export async function hydrateFromSupabase(): Promise<SyncResult | null> {
     console.error("hydrateFromSupabase failed:", err);
     window.dispatchEvent(new Event("padelop:sync-done"));
     return null;
+  }
+}
+
+// Best-effort push of any locally-cached schedule/score data to Supabase.
+// Call this before signing out (and before clearing localStorage) — everything
+// else already writes straight to Supabase the moment it happens (see db.ts),
+// so this only matters for entries created while offline that never made it
+// up yet. Upserts are idempotent, so re-sending already-synced rows is harmless.
+export async function flushLocalOnlyToDb(): Promise<void> {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const schedDone = JSON.parse(localStorage.getItem("padelop:schedule-done") || "{}") as Record<string, string[]>;
+    const scheduleWrites = Object.entries(schedDone)
+      .filter(([, tasks]) => tasks?.length > 0)
+      .map(([date, tasks]) => supabase.from("schedule_done").upsert(
+        { user_id: user.id, date, tasks },
+        { onConflict: "user_id,date" }
+      ));
+
+    const snaps = JSON.parse(localStorage.getItem("padelop:score-history") || "[]") as
+      { date: string; overall: number; recovery: number; nutrition: number; training: number; wellbeing: number; recoveryRaw?: number; wellbeingRaw?: number }[];
+    const snapWrites = snaps
+      .filter(s => s.recoveryRaw != null && s.wellbeingRaw != null)
+      .map(s => supabase.from("score_snapshots").upsert(
+        { user_id: user.id, date: s.date, overall: s.overall, recovery: s.recovery, nutrition: s.nutrition, training: s.training, wellbeing: s.wellbeing, recovery_raw: s.recoveryRaw ?? null, wellbeing_raw: s.wellbeingRaw ?? null },
+        { onConflict: "user_id,date" }
+      ));
+
+    await Promise.allSettled([...scheduleWrites, ...snapWrites]);
+  } catch (err) {
+    console.error("flushLocalOnlyToDb failed:", err);
   }
 }
