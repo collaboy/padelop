@@ -126,15 +126,17 @@ export const DEFAULT_DRILL: DrillDef = {
 // Falls back to this when there's no match-review history yet to derive a
 // tag from — keeps the onboarding "goal" answer meaningful from day one.
 const GOAL_TO_DRILL_TAG: Record<string, string> = {
-  "Win more matches":    "Positioning",
-  "Feel more confident": "Mental strength",
-  "Be more consistent":  "Defense",
-  "Move better":         "Movement",
-  "Improve volleys":     "Volleys",
-  "Improve my serve":    "Serve",
-  "Improve my bandeja":  "Bandeja",
-  "Improve my smash":    "Smash",
-  "Improve my vibora":   "Vibora",
+  "Win more matches":     "Positioning",
+  "Feel more confident":  "Mental strength",
+  "Build better habits":  "Mental strength",
+  "Be more consistent":   "Defense",
+  "Move better":          "Movement",
+  "Improve volleys":      "Volleys",
+  "Improve my serve":     "Serve",
+  "Improve my bandeja":   "Bandeja",
+  "Improve my smash":     "Smash",
+  "Improve my vibora":    "Vibora",
+  // "Improve my Spanish" has no sensible drill tag — intentionally unmapped.
 };
 
 export function getTopNeedsWorkTag(): string | null {
@@ -147,7 +149,12 @@ export function getTopNeedsWorkTag(): string | null {
   } catch {}
   try {
     const profile = JSON.parse(localStorage.getItem("padelop:profile") || "{}");
-    return GOAL_TO_DRILL_TAG[profile.goal] ?? null;
+    const goals: string[] = profile.goals ?? [];
+    // Use the first selected goal that actually maps to a tag, not just the
+    // first goal picked — otherwise picking an unmapped goal first (e.g.
+    // "Improve my Spanish") would silently discard a mapped one picked after it.
+    for (const g of goals) { if (GOAL_TO_DRILL_TAG[g]) return GOAL_TO_DRILL_TAG[g]; }
+    return null;
   } catch { return null; }
 }
 

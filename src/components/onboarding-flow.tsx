@@ -18,7 +18,8 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [level, setLevel] = useState<string | null>(null);
-  const [goal, setGoal] = useState<string | null>(null);
+  const [goals, setGoals] = useState<string[]>([]);
+  const toggleGoal = (g: string) => setGoals(gs => gs.includes(g) ? gs.filter(x => x !== g) : [...gs, g]);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -42,7 +43,7 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
       .update({
         display_name:         name.trim(),
         play_level:           level,
-        overall_goal:         goal,
+        overall_goal:         goals,
         onboarding_completed: true,
       })
       .eq("id", user.id);
@@ -73,7 +74,7 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
     setStep(s => s + 1);
   }
 
-  const canContinue = step === 0 && name.trim().length > 0;
+  const canContinue = (step === 0 && name.trim().length > 0) || (step === 2 && goals.length > 0);
 
   return (
     <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", background: "var(--c-bg)", padding: "60px 24px 40px" }}>
@@ -133,17 +134,18 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
           </>
         )}
 
-        {/* Step 2: Goal */}
+        {/* Step 2: Goal — multi-select (pick as many as apply), advances via
+            the explicit Continue button below, not on tap. */}
         {step === 2 && (
           <>
-            <p className="t-heading" style={{ margin: "0 0 8px" }}>Main goal?</p>
-            <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 32px" }}>This shapes your training focus.</p>
+            <p className="t-heading" style={{ margin: "0 0 8px" }}>Main goals?</p>
+            <p className="t-body-sm" style={{ color: "var(--c-text-sub)", margin: "0 0 32px" }}>Pick as many as apply — this picks your first few drills, before we learn from your matches.</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
               {GOALS.map(g => (
                 <button
                   key={g}
-                  onClick={() => { setGoal(g); setStep(s => s + 1); }}
-                  style={{ padding: "12px 18px", borderRadius: "var(--r-pill)", border: `2px solid ${goal === g ? "var(--c-blue)" : "var(--c-line)"}`, background: goal === g ? "var(--c-blue-tint)" : "#fff", cursor: "pointer", fontSize: 15, fontWeight: 600, color: goal === g ? "var(--c-blue)" : "var(--c-text)", transition: "all 0.15s" }}
+                  onClick={() => toggleGoal(g)}
+                  style={{ padding: "12px 18px", borderRadius: "var(--r-pill)", border: `2px solid ${goals.includes(g) ? "var(--c-blue)" : "var(--c-line)"}`, background: goals.includes(g) ? "var(--c-blue-tint)" : "#fff", cursor: "pointer", fontSize: 15, fontWeight: 600, color: goals.includes(g) ? "var(--c-blue)" : "var(--c-text)", transition: "all 0.15s" }}
                 >
                   {g}
                 </button>
@@ -176,10 +178,10 @@ export default function OnboardingFlow({ previewMode = false }: { previewMode?: 
         )}
       </div>
 
-      {/* Continue — only shown on the one free-text step (Name). Every
-          single-choice step auto-advances on tap instead, since picking an
-          option is already the complete answer. */}
-      {step === 0 && (
+      {/* Continue — shown on the free-text step (Name) and the multi-select
+          step (Goal), where tapping an option is a selection, not an answer
+          on its own. Single-choice steps (Level) still auto-advance on tap. */}
+      {(step === 0 || step === 2) && (
         <button
           onClick={() => setStep(s => s + 1)}
           disabled={!canContinue || saving}

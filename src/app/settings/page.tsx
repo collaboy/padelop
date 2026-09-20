@@ -5,14 +5,15 @@ import { useRouter } from "next/navigation";
 import { startNavLoad } from "@/lib/nav-events";
 import { createClient } from "@/lib/supabase/client";
 import { saveProfileToDb } from "@/lib/db";
+import { flushLocalOnlyToDb } from "@/lib/sync";
 import { resizeImage } from "@/lib/image";
 import { subscribeToPush } from "@/lib/push";
 import { GOALS, POSITIONS } from "@/lib/profile-options";
 import AvatarCropModal from "@/components/avatar-crop-modal";
 
 const PROFILE_KEY = "padelop:profile";
-type Profile = { name: string; level: string; position: string; hand: string; avatar: string; playingSince: string; goal: string };
-const EMPTY_PROFILE: Profile = { name: "", level: "", position: "", hand: "", avatar: "", playingSince: "", goal: "" };
+type Profile = { name: string; level: string; position: string; hand: string; avatar: string; playingSince: string; goals: string[] };
+const EMPTY_PROFILE: Profile = { name: "", level: "", position: "", hand: "", avatar: "", playingSince: "", goals: [] };
 const LEVELS    = ["1.0","1.5","2.0","2.5","3.0","3.5","4.0","4.5","5.0"];
 const HANDS     = ["Right","Left"];
 
@@ -67,6 +68,10 @@ export default function SettingsPage() {
   }, []);
 
   const setField = (k: keyof Profile, v: string) => { setProfileSaved(false); setProfile(p => ({ ...p, [k]: v })); };
+  const toggleGoal = (g: string) => {
+    setProfileSaved(false);
+    setProfile(p => ({ ...p, goals: p.goals.includes(g) ? p.goals.filter(x => x !== g) : [...p.goals, g] }));
+  };
   const handleAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -102,7 +107,7 @@ export default function SettingsPage() {
       play_level:    profile.level        || undefined,
       position:      profile.position     || undefined,
       playing_since: profile.playingSince || undefined,
-      overall_goal:  profile.goal         || undefined,
+      overall_goal:  profile.goals.length ? profile.goals : undefined,
     });
     setProfileSaved(true);
   };
@@ -295,10 +300,10 @@ export default function SettingsPage() {
                 </div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-hint)" }}>Main goal</label>
+                <label style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-hint)" }}>Main goals</label>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                   {GOALS.map(g => (
-                    <button key={g} onClick={() => setField("goal", g)} style={{ padding: "6px 12px", borderRadius: 20, border: "1.5px solid", fontSize: 13, fontWeight: 600, cursor: "pointer", borderColor: profile.goal === g ? "#2653d4" : "var(--c-line)", background: profile.goal === g ? "#eef2ff" : "transparent", color: profile.goal === g ? "#2653d4" : "var(--c-hint)" }}>{g}</button>
+                    <button key={g} onClick={() => toggleGoal(g)} style={{ padding: "6px 12px", borderRadius: 20, border: "1.5px solid", fontSize: 13, fontWeight: 600, cursor: "pointer", borderColor: profile.goals.includes(g) ? "#2653d4" : "var(--c-line)", background: profile.goals.includes(g) ? "#eef2ff" : "transparent", color: profile.goals.includes(g) ? "#2653d4" : "var(--c-hint)" }}>{g}</button>
                   ))}
                 </div>
               </div>
@@ -474,9 +479,16 @@ export default function SettingsPage() {
         <form
           action="/auth/signout"
           method="post"
-          onSubmit={() => {
+          onSubmit={(e) => {
+            e.preventDefault();
             setSigningOut(true);
-            Object.keys(localStorage).filter(k => k.startsWith("padelop:")).forEach(k => localStorage.removeItem(k));
+            const form = e.currentTarget;
+            // Push any offline-only data up before wiping the local cache —
+            // everything else already synced the moment it was created.
+            flushLocalOnlyToDb().finally(() => {
+              Object.keys(localStorage).filter(k => k.startsWith("padelop:")).forEach(k => localStorage.removeItem(k));
+              form.submit();
+            });
           }}
         >
           <button

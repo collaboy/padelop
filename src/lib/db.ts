@@ -31,7 +31,7 @@ export async function saveProfileToDb(profile: {
   dominant_hand?: string;
   play_level?: string;
   position?: string;
-  overall_goal?: string;
+  overall_goal?: string[];
   club?: string;
   tournament_count?: number;
   playing_since?: string;
