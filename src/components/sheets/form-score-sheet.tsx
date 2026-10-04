@@ -23,6 +23,7 @@ export default function FormScoreContent() {
 
   const ACTIVITY_TITLES = new Set([
     "Mobility Exercise", "Light mobility", "Warm up", "Cool down", "Stretch",
+    "Body maintenance",
     "Mental prep", "Visualisation", "Short walk", "Active recovery", "Rest",
   ]);
   const gdLocal: string[] = (() => { try { return JSON.parse(localStorage.getItem("padelop:game-days") || "[]"); } catch { return []; } })();

@@ -41,7 +41,7 @@ const DAY_TYPE_INFO: { label: string; color: string; desc: string; type: DayType
   { label: "Pre-Match Day",   color: "#d97706", desc: "Match tomorrow. Carb up, rest, and sleep early.", type: "pre-match" },
   { label: "Recovery Day",    color: "#7c3aed", desc: "Day after a match. Light movement, protein, hydration.", type: "recovery" },
   { label: "Training Day",    color: "#16a34a", desc: "Build the habit. Small consistent actions compound.", type: "training" },
-  { label: "Maintenance Day", color: "#0e7490", desc: "Between cycles. Stay loose and let the body absorb the work.", type: "maintenance" },
+  { label: "Maintenance Day", color: "#0e7490", desc: "A short off-court strength session. This is what keeps you playing.", type: "maintenance" },
 ];
 
 const DAY_META: Record<DayType, { label: string; color: string }> = {

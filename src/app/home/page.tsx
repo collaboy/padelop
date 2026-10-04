@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { startNavLoad } from "@/lib/nav-events";
 const LogSheet = dynamic(() => import("@/components/log-sheet"));
 const ReadinessSheet = dynamic(() => import("@/components/readiness-sheet"));
+const MorningCheckin = dynamic(() => import("@/components/morning-checkin"));
 const PushPrompt = dynamic(() => import("@/components/push-prompt"));
 
 const ScheduleSheet = dynamic(() => import("@/components/sheets/schedule-sheet"));
@@ -220,7 +221,7 @@ function getDayMsg(dayType: DayType, match: { date: string; time: string } | nul
   }
   if (dayType === "pre-match") return "Match tomorrow — carb up tonight, get to bed early.";
   if (dayType === "recovery") return "Recovery day. Drink plenty of water and get your protein in.";
-  if (dayType === "maintenance") return "Maintenance day. Hydrate, eat well, and let the body absorb the work.";
+  if (dayType === "maintenance") return "Body day. A short strength session keeps you on court — then hydrate and eat well.";
   if (dayType === "training") return "Training day — small habits compound into big results.";
   return "Hydrate, eat well, and stay consistent.";
 }
@@ -833,7 +834,7 @@ export default function Home8() {
       const hour = new Date().getHours();
       // Also check postMatchOpenRef in case mount's loadMatch already opened the popup
       // (dismissed key would already be set, so willShowPostMatch would miss it)
-      if (!done && !nudgeDismissed && hour >= 5 && hour < 13 && !willShowPostMatch && !postMatchOpenRef.current) {
+      if (!done && !nudgeDismissed && hour >= 5 && hour < 20 && !willShowPostMatch && !postMatchOpenRef.current) {
         setCheckinNudgeOpen(true);
       }
     }
@@ -965,7 +966,7 @@ export default function Home8() {
       const done = ml?.date === todayStr;
       const nudgeDismissed = localStorage.getItem("padelop:checkin-nudge-dismissed") === todayStr;
       const hour = new Date().getHours();
-      if (!done && !nudgeDismissed && hour >= 5 && hour < 13) setCheckinNudgeOpen(true);
+      if (!done && !nudgeDismissed && hour >= 5 && hour < 20) setCheckinNudgeOpen(true);
     }
     prevPostMatchOpenRef.current = postMatchOpen;
   }, [postMatchOpen]);
@@ -1824,34 +1825,13 @@ export default function Home8() {
           </div>
         )}
 
-        {/* Morning check-in nudge */}
-        {checkinNudgeOpen && !postMatchOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "24px", paddingBottom: "24px" }} onClick={() => { try { localStorage.setItem("padelop:checkin-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {} setCheckinNudgeOpen(false); }} onTouchStart={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"/>
-            <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
-              <div className="px-6 pt-8 pb-6 flex flex-col items-center text-center gap-2">
-                <div className="w-14 h-14 rounded-full flex items-center justify-center mb-2" style={{ background: "#f0f4ff" }}>
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2653d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-                </div>
-                <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">Morning check-in</p>
-                <p className="text-[15px] text-[#4a5050] mt-1 leading-snug">30 seconds to set up your day — how did you sleep?</p>
-              </div>
-              <div className="px-6 pb-8 flex flex-col gap-3">
-                <button
-                  onClick={() => { setCheckinNudgeOpen(false); setLogWizard(false); setLogTab("checkin"); setLogSheetOpen(true); }}
-                  className="w-full py-3.5 rounded-2xl text-white text-[15px] font-bold active:scale-[0.98] transition-transform"
-                  style={{ background: "#2653d4" }}>
-                  Start check-in
-                </button>
-                <button
-                  onClick={() => { try { localStorage.setItem("padelop:checkin-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {} setCheckinNudgeOpen(false); }}
-                  className="w-full py-3 text-[14px] font-semibold text-[#6b7480]">
-                  Not now
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Morning check-in */}
+        <MorningCheckin
+          open={checkinNudgeOpen && !postMatchOpen}
+          onLogWater={saveLogHydration}
+          onClose={() => setCheckinNudgeOpen(false)}
+          onDismiss={() => { try { localStorage.setItem("padelop:checkin-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {} setCheckinNudgeOpen(false); }}
+        />
 
         {/* Night check-in nudge */}
 
