@@ -1112,6 +1112,73 @@ export default function Home8() {
     }, 1500);
   }
 
+  const mouseDraggedRef = useRef(false);
+  function swipeStart(x: number, y: number) {
+    touchStartYRef.current = y;
+    touchStartXRef.current = x;
+    lastTouchYRef.current = y;
+    hitTopYRef.current = null;
+    swipeDirRef.current = null;
+  }
+  function swipeMove(x: number, y: number) {
+    lastTouchYRef.current = y;
+    const dx = x - touchStartXRef.current;
+    const dy = y - touchStartYRef.current;
+    if (!swipeDirRef.current && (Math.abs(dx) > 8 || Math.abs(dy) > 8))
+      swipeDirRef.current = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
+    if (doIdx >= 1) return;
+    if (swipeDirRef.current === 'h' && doIdx === 0) setLiveX(dx);
+    if (swipeDirRef.current === 'v' && cardSnap === 'none' && doIdx < 1 && !settlingRef.current) setLiveY(rubberBand(dy));
+  }
+  function swipeEnd(x: number, endY: number) {
+    const dx = x - touchStartXRef.current;
+    const dy = endY - touchStartYRef.current;
+    if (!swipeDirRef.current && (Math.abs(dx) > 8 || Math.abs(dy) > 8))
+      swipeDirRef.current = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
+    if (doIdx >= 1) {
+      if (swipeDirRef.current === 'v' && dy > 20) goPrev();
+      swipeDirRef.current = null;
+      return;
+    }
+    if (swipeDirRef.current === 'h' && doIdx === 0) {
+      setLiveX(0);
+      if (cardSnap === 'none') {
+        if (dx < -60) setCardSnap('left');
+        else if (dx > 60) setCardSnap('right');
+      } else if (cardSnap === 'left' && dx > 60) setCardSnap('none');
+      else if (cardSnap === 'right' && dx < -60) setCardSnap('none');
+    } else if (swipeDirRef.current === 'v' && cardSnap === 'none') {
+      setLiveY(0);
+      if (!settlingRef.current) {
+        if (dy < -40 && doIdx < 1) goNext();
+        else if (dy > 40) goPrev();
+      }
+    }
+    swipeDirRef.current = null;
+  }
+  // Tracked on window so the drag keeps working (and commits on release) even
+  // when the cursor leaves the phone-width column.
+  function startMouseSwipe(x: number, y: number) {
+    mouseDraggedRef.current = false;
+    swipeStart(x, y);
+    const onMove = (ev: MouseEvent) => {
+      if (Math.abs(ev.clientX - x) > 8 || Math.abs(ev.clientY - y) > 8) mouseDraggedRef.current = true;
+      swipeMove(ev.clientX, ev.clientY);
+    };
+    const onUp = (ev: MouseEvent) => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      swipeEnd(ev.clientX, ev.clientY);
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  }
+  function swipeCancel() {
+    setLiveX(0);
+    setLiveY(0);
+    swipeDirRef.current = null;
+  }
+
   return (
     <>
       <main style={{ ...S, position: "fixed", inset: 0, paddingTop: "env(safe-area-inset-top)", paddingLeft: 10, paddingRight: 10, paddingBottom: 0, overflow: "hidden", background: "#fff", zIndex: 60, clipPath: "inset(0)", WebkitClipPath: "inset(0)" }}>
@@ -1125,62 +1192,22 @@ export default function Home8() {
             transform: cardSnap === 'right' ? `translateX(calc(33.333% - 50px + ${liveX}px))` : cardSnap === 'left' ? `translateX(calc(-33.333% + 50px + ${liveX}px))` : `translateX(${liveX}px)`,
             transition: liveX !== 0 ? "none" : "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
           }}
-          onTouchStart={e => {
-            touchStartYRef.current = e.touches[0].clientY;
-            touchStartXRef.current = e.touches[0].clientX;
-            lastTouchYRef.current = e.touches[0].clientY;
-            hitTopYRef.current = null;
-            swipeDirRef.current = null;
-          }}
-          onTouchMove={e => {
-            const y = e.touches[0].clientY;
-            lastTouchYRef.current = y;
-            const dx = e.touches[0].clientX - touchStartXRef.current;
-            const dy = e.touches[0].clientY - touchStartYRef.current;
-            if (!swipeDirRef.current && (Math.abs(dx) > 8 || Math.abs(dy) > 8))
-              swipeDirRef.current = Math.abs(dx) > Math.abs(dy) ? 'h' : 'v';
-            if (doIdx >= 1) return;
-            if (swipeDirRef.current === 'h' && doIdx === 0) setLiveX(dx);
-            if (swipeDirRef.current === 'v' && cardSnap === 'none' && doIdx < 1 && !settlingRef.current) setLiveY(rubberBand(dy));
-          }}
-          onTouchEnd={e => {
-            const endY = e.changedTouches[0].clientY;
-            const dx = e.changedTouches[0].clientX - touchStartXRef.current;
-            const dy = endY - touchStartYRef.current;
-            if (doIdx >= 1) {
-              if (swipeDirRef.current === 'v' && dy > 20) goPrev();
-              swipeDirRef.current = null;
-              return;
-            }
-            if (swipeDirRef.current === 'h' && doIdx === 0) {
-              setLiveX(0);
-              if (cardSnap === 'none') {
-                if (dx < -60) setCardSnap('left');
-                else if (dx > 60) setCardSnap('right');
-              } else if (cardSnap === 'left' && dx > 60) setCardSnap('none');
-              else if (cardSnap === 'right' && dx < -60) setCardSnap('none');
-            } else if (swipeDirRef.current === 'v' && cardSnap === 'none') {
-              setLiveY(0);
-              if (!settlingRef.current) {
-                if (dy < -40 && doIdx < 1) goNext();
-                else if (dy > 40) goPrev();
-              }
-            }
-            swipeDirRef.current = null;
-          }}
-          onTouchCancel={() => {
-            setLiveX(0);
-            setLiveY(0);
-            swipeDirRef.current = null;
-          }}
+          onTouchStart={e => swipeStart(e.touches[0].clientX, e.touches[0].clientY)}
+          onTouchMove={e => swipeMove(e.touches[0].clientX, e.touches[0].clientY)}
+          onTouchEnd={e => swipeEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY)}
+          onTouchCancel={swipeCancel}
+          // Mouse drag = swipe, so the carousel also works on desktop
+          onMouseDown={e => { if (e.button === 0) startMouseSwipe(e.clientX, e.clientY); }}
+          // A drag must not also count as a click on whatever is under the cursor (e.g. the ball)
+          onClickCapture={e => { if (mouseDraggedRef.current) { mouseDraggedRef.current = false; e.stopPropagation(); e.preventDefault(); } }}
         >
           {/* Log panel */}
           <div style={{ width: "33.333%", flexShrink: 0, height: "100%", paddingRight: 20, paddingLeft: 20 }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, transform: `translateX(${cardSnap === 'right' ? 50 : 0}px) translateY(calc(45dvh - 3 * (100vw - 40px) / 2 - 10px))`, transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, transform: `translateX(${cardSnap === 'right' ? 50 : 0}px) translateY(calc(45dvh - 3 * (var(--app-w) - 40px) / 2 - 10px))`, transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
               {/* Placeholder above */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "#fff", opacity: 0 }} />
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(var(--app-w) - 40px)", borderRadius: 24, background: "#fff", opacity: 0 }} />
               {/* Main card */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", background: "#fff", borderRadius: 24, marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(var(--app-w) - 40px)", background: "#fff", borderRadius: 24, marginRight: cardSnap === 'right' ? 0 : -40, opacity: cardSnap === 'right' ? 1 : 0, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
                   {(() => {
                     let scale = 1;
@@ -1235,7 +1262,7 @@ export default function Home8() {
                 </div>
               </div>
               {/* Placeholder below */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: 24, background: "#fff", opacity: 0 }} />
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(var(--app-w) - 40px)", borderRadius: 24, background: "#fff", opacity: 0 }} />
             </div>
           </div>
 
@@ -1244,14 +1271,14 @@ export default function Home8() {
             <div style={{
               display: "flex", flexDirection: "column", gap: 10,
               transform: doIdx === 1
-                ? `translateY(calc(270px - 200vw - 100dvh))`
+                ? `translateY(calc(270px - 2 * var(--app-w) - 100dvh))`
                 : doIdx === -1
-                  ? `translateY(calc(60px - 100vw + ${liveY}px))`
-                  : `translateY(calc(160px - 150vw - 55dvh + ${liveY}px))`,
+                  ? `translateY(calc(60px - var(--app-w) + ${liveY}px))`
+                  : `translateY(calc(160px - 1.5 * var(--app-w) - 55dvh + ${liveY}px))`,
               transition: liveY !== 0 ? "none" : "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
             }}>
               {/* Structural spacer — keeps transform geometry intact */}
-              <div style={{ width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", pointerEvents: "none" }} />
+              <div style={{ width: "100%", flexShrink: 0, height: "calc(var(--app-w) - 40px)", pointerEvents: "none" }} />
 
               {/* Card 0: Next Match (reinstated at top; encouragement card kept below, unused, for later) */}
               {(() => {
@@ -1265,7 +1292,7 @@ export default function Home8() {
                       const countdownLabel = diffDays === 0 ? "TODAY" : diffDays === 1 ? "TOMORROW" : `IN ${diffDays} DAYS`;
                       return (
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-                          <div style={{ position: "relative", width: "calc((100vw - 40px) * 0.65)", height: "calc((100vw - 40px) * 0.65)", flexShrink: 0 }}>
+                          <div style={{ position: "relative", width: "calc((var(--app-w) - 40px) * 0.65)", height: "calc((var(--app-w) - 40px) * 0.65)", flexShrink: 0 }}>
                             <button onClick={() => setMatchInfoOpen(true)} style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, boxShadow: "0 4px 20px #2653d455" }}>
                               <span style={{ fontSize: "clamp(17px, 4.4vw, 21px)", fontWeight: 800, color: "rgba(255,255,255,0.85)", letterSpacing: "0.08em", textTransform: "uppercase", lineHeight: 1 }}>{countdownLabel}</span>
                               <span style={{ fontSize: "clamp(30px, 7.7vw, 37px)", fontWeight: 800, color: "#fff", lineHeight: 1, letterSpacing: "-0.02em" }}>{match.time}</span>
@@ -1283,7 +1310,7 @@ export default function Home8() {
                       );
                     })() : (
                       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-                        <div style={{ position: "relative", width: "calc((100vw - 40px) * 0.65)", height: "calc((100vw - 40px) * 0.65)", flexShrink: 0 }}>
+                        <div style={{ position: "relative", width: "calc((var(--app-w) - 40px) * 0.65)", height: "calc((var(--app-w) - 40px) * 0.65)", flexShrink: 0 }}>
                           <button
                             onClick={() => setMatchModalOpen(true)}
                             style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#2653d4", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 20px #2653d455" }}
@@ -1345,7 +1372,7 @@ export default function Home8() {
                 const nextSlide = schedule[currentIdx + 1];
                 const secsUntilNext = nextSlide ? toMins(nextSlide.time) * 60 - (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) : 0;
                 const fmtTime = (s: number) => { if (s <= 0) return "a moment"; const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60); if (h > 0) return `${h}h ${String(m).padStart(2,"0")}m`; return m > 0 ? `${m}m` : "a moment"; };
-                const cardStyle: React.CSSProperties = { position: "relative", width: "100%", flexShrink: 0, height: "calc(100vw - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", zIndex: 3, boxShadow: "none" };
+                const cardStyle: React.CSSProperties = { position: "relative", width: "100%", flexShrink: 0, height: "calc(var(--app-w) - 40px)", borderRadius: "50%", overflow: "hidden", background: "#00D455", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", zIndex: 3, boxShadow: "none" };
                 if (!clientReady) return (
                   <div key="active" style={{ ...cardStyle, background: "#fff" }} />
                 );
@@ -1610,7 +1637,7 @@ export default function Home8() {
                 return (
                   <div
                     key="card2"
-                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 0, gap: 2, zIndex: doIdx === 1 ? 2 : 1, height: "calc(100vw - 40px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", opacity: doIdx === 1 ? 1 : 0, transition: "opacity 0.3s" }}
+                    style={{ width: "100%", flexShrink: 0, borderRadius: 24, background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 0, gap: 2, zIndex: doIdx === 1 ? 2 : 1, height: "calc(var(--app-w) - 40px)", overflow: "hidden", pointerEvents: doIdx === 1 ? "auto" : "none", touchAction: "none", opacity: doIdx === 1 ? 1 : 0, transition: "opacity 0.3s" }}
                   >
                     {(() => {
                       const sub =
@@ -1641,8 +1668,8 @@ export default function Home8() {
           </div>
 
           {/* Profile panel */}
-          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 20, paddingRight: 20, paddingTop: "calc(45dvh - (100vw - 40px) / 2)" }}>
-            <div style={{ width: "100%", height: "calc(100vw - 40px)", background: "#fff", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, padding: "16px 12px", marginLeft: cardSnap === 'left' ? 0 : -20, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+          <div style={{ width: "33.333%", flexShrink: 0, height: "100%", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingLeft: 20, paddingRight: 20, paddingTop: "calc(45dvh - (var(--app-w) - 40px) / 2)" }}>
+            <div style={{ width: "100%", height: "calc(var(--app-w) - 40px)", background: "#fff", borderRadius: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, padding: "16px 12px", marginLeft: cardSnap === 'left' ? 0 : -20, opacity: cardSnap === 'left' ? 1 : 0, transform: `translateX(${cardSnap === 'left' ? -50 : 0}px)`, transition: "margin 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
               {/* Hydration teardrop meter */}
               {(() => {
                 const MAX = 3000;
