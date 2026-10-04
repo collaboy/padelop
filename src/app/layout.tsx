@@ -45,11 +45,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-startup-image" href="/splash/splash-1320x2868.png" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" />
       </head>
       <body className="flex flex-col min-h-full bg-[var(--bg)]" suppressHydrationWarning>
-        <div className="hidden min-[481px]:flex fixed inset-0 z-[9999] bg-white items-center justify-center flex-col gap-4 text-center px-8">
-          <div style={{ fontSize: 48 }}>📱</div>
-          <p style={{ fontSize: 22, fontWeight: 700, color: "#1a1c1c" }}>Open on your phone</p>
-          <p style={{ fontSize: 15, color: "#6b7480", lineHeight: 1.6 }}>padla is designed for mobile.<br />Scan the QR code or visit on your phone.</p>
-        </div>
         <div className="mx-auto w-full max-w-[480px] flex flex-col min-h-full">
           <SwipeNav>
             <main className="vt-page-content flex-1">

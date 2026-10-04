@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  --app-w: min(100vw, 480px); /* app column width: viewport on phones, capped on desktop */
   --bg: #ffffff;
   --surface: #ffffff;
   --green: #1e3a1e;
@@ -257,4 +258,25 @@ html.nav-backward::view-transition-old(vt-page-content) {
 }
 html.nav-backward::view-transition-new(vt-page-content) {
   animation: 300ms cubic-bezier(0.4,0,0.2,1) both nav-slide-in-left;
+}
+
+/* ── Desktop: keep the app a phone-width column ───────────────────────────
+   The layout centres a 480px column, but overlays/sheets/the home screen are
+   position:fixed and would otherwise span the whole browser window. On wider
+   screens, pin every full-screen fixed layer to that same centred column. */
+@media (min-width: 481px) {
+  html, body { background: #e4e6ea; }
+  .fixed.inset-0,
+  [style*="fixed"][style*="inset"] {
+    left: calc(50% - 240px) !important;
+    right: auto !important;
+    width: 480px !important;
+  }
+  .fixed.left-4.right-4 {
+    left: calc(50% - 240px + 16px) !important;
+    right: calc(50% - 240px + 16px) !important;
+  }
+  [style*="fixed"][style*="right"] {
+    right: calc(50% - 240px + 24px) !important;
+  }
 }
