@@ -1777,7 +1777,7 @@ export default function Home8() {
             onComplete={handleModalComplete}
             onClosed={() => { setDoModalOpen(false); setSchedModalIdx(null); }}
             onCompleteRevealed={handleModalCompleteRevealed}
-            swipeLabelText="Swipe to complete (+1 pt)"
+            doneLabelText="Done · +1 pt"
             zIndex={200}
           />
         )}
