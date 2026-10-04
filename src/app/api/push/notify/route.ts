@@ -44,6 +44,7 @@ export async function GET(request: Request) {
   const localMins = localNow.getUTCHours() * 60 + localNow.getUTCMinutes();
   const todayStr     = localNow.toISOString().slice(0, 10);
   const yesterdayStr = new Date(localNow.getTime() - 86400000).toISOString().slice(0, 10);
+  const tomorrowStr  = new Date(localNow.getTime() + 86400000).toISOString().slice(0, 10);
 
   const isTest = new URL(request.url).searchParams.get("test") === "1";
 
@@ -57,13 +58,19 @@ export async function GET(request: Request) {
 
   for (const sub of subs) {
     try {
-      const [{ data: todayMatch }, { data: yesterdayMatch }] = await Promise.all([
+      const [{ data: todayMatch }, { data: yesterdayMatch }, { data: tomorrowMatch }, { data: lastMatch }] = await Promise.all([
         supabase.from("matches").select("time, location").eq("user_id", sub.user_id).eq("date", todayStr).not("time", "is", null).order("time").limit(1).maybeSingle(),
         supabase.from("matches").select("date").eq("user_id", sub.user_id).eq("date", yesterdayStr).limit(1).maybeSingle(),
+        supabase.from("matches").select("date").eq("user_id", sub.user_id).eq("date", tomorrowStr).not("time", "is", null).limit(1).maybeSingle(),
+        supabase.from("matches").select("date").eq("user_id", sub.user_id).lt("date", todayStr).order("date", { ascending: false }).limit(1).maybeSingle(),
       ]);
 
       const dayType: "match" | "recovery" | "training" = todayMatch ? "match" : yesterdayMatch ? "recovery" : "training";
-      const items = getScheduleItems(dayType, todayMatch?.time ?? null);
+      // Mirror getDayType() in schedule-data.ts: the session is on maintenance days
+      // (every other off day counted from the last match) and for users with no matches yet.
+      const daysSince = lastMatch ? Math.round((Date.parse(todayStr) - Date.parse(lastMatch.date)) / 86400000) : null;
+      const bodySession = !tomorrowMatch && (daysSince === null || (daysSince - 2) % 2 === 0);
+      const items = getScheduleItems(dayType, todayMatch?.time ?? null, bodySession);
       const due = isTest ? items.slice(0, 1) : dueItems(items, localMins);
 
       for (const item of due) {

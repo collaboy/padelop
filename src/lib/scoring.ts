@@ -508,6 +508,79 @@ export function computeMatchReadiness(
   return { color, label, limiter: limiter ? limiterLabels[limiter] : null, actions, riskScore };
 }
 
+export type TodayFocus = {
+  color: MatchReadinessResult["color"];
+  headline: string;
+  matchLine: string | null;
+  followUp: string;
+  reason: string | null;
+};
+
+// Turns the morning check-in + what we already know (next match) into the one
+// recommendation shown straight after the check-in.
+export function computeTodayFocus(
+  checkIn: DailyCheckIn | null,
+  match: { date: string; time?: string | null } | null,
+  dayType: string | null = null,
+  now: Date = new Date(),
+): TodayFocus {
+  const { color } = computeMatchReadiness(checkIn, loadMorningLog(), false);
+  const low = color === "orange" || color === "red";
+
+  const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const today = ymd(now);
+  const tomorrow = ymd(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1));
+  const time = match?.time || null;
+  const matchHour = time ? Number(time.split(":")[0]) : null;
+  const matchMins = time ? Number(time.split(":")[0]) * 60 + Number(time.split(":")[1] || 0) : null;
+  const matchToday = match?.date === today && (matchMins === null || matchMins > now.getHours() * 60 + now.getMinutes());
+  const matchTomorrow = match?.date === tomorrow;
+
+  let matchLine: string | null = null;
+  if (matchToday) {
+    const when = matchHour === null ? "today" : matchHour >= 18 ? "tonight" : matchHour >= 12 ? "this afternoon" : "this morning";
+    matchLine = `Match ${when}${time ? ` — ${time}` : ""}`;
+  } else if (matchTomorrow) {
+    matchLine = `Match tomorrow${time ? ` — ${time}` : ""}`;
+  }
+
+  let headline: string;
+  let followUp: string;
+  if (matchToday) {
+    if (color === "green")       { headline = "You're good to go.";            followUp = "Keep the day light and arrive sharp."; }
+    else if (color === "yellow") { headline = now.getHours() < 12 ? "Take it easy this morning." : "Take it easy for now."; followUp = "We'll ramp you up later."; }
+    else                         { headline = "Protect your energy today.";    followUp = "Longer warm-up, then play within yourself."; }
+  } else if (matchTomorrow) {
+    if (low) { headline = "Rest is today's session.";   followUp = "Eat well, hydrate, early night."; }
+    else     { headline = "Sharpen up, save the legs."; followUp = "Short and crisp today — nothing that leaves you tired."; }
+  } else if (dayType === "maintenance" && !low) {
+    headline = "Body day.";
+    followUp = "Three strength moves, 8 minutes — this is what keeps you on court.";
+  } else {
+    if (color === "green")       { headline = "Good day to push.";           followUp = "Get a proper session in."; }
+    else if (color === "yellow") { headline = "Steady day.";                 followUp = "Train, but keep it controlled."; }
+    else                         { headline = "Recovery comes first today."; followUp = "Mobility, food and sleep — skip the hard work."; }
+  }
+
+  // Name the answer that moved the recommendation, so the effect of the check-in is visible.
+  let reason: string | null = null;
+  if (checkIn) {
+    const answers: [string, number][] = [
+      ["Sleep was rough", checkIn.sleep],
+      ["Energy is low", checkIn.energy],
+      ["Your body is feeling it", checkIn.soreness],
+      ["Drive is low", checkIn.motivation],
+      ["You're low on water", checkIn.hydration],
+    ];
+    const worst = [...answers].sort((a, b) => a[1] - b[1])[0];
+    if (worst[1] <= 2 && worst[0] === "You're low on water") reason = "You're low on water — get ahead of it early.";
+    else if (worst[1] <= 2) reason = color === "green" ? `${worst[0]}, but the rest looks good.` : `${worst[0]} — so we're easing off.`;
+    else if (answers.every(a => a[1] >= 4)) reason = now.getHours() < 12 ? "Everything's looking good this morning." : "Everything's looking good today.";
+  }
+
+  return { color, headline, matchLine, followUp, reason };
+}
+
 export function improveTips(states: PillarStates): string[] {
   const tips: string[] = [];
   const isMatchDay = states.training.reason?.includes("Match");
@@ -755,11 +828,12 @@ export function computeFormScore(): FormScore {
   // Component 4: Activity (15%)
   // Fraction of the last 14 days with a match or a completed body/mental exercise
   // item (Mobility Exercise, Light mobility, Warm up, Cool down, Stretch, Mental prep,
-  // Visualisation, Short walk, Active recovery, Rest). Drills are deliberately excluded —
+  // Visualisation, Short walk, Active recovery, Rest, Body maintenance). Drills are deliberately excluded —
   // they require a court and a hitting partner, which logging in this app doesn't provide,
   // so counting them would credit activity that mostly isn't actually happening.
   const ACTIVITY_TITLES = new Set([
     "Mobility Exercise", "Light mobility", "Warm up", "Cool down", "Stretch",
+    "Body maintenance",
     "Mental prep", "Visualisation", "Short walk", "Active recovery", "Rest",
   ]);
   let activity: number | null = null;

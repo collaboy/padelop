@@ -9,7 +9,9 @@ function addMins(h: number, m: number, delta: number): string {
 
 export function getScheduleItems(
   dayType: "match" | "recovery" | "training",
-  matchTime: string | null
+  matchTime: string | null,
+  // true only on the days the app shows its Body maintenance session
+  bodySession = true
 ): ScheduleItem[] {
   const mH = matchTime ? parseInt(matchTime.split(":")[0]) : 18;
   const mM = matchTime ? parseInt(matchTime.split(":")[1]) : 30;
@@ -44,6 +46,7 @@ export function getScheduleItems(
       { time: "11:00", title: "Time to drill [6 min]", body: "Open the app — today's focus is ready" },
       { time: "12:30", title: "Time for lunch",        body: "Carbs + protein + greens" },
       { time: "15:00", title: "Light movement time [20 min]", body: "Walk, swim or light cycling" },
+      ...(bodySession ? [{ time: "17:00", title: "Look after your body [8 min]", body: "Three strength moves — today's session is in the app" }] : []),
       { time: "19:00", title: "Dinner time",           body: "Focus on variety and micronutrients" },
       { time: "21:00", title: "Eyes closed — visualisation [5 min]", body: "Mental rehearsal of key patterns" },
       { time: "22:30", title: "Start winding down",    body: "No screens, consistent bedtime" },
