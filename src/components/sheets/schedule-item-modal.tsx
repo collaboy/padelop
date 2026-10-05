@@ -53,9 +53,11 @@ interface Props {
   onCompleteRevealed?: () => void;
   doneLabelText?: string;
   zIndex?: number;
+  // Looking ahead at an item that hasn't started: read-only, can't be completed or logged yet.
+  preview?: boolean;
 }
 
-export default function ScheduleItemModal({ item, endTime, drillTag, isComplete, onComplete, onClosed, onCompleteRevealed, doneLabelText = "Done", zIndex = 200 }: Props) {
+export default function ScheduleItemModal({ item, endTime, drillTag, isComplete, onComplete, onClosed, onCompleteRevealed, doneLabelText = "Done", zIndex = 200, preview = false }: Props) {
   const v = SIZES;
   const [closing, setClosing] = useState(false);
   const [checkedMeals, setCheckedMeals] = useState<Set<number>>(new Set());
@@ -100,13 +102,14 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
   }
 
   function handlePrimary() {
+    if (preview) { requestClose(); return; }
     if (isMeal && hasMealInput) logMeals();
     // Already done + new meal input → just log it and close, don't undo completion.
     if (isComplete && hasMealInput) { requestClose(); return; }
     handleDoneClick();
   }
 
-  const primaryLabel = isComplete
+  const primaryLabel = preview ? "Got it" : isComplete
     ? (hasMealInput ? "Log meal" : "Completed")
     : (hasMealInput ? "Log meal & done" : doneLabelText);
 
@@ -166,6 +169,9 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
         </div>
 
         <div className="overflow-y-auto flex-1" style={{ minHeight: 0, padding: "8px 24px 16px" }}>
+          {preview && (
+            <p style={{ margin: "0 0 10px", fontSize: v.timeLabel, fontWeight: 600, color: "#4a5050" }}>Up next — nothing to do until {item.time}.</p>
+          )}
           <p style={{ margin: 0, fontSize: v.timeLabel, fontWeight: 700, color: "#8a9096", letterSpacing: "0.04em" }}>
             {item.time}{endTime ? ` – ${endTime}` : ""}
           </p>
@@ -202,7 +208,7 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
                   );
                 })}
               </div>
-              {elseOpen || mealText ? (
+              {preview ? null : elseOpen || mealText ? (
                 <textarea
                   value={mealText}
                   onChange={e => setMealText(e.target.value)}
@@ -246,13 +252,13 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
             onClick={handlePrimary}
             style={{
               display: "flex", alignItems: "center", justifyContent: "center", gap: 10, width: "100%", height: 60, borderRadius: 30, cursor: "pointer",
-              ...(isComplete && !hasMealInput
+              ...(preview || (isComplete && !hasMealInput)
                 ? { border: `2px solid ${item.color}`, background: "transparent", color: item.color }
                 : { border: "none", background: item.color, color: "#fff" }),
               fontSize: v.buttonLabel, fontWeight: 700,
             }}
           >
-            {isComplete && !hasMealInput && (
+            {!preview && isComplete && !hasMealInput && (
               <span style={{ width: 26, height: 26, borderRadius: "50%", background: item.color, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M5 13l4 4L19 7"/></svg>
               </span>
