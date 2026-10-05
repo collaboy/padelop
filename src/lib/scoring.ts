@@ -5,6 +5,7 @@ export type DailyCheckIn = {
   soreness: number;   // 1–5 (5 = no soreness)
   hydration: number;  // 1–5 subjective feeling (5 = well hydrated)
   stress: number;     // 1–5 (5 = low stress = good)
+  stressUnasked?: boolean;   // quick check-in doesn't ask stress — the 3 is a placeholder, don't score it
   motivation: number; // 1–5 (5 = high motivation)
   sleepHours?: string;       // "5h"|"6h"|"7h"|"8h"|"9h+"
   pain?: string;             // "none"|"minor"|"yes"
@@ -426,7 +427,8 @@ export function computeMatchReadiness(
 
   // Stress (1–5, 5 = low stress)
   const st = checkIn?.stress ?? 3;
-  if (st <= 2) stressPts = 2;
+  if (checkIn?.stressUnasked) stressPts = 0;
+  else if (st <= 2) stressPts = 2;
   else if (st === 3) stressPts = 1;
 
   // Yesterday's match
@@ -524,7 +526,7 @@ export function computeTodayFocus(
   dayType: string | null = null,
   now: Date = new Date(),
 ): TodayFocus {
-  const { color } = computeMatchReadiness(checkIn, loadMorningLog(), false);
+  const { color } = computeMatchReadiness(checkIn, checkIn ? { sleepHours: checkIn.sleepHours, pain: checkIn.pain, painAreas: checkIn.painAreas, waterOnWaking: checkIn.waterOnWaking } : loadMorningLog(), false);
   const low = color === "orange" || color === "red";
 
   const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -573,7 +575,10 @@ export function computeTodayFocus(
       ["You're low on water", checkIn.hydration],
     ];
     const worst = [...answers].sort((a, b) => a[1] - b[1])[0];
-    if (worst[1] <= 2 && worst[0] === "You're low on water") reason = "You're low on water — get ahead of it early.";
+    const where = checkIn.painAreas?.length ? ` (${checkIn.painAreas.join(", ").toLowerCase()})` : "";
+    if (checkIn.pain === "yes") reason = `You flagged pain${where} — we're protecting it today.`;
+    else if (checkIn.pain === "minor") reason = `Minor pain noted${where} — ease into it.`;
+    else if (worst[1] <= 2 && worst[0] === "You're low on water") reason = "You're low on water — get ahead of it early.";
     else if (worst[1] <= 2) reason = color === "green" ? `${worst[0]}, but the rest looks good.` : `${worst[0]} — so we're easing off.`;
     else if (answers.every(a => a[1] >= 4)) reason = now.getHours() < 12 ? "Everything's looking good this morning." : "Everything's looking good today.";
   }

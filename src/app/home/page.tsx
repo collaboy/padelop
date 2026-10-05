@@ -8,6 +8,7 @@ import { startNavLoad } from "@/lib/nav-events";
 const LogSheet = dynamic(() => import("@/components/log-sheet"));
 const ReadinessSheet = dynamic(() => import("@/components/readiness-sheet"));
 const MorningCheckin = dynamic(() => import("@/components/morning-checkin"));
+const MatchReview = dynamic(() => import("@/components/match-review"));
 const PushPrompt = dynamic(() => import("@/components/push-prompt"));
 
 const ScheduleSheet = dynamic(() => import("@/components/sheets/schedule-sheet"));
@@ -357,6 +358,33 @@ export default function Home8() {
   const [postMatchOpen, setPostMatchOpen] = useState(false);
   const [postMatchDate, setPostMatchDate] = useState<string | null>(null);
   const [checkinNudgeOpen, setCheckinNudgeOpen] = useState(false);
+  const [checkinSkipped, setCheckinSkipped] = useState(false);
+  const [syncSettled, setSyncSettled] = useState(false);
+  // /home?checkin=preview — shows the check-in popup regardless of today's state; nothing is saved.
+  const [checkinPreview, setCheckinPreview] = useState(false);
+  // The check-in pops up a beat after the green "now" ball lands, so the app is seen first.
+  // It waits for sync (a check-in from another device may still be loading) and for the
+  // post-match review to close.
+  const [checkinDelayDone, setCheckinDelayDone] = useState(false);
+  useEffect(() => {
+    if (!syncSettled && !checkinPreview) return;
+    const id = setTimeout(() => setCheckinDelayDone(true), 1800);
+    return () => clearTimeout(id);
+  }, [syncSettled, checkinPreview]);
+  useEffect(() => {
+    if (!checkinDelayDone || postMatchOpen) return;
+    const hour = new Date().getHours();
+    if (checkinPreview || (!morningDone && !checkinSkipped && hour >= 5 && hour < 20)) setCheckinNudgeOpen(true);
+  }, [checkinDelayDone, postMatchOpen, morningDone, checkinSkipped, checkinPreview]);
+  const checkinPreviewRef = useRef(false);
+  checkinPreviewRef.current = checkinPreview;
+  // /home?review=preview — same for the match review.
+  const [reviewPreview, setReviewPreview] = useState(false);
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    if (q.get("checkin") === "preview") setCheckinPreview(true);
+    if (q.get("review") === "preview") { setReviewPreview(true); setPostMatchOpen(true); }
+  }, []);
   const [yesterdayWasMatch, setYesterdayWasMatch] = useState(false);
   const [gameDays, setGameDays] = useState<string[]>([]);
   const [upcomingMatches, setUpcomingMatches] = useState<{ date: string; time: string }[]>([]);
@@ -475,9 +503,6 @@ export default function Home8() {
   drillTagRef.current = drillTag;
   const settlingRef = useRef(false);
   const checkinNudgeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const prevPostMatchOpenRef = useRef(false);
-  const postMatchOpenRef = useRef(false);
-  postMatchOpenRef.current = postMatchOpen;
   const [cardSnap, setCardSnap] = useState<'none' | 'left' | 'right'>('none');
   const [liveX, setLiveX] = useState(0);
   const [liveY, setLiveY] = useState(0);
@@ -663,9 +688,8 @@ export default function Home8() {
         const ml = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null");
         const done = ml?.date === todayStr;
         setMorningDone(done);
-        const hour = new Date().getHours();
-        const nudgeDismissed = localStorage.getItem("padelop:checkin-nudge-dismissed") === todayStr;
-        if (done) {
+        setCheckinSkipped(localStorage.getItem("padelop:checkin-nudge-dismissed") === todayStr);
+        if (done && !checkinPreviewRef.current) {
           setCheckinNudgeOpen(false);
         }
       } catch { setMorningDone(false); }
@@ -803,40 +827,11 @@ export default function Home8() {
     window.addEventListener("padelop:toggle-log-sheet", handleToggleLogSheet);
     window.addEventListener("padelop:open-checkin", handleOpenCheckin);
     window.addEventListener("padelop:open-matchreview", handleOpenMatchReview);
-    // Only show the morning nudge AFTER sync finishes — avoids false positives when sync hasn't loaded yet
+    // Only offer the check-in AFTER sync finishes — avoids false positives when sync hasn't loaded yet
     function handleSyncDone() {
       loadReadiness();
-      // Pre-check BEFORE loadMatch() because loadMatch sets padelop:post-match-dismissed
-      // atomically when it opens the popup — reading after would always see dismissed=true.
-      const willShowPostMatch = (() => {
-        try {
-          const nm = JSON.parse(localStorage.getItem("padelop:next-match") || "null");
-          if (!nm?.date) return false;
-          const nowD = new Date();
-          const todayD = localISODate(nowD);
-          let ended = nm.date < todayD;
-          if (!ended && nm.date === todayD && nm.time) {
-            const [h, m] = (nm.time as string).split(":").map(Number);
-            ended = nowD.getHours() * 60 + nowD.getMinutes() >= h * 60 + m + 90;
-          }
-          if (!ended) return false;
-          const reviews = JSON.parse(localStorage.getItem("padelop:match-reviews") || "[]");
-          const alreadyReviewed = reviews.some((r: { ts?: string }) => r.ts?.slice(0, 10) === nm.date);
-          const dismissed = localStorage.getItem("padelop:post-match-dismissed") === nm.date;
-          return !alreadyReviewed && !dismissed;
-        } catch { return false; }
-      })();
       loadMatch();
-      const todayStr = new Date().toISOString().slice(0, 10);
-      const ml = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null");
-      const done = ml?.date === todayStr;
-      const nudgeDismissed = localStorage.getItem("padelop:checkin-nudge-dismissed") === todayStr;
-      const hour = new Date().getHours();
-      // Also check postMatchOpenRef in case mount's loadMatch already opened the popup
-      // (dismissed key would already be set, so willShowPostMatch would miss it)
-      if (!done && !nudgeDismissed && hour >= 5 && hour < 20 && !willShowPostMatch && !postMatchOpenRef.current) {
-        setCheckinNudgeOpen(true);
-      }
+      setSyncSettled(true);
     }
     window.addEventListener("padelop:sync-done", handleSyncDone);
     setDrillTag(getTopNeedsWorkTag());
@@ -959,17 +954,6 @@ export default function Home8() {
     }
   }, [checkinNudgeOpen]);
 
-  useEffect(() => {
-    if (prevPostMatchOpenRef.current && !postMatchOpen) {
-      const todayStr = new Date().toISOString().slice(0, 10);
-      const ml = JSON.parse(localStorage.getItem("padelop:daily-checkin") || "null");
-      const done = ml?.date === todayStr;
-      const nudgeDismissed = localStorage.getItem("padelop:checkin-nudge-dismissed") === todayStr;
-      const hour = new Date().getHours();
-      if (!done && !nudgeDismissed && hour >= 5 && hour < 20) setCheckinNudgeOpen(true);
-    }
-    prevPostMatchOpenRef.current = postMatchOpen;
-  }, [postMatchOpen]);
 
   useEffect(() => {
     if (doIdx === 0) setDrumIdx(currentIdx);
@@ -1792,47 +1776,22 @@ export default function Home8() {
         <ReadinessSheet open={readinessSheetOpen} onClose={() => setReadinessSheetOpen(false)} onOpenLog={tab => { setLogTab(tab as Parameters<typeof setLogTab>[0]); setLogSheetOpen(true); }} onOpenLogScreen={() => setReadinessSheetOpen(false)} />
         <PushPrompt />
 
-        {/* Post-match prompt */}
-        {postMatchOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center px-6" style={{ paddingTop: "24px", paddingBottom: "24px" }} onClick={() => setPostMatchOpen(false)} onTouchStart={e => e.stopPropagation()} onTouchEnd={e => e.stopPropagation()}>
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-            <div className="relative w-full max-w-sm bg-white rounded-[28px] overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
-              <div className="px-6 pt-8 pb-6 flex flex-col items-center text-center gap-2">
-                <div className="w-14 h-14 rounded-full flex items-center justify-center mb-2" style={{ background: "#f0fdf4" }}>
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M8 21h8M12 17v4"/><path d="M7 4H4a2 2 0 0 0-2 2v2c0 3.3 2.7 6 6 6"/><path d="M17 4h3a2 2 0 0 1 2 2v2c0 3.3-2.7 6-6 6"/><path d="M7 4h10v8a5 5 0 0 1-10 0V4z"/>
-                  </svg>
-                </div>
-                <p className="text-[22px] font-bold text-[#1a1c1c] leading-tight">Great game!</p>
-                {postMatchDate && (
-                  <p className="text-[14px] text-[#6b7480]">
-                    {new Date(postMatchDate + "T12:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short" })}
-                  </p>
-                )}
-                <p className="text-[15px] text-[#4a5050] mt-1 leading-snug">Rate your match while it&apos;s fresh — it only takes a minute.</p>
-              </div>
-              <div className="px-6 pb-8 flex flex-col gap-3">
-                <button
-                  onClick={() => { setPostMatchOpen(false); setLogTab("matchreview"); setLogSheetOpen(true); }}
-                  className="w-full py-3.5 rounded-2xl text-white text-[15px] font-bold active:scale-[0.98] transition-transform"
-                  style={{ background: "#2653d4" }}
-                >
-                  Rate my match
-                </button>
-                <button onClick={() => { try { localStorage.setItem("padelop:post-match-dismissed", postMatchDate ?? ""); } catch {} setPostMatchOpen(false); }} className="w-full py-3 text-[14px] font-semibold text-[#6b7480]">
-                  I&apos;ll do it later
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Post-match review */}
+        <MatchReview
+          open={postMatchOpen}
+          matchDate={postMatchDate}
+          onClose={() => { setPostMatchOpen(false); setReviewPreview(false); }}
+          onDismiss={() => { if (!reviewPreview) { try { localStorage.setItem("padelop:post-match-dismissed", postMatchDate ?? ""); } catch {} } setPostMatchOpen(false); setReviewPreview(false); }}
+          previewMode={reviewPreview}
+        />
 
         {/* Morning check-in */}
         <MorningCheckin
           open={checkinNudgeOpen && !postMatchOpen}
           onLogWater={saveLogHydration}
           onClose={() => setCheckinNudgeOpen(false)}
-          onDismiss={() => { try { localStorage.setItem("padelop:checkin-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {} setCheckinNudgeOpen(false); }}
+          onDismiss={() => { if (!checkinPreview) { try { localStorage.setItem("padelop:checkin-nudge-dismissed", new Date().toISOString().slice(0, 10)); } catch {} setCheckinSkipped(true); } setCheckinNudgeOpen(false); }}
+          previewMode={checkinPreview}
         />
 
         {/* Night check-in nudge */}
