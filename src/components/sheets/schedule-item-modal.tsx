@@ -55,9 +55,12 @@ interface Props {
   zIndex?: number;
   // Looking ahead at an item that hasn't started: read-only, can't be completed or logged yet.
   preview?: boolean;
+  // In preview: the item just marked done, so a mis-tap can be reversed from here.
+  undoTitle?: string;
+  onUndo?: () => void;
 }
 
-export default function ScheduleItemModal({ item, endTime, drillTag, isComplete, onComplete, onClosed, onCompleteRevealed, doneLabelText = "Done", zIndex = 200, preview = false }: Props) {
+export default function ScheduleItemModal({ item, endTime, drillTag, isComplete, onComplete, onClosed, onCompleteRevealed, doneLabelText = "Done", zIndex = 200, preview = false, undoTitle, onUndo }: Props) {
   const v = SIZES;
   const [closing, setClosing] = useState(false);
   const [checkedMeals, setCheckedMeals] = useState<Set<number>>(new Set());
@@ -265,6 +268,15 @@ export default function ScheduleItemModal({ item, endTime, drillTag, isComplete,
             )}
             {primaryLabel}
           </button>
+          {preview && undoTitle && onUndo && (
+            <button
+              onClick={() => { onUndo(); requestClose(); }}
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 5, width: "100%", marginTop: 10, padding: "8px 0", background: "none", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#6b7480" }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+              Go back
+            </button>
+          )}
         </div>
       </div>
     </div>
