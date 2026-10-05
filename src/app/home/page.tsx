@@ -1063,8 +1063,7 @@ export default function Home8() {
   const goNext = () => setDoIdx(i => Math.min(i + 1, 1));
   const goPrev = () => setDoIdx(i => Math.max(i - 1, -1));
 
-  function handleModalComplete() {
-    const item = modalItem;
+  function handleModalComplete(item: typeof modalItem = modalItem) {
     const wasComplete = completed.has(item.title);
     if (!wasComplete && item.isDrill) {
       try {
@@ -1776,7 +1775,9 @@ export default function Home8() {
             drillTag={drillTag}
             isComplete={completed.has(modalItem.title)}
             preview={modalIdx > currentIdx}
-            onComplete={handleModalComplete}
+            undoTitle={modalIdx > currentIdx && completed.has(doItem.title) ? doItem.title : undefined}
+            onUndo={() => handleModalComplete(doItem)}
+            onComplete={() => handleModalComplete()}
             onClosed={() => { setDoModalOpen(false); setSchedModalIdx(null); }}
             onCompleteRevealed={handleModalCompleteRevealed}
             doneLabelText="Done · +1 pt"
