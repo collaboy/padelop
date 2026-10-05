@@ -109,6 +109,10 @@ export async function saveMatchReview(entry: {
   mental_before?: string;
   mental_during?: string;
   mental_after?: string;
+  // The review forms store these camelCase; accept both so they reach the database.
+  mentalBefore?: string;
+  mentalDuring?: string;
+  mentalAfter?: string;
   warmup?: string;
   wellDone?: string[];
   improved?: string[];
@@ -131,9 +135,9 @@ export async function saveMatchReview(entry: {
       feeling:       entry.feeling ?? null,
       energy:        entry.energy ?? null,
       injury:        entry.injury ?? null,
-      mental_before: entry.mental_before ?? null,
-      mental_during: entry.mental_during ?? null,
-      mental_after:  entry.mental_after ?? null,
+      mental_before: entry.mental_before ?? entry.mentalBefore ?? null,
+      mental_during: entry.mental_during ?? entry.mentalDuring ?? null,
+      mental_after:  entry.mental_after ?? entry.mentalAfter ?? null,
       warmup:        entry.warmup ?? null,
       well_done:     entry.wellDone ?? [],
       improved:      entry.improved ?? [],
