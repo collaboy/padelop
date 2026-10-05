@@ -1400,7 +1400,7 @@ export default function Home8() {
                   const nextTitle = nextSlide.title;
 
                   return (
-                    <div key="done-card" style={{ ...cardStyle, background: "#E5E7EB" }} onClick={() => { setSchedModalIdx(currentIdx); setDoModalOpen(true); setModalDetailOpen(false); }}>
+                    <div key="done-card" style={{ ...cardStyle, background: "#E5E7EB" }} onClick={() => { setSchedModalIdx(currentIdx + 1); setDoModalOpen(true); setModalDetailOpen(false); }}>
                       {textureOverlay}
 
                       {/* Timer layer */}
@@ -1775,6 +1775,7 @@ export default function Home8() {
             endTime={modalEndTime}
             drillTag={drillTag}
             isComplete={completed.has(modalItem.title)}
+            preview={modalIdx > currentIdx}
             onComplete={handleModalComplete}
             onClosed={() => { setDoModalOpen(false); setSchedModalIdx(null); }}
             onCompleteRevealed={handleModalCompleteRevealed}
